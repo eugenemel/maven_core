@@ -1,4 +1,4 @@
-LIBMAVEN - Core Library for use in Metabolomic Analysis and Visualization Engine
+MAVEN CORE: Set of Library for use in Metabolomic Analysis and Visualization Engine
 
 Authors: Eugene Melamud
 Copyright 2010 Eugene Melamud / Princeton University
