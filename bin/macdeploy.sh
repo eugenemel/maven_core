@@ -1,7 +1,7 @@
 #!/bin/sh
 DATE=`date +%Y%m%d`
-SRC=/Users/eugenemelamud/src/mzroll
-BUILD=/Users/eugenemelamud/src/mzroll
+SRC=/Users/eugenemelamud/src/maven_core
+BUILD=/Users/eugenemelamud/src/maven_core
 QTBIN=/Users/eugenemelamud/Qt5.7.0/5.7/clang_64/bin
 #QTBIN=~/Qt/5.6/clang_64/bin/
 #QTBIN=~/Qt/5.6/clang_64/bin/macdeployqt
