@@ -52,7 +52,7 @@ unix {
     DEFINES -= LITTLE_ENDIAN
  #  DEFINES += CDFPARSER
  #  LIBS += -lcdfread -lnetcdf
- #  DEFINES += ZLIB
+    DEFINES += ZLIB
  #  LIBS += -lz -lcdfread -lnetcdf
 }
 
