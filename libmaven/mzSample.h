@@ -671,6 +671,7 @@ class Compound {
             string name;
             string formula;
             string smileString;
+            string adductString;
             int    ionizationMode;
 
             string srmId;
