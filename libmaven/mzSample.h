@@ -82,7 +82,7 @@ class Scan {
     inline mzSample* getSample() { return sample; }
     vector<int> findMatchingMzs(float mzmin, float mzmax);
     int findHighestIntensityPos(float mz, float ppm);		//higest intensity pos
-    int findClosestHighestIntensityPos(float mz, float ppm);	//highest intensity pos nearest to the cente mz
+    int findClosestHighestIntensityPos(float mz, float amu_tolr);	//highest intensity pos nearest to the cente mz
     bool isMonoisotopicPrecursor(float monoIsotopeMz, float ppm);
 
     bool hasMz(float mz, float ppm);

@@ -284,8 +284,8 @@ namespace
 	
 	bool is_inf(double value) {
 #if defined(__USE_ISOC99)
-		return !isfinite(value);
-		//return !std::isfinite(value);
+		//return !isfinite(value);
+		return !std::isfinite(value);
 #elif (defined(_MSC_VER) || defined(__BORLANDC__)) && !defined(__COMO__)
 		return !_finite(value);
 #elif FLT_RADIX == 2 && DBL_MAX_EXP == 1024 && DBL_MANT_DIG == 53

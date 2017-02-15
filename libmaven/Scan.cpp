@@ -56,6 +56,7 @@ int Scan::findHighestIntensityPos(float _mz, float ppm) {
         return bestPos;
 }
 
+//AMU Matching
 int Scan::findClosestHighestIntensityPos(float _mz, float tolr) {
 			float mzmin = _mz - tolr-0.001;
 			float mzmax = _mz + tolr+0.001;
