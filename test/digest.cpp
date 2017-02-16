@@ -3,12 +3,14 @@
 #include <fstream>
 #include <vector>
 #include <algorithm>
+#include <iomanip>
 
 //globals
 //
 int MINLENGTH=5;
-int MAXLENTH=20;
+int MAXLENTH=30;
 int MAXMISSED=3;
+bool TMT_LABELED=false;
 
 using namespace std;
 
@@ -57,11 +59,39 @@ class Protein {
 
         void calculateMZ(string seq) {
 
-            //charge states
+            string modPeptideString;
+            if (TMT_LABELED) modPeptideString = "n[230]";
+
+            //fixed mods
+            for(int i=0; i<seq.size(); i++ ) {
+                if      (seq[i] == 'C') modPeptideString += "C[160]";
+                else if (TMT_LABELED and seq[i] == 'K')  { modPeptideString += "K[357]"; }
+                else  modPeptideString += seq[i];
+                //if (rawPeptidString[i] == '*' and rawPeptidString[i-1] == 'M')   modPeptideString += "[147]";
+            }
+            //variable mods
+
+            //cout << seq << "\t" << modPeptideString << endl;
+
+            Peptide pep(modPeptideString,1);
+
+            //for(auto m: pep.mods) { // int is the mod position. -1 = n-terminal, -2 = c-terminal
+            //    cout << m.first << "\t" << m.second << endl;
+            //}
+
+            auto SAVE_COPY=pep.mods;
             for(int z=2; z<5; z++) {
-                string peptideString(seq);
-                Peptide pep(peptideString,z);
-                cout << pep.fullWithCharge() << pep.monoisotopicMZ() << endl;
+                pep.charge = z;
+                cout <<  pep.interactStyleWithCharge() << "\t" << setprecision(7) << pep.monoisotopicMZ() << endl;
+
+                //add oxidation
+                for(int i=0; i<seq.size(); i++ ) {
+                    if (seq[i] == 'M') { 
+                        pep.mods[i] = "Oxidation";
+                        cout <<  pep.interactStyleWithCharge() << "\t" << setprecision(7) << pep.monoisotopicMZ() << endl;
+                    }
+                }
+                pep.mods = SAVE_COPY;
             }
         }
 };
@@ -102,6 +132,7 @@ int main(int argc, char** argv) {
     for(int i=1; i< argc; i++ ) {
         string optionString(argv[i]);
         if (optionString == "-i" and i+1<argc) fastafile=string(argv[i+1]);
+        if (optionString == "-tmt") TMT_LABELED=true;
     }
 
     //
