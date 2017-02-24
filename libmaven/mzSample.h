@@ -693,6 +693,7 @@ class Compound {
 
             vector<float>fragment_mzs;
             vector<float>fragment_intensity;
+            map<int,string>fragment_iontype;
             vector<string> category;
 
             float ajustedMass(int charge);

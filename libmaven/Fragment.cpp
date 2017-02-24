@@ -297,6 +297,10 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
     vector<int>ranks = compareRanks(a,b,productPpmTolr);
     //vector<int>ranks = locatePositions(a,b,productPpmTolr);
     for(int rank: ranks) { if(rank != -1) s.numMatches++; }
+
+    //annotate?
+    for(int i=0; i<ranks.size();i++) other->annotations[ranks[i]]=this->annotations[i];
+
     s.fractionMatched = s.numMatches / a->nobs();
     s.hypergeomScore  = SHP(s.numMatches,a->nobs(),b->nobs(),100000);
     s.spearmanRankCorrelation = spearmanRankCorrelation(ranks);

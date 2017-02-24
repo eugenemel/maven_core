@@ -37,6 +37,7 @@ FragmentationMatchScore Compound::scoreCompoundHit(Fragment* f, float productPpm
         t.precursorMz = cpd->precursorMz;
         t.mzs = cpd->fragment_mzs;
         t.intensity_array = cpd->fragment_intensity;
+        t.annotations = cpd->fragment_iontype;
 
         if (searchProton)  { //special case, check for loss or gain of protons
             int N = t.mzs.size();
