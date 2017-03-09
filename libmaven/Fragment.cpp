@@ -182,13 +182,14 @@ void Fragment::printConsensusMGF(ostream& outstream, double minConsensusFraction
     outstream << "END IONS" << endl;
 }
 
-void Fragment::printConsensusNIST(ostream& outstream, double minConsensusFraction, float productPpmToll, Compound* compound=0) {
+void Fragment::printConsensusNIST(ostream& outstream, double minConsensusFraction, float productPpmToll, Compound* compound=0, Adduct* adduct=0) {
 
     string COMPOUNDNAME = "Unknown";
     if (compound)  COMPOUNDNAME = compound->id;
 
     //compute average MVH score
     float avgMVH=0;
+
     //compute retention time window
     StatisticsVector<float>retentionTimes; retentionTimes.push_back(this->rt);
     for(unsigned int i=0; i<brothers.size();i++ ) retentionTimes.push_back(brothers[i]->rt);
@@ -203,7 +204,17 @@ void Fragment::printConsensusNIST(ostream& outstream, double minConsensusFractio
     int consensusSize = this->brothers.size()+1;
 
     if (compound) {
-        outstream << "ID: " << compound->id << endl;
+        if (adduct) {
+            outstream << "Name: " << compound->id << " " << adduct->name << endl;
+        } else {
+            outstream << "Name: " << compound->id << endl;
+        }
+
+        outstream << "Id: " << compound->id << endl;
+        if (adduct) {
+            outstream << "ADDUCT: " << adduct->name << endl;
+        }
+
         if (!compound->formula.empty()) outstream << "FORMULA: " << compound->formula << endl;
         if (compound->category.size())    outstream << "CATEGORY: " << compound->category.front() << endl;
         if (!compound->smileString.empty()) outstream << "SMILE: " << compound->smileString << endl;
@@ -217,7 +228,7 @@ void Fragment::printConsensusNIST(ostream& outstream, double minConsensusFractio
     outstream << " Parent=" << setprecision(10) << precursorMz;
     if(this->collisionEnergy) outstream << " collisionEnergy=" << this->collisionEnergy;
     if(avgMVH) outstream << " AvgMVH=" << avgMVH;
-    outstream << " AvgRt=" << retentionTimes.mean();
+    outstream << " AvgRt=" << this->rt;
 
     //outstream << " MaxRt=" << retentionTimes.maximum();
     outstream << " StdRt=" << sqrt(retentionTimes.variance());
@@ -230,8 +241,8 @@ void Fragment::printConsensusNIST(ostream& outstream, double minConsensusFractio
         float fracObserved = ((float) obscount[i])/consensusSize;
         if (fracObserved > minConsensusFraction )  {
 
-            outstream << setprecision(7) << mzs[i] << "\t";
-            outstream << (int) intensity_array[i] << "\t";
+            outstream << setprecision(7) << mzs[i] << " ";
+            outstream << (int) intensity_array[i] << " ";
 
             string ionName = "?";
             if (annotations.count(i))  {
@@ -382,6 +393,11 @@ void Fragment::buildConsensus(float productPpmTolr) {
         }
         Cons->sortByMz();
     }
+
+    //compute retention time window
+    StatisticsVector<float>retentionTimes; retentionTimes.push_back(this->rt);
+    for(unsigned int i=0; i<brothers.size();i++ ) retentionTimes.push_back(brothers[i]->rt);
+    Cons->rt  = retentionTimes.mean();
 
     //average values 
     int N = 1+brothers.size();

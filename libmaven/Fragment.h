@@ -9,6 +9,7 @@
 class Compound;
 class PeakGroup;
 class Scan;
+class Adduct;
 
 using namespace std;
 
@@ -121,7 +122,7 @@ class Fragment {
         void printInclusionList(bool printHeader, ostream& outstream, string COMPOUNDNAME);
         void printConsensusMS2(ostream& outstream, double minConsensusFraction);
         void printConsensusMGF(ostream& outstream, double minConsensusFraction);
-        void printConsensusNIST(ostream& outstream, double minConsensusFraction, float productPpmToll, Compound* compound);
+        void printConsensusNIST(ostream& outstream, double minConsensusFraction, float productPpmToll, Compound* compound, Adduct* adduct);
         FragmentationMatchScore scoreMatch(Fragment* other, float productPpmToll);
 
         double compareToFragment(Fragment* other, float productPPMToll);
