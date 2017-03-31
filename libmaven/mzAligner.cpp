@@ -300,3 +300,74 @@ void Aligner::Fit(int ideg) {
 	delete[] c;
 	delete[] d;
 }
+
+void Aligner::loadAlignmentFile(string alignmentFile) { 
+
+	//aligment file format
+	//sample  rt      rt_update
+	//DOplasma-set1-b1-blank-inj1-C18TBA-neg  0.0     1.4722584874037974
+	//DOplasma-set1-b1-blank-inj1-C18TBA-neg  0.024231014164164164    1.4910885552525142
+
+	ifstream myfile(alignmentFile);
+	if (!myfile.is_open()) { cerr << "Can't open file " << alignmentFile; return; }
+
+	std::string line;
+	int lineNum=0;
+
+	AligmentSegment* lastSegment=0;
+
+	while (getline(myfile,line) ) {
+		lineNum++;
+		vector<string>fields;
+		mzUtils::split(line,'\t', fields);
+
+		if (fields.size() >= 3 && lineNum > 1) {
+			AligmentSegment* seg = new AligmentSegment(); 
+
+			seg->sampleName   = fields[0];
+			seg->seg_start = 0;
+			seg->seg_end =  string2float(fields[1]);
+
+			seg->new_start = 0;
+			seg->new_end =  string2float(fields[2]);
+
+			if (lastSegment and lastSegment->sampleName == seg->sampleName) { 
+				seg->seg_start = lastSegment->seg_end;
+				seg->new_start = lastSegment->new_end;
+			}
+
+			alignmentSegments[seg->sampleName].push_back(seg);
+			lastSegment = seg;
+		}
+	}
+
+	cerr << "Aligner::loadAlignmentFile() " << alignmentSegments.size() << "\t" << lineNum << endl;
+}
+
+void Aligner::doSegmentedAligment() {
+
+	cerr << "Aligner::doSegmentedAligment()" << "samples=" << samples.size() << endl;
+
+	for (mzSample* sample: samples ) {
+		if (sample == NULL) continue;
+	
+		string sampleName = sample->sampleName;
+		mzUtils::replace(sampleName,".mzXML","");
+
+		if ( alignmentSegments.count(sampleName)  == 0) { 
+				cerr << "Can't find alignment information for sample " << sampleName << endl;
+				continue;
+		}
+
+		for( AligmentSegment* seg: alignmentSegments[sampleName] ) { 
+			//cerr << "SEG: " << sampleName << "\t" << seg->seg_start << "-" << seg->seg_end << "\t" << seg->new_start << "-" << seg->new_end << endl;
+			for(unsigned int ii=0; ii < sample->scans.size(); ii++ ) {
+				Scan* scan = sample->scans[ii];
+				if(scan->rt < seg->seg_start) continue;
+				if(scan->rt > seg->seg_end)   break;
+				//cerr << "Cor: " << scan->rt << "\t" << seg->updateRt(scan->rt) << endl;
+				scan->rt = seg->updateRt(scan->rt);
+			}
+		}
+	}
+}
