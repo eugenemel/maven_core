@@ -111,6 +111,10 @@ string cleanFilename(const string& s);
 string substituteInQuotedString(const string& s, const string& chars, const string& substitutions );
 bool gzipInflate( const std::string& compressedBytes, std::string& uncompressedBytes );
 std::string decompress_string(const std::string& str);
+bool ends_with(std::string const & value, std::string const & ending);
+bool replace(std::string& str, const std::string& from, const std::string& to);
+void replaceAll(std::string& str, const std::string& from, const std::string& to);
+
 
 /* rounding and ppm functions */
 float ppmDist(const float mz1, const float mz2);

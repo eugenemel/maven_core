@@ -762,6 +762,22 @@ class Adduct {
 		inline float computeAdductMass(float pmz) { return (pmz*nmol+mass)/abs(charge); }
 };
 
+struct AligmentSegment {
+		string sampleName;
+		float  seg_start;
+		float  seg_end;
+		float  new_start;
+		float  new_end;
+		
+		float updateRt(float oldRt) { 
+			if (oldRt < seg_start or oldRt > seg_end) return oldRt;
+			float frac = (oldRt-seg_start)/(seg_end - seg_start);
+			float newX = new_start + frac*(new_end-new_start); 
+			return newX;
+		}
+};
+		
+
 class Aligner {
 
 	public:
@@ -775,10 +791,16 @@ class Aligner {
 		void restoreFit();
 		void setMaxItterations(int x) { maxItterations=x; }
 		void setPolymialDegree(int x) { polynomialDegree=x; }
+		void setSamples(vector<mzSample*>set) { samples=set; }
+
+		void loadAlignmentFile(string alignmentFile); //load alignment information from a file
+		void doSegmentedAligment();	 //ralign scans using guided alignment
+
 	private:
 		vector< vector<float> > fit;
 		vector<mzSample*> samples;
 		vector<PeakGroup*> allgroups;
+		map<string,vector<AligmentSegment*> > alignmentSegments;
 		int maxItterations;
 		int polynomialDegree;
 		
