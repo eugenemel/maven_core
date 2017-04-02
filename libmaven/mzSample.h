@@ -91,7 +91,7 @@ class Scan {
     inline int getPolarity() { return polarity; }
     void  setPolarity(int x) { polarity = x; }
 
-    int totalIntensity(){ int sum=0; for(unsigned int i=0;i<intensity.size();i++) sum += intensity[i]; return sum; }
+    double totalIntensity(){ double sum=0; for(unsigned int i=0;i<intensity.size();i++) sum += intensity[i]; return sum; }
     float maxIntensity()  { float max=0; for(unsigned int i=0;i<intensity.size();i++) if(intensity[i] > max) max=intensity[i]; return max; }
     float minMz()  { if(nobs() > 0) return mz[0]; return 0; }
     float maxMz()  { if(nobs() > 0) return mz[nobs()-1]; return 0; }
