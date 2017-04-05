@@ -344,6 +344,17 @@ void Aligner::loadAlignmentFile(string alignmentFile) {
 	cerr << "Aligner::loadAlignmentFile() " << alignmentSegments.size() << "\t" << lineNum << endl;
 }
 
+float AligmentSegment::updateRt(float oldRt) { 
+		//fractional distance from start of a segement
+		if (oldRt >= seg_start and oldRt < seg_end) {
+			float   frac = (oldRt-seg_start)/(seg_end - seg_start);
+			return  new_start + frac*(new_end-new_start);
+		} else {
+			cerr << "Bad Map: " << oldRt << "\t" << seg_start << "\t" << seg_end << endl;
+			return oldRt; // could not correct return old rt
+		}
+}
+
 void Aligner::doSegmentedAligment() {
 
 	cerr << "Aligner::doSegmentedAligment()" << "samples=" << samples.size() << endl;
@@ -359,15 +370,26 @@ void Aligner::doSegmentedAligment() {
 				continue;
 		}
 
-		for( AligmentSegment* seg: alignmentSegments[sampleName] ) { 
-			//cerr << "SEG: " << sampleName << "\t" << seg->seg_start << "-" << seg->seg_end << "\t" << seg->new_start << "-" << seg->new_end << endl;
-			for(unsigned int ii=0; ii < sample->scans.size(); ii++ ) {
-				Scan* scan = sample->scans[ii];
-				if(scan->rt < seg->seg_start) continue;
-				if(scan->rt > seg->seg_end)   break;
-				//cerr << "Cor: " << scan->rt << "\t" << seg->updateRt(scan->rt) << endl;
-				scan->rt = seg->updateRt(scan->rt);
+		int corcount=0;
+		for(int ii=0; ii < sample->scans.size(); ii++ ) {
+			Scan* scan = sample->scans[ii];
+
+			AligmentSegment* seg = NULL;
+			for( AligmentSegment* x: alignmentSegments[sampleName] ) { 
+				if(scan->rt >= x->seg_start and scan->rt < x->seg_end) {
+						seg=x; break;
+				}
+			}
+
+			if(seg) {
+				double newRt = seg->updateRt(scan->rt);
+				scan->rt = newRt;
+				corcount++;
+			} else {
+				cerr << "Can't find segment for: " << sampleName << "\t" << scan->rt << endl;
 			}
 		}
+
+		cerr << "doSegmentedAligment: " << sampleName << "\tcorected=" << corcount << endl;
 	}
 }

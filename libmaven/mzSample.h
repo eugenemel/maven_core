@@ -768,23 +768,8 @@ struct AligmentSegment {
 		float  seg_end;
 		float  new_start;
 		float  new_end;
-		
-		float updateRt(float oldRt) { 
-            if (oldRt < seg_start or oldRt > seg_end) return oldRt;
+		float updateRt(float oldRt);
 
-            //fractional distance from start of a segement
-            float frac = (oldRt-seg_start)/(seg_end - seg_start);
-
-            //must be between 0 and 1
-            if (frac >=0 and frac<=1.0) {
-
-                //fractional distance in new space
-                float newX = new_start + frac*(new_end-new_start);
-                return newX;
-            }
-
-            return oldRt; // could not correct return old rt
-		}
 };
 		
 
