@@ -118,6 +118,101 @@ void mzSample::loadSample(const char* filename) {
     }
 }
 
+void mzSample::loadMsToolsSample(const char* filename) {
+
+    mzSample* sample = new mzSample();
+    string filenameString = string(filename);
+    this->sampleName = sample->cleanSampleName(filename);
+    this->fileName = filenameString;
+
+    MSToolkit::Spectrum spec;           // For holding spectrum.
+    MSToolkit::MSReader mstReader;
+
+   int iFirstScan=0;
+   mstReader.readFile(filename, spec, iFirstScan);
+
+   MSToolkit::MSSpectrumType filter = MSToolkit::MS1;
+   mstReader.setFilter(filter);
+
+   int iFileLastScan = mstReader.getLastScan();
+   cerr << this->sampleName <<  " #scans=" << iFileLastScan << endl;
+
+    for(int scanNum=0; scanNum<iFileLastScan; scanNum++) {
+
+        spec.clearPeaks();
+        spec.clearMZ();
+
+        mstReader.readFile(NULL, spec,scanNum);
+
+        //basic scan information
+        Scan* scan = new Scan(this,
+                scanNum,
+                spec.getMsLevel(),
+                spec.getRTime(), 0, 0);
+
+
+        //precursor information
+        if( spec.sizeMZ()) {
+                scan->precursorMz = spec.getMZ(0);
+                scan->precursorCharge = spec.getCharge();
+        }
+
+        //Activation method
+        MSToolkit::MSActivation act = spec.getActivationMethod();
+        string actMethod;
+        switch(act){
+            case MSToolkit::mstETD: actMethod="ETD"; break;
+            case MSToolkit::mstETDSA: actMethod="ETDSA"; break;
+            case MSToolkit::mstCID: actMethod="CID"; break;
+            case MSToolkit::mstECD: actMethod="ECD"; break;
+            case MSToolkit::mstPQD: actMethod = "PQD"; break;
+            case MSToolkit::mstHCD: actMethod = "HCD"; break;
+            case MSToolkit::mstNA: default: actMethod="UNKNOWN";
+            break;
+        }
+        scan->activationMethod = actMethod;
+
+        // actMethod.c_str();
+        //
+        vector<MSToolkit::Peak_T>* vPeaks =  spec.getPeaks();
+
+        if (vPeaks and vPeaks->size()) {
+            for(unsigned int i=0; i<vPeaks->size(); i++) {
+                scan->intensity.push_back( (vPeaks->at(i)).intensity );
+                scan->mz.push_back( (vPeaks->at(i)).mz );
+            }
+        }
+
+        /*
+        cerr << scan->scannum 
+            << "\t" << scan->mslevel
+            << "\t" << scan->totalIntensity()
+            << "\t" << scan->precursorMz
+            << "\t" << scan->precursorCharge
+            << "\t" << scan->activationMethod
+            << endl;
+        */
+
+        this->addScan(scan);
+    }
+
+    //set min and max values for rt
+   this->calculateMzRtRange();
+
+    //recalculate precursor masses
+    cerr << "Recalculating Ms2 Precursor Masses" << endl;
+    for(Scan* ms2scan: this->scans) {
+        if(ms2scan->mslevel==2) {
+            ms2scan->precursorMz=this->getMS1PrecurursorMass(ms2scan,20);
+        }
+    }
+
+    if (mystrcasestr(filename,"blan") != NULL) {
+        this->isBlank = true;
+        cerr << "Found Blank: " << filename << endl;
+    }
+}
+
 void mzSample::parseMzCSV(const char* filename) {
 		// file structure: scannum,rt,mz,intensity,mslevel,precursorMz,polarity,srmid
 		int lineNum=0; 

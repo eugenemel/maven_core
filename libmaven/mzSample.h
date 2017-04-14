@@ -34,6 +34,8 @@
 #include "../libcdfread/ms10.h"
 #endif
 
+#include "MSReader.h"
+
 #if defined(WIN32) || defined(WIN64)
 //define strncasecmp strnicmp
 //define isnan(x) ((x) = (x))
@@ -202,6 +204,7 @@ public:
     ~mzSample();
     void openStream(const char* filename);	   	// constructor : load from file
     void loadSample(const char* filename);	   	// constructor : load from file
+    void loadMsToolsSample(const char* filename);	// constructor : load using MSToolkit library
     void parseMzData(const char*);			// load data from mzData file
     void parseMzCSV(const char*);			// load data from mzCSV file
     void parseMzXML(const char*);			// load data from mzXML file

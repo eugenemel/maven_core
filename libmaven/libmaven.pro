@@ -5,10 +5,11 @@ TEMPLATE=lib
 CONFIG += staticlib
 TARGET = maven
 
-LIBS += -L. -lcdfread -lnetcdf
+LIBS += -L. -lcdfread -lnetcdf -lmstoolkitlite
 
+DEFINES += _LARGEFILE_SOURCE _FILE_OFFSET_BITS=64 GCC
 
-INCLUDEPATH += ../pugixml/src/ ../libcdfread/ ../zlib/
+INCLUDEPATH += ../pugixml/src/ ../libcdfread/ ../zlib/ ../MSToolkit/include
 
 SOURCES=base64.cpp mzMassCalculator.cpp mzSample.cpp  mzUtils.cpp statistics.cpp mzFit.cpp mzAligner.cpp\
        PeakGroup.cpp EIC.cpp Scan.cpp Peak.cpp  \
