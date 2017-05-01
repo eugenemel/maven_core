@@ -9,6 +9,7 @@ unix {
 
 INSTALL_PREFIX=$$(DESTDIR)$$INSTALL_PREFIX
 DEFINES += INSTALL_LIBDIR=\\\"$$INSTALL_LIBDIR\\\"
+DEFINES += _LARGEFILE_SOURCE _FILE_OFFSET_BITS=64 GCC
 
 #QMAKE_CXXFLAGS_RELEASE += -O3 -Wall -Wno-sign-conversion -Wno-c+11-extensions -std=c++11 -Wno-sign-compare
 #QMAKE_CXXFLAGS_DEBUG   += -g  -Wall -Wno-sign-conversion -Wno-std=c++11 -Wno-sign-compare
@@ -26,6 +27,7 @@ MOC_DIR = tmp
 UI_DIR   =  tmp
 QMAKE_CC = gcc
 QMAKE_CXX = g++
+
 
 win32-g++:contains(QMAKE_HOST.arch, x86_64):{
     DEFINES -= CDFPARSER
