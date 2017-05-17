@@ -46,6 +46,8 @@ zipfn="${exefn%.exe}.zip"
 
 rm -rf "${distpath}"
 mkdir -p "${distpath}"
+windeployqt.exe "${exepath}" --dir "${distpath}/${b}"
+
 for f in $(ldd "${exepath}" | awk '{print $3}' | grep 'mingw64'); do
     b=${f##*/}
     cp -v "${f}" "${distpath}/${b}"
