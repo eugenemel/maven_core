@@ -597,3 +597,10 @@ vector<Isotope> Scan::getIsotopicPattern(float centerMz, float ppm, int maxZ=6, 
     return isotopes;
 }
 
+void Scan::log10Transform() {
+    for(int i=0; i < this->intensity.size(); i++) {
+        if (this->intensity[i] > 0) {
+            this->intensity[i] = log10(this->intensity[i]);
+        }
+    }
+}

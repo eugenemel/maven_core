@@ -111,6 +111,7 @@ class Scan {
     void  intensityFilter( int minIntensity);
     void  quantileFilter(int minQuantile);
     void  summary();
+    void  log10Transform();
 
     int mslevel;
     bool centroided;
