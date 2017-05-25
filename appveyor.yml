@@ -10,34 +10,32 @@ environment:
   PATH: 'C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%'
 
 build_script:
-# Get submodules
-- git submodule update --init --recursive
+  # Get submodules
+  - git submodule update --init --recursive
 
-# Not sure, but seem to have to set path here
-- SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
+  # Not sure, but seem to have to set path here
+  - SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
 
-# Install 64-bit QT
-#- C:\msys64\usr\bin\pacman --noconfirm -S mingw-w64-x86_64-qt-creator
-- bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-qt-creator"
+  # Install 64-bit QT
+  #- C:\msys64\usr\bin\pacman --noconfirm -S mingw-w64-x86_64-qt-creator
+  - bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-qt-creator"
 
-# Install zlib
-- bash -lc "pacman -S --needed --noconfirm zlib-devel"
+  # Install zlib
+  - bash -lc "pacman -S --needed --noconfirm zlib-devel"
 
-# Install sqlite3
-- bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3"
-  #- appveyor DownloadFile http://zlib.net/zlib-1.2.11.tar.gz -FileName zlib-1.2.11.tar.gz
-  #- 7z x zlib-1.2.11.tar.gz > NUL
-  #- 7z x zlib-1.2.11.tar > NUL
-  #- cd zlib-1.2.11
-  #- md build
-  #- cd build
-  #- cmake -G "Visual Studio 14 2015 Win64" ..
-  #- cmake --build . --config Release
-  #- copy zconf.h ..
-  #- cd ..
-  #- cd ..
+  # Install sqlite3
+  - bash -lc "pacman -S --needed --noconfirm mingw64/mingw-w64-x86_64-sqlite3"
 
-# Build MAVEN
-- bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake -r"
-- bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"
+  # Build MAVEN
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake -r"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"
 
+after_build:
+    - SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
+    - get_version.bat > version.txt
+    - SET /p VERSION=<version.txt
+    - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh bin/maven_dev_$VERSION.exe
+
+artifacts:
+    - path: 'dist/maven_*.zip'
+      name: MAVEN
