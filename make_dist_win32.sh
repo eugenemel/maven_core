@@ -53,19 +53,11 @@ for f in $(ldd "${exepath}" | awk '{print $3}' | grep 'mingw64'); do
     cp -v "${f}" "${distpath}/${b}"
 done
 mkdir -p "${distpath}/methods"
-<<<<<<< 481bb30845a11fb699e1b48a246a3573c8bb428a
 cp -v bin/methods/* "${distpath}/methods"
 # mkdir -p "${distpath}/pathways"
 # cp -v bin/pathways/* "${distpath}/pathways"
 mkdir -p "${distpath}/scripts"
 cp -v bin/scripts/* "${distpath}/scripts"
-=======
-cp -v bin/methods/* "${apppath}/methods"
-mkdir -p "${distpath}/pathways"
-cp -v bin/pathways/* "${apppath}/pathways"
-mkdir -p "${distpath}/scripts"
-cp -v bin/scripts/* "${apppath}/scripts"
->>>>>>> Added appveyor artifact
 cp -v "${exepath}" "${distpath}/"
 
 rm -rf "dist/${zipfn}"
