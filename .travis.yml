@@ -23,3 +23,10 @@ script:
   - qmake -r
   - make -j2
 
+after_script:
+  - source qt-5.8.0.env
+  - export VERSION=$(get_verion.sh)
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "bin/Maven.app"; fi
+  - ls -la bin
+  - ls -la dist
+  - ls -la .
