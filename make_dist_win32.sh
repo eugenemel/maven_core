@@ -52,7 +52,13 @@ for f in $(ldd "${exepath}" | awk '{print $3}' | grep 'mingw64'); do
     b=${f##*/}
     cp -v "${f}" "${distpath}/${b}"
 done
+mkdir -p "${distpath}/methods"
+cp -v bin/methods/* "${distpath}/methods"
+# mkdir -p "${distpath}/pathways"
+# cp -v bin/pathways/* "${distpath}/pathways"
+mkdir -p "${distpath}/scripts"
+cp -v bin/scripts/* "${distpath}/scripts"
 cp -v "${exepath}" "${distpath}/"
 
 rm -rf "dist/${zipfn}"
-(cd "${distpath}" && 7za a -tzip "../${zipfn}" *)
+(cd "${distpath}" && 7z a -tzip "../${zipfn}" *)
