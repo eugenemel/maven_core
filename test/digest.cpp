@@ -14,6 +14,7 @@ bool TMT_LABELED=false;
 bool PRINT_IONS=false;
 bool BUILD_INDEX=false;
 bool TRYPTIC_DIGEST=false;
+bool REVERSE=false;
 
 using namespace std;
 
@@ -29,15 +30,24 @@ class Protein {
             seq.erase(std::remove_if(seq.begin(), seq.end(), [](char x){return std::isspace(x);}),seq.end());
         }
 
+        string reverse_sequence() {
+          string rev = seq;
+          std::reverse(rev.begin(),rev.end());
+          return rev;
+        }
+
         void trypticDigest() { 
             vector<int>cuts;
 
+            string sequence = this->seq;
+            if (REVERSE) sequence = this->reverse_sequence();
+
             //find cut points
             cuts.push_back(0);
-            for(int i=0; i<seq.length(); i++ ) {
-                if(seq[i] == 'R' or seq[i] == 'K')  cuts.push_back(i); 
+            for(int i=0; i<sequence.length(); i++ ) {
+                if(sequence[i] == 'R' or sequence[i] == 'K')  cuts.push_back(i); 
             }
-            cuts.push_back(seq.length()-1);
+            cuts.push_back(sequence.length()-1);
 
 
             for(int i=0; i < cuts.size()-1; i++ ) {
@@ -50,8 +60,8 @@ class Protein {
                     if (pos2-pos1 >=MINLENGTH and pos2-pos1 <= MAXLENTH) { 
 
                         string peptideSeq;
-                        if(i>0) peptideSeq = seq.substr(pos1+1,pos2-pos1);
-                        else    peptideSeq = seq.substr(pos1+1,pos2-pos1);
+                        if(i>0) peptideSeq = sequence.substr(pos1+1,pos2-pos1);
+                        else    peptideSeq = sequence.substr(pos1+1,pos2-pos1);
 
                        calculateMZ(peptideSeq);
 
@@ -149,10 +159,15 @@ int main(int argc, char** argv) {
     for(int i=1; i< argc; i++ ) {
         string optionString(argv[i]);
         if (optionString == "-i" and i+1<argc) fastafile=string(argv[i+1]);
-        if (optionString == "-tmt") TMT_LABELED=true;
-        if (optionString == "-ions") PRINT_IONS=true;
-        if (optionString == "-digest") TRYPTIC_DIGEST=true;
-        if (optionString == "-index")  BUILD_INDEX=true;
+        if (optionString == "-tmt")     TMT_LABELED=true;
+        if (optionString == "-ions")    PRINT_IONS=true;
+        if (optionString == "-digest")  TRYPTIC_DIGEST=true;
+        if (optionString == "-reverse") REVERSE=true;
+        if (optionString == "-index")   BUILD_INDEX=true;
+    }
+
+    if (argc <= 2) {
+        cerr << "usage: ./digest -i file.fasta -digest -reverse";
     }
 
     //
