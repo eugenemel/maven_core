@@ -22,3 +22,4 @@ script:
   - source qt-5.8.0.env
   - qmake -r
   - make -j2
+
