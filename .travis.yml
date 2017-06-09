@@ -8,9 +8,14 @@ matrix:
 
 addons:
   apt:
+    sources:
+      - sourceline: 'ppa:beineri/opt-qt58-trusty'
     packages:
-      #- qt5-default
+      - qt58base
       - libsqlite3-dev
+      - libmysqlclient-dev
+      - libssl1.0.0
+      - libssl-dev
 
 before_install:
   - ./ci/travis/before_install_${TRAVIS_OS_NAME}.sh
@@ -19,13 +24,21 @@ before_install:
 
 script:
   # Add installed Qt path to $PATH
-  - source qt-5.8.0.env
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source /opt/qt*/bin/qt*-env.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source qt-5.env; fi
+  # Build and install
   - qmake -r
-  - make -j2
+  - make -j$(nproc)
+  - make INSTALL_ROOT=appdir install
 
-after_script:
-  - source qt-5.8.0.env
-  - export VERSION=$(get_verion.sh)
+after_success:
+  # Add installed Qt path to $PATH
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source /opt/qt*/bin/qt*-env.sh; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source qt-5.env; fi
+  # Set VERSION env var
+  - export VERSION=$(./get_version.sh)
+  # Package deployment artifacts
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./make_dist_linux.sh "maven/appdir/bin/maven_dev_${VERSION}"; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "bin/Maven.app"; fi
   - ls -la bin
   - ls -la dist

@@ -48,6 +48,9 @@ basefn="${appfn%.app}"
 VERSION=$("./get_version.sh")
 dmgfn="${basefn}_${VERSION}.dmg"
 
+# Set QT Environment
+#source qt-5.env
+
 rm -rf "${distpath}"
 mkdir -p "${distpath}"
 
