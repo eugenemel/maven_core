@@ -48,9 +48,6 @@ basefn="${appfn%.app}"
 VERSION=$("./get_version.sh")
 dmgfn="${basefn}_${VERSION}.dmg"
 
-# Set QT Environment
-#source qt-5.env
-
 rm -rf "${distpath}"
 mkdir -p "${distpath}"
 
@@ -59,16 +56,28 @@ mkdir -p "${distpath}"
 # cp bin/*.csv   "${apppath}/Contents/Resources"
 # cp bin/*.model "${apppath}/Contents/Resources"
 
-mkdir "${apppath}/Contents/Resources/methods"
+echo "Copying resources to ${apppath}"
+mkdir -p "${apppath}/Contents/Resources/methods"
 cp bin/methods/* "${apppath}/Contents/Resources/methods"
 # TODO Should pathways be in the repo?
 # mkdir "${apppath}/Contents/Resources/pathways"
 # cp bin/pathways/* "${apppath}/Contents/Resources/pathways"
-mkdir "${apppath}/Contents/Resources/scripts"
+mkdir -p "${apppath}/Contents/Resources/scripts"
 cp bin/scripts/* "${apppath}/Contents/Resources/scripts"
 
+echo "Running macdeployqt"
 #fix Qt dynamic library dependancy
-macdeployqt "${apppath}" -dmg
+macdeployqt "${apppath}"
+#mv "${basepath}.dmg" "${distpath}/${dmgfn}"
 # TODO This doesn't appear to get built, is that correct or are we missing someething?
 # macdeployqt "bin/peakdetector.app" -dmg
-mv "${basepath}.dmg" "${distpath}/${dmgfn}"
+
+echo "Running macdeployqtfix"
+# Must run to address issues with macdeployqt and homebrewed qt
+# https://bugreports.qt.io/browse/QTBUG-56814
+wget "https://raw.githubusercontent.com/aurelien-rainone/macdeployqtfix/master/macdeployqtfix.py"
+python macdeployqtfix.py maven/appdir/bin/Maven.app/Contents/MacOS/Maven /usr/local/Cellar/qt5/5.9.0/
+
+echo "Making DMG"
+hdiutil create "${distpath}/${dmgfn}" -srcfolder "${apppath}" -ov
+

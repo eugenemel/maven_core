@@ -39,19 +39,10 @@ done
 
 shift $((OPTIND-1))  #This tells getopts to move on to the next argument.
 
-echo "DEBUG: Running"
 binpath=$1
-echo "DEBUG: $binpath"
 bindir=${binpath%/*}
-echo "DEBUG: $bindir"
 binfn="${binpath##*/}"
-echo "DEBUG: $binfn"
 distpath="dist"
-echo "DEBUG: $distpath"
-
-# Set QT Environment
-#source /opt/qt*/bin/qt*-env.sh
-#echo "DEBUG QT environment set"
 
 # Download linuxdeployqt
 echo "Downloading linuxdeployqt"

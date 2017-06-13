@@ -28,18 +28,11 @@ script:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source qt-5.env; fi
   # Build and install
   - qmake -r
-  - make -j$(nproc)
+  - make -j2
   - make INSTALL_ROOT=appdir install
-
-after_success:
-  # Add installed Qt path to $PATH
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source /opt/qt*/bin/qt*-env.sh; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source qt-5.env; fi
   # Set VERSION env var
   - export VERSION=$(./get_version.sh)
   # Package deployment artifacts
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./make_dist_linux.sh "maven/appdir/bin/maven_dev_${VERSION}"; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "bin/Maven.app"; fi
-  - ls -la bin
-  - ls -la dist
-  - ls -la .
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "maven/appdir/bin/Maven.app"; fi
+  - ls -la dist/
