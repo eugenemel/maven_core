@@ -11,7 +11,7 @@ environment:
 
 build_script:
   # Get submodules
-  - git submodule update --init --recursive
+  #- git submodule update --init --recursive
 
   # Not sure, but seem to have to set path here
   - SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
@@ -29,13 +29,3 @@ build_script:
   # Build MAVEN
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; qmake -r"
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j2"
-
-after_build:
-    - SET "PATH=C:\%MSYS2_DIR%\%MSYSTEM%\bin;C:\%MSYS2_DIR%\usr\bin;%PATH%"
-    - get_version.bat > version.txt
-    - SET /p VERSION=<version.txt
-    - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./make_dist_win32.sh bin/maven_dev_$VERSION.exe
-
-artifacts:
-    - path: 'dist/maven_*.zip'
-      name: MAVEN

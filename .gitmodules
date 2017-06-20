@@ -1,3 +1,0 @@
-[submodule "maven"]
-	path = maven
-	url = https://github.com/eugenemel/maven.git
