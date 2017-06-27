@@ -19,8 +19,6 @@ addons:
 
 before_install:
   - ./ci/travis/before_install_${TRAVIS_OS_NAME}.sh
-  #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./ci/travis/brew_install_osx.sh; fi
-  #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install qt5     ; fi
 
 script:
   # Add installed Qt path to $PATH
@@ -29,10 +27,10 @@ script:
   # Build and install
   - qmake -r
   - make -j2
-  - make INSTALL_ROOT=appdir install
+  #- make INSTALL_ROOT=appdir install
   # Set VERSION env var
-  - export VERSION=$(./get_version.sh)
+  #- export VERSION=$(./get_version.sh)
   # Package deployment artifacts
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./make_dist_linux.sh "maven/appdir/bin/maven_dev_${VERSION}"; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "maven/appdir/bin/Maven.app"; fi
-  - ls -la dist/
+  #- if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then ./make_dist_linux.sh "maven/appdir/bin/maven_dev_${VERSION}"; fi
+  #- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ./make_dist_osx.sh "maven/appdir/bin/Maven.app"; fi
+  #- ls -la dist/
