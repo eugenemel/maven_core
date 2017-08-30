@@ -37,7 +37,7 @@ double MassCalculator::getElementMass(string elmnt){
 
     /* default behavior is to ignore string */
     double val_atome(0);
-    
+
 /* Check for atoms */
     if (elmnt == "H")        val_atome = 1.0078250321;
     else if (elmnt == "D")   val_atome = 2.01410178;
@@ -66,16 +66,16 @@ double MassCalculator::getElementMass(string elmnt){
 /*-------------- parsing function ---------------------------------------*/
 
 map<string,int> MassCalculator::getComposition(string formula) {
-	
+
 	/* define allowed characters for formula */
 	const string UPP("ABCDEFGHIKLMNOPRSTUVWXYZ");
 	const string LOW("abcdefghiklmnoprstuy");
 	const string COEFF("0123456789");
-	
+
 	/* define some variable */
 	int SIZE = formula.length();
 	map<string,int> atoms;
-	
+
 	/* parse the formula */
 	for(int i = 0; i < SIZE; i++) {
 		string bloc, coeff_txt;
@@ -209,6 +209,14 @@ vector<Isotope> MassCalculator::computeIsotopes(string formula, int charge) {
 		}
 	}
 
+    for (int i=1; i <= CatomCount; i++ ) {
+		for (int j=1; j <= HatomCount; j++ ) {
+            string name ="C13D-label-"+integer2string(i)+"-"+integer2string(j);
+            double mass = parentMass + (j*D_Delta) + (i*C_Delta);
+            Isotope x(name,mass,i,0,0,j);
+            isotopes.push_back(x);
+		}
+	}
 
     for(unsigned int i=0; i < isotopes.size(); i++ ) {
            Isotope& x = isotopes[i];
@@ -220,8 +228,8 @@ vector<Isotope> MassCalculator::computeIsotopes(string formula, int charge) {
         isotopes[i].mass = adjustMass(isotopes[i].mass,charge);
 
 		isotopes[i].abundance=
-                 mzUtils::nchoosek(CatomCount,c)*pow(abC12,CatomCount-c)*pow(abC13,c) 
-               * mzUtils::nchoosek(NatomCount,n)*pow(abN14,NatomCount-n)*pow(abN15,n) 
+                 mzUtils::nchoosek(CatomCount,c)*pow(abC12,CatomCount-c)*pow(abC13,c)
+               * mzUtils::nchoosek(NatomCount,n)*pow(abN14,NatomCount-n)*pow(abN15,n)
                * mzUtils::nchoosek(SatomCount,s)*pow(abS32,SatomCount-s)*pow(abS34,s)
                * mzUtils::nchoosek(HatomCount,d)*pow(abH,HatomCount-d)  *pow(abH2,d);
     }
@@ -239,7 +247,7 @@ vector<MassCalculator::Match> MassCalculator::enumerateMasses(double inputMass, 
         if (c*12 > inputMass) break;
         for(int n=0; n<30; n++) {//N
             if (c*12+n*14 > inputMass) break;
-            for(int o=0; o<30;o++){//O 
+            for(int o=0; o<30;o++){//O
                 if (c*12+n*14+o*16 > inputMass) break;
                 for(int p=0; p<6;p++) { //P
                     for(int s=0; s<6;s++) { //S
@@ -272,7 +280,7 @@ vector<MassCalculator::Match> MassCalculator::enumerateMasses(double inputMass, 
     return matches;
 }
 
-std::string MassCalculator::prettyName(int c, int h, int n, int o, int p, int s) { 
+std::string MassCalculator::prettyName(int c, int h, int n, int o, int p, int s) {
 		char buf[1000];
 		string name;
 		if ( c != 0 ) { name += "C"; if (c>1) { sprintf(buf,"%d",c);  name += buf;} }
