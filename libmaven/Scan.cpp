@@ -543,7 +543,6 @@ vector<Isotope> Scan::getIsotopicPattern(float centerMz, float ppm, int maxZ=6, 
     if (pos<=0) return isotopes;
     float focusMz = this->mz[pos];
     float focusIntensity = this->intensity[pos];
-    float lastIntensity  = focusIntensity;
 
     for(int z=1; z<maxZ; z++) {
         float delta = NMASS/z;
@@ -558,7 +557,6 @@ vector<Isotope> Scan::getIsotopicPattern(float centerMz, float ppm, int maxZ=6, 
                 float matchedInt =  this->intensity[matchedPos];
                 if (matchedInt/focusIntensity<0.1) break;
 
-                lastIntensity = this->intensity[matchedPos];
                 zSeriesIntensity += log(this->intensity[matchedPos]);
                 pattern.push_back(matchedPos);
                 isoCount++;
@@ -573,7 +571,6 @@ vector<Isotope> Scan::getIsotopicPattern(float centerMz, float ppm, int maxZ=6, 
                 if (matchedInt/focusIntensity>0.5) break;
                 if (matchedInt/focusIntensity<0.1) break;
 
-                lastIntensity = this->intensity[matchedPos];
                 zSeriesIntensity += log(this->intensity[matchedPos]);
                 pattern.push_back(matchedPos);
                 isoCount++;

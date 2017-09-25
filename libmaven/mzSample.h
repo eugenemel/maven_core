@@ -64,12 +64,14 @@ using namespace std;
 class mzPoint {
 	public:
 		mzPoint() {x=y=z=0; }
+		mzPoint(double mz,double intensity) { x=mz; y=intensity; z=0;}
 		mzPoint(double ix,double iy,double iz) { x=ix; y=iy; z=iz; }
 		mzPoint& operator=(const mzPoint& b) { x=b.x; y=b.y; z=b.z; return *this;}
+		inline double mz() { return x; }
+		inline double intensity() { return y; }
 		static bool compX(const mzPoint& a, const mzPoint& b ) { return a.x < b.x; }
 		static bool compY(const mzPoint& a, const mzPoint& b ) { return a.y < b.y; }
 		static bool compZ(const mzPoint& a, const mzPoint& b ) { return a.z < b.z; }
-	
         double x,y,z;
 };
 
@@ -239,6 +241,11 @@ public:
     EIC* getBIC(float,float,int);		//get Base Peak Chromatogram
     double getMS1PrecurursorMass(Scan* ms2scan,float ppm);
     vector<Scan*> getFragmenationEvents(mzSlice* slice);
+
+	//functions for calculation of precursor purity
+	Scan* getLastFullScan(Scan* ms2scan);
+	vector<mzPoint> getIsolatedRegion(Scan* ms2scan, float isolationWindowAmu);
+	double getPrecursorPurity(Scan* ms2scan, float isolationWindowAmu, float ppm);
 
     deque <Scan*> scans;
     unsigned int sampleId;

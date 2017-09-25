@@ -119,6 +119,7 @@ void mzSample::loadSample(const char* filename) {
 }
 
 void mzSample::loadMsToolsSample(const char* filename) {
+using namespace MSToolkit;
 
     mzSample* sample = new mzSample();
     string filenameString = string(filename);
@@ -139,8 +140,8 @@ void mzSample::loadMsToolsSample(const char* filename) {
 
     for(int scanNum=0; scanNum<iFileLastScan; scanNum++) {
 
-        spec.clearPeaks();
-        spec.clearMZ();
+        //spec.clearPeaks();
+        //spec.clearMZ();
 
         mstReader.readFile(NULL, spec,scanNum);
 
@@ -172,18 +173,14 @@ void mzSample::loadMsToolsSample(const char* filename) {
         }
         scan->activationMethod = actMethod;
 
-        // actMethod.c_str();
-        //
-        vector<MSToolkit::Peak_T>* vPeaks =  spec.getPeaks();
-
-        if (vPeaks and vPeaks->size()) {
-            for(unsigned int i=0; i<vPeaks->size(); i++) {
-                scan->intensity.push_back( (vPeaks->at(i)).intensity );
-                scan->mz.push_back( (vPeaks->at(i)).mz );
+        if (spec.size() ) { 
+			for(int i=0; i < spec.size(); i++ ) {
+				scan->intensity.push_back( spec[i].intensity );
+				scan->mz.push_back( spec[i].mz );
             }
         }
 
-        /*
+		/*
         cerr << scan->scannum 
             << "\t" << scan->mslevel
             << "\t" << scan->totalIntensity()
@@ -191,7 +188,7 @@ void mzSample::loadMsToolsSample(const char* filename) {
             << "\t" << scan->precursorCharge
             << "\t" << scan->activationMethod
             << endl;
-        */
+			*/
 
         this->addScan(scan);
     }
@@ -1520,6 +1517,73 @@ void mzSample::applyPolynomialTransform() {
 		float newrt = leasev(transform, poly_align_degree, scans[i]->rt);
 		//cerr << "applyPolynomialTransform() " << scans[i]->rt << "\t" << newrt << endl;
 		scans[i]->rt = newrt;
+	}
+}
+
+Scan* mzSample::getLastFullScan(Scan* ms2scan) {
+	//check ms2scan has precursor information
+	if (ms2scan ) return 0;
+	if (ms2scan->precursorMz <= 0) return 0;
+
+    int scanNum = ms2scan->scannum;
+    for(int i=scanNum; i>scanNum-50; i--) {
+        Scan* scan = this->getScan(i);
+        if (!scan or scan->mslevel > 1) continue;
+		return scan; // found ms1 scan, all is good
+	}
+	return 0;
+}
+
+
+vector<mzPoint> mzSample::getIsolatedRegion(Scan* ms2scan, float isolationWindowAmu) {
+
+	vector<mzPoint>isolatedSegment;
+
+	//find last ms1 scan or get out
+	Scan* lastFullScan = getLastFullScan(ms2scan);
+	if (!lastFullScan) return isolatedSegment;
+
+	//no precursor information
+	if (ms2scan->precursorMz <= 0 ) return isolatedSegment;
+
+	//extract isolated region 
+	float minMz = ms2scan->precursorMz-isolationWindowAmu;
+	float maxMz = ms2scan->precursorMz-isolationWindowAmu;
+	
+	for(int i=0; i< lastFullScan->nobs(); i++ ) {
+		if (lastFullScan->mz[i] < minMz) continue;
+		if (lastFullScan->mz[i] > maxMz) break;
+		isolatedSegment.push_back(mzPoint(lastFullScan->mz[i], lastFullScan->intensity[i]));
+	}
+	return isolatedSegment;
+}
+
+
+double mzSample::getPrecursorPurity(Scan* ms2scan, float isolationWindowAmu, float ppm) {
+	//did not locate precursor mass
+    if (ms2scan->precursorMz == 0 ) return 0;
+
+	//extract isolated window
+	vector<mzPoint>isolatedSegment =  getIsolatedRegion(ms2scan,isolationWindowAmu);
+	if (isolatedSegment.size() == 0) return 0;
+
+	//get last full scan
+	Scan* lastFullScan = getLastFullScan(ms2scan);
+	if (!lastFullScan) return 0;
+
+	//locate intensity of isoloated mass
+    int pos = lastFullScan->findHighestIntensityPos(ms2scan->precursorMz,ppm);
+	if (pos < 0) return 0;
+	double targetInt = lastFullScan->intensity[pos];
+
+	//calculate total intensity in isolted segment
+	double totalInt=0;
+	for (mzPoint& x: isolatedSegment) totalInt += x.intensity();
+
+	if (totalInt>0) {
+		return targetInt/totalInt;
+	} else {
+		return 0;
 	}
 }
 
