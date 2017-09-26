@@ -121,6 +121,7 @@ class Scan {
     int   scannum;
 
     float precursorMz;
+	float isolationWindow;
     float precursorIntensity;
     int precursorCharge;
     string activationMethod;

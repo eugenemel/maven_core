@@ -685,12 +685,14 @@ Scan* mzSample::parseMzXMLScan(const xml_node& mzxml_scan_node, int scannum) {
     xml_node precursor = mzxml_scan_node.child("precursorMz");
     if (precursor) {
         _scan->precursorMz = string2float(mzxml_scan_node.child_value("precursorMz"));
+		_scan->isolationWindow = 1.0; //default value of isolation window is 1 da.
 
         for(xml_attribute attr = precursor.first_attribute(); attr; attr=attr.next_attribute()) {
-            if (strncasecmp(attr.name(),"precursorIntensity",15) == 0) _scan->precursorIntensity = string2float(attr.value());
+            if (strncasecmp(attr.name(),     "precursorIntensity",15) == 0) _scan->precursorIntensity = string2float(attr.value());
             else if (strncasecmp(attr.name(),"precursorCharge",15) == 0) _scan->precursorCharge = string2integer(attr.value());
             else if (strncasecmp(attr.name(),"activationMethod",15) == 0) _scan->activationMethod = string(attr.value());
             else if (strncasecmp(attr.name(),"precursorScanNum",15) == 0) _scan->precursorScanNum = string2integer(attr.value());
+            else if (strncasecmp(attr.name(),"windowWideness",13) == 0) _scan->isolationWindow = string2float(attr.value());
          }
     /*
         cerr << "mzLevel=" << _scan->mslevel << endl;
@@ -1522,7 +1524,7 @@ void mzSample::applyPolynomialTransform() {
 
 Scan* mzSample::getLastFullScan(Scan* ms2scan) {
 	//check ms2scan has precursor information
-	if (ms2scan ) return 0;
+	if (not ms2scan) return 0;
 	if (ms2scan->precursorMz <= 0) return 0;
 
     int scanNum = ms2scan->scannum;
@@ -1535,7 +1537,7 @@ Scan* mzSample::getLastFullScan(Scan* ms2scan) {
 }
 
 
-vector<mzPoint> mzSample::getIsolatedRegion(Scan* ms2scan, float isolationWindowAmu) {
+vector<mzPoint> mzSample::getIsolatedRegion(Scan* ms2scan, float isolationWindowAmu=1.0) {
 
 	vector<mzPoint>isolatedSegment;
 
@@ -1544,11 +1546,11 @@ vector<mzPoint> mzSample::getIsolatedRegion(Scan* ms2scan, float isolationWindow
 	if (!lastFullScan) return isolatedSegment;
 
 	//no precursor information
-	if (ms2scan->precursorMz <= 0 ) return isolatedSegment;
+	if (ms2scan->precursorMz <= 0) return isolatedSegment;
 
 	//extract isolated region 
-	float minMz = ms2scan->precursorMz-isolationWindowAmu;
-	float maxMz = ms2scan->precursorMz-isolationWindowAmu;
+	float minMz = ms2scan->precursorMz-isolationWindowAmu/2.0;
+	float maxMz = ms2scan->precursorMz+isolationWindowAmu/2.0;
 	
 	for(int i=0; i< lastFullScan->nobs(); i++ ) {
 		if (lastFullScan->mz[i] < minMz) continue;
@@ -1559,12 +1561,12 @@ vector<mzPoint> mzSample::getIsolatedRegion(Scan* ms2scan, float isolationWindow
 }
 
 
-double mzSample::getPrecursorPurity(Scan* ms2scan, float isolationWindowAmu, float ppm) {
+double mzSample::getPrecursorPurity(Scan* ms2scan, float isolationWindowAmu=1.0, float ppm=10.0) {
 	//did not locate precursor mass
-    if (ms2scan->precursorMz == 0 ) return 0;
+    if (ms2scan->precursorMz <= 0 ) return 0;
 
 	//extract isolated window
-	vector<mzPoint>isolatedSegment =  getIsolatedRegion(ms2scan,isolationWindowAmu);
+	vector<mzPoint>isolatedSegment = getIsolatedRegion(ms2scan,isolationWindowAmu);
 	if (isolatedSegment.size() == 0) return 0;
 
 	//get last full scan
