@@ -603,3 +603,69 @@ void Scan::log10Transform() {
         }
     }
 }
+
+
+Scan* Scan::getLastFullScan(int historySize=50) {
+	if (!this->sample) return 0;
+    int scanNum = this->scannum;
+    for(int i=scanNum; i>scanNum-historySize; i--) {
+        Scan* lscan = this->sample->getScan(i);
+        if (!lscan or lscan->mslevel > 1) continue;
+		return lscan; // found ms1 scan, all is good
+	}
+	return 0;
+}
+
+vector<mzPoint> Scan::getIsolatedRegion(float isolationWindowAmu=1.0) {
+
+	vector<mzPoint>isolatedSegment;
+	if(! this->sample) return isolatedSegment;
+
+	//find last ms1 scan or get out
+	Scan* lastFullScan = this->getLastFullScan(50);
+	if (!lastFullScan) return isolatedSegment;
+
+	//no precursor information
+	if (this->precursorMz <= 0) return isolatedSegment;
+
+	//extract isolated region 
+	float minMz = this->precursorMz-isolationWindowAmu/2.0;
+	float maxMz = this->precursorMz+isolationWindowAmu/2.0;
+	
+	for(int i=0; i< lastFullScan->nobs(); i++ ) {
+		if (lastFullScan->mz[i] < minMz) continue;
+		if (lastFullScan->mz[i] > maxMz) break;
+		isolatedSegment.push_back(mzPoint(lastFullScan->mz[i], lastFullScan->intensity[i]));
+	}
+	return isolatedSegment;
+}
+
+
+double Scan::getPrecursorPurity(float ppm=10.0) {
+	//did not locate precursor mass
+    if (this->precursorMz <= 0 ) return 0;
+    if (this->sample == 0 ) return 0;
+
+	//extract isolated window
+	vector<mzPoint>isolatedSegment = this->getIsolatedRegion(this->isolationWindow);
+	if (isolatedSegment.size() == 0) return 0;
+
+	//get last full scan
+	Scan* lastFullScan = this->getLastFullScan();
+	if (!lastFullScan) return 0;
+
+	//locate intensity of isoloated mass
+    int pos = lastFullScan->findHighestIntensityPos(this->precursorMz,ppm);
+	if (pos < 0) return 0;
+	double targetInt = lastFullScan->intensity[pos];
+
+	//calculate total intensity in isolted segment
+	double totalInt=0;
+	for (mzPoint& x: isolatedSegment) totalInt += x.intensity();
+
+	if (totalInt>0) {
+		return targetInt/totalInt;
+	} else {
+		return 0;
+	}
+}

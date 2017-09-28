@@ -115,6 +115,10 @@ class Scan {
     void  summary();
     void  log10Transform();
 
+	Scan* getLastFullScan(int historySize);
+	vector<mzPoint> getIsolatedRegion(float isolationWindowAmu);
+	double getPrecursorPurity(float ppm);
+
     int mslevel;
     bool centroided;
     float rt;
@@ -242,11 +246,6 @@ public:
     EIC* getBIC(float,float,int);		//get Base Peak Chromatogram
     double getMS1PrecurursorMass(Scan* ms2scan,float ppm);
     vector<Scan*> getFragmenationEvents(mzSlice* slice);
-
-	//functions for calculation of precursor purity
-	Scan* getLastFullScan(Scan* ms2scan);
-	vector<mzPoint> getIsolatedRegion(Scan* ms2scan, float isolationWindowAmu);
-	double getPrecursorPurity(Scan* ms2scan, float isolationWindowAmu, float ppm);
 
     deque <Scan*> scans;
     unsigned int sampleId;
