@@ -17,6 +17,9 @@
  * email                : ppatrick@systemsbiology.org
  * Artistic License granted 3/11/2005
  *******************************************************/
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+
 
 #include "mzParser.h"
 
@@ -647,3 +650,5 @@ instrumentInfo mzpSAXMzxmlHandler::getInstrument(){
 int mzpSAXMzxmlHandler::getPeaksCount(){
 	return m_peaksCount;
 }
+
+#pragma GCC diagnostic pop

@@ -60,15 +60,15 @@ public:
 
   string m_ion;
   int m_pos;
+  int m_loss;
   double m_mz;
   unsigned int m_charge;
-  unsigned int m_isotope;
   unsigned int m_prominence;
+  unsigned int m_isotope;
   double m_mzDiff;
   bool m_bracket;
-  int m_loss;
   bool m_assigned;
-  
+
   string getAnnotation();
   static string nextToken(string s, string::size_type from, string::size_type& tokenEnd, const char* delim = " \t\r\n", const char* skipover = " \t\r\n");
   static bool sortFragmentIonPtrsByProminence(FragmentIon* a, FragmentIon* b); 

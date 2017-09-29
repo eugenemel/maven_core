@@ -3439,17 +3439,17 @@ void Peptide::permuteModTokens(vector<map<char, set<string> > >& allowableTokenS
   }
     
 }
-
+  
 // Parser-constructor: Not used anywhere at present and not tested, so commented out for now.
 FragmentIon::FragmentIon(double mz, string& annotation, unsigned int curIsotope) :
   m_ion(""),
-  m_mz(mz),
   m_pos(0),
-  m_charge(0),
   m_loss(0),
+  m_mz(mz),
+  m_charge(0),
   m_prominence(0),
-  m_mzDiff(0.0),
   m_isotope(0),
+  m_mzDiff(0.0),
   m_bracket(false),
   m_assigned(false) {
   
@@ -3494,7 +3494,7 @@ FragmentIon::FragmentIon(double mz, string& annotation, unsigned int curIsotope)
     if (m_ion[pos] == '+') m_loss *= -1; 
   }
     
-  bool isNISTisotope = false;
+  //bool isNISTisotope = false;
   if (pos < m_ion.length() && (m_ion[pos] == 'i' || m_ion[pos] == '*')) { // NIST format, i before charge
     pos++;
   } 

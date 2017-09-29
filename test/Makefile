@@ -15,4 +15,4 @@ digest: digest.cpp ../libmaven/Peptide.cpp
 	$(CC) $(CFLAGS) -O3 -o digest ../libmaven/Peptide.cpp digest.cpp -I ../libmaven/
 
 mstoolkit: mstoolkit.cpp
-	$(CC) $(CFLAGS) -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC  -o mstoolkit mstoolkit.cpp -I../MSToolkit/include -I../libmaven/ -I../pugixml/src  -L../build/lib -lmstoolkitlite  -lz -lmaven -lpugixml
+	$(CC) $(CFLAGS) -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC  -o mstoolkit mstoolkit.cpp -I../MSToolkit/include -I../libmaven/ -I../pugixml/src  -L../build/lib -lz -lmstoolkitlite -lmaven -lpugixml

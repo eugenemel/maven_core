@@ -115,7 +115,7 @@ bool MzMLWriter::writeIndex(){
   if(bTabs) fprintf(fptr," ");
   fprintf(fptr,"</indexList>\n");
   if(bTabs) fprintf(fptr," ");
-  fprintf(fptr,"<indexListOffset>%lld</indexListOffset>\n",offset);
+  fprintf(fptr,"<indexListOffset>%ld</indexListOffset>\n",offset);
 
   return true;
 }
@@ -176,8 +176,8 @@ bool MzMLWriter::exportBinaryDataArray(Spectrum& s, bool bMZ, int tabs){
 
   //numpress if requested
   unsigned char* numpr=NULL;
-  double fixedPoint;
-  size_t numprLen;
+  double fixedPoint=0;
+  size_t numprLen=0;
   if(bNumpress){
     numpr = new unsigned char[d.size()*sizeof(double)+8];
     if(bMZ){
@@ -209,7 +209,7 @@ bool MzMLWriter::exportBinaryDataArray(Spectrum& s, bool bMZ, int tabs){
   }
 
   //convert to base64
-  int sz64;
+  int sz64=0;
   char* arr64=NULL;
   if(bNumpress){
     if(bZlib) sz64=zLen;
@@ -266,7 +266,7 @@ bool MzMLWriter::exportBinaryDataArray(Spectrum& s, bool bMZ, int tabs){
 }
 
 bool MzMLWriter::exportActivation(Spectrum& s, int tabs){
-  char tmp[128];
+  //char tmp[128];
   string value;
   string tbs="";
   if(bTabs) {
@@ -308,7 +308,7 @@ bool MzMLWriter::exportCvParam(string ac, string ref, string name, string unitAc
 }
 
 bool MzMLWriter::exportIsolationWindow(Spectrum& s, int tabs){
-  int i;
+  //int i;
   char tmp[128];
   string value;
   string tbs="";
@@ -334,7 +334,7 @@ bool MzMLWriter::exportOffset(string idRef, f_off offset, int tabs){
     tbs.append(tabs,' ');
     fprintf(fptr,"%s",&tbs[0]);
   }
-  fprintf(fptr,"<offset idRef=\"%s\">%lld</offset>\n",&idRef[0],offset);
+  fprintf(fptr,"<offset idRef=\"%s\">%ld</offset>\n",&idRef[0],offset);
   return true;
 }
 

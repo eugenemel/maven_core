@@ -1,5 +1,9 @@
 #include "MSReader.h"
 #include <iostream>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+
 using namespace std;
 using namespace MSToolkit;
 
@@ -97,9 +101,9 @@ int MSReader::openFile(const char *c,bool text){
 			for(i=0;i<16;i++) strcpy(header.header[i],"\0");
 			headerIndex=0;
 		} else {
-      fread(&iFType,4,1,fileIn);
-      fread(&iVersion,4,1,fileIn);
-			fread(&header,sizeof(MSHeader),1,fileIn);
+			size_t tmp = fread(&iFType,4,1,fileIn);
+			tmp = fread(&iVersion,4,1,fileIn);
+			tmp = fread(&header,sizeof(MSHeader),1,fileIn);
 		}
 
 	  return 0;
@@ -1861,14 +1865,14 @@ void MSReader::writeCompressSpec(FILE* fileOut, Spectrum& s){
 	int j;
 
 	//file compression
-	int err;
+	//int err;
 	uLong len;
 	unsigned char *comprM, *comprI;
   uLong comprLenM, comprLenI;
 	double *pD;
 	float *pF;
-	uLong sizeM;
-	uLong sizeI;
+	//uLong sizeM;
+	//uLong sizeI;
 
 	//Build arrays to hold scan prior to compression
 	// Ideally, we would just use the scan vectors, but I don't know how yet.
@@ -1881,17 +1885,17 @@ void MSReader::writeCompressSpec(FILE* fileOut, Spectrum& s){
 
 	//compress mz
 	len = (uLong)s.size()*sizeof(double);
-	sizeM = len;
+	//sizeM = len;
 	comprLenM = compressBound(len);
 	comprM = (unsigned char*)calloc((uInt)comprLenM, 1);
-	err = compress(comprM, &comprLenM, (const Bytef*)pD, len);
+	compress(comprM, &comprLenM, (const Bytef*)pD, len);
 
 	//compress intensity
 	len = (uLong)s.size()*sizeof(float);
-	sizeI = len;
+	//sizeI = len;
 	comprLenI = compressBound(len);
 	comprI = (unsigned char*)calloc((uInt)comprLenI, 1);
-	err = compress(comprI, &comprLenI, (const Bytef*)pF, len);
+	compress(comprI, &comprLenI, (const Bytef*)pF, len);
 
 	j=(int)comprLenM;
 	fwrite(&j,4,1,fileOut);
@@ -2161,12 +2165,12 @@ void MSReader::writeSpecHeader(FILE* fileOut, bool text, Spectrum& s) {
 
 void MSReader::readSpecHeader(FILE *fileIn, MSScanInfo &ms){
 	double d;
-
-  fread(&ms.scanNumber[0],4,1,fileIn);
+  size_t tmp;
+  tmp = fread(&ms.scanNumber[0],4,1,fileIn);
   if(feof(fileIn)) return;
-  fread(&ms.scanNumber[1],4,1,fileIn);
+  tmp = fread(&ms.scanNumber[1],4,1,fileIn);
 	if(iVersion>=5){
-		fread(&ms.mzCount,4,1,fileIn);
+		tmp =fread(&ms.mzCount,4,1,fileIn);
 		if(ms.mz!=NULL) delete [] ms.mz;
 		ms.mz = new double[ms.mzCount];
 		for(int i=0;i<ms.mzCount;i++){
@@ -2177,31 +2181,31 @@ void MSReader::readSpecHeader(FILE *fileIn, MSScanInfo &ms){
     if(ms.mz!=NULL) delete [] ms.mz;
     ms.mzCount=1;
     ms.mz = new double[ms.mzCount];
-		fread(&ms.mz[0],8,1,fileIn);
+		tmp = fread(&ms.mz[0],8,1,fileIn);
 	}
-  fread(&ms.rTime,4,1,fileIn);
+  tmp = fread(&ms.rTime,4,1,fileIn);
 
   if(iVersion>=2){
-    fread(&ms.BPI,4,1,fileIn);
-    fread(&ms.BPM,8,1,fileIn);
-    fread(&ms.convA,8,1,fileIn);
-    fread(&ms.convB,8,1,fileIn);
+    tmp = fread(&ms.BPI,4,1,fileIn);
+    tmp = fread(&ms.BPM,8,1,fileIn);
+    tmp = fread(&ms.convA,8,1,fileIn);
+    tmp = fread(&ms.convB,8,1,fileIn);
 		if(iVersion>=4){
-			fread(&ms.convC,8,1,fileIn);
-			fread(&ms.convD,8,1,fileIn);
-			fread(&ms.convE,8,1,fileIn);
-			fread(&ms.convI,8,1,fileIn);
+			tmp = fread(&ms.convC,8,1,fileIn);
+			tmp = fread(&ms.convD,8,1,fileIn);
+			tmp = fread(&ms.convE,8,1,fileIn);
+			tmp = fread(&ms.convI,8,1,fileIn);
 		}
-    fread(&ms.TIC,8,1,fileIn);
-    fread(&ms.IIT,4,1,fileIn);
+    tmp = fread(&ms.TIC,8,1,fileIn);
+    tmp = fread(&ms.IIT,4,1,fileIn);
   }
 
-  fread(&ms.numZStates,4,1,fileIn);
+  tmp = fread(&ms.numZStates,4,1,fileIn);
 
-  if(iVersion>=3) fread(&ms.numEZStates,4,1,fileIn);
+  if(iVersion>=3) tmp = fread(&ms.numEZStates,4,1,fileIn);
   else ms.numEZStates=0;
 
-  fread(&ms.numDataPoints,4,1,fileIn);
+  tmp = fread(&ms.numDataPoints,4,1,fileIn);
 
 }
 
@@ -2256,3 +2260,4 @@ MSFileFormat MSReader::checkFileFormat(const char *fn){
 
 }
 
+#pragma GCC diagnostic pop

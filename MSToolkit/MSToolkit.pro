@@ -13,13 +13,30 @@ QMAKE_CFLAGS_RELEASE   -= -std=c++11
 
 INCLUDEPATH += ./include/
 
-SOURCES = src/MSToolkit/MSObject.cpp   src/MSToolkit/MSReader.cpp   src/MSToolkit/Spectrum.cpp   src/MSToolkit/mzMLWriter.cpp\
-src/expat-2.0.1/xmlparse.c      src/expat-2.0.1/xmlrole.c       src/expat-2.0.1/xmltok.c        src/expat-2.0.1/xmltok_impl.c   src/expat-2.0.1/xmltok_ns.c\
-src/expat-2.0.1/xmlparse.cpp    src/expat-2.0.1/xmlrole.cpp     src/expat-2.0.1/xmltok.cpp      src/expat-2.0.1/xmltok_impl.cpp src/expat-2.0.1/xmltok_ns.cpp\
-./src/mzParser/BasicChromatogram.cpp ./src/mzParser/PWIZface.cpp          ./src/mzParser/mzParser.cpp          ./src/mzParser/saxhandler.cpp\
-./src/mzParser/BasicSpectrum.cpp     ./src/mzParser/RAMPface.cpp          ./src/mzParser/mzpMz5Config.cpp      ./src/mzParser/saxmzmlhandler.cpp\
-./src/mzParser/Czran.cpp             ./src/mzParser/mz5handler.cpp        ./src/mzParser/mzpMz5Structs.cpp     ./src/mzParser/saxmzxmlhandler.cpp\
-./src/mzParser/MSNumpress.cpp        ./src/mzParser/mzMLReader.cpp        ./src/mzParser/mzp_base64.cpp
+SOURCES = src/MSToolkit/MSObject.cpp\
+	 src/MSToolkit/MSReader.cpp\
+	 src/MSToolkit/Spectrum.cpp\
+	 src/MSToolkit/mzMLWriter.cpp\
+	 src/expat-2.0.1/xmlparse.cpp\
+	 src/expat-2.0.1/xmlrole.cpp\
+	 src/expat-2.0.1/xmltok.cpp\
+	 src/expat-2.0.1/xmltok_impl.cpp\
+	 src/expat-2.0.1/xmltok_ns.cpp\
+	 src/mzParser/BasicChromatogram.cpp\
+	 src/mzParser/PWIZface.cpp\
+	 src/mzParser/mzParser.cpp\
+	 src/mzParser/saxhandler.cpp\
+	 src/mzParser/BasicSpectrum.cpp\
+	 src/mzParser/RAMPface.cpp\
+	 src/mzParser/mzpMz5Config.cpp\
+	 src/mzParser/saxmzmlhandler.cpp\
+	 src/mzParser/Czran.cpp\
+	 src/mzParser/mz5handler.cpp\
+	 src/mzParser/mzpMz5Structs.cpp\
+	 src/mzParser/saxmzxmlhandler.cpp\
+	 src/mzParser/MSNumpress.cpp\
+	 src/mzParser/mzMLReader.cpp\
+	src/mzParser/mzp_base64.cpp
 
 HEADERS = include/MSNumpress.hpp include/Spectrum.h\
     include/expat.h include/latin1tab.h\

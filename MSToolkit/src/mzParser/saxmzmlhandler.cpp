@@ -32,6 +32,8 @@
  * email                : ppatrick@systemsbiology.org
  * Artistic License granted 3/11/2005
  *******************************************************/
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 
 #include "mzParser.h"
 
@@ -173,9 +175,9 @@ void mzpSAXMzmlHandler::startElement(const XML_Char *el, const XML_Char **attr){
 		stopParser();
 
 	}	else if (isElement("softwareParam", el)) {
-		const char* name = getAttrValue("name", attr);
-		const char* accession = getAttrValue("accession", attr);
-		const char* version = getAttrValue("version", attr);
+		//const char* name = getAttrValue("name", attr);
+		//const char* accession = getAttrValue("accession", attr);
+		//const char* version = getAttrValue("version", attr);
 
 	}	else if (isElement("spectrum", el)) {
 		string s=getAttrValue("id", attr);
@@ -225,7 +227,7 @@ void mzpSAXMzmlHandler::startElement(const XML_Char *el, const XML_Char **attr){
 		}
 	} else if (isElement("userParam", el)) {
     const char* name = getAttrValue("name", attr);
-    const char* dtype = getAttrValue("type", attr);
+    //const char* dtype = getAttrValue("type", attr);
     const char* value = getAttrValue("value", attr);
     if(strcmp(name,"[Thermo Trailer Extra]Monoisotopic M/Z:")==0){
       m_precursorIon.monoMZ=atof(value);
@@ -616,9 +618,9 @@ void mzpSAXMzmlHandler::decode(vector<double>& d){
 	size_t stringSize = m_strData.size();
 
   char* decoded = new char[m_encodedLen];  //array for decoded base64 string
-  int decodeLen;
-  Bytef* unzipped;
-  uLong unzippedLen;
+  int decodeLen=0;
+  Bytef* unzipped=0;
+  uLong unzippedLen=0;
 
   int i;
 
@@ -754,8 +756,8 @@ f_off mzpSAXMzmlHandler::readIndexOffset() {
 	char chunk[CHUNK];
 	char* start;
 	char* stop;
-	int readBytes;
-	size_t sz;
+	int readBytes=0;
+	size_t sz=0;
 
 	if(!m_bGZCompression){
 		FILE* f=fopen(&m_strFileName[0],"r");
@@ -857,3 +859,5 @@ int mzpSAXMzmlHandler::getPeaksCount(){
 vector<cindex>* mzpSAXMzmlHandler::getSpecIndex(){
 	return &m_vIndex;
 }
+
+#pragma GCC diagnostic pop
