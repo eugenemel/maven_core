@@ -337,8 +337,11 @@ void mzSample::parseMzMLChromatogromList(xml_node chromatogramList) {
                                 int precision = 64;
                                 if(attr.count("32-bit float")) precision=32;
 
+								bool decompress = false;
+								if(attr.count("zlib compression")) decompress=true;
+
                                 string binaryDataStr = binaryDataArray.child("binary").child_value();
-                                vector<float>binaryData = base64::decode_base64(binaryDataStr,precision/8,false,false);
+                                vector<float>binaryData = base64::decode_base64(binaryDataStr,precision/8,false,decompress);
 
                                 if(attr.count("time array")) { timeVector = binaryData; }
                                 if(attr.count("intensity array")) { intsVector = binaryData; }
@@ -378,7 +381,7 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
     for (xml_node spectrum  = spectrumList.child("spectrum");
             spectrum; spectrum = spectrum.next_sibling("spectrum")) {
         string spectrumId = spectrum.attribute("id").value();
-        cerr << "Processing: " << spectrumId << endl;
+        //cerr << "Processing: " << spectrumId << endl;
 
         if (spectrum.empty()) continue;
         map<string,string>cvParams = mzML_cvParams(spectrum);
@@ -403,13 +406,22 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
         map<string,string>scanAttr = mzML_cvParams(scanNode);
         if(scanAttr.count("scan start time")) {
             string rtStr = scanAttr["scan start time"];
-            rt = string2float(rtStr);
+            rt = string2float(rtStr)/60.0;
         }
 
 
-        map<string,string>isolationWindow = mzML_cvParams(spectrum.first_element_by_path("precursorList/precursor/isolationWindow"));
-        string precursorMzStr = isolationWindow["isolation window target m/z"];
-        float precursorMz = 0; if(string2float(precursorMzStr)>0) precursorMz=string2float(precursorMzStr);
+        map<string,string>selectedIon = mzML_cvParams(spectrum.first_element_by_path("precursorList/precursor/selectedIonList/selectedIon"));
+        string precursorMzStr = selectedIon["selected ion m/z"];
+
+		map<string,string>isolationWindow = mzML_cvParams(spectrum.first_element_by_path("precursorList/precursor/isolationWindow"));
+		if ( precursorMzStr.length() == 0) precursorMzStr = isolationWindow["isolation window target m/z"];
+
+		string precursorIsolationStr = isolationWindow["isolation window lower offset"];
+		float precursorIsolationWindow = 1.0;
+		if(string2float(precursorIsolationStr)>0) precursorIsolationWindow=string2float(precursorIsolationStr);
+
+        float precursorMz = 0; 
+		if(string2float(precursorMzStr)>0) precursorMz=string2float(precursorMzStr);
 
         string productMzStr = spectrum.first_element_by_path("product/isolationWindow/cvParam").attribute("value").value();
         float productMz = 0;   if(string2float(productMzStr)>0)   productMz=string2float(productMzStr);
@@ -426,16 +438,20 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
             int precision = 64;
             if(attr.count("32-bit float")) precision=32;
 
+			bool decompress = false;
+            if(attr.count("zlib compression")) decompress=true;
+
             string binaryDataStr = binaryDataArray.child("binary").child_value();
             if (!binaryDataStr.empty()) {
-                vector<float>binaryData = base64::decode_base64(binaryDataStr,precision/8,false,false);
+                vector<float>binaryData = base64::decode_base64(binaryDataStr,precision/8,false,decompress);
                 if(attr.count("m/z array")) { mzVector = binaryData; }
                 if(attr.count("intensity array")) { intsVector = binaryData; }
             }
         }
 
-        cerr << " scan=" << scannum << "\tms="<< mslevel << "\tprecMz" << precursorMz << "\t rt=" << rt << endl;
+        //cerr << " scan=" << scannum << "\tms="<< mslevel << "\tprecMz=" << precursorMz << "\t rt=" << rt << "\tisolWin=" << precursorIsolationWindow << endl;
         Scan* scan = new Scan(this,scannum++,mslevel,rt,precursorMz,scanpolarity);
+		scan->isolationWindow = precursorIsolationWindow;
         scan->productMz=productMz;
         scan->filterLine= spectrumId;
         scan->intensity = intsVector;
@@ -709,12 +725,9 @@ Scan* mzSample::parseMzXMLScan(const xml_node& mzxml_scan_node, int scannum) {
     if ( ! peaks.empty() ) {
         string b64String(peaks.child_value());
         if ( b64String.empty()) return _scan;  //no m/z intensity values
-		bool decompress = false;
 
-        //decompress
-        if(strncasecmp(peaks.attribute("compressionType").value(),"zlib",4) == 0) {
-			decompress=true;
-		}
+		bool decompress = false; //decompress?
+        if(strncasecmp(peaks.attribute("compressionType").value(),"zlib",4) == 0) decompress=true;
 
         if (!filterLine.empty()) _scan->filterLine=filterLine;
         if (!scanType.empty())   _scan->scanType= scanType;
@@ -728,8 +741,6 @@ Scan* mzSample::parseMzXMLScan(const xml_node& mzxml_scan_node, int scannum) {
         int precision=32;
         if (!peaks.attribute("precision").empty()) { precision = peaks.attribute("precision").as_int(); }
 
-       // cerr << "new scan=" << scannum << " msL=" << msLevel << " rt=" << rt << " precMz=" << precursorMz << " polar=" << scanpolarity
-       //    << " prec=" << precision << endl;
 
         vector<float> mzint = base64::decode_base64(b64String,precision/8,networkorder,decompress);
         int size = mzint.size()/2;
@@ -737,14 +748,16 @@ Scan* mzSample::parseMzXMLScan(const xml_node& mzxml_scan_node, int scannum) {
         _scan->mz.resize(size);
         _scan->intensity.resize(size);
 
+       //cerr << "new scan=" << scannum << " msL=" << msLevel << " rt=" << rt << " precMz=" << precursorMz << " polar=" << scanpolarity << " prec=" << precision << " byteorder=" << networkorder << " comprezed=" << decompress << "\t" << _scan->totalIntensity() << endl;
+
        // cerr << "Network:" << networkorder << " precision" << precision <<  " size=" << size << endl;
 
         int j=0; int count=0;
         for(int i=0; i < size; i++ ) {
             float mzValue = mzint[j++];
             float intensityValue = mzint[j++];
-            //cerr << mzValue << " " << intensityValue << endl;
             if (mzValue > 0 && intensityValue > 0 ) {
+				//cerr << mzValue << " " << intensityValue << endl;
                 _scan->mz[i]= mzValue;
                 _scan->intensity[i] = intensityValue;
                 count++;

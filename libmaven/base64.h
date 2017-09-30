@@ -6,19 +6,13 @@
 #include <string.h>
 #include <stdint.h>
 
-
 #ifndef BASE64_H
 #define BASE64_H
 using namespace std;
 
 namespace base64 { 
-		char decode(char c);
-		char encode(unsigned char u);
-		int is_base64(char c);
 		vector<float> decode_base64(const string& src, int float_size, bool networkorder, bool decompress);
-		char* decode_base64(const string& src);
-
-		unsigned char *encode_base64(const vector<float>& farray);
+		std::string decode_base64(const std::string& in);
 
 		/* swap bytes .. borrowed from xmms  GNU*/
 		inline uint32_t swapbytes(uint32_t x) {
@@ -29,11 +23,9 @@ namespace base64 {
 		}
 
 		inline uint64_t swapbytes64(uint64_t x) {
-				return ((((uint64_t)swapbytes((uint32_t)(x & 0xffffffffU)) << 32) |
-										(uint64_t)swapbytes((uint32_t)(x >> 32))));
+			return ((((uint64_t)swapbytes((uint32_t)(x & 0xffffffffU)) << 32) |
+						(uint64_t)swapbytes((uint32_t)(x >> 32))));
 		}
 
 }
 #endif
-
-
