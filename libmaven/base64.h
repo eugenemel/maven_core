@@ -12,7 +12,7 @@ using namespace std;
 
 namespace base64 { 
 		vector<float> decode_base64(const string& src, int float_size, bool networkorder, bool decompress);
-		std::string decode_base64(const std::string& in);
+           std::string b64decode(const void* data, const size_t len);
 
 		/* swap bytes .. borrowed from xmms  GNU*/
 		inline uint32_t swapbytes(uint32_t x) {
