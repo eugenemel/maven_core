@@ -363,7 +363,7 @@ void Aligner::doSegmentedAligment() {
 		if (sample == NULL) continue;
 	
 		string sampleName = sample->sampleName;
-		mzUtils::replace(sampleName,".mzXML","");
+		//mzUtils::replace(sampleName,".mzXML","");
 
 		if ( alignmentSegments.count(sampleName)  == 0) { 
 				cerr << "Can't find alignment information for sample " << sampleName << endl;

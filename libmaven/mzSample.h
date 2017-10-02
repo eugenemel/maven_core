@@ -802,6 +802,10 @@ class Aligner {
 		void loadAlignmentFile(string alignmentFile); //load alignment information from a file
 		void doSegmentedAligment();	 //ralign scans using guided alignment
 
+		inline void addSegment(string sampleName, AligmentSegment* s) { 
+			alignmentSegments[sampleName].push_back(s); 
+		}
+
 	private:
 		vector< vector<float> > fit;
 		vector<mzSample*> samples;

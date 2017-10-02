@@ -9,6 +9,8 @@
 
 #ifndef EIGEN_FUNCTORS_H
 #define EIGEN_FUNCTORS_H
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 namespace Eigen {
 
@@ -1024,3 +1026,4 @@ struct functor_traits<std::binary_compose<T0,T1,T2> >
 } // end namespace Eigen
 
 #endif // EIGEN_FUNCTORS_H
+#pragma GCC diagnostic pop
