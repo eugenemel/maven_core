@@ -621,7 +621,8 @@ double Fragment::logNchooseK(int N,int k) {
 
 double Fragment::SHP(int k, int m, int n, int N=100000) {   //k=matched, m=len1, n=len2
     if (k==0) return 0;
-    if (k > min(m,n)) { return -1; } //error 
+    //if (k > min(m,n)) { return -1; } //error
+    if (k > min(m,n))  k = min(m,n);
     double A=logNchooseK(m,k);
     double B=logNchooseK(N-m,n-k);
     double C=logNchooseK(N,n);
