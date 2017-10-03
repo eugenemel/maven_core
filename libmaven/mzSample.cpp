@@ -17,12 +17,13 @@ mzSample::mzSample() {
     minIntensity=0;
     totalIntensity=0;
     _normalizationConstant=1;
-    _sampleOrder=0;
+    _sampleOrder=-1;
     _C13Labeled=false;
     _N15Labeled=false;
     _S34Labeled=false; //Feng note: added to track S34 labeling state
     _D2Labeled=false; //Feng note: added to track D2 labeling state
     _setName =  "A";
+    sampleId = -1;
     color[0]=color[1]=color[2]=0;
     color[3]=1.0;
 }

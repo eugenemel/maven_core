@@ -360,7 +360,8 @@ void Aligner::doSegmentedAligment() {
 	cerr << "Aligner::doSegmentedAligment()" << "samples=" << samples.size() << endl;
 
 	for (mzSample* sample: samples ) {
-		if (sample == NULL) continue;
+        if (sample == NULL) continue;
+        sample->saveOriginalRetentionTimes();
 	
 		string sampleName = sample->sampleName;
 		//mzUtils::replace(sampleName,".mzXML","");

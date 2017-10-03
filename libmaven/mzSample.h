@@ -248,7 +248,7 @@ public:
     vector<Scan*> getFragmenationEvents(mzSlice* slice);
 
     deque <Scan*> scans;
-    unsigned int sampleId;
+    int sampleId;
     string sampleName;
     string fileName;
     bool isSelected;
@@ -293,6 +293,8 @@ public:
     inline string  getSetName()  { return _setName; }
     void   setSetName(string x) { _setName=x; }
     void   setSampleName(string x) { sampleName=x; }
+    void   setSampleId(int id) { sampleId=id; }
+    inline int	  getSampleId() { return sampleId; }
 
     static float getMaxRt(const vector<mzSample*>&samples);
     bool C13Labeled(){ return _C13Labeled; }
