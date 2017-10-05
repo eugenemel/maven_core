@@ -25,10 +25,12 @@ struct FragmentationMatchScore {
     double dotProduct;
     double weightedDotProduct;
     double hypergeomScore;
+    double mvhScore;
 
     static vector<string> getScoringAlgorithmNames() {
         vector<string> names;
         names.push_back("HyperGeomScore");
+        names.push_back("MVH");
         names.push_back("DotProduct");
         names.push_back("WeightedDotProduct");
         names.push_back("SpearmanRank");
@@ -40,6 +42,7 @@ struct FragmentationMatchScore {
 
     double getScoreByName(string scoringAlgorithm) {
         if (scoringAlgorithm == "HyperGeomScore" )         return hypergeomScore;
+        else if (scoringAlgorithm == "MVH")                return  mvhScore;
         else if (scoringAlgorithm == "DotProduct")         return dotProduct;
         else if (scoringAlgorithm == "SpearmanRank")       return spearmanRankCorrelation;
         else if (scoringAlgorithm == "TICMatched")         return ticMatched;
@@ -60,6 +63,7 @@ struct FragmentationMatchScore {
         dotProduct=0;
         weightedDotProduct=0;
         hypergeomScore=0;
+        mvhScore=0;
     }
 
     FragmentationMatchScore& operator=(const FragmentationMatchScore& b) {
@@ -73,6 +77,7 @@ struct FragmentationMatchScore {
         dotProduct=b.dotProduct;
         weightedDotProduct=b.weightedDotProduct;
         hypergeomScore=b.hypergeomScore;
+        mvhScore=b.mvhScore;
         return *this;
     }
 
@@ -156,6 +161,7 @@ class Fragment {
 
         double logNchooseK(int N,int k);
         double SHP(int matched, int len1, int len2, int N);
+        double MVH(const vector<int>& X, Fragment* other);
 
         static bool compPrecursorMz(const Fragment* a, const Fragment* b) { return a->precursorMz<b->precursorMz; }
         bool operator<(const Fragment* b) const{ return this->precursorMz < b->precursorMz; }

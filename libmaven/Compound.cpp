@@ -49,6 +49,8 @@ FragmentationMatchScore Compound::scoreCompoundHit(Fragment* f, float productPpm
             }
         }
 
+        //theory fragmentation or library fragmentation = t
+        //experimental data = f
         t.sortByIntensity();
         s = t.scoreMatch(f,productPpmTolr);
 

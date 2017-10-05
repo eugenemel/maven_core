@@ -318,6 +318,7 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
     s.mzFragError =  mzErr(ranks,b);
     s.dotProduct = dotProduct(ranks,b);
     s.hypergeomScore  = SHP(s.numMatches,a->nobs(),b->nobs(),100000) + s.ticMatched; // ticMatch is tie breaker
+    s.mvhScore = MVH(ranks,b);
     s.weightedDotProduct = mzWeightedDotProduct(ranks,b);
 
     //cerr << "scoreMatch:\n" << a->nobs() << "\t" << b->nobs() << "\t" << s.numMatches << " hyper=" << s.hypergeomScore << "\n";
@@ -625,7 +626,7 @@ double Fragment::ticMatched(const vector<int>& X) {
 }
 
 double Fragment::logNchooseK(int N,int k) {
-    if (N == k) return 0;
+    if (N == k || k == 0) return 0;
     if (N == k) return -1;  //not defined..
 
     double x = k / (double) N;
@@ -643,6 +644,34 @@ double Fragment::SHP(int k, int m, int n, int N=100000) {   //k=matched, m=len1,
     return -(A+B-C);
 }
 
+double Fragment::MVH(const vector<int>& X, Fragment* other) {
+    //other is experimental spectra
+    int N = 100000;
+    if (X.size() == 0) return 0;
+    int m = this->nobs();
+    int n = other->nobs();
+
+    int Ak =   0; int Am=0.1 * n;
+    int Bk =   0; int Bm=0.2 * n;
+    int Ck =   0; int Cm=0.7 * n;
+    int Dk =   0;
+
+    for(unsigned int i=0; i<X.size(); i++ ) {
+        int j = X[i];
+        if (j == -1)  Dk++;
+        else if (j < 0.1*n)   Ak++; //class A matched
+        else if (j < 0.3*n)   Bk++; //class B matched
+        else Ck++;                  //class C matched
+    }
+
+    cerr << "MVH:" << Ak << " " << Bk << " " << Ck << " " << Dk << endl;
+    cerr << "   "  << Am << " " << Bm << " " << Cm << "n=" << n << " m=" << m << endl;
+
+    double A=logNchooseK(Am,Ak) + logNchooseK(Bm,Bk) + logNchooseK(Cm,Ck);
+    double B=logNchooseK(N-Am-Bm-Cm,n-Ak-Bk-Ck);
+    double C=logNchooseK(N,n);
+    return -(A+B-C);
+}
 
 bool Fragment::hasMz(float mzValue, float ppmTolr) {
     for(unsigned int i=0; i < nobs(); i++)  if (mzUtils::ppmDist(mzs[i],mzValue) < ppmTolr) return true;
