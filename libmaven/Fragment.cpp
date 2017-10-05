@@ -313,12 +313,15 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
     for(int i=0; i<ranks.size();i++) other->annotations[ranks[i]]=this->annotations[i];
 
     s.fractionMatched = s.numMatches / a->nobs();
-    s.hypergeomScore  = SHP(s.numMatches,a->nobs(),b->nobs(),100000);
     s.spearmanRankCorrelation = spearmanRankCorrelation(ranks);
     s.ticMatched = ticMatched(ranks);
     s.mzFragError =  mzErr(ranks,b);
     s.dotProduct = dotProduct(ranks,b);
+    s.hypergeomScore  = SHP(s.numMatches,a->nobs(),b->nobs(),100000) + s.ticMatched; // ticMatch is tie breaker
     s.weightedDotProduct = mzWeightedDotProduct(ranks,b);
+
+    //cerr << "scoreMatch:\n" << a->nobs() << "\t" << b->nobs() << "\t" << s.numMatches << " hyper=" << s.hypergeomScore << "\n";
+
 
     return s;
 }
@@ -338,17 +341,24 @@ double Fragment::compareToFragment(Fragment* other, float productPpmTolr) {
 
 vector<int> Fragment::compareRanks(Fragment* a, Fragment* b, float productPpmTolr) {
     bool verbose=false;
-    if (verbose) { cerr << "\t\t "; a->printMzList(); cerr << "\nvs \n"; b->printMzList();  }
     vector<int> ranks (a->mzs.size(),-1);	//missing value == -1
     for(unsigned int i=0; i<a->mzs.size(); i++ ) {
         for( unsigned int j=0; j < b->mzs.size(); j++ ) {
-            //if (abs(a->mzs[i]-b->mzs[j])<productAmuToll) { ranks[i] = j; break; }   //this needs optimization..
             if (mzUtils::ppmDist(a->mzs[i],b->mzs[j])<productPpmTolr) { ranks[i] = j; break; }   //this needs optimization..
         }
     }
     if (verbose) {
-        cerr << " compareranks: ";
-        for(unsigned int i=0; i < ranks.size(); i++ ) cerr << ranks[i] << " "; }
+        cerr << " compareranks: " << a->sampleName << endl;
+        for(unsigned int i=0; i < ranks.size(); i++ ) {
+            float mz2=0;
+            float ints2=0;
+
+            if(ranks[i]>=0) { mz2=b->mzs[ ranks[i] ]; ints2= b->intensity_array[ ranks[i] ]; }
+                std::cerr << ranks[i] << "," << a->mzs[i] << "\t" << mz2 << "\t\t" <<  a->intensity_array[i] << "\t" << ints2 << endl;
+            }
+
+        }
+
         return ranks;
 }
 
@@ -615,6 +625,9 @@ double Fragment::ticMatched(const vector<int>& X) {
 }
 
 double Fragment::logNchooseK(int N,int k) {
+    if (N == k) return 0;
+    if (N == k) return -1;  //not defined..
+
     double x = k / (double) N;
     return N*x*log(1/x)+(1-x)*log(1/(1-x));
 }
@@ -626,6 +639,7 @@ double Fragment::SHP(int k, int m, int n, int N=100000) {   //k=matched, m=len1,
     double A=logNchooseK(m,k);
     double B=logNchooseK(N-m,n-k);
     double C=logNchooseK(N,n);
+    //cerr << " A,B,C " << "\t" << A << "\t" << B << "\t" << C << endl;
     return -(A+B-C);
 }
 
