@@ -667,7 +667,7 @@ double Fragment::MVH(const vector<int>& X, Fragment* other) {
     cerr << "MVH:" << Ak << " " << Bk << " " << Ck << " " << Dk << endl;
     cerr << "   "  << Am << " " << Bm << " " << Cm << "n=" << n << " m=" << m << endl;
 
-    double A=logNchooseK(Am,Ak) + logNchooseK(Bm,Bk) + logNchooseK(Cm,Ck);
+    double A=logNchooseK(Am,Ak) + 0.5*logNchooseK(Bm,Bk) + 0.1*logNchooseK(Cm,Ck);
     double B=logNchooseK(N-Am-Bm-Cm,n-Ak-Bk-Ck);
     double C=logNchooseK(N,n);
     return -(A+B-C);

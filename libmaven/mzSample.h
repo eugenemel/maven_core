@@ -666,6 +666,7 @@ class Compound {
 		private:
 			PeakGroup _group;			//link to peak group
             bool      _groupUnlinked;
+            float exactMass;
 
 		public:
 			Compound(string id, string name, string formula, int charge );
@@ -689,9 +690,7 @@ class Compound {
 
             string srmId;
             float expectedRt;
-
             int charge;
-            float mass;
 
             //QQQ mapping
             string method_id;
@@ -710,11 +709,12 @@ class Compound {
             vector<string> category;
 
             float ajustedMass(int charge);
-            static bool compMass(const Compound* a, const Compound* b )      { return(a->mass < b->mass);       }
+            static bool compMass(const Compound* a, const Compound* b )      { return(a->exactMass < b->exactMass);       }
             static bool compName(const Compound* a, const Compound* b )    { return(a->name < b->name);       }
             static bool compFormula(const Compound* a, const Compound* b ) { return(a->formula < b->formula); }
 
-	
+            inline float getExactMass() { return exactMass; }
+            void setExactMass(float value) { exactMass = value; }
 };
 
 
