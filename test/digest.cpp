@@ -49,7 +49,6 @@ class Protein {
             }
             cuts.push_back(sequence.length()-1);
 
-
             for(int i=0; i < cuts.size()-1; i++ ) {
                 int pos1 =  cuts[i];
                 for(int j=i+1; j <= cuts.size(); j++ ) {
@@ -57,11 +56,13 @@ class Protein {
                     if (pos2-pos1 > MAXLENTH) break;
                     if (j-i > MAXMISSED) break;
 
-                    if (pos2-pos1 >=MINLENGTH and pos2-pos1 <= MAXLENTH) { 
+		    int nTerm=0;
+		    if( pos1 == 0) nTerm=1;
 
+                    if (pos2-pos1+nTerm >=MINLENGTH and pos2-pos1 <= MAXLENTH) { 
                         string peptideSeq;
                         if(i>0) peptideSeq = sequence.substr(pos1+1,pos2-pos1);
-                        else    peptideSeq = sequence.substr(pos1+1,pos2-pos1);
+			else if(nTerm)  peptideSeq = sequence.substr(pos1,pos2+1);
 
                        calculateMZ(peptideSeq);
 
