@@ -1,7 +1,7 @@
-#include "MSReader.h"
 #include "mzSample.h"
+//#include "MSReader.h"
 
-using namespace MSToolkit;
+//using namespace MSToolkit;
 
 int main(int argc, char** argv) {
 	    if (argc == 1) { cerr << "Specifiy massspec sample"; return -1; }
@@ -9,6 +9,7 @@ int main(int argc, char** argv) {
 		for(int i=1; i<argc; i++ )  {
 			char* filename = argv[i];
 			cerr << "Testing " << filename << endl;
+			// if using MSToolkit
 			// mzSample* sample = new mzSample();
 			// sample->loadMsToolsSample(filename);
 
@@ -22,6 +23,9 @@ int main(int argc, char** argv) {
 				totalPeaks += scan->nobs();
 				totalInts += scan->totalIntensity();
 				//cerr << scan->mslevel << "\t" << scan->totalIntensity() << endl;
+				for (int j=0; j < scan->nobs(); j++ ) {
+					cerr << scan->mz[j] << "\t" << scan->intensity[j] << endl;
+				}
 			}
 
 			cerr << filename << "\t" << sample->scans.size() << "\tpeaks=" << totalPeaks << "\ttotalInt=" << totalInts << endl;
