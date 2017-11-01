@@ -46,13 +46,22 @@ class MassCalculator {
             compoundLink = b.compoundLink;
             adductLink =   b.adductLink;
             fragScore = b.fragScore;
+            atomCounts=b.atomCounts;
             return *this;
+        }
+
+        vector<int> compAtomCounts( Match& b) {
+            vector<int>delta = this->atomCounts;
+            if ( b.atomCounts.size() < this->atomCounts.size() ) return delta;
+            for(int i=0; i< atomCounts.size(); i++ ) delta[i] = atomCounts[i] - b.atomCounts[i];
+            return delta;
         }
 
         std::string name;
         std::string formula;
         double mass=0;
         double diff=0;
+        vector<int>atomCounts;
         Compound* compoundLink=NULL;
         Adduct*   adductLink=NULL;
         FragmentationMatchScore fragScore;
@@ -75,6 +84,8 @@ class MassCalculator {
     map<string,int> getPeptideComposition(const string& peptideSeq);
 
     static bool compDiff(const Match& a, const Match& b ) { return a.diff < b.diff; }
+    static bool compNumMatches(const Match& a, const Match& b ) { return a.fragScore.numMatches < b.fragScore.numMatches; }
+
     private:
         double getElementMass(string elmnt);
 

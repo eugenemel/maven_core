@@ -253,9 +253,9 @@ vector<MassCalculator::Match> MassCalculator::enumerateMasses(double inputMass, 
                     for(int s=0; s<6;s++) { //S
                         int hmax = c*4+o*2+n*4+p*3+s*3;
                         for(int h=0; h<hmax;h++) { //H
-                            double du = ((c*2+n+p)+2-h)/2;
-                            if (du < -0.5 ) continue;
-                            if (round(du / 0.5) != (du/0.5) ) continue;
+                            //double du = ((c*2+n+p)+2-h)/2;
+                            //if (du < -0.5 ) continue;
+                            //if (round(du / 0.5) != (du/0.5) ) continue;
 
                             double c12 = c*12.0 +  o*15.9949146221 + n*14.0030740052 + p*30.97376151 + h*1.0078250321 + s*31.97207069;
                             double diff = ppmDist(c12,inputMass);
@@ -268,6 +268,8 @@ vector<MassCalculator::Match> MassCalculator::enumerateMasses(double inputMass, 
                                 m.compoundLink = NULL;
                                 m.adductLink=NULL;
                                 m.formula=m.name=name;
+                                int tmp[6]= { c,h,n,o,p,s };
+                                m.atomCounts.assign(tmp,tmp+6);
                                 matches.push_back(m);
                             }
                         }
