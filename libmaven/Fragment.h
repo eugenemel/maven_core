@@ -99,6 +99,10 @@ class Fragment {
         int precursorCharge;
         bool isDecoy;
         SortType sortedBy;
+		int mergeCount;				    //number of merged events
+
+		void truncateTopN(int n);
+
 
         PeakGroup* group;
 
@@ -131,6 +135,7 @@ class Fragment {
         void printConsensusMGF(ostream& outstream, double minConsensusFraction);
         void printConsensusNIST(ostream& outstream, double minConsensusFraction, float productPpmToll, Compound* compound, Adduct* adduct);
         FragmentationMatchScore scoreMatch(Fragment* other, float productPpmToll);
+        float consensusRt();
 
         double compareToFragment(Fragment* other, float productPPMToll);
         static vector<int> compareRanks(Fragment* a, Fragment* b, float productPpmTolr);
@@ -145,6 +150,7 @@ class Fragment {
         void sortByIntensity();
         void sortByMz();
         void buildConsensusAvg();
+		void mergeFragment(Fragment* brother, float productPpmTolr);
 
 
         double spearmanRankCorrelation(const vector<int>& X);

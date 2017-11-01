@@ -2,7 +2,19 @@
 #include "mzSample.h"
 
 //empty constructor
-Fragment::Fragment() { precursorMz = 0; polarity=1; scanNum=0; rt=0; collisionEnergy=0; consensus=NULL; precursorCharge=0; isDecoy=false; sortedBy=None; group=NULL;}
+Fragment::Fragment() { 
+	precursorMz = 0; 
+	polarity=1; 
+	scanNum=0; 
+	rt=0;
+   	collisionEnergy=0; 
+	consensus=NULL; 
+	precursorCharge=0; 
+	isDecoy=false; 
+	sortedBy=None; 
+	group=NULL;
+	mergeCount=0;
+}
 
 
 //build fragment based on MS2 scan
@@ -14,6 +26,7 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
     this->scanNum = scan->scannum;
     this->precursorCharge = scan->precursorCharge;
     this->sortedBy= Fragment::SortType::Mz;
+	this->mergeCount=0;
 
     int baseLineLevel=5; //lowest 5% of data are considered to be baseline
 
@@ -58,6 +71,7 @@ Fragment::Fragment( Fragment* other) {
     this->precursorCharge= other->precursorCharge;
     this->sortedBy = other->sortedBy;
     this->group = other->group;
+	this->mergeCount = other->mergeCount;
 }
 
 void Fragment::appendBrothers(Fragment* other) {
@@ -182,7 +196,21 @@ void Fragment::printConsensusMGF(ostream& outstream, double minConsensusFraction
     outstream << "END IONS" << endl;
 }
 
+float Fragment::consensusRt() { 
+
+	if (brothers.size() == 0) 
+		return this->rt;
+
+    //compute retention time window
+    StatisticsVector<float>retentionTimes; retentionTimes.push_back(this->rt);
+    for(unsigned int i=0; i<brothers.size();i++ ) retentionTimes.push_back(brothers[i]->rt);
+	return retentionTimes.mean();
+}
+
 void Fragment::printConsensusNIST(ostream& outstream, double minConsensusFraction, float productPpmToll, Compound* compound=0, Adduct* adduct=0) {
+
+	//this->buildConsensus(productPpmToll);
+    //if(this->consensus == NULL) return;
 
     string COMPOUNDNAME = "Unknown";
     if (compound)  COMPOUNDNAME = compound->id;
@@ -195,13 +223,15 @@ void Fragment::printConsensusNIST(ostream& outstream, double minConsensusFractio
     for(unsigned int i=0; i<brothers.size();i++ ) retentionTimes.push_back(brothers[i]->rt);
 
     float precursorMz =  this->precursorMz;
-    float MW=this->precursorMz;
 
     //scan list
     string scanList = this->sampleName + "." + integer2string(this->scanNum);
     for(unsigned int i=0; i<brothers.size();i++ )  scanList += ";" + brothers[i]->sampleName + "." + integer2string(brothers[i]->scanNum);
 
-    int consensusSize = this->brothers.size()+1;
+    //int consensusSize = this->brothers.size()+1;
+    int consensusSize = (this->mergeCount+1);
+
+	float avgRt = this->consensusRt();
 
     if (compound) {
         if (adduct) {
@@ -220,35 +250,35 @@ void Fragment::printConsensusNIST(ostream& outstream, double minConsensusFractio
         if (!compound->smileString.empty()) outstream << "SMILE: " << compound->smileString << endl;
         outstream << "LOGP: " << compound->logP << endl;
 
-    }
-    outstream << "MW: " << setprecision(10) << MW << endl;
+    } else {
+            outstream << "Name: " << "unknown" << ppmround(this->precursorMz,1000) << "@" << ppmround(avgRt,10) << endl;
+	}
+
     outstream << "PrecursorMZ: " << setprecision(10) << precursorMz << endl;
+    outstream << "RT: " << setprecision(5) << avgRt << endl;
     outstream << "Comment: ";
     outstream << " Spec=Consensus";
     outstream << " Parent=" << setprecision(10) << precursorMz;
-    if(this->collisionEnergy) outstream << " collisionEnergy=" << this->collisionEnergy;
+    if(this->collisionEnergy) outstream << " collisionEnergy=" << (int)this->collisionEnergy;
     if(avgMVH) outstream << " AvgMVH=" << avgMVH;
-    outstream << " AvgRt=" << this->rt;
+    outstream << " AvgRt=" << avgRt;
 
-    //outstream << " MaxRt=" << retentionTimes.maximum();
-    outstream << " StdRt=" << sqrt(retentionTimes.variance());
     //outstream << " Scanlist=" << scanList;
     outstream << " ConsensusSize=" << consensusSize << endl;
     outstream << "NumPeaks: " << mzs.size() << endl;
 
 
-    for(unsigned int i=0; i< mzs.size(); i++ ) {
-        float fracObserved = ((float) obscount[i])/consensusSize;
+    for(unsigned int i=0; i< this->mzs.size(); i++ ) {
+        float fracObserved = ((float) this->obscount[i])/consensusSize;
+
         if (fracObserved > minConsensusFraction )  {
 
-            outstream << setprecision(7) << mzs[i] << " ";
-            outstream << (int) intensity_array[i] << " ";
+            outstream << setprecision(7) << this->mzs[i] << " ";
+            outstream << (int) this->intensity_array[i] << " ";
 
             string ionName = "?";
-            if (annotations.count(i))  {
-                ionName = annotations[i];
-            }
-            outstream << "\"" << ionName << " " << obscount[i] << "/" <<  consensusSize << "\"" << endl;
+            if (annotations.count(i)) ionName = annotations[i]; 
+            outstream << "\"" << ionName << " " << this->obscount[i]<< "\"" << endl;
         }
     }
     outstream << endl;
@@ -377,10 +407,44 @@ vector<int> Fragment::locatePositions( Fragment* a, Fragment* b, float productPp
     return ranks;
 }
 
+void Fragment::mergeFragment(Fragment* brother, float productPpmTolr) {
+
+	vector<int>ranks=compareRanks(brother,this,productPpmTolr);
+    for(unsigned int j=0; j<ranks.size(); j++ ) {
+            int   posA = ranks[j];
+            float mzB = brother->mzs[j];
+            float intB = brother->intensity_array[j];
+            if (posA >= 0)  {
+                this->intensity_array[ posA ] += intB;
+                this->obscount[ posA ] += 1;
+            } else if ( posA == -1 ) {
+                this->mzs.push_back(mzB);
+                this->intensity_array.push_back(intB);
+                this->obscount.push_back(1);
+            }
+      }
+
+	this->mergeCount++;
+}
+
+void Fragment::truncateTopN(int n) { 
+	if (this->nobs() < n) return;
+
+	this->sortByIntensity();
+	this->mzs.resize(n);
+	this->intensity_array.resize(n);
+	this->obscount.resize(n);
+}
+
+
 void Fragment::buildConsensus(float productPpmTolr) {
     if(this->consensus != NULL) {  delete(this->consensus); this->consensus=NULL; }
 
-    Fragment* Cons = new Fragment(this);  //make a copy
+	//find brother with largest nobs
+	Fragment* seed= this;
+    for(Fragment* b: brothers) if (b->nobs() > seed->nobs()) seed = b;
+
+    Fragment* Cons = new Fragment(seed);  //make a copy of self
     this->consensus = Cons;
     Cons->sortByMz();
 
@@ -390,7 +454,7 @@ void Fragment::buildConsensus(float productPpmTolr) {
         vector<int>ranks=compareRanks(brother,Cons,productPpmTolr);	//location
 
         for(unsigned int j=0; j<ranks.size(); j++ ) {
-            int   posA = ranks[j];	
+            int   posA = ranks[j];
             float mzB = brother->mzs[j];
             float intB = brother->intensity_array[j];
             if (posA >= 0)  {
@@ -406,19 +470,20 @@ void Fragment::buildConsensus(float productPpmTolr) {
     }
 
     //compute retention time window
-    StatisticsVector<float>retentionTimes; retentionTimes.push_back(this->rt);
-    for(unsigned int i=0; i<brothers.size();i++ ) retentionTimes.push_back(brothers[i]->rt);
-    Cons->rt  = retentionTimes.mean();
+    Cons->rt  = this->consensusRt();
 
     //average values 
     int N = 1+brothers.size();
-    for(unsigned int i=0; i<Cons->intensity_array.size(); i++) { Cons->intensity_array[i] /= N; }
+    for(unsigned int i=0; i<Cons->intensity_array.size(); i++) 
+		Cons->intensity_array[i] /= N;
+
     Cons->sortByIntensity();
     float maxValue = Cons->intensity_array[0];
 
-    for(unsigned int i=0; i<Cons->intensity_array.size(); i++) { Cons->intensity_array[i] = Cons->intensity_array[i]/maxValue*10000; }
-    this->consensus = Cons; 
+    for(unsigned int i=0; i<Cons->intensity_array.size(); i++) 
+	   	Cons->intensity_array[i] = Cons->intensity_array[i]/maxValue*10000;
 
+    this->consensus = Cons; 
 }
 
 
@@ -648,7 +713,7 @@ double Fragment::MVH(const vector<int>& X, Fragment* other) {
     //other is experimental spectra
     int N = 100000;
     if (X.size() == 0) return 0;
-    int m = this->nobs();
+    //int m = this->nobs();
     int n = other->nobs();
 
     int Ak =   0; int Am=0.1 * n;
@@ -664,8 +729,8 @@ double Fragment::MVH(const vector<int>& X, Fragment* other) {
         else Ck++;                  //class C matched
     }
 
-    cerr << "MVH:" << Ak << " " << Bk << " " << Ck << " " << Dk << endl;
-    cerr << "   "  << Am << " " << Bm << " " << Cm << "n=" << n << " m=" << m << endl;
+    //cerr << "MVH:" << Ak << " " << Bk << " " << Ck << " " << Dk << endl;
+    //cerr << "   "  << Am << " " << Bm << " " << Cm << "n=" << n << " m=" << m << endl;
 
     double A=logNchooseK(Am,Ak) + 0.5*logNchooseK(Bm,Bk) + 0.1*logNchooseK(Cm,Ck);
     double B=logNchooseK(N-Am-Bm-Cm,n-Ak-Bk-Ck);
