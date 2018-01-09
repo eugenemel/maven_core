@@ -1,8 +1,8 @@
 #include "mzSample.h"
 
 EIC::~EIC() {  
-	if(spline != NULL) delete[] spline; spline=NULL;
-	if(baseline != NULL) delete[] baseline;  baseline=NULL;
+    if(spline != NULL) { delete[] spline; spline=NULL; }
+    if(baseline != NULL) { delete[] baseline;  baseline=NULL; }
 	peaks.clear();
 }
 

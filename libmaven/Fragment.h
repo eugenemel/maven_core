@@ -99,7 +99,8 @@ class Fragment {
         int precursorCharge;
         bool isDecoy;
         SortType sortedBy;
-		int mergeCount;				    //number of merged events
+        int mergeCount;				    //number of merged events
+        float purity;
 
 		void truncateTopN(int n);
 

@@ -13,7 +13,8 @@ Fragment::Fragment() {
 	isDecoy=false; 
 	sortedBy=None; 
 	group=NULL;
-	mergeCount=0;
+    mergeCount=0;
+    purity=0;
 }
 
 
@@ -46,6 +47,7 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
     this->group = NULL;
     this->consensus =NULL;
     this->rt = scan->rt;
+    this->purity = scan->getPrecursorPurity(10.00);  //this might be slow
 
     this->sortByMz();
 }
@@ -72,6 +74,7 @@ Fragment::Fragment( Fragment* other) {
     this->sortedBy = other->sortedBy;
     this->group = other->group;
 	this->mergeCount = other->mergeCount;
+    this->purity = other->purity;
 }
 
 void Fragment::appendBrothers(Fragment* other) {
