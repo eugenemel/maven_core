@@ -26,6 +26,7 @@ struct FragmentationMatchScore {
     double weightedDotProduct;
     double hypergeomScore;
     double mvhScore;
+    double ms2purity;
 
     static vector<string> getScoringAlgorithmNames() {
         vector<string> names;
@@ -64,6 +65,7 @@ struct FragmentationMatchScore {
         weightedDotProduct=0;
         hypergeomScore=0;
         mvhScore=0;
+        ms2purity=0;
     }
 
     FragmentationMatchScore& operator=(const FragmentationMatchScore& b) {
@@ -78,6 +80,7 @@ struct FragmentationMatchScore {
         weightedDotProduct=b.weightedDotProduct;
         hypergeomScore=b.hypergeomScore;
         mvhScore=b.mvhScore;
+        ms2purity=b.ms2purity;
         return *this;
     }
 
@@ -137,6 +140,8 @@ class Fragment {
         void printConsensusNIST(ostream& outstream, double minConsensusFraction, float productPpmToll, Compound* compound, Adduct* adduct);
         FragmentationMatchScore scoreMatch(Fragment* other, float productPpmToll);
         float consensusRt();
+        float consensusPurity();
+
 
         double compareToFragment(Fragment* other, float productPPMToll);
         static vector<int> compareRanks(Fragment* a, Fragment* b, float productPpmTolr);

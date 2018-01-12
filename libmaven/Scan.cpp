@@ -647,7 +647,7 @@ double Scan::getPrecursorPurity(float ppm=10.0) {
     if (this->sample == 0 ) return 0;
 
 	//extract isolated window
-	vector<mzPoint>isolatedSegment = this->getIsolatedRegion(this->isolationWindow);
+    vector<mzPoint>isolatedSegment = this->getIsolatedRegion(this->isolationWindow);
 	if (isolatedSegment.size() == 0) return 0;
 
 	//get last full scan

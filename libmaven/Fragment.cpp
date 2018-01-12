@@ -15,6 +15,8 @@ Fragment::Fragment() {
 	group=NULL;
     mergeCount=0;
     purity=0;
+    consensus=NULL;
+    group=NULL;
 }
 
 
@@ -56,7 +58,7 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
 //delete
 Fragment::~Fragment() {
     mzUtils::delete_all(brothers);
-    delete(consensus);
+    if(consensus != NULL) delete(consensus);
 }
 
 //make a copy of Fragment.
@@ -209,6 +211,18 @@ float Fragment::consensusRt() {
     for(unsigned int i=0; i<brothers.size();i++ ) retentionTimes.push_back(brothers[i]->rt);
 	return retentionTimes.mean();
 }
+
+float Fragment::consensusPurity() {
+
+    if (brothers.size() == 0)
+        return this->purity;
+
+    //compute average purity
+    StatisticsVector<float>v; v.push_back(this->purity);
+    for(unsigned int i=0; i<brothers.size();i++ ) v.push_back(brothers[i]->purity);
+    return v.mean();
+}
+
 
 void Fragment::printConsensusNIST(ostream& outstream, double minConsensusFraction, float productPpmToll, Compound* compound=0, Adduct* adduct=0) {
 
@@ -474,6 +488,9 @@ void Fragment::buildConsensus(float productPpmTolr) {
 
     //compute retention time window
     Cons->rt  = this->consensusRt();
+
+    //compute avererage purity
+    Cons->purity = this->consensusPurity();
 
     //average values 
     int N = 1+brothers.size();

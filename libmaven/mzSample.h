@@ -596,6 +596,7 @@ class PeakGroup {
         vector<Scan*> getRepresentativeFullScans();
         vector<Scan*> getFragmenationEvents();
         void computeFragPattern(float productPpmTolr);
+        void findHighestPurityMS2Pattern(float precPpmTolr);
         Scan* getAverageFragmenationScan(float productPpmTolr);
 
         Peak* getHighestIntensityPeak();

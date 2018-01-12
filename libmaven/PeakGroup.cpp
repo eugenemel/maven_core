@@ -592,6 +592,37 @@ vector<Scan*> PeakGroup::getFragmenationEvents() {
     return matchedscans;
 }
 
+void PeakGroup::findHighestPurityMS2Pattern(float prePpmTolr) {
+
+
+    //build consensus ms2 specta
+    vector<Scan*>ms2events = getFragmenationEvents();
+    if (ms2events.size() < 1 ) return;
+
+    Scan* best=ms2events.front();
+    float highestPurity = best->getPrecursorPurity(prePpmTolr) * log10(best->nobs()+1);
+
+    cerr << "findHighesPurityMS2Pattern: " << prePpmTolr << " ms2ev:" << ms2events.size() <<  " hP=" << highestPurity << endl;
+
+    for( Scan* x: ms2events) {
+        float xpurity = x->getPrecursorPurity(prePpmTolr) * log10(x->nobs()+1);
+        if (xpurity > highestPurity) {
+            highestPurity = xpurity;
+            best = x;
+        }
+    }
+
+    if (best) {
+        fragmentationPattern = Fragment(best,0.01,1,1024);
+        //for(Scan* s : ms2events) {  fragmentationPattern.addFragment(new Fragment(s,0,0.01,1024)); }
+        //fragmentationPattern.consensus = NULL;
+        fragmentationPattern.sortByMz();;
+        ms2EventCount = ms2events.size();
+    }
+
+}
+
+
 void PeakGroup::computeFragPattern(float productPpmTolr)  {
     //build consensus ms2 specta
     vector<Scan*>ms2events = getFragmenationEvents();
