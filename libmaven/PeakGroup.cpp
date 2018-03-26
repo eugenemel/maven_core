@@ -792,14 +792,12 @@ Peak* PeakGroup::getHighestIntensityPeak() {
 int PeakGroup::getChargeStateFromMS1(float ppm) {
     Peak* highestIntensityPeak=this->getHighestIntensityPeak();
     int scanum = highestIntensityPeak->scan;
-    float peakMz =highestIntensityPeak->peakMz;
     Scan* s = highestIntensityPeak->getSample()->getScan(scanum);
 
     int peakPos=0;
     if (s) peakPos = s->findHighestIntensityPos(highestIntensityPeak->peakMz,ppm);
 
     if (s and peakPos > 0 and peakPos < s->nobs() ) {
-        float ppm = (0.005/peakMz)*1e6;
         vector<int> parentPeaks = s->assignCharges(ppm);
         return parentPeaks[peakPos];
     } else {

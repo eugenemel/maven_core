@@ -521,7 +521,7 @@ float Scan::baseMz() {
 bool Scan::isMonoisotopicPrecursor(float monoIsotopeMz, float ppm) {
 
     const double C13_DELTA_MASS = 13.0033548378-12.0;
-    for(int charge=1; charge < 5; charge++) {
+    for(int charge=1; charge <= 3; charge++) {
         int peakPos=this->findHighestIntensityPos(monoIsotopeMz-C13_DELTA_MASS/charge,ppm);
         if (peakPos != -1) {
             return false;

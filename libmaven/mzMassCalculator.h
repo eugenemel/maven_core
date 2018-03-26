@@ -43,6 +43,7 @@ class MassCalculator {
             formula = b.formula;
             mass = b.mass;
             diff = b.diff;
+            rtdiff = b.rtdiff;
             compoundLink = b.compoundLink;
             adductLink =   b.adductLink;
             fragScore = b.fragScore;
@@ -61,6 +62,7 @@ class MassCalculator {
         std::string formula;
         double mass=0;
         double diff=0;
+        double rtdiff=0;
         vector<int>atomCounts;
         Compound* compoundLink=NULL;
         Adduct*   adductLink=NULL;

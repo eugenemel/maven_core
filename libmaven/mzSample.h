@@ -606,7 +606,7 @@ class PeakGroup {
 
 		inline void setParent(PeakGroup* p) {parent=p;}
 		inline void setLabel(char label) { this->label=label;}
-		inline float ppmDist(float cmass) { return mzUtils::ppmDist(cmass,meanMz); }
+        inline float ppmDist(float cmass) { return mzUtils::ppmDist(cmass,meanMz); }
 
 		inline void addPeak(const Peak& peak) { peaks.push_back(peak); peaks.back().groupNum=groupId; }
 		inline void addChild(const PeakGroup& child) { children.push_back(child); children.back().parent = this;   }
@@ -716,6 +716,9 @@ class Compound {
 
             inline float getExactMass() { return exactMass; }
             void setExactMass(float value) { exactMass = value; }
+
+            inline float setFormala(string formulastr) { formula = formulastr; }
+            string getFormula() { return formula; }
 };
 
 
