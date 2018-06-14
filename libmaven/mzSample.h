@@ -717,7 +717,7 @@ class Compound {
             inline float getExactMass() { return exactMass; }
             void setExactMass(float value) { exactMass = value; }
 
-            inline float setFormala(string formulastr) { formula = formulastr; }
+            inline void setFormala(string formulastr) { formula = formulastr; }
             string getFormula() { return formula; }
 };
 
