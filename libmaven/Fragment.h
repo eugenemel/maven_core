@@ -143,6 +143,7 @@ class Fragment {
         float consensusPurity();
 
 
+	vector<float> asDenseVector(float mzmin, float mzmax, int nbins);
         double compareToFragment(Fragment* other, float productPPMToll);
         static vector<int> compareRanks(Fragment* a, Fragment* b, float productPpmTolr);
         static vector<int> locatePositions( Fragment* a, Fragment* b, float productPpmToll);

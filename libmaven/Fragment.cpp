@@ -656,7 +656,16 @@ double Fragment::totalIntensity() {
     return TIC;
 }
 
-
+vector<float> Fragment::asDenseVector(float mzmin, float mzmax, int nbins=2000) { 
+	vector<float>v(nbins,0);
+	double mzrange = mzmax-mzmin;
+	for(int i=0; i < mzs.size(); i++) {
+		if(mzs[i]<mzmin or mzs[i]>mzmax) continue;
+		int bin = (int) (mzs[i]-mzmin)/mzrange*nbins;
+		if(bin>0 and bin<nbins) v[bin] += this->intensity_array[i];
+	}
+	return v;
+}
 
 double Fragment::dotProduct(const vector<int>& X, Fragment* other) {
     if (X.size() == 0) return 0;
@@ -664,13 +673,18 @@ double Fragment::dotProduct(const vector<int>& X, Fragment* other) {
     double otherTIC = other->totalIntensity();
 
     if(thisTIC == 0 or otherTIC == 0) return 0;
+    vector<float> va = this->asDenseVector(100,2000,2000);
+    vector<float> vb = other->asDenseVector(100,2000,2000);
+    return mzUtils::correlation(va,vb);
 
+    /*
     double dotP=0;
     for(unsigned int i=0; i<X.size(); i++ )
         if (X[i] != -1)  dotP += this->intensity_array[i] * other->intensity_array[X[i]];
 
     //return dotP/sqrt(thisTIC*thisTIC*otherTIC*otherTIC);   //DIP
     return sqrt(dotP)/sqrt(thisTIC*otherTIC);               //SIM
+    */
 }
 
 double Fragment::mzWeightedDotProduct(const vector<int>& X, Fragment* other) {
