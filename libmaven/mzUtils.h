@@ -63,10 +63,10 @@ using namespace std;
 
 namespace mzUtils {
 
-inline float round(float val) {
-	if (val - long(val) >= 0.5 ) return (ceil(val));
-	return (floor(val));
-}
+//inline float round(float val) {
+//	if (val - long(val) >= 0.5 ) return (ceil(val));
+//	return (floor(val));
+//}
 
 //spline fitting
 float spline_eval( int n, float *x, float *f, float *b, float *c, float *d, float t );
