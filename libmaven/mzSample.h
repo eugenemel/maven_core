@@ -139,6 +139,11 @@ class Scan {
     string filterLine;
     mzSample* sample;
 
+    void addChildScan(Scan* s) { children.push_back(s); }
+    vector<Scan*> getAllChildren() { return children; }
+    Scan* getFirstChild() { if(children.size() == 0) return 0; else return children[0]; }
+    TMT tmtQuant(); 
+
     static bool compRt(Scan* a, Scan* b ) { return a->rt < b->rt; }
     static bool compPrecursor(Scan* a, Scan* b ) { return a->precursorMz < b->precursorMz; }
     static bool compIntensity(Scan* a, Scan* b ) { return a->totalIntensity() > b->totalIntensity(); }
@@ -147,6 +152,7 @@ class Scan {
     vector<Isotope> getIsotopicPattern(float centerMz, float ppm, int maxZ, int maxIsotopes);
 
 private:
+    	vector<Scan*> children;
         int polarity;
 
 
@@ -876,7 +882,6 @@ public:
     }
 
 };
-
 
 
 #endif
