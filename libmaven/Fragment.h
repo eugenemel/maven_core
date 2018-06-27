@@ -10,8 +10,31 @@ class Compound;
 class PeakGroup;
 class Scan;
 class Adduct;
+class TMT;
 
 using namespace std;
+
+class TMT {
+    public: 
+	int scannum=0;
+	vector<double>tmtIons;
+	int tmtTags=0;
+	double tmtTotalIntensity;
+	double noise;
+	double precursorPurity;
+
+     TMT& operator=(const TMT& b) {
+        scannum = b.scannum;
+        tmtIons = b.tmtIons;
+	tmtTags = b.tmtTags;
+	tmtTotalIntensity = b.tmtTotalIntensity;
+	noise = b.noise;
+	precursorPurity = b.precursorPurity;
+        return *this;
+    }
+};
+
+
 
 struct FragmentationMatchScore {
 
@@ -27,6 +50,7 @@ struct FragmentationMatchScore {
     double hypergeomScore;
     double mvhScore;
     double ms2purity;
+    vector<double> matchedQuantiles;
 
     static vector<string> getScoringAlgorithmNames() {
         vector<string> names;
@@ -81,6 +105,7 @@ struct FragmentationMatchScore {
         hypergeomScore=b.hypergeomScore;
         mvhScore=b.mvhScore;
         ms2purity=b.ms2purity;
+	matchedQuantiles=b.matchedQuantiles;
         return *this;
     }
 
@@ -104,10 +129,9 @@ class Fragment {
         SortType sortedBy;
         int mergeCount;				    //number of merged events
         float purity;
+	void truncateTopN(int n);
 
-		void truncateTopN(int n);
-
-
+	TMT tmtQuant;
         PeakGroup* group;
 
         //consensus pattern buuld from brothers generated on buildConsensus call.
@@ -175,6 +199,7 @@ class Fragment {
         double logNchooseK(int N,int k);
         double SHP(int matched, int len1, int len2, int N);
         double MVH(const vector<int>& X, Fragment* other);
+	vector<double> matchedRankVector(const vector<int>& X, Fragment* other);
 
         static bool compPrecursorMz(const Fragment* a, const Fragment* b) { return a->precursorMz<b->precursorMz; }
         bool operator<(const Fragment* b) const{ return this->precursorMz < b->precursorMz; }

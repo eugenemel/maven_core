@@ -75,8 +75,9 @@ Fragment::Fragment( Fragment* other) {
     this->precursorCharge= other->precursorCharge;
     this->sortedBy = other->sortedBy;
     this->group = other->group;
-	this->mergeCount = other->mergeCount;
+    this->mergeCount = other->mergeCount;
     this->purity = other->purity;
+    this->tmtQuant = other->tmtQuant;
 }
 
 void Fragment::appendBrothers(Fragment* other) {
@@ -367,6 +368,7 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
     s.hypergeomScore  = SHP(s.numMatches,a->nobs(),b->nobs(),100000) + s.ticMatched; // ticMatch is tie breaker
     s.mvhScore = MVH(ranks,b);
     s.weightedDotProduct = mzWeightedDotProduct(ranks,b);
+    s.matchedQuantiles = matchedRankVector(ranks,b);
 
     //cerr << "scoreMatch:\n" << a->nobs() << "\t" << b->nobs() << "\t" << s.numMatches << " hyper=" << s.hypergeomScore << "\n";
 
@@ -743,6 +745,25 @@ double Fragment::SHP(int k, int m, int n, int N=100000) {   //k=matched, m=len1,
     return -(A+B-C);
 }
 
+vector<double> Fragment::matchedRankVector(const vector<int>& X, Fragment* other) {
+    int n = other->nobs();
+    vector<double> Qcuts  = {0.2, 0.5, 0.8, 1.0};
+    vector<double> Counts( Qcuts.size(),0);
+
+    if (X.size() == 0 or n == 0 ) return(Counts);
+
+    for(unsigned int i=0; i<X.size(); i++ ) {
+	int j = X[i];
+        if (j == -1)  continue;
+    	for(int qi=0; qi < Qcuts.size(); qi++ ) {
+	   if (j < Qcuts[qi]*n ) { Counts[qi]++; break; }
+	}
+    }
+
+    for(unsigned int i=0; i < Counts.size(); i++ ) Counts[i] /= n;
+    return(Counts);
+}
+
 double Fragment::MVH(const vector<int>& X, Fragment* other) {
     //other is experimental spectra
     int N = 100000;
@@ -750,25 +771,29 @@ double Fragment::MVH(const vector<int>& X, Fragment* other) {
     //int m = this->nobs();
     int n = other->nobs();
 
-    int Ak =   0; int Am=0.1 * n;
-    int Bk =   0; int Bm=0.2 * n;
-    int Ck =   0; int Cm=0.7 * n;
+    int Ak =   0; int Am=0.2 * n;
+    int Bk =   0; int Bm=0.5 * n;
+    int Ck =   0; int Cm=0.8 * n;
     int Dk =   0;
 
     for(unsigned int i=0; i<X.size(); i++ ) {
         int j = X[i];
         if (j == -1)  Dk++;
-        else if (j < 0.1*n)   Ak++; //class A matched
-        else if (j < 0.3*n)   Bk++; //class B matched
-        else Ck++;                  //class C matched
+        else if (j < 0.2*n)   Ak++; //class A matched
+        else if (j < 0.5*n)   Bk++; //class B matched
+        else if (j < 0.8*n)   Ck++; //class C matched
+        else Dk++;                  //class D matched
     }
 
-    //cerr << "MVH:" << Ak << " " << Bk << " " << Ck << " " << Dk << endl;
-    //cerr << "   "  << Am << " " << Bm << " " << Cm << "n=" << n << " m=" << m << endl;
+    if (Ak>Am) Ak=Am;
+    if (Bk>Bm) Bk=Bm;
+    if (Ck>Cm) Ck=Cm;
 
-    double A=logNchooseK(Am,Ak) + 0.5*logNchooseK(Bm,Bk) + 0.1*logNchooseK(Cm,Ck);
+
+    double A=logNchooseK(Am,Ak) + 0.1*logNchooseK(Bm,Bk) + 0.001*logNchooseK(Cm,Ck);
     double B=logNchooseK(N-Am-Bm-Cm,n-Ak-Bk-Ck);
     double C=logNchooseK(N,n);
+    //printf("MVH %d %d  %d %d  %d %d  %d -> %e, %e, %e\n", Ak,Am, Bk,Bm, Ck,Cm, Dk,  A,B,C);
     return -(A+B-C);
 }
 

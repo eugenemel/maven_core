@@ -669,3 +669,56 @@ double Scan::getPrecursorPurity(float ppm=10.0) {
 		return 0;
 	}
 }
+
+TMT Scan::tmtQuant() {
+    float TMT_ION_MASS[] = { 126.127726,127.124761,127.131081,128.128116,128.134436,129.131471,129.137790,130.134825,130.141145,131.138180 };
+
+    std::vector<double>tmtReporterIons(10,0); 
+
+    //signal
+    double totalSignal=0;
+    int    tmtTagCount=0;
+    for(int i=0; i<10; i++ ) {
+        int pos = this->findHighestIntensityPos(TMT_ION_MASS[i],20.00);
+
+        if (pos>0)  {
+            tmtReporterIons[i] = this->intensity[pos]; 
+            totalSignal+= this->intensity[pos]; 
+            tmtTagCount++;
+        }
+    }
+
+    TMT tmtquant;
+    tmtquant.scannum = this->scannum;
+    tmtquant.tmtTags = tmtTagCount;
+    tmtquant.tmtTotalIntensity = totalSignal;
+    tmtquant.tmtIons = tmtReporterIons;
+
+    //calculate noise
+    double totalI=0; int n=0;
+    for(int i=0; i< nobs(); i++ ) {
+	if (mz[i] < 126) continue;
+	if (mz[i] > 131.2) break;
+	totalI += intensity[i];
+	n++; 
+    }
+
+    //remove signal contribution
+    totalI = totalI-totalSignal;
+    n = n - tmtTagCount;
+
+    tmtquant.noise =  0;
+    if(n>0 and totalI >0) tmtquant.noise =  totalI/n;
+    //if(tmtquant.noise < MIN_TMT_ION) tmtquant.noise=MIN_TMT_ION;
+
+    /*
+    cerr << "TMT SCAN:" << endl;
+    for(int i=0; i<this->nobs(); i++ ) {
+	if (this->mz[i] < 126) continue;
+	if (this->mz[i] > 131.2) break;
+        cerr << setprecision(6) << this->mz[i] << "\t" << setprecision(3) << this->intensity[i] << endl;
+    }
+    */
+    return tmtquant;
+}
+
