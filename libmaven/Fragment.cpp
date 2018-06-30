@@ -17,6 +17,7 @@ Fragment::Fragment() {
     purity=0;
     consensus=NULL;
     group=NULL;
+    clusterId=0;
 }
 
 
@@ -78,6 +79,7 @@ Fragment::Fragment( Fragment* other) {
     this->mergeCount = other->mergeCount;
     this->purity = other->purity;
     this->tmtQuant = other->tmtQuant;
+    this->clusterId= other->clusterId;
 }
 
 void Fragment::appendBrothers(Fragment* other) {

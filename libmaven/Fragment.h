@@ -130,6 +130,7 @@ class Fragment {
         int mergeCount;				    //number of merged events
         float purity;
 	void truncateTopN(int n);
+	int clusterId;
 
 	TMT tmtQuant;
         PeakGroup* group;
