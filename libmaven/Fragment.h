@@ -23,14 +23,13 @@ class TMT {
 	double noise;
 	double precursorPurity;
 
-     TMT& operator=(const TMT& b) {
+	void copy(const TMT& b) { 
         scannum = b.scannum;
         tmtIons = b.tmtIons;
-	tmtTags = b.tmtTags;
-	tmtTotalIntensity = b.tmtTotalIntensity;
-	noise = b.noise;
-	precursorPurity = b.precursorPurity;
-        return *this;
+		tmtTags = b.tmtTags;
+		tmtTotalIntensity = b.tmtTotalIntensity;
+		noise = b.noise;
+		precursorPurity = b.precursorPurity;
     }
 };
 
@@ -47,6 +46,7 @@ struct FragmentationMatchScore {
     double mergedScore;
     double dotProduct;
     double weightedDotProduct;
+	double dotProductShuffle;
     double hypergeomScore;
     double mvhScore;
     double ms2purity;
@@ -90,6 +90,7 @@ struct FragmentationMatchScore {
         hypergeomScore=0;
         mvhScore=0;
         ms2purity=0;
+		dotProductShuffle=0;
     }
 
     FragmentationMatchScore& operator=(const FragmentationMatchScore& b) {
@@ -105,7 +106,8 @@ struct FragmentationMatchScore {
         hypergeomScore=b.hypergeomScore;
         mvhScore=b.mvhScore;
         ms2purity=b.ms2purity;
-	matchedQuantiles=b.matchedQuantiles;
+		matchedQuantiles=b.matchedQuantiles;
+		dotProductShuffle = b.dotProductShuffle;
         return *this;
     }
 
@@ -191,6 +193,7 @@ class Fragment {
 
         double totalIntensity();
         double dotProduct(const vector<int>& X, Fragment* other);
+		double dotProductShuffle(const vector<int>& X, Fragment* other);
         double ticMatched(const vector<int>& X);
         double mzWeightedDotProduct(const vector<int>& X, Fragment* other);
         bool hasMz(float mzValue, float ppmTolr);

@@ -371,6 +371,7 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
     s.mvhScore = MVH(ranks,b);
     s.weightedDotProduct = mzWeightedDotProduct(ranks,b);
     s.matchedQuantiles = matchedRankVector(ranks,b);
+	s.dotProductShuffle = this->dotProductShuffle(ranks,b);
 
     //cerr << "scoreMatch:\n" << a->nobs() << "\t" << b->nobs() << "\t" << s.numMatches << " hyper=" << s.hypergeomScore << "\n";
 
@@ -669,6 +670,32 @@ vector<float> Fragment::asDenseVector(float mzmin, float mzmax, int nbins=2000) 
 		if(bin>0 and bin<nbins) v[bin] += this->intensity_array[i];
 	}
 	return v;
+}
+
+double Fragment::dotProductShuffle(const vector<int>& X, Fragment* other) {
+    if (X.size() == 0) return 0;
+    double thisTIC = totalIntensity();
+    double otherTIC = other->totalIntensity();
+
+    if(thisTIC == 0 or otherTIC == 0) return 0;
+    vector<float> va = this->asDenseVector(100,2000,2000);
+    vector<float> vb = other->asDenseVector(100,2000,2000);
+
+    float obs_corr = mzUtils::correlation(va,vb);
+
+	//expectation
+	StatisticsVector<float>E;
+	for(int i=0; i<20; i++ ) {
+		shuffle(vb);
+		E.push_back( mzUtils::correlation(va,vb) );
+	}
+	float exp_corr = E.mean();
+
+	float exp_std  = E.stddev(exp_corr);
+	if (exp_std <= 0)  return 0;
+	float score = (obs_corr - exp_corr)/exp_std;
+	if (score > 100) score = 100;
+	return(score);
 }
 
 double Fragment::dotProduct(const vector<int>& X, Fragment* other) {
