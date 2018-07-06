@@ -674,24 +674,25 @@ vector<float> Fragment::asDenseVector(float mzmin, float mzmax, int nbins=2000) 
 
 void Fragment::normalizeIntensity(vector<float>&x, int binSize=100)  { 
     //condition
-    for(int i=0; i<x.size(); i+=100) {
+    for(int i=0; i<x.size(); i+=binSize) {
 	float maxI = 0;
-    	for(int j=i; j<i+100 or j<x.size(); j++) if(x[j]>maxI) maxI=x[j];
+    	for(int j=i; j<i+binSize and j<x.size(); j++) if(x[j]>maxI) maxI=x[j];
 	if(maxI <=0) continue;
-    	for(int j=i; j<i+100 or j<x.size(); j++) x[j] = x[j] /maxI;
+    	for(int j=i; j<i+binSize and j<x.size(); j++) x[j] = x[j] /maxI;
     }
 }
 
 double Fragment::dotProductShuffle(Fragment* other) {
+
     double thisTIC = totalIntensity();
     double otherTIC = other->totalIntensity();
 
     if(thisTIC == 0 or otherTIC == 0) return 0;
-    vector<float> va = this->asDenseVector(100,2000,2000);
-    vector<float> vb = other->asDenseVector(100,2000,2000);
+    vector<float> va = this->asDenseVector(0,2000,2000);
+    vector<float> vb = other->asDenseVector(0,2000,2000);
 
-    normalizeIntensity(va);
-    normalizeIntensity(vb);
+    normalizeIntensity(va,100);
+    normalizeIntensity(vb,100);
 
     float obs_corr = mzUtils::correlation(va,vb);
 
@@ -704,7 +705,7 @@ double Fragment::dotProductShuffle(Fragment* other) {
 	float exp_corr = E.mean();
 
 	float exp_std  = E.stddev(exp_corr);
-	if (exp_std <= 0)  return 0;
+	if (exp_std <= 0)  exp_std = 0.01;
 	float score = (obs_corr - exp_corr)/exp_std;
 	if (score > 100) score = 100;
 	return(score);
