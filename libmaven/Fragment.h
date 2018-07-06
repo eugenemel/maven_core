@@ -192,13 +192,14 @@ class Fragment {
         double mzErr(const vector<int>& X, Fragment* other);
 
         double totalIntensity();
-        double dotProduct(const vector<int>& X, Fragment* other);
-		double dotProductShuffle(const vector<int>& X, Fragment* other);
+        double dotProduct(Fragment* other);
+	double dotProductShuffle(Fragment* other);
         double ticMatched(const vector<int>& X);
         double mzWeightedDotProduct(const vector<int>& X, Fragment* other);
         bool hasMz(float mzValue, float ppmTolr);
         bool hasNLS(float NLS, float ppmTolr);
         void addNeutralLosses();
+	void normalizeIntensity(vector<float>&x, int binSize);
 
         double logNchooseK(int N,int k);
         double SHP(int matched, int len1, int len2, int N);
