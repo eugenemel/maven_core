@@ -18,6 +18,7 @@ Fragment::Fragment() {
     consensus=NULL;
     group=NULL;
     clusterId=0;
+	mergedScore=0;
 }
 
 
@@ -31,6 +32,8 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
     this->precursorCharge = scan->precursorCharge;
     this->sortedBy= Fragment::SortType::Mz;
 	this->mergeCount=0;
+	this->mergedScore=0;
+	this->clusterId=0;
 
     int baseLineLevel=5; //lowest 5% of data are considered to be baseline
 
@@ -51,7 +54,6 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
     this->consensus =NULL;
     this->rt = scan->rt;
     this->purity = scan->getPrecursorPurity(10.00);  //this might be slow
-
     this->sortByMz();
 }
 
@@ -80,6 +82,7 @@ Fragment::Fragment( Fragment* other) {
     this->purity = other->purity;
     this->tmtQuant = other->tmtQuant;
     this->clusterId= other->clusterId;
+	this->mergedScore = other->mergedScore;
 }
 
 void Fragment::appendBrothers(Fragment* other) {
