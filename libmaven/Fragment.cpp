@@ -369,12 +369,12 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
     s.spearmanRankCorrelation = spearmanRankCorrelation(ranks);
     s.ticMatched = ticMatched(ranks);
     s.mzFragError =  mzErr(ranks,b);
-    s.dotProduct = dotProduct(ranks,b);
+    s.dotProduct = dotProduct(b);
     s.hypergeomScore  = SHP(s.numMatches,a->nobs(),b->nobs(),100000) + s.ticMatched; // ticMatch is tie breaker
     s.mvhScore = MVH(ranks,b);
     s.weightedDotProduct = mzWeightedDotProduct(ranks,b);
     s.matchedQuantiles = matchedRankVector(ranks,b);
-	s.dotProductShuffle = this->dotProductShuffle(ranks,b);
+    s.dotProductShuffle = this->dotProductShuffle(b);
 
     //cerr << "scoreMatch:\n" << a->nobs() << "\t" << b->nobs() << "\t" << s.numMatches << " hyper=" << s.hypergeomScore << "\n";
 
@@ -675,14 +675,27 @@ vector<float> Fragment::asDenseVector(float mzmin, float mzmax, int nbins=2000) 
 	return v;
 }
 
-double Fragment::dotProductShuffle(const vector<int>& X, Fragment* other) {
-    if (X.size() == 0) return 0;
+void Fragment::normalizeIntensity(vector<float>&x, int binSize=100)  { 
+    //condition
+    for(int i=0; i<x.size(); i+=binSize) {
+	float maxI = 0;
+    	for(int j=i; j<i+binSize and j<x.size(); j++) if(x[j]>maxI) maxI=x[j];
+	if(maxI <=0) continue;
+    	for(int j=i; j<i+binSize and j<x.size(); j++) x[j] = x[j] /maxI;
+    }
+}
+
+double Fragment::dotProductShuffle(Fragment* other) {
+
     double thisTIC = totalIntensity();
     double otherTIC = other->totalIntensity();
 
     if(thisTIC == 0 or otherTIC == 0) return 0;
-    vector<float> va = this->asDenseVector(100,2000,2000);
-    vector<float> vb = other->asDenseVector(100,2000,2000);
+    vector<float> va = this->asDenseVector(0,2000,2000);
+    vector<float> vb = other->asDenseVector(0,2000,2000);
+
+    normalizeIntensity(va,100);
+    normalizeIntensity(vb,100);
 
     float obs_corr = mzUtils::correlation(va,vb);
 
@@ -695,14 +708,13 @@ double Fragment::dotProductShuffle(const vector<int>& X, Fragment* other) {
 	float exp_corr = E.mean();
 
 	float exp_std  = E.stddev(exp_corr);
-	if (exp_std <= 0)  return 0;
+	if (exp_std <= 0)  exp_std = 0.01;
 	float score = (obs_corr - exp_corr)/exp_std;
 	if (score > 100) score = 100;
 	return(score);
 }
 
-double Fragment::dotProduct(const vector<int>& X, Fragment* other) {
-    if (X.size() == 0) return 0;
+double Fragment::dotProduct(Fragment* other) {
     double thisTIC = totalIntensity();
     double otherTIC = other->totalIntensity();
 
