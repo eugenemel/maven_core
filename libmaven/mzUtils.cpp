@@ -892,6 +892,66 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
 }
 
 
+// for correlattion just reverse the order of sequence y;
+float  crossCorrelationZ(vector<float>&xvector, vector<float>& yvector, float offset=.45)
+{
+	int lenx = xvector.size();
+	int leny = yvector.size();
+	int lenz= lenx+leny-1;
+
+	//cerr << "LEN: " << lenx << "\t" << leny << endl;
+	float meanx=0; float meany=0;
+	for (float xi: xvector) meanx+=xi;
+	for (float yi: yvector) meany+=yi;
+	meanx /= lenx;
+	meany /= leny;
+
+	float obs_corr=0;
+	float exp_corr=0;
+	float exp_n=0; 
+	
+	for (int i=offset*lenz;i<lenz*(1-offset);i++) {
+		int yp=(leny-i-1);
+		if (yp < 0) yp=0;
+		if (yp >= leny) yp = (leny-1);
+
+		int xp=(i-leny+1);
+		if (xp < 0) xp = 0;
+		if (xp >= lenx) xp = (lenx-1);
+
+		bool isShifted=true;
+		if (xp == 0 and yp == 0) isShifted=false;
+
+//		cerr << i << "\t" << xp << ":" << yp << endl;
+		float xy=0; float xx=0; float yy=0;
+		while(xp<lenx & yp<leny) {
+			float x = xvector[xp]-meanx;
+			float y = yvector[yp]-meany;
+			xy +=  x*y;
+			xx +=  x*x;
+			yy +=  y*y;
+			xp++;
+			yp++;
+		}
+		float r = xy / sqrt(xx*yy);
+		if(isShifted) { exp_n++; exp_corr+=r; } else { obs_corr=r; }
+	}
+
+	//cerr << exp_n << endl;
+	if ( exp_n > 0 ) {
+		exp_corr /= exp_n;
+		//float exp_corr = E.mean();
+		//float exp_std  = E.stddev(exp_corr);
+		//if (exp_std <= 0.05)  exp_std = 0.05;
+		float score = (obs_corr - exp_corr)/0.05;
+		if (score > 100) score = 100;
+		return(score);
+	} else {
+		return(0);
+	}
+}
+
+
 
 } //namespace end
 

@@ -194,7 +194,7 @@ class Fragment {
 
         double totalIntensity();
         double dotProduct(Fragment* other);
-	double dotProductShuffle(Fragment* other);
+	double dotProductShuffle(Fragment* other,int nbins);
         double ticMatched(const vector<int>& X);
         double mzWeightedDotProduct(const vector<int>& X, Fragment* other);
         bool hasMz(float mzValue, float ppmTolr);
