@@ -38,16 +38,20 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
     int baseLineLevel=5; //lowest 5% of data are considered to be baseline
 
     //don't worry about baseline.. keeping all points
+	/*
     if(scan->nobs()<maxFragmentSize) { 
         minSigNoiseRatio=0; 
         minFractionalIntensity=0;
     }
+	*/
 
     vector<pair<float,float> >mzarray = scan->getTopPeaks(minFractionalIntensity,minSigNoiseRatio,baseLineLevel);
 
     for(unsigned int j=0; j<mzarray.size() && j < maxFragmentSize; j++ ) {
-        this->mzs.push_back(mzarray[j].second);
-        this->intensity_array.push_back(mzarray[j].first);
+		if (mzarray[j].second < this->precursorMz-1 ) { //remove fragments higher than precursorMz
+			this->mzs.push_back(mzarray[j].second);
+			this->intensity_array.push_back(mzarray[j].first);
+		}
     }
     this->obscount = vector<int>( this->mzs.size(), 1);
     this->group = NULL;
