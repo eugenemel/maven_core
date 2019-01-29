@@ -479,7 +479,6 @@ void Fragment::buildConsensus(float productPpmTolr) {
 
     for(unsigned int i=0; i<brothers.size(); i++) {
         Fragment* brother = brothers[i];
-
         vector<int>ranks=compareRanks(brother,Cons,productPpmTolr);	//location
 
         for(unsigned int j=0; j<ranks.size(); j++ ) {
@@ -505,15 +504,18 @@ void Fragment::buildConsensus(float productPpmTolr) {
     Cons->purity = this->consensusPurity();
 
     //average values 
-    int N = 1+brothers.size();
-    for(unsigned int i=0; i<Cons->intensity_array.size(); i++) 
-		Cons->intensity_array[i] /= N;
-
+	if( brothers.size() >= 1) {
+		int N = 1+brothers.size();
+		for(unsigned int i=0; i<Cons->intensity_array.size(); i++) Cons->intensity_array[i] /= N;
+	}
+	
     Cons->sortByIntensity();
-    float maxValue = Cons->intensity_array[0];
-
-    for(unsigned int i=0; i<Cons->intensity_array.size(); i++) 
-	   	Cons->intensity_array[i] = Cons->intensity_array[i]/maxValue*10000;
+	if (Cons->intensity_array.size() > 1) {
+		float maxValue = Cons->intensity_array[0];
+		for(unsigned int i=0; i<Cons->intensity_array.size(); i++)  {
+		   	Cons->intensity_array[i] = Cons->intensity_array[i]/maxValue*10000;
+		}
+	}
 
     this->consensus = Cons; 
 }
