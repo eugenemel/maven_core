@@ -132,6 +132,7 @@ class Scan {
     int precursorScanNum;
     float productMz;
     float collisionEnergy;
+    float injectionTime;
 
     vector <float> intensity;
     vector <float> mz;

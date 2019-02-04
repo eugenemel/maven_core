@@ -425,6 +425,10 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
         if(string2float(precursorIsolationStrUpper)>0) precursorIsolationWindow+=string2float(precursorIsolationStrUpper);
         if (precursorIsolationWindow <= 0) precursorIsolationWindow = 1.0; //default to 1.0
 
+        float injectionTime=0;
+        string injectionTimeStr = scanAttr["ion injection time"];
+        if(string2float(injectionTimeStr)>0) injectionTime=string2float(injectionTimeStr);
+
         float precursorMz = 0; 
 		if(string2float(precursorMzStr)>0) precursorMz=string2float(precursorMzStr);
 
@@ -460,6 +464,7 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
         scan->productMz=productMz;
         scan->filterLine= spectrumId;
         scan->intensity = intsVector;
+        scan->injectionTime = injectionTime;
         scan->mz= mzVector;
         addScan(scan);
     }
