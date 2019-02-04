@@ -407,7 +407,7 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
         map<string,string>scanAttr = mzML_cvParams(scanNode);
         if(scanAttr.count("scan start time")) {
             string rtStr = scanAttr["scan start time"];
-            rt = string2float(rtStr)/60.0;
+            rt = string2float(rtStr);
         }
 
 
@@ -417,9 +417,13 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
 		map<string,string>isolationWindow = mzML_cvParams(spectrum.first_element_by_path("precursorList/precursor/isolationWindow"));
 		if ( precursorMzStr.length() == 0) precursorMzStr = isolationWindow["isolation window target m/z"];
 
-		string precursorIsolationStr = isolationWindow["isolation window lower offset"];
-		float precursorIsolationWindow = 1.0;
-		if(string2float(precursorIsolationStr)>0) precursorIsolationWindow=string2float(precursorIsolationStr);
+        string precursorIsolationStrLower = isolationWindow["isolation window lower offset"];
+        string precursorIsolationStrUpper = isolationWindow["isolation window upper offset"];
+
+        float precursorIsolationWindow=0;
+        if(string2float(precursorIsolationStrLower)>0) precursorIsolationWindow+=string2float(precursorIsolationStrLower);
+        if(string2float(precursorIsolationStrUpper)>0) precursorIsolationWindow+=string2float(precursorIsolationStrUpper);
+        if (precursorIsolationWindow <= 0) precursorIsolationWindow = 1.0; //default to 1.0
 
         float precursorMz = 0; 
 		if(string2float(precursorMzStr)>0) precursorMz=string2float(precursorMzStr);
