@@ -19,3 +19,11 @@ moc_*
 qrc_*
 dump
 *.msp
+
+#IDE-related
+.cproject
+.project
+.settings/
+
+#dependency
+maven_core
