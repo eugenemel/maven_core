@@ -50,6 +50,7 @@ struct FragmentationMatchScore {
     double hypergeomScore;
     double mvhScore;
     double ms2purity;
+    double ms2ProportionMatchedScore;
     vector<double> matchedQuantiles;
 
     static vector<string> getScoringAlgorithmNames() {
@@ -61,6 +62,7 @@ struct FragmentationMatchScore {
         names.push_back("SpearmanRank");
         names.push_back("TICMatched");
         names.push_back("NumMatches");
+        names.push_back("ProportionMatched");
         return names;
     }
 
@@ -72,7 +74,8 @@ struct FragmentationMatchScore {
         else if (scoringAlgorithm == "SpearmanRank")       return spearmanRankCorrelation;
         else if (scoringAlgorithm == "TICMatched")         return ticMatched;
         else if (scoringAlgorithm == "WeightedDotProduct") return weightedDotProduct;
-        else if (scoringAlgorithm == "NumMatches")        return  numMatches;
+        else if (scoringAlgorithm == "NumMatches")         return numMatches;
+        else if (scoringAlgorithm == "ProportionMatched")  return ms2ProportionMatchedScore;
         else return hypergeomScore;
 
     }
@@ -91,6 +94,7 @@ struct FragmentationMatchScore {
         mvhScore=0;
         ms2purity=0;
 		dotProductShuffle=0;
+        ms2ProportionMatchedScore=0;
     }
 
     FragmentationMatchScore& operator=(const FragmentationMatchScore& b) {
