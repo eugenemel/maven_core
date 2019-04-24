@@ -62,7 +62,7 @@ struct FragmentationMatchScore {
         names.push_back("SpearmanRank");
         names.push_back("TICMatched");
         names.push_back("NumMatches");
-        names.push_back("ProportionMatched");
+        names.push_back("ProportionRefMatched");
         return names;
     }
 
@@ -75,7 +75,7 @@ struct FragmentationMatchScore {
         else if (scoringAlgorithm == "TICMatched")         return ticMatched;
         else if (scoringAlgorithm == "WeightedDotProduct") return weightedDotProduct;
         else if (scoringAlgorithm == "NumMatches")         return numMatches;
-        else if (scoringAlgorithm == "ProportionMatched")  return ms2ProportionMatchedScore;
+        else if (scoringAlgorithm == "ProportionRefMatched")  return ms2ProportionMatchedScore;
         else return hypergeomScore;
 
     }
