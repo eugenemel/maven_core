@@ -422,6 +422,15 @@ vector<int> Fragment::compareRanks(Fragment* a, Fragment* b, float productPpmTol
         return ranks;
 }
 
+vector<pair<int,int>> Fragment::findMatches(Fragment* a, Fragment* b, float productPpmTolr) {
+
+    pair<int,int> dummy (4,2);
+    vector<pair<int,int>> matches;
+    matches.push_back(dummy);
+
+    return matches;
+}
+
 
 vector<int> Fragment::locatePositions( Fragment* a, Fragment* b, float productPpmTolr) {
     bool verbose=false;
