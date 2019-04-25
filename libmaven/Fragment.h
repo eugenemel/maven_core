@@ -68,14 +68,14 @@ struct FragmentationMatchScore {
 
 
     double getScoreByName(string scoringAlgorithm) {
-        if (scoringAlgorithm == "HyperGeomScore" )         return hypergeomScore;
-        else if (scoringAlgorithm == "MVH")                return  mvhScore;
-        else if (scoringAlgorithm == "DotProduct")         return dotProduct;
-        else if (scoringAlgorithm == "SpearmanRank")       return spearmanRankCorrelation;
-        else if (scoringAlgorithm == "TICMatched")         return ticMatched;
-        else if (scoringAlgorithm == "WeightedDotProduct") return weightedDotProduct;
-        else if (scoringAlgorithm == "NumMatches")         return numMatches;
-        else if (scoringAlgorithm == "ProportionRefMatched")  return ms2ProportionMatchedScore;
+        if (scoringAlgorithm.compare("HyperGeomScore") == 0)         return hypergeomScore;
+        else if (scoringAlgorithm.compare("MVH") == 0)                return  mvhScore;
+        else if (scoringAlgorithm.compare("DotProduct") == 0)         return dotProduct;
+        else if (scoringAlgorithm.compare("SpearmanRank") == 0)       return spearmanRankCorrelation;
+        else if (scoringAlgorithm.compare("TICMatched")== 0)         return ticMatched;
+        else if (scoringAlgorithm.compare("WeightedDotProduct") == 0) return weightedDotProduct;
+        else if (scoringAlgorithm.compare("NumMatches") == 0)         return numMatches;
+        else if (scoringAlgorithm.compare("ProportionRefMatched") == 0)  return ms2ProportionMatchedScore;
         else return hypergeomScore;
 
     }

@@ -378,7 +378,7 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
     s.mvhScore = MVH(ranks,b);
     s.weightedDotProduct = mzWeightedDotProduct(ranks,b);
     s.matchedQuantiles = matchedRankVector(ranks,b);
-    s.ms2ProportionMatchedScore = b->nobs(); //TODO: for testing - is b the library spectrum, or the observed spectrum? or not defined? // s.numMatches / static_cast<double>(b->nobs());
+    s.ms2ProportionMatchedScore = 7.823; //TODO: for testing - is b the library spectrum, or the observed spectrum? or not defined? // s.numMatches / static_cast<double>(b->nobs());
     //s.dotProductShuffle = this->dotProductShuffle(b,2000);
 
     //cerr << "scoreMatch:\n" << a->nobs() << "\t" << b->nobs() << "\t" << s.numMatches << " hyper=" << s.hypergeomScore << "\n";
