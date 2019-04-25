@@ -428,8 +428,23 @@ vector<int> Fragment::compareRanks(Fragment* a, Fragment* b, float productPpmTol
 
 vector<pair<int,int>> Fragment::findMatches(Fragment* a, Fragment* b, float productPpmTolr) {
 
+    //Sort spectra by m/z
     a->sortByMz();
     b->sortByMz();
+
+    //Tag fragment m/zs with source with Fragment*.
+    //a = 1, b = 2
+    vector<pair<int,double>> a_mzs;
+    for (float mz : a->mzs) {
+        pair<int,double> mzPair (1, mz);
+        a_mzs.push_back(mzPair);
+    }
+
+    vector<pair<int,double>> b_mzs;
+    for (float mz : b->mzs) {
+        pair<int,double> mzPair (1, mz);
+        b_mzs.push_back(mzPair);
+    }
 
     pair<int,int> dummy (4,2);
     vector<pair<int,int>> matches;
