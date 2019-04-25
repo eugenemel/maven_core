@@ -426,6 +426,20 @@ vector<int> Fragment::compareRanks(Fragment* a, Fragment* b, float productPpmTol
         return ranks;
 }
 
+/**
+ * Method to return all m/z matches between two MS/MS spectra (represented as Fragment objects).
+ *
+ * Requires that Fragments be sorted by m/z.  If they are not, they will be in this method.
+ *
+ * @brief Fragment::findMatches
+ * @param a (MS/MS spectrum 1)
+ * @param b (MS/MS spectrum 2)
+ * @param maxMzDiff (tolerance, translated into a maximum m/z difference)
+ * @return a list of pairs of integers, where for each pair<int, int> the left position
+ * corresponds to an m/z from a, and the right an m/z from b.
+ *
+ * Note that these pairs are only valid if the two MS/MS spectra remain sorted by Mz.
+ */
 vector<pair<int,int>> Fragment::findMatches(Fragment* a, Fragment* b, float maxMzDiff) {
 
     //Sort spectra by m/z
