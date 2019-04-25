@@ -177,7 +177,7 @@ class Fragment {
         double compareToFragment(Fragment* other, float productPPMToll);
         static vector<int> compareRanks(Fragment* a, Fragment* b, float productPpmTolr);
         static vector<int> locatePositions( Fragment* a, Fragment* b, float productPpmToll);
-        vector<pair<int,int>> findMatches(Fragment* a, Fragment* b, float productPpmTolr);
+        vector<pair<int,int>> findMatches(Fragment* a, Fragment* b, float maxMzDiff);
 
         void buildConsensus(float productPpmTolr);
         vector<unsigned int> intensityOrderDesc();

@@ -426,7 +426,7 @@ vector<int> Fragment::compareRanks(Fragment* a, Fragment* b, float productPpmTol
         return ranks;
 }
 
-vector<pair<int,int>> Fragment::findMatches(Fragment* a, Fragment* b, float productPpmTolr) {
+vector<pair<int,int>> Fragment::findMatches(Fragment* a, Fragment* b, float maxMzDiff) {
 
     //Sort spectra by m/z
     a->sortByMz();
@@ -449,6 +449,8 @@ vector<pair<int,int>> Fragment::findMatches(Fragment* a, Fragment* b, float prod
     pair<int,int> dummy (4,2);
     vector<pair<int,int>> matches;
     matches.push_back(dummy);
+
+    //Determine all valid possible fragment pairs (based on tolerance)
 
     return matches;
 }
