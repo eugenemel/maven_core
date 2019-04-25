@@ -446,7 +446,7 @@ vector<pair<int,int>> Fragment::findMatches(Fragment* a, Fragment* b, float maxM
     a->sortByMz();
     b->sortByMz();
 
-    //Tag fragment m/zs with source with Fragment*.
+    //Tag fragment m/zs with source Fragment* using an int code.
     //a = 1, b = 2
     vector<pair<int,double>> a_mzs;
     for (float mz : a->mzs) {
