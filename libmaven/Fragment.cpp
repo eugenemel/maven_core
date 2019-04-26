@@ -440,7 +440,7 @@ vector<int> Fragment::compareRanks(Fragment* a, Fragment* b, float productPpmTol
  *
  * Note that these pairs are only valid if the two MS/MS spectra remain sorted by Mz.
  */
-vector<pair<int,int>> Fragment::findMatches(Fragment* a, Fragment* b, float maxMzDiff) {
+vector<pair<uint,uint>> Fragment::findMatchesGreedyMz(Fragment* a, Fragment* b, float maxMzDiff) {
 
     //Sort spectra by m/z
     a->sortByMz();
@@ -470,9 +470,9 @@ vector<pair<int,int>> Fragment::findMatches(Fragment* a, Fragment* b, float maxM
                 float mzDelta = abs(mz_a - mz_b);
                 pair<uint,uint> peakPair (i, j); //First position is reserved for a, second for b
 
-                pair<float,pair<uint, uint>> peakPairWithDistance (mzDelta, peakPair);
+                pair<float,pair<uint, uint>> fragPairWithMzDelta (mzDelta, peakPair);
 
-                fragPairsWithMzDeltas.push_back(peakPairWithDistance);
+                fragPairsWithMzDeltas.push_back(fragPairWithMzDelta);
             }
 
         }
@@ -500,14 +500,25 @@ vector<pair<int,int>> Fragment::findMatches(Fragment* a, Fragment* b, float maxM
         }
     });
 
-    //TODO: build clusters from dissimilarities.
-    //Once a frag mz is associated in a cluster, it cannot be
-    //associated with any other cluster.
+    //Once a fragment has been claimed in a frag pair, it may not be involved in any other
+    //frag pair.
+    vector<pair<uint, uint>> matches;
+    set<uint> claimedAFrags;
+    set<uint> claimedBFrags;
 
-    //TODO: remove this dummy block
-    pair<int,int> dummy (4,2);
-    vector<pair<int,int>> matches;
-    matches.push_back(dummy);
+    for (pair<float,pair<uint,uint>> fragPairWithMzDelta : fragPairsWithMzDeltas){
+        pair<uint, uint> fragPair = fragPairWithMzDelta.second;
+        uint a_frag = fragPair.first;
+        uint b_frag = fragPair.second;
+
+        if (claimedAFrags.count(a_frag) != 0 && claimedBFrags.count(b_frag) != 0){
+
+            matches.push_back(fragPair);
+
+            claimedAFrags.insert(a_frag);
+            claimedBFrags.insert(b_frag);
+        }
+    }
 
     return matches;
 }
