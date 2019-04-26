@@ -466,7 +466,7 @@ vector<pair<int,int>> Fragment::findMatches(Fragment* a, Fragment* b, float maxM
 
         float mz_a = a->mzs.at(i);
 
-        for (uint j = 0; j< b->mzs.size(); j++) {
+        for (uint j = 0; j < b->mzs.size(); j++) {
 
             float mz_b = b->mzs.at(j);
 
@@ -484,6 +484,11 @@ vector<pair<int,int>> Fragment::findMatches(Fragment* a, Fragment* b, float maxM
         }
     }
 
+    //TODO: sort candidate frag matches by decreasing mz distance
+
+    //TODO: build clusters from dissimilarities.
+    //Once a frag mz is associated in a cluster, it cannot be
+    //associated with any other cluster.
 
     //TODO: remove this dummy block
     pair<int,int> dummy (4,2);
