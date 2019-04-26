@@ -460,11 +460,35 @@ vector<pair<int,int>> Fragment::findMatches(Fragment* a, Fragment* b, float maxM
         b_mzs.push_back(mzPair);
     }
 
+    //Determine all valid possible fragment pairs (based on tolerance)
+
+    for (uint i = 0; i < a->mzs.size(); i++){
+
+        float mz_a = a->mzs.at(i);
+
+        for (uint j = 0; j< b->mzs.size(); j++) {
+
+            float mz_b = b->mzs.at(j);
+
+            if (mz_a - mz_b > maxMzDiff) {
+                //Out of tolerance - could possibly come into tolerance as j increases.
+            } else if (mz_b - mz_a > maxMzDiff) {
+                //Out of tolerance - cannot possibly come into tolerance as j increases.
+                break;
+            } else {
+                //In tolerance - record dissimilarity as candidate match.
+
+                //TODO
+            }
+
+        }
+    }
+
+
+    //TODO: remove this dummy block
     pair<int,int> dummy (4,2);
     vector<pair<int,int>> matches;
     matches.push_back(dummy);
-
-    //Determine all valid possible fragment pairs (based on tolerance)
 
     return matches;
 }
