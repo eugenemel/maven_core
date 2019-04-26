@@ -146,8 +146,24 @@ class Fragment {
         vector<int>obscount; // vector size =  mzs vector size, with counts of number of times mz was observed
         map<int,string> annotations; //mz value annotations.. assume that values are sorted by mz
 
-        inline unsigned int nobs() { return mzs.size(); }
+        inline unsigned int nobs() { return static_cast<uint>(mzs.size()); }
         inline void addFragment(Fragment* b) { brothers.push_back(b); }
+        inline unsigned int nobs(float intensityThreshold){
+            float maxIntensity = 0;
+            for (float intensity : intensity_array){
+                if (intensity > maxIntensity){
+                    maxIntensity = intensity;
+                }
+            }
+            unsigned int numObsAboveIntensityThreshold = 0;
+            for (float intensity : intensity_array){
+                float intensityFraction = intensity/maxIntensity;
+                if (intensityFraction >= intensityThreshold){
+                    numObsAboveIntensityThreshold++;
+                }
+            }
+            return numObsAboveIntensityThreshold;
+        }
 
         //empty constructor
         Fragment();

@@ -441,8 +441,8 @@ vector<int> Fragment::compareRanks(Fragment* a, Fragment* b, float productPpmTol
  * Requires that Fragments be sorted by m/z.  If they are not, they will be in this method.
  *
  * @brief Fragment::findMatches
- * @param a (MS/MS spectrum 1)
- * @param b (MS/MS spectrum 2)
+ * @param a (MS/MS spectrum 1) (typically from library)
+ * @param b (MS/MS spectrum 2) (typically from experimental data)
  * @param maxMzDiff (tolerance, translated into a maximum m/z difference)
  * @return ranks vector<int>, of length of a.
  *
