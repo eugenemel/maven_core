@@ -110,6 +110,7 @@ struct FragmentationMatchScore {
         ms2purity=b.ms2purity;
 		matchedQuantiles=b.matchedQuantiles;
 		dotProductShuffle = b.dotProductShuffle;
+        fractionMatched = b.fractionMatched;
         return *this;
     }
 
