@@ -363,11 +363,21 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
 
     //which one is smaller;
     Fragment* a = this;
-    Fragment* b =  other;
+    Fragment* b = other;
 
     s.ppmError = abs((a->precursorMz-b->precursorMz)/a->precursorMz*1e6);
-    vector<int>ranks = compareRanks(a,b,productPpmTolr);
+
+    float maxDeltaMz = (productPpmTolr * static_cast<float>(a->precursorMz))/ 1000000;
+
+    /*
+     * ranks[x] = y
+     * x = index of frag peak in a
+     * y = index of frag peak in b
+     */
+    vector<int> ranks = findFragPairsGreedyMz(a, b, maxDeltaMz);
+    //vector<int>ranks = compareRanks(a,b,productPpmTolr);
     //vector<int>ranks = locatePositions(a,b,productPpmTolr);
+
     for(int rank: ranks) { if(rank != -1) s.numMatches++; }
 
     //annotate?
@@ -385,11 +395,6 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
     //s.dotProductShuffle = this->dotProductShuffle(b,2000);
 
     //cerr << "scoreMatch:\n" << a->nobs() << "\t" << b->nobs() << "\t" << s.numMatches << " hyper=" << s.hypergeomScore << "\n";
-
-    float deltaMz = (productPpmTolr * static_cast<float>(a->precursorMz))/ 1000000;
-    vector<pair<uint, uint>> fragMatches = findMatchesGreedyMz(a, b, deltaMz);
-
-    s.fractionMatched = static_cast<double>(fragMatches.size())/a->nobs();
 
     return s;
 }
@@ -439,12 +444,14 @@ vector<int> Fragment::compareRanks(Fragment* a, Fragment* b, float productPpmTol
  * @param a (MS/MS spectrum 1)
  * @param b (MS/MS spectrum 2)
  * @param maxMzDiff (tolerance, translated into a maximum m/z difference)
- * @return a list of pairs of integers, where for each pair<int, int> the left position
- * corresponds to an m/z from a, and the right an m/z from b.
+ * @return ranks vector<int>, of length of a.
+ *
+ * rank[a_position] = b_position
+ * when sorted by m/z
  *
  * Note that these pairs are only valid if the two MS/MS spectra remain sorted by Mz.
  */
-vector<pair<uint,uint>> Fragment::findMatchesGreedyMz(Fragment* a, Fragment* b, float maxMzDiff) {
+vector<int> Fragment::findFragPairsGreedyMz(Fragment* a, Fragment* b, float maxMzDiff) {
 
     //Sort spectra by m/z
     a->sortByMz();
@@ -472,6 +479,7 @@ vector<pair<uint,uint>> Fragment::findMatchesGreedyMz(Fragment* a, Fragment* b, 
                 //In tolerance - record dissimilarity as candidate match.
 
                 float mzDelta = abs(mz_a - mz_b);
+
                 pair<uint,uint> peakPair (i, j); //First position is reserved for a, second for b
 
                 pair<float,pair<uint, uint>> fragPairWithMzDelta (mzDelta, peakPair);
@@ -507,6 +515,7 @@ vector<pair<uint,uint>> Fragment::findMatchesGreedyMz(Fragment* a, Fragment* b, 
     //Once a fragment has been claimed in a frag pair, it may not be involved in any other
     //frag pair.
     vector<pair<uint, uint>> matches;
+    vector<int> ranks (a->mzs.size(),-1);
     set<uint> claimedAFrags;
     set<uint> claimedBFrags;
 
@@ -518,13 +527,14 @@ vector<pair<uint,uint>> Fragment::findMatchesGreedyMz(Fragment* a, Fragment* b, 
         if (claimedAFrags.count(a_frag) == 0 && claimedBFrags.count(b_frag) == 0){
 
             matches.push_back(fragPair);
+            ranks[a_frag] = static_cast<int>(b_frag);
 
             claimedAFrags.insert(a_frag);
             claimedBFrags.insert(b_frag);
         }
     }
 
-    return matches;
+    return ranks;
 }
 
 
