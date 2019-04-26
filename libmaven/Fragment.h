@@ -148,22 +148,6 @@ class Fragment {
 
         inline unsigned int nobs() { return static_cast<uint>(mzs.size()); }
         inline void addFragment(Fragment* b) { brothers.push_back(b); }
-        inline unsigned int nobs(float intensityThreshold){
-            float maxIntensity = 0;
-            for (float intensity : intensity_array){
-                if (intensity > maxIntensity){
-                    maxIntensity = intensity;
-                }
-            }
-            unsigned int numObsAboveIntensityThreshold = 0;
-            for (float intensity : intensity_array){
-                float intensityFraction = intensity/maxIntensity;
-                if (intensityFraction >= intensityThreshold){
-                    numObsAboveIntensityThreshold++;
-                }
-            }
-            return numObsAboveIntensityThreshold;
-        }
 
         //empty constructor
         Fragment();
