@@ -386,6 +386,10 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
 
     //cerr << "scoreMatch:\n" << a->nobs() << "\t" << b->nobs() << "\t" << s.numMatches << " hyper=" << s.hypergeomScore << "\n";
 
+    float deltaMz = (20 * static_cast<float>(a->precursorMz))/ 1000000; //TODO: hard-coded for 20 ppm
+    vector<pair<uint, uint>> fragMatches = findMatchesGreedyMz(a, b, deltaMz);
+
+    s.fractionMatched = static_cast<double>(fragMatches.size())/a->nobs();
 
     return s;
 }
