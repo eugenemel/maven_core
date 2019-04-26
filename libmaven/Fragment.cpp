@@ -354,10 +354,6 @@ void Fragment::printInclusionList(bool printHeader, ostream& outstream, string C
 
 }
 
-//WARNING: caller Compound::scoreCompoundHit calls Fragment::sortByIntensity() just before Fragment::scoreMatch().
-//This seems dangerous.  If this sorting is required for scoring, it should be done inside this method,
-//not just before calling.
-
 FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTolr) {
     FragmentationMatchScore s;
     if (mzs.size() < 2 or other->mzs.size() < 2) return s;
