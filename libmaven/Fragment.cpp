@@ -446,21 +446,10 @@ vector<pair<int,int>> Fragment::findMatches(Fragment* a, Fragment* b, float maxM
     a->sortByMz();
     b->sortByMz();
 
-    //Tag fragment m/zs with source Fragment* using an int code.
-    //a = 1, b = 2
-    vector<pair<int,double>> a_mzs;
-    for (float mz : a->mzs) {
-        pair<int,double> mzPair (1, mz);
-        a_mzs.push_back(mzPair);
-    }
+    //Identify all valid possible fragment pairs (based on tolerance),
+    //record with mzDelta
 
-    vector<pair<int,double>> b_mzs;
-    for (float mz : b->mzs) {
-        pair<int,double> mzPair (1, mz);
-        b_mzs.push_back(mzPair);
-    }
-
-    //Determine all valid possible fragment pairs (based on tolerance)
+    vector<pair<float,pair<uint, uint>>> fragPairsWithMzDeltas;
 
     for (uint i = 0; i < a->mzs.size(); i++){
 
@@ -478,13 +467,38 @@ vector<pair<int,int>> Fragment::findMatches(Fragment* a, Fragment* b, float maxM
             } else {
                 //In tolerance - record dissimilarity as candidate match.
 
-                //TODO
+                float mzDelta = abs(mz_a - mz_b);
+                pair<uint,uint> peakPair (i, j); //First position is reserved for a, second for b
+
+                pair<float,pair<uint, uint>> peakPairWithDistance (mzDelta, peakPair);
+
+                fragPairsWithMzDeltas.push_back(peakPairWithDistance);
             }
 
         }
     }
 
-    //TODO: sort candidate frag matches by decreasing mz distance
+    //sort pairs in increasing order by mzDelta
+    std::sort(fragPairsWithMzDeltas.begin(), fragPairsWithMzDeltas.end(),
+              [ ](const pair<float,pair<uint, uint>>& lhs, const pair<float,pair<uint, uint>>& rhs){
+        if (lhs.first < rhs.first) {
+            return -1;
+        } else if (lhs.first > rhs.first) {
+            return 1;
+        } else {
+            if (lhs.second.first < rhs.second.first) {
+                return -1;
+            } else if (lhs.second.first > rhs.second.first){
+                return 1;
+            } else if (lhs.second.second < rhs.second.second){
+                return -1;
+            } else if (lhs.second.second > rhs.second.second){
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    });
 
     //TODO: build clusters from dissimilarities.
     //Once a frag mz is associated in a cluster, it cannot be
