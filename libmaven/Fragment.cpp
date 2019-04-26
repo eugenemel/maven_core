@@ -515,7 +515,7 @@ vector<pair<uint,uint>> Fragment::findMatchesGreedyMz(Fragment* a, Fragment* b, 
         uint a_frag = fragPair.first;
         uint b_frag = fragPair.second;
 
-        if (claimedAFrags.count(a_frag) != 0 && claimedBFrags.count(b_frag) != 0){
+        if (claimedAFrags.count(a_frag) == 0 && claimedBFrags.count(b_frag) == 0){
 
             matches.push_back(fragPair);
 
