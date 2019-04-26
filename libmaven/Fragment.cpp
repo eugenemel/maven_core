@@ -35,6 +35,7 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
 	this->mergedScore=0;
 	this->clusterId=0;
 
+    //TODO: make this configurable? as a scoring parameter?
     int baseLineLevel=5; //lowest 5% of data are considered to be baseline
 
     //don't worry about baseline.. keeping all points
