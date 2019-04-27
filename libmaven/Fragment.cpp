@@ -409,6 +409,22 @@ double Fragment::compareToFragment(Fragment* other, float productPpmTolr) {
     return ticMatched(ranks);
 }
 
+/**
+ * Issue 2: Comments
+ *
+ * This allows the same frag peak from b to be matched to different frag peaks from a,
+ * If there are multiple hits in tolerance.
+ *
+ * For example, if i1, i2 both match each to j1, j2, then i1 and i2 will both match to j2.
+ *
+ * Similarly, if i1, i2 both match to j1 in tolerance, then i1 and i2 will both match to j1.
+ *
+ * @brief Fragment::compareRanks
+ * @param a
+ * @param b
+ * @param productPpmTolr
+ * @return
+ */
 vector<int> Fragment::compareRanks(Fragment* a, Fragment* b, float productPpmTolr) {
     bool verbose=false;
     vector<int> ranks (a->mzs.size(),-1);	//missing value == -1
