@@ -503,27 +503,19 @@ vector<int> Fragment::findFragPairsGreedyMz(Fragment* a, Fragment* b, float maxM
         }
     }
 
-    //sort pairs in increasing order by mzDelta
-    std::sort(fragPairsWithMzDeltas.begin(), fragPairsWithMzDeltas.end(),
-              [ ](const pair<float,pair<uint, uint>>& lhs, const pair<float,pair<uint, uint>>& rhs){
-        if (lhs.first < rhs.first) {
-            return -1;
-        } else if (lhs.first > rhs.first) {
-            return 1;
-        } else {
-            if (lhs.second.first < rhs.second.first) {
-                return -1;
-            } else if (lhs.second.first > rhs.second.first){
-                return 1;
-            } else if (lhs.second.second < rhs.second.second){
-                return -1;
-            } else if (lhs.second.second > rhs.second.second){
-                return 1;
-            } else {
-                return 0;
-            }
-        }
-    });
+    //sort standard ions by m/z for matching.
+    sort(fragPairsWithMzDeltas.begin(), fragPairsWithMzDeltas.end(),
+         [ ](const pair < float,pair < int, int > > & lhs, const pair < float,pair < int, int > > & rhs){
+           if (lhs.first == rhs.first) {
+             if (lhs.second.first == rhs.second.first) {
+               return lhs.second.second < rhs.second.second;
+             } else {
+               return lhs.second.first < rhs.second.first;
+             }
+           } else {
+             return lhs.first < rhs.first;
+           }
+         });
 
     //Once a fragment has been claimed in a frag pair, it may not be involved in any other
     //frag pair.
