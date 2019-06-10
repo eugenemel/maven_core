@@ -19,3 +19,5 @@ moc_*
 qrc_*
 dump
 *.msp
+.DS_Store
+.qmake.stash
