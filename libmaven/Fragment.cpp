@@ -359,11 +359,21 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
 
     //which one is smaller;
     Fragment* a = this;
-    Fragment* b =  other;
+    Fragment* b = other;
 
     s.ppmError = abs((a->precursorMz-b->precursorMz)/a->precursorMz*1e6);
-    vector<int>ranks = compareRanks(a,b,productPpmTolr);
+
+    float maxDeltaMz = (productPpmTolr * static_cast<float>(a->precursorMz))/ 1000000;
+
+    /*
+     * ranks[x] = y
+     * x = index of frag peak in a
+     * y = index of frag peak in b
+     */
+    vector<int> ranks = findFragPairsGreedyMz(a, b, maxDeltaMz);
+    //vector<int>ranks = compareRanks(a,b,productPpmTolr);
     //vector<int>ranks = locatePositions(a,b,productPpmTolr);
+
     for(int rank: ranks) { if(rank != -1) s.numMatches++; }
 
     //annotate?
@@ -382,7 +392,6 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
 
     //cerr << "scoreMatch:\n" << a->nobs() << "\t" << b->nobs() << "\t" << s.numMatches << " hyper=" << s.hypergeomScore << "\n";
 
-
     return s;
 }
 
@@ -399,6 +408,22 @@ double Fragment::compareToFragment(Fragment* other, float productPpmTolr) {
     return ticMatched(ranks);
 }
 
+/**
+ * Issue 2: Comments
+ *
+ * This allows the same frag peak from b to be matched to different frag peaks from a,
+ * If there are multiple hits in tolerance.
+ *
+ * For example, if i1, i2 both match each to j1, j2, then i1 and i2 will both match to j2.
+ *
+ * Similarly, if i1, i2 both match to j1 in tolerance, then i1 and i2 will both match to j1.
+ *
+ * @brief Fragment::compareRanks
+ * @param a
+ * @param b
+ * @param productPpmTolr
+ * @return
+ */
 vector<int> Fragment::compareRanks(Fragment* a, Fragment* b, float productPpmTolr) {
     bool verbose=false;
     vector<int> ranks (a->mzs.size(),-1);	//missing value == -1
@@ -420,6 +445,100 @@ vector<int> Fragment::compareRanks(Fragment* a, Fragment* b, float productPpmTol
         }
 
         return ranks;
+}
+
+/**
+ * Method to return all m/z matches between two MS/MS spectra (represented as Fragment objects).
+ *
+ * Requires that Fragments be sorted by m/z.  If they are not, they will be in this method.
+ *
+ * @brief Fragment::findMatches
+ * @param a (MS/MS spectrum 1) (typically from library)
+ * @param b (MS/MS spectrum 2) (typically from experimental data)
+ * @param maxMzDiff (tolerance, translated into a maximum m/z difference)
+ * @return ranks vector<int>, of length of a.
+ *
+ * rank[a_position] = b_position
+ * when sorted by m/z
+ *
+ * Note that these pairs are only valid if the two MS/MS spectra remain sorted by Mz.
+ */
+vector<int> Fragment::findFragPairsGreedyMz(Fragment* a, Fragment* b, float maxMzDiff) {
+
+    //Sort spectra by m/z
+    a->sortByMz();
+    b->sortByMz();
+
+    //Identify all valid possible fragment pairs (based on tolerance),
+    //record with mzDelta
+
+    vector<pair<float,pair<uint, uint>>> fragPairsWithMzDeltas;
+
+    for (uint i = 0; i < a->mzs.size(); i++){
+
+        float mz_a = a->mzs.at(i);
+
+        for (uint j = 0; j < b->mzs.size(); j++) {
+
+            float mz_b = b->mzs.at(j);
+
+            if (mz_a - mz_b > maxMzDiff) {
+                //Out of tolerance - could possibly come into tolerance as j increases.
+            } else if (mz_b - mz_a > maxMzDiff) {
+                //Out of tolerance - cannot possibly come into tolerance as j increases.
+                break;
+            } else {
+                //In tolerance - record dissimilarity as candidate match.
+
+                float mzDelta = abs(mz_a - mz_b);
+
+                pair<uint,uint> peakPair (i, j); //First position is reserved for a, second for b
+
+                pair<float,pair<uint, uint>> fragPairWithMzDelta (mzDelta, peakPair);
+
+                fragPairsWithMzDeltas.push_back(fragPairWithMzDelta);
+            }
+
+        }
+    }
+
+    //sort standard ions by m/z for matching.
+    sort(fragPairsWithMzDeltas.begin(), fragPairsWithMzDeltas.end(),
+         [ ](const pair < float,pair < int, int > > & lhs, const pair < float,pair < int, int > > & rhs){
+           if (lhs.first == rhs.first) {
+             if (lhs.second.first == rhs.second.first) {
+               return lhs.second.second < rhs.second.second;
+             } else {
+               return lhs.second.first < rhs.second.first;
+             }
+           } else {
+             return lhs.first < rhs.first;
+           }
+         });
+
+    //Once a fragment has been claimed in a frag pair, it may not be involved in any other
+    //frag pair.
+    vector<pair<uint, uint>> matches;
+    vector<int> ranks (a->mzs.size(),-1);
+    set<uint> claimedAFrags;
+    set<uint> claimedBFrags;
+
+    for (pair<float,pair<uint,uint>> fragPairWithMzDelta : fragPairsWithMzDeltas){
+        pair<uint, uint> fragPair = fragPairWithMzDelta.second;
+        uint a_frag = fragPair.first;
+        uint b_frag = fragPair.second;
+
+        if (claimedAFrags.count(a_frag) == 0 && claimedBFrags.count(b_frag) == 0){
+
+            matches.push_back(fragPair);
+            ranks[a_frag] = static_cast<int>(b_frag);
+
+            claimedAFrags.insert(a_frag);
+            claimedBFrags.insert(b_frag);
+        }
+    }
+
+    return ranks;
 }
 
 

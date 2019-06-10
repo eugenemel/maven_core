@@ -61,6 +61,7 @@ struct FragmentationMatchScore {
         names.push_back("SpearmanRank");
         names.push_back("TICMatched");
         names.push_back("NumMatches");
+        names.push_back("FractionRefMatched");
         return names;
     }
 
@@ -73,6 +74,7 @@ struct FragmentationMatchScore {
         else if (scoringAlgorithm == "TICMatched")         return ticMatched;
         else if (scoringAlgorithm == "WeightedDotProduct") return weightedDotProduct;
         else if (scoringAlgorithm == "NumMatches")        return  numMatches;
+        else if (scoringAlgorithm == "FractionRefMatched")  return fractionMatched;
         else return hypergeomScore;
 
     }
@@ -108,6 +110,7 @@ struct FragmentationMatchScore {
         ms2purity=b.ms2purity;
 		matchedQuantiles=b.matchedQuantiles;
 		dotProductShuffle = b.dotProductShuffle;
+        fractionMatched = b.fractionMatched;
         return *this;
     }
 
@@ -175,7 +178,7 @@ class Fragment {
         double compareToFragment(Fragment* other, float productPPMToll);
         static vector<int> compareRanks(Fragment* a, Fragment* b, float productPpmTolr);
         static vector<int> locatePositions( Fragment* a, Fragment* b, float productPpmToll);
-
+        static vector<int> findFragPairsGreedyMz(Fragment* a, Fragment* b, float maxMzDiff);
 
         void buildConsensus(float productPpmTolr);
         vector<unsigned int> intensityOrderDesc();
