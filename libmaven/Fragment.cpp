@@ -523,6 +523,8 @@ vector<int> Fragment::findFragPairsGreedyMz(Fragment* a, Fragment* b, float maxM
     set<uint> claimedAFrags;
     set<uint> claimedBFrags;
 
+    cerr << "match: ref <--> obs" << endl;
+
     for (pair<float,pair<uint,uint>> fragPairWithMzDelta : fragPairsWithMzDeltas){
         pair<uint, uint> fragPair = fragPairWithMzDelta.second;
         uint a_frag = fragPair.first;
@@ -532,6 +534,8 @@ vector<int> Fragment::findFragPairsGreedyMz(Fragment* a, Fragment* b, float maxM
 
             matches.push_back(fragPair);
             ranks[a_frag] = static_cast<int>(b_frag);
+
+            cerr << "match: " << a->mzs.at(a_frag) << " <--> " << b->mzs.at(b_frag) << endl;
 
             claimedAFrags.insert(a_frag);
             claimedBFrags.insert(b_frag);
