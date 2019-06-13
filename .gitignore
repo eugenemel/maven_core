@@ -21,3 +21,4 @@ dump
 *.msp
 .DS_Store
 .qmake.stash
+maven_core.pro
