@@ -542,6 +542,8 @@ vector<int> Fragment::findFragPairsGreedyMz(Fragment* a, Fragment* b, float maxM
         }
     }
 
+    cerr << endl;
+
     return ranks;
 }
 
