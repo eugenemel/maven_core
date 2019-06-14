@@ -52,17 +52,18 @@ FragmentationMatchScore Compound::scoreCompoundHit(Fragment* f, float productPpm
         //theory fragmentation or library fragmentation = t
         //experimental data = f
 
-        cerr << "Compound: " << cpd->name << endl;
-        for (float mz : t.mzs) {
-            cerr << mz << endl;
-        }
-        cerr << endl;
+//        cerr << endl;
+//        cerr << "Compound: " << cpd->name << endl;
+//        for (float mz : t.mzs) {
+//            cerr << mz << endl;
+//        }
+//        cerr << endl;
 
-        cerr << "Observed: " << f->precursorMz << ", " << endl;
-        for (float mz : f->mzs) {
-            cerr << mz << endl;
-        }
-        cerr << endl;
+//        cerr << "Observed (precursorMz=" << f->precursorMz << ")" << endl;
+//        for (float mz : f->mzs) {
+//            cerr << mz << endl;
+//        }
+//        cerr << endl;
 
         s = t.scoreMatch(f,productPpmTolr);
 
