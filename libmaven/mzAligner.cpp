@@ -37,12 +37,12 @@ void Aligner::doAlignment(vector<PeakGroup*>& peakgroups) {
 	 double R2_before = checkFit();
 
 
-     cerr << "Max Itterations: " << maxItterations << endl;
+     cerr << "Max Iterations: " << maxItterations << endl;
      for(int iter=0; iter < maxItterations; iter++) {
 
        PolyFit(polynomialDegree);
         double R2_after = checkFit();
-        cerr << "Itteration:" << iter << " R2_before" << R2_before << " R2_after=" << R2_after << endl;
+        cerr << "Iteration:" << iter << " R2_before" << R2_before << " R2_after=" << R2_after << endl;
 
 		if (R2_after > R2_before) {
             cerr << "done...restoring previous fit.." << endl;
