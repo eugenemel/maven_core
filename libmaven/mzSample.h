@@ -163,12 +163,12 @@ private:
 class mzSlice { 
     public:
 
-    mzSlice(float mzmin, float mzmax, float rtmin, float rtmax) { this->mzmin=mzmin; this->mzmax=mzmax; this->rtmin=rtmin; this->rtmax=rtmax; this->mz=mzmin+(mzmax-mzmin)/2; this->rt=rtmin+(rtmax-rtmin)/2; compound=NULL; adduct=NULL, ionCount=0; }
-    mzSlice(float mz, float rt, float ions) {  this->mz=this->mzmin=this->mzmax=mz; this->rt=this->rtmin=this->rtmax=rt; this->ionCount=ions;  compound=NULL; adduct=NULL, ionCount=0; }
-    mzSlice(string filterLine) { mzmin=mzmax=rtmin=rtmax=mz=rt=ionCount=0; compound=NULL; adduct=NULL,srmId=filterLine; }
-    mzSlice() { mzmin=mzmax=rtmin=rtmax=mz=rt=ionCount=0; compound=NULL; adduct=NULL; }
-    mzSlice(const mzSlice& b) { mzmin=b.mzmin; mzmax=b.mzmax; rtmin=b.rtmin; rtmax=b.rtmax; ionCount=b.ionCount; mz=b.mz; rt=b.rt; compound=b.compound; adduct=b.adduct; srmId=b.srmId; }
-    mzSlice& operator= (const mzSlice& b) { mzmin=b.mzmin; mzmax=b.mzmax; rtmin=b.rtmin; rtmax=b.rtmax; ionCount=b.ionCount; compound=b.compound; adduct=b.adduct; srmId=b.srmId; mz=b.mz; rt=b.rt; return *this; }
+    mzSlice(float mzmin, float mzmax, float rtmin, float rtmax) { this->mzmin=mzmin; this->mzmax=mzmax; this->rtmin=rtmin; this->rtmax=rtmax; this->mz=mzmin+(mzmax-mzmin)/2; this->rt=rtmin+(rtmax-rtmin)/2; compound=NULL; adduct=NULL, ionCount=0; compoundVector=vector<Compound*>();}
+    mzSlice(float mz, float rt, float ions) {  this->mz=this->mzmin=this->mzmax=mz; this->rt=this->rtmin=this->rtmax=rt; this->ionCount=ions;  compound=NULL; adduct=NULL, ionCount=0; compoundVector=vector<Compound*>();}
+    mzSlice(string filterLine) { mzmin=mzmax=rtmin=rtmax=mz=rt=ionCount=0; compound=NULL; adduct=NULL,srmId=filterLine; compoundVector=vector<Compound*>();}
+    mzSlice() { mzmin=mzmax=rtmin=rtmax=mz=rt=ionCount=0; compound=NULL; adduct=NULL; compoundVector=vector<Compound*>();}
+    mzSlice(const mzSlice& b) { mzmin=b.mzmin; mzmax=b.mzmax; rtmin=b.rtmin; rtmax=b.rtmax; ionCount=b.ionCount; mz=b.mz; rt=b.rt; compound=b.compound; adduct=b.adduct; srmId=b.srmId; compoundVector=b.compoundVector;}
+    mzSlice& operator= (const mzSlice& b) { mzmin=b.mzmin; mzmax=b.mzmax; rtmin=b.rtmin; rtmax=b.rtmax; ionCount=b.ionCount; compound=b.compound; adduct=b.adduct; srmId=b.srmId; mz=b.mz; rt=b.rt; compoundVector=b.compoundVector; return *this; }
 
         float mzmin;
         float mzmax;
@@ -179,6 +179,7 @@ class mzSlice {
         float ionCount;
         Compound* compound;
         Adduct*   adduct;
+        vector<Compound*> compoundVector;
 
 	string srmId;
 
