@@ -393,7 +393,6 @@ void PeakGroup::groupStatistics() {
     float rtSum = 0;
     float mzSum = 0;
     maxIntensity = 0;
-    ms2EventCount =  0;
 
     blankMax =0;
     blankSampleCount=0;
