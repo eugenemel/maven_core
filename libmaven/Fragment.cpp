@@ -474,13 +474,13 @@ vector<int> Fragment::findFragPairsGreedyMz(Fragment* a, Fragment* b, float maxM
     //Identify all valid possible fragment pairs (based on tolerance),
     //record with mzDelta
 
-    vector<pair<float,pair<uint, uint>>> fragPairsWithMzDeltas;
+    vector<pair<float,pair<unsigned int, unsigned int>>> fragPairsWithMzDeltas;
 
-    for (uint i = 0; i < a->mzs.size(); i++){
+    for (unsigned int i = 0; i < a->mzs.size(); i++){
 
         float mz_a = a->mzs.at(i);
 
-        for (uint j = 0; j < b->mzs.size(); j++) {
+        for (unsigned int j = 0; j < b->mzs.size(); j++) {
 
             float mz_b = b->mzs.at(j);
 
@@ -494,9 +494,9 @@ vector<int> Fragment::findFragPairsGreedyMz(Fragment* a, Fragment* b, float maxM
 
                 float mzDelta = abs(mz_a - mz_b);
 
-                pair<uint,uint> peakPair (i, j); //First position is reserved for a, second for b
+                pair<unsigned int, unsigned int> peakPair (i, j); //First position is reserved for a, second for b
 
-                pair<float,pair<uint, uint>> fragPairWithMzDelta (mzDelta, peakPair);
+                pair<float,pair<unsigned int, unsigned int>> fragPairWithMzDelta (mzDelta, peakPair);
 
                 fragPairsWithMzDeltas.push_back(fragPairWithMzDelta);
             }
@@ -507,7 +507,7 @@ vector<int> Fragment::findFragPairsGreedyMz(Fragment* a, Fragment* b, float maxM
     //sort standard ions by m/z for matching.
     sort(fragPairsWithMzDeltas.begin(), fragPairsWithMzDeltas.end(),
          [ ](const pair < float,pair < int, int > > & lhs, const pair < float,pair < int, int > > & rhs){
-           if (lhs.first == rhs.first) {
+           if (abs(static_cast<double>(lhs.first) - static_cast<double>(rhs.first)) < 1e-6) {
              if (lhs.second.first == rhs.second.first) {
                return lhs.second.second < rhs.second.second;
              } else {
@@ -520,17 +520,17 @@ vector<int> Fragment::findFragPairsGreedyMz(Fragment* a, Fragment* b, float maxM
 
     //Once a fragment has been claimed in a frag pair, it may not be involved in any other
     //frag pair.
-    vector<pair<uint, uint>> matches;
+    vector<pair<unsigned int, unsigned int>> matches;
     vector<int> ranks (a->mzs.size(),-1);
-    set<uint> claimedAFrags;
-    set<uint> claimedBFrags;
+    set<unsigned int> claimedAFrags;
+    set<unsigned int> claimedBFrags;
 
 //    cerr << "match: ref <--> obs" << endl;
 
-    for (pair<float,pair<uint,uint>> fragPairWithMzDelta : fragPairsWithMzDeltas){
-        pair<uint, uint> fragPair = fragPairWithMzDelta.second;
-        uint a_frag = fragPair.first;
-        uint b_frag = fragPair.second;
+    for (pair<float,pair<unsigned int, unsigned int>> fragPairWithMzDelta : fragPairsWithMzDeltas){
+        pair<unsigned int, unsigned int> fragPair = fragPairWithMzDelta.second;
+        unsigned int a_frag = fragPair.first;
+        unsigned int b_frag = fragPair.second;
 
         if (claimedAFrags.count(a_frag) == 0 && claimedBFrags.count(b_frag) == 0){
 
