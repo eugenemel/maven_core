@@ -253,7 +253,7 @@ public:
     EIC* getTIC(float,float,int);		//get Total Ion Chromatogram
     EIC* getBIC(float,float,int);		//get Base Peak Chromatogram
     double getMS1PrecurursorMass(Scan* ms2scan,float ppm);
-    vector<Scan*> getFragmenationEvents(mzSlice* slice);
+    vector<Scan*> getFragmentationEvents(mzSlice* slice);
 
     deque <Scan*> scans;
     int sampleId;

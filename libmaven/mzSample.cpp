@@ -1581,7 +1581,7 @@ double mzSample::getMS1PrecurursorMass(Scan* ms2scan,float ppm) {
     }
 }
 
-vector<Scan*> mzSample::getFragmenationEvents(mzSlice* slice) {
+vector<Scan*> mzSample::getFragmentationEvents(mzSlice* slice) {
     vector<Scan*>matchedscans;
     for( unsigned int j=0; j < scans.size(); j++ ) {
             Scan* scan = scans[j];
