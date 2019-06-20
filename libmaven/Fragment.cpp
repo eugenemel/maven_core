@@ -30,7 +30,6 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
     this->sampleName = scan->sample->sampleName;
     this->scanNum = scan->scannum;
     this->precursorCharge = scan->precursorCharge;
-    this->sortedBy= Fragment::SortType::Mz;
 	this->mergeCount=0;
 	this->mergedScore=0;
 	this->clusterId=0;
