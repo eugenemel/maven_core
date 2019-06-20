@@ -576,7 +576,7 @@ vector<Scan*> PeakGroup::getFragmenationEvents() {
     vector<Scan*>matchedscans;
     for(unsigned int i=0; i < peaks.size(); i++ ) {
         mzSample* sample = peaks[i].getSample();
-        if ( sample == NULL ) continue;
+        if (!sample) continue;
 
         for( unsigned int j=0; j < sample->scans.size(); j++ ) {
             Scan* scan = sample->scans[j];
