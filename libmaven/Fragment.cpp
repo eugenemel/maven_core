@@ -370,8 +370,6 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
      * y = index of frag peak in b
      */
     vector<int> ranks = findFragPairsGreedyMz(a, b, maxDeltaMz);
-    //vector<int>ranks = compareRanks(a,b,productPpmTolr);
-    //vector<int>ranks = locatePositions(a,b,productPpmTolr);
 
     for(int rank: ranks) { if(rank != -1) s.numMatches++; }
 
@@ -410,42 +408,11 @@ double Fragment::compareToFragment(Fragment* other, float productPpmTolr) {
 }
 
 /**
- * Issue 2: Comments
- *
- * This allows the same frag peak from b to be matched to different frag peaks from a,
- * If there are multiple hits in tolerance.
- *
- * For example, if i1, i2 both match each to j1, j2, then i1 and i2 will both match to j2.
- *
- * Similarly, if i1, i2 both match to j1 in tolerance, then i1 and i2 will both match to j1.
- *
- * @brief Fragment::compareRanks
- * @param a
- * @param b
- * @param productPpmTolr
- * @return
+ * Note change to use findFragPairsGreedyMz()
  */
 vector<int> Fragment::compareRanks(Fragment* a, Fragment* b, float productPpmTolr) {
-    bool verbose=false;
-    vector<int> ranks (a->mzs.size(),-1);	//missing value == -1
-    for(unsigned int i=0; i<a->mzs.size(); i++ ) {
-        for( unsigned int j=0; j < b->mzs.size(); j++ ) {
-            if (mzUtils::ppmDist(a->mzs[i],b->mzs[j])<productPpmTolr) { ranks[i] = j; break; }   //this needs optimization..
-        }
-    }
-    if (verbose) {
-        cerr << " compareranks: " << a->sampleName << endl;
-        for(unsigned int i=0; i < ranks.size(); i++ ) {
-            float mz2=0;
-            float ints2=0;
-
-            if(ranks[i]>=0) { mz2=b->mzs[ ranks[i] ]; ints2= b->intensity_array[ ranks[i] ]; }
-                std::cerr << ranks[i] << "," << a->mzs[i] << "\t" << mz2 << "\t\t" <<  a->intensity_array[i] << "\t" << ints2 << endl;
-            }
-
-        }
-
-        return ranks;
+    float maxDeltaMz = (productPpmTolr * static_cast<float>(a->precursorMz))/ 1000000;
+    return findFragPairsGreedyMz(a, b, maxDeltaMz);
 }
 
 /**
