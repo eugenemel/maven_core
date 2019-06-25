@@ -8,15 +8,15 @@ Fragment::Fragment() {
 	scanNum=0; 
 	rt=0;
    	collisionEnergy=0; 
-	consensus=NULL; 
+    consensus=nullptr;
 	precursorCharge=0; 
 	isDecoy=false; 
 	sortedBy=None; 
-	group=NULL;
+    group=nullptr;
     mergeCount=0;
     purity=0;
-    consensus=NULL;
-    group=NULL;
+    consensus=nullptr;
+    group=nullptr;
     clusterId=0;
 	mergedScore=0;
 }
@@ -53,8 +53,8 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
 		}
     }
     this->obscount = vector<int>( this->mzs.size(), 1);
-    this->group = NULL;
-    this->consensus =NULL;
+    this->group = nullptr;
+    this->consensus = nullptr;
     this->rt = scan->rt;
     this->purity = scan->getPrecursorPurity(10.00);  //this might be slow
     this->sortByMz();
@@ -64,7 +64,7 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
 //delete
 Fragment::~Fragment() {
     mzUtils::delete_all(brothers);
-    if(consensus != NULL) delete(consensus);
+    if(consensus) delete(consensus);
 }
 
 //make a copy of Fragment.
@@ -362,7 +362,10 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
 
     s.ppmError = abs((a->precursorMz-b->precursorMz)/a->precursorMz*1e6);
 
-    float maxDeltaMz = (productPpmTolr * static_cast<float>(a->precursorMz))/ 1000000;
+    //use library precursorMz if it exists.  If it is not provided, use the experimental precursorMz
+    double precursorMz = a->precursorMz > 0 ? a->precursorMz : b->precursorMz;
+
+    float maxDeltaMz = (productPpmTolr * static_cast<float>(precursorMz))/ 1000000;
 
     /*
      * ranks[x] = y
