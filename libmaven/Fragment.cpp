@@ -643,7 +643,7 @@ vector<int> Fragment::mzOrderInc() {
     //forward sort first key
     sort(_pairsarray.begin(), _pairsarray.end());
 
-    //return positions in order from highest to lowest intenisty
+    //return positions in order of increasing m/z
     for(unsigned int i=0; i < _pairsarray.size(); i++) { position[i] = _pairsarray[i].second; }
     return position;
 }
@@ -673,7 +673,7 @@ void Fragment::sortByIntensity() {
 
 void Fragment::sortByMz() {
 
-    if(sortedBy == Fragment::SortType::Mz) return; //sppedup already sorted
+    if(sortedBy == Fragment::SortType::Mz) return; //speedup already sorted
 
     vector<int>order = mzOrderInc();
     vector<float> a(mzs.size());
