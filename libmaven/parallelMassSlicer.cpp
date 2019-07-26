@@ -214,8 +214,10 @@ mzSlice*  ParallelMassSlicer::sliceExists(float mz, float rt) {
 
 	for( ;it2 != ppp.second; ++it2 ) {
 		mzSlice* x = (*it2).second; 
-		if (mz > x->mzmin && mz < x->mzmax && rt > x->rtmin && rt < x->rtmax) {
-			float d = (mz-x->mzmin) + (x->mzmax-mz);
+		if (mz >= x->mzmin && mz <= x->mzmax && rt >= x->rtmin && rt <= x->rtmax) {
+			float mzc = (x->mzmax - x->mzmin)/2;
+			float rtc = (x->rtmax - x->rtmin)/2;
+			float d = sqrt((POW2(mz-mzc) + POW2(rt-rtc)));
 			if ( d < bestDist ) { best=x; bestDist=d; }
 		}
 	}
