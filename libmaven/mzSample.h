@@ -87,7 +87,7 @@ class Scan {
     vector<int> findMatchingMzs(float mzmin, float mzmax);
     int findHighestIntensityPos(float mz, float ppm);		//higest intensity pos
     int findClosestHighestIntensityPos(float mz, float amu_tolr);	//highest intensity pos nearest to the cente mz
-    bool isMonoisotopicPrecursor(float monoIsotopeMz, float ppm);
+    bool isMonoisotopicPrecursor(float monoIsotopeMz, float ppm, int charge=1);
 
     bool hasMz(float mz, float ppm);
     bool isCentroided() { return centroided; }
