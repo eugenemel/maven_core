@@ -727,20 +727,27 @@ void Fragment::buildConsensusAvg() {
 
 double Fragment::spearmanRankCorrelation(const vector<int>& X) {
     double d2=0; 
-    int N = X.size();
+    int N = min((int)nobs(), (int) X.size()); //max elements in the second vector
     int n=0;
     for(int i=0; i<N;i++ ) {	
-        if (X[i] == -1 ) { //mising values set to average distance
-            d2 += 2*i;
-            n++;
+		cerr << i << "\t" << n << "\t" << X[i] << endl;
+        if (X[i] != -1 ) { //mising values set to average distance
+            d2 += (n-X[i])*(n-X[i]);
+			n++;
         } else  {
-            n++;
-            d2 += (i-X[i])*(i-X[i]);
-            //cerr << "n=" << n << " cor=" << d2 << endl;
-        }
+            d2 += (i-N)*(i-N);
+		}
+        //cerr << "n=" << n << " cor=" << d2 << endl;
+        //}
     }
-    //double p = 1.00-(6.0*d2)/(n*((n*n)-1));
-    return 1.00-(6.0*d2)/(n*((n*n)-1));
+    if(n>1) { 
+		cerr << "n=" << n << "\t" << d2 << endl;
+		//double p = 1.00-(6.0*d2)/(n*((n*n)-1));
+		double p = 1.00-(6.0*d2)/(n*((n*n)-1));
+		return p;
+	} else {
+		return 0;
+	}
 }
 
 double Fragment::fractionMatched(const vector<int>& X) {
@@ -753,9 +760,11 @@ double Fragment::fractionMatched(const vector<int>& X) {
 
 double Fragment::mzErr(const vector<int>& X, Fragment* other) {
     if (X.size() == 0) return 0;
-    double ERR=1000;
-    for(unsigned int i=0; i<X.size(); i++ ) if (X[i] != -1) ERR = POW2( mzs[i] - other->mzs[ X[i] ]);
-    return sqrt(ERR);
+	int n=0;
+    double ERR=0;
+    for(unsigned int i=0; i<X.size(); i++ ) if (X[i] != -1) { n++; ERR += POW2( mzs[i] - other->mzs[ X[i] ]);  }
+	if (n) { return sqrt(ERR/n); }
+	return 0;
 }
 
 double Fragment::totalIntensity() {

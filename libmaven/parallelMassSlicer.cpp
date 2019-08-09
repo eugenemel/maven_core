@@ -204,6 +204,76 @@ void ParallelMassSlicer::algorithmD(float ppm, float rtWindow) {        //featur
         cerr << "#algorithmD" << slices.size() << endl;
 }
 
+void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //features that have ms2 events
+        delete_all(slices);
+        slices.clear();
+        cache.clear();
+
+		vector<mzSlice*> sample_slices;
+
+        for(unsigned int i=0; i < samples.size(); i++) {
+            mzSample* s = samples[i];
+
+            for(unsigned int j=0; j < s->scans.size(); j++) {
+                Scan* scan = samples[i]->scans[j];
+                if (scan->mslevel != 2 ) continue;
+                float rt = scan->rt;
+                float mz = scan->precursorMz;
+                float mzmax = mz + mz/1e6*ppm;
+                float mzmin = mz - mz/1e6*ppm;
+
+                mzSlice* s = new mzSlice(mzmin,mzmax, rt-2*rtWindow, rt+2*rtWindow);
+                s->rt=scan->rt;
+                s->mz=mz;
+				s->deleteFlag = 0;
+				sample_slices.push_back(s);
+            }
+		}
+
+		sort(sample_slices.begin(), sample_slices.end(), 
+					[ ](const mzSlice* lhs, const mzSlice* rhs){
+						if (abs(lhs->mz - rhs->mz) < 0.05) {
+							return lhs->rt < rhs->rt;
+						} else {
+							return lhs->mz < rhs->mz;
+						}
+					}
+		);
+		cerr << "Number if input slice before merge: " << sample_slices.size() << endl;
+
+		for(int i=0; i < sample_slices.size(); i++ ) {
+
+			mzSlice* a  = sample_slices[i];
+			if (a->deleteFlag) continue; //skip over if already markedyy
+			cerr << a->mz << "\t" << a->rt << endl;
+
+			for(int j=i+1; j < sample_slices.size(); j++ ) {
+				mzSlice* b  = sample_slices[j];
+				if (b->deleteFlag) continue; //skip over if already markedyy
+
+				//distance
+				float mzdist = ppmDist(a->mz,b->mz);
+			    if( mzdist > ppm) break;
+
+				float rtdist = (a->rtmax - b->rtmin);
+				if(rtdist > 0 ) {  //removing /merge
+					a->rtmax = b->rtmax;
+				    a->mzmin = min(a->mzmin,b->mzmin);
+				    a->mzmax = max(a->mzmax,b->mzmax);
+					a->mz  = (a->mzmax - a->mzmin)/2;
+					a->rt  = (a->rtmax - a->rtmin)/2;
+					b->deleteFlag = true;
+				}
+			}
+		}
+
+		for (mzSlice* x: sample_slices) { 
+			if (!x->deleteFlag) slices.push_back(x); 
+		}
+
+        cerr << "#algorithmE" << slices.size() << endl;
+}
+
 mzSlice*  ParallelMassSlicer::sliceExists(float mz, float rt) {
 	pair< multimap<int, mzSlice*>::iterator,  multimap<int, mzSlice*>::iterator > ppp;
 	ppp = cache.equal_range( (int) (mz*10) );

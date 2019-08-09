@@ -5,6 +5,7 @@
 #include<vector>
 #include<map>
 #include<math.h>
+#include<float.h>
 
 class Compound;
 class PeakGroup;
@@ -84,8 +85,8 @@ struct FragmentationMatchScore {
         spearmanRankCorrelation=0;
         ticMatched=0;
         numMatches=0;
-        ppmError=1000;
-        mzFragError=1000;
+        ppmError=DBL_MAX;
+        mzFragError=DBL_MAX;
         mergedScore=0;
         dotProduct=0;
         weightedDotProduct=0;

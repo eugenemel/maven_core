@@ -180,6 +180,7 @@ class mzSlice {
         Compound* compound;
         Adduct*   adduct;
         vector<Compound*> compoundVector;
+		bool deleteFlag=0;
 
 	string srmId;
 
