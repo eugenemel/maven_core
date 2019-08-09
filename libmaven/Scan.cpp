@@ -520,12 +520,25 @@ float Scan::baseMz() {
 }
 
 
-bool Scan::isMonoisotopicPrecursor(float monoIsotopeMz, float ppm) {
+bool Scan::isMonoisotopicPrecursor(float queryMz, float ppm, int charge) {
+    const float C13_DELTA_MASS = 13.0033548378-12.0;
 
-    const double C13_DELTA_MASS = 13.0033548378-12.0;
-    for(int charge=1; charge <= 3; charge++) {
-        int peakPos=this->findHighestIntensityPos(monoIsotopeMz-C13_DELTA_MASS/charge,ppm);
-        if (peakPos != -1) {
+    //intensity o monoisotopic peak must at least 5% of the C13 peak (
+    //Fix: this needs to be tunable, could be an issue for isotopic labeling experiments
+    //if C12 completly disappers
+    const float minParentIntensityFrac = 0.05;
+
+
+    if (charge <= 0) return true;  //senity check default to true
+
+    //look back, to see if there is a parent peak.
+    int parentPos=this->findHighestIntensityPos(queryMz-C13_DELTA_MASS/charge,ppm);
+
+    //found a potential C12 peak.
+    if (parentPos != -1) {
+        // compare intensities of presumbed parent and this peak, parent nees to be above some threshold
+        int peakPos =  this->findHighestIntensityPos(queryMz,ppm);
+        if (peakPos != -1 and intensity[parentPos] > intensity[peakPos]* minParentIntensityFrac) {
             return false;
         }
     }
