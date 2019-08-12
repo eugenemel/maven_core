@@ -230,17 +230,7 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //featur
             }
 		}
 
-//        sort(sample_slices.begin(), sample_slices.end(),
-//                    [ ](const mzSlice* lhs, const mzSlice* rhs){
-//                        if (abs(lhs->mz - rhs->mz) < 0.05) {
-//                            return lhs->rt < rhs->rt;
-//                        } else {
-//                            return lhs->mz < rhs->mz;
-//                        }
-//                    }
-//        );
-
-        //sort only by m/z, rely on RT tolerance to
+        //sort only by m/z, rely on RT tolerance downstream
         sort(sample_slices.begin(), sample_slices.end(), [ ](const mzSlice* lhs, const mzSlice* rhs){
             return lhs->mz < rhs->mz;
         });
@@ -262,23 +252,15 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //featur
 				mzSlice* b  = sample_slices[j];
 
                 //debugging
-                cout << "(" << i << ", " << j << "): "
-                     << "(i=[" << to_string(a->mzmin) << "-" << to_string(a->mzmax)
-                     << ", " << to_string(a->rtmin) << "-" << to_string(a->rtmax) << "]"
-                     << " deleteFlag= " << (a->deleteFlag ? "TRUE" : "FALSE")
-                     << ") (j=[" << to_string(b->mzmin) << "-" << to_string(b->mzmax)
-                     << ", " << to_string(b->rtmin) << "-" << to_string(b->rtmax) << "]"
-                     << " deleteFlag= " << (b->deleteFlag ? "TRUE" : "FALSE")
-                     << ")"
-                     << endl;
-
-//                //ensure that m/z distance is within tolerance
-//                float mzdist = ppmDist(a->mz, b->mz);
-//			    if( mzdist > ppm) break;
-
-//                //check for overlapping RT windows
-//				float rtdist = (a->rtmax - b->rtmin);
-//                if(rtdist > 0 ) {
+//                cout << "(" << i << ", " << j << "): "
+//                     << "(i=[" << to_string(a->mzmin) << "-" << to_string(a->mzmax)
+//                     << ", " << to_string(a->rtmin) << "-" << to_string(a->rtmax) << "]"
+//                     << " deleteFlag= " << (a->deleteFlag ? "TRUE" : "FALSE")
+//                     << ") (j=[" << to_string(b->mzmin) << "-" << to_string(b->mzmax)
+//                     << ", " << to_string(b->rtmin) << "-" << to_string(b->rtmax) << "]"
+//                     << " deleteFlag= " << (b->deleteFlag ? "TRUE" : "FALSE")
+//                     << ")"
+//                     << endl;
 
                 //Once the distance in m/z exceeds user-specified limit, no need to keep comparing for merges.
                 //Note that b->mzmin < a->mzmax comparison is necessary
@@ -324,17 +306,17 @@ bool ParallelMassSlicer::isOverlapping(mzSlice *a, mzSlice *b){
     bool isRtOverlapping = !((b->rtmin > a->rtmax || a->rtmin > b->rtmax));
 
     //debugging
-    cout
-         << "a=[" << to_string(a->mzmin) << "-" << to_string(a->mzmax) << ", " << to_string(a->rtmin) << "-" << to_string(a->rtmax) << "]"
-         << " <--> "
-         << "b=[" << to_string(b->mzmin) << "-" << to_string(b->mzmax) << ", " << to_string(b->rtmin) << "-" << to_string(b->rtmax) << "]"
-         << endl;
+//    cout
+//         << "a=[" << to_string(a->mzmin) << "-" << to_string(a->mzmax) << ", " << to_string(a->rtmin) << "-" << to_string(a->rtmax) << "]"
+//         << " <--> "
+//         << "b=[" << to_string(b->mzmin) << "-" << to_string(b->mzmax) << ", " << to_string(b->rtmin) << "-" << to_string(b->rtmax) << "]"
+//         << endl;
 
-    cout
-         << "isMzOverlapping? " << (isMzOverlapping ? "TRUE" : "FALSE") << " "
-         << "isRtOverlapping? " << (isRtOverlapping ? "TRUE" : "FALSE") << " "
-         << "isOverlapping? " << (isMzOverlapping && isRtOverlapping ? "TRUE" : "FALSE")
-         << endl;
+//    cout
+//         << "isMzOverlapping? " << (isMzOverlapping ? "TRUE" : "FALSE") << " "
+//         << "isRtOverlapping? " << (isRtOverlapping ? "TRUE" : "FALSE") << " "
+//         << "isOverlapping? " << (isMzOverlapping && isRtOverlapping ? "TRUE" : "FALSE")
+//         << endl;
 
     return isMzOverlapping && isRtOverlapping;
 }
