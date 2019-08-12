@@ -126,7 +126,7 @@ int Peak::getChargeState() {
 	}
 }
 
-vector<Scan*> Peak::getFragmenationEvents(float ppmWindow) {
+vector<Scan*> Peak::getFragmentationEvents(float ppmWindow) {
     vector<Scan*>matchedscans;
     if ( sample == NULL ) return matchedscans;
 
@@ -144,7 +144,7 @@ vector<Scan*> Peak::getFragmenationEvents(float ppmWindow) {
 
 
 Fragment Peak::getConsensusFragmentation(float ppmWindow,float productPpmTolr=20) {
-            vector<Scan*> ms2events =  this->getFragmenationEvents(ppmWindow);
+            vector<Scan*> ms2events =  this->getFragmentationEvents(ppmWindow);
             if (ms2events.size()==0) return Fragment();
             Fragment* f = new Fragment(ms2events[0],0.0001,0,1024);
             for(Scan* s: ms2events) f->addFragment(new Fragment(s,0.0001,0,1024));

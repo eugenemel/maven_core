@@ -572,7 +572,7 @@ vector<Scan*> PeakGroup::getRepresentativeFullScans() {
     return matchedscans;
 }
 
-vector<Scan*> PeakGroup::getFragmenationEvents() {
+vector<Scan*> PeakGroup::getFragmentationEvents() {
     vector<Scan*>matchedscans;
     for(unsigned int i=0; i < peaks.size(); i++ ) {
         mzSample* sample = peaks[i].getSample();
@@ -595,7 +595,7 @@ void PeakGroup::findHighestPurityMS2Pattern(float prePpmTolr) {
 
 
     //build consensus ms2 specta
-    vector<Scan*>ms2events = getFragmenationEvents();
+    vector<Scan*>ms2events = getFragmentationEvents();
     if (ms2events.size() < 1 ) return;
 
     Scan* best=ms2events.front();
@@ -624,7 +624,7 @@ void PeakGroup::findHighestPurityMS2Pattern(float prePpmTolr) {
 
 void PeakGroup::computeFragPattern(float productPpmTolr)  {
     //build consensus ms2 specta
-    vector<Scan*>ms2events = getFragmenationEvents();
+    vector<Scan*>ms2events = getFragmentationEvents();
     if (ms2events.size() == 0 ) return;
     sort(ms2events.begin(),ms2events.end(),Scan::compIntensity);
 
@@ -636,7 +636,7 @@ void PeakGroup::computeFragPattern(float productPpmTolr)  {
     ms2EventCount = ms2events.size();
 }
 
-Scan* PeakGroup::getAverageFragmenationScan(float productPpmTolr)  {
+Scan* PeakGroup::getAverageFragmentationScan(float productPpmTolr)  {
     //build consensus ms2 specta
     computeFragPattern(productPpmTolr);
     Scan* avgScan = new Scan(NULL,0,0,0,0,0);

@@ -712,7 +712,7 @@ void EIC::cubicSplineFit()  {
 
 
 
-vector<Scan*> EIC::getFragmenationEvents() {
+vector<Scan*> EIC::getFragmentationEvents() {
     vector<Scan*>matchedscans;
 	if(!sample) return matchedscans;
 

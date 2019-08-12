@@ -390,7 +390,7 @@ class EIC {
 		void findPeakBounds(Peak& peak);
 		void getPeakStatistics();
 		void checkGaussianFit(Peak& peak);
-		vector<Scan*> getFragmenationEvents();
+        vector<Scan*> getFragmentationEvents();
 		void subtractBaseLine();
 		void removeOverlapingPeaks();
 		EIC* clone(); //make a copy of self
@@ -487,7 +487,7 @@ class Peak {
 		inline EIC*	 getEIC() { return eic;    }
 		inline bool hasEIC() { return eic != NULL; }
 		Scan* getScan() { if(sample) return sample->getScan(scan); else return NULL; }	
-        vector<Scan*> getFragmenationEvents(float ppmWindow);
+        vector<Scan*> getFragmentationEvents(float ppmWindow);
         Fragment getConsensusFragmentation(float ppmWindow, float productPpmTolr);
 
 		int getChargeState();
@@ -603,10 +603,10 @@ class PeakGroup {
         inline vector<PeakGroup>& getChildren()  { return children; }
 
         vector<Scan*> getRepresentativeFullScans();
-        vector<Scan*> getFragmenationEvents();
+        vector<Scan*> getFragmentationEvents();
         void computeFragPattern(float productPpmTolr);
         void findHighestPurityMS2Pattern(float precPpmTolr);
-        Scan* getAverageFragmenationScan(float productPpmTolr);
+        Scan* getAverageFragmentationScan(float productPpmTolr);
 
         Peak* getHighestIntensityPeak();
         int getChargeStateFromMS1(float ppm);
