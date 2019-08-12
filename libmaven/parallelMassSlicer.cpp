@@ -266,7 +266,7 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //featur
                      << " deleteFlag= " << (a->deleteFlag ? "TRUE" : "FALSE")
                      << ") (j=[" << to_string(b->mzmin) << "-" << to_string(b->mzmax)
                      << ", " << to_string(b->rtmin) << "-" << to_string(b->rtmax) << "]"
-                     << " deleteFlag= " << (a->deleteFlag ? "TRUE" : "FALSE")
+                     << " deleteFlag= " << (b->deleteFlag ? "TRUE" : "FALSE")
                      << ")"
                      << endl;
 
