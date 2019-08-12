@@ -39,6 +39,7 @@ class ParallelMassSlicer {
 		void setMaxCharge   ( float v) {  _maxCharge = v; }
 		void setPrecursorPPMTolr (float v) { _precursorPPM = v; }
 		void addSlice(mzSlice* s);
+        static bool isOverlapping(mzSlice *a, mzSlice *b);
 
 	private:
 		unsigned int _maxSlices;
