@@ -241,13 +241,13 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //featur
 		);
         cerr << "#algorithmE number of mz slices before merge: " << sample_slices.size() << endl;
 
-		for(int i=0; i < sample_slices.size(); i++ ) {
+        for(unsigned int i=0; i < sample_slices.size(); i++ ) {
 
 			mzSlice* a  = sample_slices[i];
 			if (a->deleteFlag) continue; //skip over if already markedyy
-			cerr << a->mz << "\t" << a->rt << endl;
+            //cerr << a->mz << "\t" << a->rt << endl;
 
-			for(int j=i+1; j < sample_slices.size(); j++ ) {
+            for(unsigned int j=i+1; j < sample_slices.size(); j++ ) {
 				mzSlice* b  = sample_slices[j];
 				if (b->deleteFlag) continue; //skip over if already markedyy
 
