@@ -239,7 +239,7 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //featur
 						}
 					}
 		);
-		cerr << "Number if input slice before merge: " << sample_slices.size() << endl;
+        cerr << "#algorithmE number of mz slices before merge: " << sample_slices.size() << endl;
 
 		for(int i=0; i < sample_slices.size(); i++ ) {
 
@@ -271,7 +271,7 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //featur
 			if (!x->deleteFlag) slices.push_back(x); 
 		}
 
-        cerr << "#algorithmE" << slices.size() << endl;
+        cerr << "#algorithmE number of mz slices after merge: " << slices.size() << endl;
 }
 
 mzSlice*  ParallelMassSlicer::sliceExists(float mz, float rt) {
