@@ -22,3 +22,4 @@ dump
 .DS_Store
 .qmake.stash
 maven_core.pro
+peakdetector.pro.user
