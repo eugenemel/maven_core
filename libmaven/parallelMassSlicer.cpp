@@ -225,7 +225,7 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //featur
                 mzSlice* s = new mzSlice(mzmin,mzmax, rt-2*rtWindow, rt+2*rtWindow);
                 s->rt=scan->rt;
                 s->mz=mz;
-				s->deleteFlag = 0;
+                s->deleteFlag = false;
 				sample_slices.push_back(s);
             }
 		}
@@ -252,7 +252,9 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //featur
         for(unsigned int i=0; i < sample_slices.size(); i++ ) {
 
 			mzSlice* a  = sample_slices[i];
+
             if (a->deleteFlag) continue; //skip over if already marked
+
             // cerr << a->mz << "\t" << a->rt << endl;
 
             for(unsigned int j=i+1; j < sample_slices.size(); j++ ) {
@@ -301,6 +303,9 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //featur
                     a->deleteFlag = true;
                     deleteCounter++;
 				}
+
+                //b now contains all of the information in a, so proceed to next index
+                if (a->deleteFlag) break;
 			}
 		}
 
