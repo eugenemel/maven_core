@@ -279,7 +279,8 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //featur
 //                if(rtdist > 0 ) {
 
                 //Once the distance in m/z exceeds user-specified limit, no need to keep comparing for merges.
-                if (ppmDist(a->mzmax, b->mzmin) > ppm) break;
+                //Note that b->mzmin < a->mzmax comparison is necessary
+                if (b->mzmin > a->mzmax && ppmDist(a->mzmax, b->mzmin) > ppm) break;
 
                 //skip over mz slices that have already been merged
                 if (b->deleteFlag) continue;
