@@ -258,7 +258,6 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //featur
             for(unsigned int j=i+1; j < sample_slices.size(); j++ ) {
 
 				mzSlice* b  = sample_slices[j];
-                if (b->deleteFlag) continue; //skip over if already marked
 
 //                //ensure that m/z distance is within tolerance
 //                float mzdist = ppmDist(a->mz, b->mz);
@@ -270,6 +269,9 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //featur
 
                 //Once the distance in m/z exceeds user-specified limit, no need to keep comparing for merges.
                 if (ppmDist(a->mzmax, b->mzmin) > ppm) break;
+
+                //skip over mz slices that have already been merged
+                if (b->deleteFlag) continue;
 
                 if (ParallelMassSlicer::isOverlapping(a, b)) {
 
