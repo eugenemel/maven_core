@@ -251,7 +251,7 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //featur
 
 			mzSlice* a  = sample_slices[i];
             if (a->deleteFlag) continue; //skip over if already marked
-            //cerr << a->mz << "\t" << a->rt << endl;
+            cerr << a->mz << "\t" << a->rt << endl;
 
             for(unsigned int j=i+1; j < sample_slices.size(); j++ ) {
 
@@ -298,6 +298,19 @@ bool ParallelMassSlicer::isOverlapping(mzSlice *a, mzSlice *b){
 
     bool isMzOverlapping = !((b->mzmin > a->mzmax || a->mzmin > b->mzmax));
     bool isRtOverlapping = !((b->rtmin > a->rtmax || a->rtmin > b->rtmax));
+
+    //debugging
+    cout
+         << "a=[" << to_string(a->mzmin) << "-" << to_string(a->mzmax) << ", " << to_string(a->rtmin) << "-" << to_string(a->rtmax)
+         << " <--> "
+         << "b=[" << to_string(b->mzmin) << "-" << to_string(b->mzmax) << ", " << to_string(b->rtmin) << "-" << to_string(b->rtmax)
+         << endl;
+
+    cout
+         << "isMzOverlapping? " << (isMzOverlapping ? "TRUE" : "FALSE")
+         << "isRtOverlapping? " << (isRtOverlapping ? "TRUE" : "FALSE")
+         << "isOverlapping? " << (isMzOverlapping && isRtOverlapping ? "TRUE" : "FALSE")
+         << endl;
 
     return isMzOverlapping && isRtOverlapping;
 }
