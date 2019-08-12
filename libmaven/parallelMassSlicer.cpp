@@ -307,8 +307,8 @@ bool ParallelMassSlicer::isOverlapping(mzSlice *a, mzSlice *b){
          << endl;
 
     cout
-         << "isMzOverlapping? " << (isMzOverlapping ? "TRUE" : "FALSE")
-         << "isRtOverlapping? " << (isRtOverlapping ? "TRUE" : "FALSE")
+         << "isMzOverlapping? " << (isMzOverlapping ? "TRUE" : "FALSE") << " "
+         << "isRtOverlapping? " << (isRtOverlapping ? "TRUE" : "FALSE") << " "
          << "isOverlapping? " << (isMzOverlapping && isRtOverlapping ? "TRUE" : "FALSE")
          << endl;
 
