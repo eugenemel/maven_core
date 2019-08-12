@@ -282,8 +282,8 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //featur
                     b->mzmin = min(a->mzmin, b->mzmin);
                     b->mzmax = max(a->mzmax, b->mzmax);
 
-                    b->mz  = (a->mzmax - a->mzmin)/2;
-                    b->rt  = (a->rtmax - a->rtmin)/2;
+                    b->mz  = (b->mzmax - b->mzmin)/2;
+                    b->rt  = (b->rtmax - b->rtmin)/2;
 
                     //a is marked to be ignored in the future
                     a->deleteFlag = true;
