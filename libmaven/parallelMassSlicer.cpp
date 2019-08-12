@@ -247,11 +247,13 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //featur
 
         cerr << "#algorithmE number of mz slices before merge: " << sample_slices.size() << endl;
 
+        unsigned int deleteCounter = 0;
+
         for(unsigned int i=0; i < sample_slices.size(); i++ ) {
 
 			mzSlice* a  = sample_slices[i];
             if (a->deleteFlag) continue; //skip over if already marked
-            cerr << a->mz << "\t" << a->rt << endl;
+            // cerr << a->mz << "\t" << a->rt << endl;
 
             for(unsigned int j=i+1; j < sample_slices.size(); j++ ) {
 
@@ -283,9 +285,12 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //featur
 
                     //a is marked to be ignored in the future
                     a->deleteFlag = true;
+                    deleteCounter++;
 				}
 			}
 		}
+
+        cerr << deleteCounter << " mz slices flagged for exclusion." << endl;
 
 		for (mzSlice* x: sample_slices) { 
 			if (!x->deleteFlag) slices.push_back(x); 
