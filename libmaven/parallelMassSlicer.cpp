@@ -259,6 +259,17 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //featur
 
 				mzSlice* b  = sample_slices[j];
 
+                //debugging
+                cout << "(" << i << ", " << j << "): "
+                     << "(i=[" << to_string(a->mzmin) << "-" << to_string(a->mzmax)
+                     << ", " << to_string(a->rtmin) << "-" << to_string(a->rtmax) << "]"
+                     << " deleteFlag= " << (a->deleteFlag ? "TRUE" : "FALSE")
+                     << ") (j=[" << to_string(b->mzmin) << "-" << to_string(b->mzmax)
+                     << ", " << to_string(b->rtmin) << "-" << to_string(b->rtmax) << "]"
+                     << " deleteFlag= " << (a->deleteFlag ? "TRUE" : "FALSE")
+                     << ")"
+                     << endl;
+
 //                //ensure that m/z distance is within tolerance
 //                float mzdist = ppmDist(a->mz, b->mz);
 //			    if( mzdist > ppm) break;
@@ -308,9 +319,9 @@ bool ParallelMassSlicer::isOverlapping(mzSlice *a, mzSlice *b){
 
     //debugging
     cout
-         << "a=[" << to_string(a->mzmin) << "-" << to_string(a->mzmax) << ", " << to_string(a->rtmin) << "-" << to_string(a->rtmax)
+         << "a=[" << to_string(a->mzmin) << "-" << to_string(a->mzmax) << ", " << to_string(a->rtmin) << "-" << to_string(a->rtmax) << "]"
          << " <--> "
-         << "b=[" << to_string(b->mzmin) << "-" << to_string(b->mzmax) << ", " << to_string(b->rtmin) << "-" << to_string(b->rtmax)
+         << "b=[" << to_string(b->mzmin) << "-" << to_string(b->mzmax) << ", " << to_string(b->rtmin) << "-" << to_string(b->rtmax) << "]"
          << endl;
 
     cout
