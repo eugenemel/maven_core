@@ -552,21 +552,23 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
             return pgroups;
         }
 
-        //create EIC compose from all sample eics
-        EIC* m = EIC::eicMerge(eics);
-        if (!m) return pgroups;
+        EIC *m = eics[0];
+
+        //TODO: consider all of the samples
 
         //find peaks in merged eic
         m->getPeakPositions(smoothingWindow);
         sort(m->peaks.begin(), m->peaks.end(), Peak::compRt);
 
-        for(unsigned int i=0; i< m->peaks.size(); i++ ) {
+        for(unsigned int i=0; i< m->peaks.size(); i++) {
             PeakGroup grp;
             grp.groupId = i;
             pgroups.push_back(grp);
         }
 
         //TODO: in original algorithm, this is where filtering was done.
+
+        if (m) delete (m);
 
         return(pgroups);
 }
