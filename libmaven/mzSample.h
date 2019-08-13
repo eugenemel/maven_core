@@ -405,7 +405,8 @@ class EIC {
 
 		inline unsigned int size() { return intensity.size();}
 		inline mzSample* getSample() { return sample; } 
-		static vector<PeakGroup> groupPeaks(vector<EIC*>&eics, int smoothingWindow, float maxRtDiff);
+        static vector<PeakGroup> groupPeaks(vector<EIC*>&eics, int smoothingWindow, float maxRtDiff);
+        static vector<PeakGroup> groupPeaksB(vector<EIC*>&eics, int smoothingWindow, float maxRtDiff);
 
 		static EIC* eicMerge(const vector<EIC*>& eics);
 		static void removeLowRankGroups(vector<PeakGroup>&groups, unsigned int rankLimit );

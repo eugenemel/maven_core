@@ -535,6 +535,42 @@ void EIC::removeLowRankGroups( vector<PeakGroup>& groups, unsigned int rankLimit
 	}
 }
 
+vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff) {
+        //list filled and return by this function
+        vector<PeakGroup> pgroups;
+
+        //case there is only a single EIC, there is nothing to group
+        if ( eics.size() == 1 && eics[0] != NULL) {
+            EIC* m=eics[0];
+            for(unsigned int i=0; i< m->peaks.size(); i++ ) {
+                PeakGroup grp;
+                grp.groupId = i;
+                grp.addPeak(m->peaks[i]);
+                grp.groupStatistics();
+                pgroups.push_back(grp);
+            }
+            return pgroups;
+        }
+
+        //create EIC compose from all sample eics
+        EIC* m = EIC::eicMerge(eics);
+        if (!m) return pgroups;
+
+        //find peaks in merged eic
+        m->getPeakPositions(smoothingWindow);
+        sort(m->peaks.begin(), m->peaks.end(), Peak::compRt);
+
+        for(unsigned int i=0; i< m->peaks.size(); i++ ) {
+            PeakGroup grp;
+            grp.groupId = i;
+            pgroups.push_back(grp);
+        }
+
+        //TODO: in original algorithm, this is where filtering was done.
+
+        return(pgroups);
+}
+
 vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff) { 
 	
 	//list filled and return by this function
