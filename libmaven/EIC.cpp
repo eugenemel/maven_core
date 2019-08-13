@@ -552,6 +552,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
             return pgroups;
         }
 
+        //TODO: this causes the program to crash. do not do this.
         EIC *m = eics[0];
 
         //TODO: consider all of the samples
