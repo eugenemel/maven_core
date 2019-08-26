@@ -552,10 +552,9 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
             return pgroups;
         }
 
-        //TODO: this causes the program to crash. do not do this.
-        EIC *m = eics[0];
-
-        //TODO: consider all of the samples
+        //create EIC compose from all sample eics
+        EIC* m = EIC::eicMerge(eics);
+        if (!m) return pgroups;
 
         //find peaks in merged eic
         m->getPeakPositions(smoothingWindow);
@@ -563,7 +562,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
         for(unsigned int i=0; i< m->peaks.size(); i++) {
             PeakGroup grp;
-            grp.groupId = i;
+            grp.groupId = static_cast<int>(i);
             pgroups.push_back(grp);
         }
 
