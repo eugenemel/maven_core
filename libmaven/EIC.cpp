@@ -552,7 +552,12 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
             return pgroups;
         }
 
-        //create EIC compose from all sample eics
+        for (auto eic : eics){
+            eic->getPeakPositions(smoothingWindow);
+
+        }
+
+        //create EIC composed from all sample eics
         EIC* m = EIC::eicMerge(eics);
         if (!m) return pgroups;
 
