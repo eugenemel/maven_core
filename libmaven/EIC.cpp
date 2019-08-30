@@ -540,21 +540,16 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
         vector<PeakGroup> pgroups;
 
         //case there is only a single EIC, there is nothing to group
-        if ( eics.size() == 1 && eics[0] != NULL) {
+        if (eics.size() == 1 && eics[0]) {
             EIC* m=eics[0];
             for(unsigned int i=0; i< m->peaks.size(); i++ ) {
                 PeakGroup grp;
-                grp.groupId = i;
+                grp.groupId = static_cast<int>(i);
                 grp.addPeak(m->peaks[i]);
                 grp.groupStatistics();
                 pgroups.push_back(grp);
             }
             return pgroups;
-        }
-
-        for (auto eic : eics){
-            eic->getPeakPositions(smoothingWindow);
-
         }
 
         //create EIC composed from all sample eics
@@ -563,6 +558,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
         //find peaks in merged eic
         m->getPeakPositions(smoothingWindow);
+
         sort(m->peaks.begin(), m->peaks.end(), Peak::compRt);
 
         for(unsigned int i=0; i< m->peaks.size(); i++) {
