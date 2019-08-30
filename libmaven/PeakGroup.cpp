@@ -296,7 +296,7 @@ void PeakGroup::fillInPeaks(const vector<EIC*>& eics) {
     for(unsigned int i=0; i < eics.size(); i++ ) {
         EIC* eic = eics[i];
         if (eic == NULL ) continue;
-        if (eic->spline == NULL ) continue;
+        if (eic->spline.size() ) continue;
         if (eic->intensity.size() == 0) continue;
 
         bool missing=true;

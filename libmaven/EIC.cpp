@@ -1,8 +1,6 @@
 #include "mzSample.h"
 
 EIC::~EIC() {  
-    if(spline != NULL) { delete[] spline; spline=NULL; }
-    if(baseline != NULL) { delete[] baseline;  baseline=NULL; }
 	peaks.clear();
 }
 
@@ -33,9 +31,6 @@ EIC* EIC::clone() {
 	clonedEIC->intensity = intensity;
 	clonedEIC->mz = mz;
 	clonedEIC->scannum = scannum;
-
-    clonedEIC->spline=NULL;
-    clonedEIC->baseline=NULL;
 
 	return clonedEIC;
 }
@@ -77,7 +72,7 @@ EIC* EIC::eicMerge(const vector<EIC*>& eics) {
                 if (bin >= maxlen) bin=maxlen-1; 
 
 
-                if(e->spline and e->spline[j] > 0) {
+                if(e->spline.size() and e->spline[j] > 0) {
                     intensity[bin] += e->spline[j];
                 } else {
                     intensity[bin] += e->intensity[j];
@@ -113,9 +108,8 @@ EIC* EIC::eicMerge(const vector<EIC*>& eics) {
 
 void  EIC::computeBaseLine(int smoothing_window, int dropTopX) {
 
-    if (baseline != NULL ) {  //delete previous baseline if exists
-        delete[] baseline;
-        baseline=NULL;
+    if (baseline.size()) {  //delete previous baseline if exists
+        baseline.clear();
         eic_noNoiseObs=0;
     }
 
@@ -123,8 +117,7 @@ void  EIC::computeBaseLine(int smoothing_window, int dropTopX) {
 	if (n == 0)  return;
 
 	try { 
-		baseline = new float[n]; 
-		std::fill_n(baseline,n,0); 
+		baseline = vector<float>(n,0);
 	}  catch(...) { 
 		cerr << "Exception caught while allocating memory " << n << "floats " << endl;
 	}
@@ -151,7 +144,7 @@ void  EIC::computeBaseLine(int smoothing_window, int dropTopX) {
 	}
 
         //smooth baseline
-        gaussian1d_smoothing(n,smoothing_window,baseline);
+        gaussian1d_smoothing(n,smoothing_window,&baseline[0]);
 
         //count number of observation in EIC above baseline
         for(int i=0; i<n; i++) {
@@ -161,7 +154,7 @@ void  EIC::computeBaseLine(int smoothing_window, int dropTopX) {
 
 void  EIC::subtractBaseLine() {
 
-	if (baseline == NULL ) {
+	if (baseline.size() == 0 ) {
 		cerr << "subtractBaseLine() failed. empty baseline vector\n";
 		return;
 	}
@@ -178,11 +171,10 @@ void EIC::computeSpline(int smoothWindow) {
 	int n = intensity.size();
 
     if (n == 0) return;
-        if ( this->spline != NULL ) { delete[] spline; spline=NULL; }
+        if ( this->spline.size() ) { spline.clear(); }
 
         try {
-                this->spline = new float[n];
-                for(int i=0; i<n; i++) spline[i] = 0;
+                this->spline = vector<float>(n,0);
         }  catch(...) {
                 cerr << "Exception caught while allocating memory " << n << "floats " << endl;
         }
@@ -198,11 +190,11 @@ void EIC::computeSpline(int smoothWindow) {
             vector<float>smoothed = smoother.Smooth(intensity);
             for(int i=0; i<n; i++) spline[i] = smoothed[i];
         } else if (smootherType==GAUSSIAN) { //GAUSSIAN SMOOTHER
-            gaussian1d_smoothing(n,smoothWindow,spline);
+            gaussian1d_smoothing(n,smoothWindow,&spline[0]);
         } else if ( smootherType == AVG) {
             float* y  = new float[n];
             for(int i=0; i<n; i++) y[i] = intensity[i];
-            smoothAverage(y,spline,smoothWindow,n);
+            smoothAverage(y,&spline[0],smoothWindow,n);
             delete[] y;
         }
 
@@ -246,7 +238,7 @@ void  EIC::getPeakPositions(int smoothWindow) {
     if ( N == 0 ) return;
 
     computeSpline(smoothWindow);
-    if (!spline) return;
+    if (spline.size() == 0) return;
 
     for (unsigned int i=1; i < N-1; i++ ) {
         if ( spline[i] > spline[i-1] && spline[i] > spline[i+1]) {
@@ -276,8 +268,8 @@ void EIC::findPeakBounds(Peak& peak) {
 
 	unsigned int N = intensity.size();
 	if (N==0) return;
-	if (!spline)   return;
-	if (!baseline) return;
+	if (spline.size())   return;
+	if (baseline.size()) return;
 
 	//cerr << "findPeakBounds:" << apex << " " << rt[apex] << endl;
 
@@ -344,7 +336,6 @@ void  EIC::getPeakDetails(Peak& peak) {
     unsigned int N = intensity.size();
 
     if (N == 0) return;
-    if (baseline == NULL ) return;
     if (peak.pos >= N) return;
 
     //intensity and mz at the apex of the peaks
@@ -463,7 +454,7 @@ vector<mzPoint> EIC::getIntensityVector(Peak& peak) {
         if(maxi >= intensity.size()) maxi=intensity.size()-1;
 
         for(unsigned int i=mini; i <= maxi; i++ ) {
-            if(baseline and intensity[i] > baseline[i] )  {
+            if(baseline.size() and intensity[i] > baseline[i] )  {
                 y.push_back(mzPoint(rt[i],intensity[i],mz[i]));
             } else {
                 y.push_back(mzPoint(rt[i],intensity[i],mz[i]));

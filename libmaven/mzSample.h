@@ -344,8 +344,6 @@ class EIC {
 
     EIC() {
         sample=NULL;
-        spline=NULL;
-        baseline=NULL;
         mzmin=mzmax=rtmin=rtmax=0;
         maxIntensity=totalIntensity=0;
         eic_noNoiseObs=0;
@@ -368,8 +366,8 @@ class EIC {
 
         mzSample* sample;       //pointer to originating sample
         float color[4];         //color of the eic line, [r,g,b, alpha]
-        float *spline;          //pointer to smoothed intentsity array
-        float *baseline;        //pointer to baseline array
+        vector<float> spline;          //pointer to smoothed intentsity array
+        vector<float> baseline;        //pointer to baseline array
 
         float maxIntensity;     //maxItensity in eics
         float totalIntensity;   //sum of all intensities in EIC
