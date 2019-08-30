@@ -536,8 +536,12 @@ void EIC::removeLowRankGroups( vector<PeakGroup>& groups, unsigned int rankLimit
 }
 
 vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff) {
-        //list filled and return by this function
+
+    //list filled and return by this function
         vector<PeakGroup> pgroups;
+
+        //case with empty eics
+        if (eics.empty()) return pgroups;
 
         //case there is only a single EIC, there is nothing to group
         if (eics.size() == 1 && eics[0]) {
@@ -552,24 +556,43 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
             return pgroups;
         }
 
-        //create EIC composed from all sample eics
-        EIC* m = EIC::eicMerge(eics);
-        if (!m) return pgroups;
+//        //create EIC composed from all sample eics
+//        EIC* m = EIC::eicMerge(eics);
+//        if (!m) return pgroups;
 
-        //find peaks in merged eic
-        m->getPeakPositions(smoothingWindow);
+//        //find peaks in merged eic
+//        m->getPeakPositions(smoothingWindow);
 
-        sort(m->peaks.begin(), m->peaks.end(), Peak::compRt);
+//        sort(m->peaks.begin(), m->peaks.end(), Peak::compRt);
 
-        for(unsigned int i=0; i< m->peaks.size(); i++) {
-            PeakGroup grp;
-            grp.groupId = static_cast<int>(i);
-            pgroups.push_back(grp);
+//        for(unsigned int i=0; i< m->peaks.size(); i++) {
+//            PeakGroup grp;
+//            grp.groupId = static_cast<int>(i);
+//            pgroups.push_back(grp);
+//        }
+
+//        //TODO: in original algorithm, this is where filtering was done.
+
+//        if (m) delete (m);
+
+        //Test: Avoid eicMerge() call
+        vector<Peak> allPeaks;
+        for (auto eic : eics) {
+            eic->getPeakPositions(smoothingWindow);
+            for (auto peak : eic->peaks){
+                allPeaks.push_back(peak);
+            }
         }
 
-        //TODO: in original algorithm, this is where filtering was done.
+        sort(allPeaks.begin(), allPeaks.end(), Peak::compRt);
 
-        if (m) delete (m);
+        for(unsigned int i=0; i< allPeaks.size(); i++) {
+            PeakGroup grp;
+            grp.groupId = static_cast<int>(i);
+            grp.addPeak(allPeaks.at(i));
+            grp.groupStatistics();
+            pgroups.push_back(grp);
+        }
 
         return(pgroups);
 }
