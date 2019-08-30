@@ -246,7 +246,7 @@ void  EIC::getPeakPositions(int smoothWindow) {
     if ( N == 0 ) return;
 
     computeSpline(smoothWindow);
-    if (spline == NULL ) return;
+    if (!spline) return;
 
     for (unsigned int i=1; i < N-1; i++ ) {
         if ( spline[i] > spline[i-1] && spline[i] > spline[i+1]) {

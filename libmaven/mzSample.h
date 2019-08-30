@@ -353,7 +353,7 @@ class EIC {
         baselineSmoothingWindow=5;  //baseline smoothin window
         baselineDropTopX=60;    //fraction of point to remove when computing baseline
         for(unsigned int i=0; i<4;i++) color[i]=0;
-    };
+    }
 
 		~EIC();
 
