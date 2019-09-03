@@ -53,6 +53,9 @@ double GaussianSmoother::getGaussianWeight(double sigma) {
  * Execute:
  * ./ThreadSafeSmoother
  *
+ * Functions tested
+ * -- MovingAverageSmoother::getWeights() [2019-09-03]
+ *
  * @brief main
  * @param argc
  * @param argv
