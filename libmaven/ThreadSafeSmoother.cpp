@@ -39,33 +39,50 @@ void GaussianSmoother::init(unsigned long zMax, unsigned long sigma){
 vector<float> GaussianSmoother::getWeights(unsigned long windowSize) {
 
     vector<float> weights = vector<float>(windowSize, 0);
+    float weightSum = 0;
 
     unsigned long halfWindow = static_cast<unsigned long>(windowSize-1)/2;
-    float deltaSigma = zMax / static_cast<float>(halfWindow+1); // endpoint at zMax sigma is not directly used
+    double deltaSigma = zMax / static_cast<double>(halfWindow+1); // endpoint at zMax sigma is not directly used
 
     unsigned long index = 0;
 
     for (unsigned long i = 0; i < halfWindow; i++) {
 
-        float zScore = static_cast<float>(halfWindow-i)*deltaSigma; //working
-        weights.at(index) = getGaussianWeight(zScore);
+        double zScore = static_cast<double>(halfWindow-i)*deltaSigma;
+        float gaussianWeight = static_cast<float>(getGaussianWeight(zScore));
+
+        weights.at(index) = gaussianWeight;
+        weightSum += gaussianWeight;
 
         index++;
     }
 
-    float zScore = 0; //working
-    weights.at(index) = getGaussianWeight(zScore);
+    double zScore = 0;
+    float gaussianWeight = static_cast<float>(getGaussianWeight(zScore));
+
+    weights.at(index) = gaussianWeight;
+    weightSum += gaussianWeight;
+
     index++;
 
     for (unsigned long i = 0; i < halfWindow; i++) {
 
-        float zScore = static_cast<float>(i+1) * deltaSigma; //working
-        weights.at(index) = getGaussianWeight(zScore);
+        double zScore = static_cast<double>(i+1) * deltaSigma;
+        float gaussianWeight = static_cast<float>(getGaussianWeight(zScore));
+
+        weights.at(index) = gaussianWeight;
+        weightSum += gaussianWeight;
 
         index++;
     }
 
-    return weights;
+    vector<float> normalizedWeights = vector<float>(windowSize, 0);
+
+    for (unsigned int i = 0; i < weights.size(); i++){
+        normalizedWeights.at(i) = weights.at(i) / weightSum;
+    }
+
+    return normalizedWeights;
 
 }
 
