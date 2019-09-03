@@ -7,7 +7,24 @@ using namespace std;
 vector<float> VectorSmoother::smooth(vector<float> data, vector<float> weights){
     vector<float> smoothedData = vector<float>(data.size(), 0);
 
-    //TODO
+    int halfWindow = (weights.size() - 1) / 2;
+
+    for (int i = 0; i < data.size(); i++){
+        int jMin = i-halfWindow;
+        int jMax = i+halfWindow;
+
+        if (jMin < 0 || jMax >= data.size()) {
+            continue;
+            //TODO: handle edges?
+        }
+
+        int weightIndex = 0;
+        for (int j = jMin; j <= jMax; j++) {
+            smoothedData.at(j) = smoothedData.at(j) + (data.at(j) * weights.at(weightIndex));
+            weightIndex++;
+        }
+
+    }
 
     return smoothedData;
 }
@@ -102,7 +119,8 @@ double GaussianSmoother::getGaussianWeight(double zScore) {
  *
  * Functions tested
  * -- MovingAverageSmoother::getWeights() [2019-09-03]
- * -- GaussianSmoother::getWeights() [TODO]
+ * -- GaussianSmoother::getWeights() [2019-09-03]
+ * -- MovingAverageSmoother::smooth() [TODO]
  * @brief main
  * @param argc
  * @param argv
