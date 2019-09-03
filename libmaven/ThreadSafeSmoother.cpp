@@ -55,7 +55,7 @@ double GaussianSmoother::getGaussianWeight(double sigma) {
  *
  * Functions tested
  * -- MovingAverageSmoother::getWeights() [2019-09-03]
- *
+ * -- GaussianSmoother::getWeights() [TODO]
  * @brief main
  * @param argc
  * @param argv
@@ -66,12 +66,22 @@ int main(int argc, char *argv[]) {
     GaussianSmoother gaussianSmoother = GaussianSmoother();
     MovingAverageSmoother movingAverageSmoother = MovingAverageSmoother();
 
-    for (unsigned int i = 0; i <= 10; i++){
+    for (unsigned int i = 3; i <= 10; i++){
+
          vector<float> movingAvgWeights = movingAverageSmoother.getWeights(i);
          cout << "window=" << i << ": ";
          for (auto weight : movingAvgWeights) {
              cout << weight << " ";
          }
+
+         cout << endl;
+
+         vector<float> gaussianWeights = gaussianSmoother.getWeights(i);
+         cout << "window=" << i << ": ";
+         for (auto weight : gaussianWeights) {
+             cout << weight << " ";
+         }
+
          cout << endl;
     }
 }
