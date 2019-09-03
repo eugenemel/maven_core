@@ -17,11 +17,24 @@ vector<float> MovingAverageSmoother::getWeights(unsigned long windowSize){
     return vector<float>(windowSize, frac);
 }
 
-GaussianSmoother::GaussianSmoother(unsigned long zMax){
-    this->zMax = zMax;
+GaussianSmoother::GaussianSmoother(unsigned long zMax, unsigned long sigma){
+    GaussianSmoother::init(zMax, sigma);
 }
 
-GaussianSmoother::GaussianSmoother() { }
+GaussianSmoother::GaussianSmoother() {
+    GaussianSmoother::init(3, 1);
+}
+
+void GaussianSmoother::init(unsigned long zMax, unsigned long sigma){
+
+    //passed arguments
+    this->zMax = zMax;
+    this->sigma = sigma;
+
+    //computed constants
+    this->k1 = 1 / (static_cast<double>(sigma) * sqrt(2 * M_PI));
+    this->k2 = 1 / (2 * static_cast<double>(sigma) * static_cast<double>(sigma));
+}
 
 vector<float> GaussianSmoother::getWeights(unsigned long windowSize) {
 
@@ -35,19 +48,19 @@ vector<float> GaussianSmoother::getWeights(unsigned long windowSize) {
     for (unsigned long i = 0; i < halfWindow; i++) {
 
         float zScore = static_cast<float>(halfWindow-i)*deltaSigma; //working
-        weights.at(index) = zScore;
+        weights.at(index) = getGaussianWeight(zScore);
 
         index++;
     }
 
     float zScore = 0; //working
-    weights.at(index) = zScore;
+    weights.at(index) = getGaussianWeight(zScore);
     index++;
 
     for (unsigned long i = 0; i < halfWindow; i++) {
 
         float zScore = static_cast<float>(i+1) * deltaSigma; //working
-        weights.at(index) = zScore;
+        weights.at(index) = getGaussianWeight(zScore);
 
         index++;
     }
@@ -56,10 +69,8 @@ vector<float> GaussianSmoother::getWeights(unsigned long windowSize) {
 
 }
 
-double GaussianSmoother::getGaussianWeight(double sigma) {
-    double expVal = -1 / pow(2 * sigma, 2);
-    double divider = sqrt(2 * M_PI * pow(sigma, 2));
-    return (1 / divider) * exp(expVal);
+double GaussianSmoother::getGaussianWeight(double zScore) {
+    return k1 * exp(-1 * k2 * (zScore * zScore));
 }
 
 /**
@@ -82,7 +93,7 @@ double GaussianSmoother::getGaussianWeight(double sigma) {
  */
 int main(int argc, char *argv[]) {
 
-    GaussianSmoother gaussianSmoother = GaussianSmoother(4);
+    GaussianSmoother gaussianSmoother = GaussianSmoother(3, 1);
     MovingAverageSmoother movingAverageSmoother = MovingAverageSmoother();
 
     for (unsigned int i = 3; i <= 15; i=i+2){

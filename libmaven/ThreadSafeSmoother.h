@@ -65,14 +65,41 @@ class GaussianSmoother : VectorSmoother {
      * windowSize=15, zMax=4
      * --> z = (3.5, 3, 2.5, 2, 1.5, 1, 0.5, 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5)
      */
-    unsigned long zMax = 3;
+    unsigned long zMax;
+
+    /**
+     * @brief sigma
+     * standard deviation. Gaussian always has mean value of 0.
+     */
+    unsigned long sigma;
+
+    /**
+     * @brief k1
+     *
+     * Gaussian distribution constant:
+     *
+     * 1 / (sigma * sqrt(2 * PI))
+     */
+    double k1;
+
+    /**
+     * @brief k2
+     *
+     * Gaussian distribution constant:
+     *
+     * 1 / (2 * sigma * sigma)
+     */
+    double k2;
 
 public:
 
     GaussianSmoother();
-    GaussianSmoother(unsigned long zMaxVal);
+    GaussianSmoother(unsigned long zMaxVal, unsigned long sigma);
 
     ~GaussianSmoother() { }
     std::vector<float> getWeights(unsigned long windowSize);
     double getGaussianWeight(double sigma);
+
+private:
+    void init(unsigned long zMaxVal, unsigned long sigma);
 };
