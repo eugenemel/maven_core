@@ -62,9 +62,14 @@ string substituteInQuotedString(const string& s, const string& chars, const stri
 
 void smoothAverage(float *y, float* s, int smoothWindowLen, int ly) {
     if (smoothWindowLen == 0 ) return;
-    float* x = new float[smoothWindowLen];
-    for(int i=0; i< smoothWindowLen; i++ ) x[i] = 1.0/smoothWindowLen;
-    conv(smoothWindowLen,-smoothWindowLen/2,x,ly, 0,y,ly,0,s);
+
+    float *x = new float[smoothWindowLen];
+    for(int i=0; i< smoothWindowLen; i++ ){
+        x[i] = 1.0/smoothWindowLen;
+    }
+
+    conv(smoothWindowLen,-smoothWindowLen/2, x, ly, 0, y, ly, 0, s);
+
     delete[] x;
 }
 

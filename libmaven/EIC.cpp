@@ -254,7 +254,9 @@ void  EIC::getPeakPositions(int smoothWindow) {
         }
     }	
 
+    //baseline always uses Gaussian smoothing.
     computeBaseLine(baselineSmoothingWindow, baselineDropTopX);
+
     getPeakStatistics();
 }
 
