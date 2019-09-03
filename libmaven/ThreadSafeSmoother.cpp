@@ -19,17 +19,33 @@ vector<float> MovingAverageSmoother::getWeights(unsigned long windowSize){
 
 vector<float> GaussianSmoother::getWeights(unsigned long windowSize) {
 
-    double windowSizeDouble = static_cast<double>(windowSize);
-
     vector<float> weights = vector<float>(windowSize, 0);
 
-    double deltaSigma = 6 / windowSizeDouble; // bounds determined by +/- 3 sigma
+    unsigned long halfWindow = static_cast<unsigned long>(windowSize-1)/2;
+    //cout << "HALF-WINDOW=" << halfWindow << endl; // working
 
-    unsigned int index = 0;
+    float deltaSigma = 3 / static_cast<float>(halfWindow+1); // add an endpoint at 3 sigma that will not be directly used
+    //cout << "DELTASIGMA=" << deltaSigma << endl; // working
 
-    while (index < windowSize) {
-        double sigma = -3 + deltaSigma * index;
-        weights.at(index) = static_cast<float>(getGaussianWeight(sigma)/windowSizeDouble);
+    unsigned long index = 0;
+
+    for (unsigned long i = 0; i < halfWindow; i++) {
+
+        float zScore = static_cast<float>(halfWindow-i)*deltaSigma; //working
+        weights.at(index) = zScore;
+
+        index++;
+    }
+
+    float zScore = 0; //working
+    weights.at(index) = zScore;
+    index++;
+
+    for (unsigned long i = 0; i < halfWindow; i++) {
+
+        float zScore = static_cast<float>(i+1) * deltaSigma; //working
+        weights.at(index) = zScore;
+
         index++;
     }
 
@@ -66,7 +82,7 @@ int main(int argc, char *argv[]) {
     GaussianSmoother gaussianSmoother = GaussianSmoother();
     MovingAverageSmoother movingAverageSmoother = MovingAverageSmoother();
 
-    for (unsigned int i = 3; i <= 10; i++){
+    for (unsigned int i = 3; i <= 15; i=i+2){
 
          vector<float> movingAvgWeights = movingAverageSmoother.getWeights(i);
          cout << "moving avg window=" << i << ": ";
