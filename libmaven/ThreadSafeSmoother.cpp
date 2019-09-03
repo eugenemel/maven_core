@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 
     for (unsigned int i = 0; i <= 10; i++){
          vector<float> movingAvgWeights = movingAverageSmoother.getWeights(i);
-         cout << "window = " << i << " ";
+         cout << "window=" << i << ": ";
          for (auto weight : movingAvgWeights) {
              cout << weight << " ";
          }
