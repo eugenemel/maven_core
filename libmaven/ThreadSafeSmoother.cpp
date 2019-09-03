@@ -59,5 +59,16 @@ double GaussianSmoother::getGaussianWeight(double sigma) {
  * @return
  */
 int main(int argc, char *argv[]) {
-    cout << "TODO" << endl;
+
+    GaussianSmoother gaussianSmoother = GaussianSmoother();
+    MovingAverageSmoother movingAverageSmoother = MovingAverageSmoother();
+
+    for (unsigned int i = 0; i <= 10; i++){
+         vector<float> movingAvgWeights = movingAverageSmoother.getWeights(i);
+         cout << "window = " << i << " ";
+         for (auto weight : movingAvgWeights) {
+             cout << weight << " ";
+         }
+         cout << endl;
+    }
 }
