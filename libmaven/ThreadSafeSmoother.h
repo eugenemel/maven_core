@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 
-//class
 namespace mzUtils {
 
      /**
@@ -15,11 +14,22 @@ namespace mzUtils {
         virtual ~VectorSmoother() = 0;
     };
 
+    /**
+     * @brief MovingAverageSmoother class (subclass of VectorSmoother)
+     * equal weights, all based on window size.
+     */
     class MovingAverageSmoother : VectorSmoother {
         std::vector<float> getWeights(int windowSize);
     };
 
+    /**
+     * @brief GaussianSmoother (subclass of VectorSmoother)
+     * weights sample Gaussian distribution (approximately),
+     * with furthest-out points pinned to +/- 3 sigma.
+     */
     class GaussianSmoother : VectorSmoother {
         std::vector<float> getWeights(int windowSize);
+    private:
+        double getGaussianWeight(double sigma);
     };
 }
