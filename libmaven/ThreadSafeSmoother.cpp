@@ -17,15 +17,18 @@ vector<float> MovingAverageSmoother::getWeights(unsigned long windowSize){
     return vector<float>(windowSize, frac);
 }
 
+GaussianSmoother::GaussianSmoother(unsigned long zMax){
+    this->zMax = zMax;
+}
+
+GaussianSmoother::GaussianSmoother() { }
+
 vector<float> GaussianSmoother::getWeights(unsigned long windowSize) {
 
     vector<float> weights = vector<float>(windowSize, 0);
 
     unsigned long halfWindow = static_cast<unsigned long>(windowSize-1)/2;
-    //cout << "HALF-WINDOW=" << halfWindow << endl; // working
-
-    float deltaSigma = 3 / static_cast<float>(halfWindow+1); // add an endpoint at 3 sigma that will not be directly used
-    //cout << "DELTASIGMA=" << deltaSigma << endl; // working
+    float deltaSigma = zMax / static_cast<float>(halfWindow+1); // endpoint at zMax sigma is not directly used
 
     unsigned long index = 0;
 
@@ -79,7 +82,7 @@ double GaussianSmoother::getGaussianWeight(double sigma) {
  */
 int main(int argc, char *argv[]) {
 
-    GaussianSmoother gaussianSmoother = GaussianSmoother();
+    GaussianSmoother gaussianSmoother = GaussianSmoother(4);
     MovingAverageSmoother movingAverageSmoother = MovingAverageSmoother();
 
     for (unsigned int i = 3; i <= 15; i=i+2){

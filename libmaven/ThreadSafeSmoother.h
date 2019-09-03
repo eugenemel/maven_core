@@ -44,7 +44,34 @@ public:
 * with furthest-out points pinned to +/- 3 sigma.
 */
 class GaussianSmoother : VectorSmoother {
+
+    /**
+     * @brief zMax
+     * Sample Gaussian intensities from (-zMax, +zMax) evenly
+     *
+     * Gaussian does not include intensity values from +/- zMax itself, but will asymptotically approach this value
+     * as the windowSize increases.
+     *
+     * Examples:
+     * windowSize=3, zMax=3
+     * --> z= (-1.5, 0, +1.5)
+     *
+     * windowSize=5, zMax=3
+     * --> z = (2, 1, 0, 1, 2)
+     *
+     * windowSize=15, zMax=3
+     * --> z = (-2.625, -2.25, -1.875, -1.5, -1.125, -0.75, -0.375, 0, 0.375, 0.75, 1.125, 1.5, 1.875, 2.25, 2.625)
+     *
+     * windowSize=15, zMax=4
+     * --> z = (3.5, 3, 2.5, 2, 1.5, 1, 0.5, 0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5)
+     */
+    unsigned long zMax = 3;
+
 public:
+
+    GaussianSmoother();
+    GaussianSmoother(unsigned long zMaxVal);
+
     ~GaussianSmoother() { }
     std::vector<float> getWeights(unsigned long windowSize);
     double getGaussianWeight(double sigma);
