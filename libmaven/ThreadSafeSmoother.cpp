@@ -45,7 +45,7 @@ vector<float> MovingAverageSmoother::getWeights(unsigned long windowSize){
     return vector<float>(windowSize, frac);
 }
 
-GaussianSmoother::GaussianSmoother(unsigned long zMax, unsigned long sigma){
+GaussianSmoother::GaussianSmoother(double zMax, double sigma){
     GaussianSmoother::init(zMax, sigma);
 }
 
@@ -53,7 +53,7 @@ GaussianSmoother::GaussianSmoother() {
     GaussianSmoother::init(3, 1);
 }
 
-void GaussianSmoother::init(unsigned long zMax, unsigned long sigma){
+void GaussianSmoother::init(double zMax, double sigma){
 
     //passed arguments
     this->zMax = zMax;
@@ -219,7 +219,7 @@ int main(int argc, char *argv[]) {
 
     cout << "THREE: SHARP PEAK" << endl;
 
-    vector<float> sharpPeak = vector<float>(20, 0);
+    vector<float> sharpPeak = vector<float>(21, 0);
     for (int i = 0; i < 20; i++){
         if (i >=5 && i < 10) {
             sharpPeak.at(i) = 10-(10-i)*2;
@@ -228,7 +228,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    vector<float> movingAvgSharpPeak = movingAverageSmoother.smooth(sharpPeak, 5);
+    vector<float> movingAvgSharpPeak = movingAverageSmoother.smooth(sharpPeak, 15);
     vector<float> gaussianSharpPeak = gaussianSmoother.smooth(sharpPeak, 5);
 
     string separator = " " ;
