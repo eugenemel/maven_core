@@ -132,7 +132,7 @@ double GaussianSmoother::getGaussianWeight(double zScore) {
  * -- MovingAverageSmoother::getWeights() [2019-09-03]
  * -- GaussianSmoother::getWeights() [2019-09-03]
  * -- MovingAverageSmoother::smooth() [2019-09-03]
- * -- smooth() speedup [TODO]
+ * -- smooth() speedup [2019-09-04]
  *
  * @brief main
  * @param argc
@@ -197,8 +197,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    vector<float> smoothedFivesAndSevens = movingAverageSmoother.smooth(fivesAndSevens, 7);
-    vector<float> gaussianFivesAndSevens = gaussianSmoother.smooth(fivesAndSevens, 7);
+    vector<float> smoothedFivesAndSevens = movingAverageSmoother.smooth(fivesAndSevens, 3);
+    vector<float> gaussianFivesAndSevens = gaussianSmoother.smooth(fivesAndSevens, 3);
 
     for (auto f : fivesAndSevens) {
         cout << f << " ";
