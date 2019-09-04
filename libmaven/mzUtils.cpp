@@ -73,6 +73,13 @@ void smoothAverage(float *y, float* s, int smoothWindowLen, int ly) {
     delete[] x;
 }
 
+/**
+  *
+  * @deprecated
+  *
+  * @warning
+  * Not thread safe!
+  */
 void conv (int lx, int ifx, float *x, int ly, int ify, float *y, int lz, int ifz, float *z) /*****************************************************************************
 Compute z = x convolved with y; i.e.,
 
@@ -126,6 +133,17 @@ Author:  Dave Hale, Colorado School of Mines, 11/23/91
 	}
 }
 
+/**
+ * @brief gaussian1d_smoothing
+ * @param ns
+ * @param nsr
+ * @param data
+ *
+ * @warning
+ * Not thread-safe!
+ *
+ * @deprecated
+ */
 void gaussian1d_smoothing (int ns, int nsr, float *data) 
 {
 //Subroutine to apply a one-dimensional gaussian smoothing
