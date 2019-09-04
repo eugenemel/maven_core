@@ -217,4 +217,34 @@ int main(int argc, char *argv[]) {
     cout << endl;
     cout << endl;
 
+    cout << "THREE: SHARP PEAK" << endl;
+
+    vector<float> sharpPeak = vector<float>(20, 0);
+    for (int i = 0; i < 20; i++){
+        if (i >=5 && i < 10) {
+            sharpPeak.at(i) = 10-(10-i)*2;
+        } else if (i >= 10 && i < 15) {
+            sharpPeak.at(i) = 10-(i-10)*2;
+        }
+    }
+
+    vector<float> movingAvgSharpPeak = movingAverageSmoother.smooth(sharpPeak, 5);
+    vector<float> gaussianSharpPeak = gaussianSmoother.smooth(sharpPeak, 5);
+
+    for (auto f : sharpPeak) {
+        cout << f << " ";
+    }
+    cout << endl;
+
+    for (auto f : movingAvgSharpPeak){
+        cout << f << " ";
+    }
+    cout << endl;
+
+    for (auto f : gaussianSharpPeak){
+        cout << f << " ";
+    }
+    cout << endl;
+    cout << endl;
+
 }
