@@ -163,16 +163,56 @@ int main(int argc, char *argv[]) {
          cout << endl;
     }
 
-    cout << "TEST SMOOTHING" << endl;
+    cout << "TEST SMOOTHING" << endl << endl;
 
     cout << "ONE: CONSTANT VECTOR" << endl;
 
     vector<float> allSevens = vector<float>(10, 7);
-
     vector<float> smoothedSevens = movingAverageSmoother.smooth(allSevens, 5);
+    vector<float> gaussianSevens = gaussianSmoother.smooth(allSevens, 5);
+
+    for (auto f : allSevens) {
+        cout << f << " ";
+    }
+    cout << endl;
+
     for (auto f : smoothedSevens){
         cout << f << " ";
     }
+    cout << endl;
+
+    for (auto f : gaussianSevens){
+        cout << f << " ";
+    }
+    cout << endl;
+    cout << endl;
+
+    cout << "TWO: ALTERNATING VECTOR" << endl;
+
+    vector<float> fivesAndSevens = vector<float>(10, 7);
+    for (int i = 0; i < 10; i++){
+        if (i % 2 == 0){
+            fivesAndSevens.at(i) = 5;
+        }
+    }
+
+    vector<float> smoothedFivesAndSevens = movingAverageSmoother.smooth(fivesAndSevens, 7);
+    vector<float> gaussianFivesAndSevens = gaussianSmoother.smooth(fivesAndSevens, 7);
+
+    for (auto f : fivesAndSevens) {
+        cout << f << " ";
+    }
+    cout << endl;
+
+    for (auto f : smoothedFivesAndSevens){
+        cout << f << " ";
+    }
+    cout << endl;
+
+    for (auto f : gaussianFivesAndSevens){
+        cout << f << " ";
+    }
+    cout << endl;
     cout << endl;
 
 }
