@@ -60,6 +60,16 @@ string substituteInQuotedString(const string& s, const string& chars, const stri
   return result;
 }
 
+/**
+ * @brief smoothAverage
+ * @param y
+ * @param s
+ * @param smoothWindowLen
+ * @param ly
+ *
+ * @deprecated
+ * Issue 42: Not thread safe! Do not use!
+ */
 void smoothAverage(float *y, float* s, int smoothWindowLen, int ly) {
     if (smoothWindowLen == 0 ) return;
 

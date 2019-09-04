@@ -144,7 +144,9 @@ void  EIC::computeBaseLine(int smoothing_window, int dropTopX) {
 	}
 
         //smooth baseline
-        gaussian1d_smoothing(n,smoothing_window,&baseline[0]);
+        mzUtils::GaussianSmoother smoother;
+        vector<float> smoothed = smoother.smooth(baseline, smoothing_window);
+        for (int i = 0; i < smoothed.size(); i++) baseline[i] = smoothed.at(i);
 
         //count number of observation in EIC above baseline
         for(int i=0; i<n; i++) {
@@ -185,43 +187,25 @@ void EIC::computeSpline(int smoothWindow) {
         if (smoothWindow > n/3 ) smoothWindow=n/3; //smoothing window is too large
         if (smoothWindow <= 1) return; 	//nothing to smooth get out
 
-        if( smootherType==SAVGOL) { //SAVGOL SMOOTHER
+        if( smootherType == SAVGOL) { //SAVGOL SMOOTHER
+
             mzUtils::SavGolSmoother smoother(smoothWindow,smoothWindow,4);
             vector<float>smoothed = smoother.Smooth(intensity);
             for(int i=0; i<n; i++) spline[i] = smoothed[i];
-        } else if (smootherType==GAUSSIAN) { //GAUSSIAN SMOOTHER
-            gaussian1d_smoothing(n,smoothWindow,&spline[0]);
-        } else if ( smootherType == AVG) {
-            float* y  = new float[n];
-            for(int i=0; i<n; i++) y[i] = intensity[i];
-            smoothAverage(y,&spline[0],smoothWindow,n);
-            delete[] y;
+
+        } else if (smootherType == GAUSSIAN) { //GAUSSIAN SMOOTHER
+
+            mzUtils::GaussianSmoother smoother(3, 1);
+            vector<float> smoothed = smoother.smooth(intensity, smoothWindow);
+            for (int i = 0; i<n; i++) spline[i] = smoothed[i];
+
+        } else if ( smootherType == AVG) { //MOVING AVERAGE SMOOTHER
+
+            mzUtils::MovingAverageSmoother smoother;
+            vector<float> smoothed = smoother.smooth(intensity, smoothWindow);
+            for (int i =0; i<n; i++) spline[i] = smoothed[i];
+
         }
-
-        /*
-        float* x = new float[n];
-        float* f = new float[n];
-        float* b = new float[n];
-        float* c = new float[n];
-        float* d = new float[n];
-
-        for(int i=0; i<n; i++) { f[i] = intensity[i]; x[i] = rt[i]; b[i]=c[i]=d[i]=0; }
-        mzUtils::cubic_nak(n,x,f,b,c,d);
-        for(int i=1; i<n; i++) {
-            float dt=0.05;
-            spline[i] = f[i-1] + (dt) * ( b[i-1] + ( dt ) * ( c[i-1] + (dt ) * d[i-1] ) );
-            //spline[i] = mzUtils::spline_eval(n,x,f,b,c,d,x[i]);
-            //cerr << x[i] << " " << f[i] << " " << b[i] << " " << spline[i] << endl;
-        }
-
-        delete[] x;
-        delete[] f;
-        delete[] b;
-        delete[] c;
-        delete[] d;
-        */
-
-
 }
 
 
