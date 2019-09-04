@@ -1,6 +1,9 @@
 #pragma once
 #include <vector>
 
+namespace mzUtils
+{
+
 /**
 * @brief The VectorSmoother class
 * Thread-safe implementations of 1D smoothing (std::vector is thread-safe)
@@ -103,3 +106,5 @@ public:
 private:
     void init(double zMaxVal, double sigma);
 };
+
+}

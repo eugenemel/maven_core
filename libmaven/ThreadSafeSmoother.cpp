@@ -4,7 +4,7 @@
 #include <map>
 
 using namespace std;
-
+namespace mzUtils {
 vector<float> VectorSmoother::smooth(vector<float> data, vector<float> weights){
 
     int halfWindow = static_cast<int>((weights.size() - 1) / 2);
@@ -117,7 +117,7 @@ vector<float> GaussianSmoother::getWeights(unsigned long windowSize) {
 double GaussianSmoother::getGaussianWeight(double zScore) {
     return k1 * exp(-1 * k2 * (zScore * zScore));
 }
-
+}
 /**
  * For Testing
  *
@@ -142,8 +142,8 @@ double GaussianSmoother::getGaussianWeight(double zScore) {
  */
 int main(int argc, char *argv[]) {
 
-    GaussianSmoother gaussianSmoother = GaussianSmoother(3, 1);
-    MovingAverageSmoother movingAverageSmoother = MovingAverageSmoother();
+    mzUtils::GaussianSmoother gaussianSmoother = mzUtils::GaussianSmoother(3, 1);
+    mzUtils::MovingAverageSmoother movingAverageSmoother = mzUtils::MovingAverageSmoother();
 
     for (unsigned int i = 3; i <= 15; i=i+2){
 
@@ -248,5 +248,4 @@ int main(int argc, char *argv[]) {
     }
     cout << endl;
     cout << endl;
-
 }
