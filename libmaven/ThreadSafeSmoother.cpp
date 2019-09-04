@@ -231,18 +231,20 @@ int main(int argc, char *argv[]) {
     vector<float> movingAvgSharpPeak = movingAverageSmoother.smooth(sharpPeak, 5);
     vector<float> gaussianSharpPeak = gaussianSmoother.smooth(sharpPeak, 5);
 
+    string separator = " " ;
+
     for (auto f : sharpPeak) {
-        cout << f << " ";
+        cout << f << separator;
     }
     cout << endl;
 
     for (auto f : movingAvgSharpPeak){
-        cout << f << " ";
+        cout << f << separator;
     }
     cout << endl;
 
     for (auto f : gaussianSharpPeak){
-        cout << f << " ";
+        cout << f << separator;
     }
     cout << endl;
     cout << endl;
