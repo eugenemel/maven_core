@@ -19,6 +19,7 @@
 #include <fcntl.h>
 #include "statistics.h"
 #include "SavGolSmoother.h"
+#include "ThreadSafeSmoother.h"
 
 #ifdef ZLIB
 #include <zlib.h>
