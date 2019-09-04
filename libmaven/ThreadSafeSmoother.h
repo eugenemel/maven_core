@@ -29,7 +29,8 @@ public:
    std::vector<float> smooth(std::vector<float> data, std::vector<float> weights);
 };
 
-VectorSmoother::~VectorSmoother() { } //need definition, even if empty
+//inline is required here: https://stackoverflow.com/questions/23780274/duplicate-symbol-error-with-base-class-when-compiling
+inline VectorSmoother::~VectorSmoother() { } //need definition, even if empty
 
 /**
 * @brief MovingAverageSmoother class (subclass of VectorSmoother)
