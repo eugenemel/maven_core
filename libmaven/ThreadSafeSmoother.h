@@ -32,7 +32,7 @@ VectorSmoother::~VectorSmoother() { } //need definition, even if empty
 * @brief MovingAverageSmoother class (subclass of VectorSmoother)
 * equal weights, all based on window size.
 */
-class MovingAverageSmoother : VectorSmoother {
+class MovingAverageSmoother : public VectorSmoother {
 public:
     ~MovingAverageSmoother() { }
    std::vector<float> getWeights(unsigned long windowSize);
@@ -43,7 +43,7 @@ public:
 * weights sample Gaussian distribution (approximately),
 * with furthest-out points pinned to +/- 3 sigma.
 */
-class GaussianSmoother : VectorSmoother {
+class GaussianSmoother : public VectorSmoother {
 
     /**
      * @brief zMax

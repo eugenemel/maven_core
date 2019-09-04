@@ -5,22 +5,28 @@
 using namespace std;
 
 vector<float> VectorSmoother::smooth(vector<float> data, vector<float> weights){
+
     vector<float> smoothedData = vector<float>(data.size(), 0);
 
-    int halfWindow = (weights.size() - 1) / 2;
+    int halfWindow = static_cast<int>((weights.size() - 1) / 2);
+    int dataSize = static_cast<int>(data.size());
 
-    for (int i = 0; i < data.size(); i++){
+    for (int i = 0; i < dataSize; i++){
+
         int jMin = i-halfWindow;
         int jMax = i+halfWindow;
 
-        if (jMin < 0 || jMax >= data.size()) {
+        if (jMin < 0 || jMax >= static_cast<int>(data.size())) {
             continue;
             //TODO: handle edges?
         }
 
-        int weightIndex = 0;
+        unsigned long weightIndex = 0;
         for (int j = jMin; j <= jMax; j++) {
-            smoothedData.at(j) = smoothedData.at(j) + (data.at(j) * weights.at(weightIndex));
+
+            unsigned long smoothedDataCoord = static_cast<unsigned long>(j);
+
+            smoothedData.at(smoothedDataCoord) = smoothedData.at(smoothedDataCoord) + (data.at(smoothedDataCoord) * weights.at(weightIndex));
             weightIndex++;
         }
 
@@ -149,4 +155,17 @@ int main(int argc, char *argv[]) {
 
          cout << endl;
     }
+
+    cout << "TEST SMOOTHING" << endl;
+
+    cout << "ONE: CONSTANT VECTOR" << endl;
+
+    vector<float> allSevens = vector<float>(10, 7);
+
+    vector<float> smoothedSevens = movingAverageSmoother.smooth(allSevens, 5);
+    for (auto f : smoothedSevens){
+        cout << f << " ";
+    }
+    cout << endl;
+
 }
