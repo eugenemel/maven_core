@@ -7,63 +7,34 @@ using namespace std;
 
 vector<float> VectorSmoother::smooth(vector<float> data, vector<float> weights){
 
-    map<int, vector<pair<float,float>>> coordToValues = {};
-
-    vector<float> weightTotal = vector<float>(data.size(), 0);
-
     int halfWindow = static_cast<int>((weights.size() - 1) / 2);
     int dataSize = static_cast<int>(data.size());
 
-    for (int i = 0; i < dataSize; i++){
+    vector<float> smoothedData = vector<float>(data.size(), 0);
 
-        coordToValues.insert(make_pair(i, vector<pair<float,float>>()));
+    for (int i = 0; i < dataSize; i++){
 
         int jMin = i-halfWindow;
         int jMax = i+halfWindow;
 
-        if (jMin < 0 || jMax >= static_cast<int>(data.size())) {
-            continue;
-            //TODO: handle edges?
-        }
-
+        float weightSumm = 0;
         unsigned long weightIndex = 0;
+
         for (int j = jMin; j <= jMax; j++) {
 
-            unsigned long smoothedDataCoord = static_cast<unsigned long>(j);
+            if (j >= 0 && j < data.size()) {
 
-            coordToValues[i].push_back(make_pair(data.at(smoothedDataCoord), weights.at(weightIndex)));
+                float weight = weights.at(weightIndex);
+                weightSumm += weight;
+
+                smoothedData.at(i) += weight * data.at(j);
+            }
+
             weightIndex++;
+
         }
 
-    }
-
-    vector<float> smoothedData = vector<float>(data.size(), 0);
-
-    typedef map<int, vector<pair<float, float>>>::iterator valIterator;
-
-    //TODO: this is very slow
-
-    for (valIterator k = coordToValues.begin(); k != coordToValues.end(); ++k){
-
-        int coord = k->first;
-        vector<pair<float, float>> values = k->second;
-
-        if (values.size() == 0){
-            smoothedData.at(coord) = data.at(coord);
-            continue;
-        }
-
-        double weightedAvg = 0;
-        double weightSum = 0;
-
-        for (auto pair : values){
-            weightedAvg += pair.first * pair.second;
-            weightSum += pair.second;
-        }
-
-        weightedAvg /= weightSum;
-
-        smoothedData.at(coord) = weightedAvg;
+        smoothedData.at(i) /= weightSumm;
     }
 
     return smoothedData;
