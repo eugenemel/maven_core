@@ -133,6 +133,7 @@ double GaussianSmoother::getGaussianWeight(double zScore) {
  * -- GaussianSmoother::getWeights() [2019-09-03]
  * -- MovingAverageSmoother::smooth() [2019-09-03]
  * -- smooth() speedup [2019-09-04]
+ * -- verifyVsKnownData [TODO]
  *
  * @brief main
  * @param argc
