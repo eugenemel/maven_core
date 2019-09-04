@@ -1,17 +1,22 @@
 #include "ThreadSafeSmoother.h"
 #include <cmath>
 #include <iostream>
+#include <map>
 
 using namespace std;
 
 vector<float> VectorSmoother::smooth(vector<float> data, vector<float> weights){
 
-    vector<float> smoothedData = vector<float>(data.size(), 0);
+    map<int, vector<pair<float,float>>> coordToValues = {};
+
+    vector<float> weightTotal = vector<float>(data.size(), 0);
 
     int halfWindow = static_cast<int>((weights.size() - 1) / 2);
     int dataSize = static_cast<int>(data.size());
 
     for (int i = 0; i < dataSize; i++){
+
+        coordToValues.insert(make_pair(i, vector<pair<float,float>>()));
 
         int jMin = i-halfWindow;
         int jMax = i+halfWindow;
@@ -26,10 +31,39 @@ vector<float> VectorSmoother::smooth(vector<float> data, vector<float> weights){
 
             unsigned long smoothedDataCoord = static_cast<unsigned long>(j);
 
-            smoothedData.at(smoothedDataCoord) = smoothedData.at(smoothedDataCoord) + (data.at(smoothedDataCoord) * weights.at(weightIndex));
+            coordToValues[i].push_back(make_pair(data.at(smoothedDataCoord), weights.at(weightIndex)));
             weightIndex++;
         }
 
+    }
+
+    vector<float> smoothedData = vector<float>(data.size(), 0);
+
+    typedef map<int, vector<pair<float, float>>>::iterator valIterator;
+
+    //TODO: this is very slow
+
+    for (valIterator k = coordToValues.begin(); k != coordToValues.end(); ++k){
+
+        int coord = k->first;
+        vector<pair<float, float>> values = k->second;
+
+        if (values.size() == 0){
+            smoothedData.at(coord) = data.at(coord);
+            continue;
+        }
+
+        double weightedAvg = 0;
+        double weightSum = 0;
+
+        for (auto pair : values){
+            weightedAvg += pair.first * pair.second;
+            weightSum += pair.second;
+        }
+
+        weightedAvg /= weightSum;
+
+        smoothedData.at(coord) = weightedAvg;
     }
 
     return smoothedData;
@@ -126,7 +160,9 @@ double GaussianSmoother::getGaussianWeight(double zScore) {
  * Functions tested
  * -- MovingAverageSmoother::getWeights() [2019-09-03]
  * -- GaussianSmoother::getWeights() [2019-09-03]
- * -- MovingAverageSmoother::smooth() [TODO]
+ * -- MovingAverageSmoother::smooth() [2019-09-03]
+ * -- smooth() speedup [TODO]
+ *
  * @brief main
  * @param argc
  * @param argv
