@@ -671,6 +671,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
                     iCluster.insert(iCluster.end(), jCluster.begin(), jCluster.end());
 
                     jCluster.clear();
+                    jCluster.shrink_to_fit();
 
                     peakGroups.at(iContainingClusterIndex) = iCluster;
                     peakGroups.at(jContainingClusterIndex) = jCluster;
