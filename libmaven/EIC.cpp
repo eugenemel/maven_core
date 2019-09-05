@@ -144,8 +144,8 @@ void  EIC::computeBaseLine(int smoothing_window, int dropTopX) {
 	}
 
         //smooth baseline
-        mzUtils::GaussianSmoother smoother;
-        vector<float> smoothed = smoother.smooth(baseline, smoothing_window);
+        mzUtils::GaussianSmoother smoother(smoothing_window);
+        vector<float> smoothed = smoother.smooth(baseline);
         for (int i = 0; i < smoothed.size(); i++) baseline[i] = smoothed.at(i);
 
         //count number of observation in EIC above baseline
@@ -195,14 +195,14 @@ void EIC::computeSpline(int smoothWindow) {
 
         } else if (smootherType == GAUSSIAN) { //GAUSSIAN SMOOTHER
 
-            mzUtils::GaussianSmoother smoother(3, 1);
-            vector<float> smoothed = smoother.smooth(intensity, smoothWindow);
+            mzUtils::GaussianSmoother smoother(smoothWindow, 3, 1);
+            vector<float> smoothed = smoother.smooth(intensity);
             for (int i = 0; i<n; i++) spline[i] = smoothed[i];
 
         } else if ( smootherType == AVG) { //MOVING AVERAGE SMOOTHER
 
-            mzUtils::MovingAverageSmoother smoother;
-            vector<float> smoothed = smoother.smooth(intensity, smoothWindow);
+            mzUtils::MovingAverageSmoother smoother(smoothWindow);
+            vector<float> smoothed = smoother.smooth(intensity);
             for (int i =0; i<n; i++) spline[i] = smoothed[i];
 
         }
