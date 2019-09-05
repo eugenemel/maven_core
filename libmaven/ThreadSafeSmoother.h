@@ -97,10 +97,36 @@ class GaussianSmoother : public VectorSmoother {
 
 public:
 
+    /**
+     * @brief FWHM_sigma
+     *
+     * Used in conjunction with getWindowSizeFromNsr()
+     */
+    constexpr static double FWHM_sigma = 1.17741002252; // sqrt(2 * ln(2))
+
     GaussianSmoother();
     GaussianSmoother(double zMaxVal, double sigma);
 
     ~GaussianSmoother() { }
+
+    /**
+     *
+     * @brief getWeights
+     *
+     * Previously, Gaussian smoothing was specified in nsr space
+     * (see mzUtils::gaussian1d_smoothing), and so the weights vector
+     * is also specified this way.
+     *
+     * Note that the actual length of the weights vector depends on
+     * the zMax parameter (how far out to extend the Gaussian in each direction
+     * for convolution)
+     *
+     * @param windowSize (# of points with amplitude > half max)
+     * or, the # of points in with 2 * FWHM_sigma
+     *
+     * @return weights vector
+     * size depends on nsr (windowSize) and zMax parameter
+     */
     std::vector<float> getWeights(unsigned long windowSize);
     double getGaussianWeight(double sigma);
 
