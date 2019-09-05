@@ -552,6 +552,120 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
 //        if (m) delete (m);
 
+        int numTotalPeaks = 0;
+        for (auto eic : eics){
+            eic->getPeakPositions(smoothingWindow);
+            numTotalPeaks += eic->peaks.size();
+        }
+
+                //<sample, peak>
+        vector<pair<int, Peak*>> peakSamplePairs = vector<pair<int,Peak*>>(numTotalPeaks);
+
+        int k = 0;
+        for (int i = 0; i < eics.size(); i++) {
+            EIC *eic = eics.at(i);
+            for (auto peak : eic->peaks) {
+                peakSamplePairs.at(k) = make_pair(i, &peak);
+                k++;
+            }
+        }
+
+        sort(peakSamplePairs.begin(), peakSamplePairs.end(),
+             [](const pair<int, Peak*>& lhs, const pair<int, Peak*>& rhs){
+                return lhs.second->rt - rhs.second->rt < 0;
+            });
+
+        vector<pair<double, pair<unsigned int, unsigned int>>> dissimilarities;
+
+        for (unsigned int i = 0; i < peakSamplePairs.size(); i++){
+
+            pair<int, Peak*> peakPairI = peakSamplePairs.at(i);
+
+            for (unsigned int j = i+1; j < peakSamplePairs.size(); j++) {
+
+                pair<int, Peak*> peakPairJ = peakSamplePairs.at(j);
+
+                float deltaRt = peakPairJ.second->rt - peakPairI.second->rt;
+
+                //out of tolerance condition
+                if (deltaRt > maxRtDiff) {
+                    continue;
+                }
+
+                //else, create a pair
+                dissimilarities.push_back(make_pair(deltaRt, make_pair(i, j)));
+
+            }
+        }
+
+        sort(dissimilarities.begin(), dissimilarities.end(),
+             [](const pair<double, pair<unsigned int, unsigned int>>& lhs, const pair<double, pair<unsigned int, unsigned int>>& rhs){
+            if (abs(lhs.first - rhs.first) < 1e-6) {
+              if (lhs.second.first == rhs.second.first) {
+                return lhs.second.second < rhs.second.second;
+              } else {
+                return lhs.second.first < rhs.second.first;
+              }
+            } else {
+              return lhs.first < rhs.first;
+            }
+        });
+
+        // <unsigned int> --> peakSamplePairs index
+        vector<vector<unsigned int>> peakGroups;
+
+        for (auto dissimilarity : dissimilarities) {
+
+            unsigned int i = dissimilarity.second.first; //refers to a peakSamplePair
+            unsigned int j = dissimilarity.second.second; //refers to a peakSamplePair
+
+            vector<unsigned int> iClusters;
+            vector<unsigned int> jClusters;
+
+            //check existing clusters
+            for (auto cluster : peakGroups) {
+                if (find(cluster.begin(), cluster.end(), i) != cluster.end()) {
+                    iClusters = cluster;
+                } else if (find(cluster.begin(), cluster.end(), j) != cluster.end()) {
+                    jClusters = cluster;
+                }
+
+                if (iClusters.size() > 0 && jClusters.size() > 0) {
+                    break;
+                }
+            }
+
+            /*
+             * TODO: based on clusters retrieved, and samples already present,
+             * either
+             *
+             * 1. accept (i,j) pair by merging to an existing cluster,
+             * --> possibly join two existing clusters together
+             *
+             * 2. accept (i,j) pair by creating a new cluster
+             * --> only if i and j are not involved in any other clusters
+             *
+             * 3. reject (i,j) pair
+             * if i or j are involved in another cluster, and the merge cannot proceed.
+             *
+             * In the case of merging, need to update the peakGroups vector appropriately
+             *
+             * Will probably require an extensive amount of testing
+             *
+             * meanwhile, is this even the issue? what exactly is happening here?
+            */
+            if (iClusters.size() == 0 && jClusters.size() == 0) {
+                //no existing clusters - add a new cluster
+                vector<unsigned int> newCluster = {i, j};
+                peakGroups.push_back(newCluster);
+
+
+            } else if (iClusters.size() != 0 && jClusters.size() == 0) {
+                //one existing cluster
+            }
+
+        }
+
         //Test: Avoid eicMerge() call
         vector<Peak> allPeaks;
         for (auto eic : eics) {
