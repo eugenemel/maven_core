@@ -121,9 +121,10 @@ double GaussianSmoother::getGaussianWeight(double zScore) {
 /**
  * For Testing
  *
- * To compile:
- * cd ~/workspace/maven_core/libmaven
- * clang-omp++ ThreadSafeSmoother.cpp -o ThreadSafeSmoother -Wall -I/usr/local/Cellar/llvm/8.0.1/include/c++/v1
+ * To create an executable:
+ * rename 'testThreadSafeSmoother' to 'main'
+ * cd ~/workspace/maven_core
+ * clang-omp++ libmaven/ThreadSafeSmoother.cpp -o libmaven/ThreadSafeSmoother -Wall -I/usr/local/Cellar/llvm/8.0.1/include/c++/v1
  *
  * Execute:
  * ./ThreadSafeSmoother
@@ -135,12 +136,12 @@ double GaussianSmoother::getGaussianWeight(double zScore) {
  * -- smooth() speedup [2019-09-04]
  * -- verifyVsKnownData [TODO]
  *
- * @brief main
+ * @brief testThreadSafeSmoother
  * @param argc
  * @param argv
  * @return
  */
-int main(int argc, char *argv[]) {
+int testThreadSafeSmoother(int argc, char *argv[]) {
 
     mzUtils::GaussianSmoother gaussianSmoother = mzUtils::GaussianSmoother(3, 1);
     mzUtils::MovingAverageSmoother movingAverageSmoother = mzUtils::MovingAverageSmoother();
