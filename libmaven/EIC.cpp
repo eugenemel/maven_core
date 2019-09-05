@@ -538,6 +538,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
         int numTotalPeaks = 0;
         for (auto eic : eics){
+            //TODO: remove peaks with intensity that are too low
             eic->getPeakPositions(smoothingWindow);
             numTotalPeaks += eic->peaks.size();
         }
@@ -609,21 +610,23 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
             unsigned int j = dissimilarity.second.second;
 
             //refers to index in peakGroups
-            int iContainingCluster = -1;
-            int jContainingCluster = -1;
+            int iContainingClusterIndex = -1;
+            int jContainingClusterIndex = -1;
 
             //check existing clusters
             for (unsigned int k = 0; k < peakGroups.size(); k++) {
 
                 vector<unsigned int> cluster = peakGroups.at(k);
 
+                if (cluster.empty()) continue;
+
                 if (find(cluster.begin(), cluster.end(), i) != cluster.end()) {
-                    iContainingCluster = k;
+                    iContainingClusterIndex = k;
                 } else if (find(cluster.begin(), cluster.end(), j) != cluster.end()) {
-                    jContainingCluster = k;
+                    jContainingClusterIndex = k;
                 }
 
-                if (iContainingCluster != -1 && jContainingCluster != -1) {
+                if (iContainingClusterIndex != -1 && jContainingClusterIndex != -1) {
                     break;
                 }
             }
@@ -648,12 +651,37 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
              * meanwhile, is this even the issue? what exactly is happening here?
             */
 
-            if (iContainingCluster != -1 && jContainingCluster != -1) {
-                //TODO
-            } else if (iContainingCluster != -1 && jContainingCluster == -1) {
-                //TODO
-            } else if (iContainingCluster == -1 && jContainingCluster != -1) {
-                //TODO
+            if (iContainingClusterIndex != -1 && jContainingClusterIndex != -1) {
+
+                //retrieve clusters
+                vector<unsigned int> *iCluster = &peakGroups.at(iContainingClusterIndex);
+                vector<unsigned int> *jCluster = &peakGroups.at(jContainingClusterIndex);
+
+                vector<unsigned int> intersection;
+
+                set_intersection(iCluster->begin(), iCluster->end(), jCluster->begin(), jCluster->end(), intersection);
+
+                if (intersection.empty()) {
+
+                    //merge all of jCluster into iCluster, if no overlap
+                    iCluster->resize(iCluster->size()+jCluster->size());
+                    iCluster->insert(iCluster->end(), jCluster->begin(), jCluster->end());
+
+                    jCluster->clear();
+                }
+
+            } else if (iContainingClusterIndex != -1 && jContainingClusterIndex == -1) {
+
+                vector<unsigned int> *iCluster = &peakGroups.at(iContainingClusterIndex);
+                iCluster->resize(iCluster->size()+1);
+                iCluster->insert(iCluster->end(), j);
+
+            } else if (iContainingClusterIndex == -1 && jContainingClusterIndex != -1) {
+
+                vector<unsigned int> *jCluster = &peakGroups.at(jContainingClusterIndex);
+                jCluster->resize(jCluster->size()+1);
+                jCluster->insert(jCluster->end(), i);
+
             } else {
 
                 //no existing clusters involving i or j - add a new cluster
@@ -666,7 +694,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
         cerr << "Identified " << peakGroups.size() << " peak groups." << endl;
 
         //Translate results and return
-        for (int i = 0; i < peakGroups.size(); i++){
+        for (unsigned int i = 0; i < peakGroups.size(); i++){
 
             if (peakGroups.at(i).empty()) continue;
 
