@@ -514,6 +514,8 @@ void EIC::removeLowRankGroups( vector<PeakGroup>& groups, unsigned int rankLimit
 
 vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff) {
 
+        cout <<"smoothingWindow=" << smoothingWindow << ", maxRtDiff=" << maxRtDiff << endl;
+
         //list filled and return by this function
         vector<PeakGroup> pgroups;
 
@@ -540,7 +542,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
             numTotalPeaks += eic->peaks.size();
         }
 
-        cerr << "Discovered " << numTotalPeaks << "peaks in " << eics.size() << " samples." << endl;
+        cerr << "Discovered " << numTotalPeaks << " peaks in " << eics.size() << " samples." << endl;
 
                 //<sample, peak>
         vector<pair<int, Peak*>> peakSamplePairs = vector<pair<int,Peak*>>(numTotalPeaks);
@@ -611,7 +613,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
             int jContainingCluster = -1;
 
             //check existing clusters
-            for (unsigned int k = 0; i < peakGroups.size(); k++) {
+            for (unsigned int k = 0; k < peakGroups.size(); k++) {
 
                 vector<unsigned int> cluster = peakGroups.at(k);
 
