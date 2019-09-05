@@ -514,7 +514,7 @@ void EIC::removeLowRankGroups( vector<PeakGroup>& groups, unsigned int rankLimit
 
 vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff) {
 
-    //list filled and return by this function
+        //list filled and return by this function
         vector<PeakGroup> pgroups;
 
         //case with empty eics
@@ -530,33 +530,17 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
                 grp.groupStatistics();
                 pgroups.push_back(grp);
             }
+            cerr << "Case with 1 eic produces " << pgroups.size() <<  "peak groups." << endl;
             return pgroups;
         }
-
-//        //create EIC composed from all sample eics
-//        EIC* m = EIC::eicMerge(eics);
-//        if (!m) return pgroups;
-
-//        //find peaks in merged eic
-//        m->getPeakPositions(smoothingWindow);
-
-//        sort(m->peaks.begin(), m->peaks.end(), Peak::compRt);
-
-//        for(unsigned int i=0; i< m->peaks.size(); i++) {
-//            PeakGroup grp;
-//            grp.groupId = static_cast<int>(i);
-//            pgroups.push_back(grp);
-//        }
-
-//        //TODO: in original algorithm, this is where filtering was done.
-
-//        if (m) delete (m);
 
         int numTotalPeaks = 0;
         for (auto eic : eics){
             eic->getPeakPositions(smoothingWindow);
             numTotalPeaks += eic->peaks.size();
         }
+
+        cerr << "Discovered " << numTotalPeaks << "peaks in " << eics.size() << " samples." << endl;
 
                 //<sample, peak>
         vector<pair<int, Peak*>> peakSamplePairs = vector<pair<int,Peak*>>(numTotalPeaks);
@@ -598,6 +582,8 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
             }
         }
 
+        cerr << "Computed " << dissimilarities.size() << " dissimilarities." << endl;
+
         sort(dissimilarities.begin(), dissimilarities.end(),
              [](const pair<double, pair<unsigned int, unsigned int>>& lhs, const pair<double, pair<unsigned int, unsigned int>>& rhs){
             if (abs(lhs.first - rhs.first) < 1e-6) {
@@ -616,21 +602,26 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
         for (auto dissimilarity : dissimilarities) {
 
-            unsigned int i = dissimilarity.second.first; //refers to a peakSamplePair
-            unsigned int j = dissimilarity.second.second; //refers to a peakSamplePair
+            //refers to index in peakSamplePair
+            unsigned int i = dissimilarity.second.first;
+            unsigned int j = dissimilarity.second.second;
 
-            vector<unsigned int> iClusters;
-            vector<unsigned int> jClusters;
+            //refers to index in peakGroups
+            int iContainingCluster = -1;
+            int jContainingCluster = -1;
 
             //check existing clusters
-            for (auto cluster : peakGroups) {
+            for (unsigned int k = 0; i < peakGroups.size(); k++) {
+
+                vector<unsigned int> cluster = peakGroups.at(k);
+
                 if (find(cluster.begin(), cluster.end(), i) != cluster.end()) {
-                    iClusters = cluster;
+                    iContainingCluster = k;
                 } else if (find(cluster.begin(), cluster.end(), j) != cluster.end()) {
-                    jClusters = cluster;
+                    jContainingCluster = k;
                 }
 
-                if (iClusters.size() > 0 && jClusters.size() > 0) {
+                if (iContainingCluster != -1 && jContainingCluster != -1) {
                     break;
                 }
             }
@@ -654,36 +645,42 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
              *
              * meanwhile, is this even the issue? what exactly is happening here?
             */
-            if (iClusters.size() == 0 && jClusters.size() == 0) {
-                //no existing clusters - add a new cluster
+
+            if (iContainingCluster != -1 && jContainingCluster != -1) {
+                //TODO
+            } else if (iContainingCluster != -1 && jContainingCluster == -1) {
+                //TODO
+            } else if (iContainingCluster == -1 && jContainingCluster != -1) {
+                //TODO
+            } else {
+
+                //no existing clusters involving i or j - add a new cluster
                 vector<unsigned int> newCluster = {i, j};
                 peakGroups.push_back(newCluster);
-
-
-            } else if (iClusters.size() != 0 && jClusters.size() == 0) {
-                //one existing cluster
             }
 
         }
 
-        //Test: Avoid eicMerge() call
-        vector<Peak> allPeaks;
-        for (auto eic : eics) {
-            eic->getPeakPositions(smoothingWindow);
-            for (auto peak : eic->peaks){
-                allPeaks.push_back(peak);
-            }
-        }
+        cerr << "Identified " << peakGroups.size() << " peak groups." << endl;
 
-        sort(allPeaks.begin(), allPeaks.end(), Peak::compRt);
+        //Translate results and return
+        for (int i = 0; i < peakGroups.size(); i++){
 
-        for(unsigned int i=0; i< allPeaks.size(); i++) {
+            if (peakGroups.at(i).empty()) continue;
+
             PeakGroup grp;
             grp.groupId = static_cast<int>(i);
-            grp.addPeak(allPeaks.at(i));
+
+            for (auto index : peakGroups.at(i)) {
+                pair<unsigned int, Peak*> peakSamplePair = peakSamplePairs.at(index);
+                grp.addPeak(*(peakSamplePair.second));
+            }
+
             grp.groupStatistics();
             pgroups.push_back(grp);
         }
+
+        cerr << "Returning " << pgroups.size() << " peak groups." << endl;
 
         return(pgroups);
 }
