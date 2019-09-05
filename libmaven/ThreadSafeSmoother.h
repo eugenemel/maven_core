@@ -10,23 +10,18 @@ namespace mzUtils
 */
 class VectorSmoother {
 public:
+
+   unsigned long windowSize;
+   std::vector<float> weights; // computed by getWeights().
+
+   explicit VectorSmoother(unsigned long windowSize) { }
    virtual ~VectorSmoother() = 0;
-   std::vector<float> smooth(std::vector<float> data, unsigned long windowSize){
 
-       //intercept window size to minimum of 3 (1 before and 1 after)
-       if (windowSize <= 0) {
-           windowSize = 3;
-       }
+   std::vector<float> smooth(std::vector<float> data);
+   unsigned long adjustWindowSize(unsigned long windowSize);
 
-       if (windowSize % 2 == 0){
-           windowSize++; //err on side of longer half-windows
-       }
+   virtual void computeWeights() = 0;
 
-       return smooth(data, getWeights(windowSize));
-   }
-
-   virtual std::vector<float> getWeights(unsigned long windowSize) = 0;
-   std::vector<float> smooth(std::vector<float> data, std::vector<float> weights);
 };
 
 //inline is required here: https://stackoverflow.com/questions/23780274/duplicate-symbol-error-with-base-class-when-compiling
@@ -38,8 +33,14 @@ inline VectorSmoother::~VectorSmoother() { } //need definition, even if empty
 */
 class MovingAverageSmoother : public VectorSmoother {
 public:
+
+    explicit MovingAverageSmoother(unsigned long windowSize) : VectorSmoother(windowSize) {
+        this->windowSize = adjustWindowSize(windowSize);
+        computeWeights();
+    }
+
     ~MovingAverageSmoother() { }
-   std::vector<float> getWeights(unsigned long windowSize);
+    void computeWeights();
 };
 
 /**
@@ -104,8 +105,17 @@ public:
      */
     constexpr static double FWHM_sigma = 1.17741002252; // sqrt(2 * ln(2))
 
-    GaussianSmoother();
-    GaussianSmoother(double zMaxVal, double sigma);
+    explicit GaussianSmoother(unsigned long windowSize) : GaussianSmoother(windowSize, 3, 1) { }
+
+    explicit GaussianSmoother(unsigned long windowSize, double zMaxVal, double sigma) : VectorSmoother(windowSize) {
+
+        //Here, 'windowSize' refers to 'nsr' - the number of points with > 50% amplitude
+        this->windowSize = adjustWindowSize(windowSize);
+
+        GaussianSmoother::init(zMaxVal, sigma);
+
+        computeWeights();
+    }
 
     ~GaussianSmoother() { }
 
@@ -127,7 +137,12 @@ public:
      * @return weights vector
      * size depends on nsr (windowSize) and zMax parameter
      */
-    std::vector<float> getWeights(unsigned long windowSize);
+    void computeWeights();
+
+    /**
+     * @brief getGaussianWeight
+     * get a single weight based on a z-score (number of std dev)
+     */
     double getGaussianWeight(double sigma);
 
 private:

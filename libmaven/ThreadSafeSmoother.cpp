@@ -5,7 +5,23 @@
 
 using namespace std;
 namespace mzUtils {
-vector<float> VectorSmoother::smooth(vector<float> data, vector<float> weights){
+
+unsigned long VectorSmoother::adjustWindowSize(unsigned long windowSize) {
+
+    //intercept window size to minimum of 3 (1 before and 1 after)
+    if (windowSize <= 0) {
+        return 3;
+    }
+
+    //even numbers become odd
+    if (windowSize % 2 == 0){
+        return (windowSize+1);
+    }
+
+    return windowSize;
+}
+
+vector<float> VectorSmoother::smooth(vector<float> data){
 
     int halfWindow = static_cast<int>((weights.size() - 1) / 2);
     int dataSize = static_cast<int>(data.size());
@@ -40,17 +56,9 @@ vector<float> VectorSmoother::smooth(vector<float> data, vector<float> weights){
     return smoothedData;
 }
 
-vector<float> MovingAverageSmoother::getWeights(unsigned long windowSize){
+void MovingAverageSmoother::computeWeights(){
     float frac = 1 / static_cast<float>(windowSize);
-    return vector<float>(windowSize, frac);
-}
-
-GaussianSmoother::GaussianSmoother(double zMax, double sigma){
-    GaussianSmoother::init(zMax, sigma);
-}
-
-GaussianSmoother::GaussianSmoother() {
-    GaussianSmoother::init(3, 1);
+    weights = vector<float>(windowSize, frac);
 }
 
 void GaussianSmoother::init(double zMax, double sigma){
@@ -65,7 +73,7 @@ void GaussianSmoother::init(double zMax, double sigma){
 }
 
 //Here, 'windowSize' refers to 'nsr' - the number of points with > 50% amplitude
-vector<float> GaussianSmoother::getWeights(unsigned long windowSize) {
+void GaussianSmoother::computeWeights() {
 
     unsigned long halfWindow = static_cast<unsigned long>(windowSize-1)/2;
     double deltaSigma = GaussianSmoother::FWHM_sigma / halfWindow;
@@ -73,7 +81,7 @@ vector<float> GaussianSmoother::getWeights(unsigned long windowSize) {
     halfWindow = floor(zMax / deltaSigma) + 1;
     windowSize = 2*halfWindow + 1;
 
-    vector<float> weights = vector<float>(windowSize, 0);
+    weights = vector<float>(windowSize, 0);
 
     unsigned long index = 0;
 
@@ -103,8 +111,6 @@ vector<float> GaussianSmoother::getWeights(unsigned long windowSize) {
 
         index++;
     }
-
-    return weights;
 
 }
 
@@ -137,12 +143,12 @@ double GaussianSmoother::getGaussianWeight(double zScore) {
  */
 int testThreadSafeSmoother(int argc, char *argv[]) {
 
-    mzUtils::GaussianSmoother gaussianSmoother = mzUtils::GaussianSmoother(3, 1);
-    mzUtils::MovingAverageSmoother movingAverageSmoother = mzUtils::MovingAverageSmoother();
-
     for (unsigned int i = 3; i <= 15; i=i+2){
 
-         vector<float> movingAvgWeights = movingAverageSmoother.getWeights(i);
+        mzUtils::GaussianSmoother gaussianSmoother = mzUtils::GaussianSmoother(i, 3, 1);
+        mzUtils::MovingAverageSmoother movingAverageSmoother = mzUtils::MovingAverageSmoother(i);
+
+         vector<float> movingAvgWeights = movingAverageSmoother.weights;
          cout << "moving avg window=" << i << ": ";
          for (auto weight : movingAvgWeights) {
              cout << weight << " ";
@@ -150,7 +156,7 @@ int testThreadSafeSmoother(int argc, char *argv[]) {
 
          cout << endl;
 
-         vector<float> gaussianWeights = gaussianSmoother.getWeights(i);
+         vector<float> gaussianWeights = gaussianSmoother.weights;
          cout << "Gaussian   window=" << i << ": ";
          for (auto weight : gaussianWeights) {
              cout << weight << " ";
@@ -162,11 +168,14 @@ int testThreadSafeSmoother(int argc, char *argv[]) {
 
     cout << "TEST SMOOTHING" << endl << endl;
 
+    mzUtils::GaussianSmoother gaussianSmoother = mzUtils::GaussianSmoother(5, 3, 1);
+    mzUtils::MovingAverageSmoother movingAverageSmoother = mzUtils::MovingAverageSmoother(15);
+
     cout << "ONE: CONSTANT VECTOR" << endl;
 
     vector<float> allSevens = vector<float>(10, 7);
-    vector<float> smoothedSevens = movingAverageSmoother.smooth(allSevens, 5);
-    vector<float> gaussianSevens = gaussianSmoother.smooth(allSevens, 5);
+    vector<float> smoothedSevens = movingAverageSmoother.smooth(allSevens);
+    vector<float> gaussianSevens = gaussianSmoother.smooth(allSevens);
 
     for (auto f : allSevens) {
         cout << f << " ";
@@ -193,8 +202,8 @@ int testThreadSafeSmoother(int argc, char *argv[]) {
         }
     }
 
-    vector<float> smoothedFivesAndSevens = movingAverageSmoother.smooth(fivesAndSevens, 3);
-    vector<float> gaussianFivesAndSevens = gaussianSmoother.smooth(fivesAndSevens, 3);
+    vector<float> smoothedFivesAndSevens = movingAverageSmoother.smooth(fivesAndSevens);
+    vector<float> gaussianFivesAndSevens = gaussianSmoother.smooth(fivesAndSevens);
 
     for (auto f : fivesAndSevens) {
         cout << f << " ";
@@ -223,8 +232,8 @@ int testThreadSafeSmoother(int argc, char *argv[]) {
         }
     }
 
-    vector<float> movingAvgSharpPeak = movingAverageSmoother.smooth(sharpPeak, 15);
-    vector<float> gaussianSharpPeak = gaussianSmoother.smooth(sharpPeak, 5);
+    vector<float> movingAvgSharpPeak = movingAverageSmoother.smooth(sharpPeak);
+    vector<float> gaussianSharpPeak = gaussianSmoother.smooth(sharpPeak);
 
     string separator = " " ;
 
