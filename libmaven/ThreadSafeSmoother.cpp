@@ -21,7 +21,7 @@ unsigned long VectorSmoother::adjustWindowSize(unsigned long windowSize) {
     return windowSize;
 }
 
-vector<float> VectorSmoother::smooth(vector<float> data){
+vector<float> VectorSmoother::smooth(vector<float>& data){
 
     int halfWindow = static_cast<int>((weights.size() - 1) / 2);
     int dataSize = static_cast<int>(data.size());

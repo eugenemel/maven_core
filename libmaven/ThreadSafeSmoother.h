@@ -17,7 +17,7 @@ public:
    explicit VectorSmoother(unsigned long windowSize) { }
    virtual ~VectorSmoother() = 0;
 
-   std::vector<float> smooth(std::vector<float> data);
+   std::vector<float> smooth(std::vector<float>& data);
    unsigned long adjustWindowSize(unsigned long windowSize);
 
    virtual void computeWeights() = 0;
