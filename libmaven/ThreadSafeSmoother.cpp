@@ -64,13 +64,16 @@ void GaussianSmoother::init(double zMax, double sigma){
     this->k2 = 1 / (2 * static_cast<double>(sigma) * static_cast<double>(sigma));
 }
 
+//Here, 'windowSize' refers to 'nsr' - the number of points with > 50% amplitude
 vector<float> GaussianSmoother::getWeights(unsigned long windowSize) {
 
-    vector<float> weights = vector<float>(windowSize, 0);
-    float weightSum = 0;
-
     unsigned long halfWindow = static_cast<unsigned long>(windowSize-1)/2;
-    double deltaSigma = zMax / static_cast<double>(halfWindow+1); // endpoint at zMax sigma is not directly used
+    double deltaSigma = GaussianSmoother::FWHM_sigma / halfWindow;
+
+    halfWindow = floor(zMax / deltaSigma) + 1;
+    windowSize = 2*halfWindow + 1;
+
+    vector<float> weights = vector<float>(windowSize, 0);
 
     unsigned long index = 0;
 
@@ -80,7 +83,6 @@ vector<float> GaussianSmoother::getWeights(unsigned long windowSize) {
         float gaussianWeight = static_cast<float>(getGaussianWeight(zScore));
 
         weights.at(index) = gaussianWeight;
-        weightSum += gaussianWeight;
 
         index++;
     }
@@ -89,7 +91,6 @@ vector<float> GaussianSmoother::getWeights(unsigned long windowSize) {
     float gaussianWeight = static_cast<float>(getGaussianWeight(zScore));
 
     weights.at(index) = gaussianWeight;
-    weightSum += gaussianWeight;
 
     index++;
 
@@ -99,18 +100,11 @@ vector<float> GaussianSmoother::getWeights(unsigned long windowSize) {
         float gaussianWeight = static_cast<float>(getGaussianWeight(zScore));
 
         weights.at(index) = gaussianWeight;
-        weightSum += gaussianWeight;
 
         index++;
     }
 
-    vector<float> normalizedWeights = vector<float>(windowSize, 0);
-
-    for (unsigned int i = 0; i < weights.size(); i++){
-        normalizedWeights.at(i) = weights.at(i) / weightSum;
-    }
-
-    return normalizedWeights;
+    return weights;
 
 }
 
