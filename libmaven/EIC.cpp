@@ -654,33 +654,43 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
             if (iContainingClusterIndex != -1 && jContainingClusterIndex != -1) {
 
                 //retrieve clusters
-                vector<unsigned int> *iCluster = &peakGroups.at(iContainingClusterIndex);
-                vector<unsigned int> *jCluster = &peakGroups.at(jContainingClusterIndex);
+                vector<unsigned int> iCluster = peakGroups.at(iContainingClusterIndex);
+                vector<unsigned int> jCluster = peakGroups.at(jContainingClusterIndex);
 
                 vector<unsigned int> intersection;
 
-                set_intersection(iCluster->begin(), iCluster->end(), jCluster->begin(), jCluster->end(), intersection);
+                sort(iCluster.begin(), iCluster.end());
+                sort(jCluster.begin(), jCluster.end());
+
+                set_intersection(iCluster.begin(), iCluster.end(), jCluster.begin(), jCluster.end(), back_inserter(intersection));
 
                 if (intersection.empty()) {
 
                     //merge all of jCluster into iCluster, if no overlap
-                    iCluster->resize(iCluster->size()+jCluster->size());
-                    iCluster->insert(iCluster->end(), jCluster->begin(), jCluster->end());
+                    iCluster.resize(iCluster.size()+jCluster.size());
+                    iCluster.insert(iCluster.end(), jCluster.begin(), jCluster.end());
 
-                    jCluster->clear();
+                    jCluster.clear();
+
+                    peakGroups.at(iContainingClusterIndex) = iCluster;
+                    peakGroups.at(jContainingClusterIndex) = jCluster;
                 }
 
             } else if (iContainingClusterIndex != -1 && jContainingClusterIndex == -1) {
 
-                vector<unsigned int> *iCluster = &peakGroups.at(iContainingClusterIndex);
-                iCluster->resize(iCluster->size()+1);
-                iCluster->insert(iCluster->end(), j);
+                vector<unsigned int> iCluster = peakGroups.at(iContainingClusterIndex);
+                iCluster.resize(iCluster.size()+1);
+                iCluster.insert(iCluster.end(), j);
+
+                peakGroups.at(iContainingClusterIndex) = iCluster;
 
             } else if (iContainingClusterIndex == -1 && jContainingClusterIndex != -1) {
 
-                vector<unsigned int> *jCluster = &peakGroups.at(jContainingClusterIndex);
-                jCluster->resize(jCluster->size()+1);
-                jCluster->insert(jCluster->end(), i);
+                vector<unsigned int> jCluster = peakGroups.at(jContainingClusterIndex);
+                jCluster.resize(jCluster.size()+1);
+                jCluster.insert(jCluster.end(), i);
+
+                peakGroups.at(jContainingClusterIndex) = jCluster;
 
             } else {
 
