@@ -720,7 +720,8 @@ vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float
 		pgroups.push_back(grp);
   	}
 
-    //cerr << "EIC::groupPeaks() peakgroups=" << pgroups.size() << endl;
+    cerr << "EIC::groupPeaks() eics=" << eics.size() << endl;
+    cerr << "EIC::groupPeaks() peakgroups=" << pgroups.size() << endl;
 
 	for(unsigned int i=0; i < eics.size(); i++ ) {	//for every sample
 		for(unsigned int j=0; j < eics[i]->peaks.size(); j++ ) { //for every peak in the sample
