@@ -703,6 +703,13 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
         }
 
         cerr << "Identified " << peakGroups.size() << " peak groups." << endl;
+        for (auto peakGroup : peakGroups) {
+            cerr << "peakSamplePair Indexes: ";
+            for (auto index : peakGroup){
+                cerr << index << " ";
+            }
+            cerr << endl;
+        }
 
         //Translate results and return
         for (unsigned int i = 0; i < peakGroups.size(); i++){
