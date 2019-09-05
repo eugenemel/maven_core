@@ -786,7 +786,7 @@ vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float
             }
 	}
 
-    cerr << "EIC::groupPeaks() peakgroups post-processing=" << eics.size() << endl;
+    cerr << "EIC::groupPeaks() peakgroups post-processing=" << pgroups.size() << endl;
 
 	//now merge overlapping groups
 	//EIC::mergeOverlapingGroups(pgroups);
