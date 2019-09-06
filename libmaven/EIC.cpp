@@ -630,7 +630,9 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
                 if (find(cluster.begin(), cluster.end(), i) != cluster.end()) {
                     iContainingClusterIndex = k;
-                } else if (find(cluster.begin(), cluster.end(), j) != cluster.end()) {
+                }
+
+                if (find(cluster.begin(), cluster.end(), j) != cluster.end()) {
                     jContainingClusterIndex = k;
                 }
 
