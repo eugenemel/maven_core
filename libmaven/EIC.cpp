@@ -661,7 +661,9 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
              * meanwhile, is this even the issue? what exactly is happening here?
             */
 
-            if (iContainingClusterIndex != -1 && jContainingClusterIndex != -1) {
+            //if i and j are already involved in different clusters, try to merge them.
+            //if i and j are already involved in the same cluster, they are already merged together.
+            if (iContainingClusterIndex != -1 && jContainingClusterIndex != -1 && iContainingClusterIndex != jContainingClusterIndex) {
 
                 //retrieve clusters
                 vector<unsigned int> iCluster = peakGroups.at(iContainingClusterIndex);
@@ -724,8 +726,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
                 }
                 cout << endl;
 
-                iCluster.resize(iCluster.size()+1);
-                iCluster.insert(iCluster.end(), j);
+                iCluster.push_back(j);
 
                 peakGroups.at(iContainingClusterIndex) = iCluster;
 
@@ -747,8 +748,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
                 }
                 cout << endl;
 
-                jCluster.resize(jCluster.size()+1);
-                jCluster.insert(jCluster.end(), i);
+                jCluster.push_back(i);
 
                 peakGroups.at(jContainingClusterIndex) = jCluster;
 
