@@ -633,6 +633,9 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
                 //else, create a pair
                 dissimilarities.push_back(make_pair(deltaRt, make_pair(i, j)));
 
+                cout << "Dissimilarity: (" << i << ", " << j << "): Peaki="
+                     << peakPairI.second->rt << " PeakJ=" << peakPairJ.second->rt
+                     << " deltaRt=" << deltaRt << endl;
             }
         }
 
