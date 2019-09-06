@@ -666,14 +666,13 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
                 if (intersection.empty()) {
 
-                    //merge all of jCluster into iCluster, if no overlap
-                    iCluster.resize(iCluster.size()+jCluster.size());
-                    iCluster.insert(iCluster.end(), jCluster.begin(), jCluster.end());
+                    vector<unsigned int> unionVector;
+                    set_union(iCluster.begin(), iCluster.end(), jCluster.begin(), jCluster.end(), back_inserter(unionVector));
 
                     jCluster.clear();
                     jCluster.shrink_to_fit();
 
-                    peakGroups.at(iContainingClusterIndex) = iCluster;
+                    peakGroups.at(iContainingClusterIndex) = unionVector;
                     peakGroups.at(jContainingClusterIndex) = jCluster;
                 }
 
