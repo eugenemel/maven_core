@@ -600,9 +600,6 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
         for (unsigned int i = 0; i < eics.size(); i++) {
             EIC *eic = eics.at(i);
             for (auto peak : eic->peaks) {
-
-                cout << "PEAK rt=" << peak.rt << endl;
-
                 peakSamplePairs.at(k) = make_pair(i, peak);
                 k++;
             }
@@ -635,10 +632,6 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
                 //else, create a pair
                 dissimilarities.push_back(make_pair(deltaRt, make_pair(i, j)));
-
-                cout << "Dissimilarity: (" << i << ", " << j << "): Peaki="
-                     << peakPairI.second.rt << " PeakJ=" << peakPairJ.second.rt
-                     << " deltaRt=" << deltaRt << endl;
             }
         }
 
@@ -788,13 +781,24 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
                 vector<unsigned int> intersection;
 
-                sort(firstContainingCluster.begin(), firstContainingCluster.end());
-                sort(secondContainingCluster.begin(), secondContainingCluster.end());
+                vector<unsigned int> firstContainingClusterSamples = vector<unsigned int>(firstContainingCluster.size());
+                vector<unsigned int> secondContainingClusterSamples = vector<unsigned int>(secondContainingCluster.size());
 
-                set_intersection(firstContainingCluster.begin(),
-                                 firstContainingCluster.end(),
-                                 secondContainingCluster.begin(),
-                                 secondContainingCluster.end(),
+                for (unsigned int i = 0; i < firstContainingCluster.size(); i++){
+                    firstContainingClusterSamples.at(i) = peakSamplePairs.at(firstContainingCluster.at(i)).first;
+                }
+
+                for (unsigned int i = 0; i < secondContainingCluster.size(); i++){
+                    secondContainingClusterSamples.at(i) = peakSamplePairs.at(secondContainingCluster.at(i)).first;
+                }
+
+                sort(firstContainingClusterSamples.begin(), firstContainingClusterSamples.end());
+                sort(secondContainingClusterSamples.begin(), secondContainingClusterSamples.end());
+
+                set_intersection(firstContainingClusterSamples.begin(),
+                                 firstContainingClusterSamples.end(),
+                                 secondContainingClusterSamples.begin(),
+                                 secondContainingClusterSamples.end(),
                                  back_inserter(intersection));
 
                 if (intersection.empty()) {
