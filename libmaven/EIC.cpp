@@ -600,6 +600,9 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
         for (unsigned int i = 0; i < eics.size(); i++) {
             EIC *eic = eics.at(i);
             for (auto peak : eic->peaks) {
+
+                cout << "PEAK rt=" << peak.rt << endl;
+
                 peakSamplePairs.at(k) = make_pair(i, &peak);
                 k++;
             }
