@@ -610,7 +610,30 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
         }
 
         // <unsigned int> --> peakSamplePairs index
-        vector<vector<pair<unsigned int, Peak*>>> peakGroups;
+
+        //Initially, all peaks start in their own clusters
+        vector<vector<pair<unsigned int, Peak*>>> peakGroups = vector<vector<pair<unsigned int, Peak*>>> (peakSamplePairs.size());
+        for (unsigned int i = 0; i < peakGroups.size(); i++){
+
+            vector<pair<unsigned int, Peak*>> cluster(1);
+            cluster.at(0) = peakSamplePairs.at(i);
+            peakGroups.at(i) = cluster;
+        }
+
+        //START DEBUGGING BLOCK
+
+       cout << endl;
+       cout << "peakGroups initial status:" << endl;
+       for (auto peakGroup : peakGroups) {
+           if (peakGroup.empty()) continue;
+           cout << "peakGroup Indexes: ";
+           for (auto index : peakGroup){
+               cout << index.first << " ";
+           }
+           cout << endl;
+       }
+
+       //END DEBUGGING BLOCK
 
         int counter = 0;
         for (auto dissimilarity : dissimilarities) {
