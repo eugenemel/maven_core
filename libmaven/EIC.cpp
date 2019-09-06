@@ -244,6 +244,46 @@ void  EIC::getPeakPositions(int smoothWindow) {
     getPeakStatistics();
 }
 
+/**
+ * @brief EIC::getPeakPositionsB
+ * @param smoothWindow
+ * @param intensityThreshold
+ * Use intensity threshold, and write rt information to peak
+ */
+void EIC::getPeakPositionsB(int smoothWindow, float intensityThreshold) {
+
+    unsigned int N = intensity.size();
+    if ( N == 0 ) return;
+
+    computeSpline(smoothWindow);
+    if (spline.size() == 0) return;
+
+    for (unsigned int i=1; i < N-1; i++ ) {
+        if (spline[i] < intensityThreshold ) continue;
+        if (spline[i] > spline[i-1] && spline[i] > spline[i+1]) {
+            Peak* p = addPeak(i);
+            p->rt = rt[i];
+        } else if ( spline[i] > spline[i-1] && spline[i] == spline[i+1] ) {
+            float highpoint = spline[i];
+            while(i<N-1) {
+                i++;
+                if ( spline[i+1] == highpoint) continue;
+                if ( spline[i+1] > highpoint) break;
+                if ( spline[i+1] < highpoint) {
+                    Peak* p = addPeak(i);
+                    p->rt = rt[i];
+                    break;
+                }
+            }
+        }
+    }
+
+    //baseline always uses Gaussian smoothing.
+    computeBaseLine(baselineSmoothingWindow, baselineDropTopX);
+
+    getPeakStatistics();
+}
+
 void EIC::findPeakBounds(Peak& peak) {
 	int apex = peak.pos;
 
@@ -512,7 +552,16 @@ void EIC::removeLowRankGroups( vector<PeakGroup>& groups, unsigned int rankLimit
 	}
 }
 
-vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff) {
+/**
+ * @brief EIC::groupPeaksB
+ * @param eics
+ * @param smoothingWindow
+ * @param maxRtDiff
+ * @param noiseThreshold
+ * this noise threshold applies to the actual raw signal in the files
+ * @return
+ */
+vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, float noiseThreshold) {
 
         cout <<"smoothingWindow=" << smoothingWindow << ", maxRtDiff=" << maxRtDiff << endl;
 
@@ -538,8 +587,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
         int numTotalPeaks = 0;
         for (auto eic : eics){
-            //TODO: remove peaks with intensity that are too low
-            eic->getPeakPositions(smoothingWindow);
+            eic->getPeakPositionsB(smoothingWindow, noiseThreshold);
             numTotalPeaks += eic->peaks.size();
         }
 
