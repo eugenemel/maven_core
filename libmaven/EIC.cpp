@@ -572,6 +572,9 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
                 pair<unsigned int, Peak*> peakPairJ = peakSamplePairs.at(j);
 
+                //skip peaks from the same sample.
+                if (peakPairI.first == peakPairJ.first) continue;
+
                 float deltaRt = peakPairJ.second->rt - peakPairI.second->rt;
 
                 //out of tolerance condition
