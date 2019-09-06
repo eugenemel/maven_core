@@ -261,8 +261,7 @@ void EIC::getPeakPositionsB(int smoothWindow, float intensityThreshold) {
     for (unsigned int i=1; i < N-1; i++ ) {
         if (spline[i] < intensityThreshold ) continue;
         if (spline[i] > spline[i-1] && spline[i] > spline[i+1]) {
-            Peak* p = addPeak(i);
-            p->rt = rt[i];
+            addPeak(i);
         } else if ( spline[i] > spline[i-1] && spline[i] == spline[i+1] ) {
             float highpoint = spline[i];
             while(i<N-1) {
@@ -270,8 +269,7 @@ void EIC::getPeakPositionsB(int smoothWindow, float intensityThreshold) {
                 if ( spline[i+1] == highpoint) continue;
                 if ( spline[i+1] > highpoint) break;
                 if ( spline[i+1] < highpoint) {
-                    Peak* p = addPeak(i);
-                    p->rt = rt[i];
+                    addPeak(i);
                     break;
                 }
             }
