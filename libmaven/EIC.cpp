@@ -603,11 +603,19 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
         // <unsigned int> --> peakSamplePairs index
         vector<vector<unsigned int>> peakGroups;
 
+        int counter = 0;
         for (auto dissimilarity : dissimilarities) {
+
+            cout << "***********************" << endl;
+            cout << "ITERATION " << counter << endl;
+
+            counter++;
 
             //refers to index in peakSamplePair
             unsigned int i = dissimilarity.second.first;
             unsigned int j = dissimilarity.second.second;
+
+            cout << "COMPARE i=" << i << ", j=" << j << endl;
 
             //refers to index in peakGroups
             int iContainingClusterIndex = -1;
@@ -630,6 +638,8 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
                     break;
                 }
             }
+
+            cout << "FOUND iContainingClusterIndex=" << iContainingClusterIndex << ", " << "jContainingClusterIndex=" << jContainingClusterIndex << endl;
 
             /*
              * TODO: based on clusters retrieved, and samples already present,
@@ -657,6 +667,20 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
                 vector<unsigned int> iCluster = peakGroups.at(iContainingClusterIndex);
                 vector<unsigned int> jCluster = peakGroups.at(jContainingClusterIndex);
 
+                cout << "MERGE STEP" << endl;
+
+                cout << "iCluster: ";
+                for (auto ind : iCluster){
+                    cout << ind << " ";
+                }
+                cout << endl;
+
+                cout << "jCluster: ";
+                for (auto ind : jCluster){
+                    cout << ind << " ";
+                }
+                cout << endl;
+
                 vector<unsigned int> intersection;
 
                 sort(iCluster.begin(), iCluster.end());
@@ -676,38 +700,85 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
                     peakGroups.at(jContainingClusterIndex) = jCluster;
                 }
 
+                cout << "Updated iCluster: ";
+                for (auto ind : peakGroups.at(iContainingClusterIndex)){
+                    cout << ind << " ";
+                }
+                cout << endl;
+
+                cout << "Updated jCluster: ";
+                for (auto ind: peakGroups.at(jContainingClusterIndex)){
+                    cout << ind << " ";
+                }
+                cout << endl;
+
             } else if (iContainingClusterIndex != -1 && jContainingClusterIndex == -1) {
 
+                cout << "JOIN ICLUSTER STEP" << endl;
+
                 vector<unsigned int> iCluster = peakGroups.at(iContainingClusterIndex);
+
+                cout << "iCluster: ";
+                for (auto ind : iCluster){
+                    cout << ind << " ";
+                }
+                cout << endl;
+
                 iCluster.resize(iCluster.size()+1);
                 iCluster.insert(iCluster.end(), j);
 
                 peakGroups.at(iContainingClusterIndex) = iCluster;
 
+                cout << "Updated iCluster: ";
+                for (auto ind : peakGroups.at(iContainingClusterIndex)){
+                    cout << ind << " ";
+                }
+                cout << endl;
+
             } else if (iContainingClusterIndex == -1 && jContainingClusterIndex != -1) {
 
+                cout << "JOIN JCLUSTER STEP" << endl;
+
                 vector<unsigned int> jCluster = peakGroups.at(jContainingClusterIndex);
+
+                cout << "jCluster: ";
+                for (auto ind : jCluster){
+                    cout << ind << " ";
+                }
+                cout << endl;
+
                 jCluster.resize(jCluster.size()+1);
                 jCluster.insert(jCluster.end(), i);
 
                 peakGroups.at(jContainingClusterIndex) = jCluster;
 
+                cout << "Updated jCluster: ";
+                for (auto ind: peakGroups.at(jContainingClusterIndex)){
+                    cout << ind << " ";
+                }
+                cout << endl;
+
             } else {
+
+                cout << "NEW CLUSTER STEP" << endl;
 
                 //no existing clusters involving i or j - add a new cluster
                 vector<unsigned int> newCluster = {i, j};
                 peakGroups.push_back(newCluster);
             }
 
-        }
-
-        cerr << "Identified " << peakGroups.size() << " peak groups." << endl;
-        for (auto peakGroup : peakGroups) {
-            cerr << "peakSamplePair Indexes: ";
-            for (auto index : peakGroup){
-                cerr << index << " ";
+            cout << endl;
+            cout << "peakGroups status:" << endl;
+            for (auto peakGroup : peakGroups) {
+                if (peakGroup.empty()) continue;
+                cout << "peakGroup Indexes: ";
+                for (auto index : peakGroup){
+                    cout << index << " ";
+                }
+                cout << endl;
             }
-            cerr << endl;
+
+            cout << "***********************" << endl;
         }
 
         //Translate results and return
