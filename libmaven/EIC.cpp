@@ -591,13 +591,13 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
         cout << "Computed " << dissimilarities.size() << " dissimilarities." << endl;
 
         sort(dissimilarities.begin(), dissimilarities.end(),
-             [](const pair<double, pair<pair<unsigned int, Peak*>, pair<unsigned int, Peak*>>>& lhs,
-                const pair<double, pair<pair<unsigned int, Peak*>, pair<unsigned int, Peak*>>>& rhs){
+             [](const pair<double, pair<unsigned int, unsigned int>>& lhs,
+                const pair<double, pair<unsigned int, unsigned int>>& rhs){
             if (abs(lhs.first - rhs.first) < 1e-6) {
-              if (lhs.second.first.first == rhs.second.first.first) {
-                return lhs.second.second.first < rhs.second.second.first;
+              if (lhs.second.first == rhs.second.first) {
+                return lhs.second.second < rhs.second.second;
               } else {
-                return lhs.second.first.first < rhs.second.first.first;
+                return lhs.second.first < rhs.second.first;
               }
             } else {
               return lhs.first < rhs.first;
