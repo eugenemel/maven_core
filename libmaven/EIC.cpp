@@ -545,7 +545,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
         cerr << "Discovered " << numTotalPeaks << " peaks in " << eics.size() << " samples." << endl;
 
-                //<sample, peak>
+                  //<sample id,   peak>
         vector<pair<unsigned int, Peak*>> peakSamplePairs = vector<pair<unsigned int,Peak*>>(numTotalPeaks);
 
         int k = 0;
@@ -562,17 +562,15 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
                 return lhs.second->rt - rhs.second->rt < 0;
             });
 
-        vector<pair<double, pair<unsigned int, unsigned int>>> dissimilarities;
+        vector<pair<double, pair<pair<unsigned int, Peak*>, pair<unsigned int, Peak*>>>> dissimilarities;
 
         for (unsigned int i = 0; i < peakSamplePairs.size(); i++){
 
             pair<unsigned int, Peak*> peakPairI = peakSamplePairs.at(i);
-            unsigned int sampleOfI = peakPairI.first;
 
             for (unsigned int j = i+1; j < peakSamplePairs.size(); j++) {
 
                 pair<unsigned int, Peak*> peakPairJ = peakSamplePairs.at(j);
-                unsigned int sampleOfJ = peakPairJ.first;
 
                 float deltaRt = peakPairJ.second->rt - peakPairI.second->rt;
 
@@ -582,7 +580,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
                 }
 
                 //else, create a pair
-                dissimilarities.push_back(make_pair(deltaRt, make_pair(sampleOfI, sampleOfJ)));
+                dissimilarities.push_back(make_pair(deltaRt, make_pair(peakPairI, peakPairJ)));
 
             }
         }
@@ -590,12 +588,13 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
         cout << "Computed " << dissimilarities.size() << " dissimilarities." << endl;
 
         sort(dissimilarities.begin(), dissimilarities.end(),
-             [](const pair<double, pair<unsigned int, unsigned int>>& lhs, const pair<double, pair<unsigned int, unsigned int>>& rhs){
+             [](const pair<double, pair<pair<unsigned int, Peak*>, pair<unsigned int, Peak*>>>& lhs,
+                const pair<double, pair<pair<unsigned int, Peak*>, pair<unsigned int, Peak*>>>& rhs){
             if (abs(lhs.first - rhs.first) < 1e-6) {
-              if (lhs.second.first == rhs.second.first) {
-                return lhs.second.second < rhs.second.second;
+              if (lhs.second.first.first == rhs.second.first.first) {
+                return lhs.second.second.first < rhs.second.second.first;
               } else {
-                return lhs.second.first < rhs.second.first;
+                return lhs.second.first.first < rhs.second.first.first;
               }
             } else {
               return lhs.first < rhs.first;
@@ -604,51 +603,58 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
         cout << "Dissimilarities: " << endl;
         for (auto diss : dissimilarities) {
-            cout << "(" << diss.second.first << ", " << diss.second.second << "): " << diss.first << endl;
+            cout << "(" << diss.second.first.first << ", " << diss.second.second.first << "): " << diss.first << endl;
         }
 
         // <unsigned int> --> peakSamplePairs index
-        vector<vector<unsigned int>> peakGroups;
+        vector<vector<pair<unsigned int, Peak*>>> peakGroups;
 
         int counter = 0;
         for (auto dissimilarity : dissimilarities) {
 
+            //START DEBUGGING BLOCK
+
             cout << "***********************" << endl;
             cout << "ITERATION " << counter << endl;
+
+            //END DEBUGGING BLOCK
 
             counter++;
 
             //refers to index in peakSamplePair (sample id)
-            unsigned int i = dissimilarity.second.first;
-            unsigned int j = dissimilarity.second.second;
-
-            cout << "COMPARE i=" << i << ", j=" << j << endl;
+            pair<unsigned int, Peak*> firstPeakPair = dissimilarity.second.first;
+            pair<unsigned int, Peak*> secondPeakPair = dissimilarity.second.second;
 
             //refers to index in peakGroups
-            int iContainingClusterIndex = -1;
-            int jContainingClusterIndex = -1;
+            int firstContainingClusterIndex = -1;
+            int secondContainingClusterIndex = -1;
 
             //check existing clusters
-            for (unsigned int k = 0; k < peakGroups.size(); k++) {
+            for (unsigned int i = 0; i < peakGroups.size(); i++) {
 
-                vector<unsigned int> cluster = peakGroups.at(k);
+                vector<pair<unsigned int, Peak*>> cluster = peakGroups.at(i);
 
                 if (cluster.empty()) continue;
 
-                if (find(cluster.begin(), cluster.end(), i) != cluster.end()) {
-                    iContainingClusterIndex = k;
+                for (auto peakPair : cluster){
+                    if (peakPair == firstPeakPair){
+                        firstContainingClusterIndex = i;
+                    }
+                    if (peakPair == secondPeakPair){
+                        secondContainingClusterIndex = i;
+                    }
                 }
 
-                if (find(cluster.begin(), cluster.end(), j) != cluster.end()) {
-                    jContainingClusterIndex = k;
-                }
-
-                if (iContainingClusterIndex != -1 && jContainingClusterIndex != -1) {
+                if (firstContainingClusterIndex != -1 && secondContainingClusterIndex != -1) {
                     break;
                 }
             }
 
-            cout << "FOUND iContainingClusterIndex=" << iContainingClusterIndex << ", " << "jContainingClusterIndex=" << jContainingClusterIndex << endl;
+            //START DEBUGGING BLOCK
+
+            cout << "FOUND firstContainingClusterIndex=" << firstContainingClusterIndex << ", " << "secondContainingClusterIndex=" << secondContainingClusterIndex << endl;
+
+            //END DEBUGGING BLOCK
 
             /*
              * TODO: based on clusters retrieved, and samples already present,
@@ -670,128 +676,175 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
              * meanwhile, is this even the issue? what exactly is happening here?
             */
 
-            //i and j are involved in clusters.
+            //first and second are involved in clusters.
             //If the cluster are different, merge the clusters together.
             //If the clusters are the same, they are already merged together.
-            if (iContainingClusterIndex != -1 && jContainingClusterIndex != -1 && iContainingClusterIndex != jContainingClusterIndex) {
+            if (firstContainingClusterIndex != -1 && secondContainingClusterIndex != -1 && firstContainingClusterIndex != secondContainingClusterIndex) {
 
                 //retrieve clusters
-                vector<unsigned int> iCluster = peakGroups.at(iContainingClusterIndex);
-                vector<unsigned int> jCluster = peakGroups.at(jContainingClusterIndex);
+                vector<pair<unsigned int, Peak*>> firstContainingCluster = peakGroups.at(firstContainingClusterIndex);
+                vector<pair<unsigned int, Peak*>> secondContainingCluster = peakGroups.at(secondContainingClusterIndex);
+
+                //START DEBUGGING BLOCK
 
                 cout << "MERGE STEP" << endl;
 
                 cout << "iCluster: ";
-                for (auto ind : iCluster){
-                    cout << ind << " ";
+                for (auto ind : firstContainingCluster){
+                    cout << ind.first << " ";
                 }
                 cout << endl;
 
                 cout << "jCluster: ";
-                for (auto ind : jCluster){
-                    cout << ind << " ";
+                for (auto ind : secondContainingCluster){
+                    cout << ind.first << " ";
                 }
                 cout << endl;
+
+                //END DEBUGGING BLOCK
+
+                //check to see that merging the two clusters would not lead to a cluster with duplicate sample ids.
+
+                vector<unsigned int> firstContainingClusterSampleIds = vector<unsigned int>(firstContainingCluster.size());
+                for (unsigned int i = 0; i < firstContainingCluster.size(); i++){
+                    firstContainingClusterSampleIds.at(i) = firstContainingCluster.at(i).first;
+                }
+
+                vector<unsigned int> secondContainingClusterSampleIds = vector<unsigned int>(secondContainingCluster.size());
+                for (unsigned int i = 0; i <secondContainingCluster.size(); i++){
+                    secondContainingClusterSampleIds.at(i) = secondContainingCluster.at(i).first;
+                }
 
                 vector<unsigned int> intersection;
 
-                sort(iCluster.begin(), iCluster.end());
-                sort(jCluster.begin(), jCluster.end());
+                sort(firstContainingClusterSampleIds.begin(), firstContainingClusterSampleIds.end());
+                sort(secondContainingClusterSampleIds.begin(), secondContainingClusterSampleIds.end());
 
-                set_intersection(iCluster.begin(), iCluster.end(), jCluster.begin(), jCluster.end(), back_inserter(intersection));
+                set_intersection(firstContainingClusterSampleIds.begin(),
+                                 firstContainingClusterSampleIds.end(),
+                                 secondContainingClusterSampleIds.begin(),
+                                 secondContainingClusterSampleIds.end(),
+                                 back_inserter(intersection));
 
                 if (intersection.empty()) {
+                    //merge will not lead to multiple peaks from the same sample
 
-                    vector<unsigned int> unionVector;
-                    set_union(iCluster.begin(), iCluster.end(), jCluster.begin(), jCluster.end(), back_inserter(unionVector));
+                    firstContainingCluster.insert(firstContainingCluster.end(), secondContainingCluster.begin(), secondContainingCluster.end());
 
-                    jCluster.clear();
-                    jCluster.shrink_to_fit();
+                    secondContainingCluster.clear();
+                    secondContainingCluster.shrink_to_fit();
 
-                    peakGroups.at(iContainingClusterIndex) = unionVector;
-                    peakGroups.at(jContainingClusterIndex) = jCluster;
+                    peakGroups.at(firstContainingClusterIndex) = firstContainingCluster;
+                    peakGroups.at(secondContainingClusterIndex) = secondContainingCluster;
                 }
 
+                //START DEBUGGING BLOCK
+
+                //TODO: finish updating this
                 cout << "Updated iCluster: ";
-                for (auto ind : peakGroups.at(iContainingClusterIndex)){
-                    cout << ind << " ";
+                for (auto ind : peakGroups.at(firstContainingClusterIndex)){
+                    cout << ind.first << " ";
                 }
                 cout << endl;
 
                 cout << "Updated jCluster: ";
-                for (auto ind: peakGroups.at(jContainingClusterIndex)){
-                    cout << ind << " ";
+                for (auto ind: peakGroups.at(secondContainingClusterIndex)){
+                    cout << ind.first << " ";
                 }
                 cout << endl;
 
+                //END DEBUGGING BLOCK
+
             //j joins cluster i
-            } else if (iContainingClusterIndex != -1 && jContainingClusterIndex == -1) {
+            } else if (firstContainingClusterIndex != -1 && secondContainingClusterIndex == -1) {
+
+                vector<pair<unsigned int, Peak*>> firstContainingCluster  = peakGroups.at(firstContainingClusterIndex);
+
+                //START DEBUGGING BLOCK
 
                 cout << "JOIN ICLUSTER STEP" << endl;
 
-                vector<unsigned int> iCluster = peakGroups.at(iContainingClusterIndex);
-
-                cout << "iCluster: ";
-                for (auto ind : iCluster){
-                    cout << ind << " ";
+                cout << "firstContainingCluster: ";
+                for (auto ind : firstContainingCluster){
+                    cout << ind.first << " ";
                 }
                 cout << endl;
 
-                iCluster.push_back(j);
+                //END DEBUGGING BLOCK
 
-                peakGroups.at(iContainingClusterIndex) = iCluster;
+                firstContainingCluster.push_back(firstPeakPair);
+
+                //TODO: finish this
+
+                peakGroups.at(firstContainingClusterIndex) = firstContainingCluster;
+
+                //START DEBUGGING BLOCK
 
                 cout << "Updated iCluster: ";
-                for (auto ind : peakGroups.at(iContainingClusterIndex)){
-                    cout << ind << " ";
+                for (auto ind : peakGroups.at(firstContainingClusterIndex)){
+                    cout << ind.first << " ";
                 }
                 cout << endl;
 
+                //END DEBUGGING BLOCK
+
             //i joins cluster j
-            } else if (iContainingClusterIndex == -1 && jContainingClusterIndex != -1) {
+            } else if (firstContainingClusterIndex == -1 && secondContainingClusterIndex != -1) {
+
+                vector<pair<unsigned int, Peak*>> secondContainingCluster = peakGroups.at(secondContainingClusterIndex);
+
+                 //START DEBUGGING BLOCK
 
                 cout << "JOIN JCLUSTER STEP" << endl;
 
-                vector<unsigned int> jCluster = peakGroups.at(jContainingClusterIndex);
-
-                cout << "jCluster: ";
-                for (auto ind : jCluster){
-                    cout << ind << " ";
+                cout << "secondContainingCluster: ";
+                for (auto ind : secondContainingCluster){
+                    cout << ind.first << " ";
                 }
                 cout << endl;
 
-                jCluster.push_back(i);
+                //END DEBUGGING BLOCK
 
-                peakGroups.at(jContainingClusterIndex) = jCluster;
+                secondContainingCluster.push_back(secondPeakPair);
 
-                cout << "Updated jCluster: ";
-                for (auto ind: peakGroups.at(jContainingClusterIndex)){
-                    cout << ind << " ";
+                peakGroups.at(secondContainingClusterIndex) = secondContainingCluster;
+
+                //START DEBUGGING BLOCK
+
+                cout << "Updated secondContainingCluster: ";
+                for (auto ind: peakGroups.at(secondContainingClusterIndex)){
+                    cout << ind.first << " ";
                 }
                 cout << endl;
+
+                //END DEBUGGING BLOCK
 
             //i and j are not part of any extant cluster, they merge together to create a new cluster.
-            } else if (iContainingClusterIndex == -1 && jContainingClusterIndex == -1){
+            } else if (firstContainingClusterIndex == -1 && secondContainingClusterIndex == -1){
 
+                //START DEBUGGING BLOCK
                 cout << "NEW CLUSTER STEP" << endl;
+                //END DEBUGGING BLOCK
 
                 //no existing clusters involving i or j - add a new cluster
-                vector<unsigned int> newCluster = {i, j};
+                vector<pair<unsigned int, Peak*>> newCluster = {firstPeakPair, secondPeakPair};
                 peakGroups.push_back(newCluster);
             }
 
+             //START DEBUGGING BLOCK
             cout << endl;
             cout << "peakGroups status:" << endl;
             for (auto peakGroup : peakGroups) {
                 if (peakGroup.empty()) continue;
                 cout << "peakGroup Indexes: ";
                 for (auto index : peakGroup){
-                    cout << index << " ";
+                    cout << index.first << " ";
                 }
                 cout << endl;
             }
 
             cout << "***********************" << endl;
+            //END DEBUGGING BLOCK
         }
 
         //Translate results and return
@@ -802,16 +855,17 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
             PeakGroup grp;
             grp.groupId = static_cast<int>(i);
 
-            for (auto index : peakGroups.at(i)) {
-                pair<unsigned int, Peak*> peakSamplePair = peakSamplePairs.at(index);
-                grp.addPeak(*(peakSamplePair.second));
+            for (auto peakPair : peakGroups.at(i)) {
+                grp.addPeak(*(peakPair.second));
             }
 
             grp.groupStatistics();
             pgroups.push_back(grp);
         }
 
+        //START DEBUGGING BLOCK
         cerr << "Returning " << pgroups.size() << " peak groups." << endl;
+        //END DEBUGGING BLOCK
 
         return(pgroups);
 }
