@@ -546,10 +546,10 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
         cerr << "Discovered " << numTotalPeaks << " peaks in " << eics.size() << " samples." << endl;
 
                 //<sample, peak>
-        vector<pair<int, Peak*>> peakSamplePairs = vector<pair<int,Peak*>>(numTotalPeaks);
+        vector<pair<unsigned int, Peak*>> peakSamplePairs = vector<pair<unsigned int,Peak*>>(numTotalPeaks);
 
         int k = 0;
-        for (int i = 0; i < eics.size(); i++) {
+        for (unsigned int i = 0; i < eics.size(); i++) {
             EIC *eic = eics.at(i);
             for (auto peak : eic->peaks) {
                 peakSamplePairs.at(k) = make_pair(i, &peak);
@@ -566,13 +566,13 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
         for (unsigned int i = 0; i < peakSamplePairs.size(); i++){
 
-            pair<int, Peak*> peakPairI = peakSamplePairs.at(i);
-            int sampleOfI = peakPairI.first;
+            pair<unsigned int, Peak*> peakPairI = peakSamplePairs.at(i);
+            unsigned int sampleOfI = peakPairI.first;
 
             for (unsigned int j = i+1; j < peakSamplePairs.size(); j++) {
 
-                pair<int, Peak*> peakPairJ = peakSamplePairs.at(j);
-                int sampleOfJ = peakPairJ.first;
+                pair<unsigned int, Peak*> peakPairJ = peakSamplePairs.at(j);
+                unsigned int sampleOfJ = peakPairJ.first;
 
                 float deltaRt = peakPairJ.second->rt - peakPairI.second->rt;
 
@@ -587,7 +587,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
             }
         }
 
-        cerr << "Computed " << dissimilarities.size() << " dissimilarities." << endl;
+        cout << "Computed " << dissimilarities.size() << " dissimilarities." << endl;
 
         sort(dissimilarities.begin(), dissimilarities.end(),
              [](const pair<double, pair<unsigned int, unsigned int>>& lhs, const pair<double, pair<unsigned int, unsigned int>>& rhs){
@@ -601,6 +601,11 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
               return lhs.first < rhs.first;
             }
         });
+
+        cout << "Dissimilarities: " << endl;
+        for (auto diss : dissimilarities) {
+            cout << "(" << diss.second.first << ", " << diss.second.second << "): " << diss.first << endl;
+        }
 
         // <unsigned int> --> peakSamplePairs index
         vector<vector<unsigned int>> peakGroups;
