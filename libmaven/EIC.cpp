@@ -557,10 +557,14 @@ void EIC::removeLowRankGroups( vector<PeakGroup>& groups, unsigned int rankLimit
  * @param maxRtDiff
  * @param noiseThreshold
  * this noise threshold applies to the actual raw signal in the files
+ *
  * @return
+ * peaks are picked in individual EICs, and grouped together based on similarity in RT.
+ *
+ * peaks are not retained if they are below the noiseThreshold.
+ * Note that the smoothed value is compared to the noiseThreshold, not the raw intensity.
  */
 vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, float noiseThreshold) {
-
 
         //TODO: check that this flag is not too slow
         bool debug = false;
