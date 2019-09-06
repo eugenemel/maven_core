@@ -689,13 +689,13 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
                 cout << "MERGE STEP" << endl;
 
-                cout << "iCluster: ";
+                cout << "firstContainingCluster: ";
                 for (auto ind : firstContainingCluster){
                     cout << ind.first << " ";
                 }
                 cout << endl;
 
-                cout << "jCluster: ";
+                cout << "secondContainingCluster: ";
                 for (auto ind : secondContainingCluster){
                     cout << ind.first << " ";
                 }
@@ -741,13 +741,13 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
                 //START DEBUGGING BLOCK
 
                 //TODO: finish updating this
-                cout << "Updated iCluster: ";
+                cout << "Updated firstContainingCluster: ";
                 for (auto ind : peakGroups.at(firstContainingClusterIndex)){
                     cout << ind.first << " ";
                 }
                 cout << endl;
 
-                cout << "Updated jCluster: ";
+                cout << "Updated secondContainingCluster: ";
                 for (auto ind: peakGroups.at(secondContainingClusterIndex)){
                     cout << ind.first << " ";
                 }
@@ -755,14 +755,14 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
                 //END DEBUGGING BLOCK
 
-            //j joins cluster i
+            //secondPeakPair joins firstContainingCluster
             } else if (firstContainingClusterIndex != -1 && secondContainingClusterIndex == -1) {
 
                 vector<pair<unsigned int, Peak*>> firstContainingCluster  = peakGroups.at(firstContainingClusterIndex);
 
                 //START DEBUGGING BLOCK
 
-                cout << "JOIN ICLUSTER STEP" << endl;
+                cout << "JOIN FIRST CONTAINING CLUSTER STEP" << endl;
 
                 cout << "firstContainingCluster: ";
                 for (auto ind : firstContainingCluster){
@@ -772,7 +772,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
                 //END DEBUGGING BLOCK
 
-                firstContainingCluster.push_back(firstPeakPair);
+                firstContainingCluster.push_back(secondPeakPair);
 
                 //TODO: finish this
 
@@ -780,7 +780,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
                 //START DEBUGGING BLOCK
 
-                cout << "Updated iCluster: ";
+                cout << "Updated firstContainingCluster: ";
                 for (auto ind : peakGroups.at(firstContainingClusterIndex)){
                     cout << ind.first << " ";
                 }
@@ -788,14 +788,14 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
                 //END DEBUGGING BLOCK
 
-            //i joins cluster j
+            //firstPeakPair joins secondContainingCluster
             } else if (firstContainingClusterIndex == -1 && secondContainingClusterIndex != -1) {
 
                 vector<pair<unsigned int, Peak*>> secondContainingCluster = peakGroups.at(secondContainingClusterIndex);
 
                  //START DEBUGGING BLOCK
 
-                cout << "JOIN JCLUSTER STEP" << endl;
+                cout << "JOIN SECOND CONTAINING CLUSTER STEP" << endl;
 
                 cout << "secondContainingCluster: ";
                 for (auto ind : secondContainingCluster){
@@ -805,7 +805,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
                 //END DEBUGGING BLOCK
 
-                secondContainingCluster.push_back(secondPeakPair);
+                secondContainingCluster.push_back(firstPeakPair);
 
                 peakGroups.at(secondContainingClusterIndex) = secondContainingCluster;
 
