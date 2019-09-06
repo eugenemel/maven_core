@@ -663,8 +663,9 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
              * meanwhile, is this even the issue? what exactly is happening here?
             */
 
-            //if i and j are already involved in different clusters, try to merge them.
-            //if i and j are already involved in the same cluster, they are already merged together.
+            //i and j are involved in clusters.
+            //If the cluster are different, merge the clusters together.
+            //If the clusters are the same, they are already merged together.
             if (iContainingClusterIndex != -1 && jContainingClusterIndex != -1 && iContainingClusterIndex != jContainingClusterIndex) {
 
                 //retrieve clusters
@@ -716,6 +717,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
                 }
                 cout << endl;
 
+            //j joins cluster i
             } else if (iContainingClusterIndex != -1 && jContainingClusterIndex == -1) {
 
                 cout << "JOIN ICLUSTER STEP" << endl;
@@ -738,6 +740,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
                 }
                 cout << endl;
 
+            //i joins cluster j
             } else if (iContainingClusterIndex == -1 && jContainingClusterIndex != -1) {
 
                 cout << "JOIN JCLUSTER STEP" << endl;
@@ -760,7 +763,8 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
                 }
                 cout << endl;
 
-            } else {
+            //i and j are not part of any extant cluster, they merge together to create a new cluster.
+            } else if (iContainingClusterIndex == -1 && jContainingClusterIndex == -1){
 
                 cout << "NEW CLUSTER STEP" << endl;
 
