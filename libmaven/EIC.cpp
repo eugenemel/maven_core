@@ -567,10 +567,12 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
         for (unsigned int i = 0; i < peakSamplePairs.size(); i++){
 
             pair<int, Peak*> peakPairI = peakSamplePairs.at(i);
+            int sampleOfI = peakPairI.first;
 
             for (unsigned int j = i+1; j < peakSamplePairs.size(); j++) {
 
                 pair<int, Peak*> peakPairJ = peakSamplePairs.at(j);
+                int sampleOfJ = peakPairJ.first;
 
                 float deltaRt = peakPairJ.second->rt - peakPairI.second->rt;
 
@@ -580,7 +582,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
                 }
 
                 //else, create a pair
-                dissimilarities.push_back(make_pair(deltaRt, make_pair(i, j)));
+                dissimilarities.push_back(make_pair(deltaRt, make_pair(sampleOfI, sampleOfJ)));
 
             }
         }
@@ -611,7 +613,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
             counter++;
 
-            //refers to index in peakSamplePair
+            //refers to index in peakSamplePair (sample id)
             unsigned int i = dissimilarity.second.first;
             unsigned int j = dissimilarity.second.second;
 
