@@ -562,7 +562,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
                 return lhs.second->rt - rhs.second->rt < 0;
             });
 
-        vector<pair<double, pair<pair<unsigned int, Peak*>, pair<unsigned int, Peak*>>>> dissimilarities;
+        vector<pair<double, pair<unsigned int, unsigned int>>> dissimilarities;
 
         for (unsigned int i = 0; i < peakSamplePairs.size(); i++){
 
@@ -583,7 +583,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
                 }
 
                 //else, create a pair
-                dissimilarities.push_back(make_pair(deltaRt, make_pair(peakPairI, peakPairJ)));
+                dissimilarities.push_back(make_pair(deltaRt, make_pair(i, j)));
 
             }
         }
@@ -606,14 +606,14 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
         cout << "Dissimilarities: " << endl;
         for (auto diss : dissimilarities) {
-            cout << "(" << diss.second.first.first << ", " << diss.second.second.first << "): " << diss.first << endl;
+            cout << "(" << diss.second.first << ", " << diss.second.second << "): " << diss.first << endl;
         }
 
         // <unsigned int> --> peakSamplePairs index
 
         //Initially, all peaks start in their own clusters
         vector<vector<pair<unsigned int, Peak*>>> peakGroups = vector<vector<pair<unsigned int, Peak*>>> (peakSamplePairs.size());
-        for (unsigned int i = 0; i < peakGroups.size(); i++){
+        for (unsigned int i = 0; i < peakSamplePairs.size(); i++){
 
             vector<pair<unsigned int, Peak*>> cluster(1);
             cluster.at(0) = peakSamplePairs.at(i);
@@ -648,8 +648,8 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
             counter++;
 
             //refers to index in peakSamplePair (sample id)
-            pair<unsigned int, Peak*> firstPeakPair = dissimilarity.second.first;
-            pair<unsigned int, Peak*> secondPeakPair = dissimilarity.second.second;
+            pair<unsigned int, Peak*> firstPeakPair = peakSamplePairs.at(dissimilarity.second.first);
+            pair<unsigned int, Peak*> secondPeakPair = peakSamplePairs.at(dissimilarity.second.second);
 
             //refers to index in peakGroups
             int firstContainingClusterIndex = -1;
@@ -664,10 +664,10 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
                 for (auto peakPair : cluster){
                     if (peakPair == firstPeakPair){
-                        firstContainingClusterIndex = i;
+                        firstContainingClusterIndex = static_cast<int>(i);
                     }
                     if (peakPair == secondPeakPair){
-                        secondContainingClusterIndex = i;
+                        secondContainingClusterIndex = static_cast<int>(i);
                     }
                 }
 
@@ -702,7 +702,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
              * meanwhile, is this even the issue? what exactly is happening here?
             */
 
-            //first and second are involved in clusters.
+            //both the first and second peaks are already involved in clusters.
             //If the cluster are different, merge the clusters together.
             //If the clusters are the same, they are already merged together.
             if (firstContainingClusterIndex != -1 && secondContainingClusterIndex != -1 && firstContainingClusterIndex != secondContainingClusterIndex) {
@@ -781,6 +781,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
                 //END DEBUGGING BLOCK
 
+            //only the first peak is involved in a cluster already.
             //secondPeakPair joins firstContainingCluster
             } else if (firstContainingClusterIndex != -1 && secondContainingClusterIndex == -1) {
 
@@ -814,6 +815,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
                 //END DEBUGGING BLOCK
 
+            //only the second peak is involved in a cluster already.
             //firstPeakPair joins secondContainingCluster
             } else if (firstContainingClusterIndex == -1 && secondContainingClusterIndex != -1) {
 
@@ -845,7 +847,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
                 //END DEBUGGING BLOCK
 
-            //i and j are not part of any extant cluster, they merge together to create a new cluster.
+            //both the first and second peak are not part of any extant cluster, they merge together to create a new cluster.
             } else if (firstContainingClusterIndex == -1 && secondContainingClusterIndex == -1){
 
                 //START DEBUGGING BLOCK
