@@ -292,8 +292,8 @@ void EIC::findPeakBounds(Peak& peak) {
 
 	unsigned int N = intensity.size();
 	if (N==0) return;
-	if (spline.size())   return;
-	if (baseline.size()) return;
+    if (spline.empty())   return;
+    if (baseline.empty()) return;
 
 	//cerr << "findPeakBounds:" << apex << " " << rt[apex] << endl;
 
@@ -489,6 +489,7 @@ vector<mzPoint> EIC::getIntensityVector(Peak& peak) {
 }
 
 
+//TODO: verify that this is thread-safe
 void EIC::checkGaussianFit(Peak& peak) { 
 
 		peak.gaussFitSigma=0;
