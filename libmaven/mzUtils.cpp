@@ -526,14 +526,14 @@ float correlation(const vector<float>&x, const vector<float>&y) {
 
 
 /*peak fitting function*/
-void gaussFit(const vector<float>&ycoord, float* sigma, float* R2) {  
+pair<float, float> gaussFit(const vector<float>&ycoord) {
 
         float s = 20;
 		float min_s = 0;
-		float minR = 1e99;
+        float minR = FLT_MAX;
 
 		//find best fit
-		if (ycoord.size()<3) return;
+        if (ycoord.size()<3) return make_pair(min_s, minR);
 		vector<float>yobs=ycoord;
 		int ysize=yobs.size();
 		int midpoint  = int(ysize/2);
@@ -561,7 +561,7 @@ void gaussFit(const vector<float>&ycoord, float* sigma, float* R2) {
         bool converged = false; 
 		int ittr = 0; 
 
-		if (greaterZeroCount <= 3 ) return;
+        if (greaterZeroCount <= 3 ) return make_pair(min_s, minR);
 		while (!converged ) {
 				if ( ittr++ > 20 ) break;
                 float Rsqr=0;
@@ -573,9 +573,11 @@ void gaussFit(const vector<float>&ycoord, float* sigma, float* R2) {
 				s /= 1.25;
 		}
 
-		*sigma = min_s;
-		*R2 = minR/(ysize*ysize);	//corrected R2
-        //cerr << "fit() s=" << *sigma << " R2=" << *R2 << endl;
+//		*sigma = min_s;
+//		*R2 = minR/(ysize*ysize);	//corrected R2
+//        //cerr << "fit() s=" << *sigma << " R2=" << *R2 << endl;
+
+        return make_pair(min_s, minR/(ysize*ysize));
 	}
 
 

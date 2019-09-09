@@ -445,8 +445,8 @@ void  EIC::getPeakDetails(Peak& peak) {
 	//cerr << peak.peakMz << " " << peak.medianMz << " " << bitstring << endl;
 
 	mzPattern p(bitstring);
-	if (peak.width >= 5) peak.symmetry =  p.longestSymmetry('+','-');
-	checkGaussianFit(peak);
+    if (peak.width >= 5) peak.symmetry =  p.longestSymmetry('+','-');
+    checkGaussianFit(peak);
 }
 
 
@@ -509,8 +509,12 @@ void EIC::checkGaussianFit(Peak& peak) {
 
 		int k=0;
 		for(; i<=j; i++) { pints[k]=intensity[i]; k++; }
-		mzUtils::gaussFit(pints, &(peak.gaussFitSigma), &(peak.gaussFitR2));
-		//cerr << "\tcheckGaussianFit(): Best Sigma=" << peak.gaussFitSigma <<  " minRsqr=" << peak.gaussFitR2 << endl;
+
+        pair<float, float> gaussFitParams = mzUtils::gaussFit(pints);
+        peak.gaussFitSigma = gaussFitParams.first;
+        peak.gaussFitR2 = gaussFitParams.second;
+
+        //cerr << "\tcheckGaussianFit(): Best Sigma=" << peak.gaussFitSigma <<  " minRsqr=" << peak.gaussFitR2 << endl;
 }
 
 
@@ -943,7 +947,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 }
 
 vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff) { 
-	
+
 	//list filled and return by this function
 	vector<PeakGroup> pgroups;
 
