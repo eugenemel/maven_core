@@ -568,8 +568,7 @@ pair<float, float> gaussFit(const vector<float>&ycoord) {
 				for(int i=0; i < ysize; i++ )  { Rsqr += POW2(exp(-0.5*POW2(x[i]/s)) - yobs[i]); }
          //       cerr << "\t\ts=" << s << " Rsqr=" << Rsqr << endl;
 				if ( Rsqr < minR || ittr == 0 ) { minR = Rsqr; min_s = s; }
-				else if ( Rsqr > minR ) break;
-				else if ( Rsqr - minR == 0 ) break;
+                else if ( Rsqr >= minR ) break;
 				s /= 1.25;
 		}
 
