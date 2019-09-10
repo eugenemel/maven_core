@@ -511,9 +511,6 @@ void EIC::checkGaussianFit(Peak& peak) {
 		int k=0;
 		for(; i<=j; i++) { pints[k]=intensity[i]; k++; }
 
-        float defaultSigma = 0;
-        float defaultR2 = 0.03;
-
         //   <sigma, minR>
         pair<float, float> gaussFitParams = mzUtils::gaussFit(pints, 0, 0.03);
 
