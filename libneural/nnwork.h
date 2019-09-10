@@ -24,7 +24,7 @@
 #define _NNWORK_H
 #include "neuron.h"
 #include <string.h>
-
+#include <vector>
 
 #define ALL 0
 #define NN_INPUT 1
@@ -59,6 +59,10 @@ public:
 
 	void run (float [], float []);
 	
+//Threading-safe NN
+
+    std::vector<float> runMultiThreaded(std::vector<float> data);
+
 // Arg for load and save is just the filename.
 
 	int load (char*);

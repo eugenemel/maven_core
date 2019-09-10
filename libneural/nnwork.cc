@@ -211,6 +211,9 @@ void nnwork::train (float data [], float desired [], float max_MSE, float eta)
 // boolean output but could be different) goes into result. Naturally, data
 // and result are the same size as the input and output vectors respectively.
 
+// WARNING: only use in a single-threaded context. Otherwise, float data [] is
+// converted to a float*, which is not thread-safe!
+
 void nnwork::run (float data [], float result [])
 {
 	int i, j, k;
@@ -244,6 +247,39 @@ void nnwork::run (float data [], float result [])
 	}
 
 	//for (i = 0; i < input_size; i++) cerr << data[i] << " "; cerr << sigmoid(sum) << endl;
+}
+
+vector<float> nnwork::runMultiThreaded(vector<float> data) {
+
+    vector<float> result = vector<float>(output_size, 0);
+
+    unsigned int i, j, k;
+    float sum;
+
+
+    for (j = 0; j < hidden_size; j++) {
+
+        sum = 0;
+
+        // Calculate the output valur
+        for (i = 0; i < input_size; i++){
+            sum += hidden_nodes -> nodes[j].weights[i] * data.at(i);
+        }
+
+        hidden_nodes -> nodes [j].output = sigmoid(sum);
+    }
+
+    for (k = 0; k < output_size; k++) {
+        sum = 0;
+
+        // Calculate the output value
+        for (j = 0; j < hidden_size; j++)
+            sum += output_nodes -> nodes[k].weights[j] * hidden_nodes -> nodes[j].output;
+
+        result.at(k) = sigmoid (sum);
+    }
+
+    return result;
 }
 
 /* 
