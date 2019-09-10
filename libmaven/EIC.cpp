@@ -572,7 +572,7 @@ void EIC::removeLowRankGroups( vector<PeakGroup>& groups, unsigned int rankLimit
 vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, float noiseThreshold) {
 
         //TODO: check that this flag is not too slow
-        bool debug = false;
+        bool debug = true;
 
         if (debug){
             cout <<"smoothingWindow=" << smoothingWindow << ", maxRtDiff=" << maxRtDiff << endl;
