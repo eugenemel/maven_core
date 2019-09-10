@@ -495,6 +495,10 @@ vector<mzPoint> EIC::getIntensityVector(Peak& peak) {
 //TODO: verify that this is thread-safe
 void EIC::checkGaussianFit(Peak& peak) { 
 
+        //set default values for fit (in case fit cannot be assessed).
+        peak.gaussFitSigma = 0;
+        peak.gaussFitR2 = 0.03;
+
 		int left =  peak.pos - peak.minpos;
 		int right = peak.maxpos - peak.pos;
 		if (left <= 0 || right <= 0 ) return;
@@ -512,7 +516,7 @@ void EIC::checkGaussianFit(Peak& peak) {
 		for(; i<=j; i++) { pints[k]=intensity[i]; k++; }
 
         //   <sigma, minR>
-        pair<float, float> gaussFitParams = mzUtils::gaussFit(pints, 0, 0.03);
+        pair<float, float> gaussFitParams = mzUtils::gaussFit(pints, peak.gaussFitSigma, peak.gaussFitR2);
 
         peak.gaussFitSigma = gaussFitParams.first;
         peak.gaussFitR2 = gaussFitParams.second;
