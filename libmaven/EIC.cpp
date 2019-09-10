@@ -252,6 +252,9 @@ void  EIC::getPeakPositions(int smoothWindow) {
  */
 void EIC::getPeakPositionsB(int smoothWindow, float intensityThreshold) {
 
+    //Need to explicitly clear out peaks, else an extra peak will be added with each getPeaks() call.
+    peaks.clear();
+
     unsigned int N = intensity.size();
     if ( N == 0 ) return;
 
@@ -572,7 +575,7 @@ void EIC::removeLowRankGroups( vector<PeakGroup>& groups, unsigned int rankLimit
 vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, float noiseThreshold) {
 
         //TODO: check that this flag is not too slow
-        bool debug = true;
+        bool debug = false;
 
         if (debug){
             cout <<"smoothingWindow=" << smoothingWindow << ", maxRtDiff=" << maxRtDiff << endl;
