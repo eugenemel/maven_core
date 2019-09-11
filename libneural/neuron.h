@@ -28,15 +28,16 @@
 #define _NEURON_H
 #define NN_INPUT 1
 #define NN_NONINPUT 0
+#include <vector>
 
 struct neuron {
-	float *weights;
+    std::vector<float> weights;
 	float output;
 };
 
 class nnlayer {
 public:
-	neuron *nodes;
+    std::vector<neuron> nodes;
 	nnlayer (int, int);		// Number of nodes in the layer.
 	~nnlayer ();
 private:

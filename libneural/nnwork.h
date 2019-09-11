@@ -69,8 +69,8 @@ public:
 	int save (char*);
 
 private:
-	nnlayer *output_nodes;
-	nnlayer *hidden_nodes;
+    nnlayer *output_nodes;
+    nnlayer *hidden_nodes;
 	int input_size;
 	int output_size;
 	int hidden_size;

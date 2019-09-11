@@ -36,23 +36,25 @@ nnlayer::nnlayer (int dimension, int num_weights)
 {
 	size = dimension;
 	weights = num_weights;
-	nodes = new neuron [size];
-	assert (nodes);
+    nodes = std::vector<neuron>(static_cast<unsigned long>(size)); //OLD: new neuron [size];
+//OLD: assert (nodes);
 	
 	for (int j = 0; j < size; j++) {
-		nodes [j].weights = new float [weights];
-		assert (nodes [j].weights);
-		for (int i = 0; i < weights; i++)
-			nodes [j].weights [i] = 0.5 - rand () / float (RAND_MAX);
+        nodes.at(j).weights = std::vector<float>(static_cast<unsigned long>(weights));//OLD nodes [j].weights = new float [weights];
+        //OLD assert (nodes [j].weights);
+
+        for (unsigned int i = 0; i < weights; i++)
+            nodes.at(j).weights.at(i) = 0.5 - rand() / float (RAND_MAX);
 	}
 }
 
+//OLD: destructor necessary to clean up pointers.
 // Destructor. 
 
-nnlayer::~nnlayer ()
-{
-	for (int i = 0; i < size; i++)
-		delete [] nodes [i].weights;
+//nnlayer::~nnlayer ()
+//{
+//	for (int i = 0; i < size; i++)
+//		delete [] nodes [i].weights;
 
-	delete [] nodes;
-}
+//	delete [] nodes;
+//}

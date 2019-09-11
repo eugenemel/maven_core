@@ -47,7 +47,7 @@ nnwork::nnwork (int input, int hidden, int output)
 	input_size = input;
 	hidden_size = hidden;
 	output_size = output;
-	srand (time (0));
+    srand (static_cast<unsigned int>(time (nullptr)));
 	
 	hidden_nodes = new nnlayer (hidden_size, input_size);
 	assert (hidden_nodes);
