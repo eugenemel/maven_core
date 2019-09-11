@@ -39,7 +39,7 @@ class nnlayer {
 public:
     std::vector<neuron> nodes;
 	nnlayer (int, int);		// Number of nodes in the layer.
-	~nnlayer ();
+    //OLD: remove explicitly defined destructor ~nnlayer();
 private:
 	int size;
 	int weights;
