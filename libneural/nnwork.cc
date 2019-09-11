@@ -277,6 +277,7 @@ vector<float> nnwork::runMultiThreaded(vector<float> data) {
 
     vector<float> dataSpecificOutputNodes = vector<float>(hidden_size, 0);
 
+    cout << "dataSpecificOutputNodes: ";
     for (j = 0; j < hidden_size; j++) {
 
         sum = 0;
@@ -296,8 +297,11 @@ vector<float> nnwork::runMultiThreaded(vector<float> data) {
 
         //NEW APPROACH
         dataSpecificOutputNodes.at(j) = sigmoid(sum);
+        cout << "j=" << j << ": " << dataSpecificOutputNodes.at(j) << " ";
     }
+    cout << endl;
 
+    cout << "result: ";
     for (k = 0; k < output_size; k++) {
         sum = 0;
 
@@ -312,7 +316,9 @@ vector<float> nnwork::runMultiThreaded(vector<float> data) {
         }
 
         result.at(k) = sigmoid (sum);
+        cout <<"k=" << k << ": " <<result.at(k) << " ";
     }
+    cout << endl;
 
     return result;
 }
