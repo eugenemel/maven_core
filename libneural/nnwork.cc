@@ -211,8 +211,11 @@ void nnwork::train (float data [], float desired [], float max_MSE, float eta)
 // boolean output but could be different) goes into result. Naturally, data
 // and result are the same size as the input and output vectors respectively.
 
-// WARNING: only use in a single-threaded context. Otherwise, float data [] is
-// converted to a float*, which is not thread-safe!
+// WARNING: running this mutates hidden_nodes->nodes[j].output, which means that
+// the order of data supplied to this function will change the results.
+
+// For use in a multi-threaded context, avoid updating the hidden_nodes output values,
+// See nnwork::runMultiThreaded()
 
 void nnwork::run (float data [], float result [])
 {
@@ -249,6 +252,22 @@ void nnwork::run (float data [], float result [])
 	//for (i = 0; i < input_size; i++) cerr << data[i] << " "; cerr << sigmoid(sum) << endl;
 }
 
+/**
+ * @brief nnwork::runMultiThreaded
+ * Given a vector of data and a pre-trained neural network,
+ * this function returns a vector of adjusted values.
+ *
+ * Note that the neural network itself is not updated - it should already
+ * have been trained previously.
+ *
+ * Therefore, what this function really does is return a weighted average of some features.
+ *
+ * However, this is essential for deterministic behavior in a multithreaded context, b/c
+ * the order that data is fed into the nn is not defined.
+ *
+ * @param data
+ * @return weight-adjusted output vector, coming from results of pretrained neural net
+ */
 vector<float> nnwork::runMultiThreaded(vector<float> data) {
 
     vector<float> result = vector<float>(output_size, 0);
@@ -256,25 +275,41 @@ vector<float> nnwork::runMultiThreaded(vector<float> data) {
     unsigned int i, j, k;
     float sum;
 
+    vector<float> dataSpecificOutputNodes = vector<float>(hidden_size, 0);
 
     for (j = 0; j < hidden_size; j++) {
 
         sum = 0;
 
-        // Calculate the output valur
+        // Calculate the output value
         for (i = 0; i < input_size; i++){
             sum += hidden_nodes -> nodes[j].weights[i] * data.at(i);
         }
 
-        hidden_nodes -> nodes [j].output = sigmoid(sum);
+        //BUG: do not adjust the hidden nodes based on the data! This will affect future runs (stochasticity)
+        //and different orders of processing will produce different weights.
+        //
+        //Instead, do not update the output values of the hidden nodes.
+
+        //OLD APPROACH
+        //hidden_nodes -> nodes[j].output = sigmoid(sum);
+
+        //NEW APPROACH
+        dataSpecificOutputNodes.at(j) = sigmoid(sum);
     }
 
     for (k = 0; k < output_size; k++) {
         sum = 0;
 
         // Calculate the output value
-        for (j = 0; j < hidden_size; j++)
-            sum += output_nodes -> nodes[k].weights[j] * hidden_nodes -> nodes[j].output;
+        for (j = 0; j < hidden_size; j++){
+
+            //OLD APPROACH
+            //sum += output_nodes -> nodes[k].weights[j] * hidden_nodes -> nodes[j].output;
+
+            //NEW APPROACH
+            sum += output_nodes -> nodes[k].weights[j] * dataSpecificOutputNodes.at(j);
+        }
 
         result.at(k) = sigmoid (sum);
     }
