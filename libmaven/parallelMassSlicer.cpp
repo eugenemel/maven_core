@@ -204,7 +204,7 @@ void ParallelMassSlicer::algorithmD(float ppm, float rtWindow) {        //featur
         cerr << "#algorithmD" << slices.size() << endl;
 }
 
-void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //features that have ms2 events
+void ParallelMassSlicer::algorithmE(float ppm, float rtHalfWindowInMin) {        //features that have ms2 events
         delete_all(slices);
         slices.clear();
         cache.clear();
@@ -222,7 +222,7 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtWindow) {        //featur
                 float mzmax = mz + mz/1e6*ppm;
                 float mzmin = mz - mz/1e6*ppm;
 
-                mzSlice* s = new mzSlice(mzmin,mzmax, rt-2*rtWindow, rt+2*rtWindow);
+                mzSlice* s = new mzSlice(mzmin,mzmax, rt-rtHalfWindowInMin, rt+rtHalfWindowInMin);
                 s->rt=scan->rt;
                 s->mz=mz;
                 s->deleteFlag = false;
