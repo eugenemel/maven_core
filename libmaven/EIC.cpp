@@ -492,7 +492,6 @@ vector<mzPoint> EIC::getIntensityVector(Peak& peak) {
 }
 
 
-//TODO: verify that this is thread-safe
 void EIC::checkGaussianFit(Peak& peak) { 
 
         //set default values for fit (in case fit cannot be assessed).
