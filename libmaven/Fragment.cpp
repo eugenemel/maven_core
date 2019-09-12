@@ -741,7 +741,7 @@ double Fragment::spearmanRankCorrelation(const vector<int>& X) {
         //}
     }
     if(n>1) { 
-		cerr << "n=" << n << "\t" << d2 << endl;
+        // cerr << "n=" << n << "\t" << d2 << endl;
 		//double p = 1.00-(6.0*d2)/(n*((n*n)-1));
 		double p = 1.00-(6.0*d2)/(n*((n*n)-1));
 		return p;
