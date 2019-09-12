@@ -952,6 +952,16 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
         return(pgroups);
 }
 
+/**
+ * @brief EIC::groupPeaks
+ * @param eics
+ * @param smoothingWindow
+ * @param maxRtDiff
+ * @return
+ *
+ *
+ * @deprecated in favor of EIC::groupPeaksB()
+ */
 vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff) { 
 
 	//list filled and return by this function
