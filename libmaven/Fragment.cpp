@@ -730,7 +730,7 @@ double Fragment::spearmanRankCorrelation(const vector<int>& X) {
     int N = min((int)nobs(), (int) X.size()); //max elements in the second vector
     int n=0;
     for(int i=0; i<N;i++ ) {	
-		cerr << i << "\t" << n << "\t" << X[i] << endl;
+        //cerr << i << "\t" << n << "\t" << X[i] << endl;
         if (X[i] != -1 ) { //mising values set to average distance
             d2 += (n-X[i])*(n-X[i]);
 			n++;
@@ -741,7 +741,7 @@ double Fragment::spearmanRankCorrelation(const vector<int>& X) {
         //}
     }
     if(n>1) { 
-        // cerr << "n=" << n << "\t" << d2 << endl;
+        //cerr << "n=" << n << "\t" << d2 << endl;
 		//double p = 1.00-(6.0*d2)/(n*((n*n)-1));
 		double p = 1.00-(6.0*d2)/(n*((n*n)-1));
 		return p;
