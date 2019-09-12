@@ -250,7 +250,7 @@ void  EIC::getPeakPositions(int smoothWindow) {
  * @param intensityThreshold
  * Use intensity threshold, and write rt information to peak
  */
-void EIC::getPeakPositionsB(int smoothWindow, float intensityThreshold) {
+void EIC::getPeakPositionsB(int smoothWindow, float minSmoothedPeakIntensity) {
 
     //Need to explicitly clear out peaks, else an extra peak will be added with each getPeaks() call.
     peaks.clear();
@@ -262,7 +262,7 @@ void EIC::getPeakPositionsB(int smoothWindow, float intensityThreshold) {
     if (spline.size() == 0) return;
 
     for (unsigned int i=1; i < N-1; i++ ) {
-        if (spline[i] < intensityThreshold ) continue;
+        if (spline[i] < minSmoothedPeakIntensity ) continue;
         if (spline[i] > spline[i-1] && spline[i] > spline[i+1]) {
             addPeak(i);
         } else if ( spline[i] > spline[i-1] && spline[i] == spline[i+1] ) {
@@ -575,7 +575,7 @@ void EIC::removeLowRankGroups( vector<PeakGroup>& groups, unsigned int rankLimit
  * peaks are not retained if they are below the noiseThreshold.
  * Note that the smoothed value is compared to the noiseThreshold, not the raw intensity.
  */
-vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, float noiseThreshold) {
+vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, float minSmoothedPeakIntensity) {
 
         //TODO: check that this flag is not too slow
         bool debug = false;
@@ -608,7 +608,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
 
         int numTotalPeaks = 0;
         for (auto eic : eics){
-            eic->getPeakPositionsB(smoothingWindow, noiseThreshold);
+            eic->getPeakPositionsB(smoothingWindow, minSmoothedPeakIntensity);
             numTotalPeaks += eic->peaks.size();
         }
 

@@ -381,7 +381,7 @@ class EIC {
 		Peak* addPeak(int peakPos);
 		void deletePeak(unsigned int i);
         void getPeakPositions(int smoothWindow);
-        void getPeakPositionsB(int smoothWindow, float noiseThreshold);
+        void getPeakPositionsB(int smoothWindow, float minSmoothedPeakIntensity);
 		void getPeakDetails(Peak& peak);
 		void getPeakWidth(Peak& peak);
         void computeBaseLine(int smoothingWindow, int dropTopX);
@@ -405,7 +405,7 @@ class EIC {
 		inline unsigned int size() { return intensity.size();}
 		inline mzSample* getSample() { return sample; } 
         static vector<PeakGroup> groupPeaks(vector<EIC*>&eics, int smoothingWindow, float maxRtDiff);
-        static vector<PeakGroup> groupPeaksB(vector<EIC*>&eics, int smoothingWindow, float maxRtDiff, float noiseThreshold);
+        static vector<PeakGroup> groupPeaksB(vector<EIC*>&eics, int smoothingWindow, float maxRtDiff, float minSmoothedPeakIntensity);
 
 		static EIC* eicMerge(const vector<EIC*>& eics);
 		static void removeLowRankGroups(vector<PeakGroup>&groups, unsigned int rankLimit );
