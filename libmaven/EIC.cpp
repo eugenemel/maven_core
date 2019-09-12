@@ -717,9 +717,6 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
             unsigned int firstPeakPairIndex = dissimilarity.second.first;
             unsigned int secondPeakPairIndex = dissimilarity.second.second;
 
-            pair<unsigned int, Peak> firstPeakPair = peakSamplePairs.at(firstPeakPairIndex);
-            pair<unsigned int, Peak> secondPeakPair = peakSamplePairs.at(secondPeakPairIndex);
-
             //refers to index in peakGroups
             int firstContainingClusterIndex = -1;
             int secondContainingClusterIndex = -1;

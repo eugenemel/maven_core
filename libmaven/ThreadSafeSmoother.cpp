@@ -68,7 +68,7 @@ void GaussianSmoother::init(double zMax, double sigma){
     this->sigma = sigma;
 
     //computed constants
-    this->k1 = 1 / (static_cast<double>(sigma) * sqrt(2 * M_PI));
+    this->k1 = 1 / (static_cast<double>(sigma) * sqrt(2 * 3.14159265358979323846264338327950288));
     this->k2 = 1 / (2 * static_cast<double>(sigma) * static_cast<double>(sigma));
 }
 
@@ -252,4 +252,6 @@ int testThreadSafeSmoother(int argc, char *argv[]) {
     }
     cout << endl;
     cout << endl;
+
+    return 0;
 }

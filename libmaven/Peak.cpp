@@ -217,7 +217,10 @@ vector<mzLink> Peak::findCovariants() {
 		if (yref.size()==0) return covariants;
 
 		cerr << "Reference" << endl;
-		for (int j=0; j<scanCount; j++ ) cerr << yref[j]; cerr << endl;
+        for (int j=0; j<scanCount; j++ ) {
+            cerr << yref[j];
+        }
+        cerr << endl;
 
 		for(itr = M.begin(); itr != M.end(); ++itr) { 
 				int rmz = (*itr).first;
