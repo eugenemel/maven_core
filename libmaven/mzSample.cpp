@@ -115,7 +115,7 @@ void mzSample::loadSample(const char* filename, bool isCorrectPrecursor) {
     if (isCorrectPrecursor) {
         cerr << "Recalculating Ms2 Precursor Masses" << endl;
         for(Scan* ms2scan: scans) {
-            ms2scan->precursorMz=getMS1PrecurursorMass(ms2scan,20);
+            ms2scan->precursorMz=getMS1PrecursorMass(ms2scan,20);
         }
     }
 
@@ -207,7 +207,7 @@ using namespace MSToolkit;
     cerr << "Recalculating Ms2 Precursor Masses" << endl;
     for(Scan* ms2scan: this->scans) {
         if(ms2scan->mslevel==2) {
-            ms2scan->precursorMz=this->getMS1PrecurursorMass(ms2scan,20);
+            ms2scan->precursorMz=this->getMS1PrecursorMass(ms2scan,20);
         }
     }
 
@@ -1554,7 +1554,7 @@ void mzSample::applyPolynomialTransform() {
 	}
 }
 
-double mzSample::getMS1PrecurursorMass(Scan* ms2scan,float ppm) {
+double mzSample::getMS1PrecursorMass(Scan* ms2scan,float ppm) {
 
     if (ms2scan->precursorMz == 0 ) return 0;
     int scanNum = ms2scan->scannum;

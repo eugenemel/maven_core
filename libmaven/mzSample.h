@@ -254,7 +254,7 @@ public:
     EIC* getEIC(float precursorMz, float collisionEnergy, float productMz, float amuQ1, float amuQ2 );
     EIC* getTIC(float,float,int);		//get Total Ion Chromatogram
     EIC* getBIC(float,float,int);		//get Base Peak Chromatogram
-    double getMS1PrecurursorMass(Scan* ms2scan,float ppm);
+    double getMS1PrecursorMass(Scan* ms2scan,float ppm);
     vector<Scan*> getFragmentationEvents(mzSlice* slice);
 
     deque <Scan*> scans;
