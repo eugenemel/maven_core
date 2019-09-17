@@ -85,6 +85,10 @@ string mzSample::cleanSampleName(string sampleName) {
 }
 
 void mzSample::loadSample(const char* filename) {
+    loadSample(filename, true);
+}
+
+void mzSample::loadSample(const char* filename, bool isCorrectPrecursor) {
 
     string filenameString = string(filename);
     this->sampleName = cleanSampleName(filename);
@@ -108,9 +112,11 @@ void mzSample::loadSample(const char* filename) {
     calculateMzRtRange();
 
     //recalculate precursor masses
-    cerr << "Recalculating Ms2 Precursor Masses" << endl;
-    for(Scan* ms2scan: scans) {
-        ms2scan->precursorMz=getMS1PrecurursorMass(ms2scan,20);
+    if (isCorrectPrecursor) {
+        cerr << "Recalculating Ms2 Precursor Masses" << endl;
+        for(Scan* ms2scan: scans) {
+            ms2scan->precursorMz=getMS1PrecurursorMass(ms2scan,20);
+        }
     }
 
     if (mystrcasestr(filename,"blan") != NULL) {

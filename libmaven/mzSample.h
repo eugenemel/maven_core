@@ -220,7 +220,8 @@ public:
     mzSample();                         			// constructor
     ~mzSample();
     void openStream(const char* filename);	   	// constructor : load from file
-    void loadSample(const char* filename);	   	// constructor : load from file
+    void loadSample(const char* filename);      // constructor: load from file
+    void loadSample(const char* filename, bool isCorrectPrecursor);	   	// constructor : load from file
     void loadMsToolsSample(const char* filename);	// constructor : load using MSToolkit library
     void parseMzData(const char*);			// load data from mzData file
     void parseMzCSV(const char*);			// load data from mzCSV file
