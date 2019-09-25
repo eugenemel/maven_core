@@ -2,6 +2,11 @@
 
 using namespace std;
 
-void DirectInfusionProcessor::process() {
-    cout << "TODO: process" << endl;
+void DirectInfusionProcessor::processSingleSample(mzSample* sample, const vector<Compound*>& compounds) {
+
+    for (Scan* scan : sample->scans){
+        if (scan->mslevel == 2){
+            //TODO: do something
+        }
+    }
 }

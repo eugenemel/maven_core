@@ -8,15 +8,5 @@ class mzSample;
 class DirectInfusionProcessor {
 
     public:
-
-    explicit DirectInfusionProcessor(const vector<mzSample*>& samples, const vector<Compound*>& compounds){
-        this->samples = samples;
-        this->compounds = compounds;
-    }
-
-    private:
-        vector<mzSample*> samples;
-        vector<Compound*> compounds;
-
-        void process();
+        static void processSingleSample(mzSample* sample, const vector<Compound*>& compounds);
 };
