@@ -22,10 +22,12 @@ SOURCES=base64.cpp mzMassCalculator.cpp mzSample.cpp  mzUtils.cpp statistics.cpp
        BondBreaker.cpp \
        Peptide.cpp \
        sha1.cpp \
-       ThreadSafeSmoother.cpp
+       ThreadSafeSmoother.cpp \
+    directinfusionprocessor.cpp
 
 
 HEADERS += base64.h mzFit.h mzMassCalculator.h mzSample.h mzPatterns.h mzUtils.h  statistics.h SavGolSmoother.h PolyAligner.h Fragment.h parallelmassSlicer.h BondBreaker.h Peptide.h sha1.hpp \
-    ThreadSafeSmoother.h
+    ThreadSafeSmoother.h \
+    directinfusionprocessor.h
 
 message($$LIBS)
