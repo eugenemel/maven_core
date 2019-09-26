@@ -48,7 +48,7 @@ void DirectInfusionProcessor::processSingleSample(mzSample* sample, const vector
 
         //TODO: actually get adductlist
         vector<Adduct*> adductList;
-        adductList.push_back(MassCalculator::PlusHAdduct);
+        adductList.push_back(MassCalculator::MinusHAdduct);
 
          MassCalculator massCalc;
 
@@ -65,7 +65,7 @@ void DirectInfusionProcessor::processSingleSample(mzSample* sample, const vector
                 double compoundMz = adduct->computeAdductMass(massCalc.computeNeutralMass(compound->getFormula()));
 
                 if (compoundMz > minMz && compoundMz < maxMz) {
-                    FragmentationMatchScore s = compound->scoreCompoundHit(f.consensus, 20, false);
+                    FragmentationMatchScore s = compound->scoreCompoundHit(f->consensus, 20, false);
 
                     if (s.numMatches > 5) {
                         cerr << compound->name << ": " << s.numMatches << endl;
