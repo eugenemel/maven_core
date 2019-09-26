@@ -2,14 +2,17 @@
 
 using namespace std;
 
-vector<DirectInfusionAnnotation> DirectInfusionProcessor::processSingleSample(mzSample* sample, const vector<Compound*>& compounds, const vector<Adduct*>& adducts) {
+vector<DirectInfusionAnnotation> DirectInfusionProcessor::processSingleSample(mzSample* sample,
+                                                                              const vector<Compound*>& compounds,
+                                                                              const vector<Adduct*>& adducts,
+                                                                              bool debug) {
 
     MassCalculator massCalc;
     vector<DirectInfusionAnnotation> annotations;
 
     float minFractionalIntensity = 0.000001f; //TODO: refactor as a parameter
 
-    cerr << "Started DirectInfusionProcessor::processSingleSample()" << endl;
+    if (debug) cerr << "Started DirectInfusionProcessor::processSingleSample()" << endl;
 
     //Organize all scans by common precursor m/z
 
@@ -39,14 +42,20 @@ vector<DirectInfusionAnnotation> DirectInfusionProcessor::processSingleSample(mz
         }
     }
 
-    cerr << "Organizing database into map for fast lookup..." << endl;
+    if (debug) cerr << "Organizing database into map for fast lookup..." << endl;
 
     for (Compound *compound : compounds) {
         for (Adduct *adduct : adducts) {
 
+            //require adduct match to compound name, assumes that compounds have adduct as part of name
+            if(compound->name.length() < adduct->name.length() ||
+               compound->name.compare (compound->name.length() - adduct->name.length(), adduct->name.length(), adduct->name) != 0){
+                continue;
+            }
+
             float compoundMz = adduct->computeAdductMass(massCalc.computeNeutralMass(compound->getFormula()));
 
-            //determine which map key to assocaite this compound, adduct with
+            //determine which map key to associate this compound, adduct with
 
             for (mzRangeIterator it = mzRangeByPrecursor.begin(); it != mzRangeByPrecursor.end(); ++it) {
                 int mapKey = it->first;
@@ -59,7 +68,7 @@ vector<DirectInfusionAnnotation> DirectInfusionProcessor::processSingleSample(mz
         }
     }
 
-    cerr << "Performing search over map keys..." << endl;
+    if (debug) cerr << "Performing search over map keys..." << endl;
 
     for (auto mapKey : mapKeys){
 
@@ -68,8 +77,10 @@ vector<DirectInfusionAnnotation> DirectInfusionProcessor::processSingleSample(mz
         float precMzMin = mzRange.first;
         float precMzMax = mzRange.second;
 
-        cerr << "=========================================" << endl;
-        cerr << "Investigating precMzRange = [" << precMzMin << " - " << precMzMax << "]" << endl;
+        if (debug) {
+            cerr << "=========================================" << endl;
+            cerr << "Investigating precMzRange = [" << precMzMin << " - " << precMzMax << "]" << endl;
+        }
 
         pair<scanIterator, scanIterator> scansAtKey = scansByPrecursor.equal_range(mapKey);
 
@@ -77,9 +88,9 @@ vector<DirectInfusionAnnotation> DirectInfusionProcessor::processSingleSample(mz
         int numScansPerPrecursorMz = 0;
         for (scanIterator it = scansAtKey.first; it != scansAtKey.second; ++it) {
             if (numScansPerPrecursorMz == 0){
-                f = new Fragment(it->second, minFractionalIntensity, 0, __FLT_MAX__);
+                f = new Fragment(it->second, minFractionalIntensity, 0, UINT_MAX);
             } else {
-                Fragment *brother = new Fragment(it->second, minFractionalIntensity, 0, __FLT_MAX__);
+                Fragment *brother = new Fragment(it->second, minFractionalIntensity, 0, UINT_MAX);
                 f->addFragment(brother);
             }
             numScansPerPrecursorMz++;
@@ -90,26 +101,32 @@ vector<DirectInfusionAnnotation> DirectInfusionProcessor::processSingleSample(mz
 
         pair<compoundsIterator, compoundsIterator> compoundMatches = compoundsByMapKey.equal_range(mapKey);
 
+        int compCounter = 0;
+        int matchCounter = 0;
         for (compoundsIterator it = compoundMatches.first; it != compoundMatches.second; ++it){
 
-            int mapKey = it->first;
             Compound* compound = it->second.first;
+            Adduct* adduct = it->second.second;
 
             FragmentationMatchScore s = compound->scoreCompoundHit(f->consensus, 20, false); //TODO: parameters
 
             if (s.numMatches > 3) {
-                cerr << compound->name << ": " << s.numMatches << endl;
+                if (debug) cerr << compound->name << ": " << s.numMatches << endl;
+                matchCounter++;
             }
 
+            compCounter++;
         }
 
         delete(f);
-        cerr << "=========================================" << endl;
 
-        //cerr << "mapKey= " << mapKey << ": " << numScansPerPrecursorMz << " MS2 scans." << endl;
+        if (debug) {
+            cerr << "Matched " << matchCounter << "/" << compCounter << " compounds." << endl;
+            cerr << "=========================================" << endl;
+        }
     }
 
-    cerr << "Finished DirectInfusionProcessor::processSingleSample()" << endl;
+    if (debug) cerr << "Finished DirectInfusionProcessor::processSingleSample()" << endl;
 
     return annotations;
 
