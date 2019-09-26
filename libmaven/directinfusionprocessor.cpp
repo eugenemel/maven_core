@@ -26,22 +26,25 @@ void DirectInfusionProcessor::processSingleSample(mzSample* sample, const vector
 
     for (auto mapKey : mapKeys){
 
+        cerr << "=========================================" << endl;
+        cerr << "Investigating mapKey=" << mapKey << endl;
+
         pair<scanIterator, scanIterator> scansAtKey = scansByPrecursor.equal_range(mapKey);
 
-        Fragment f;
+        Fragment *f;
         int numScansPerPrecursorMz = 0;
         for (scanIterator it = scansAtKey.first; it != scansAtKey.second; ++it) {
             if (numScansPerPrecursorMz == 0){
-                Fragment f(it->second, minFractionalIntensity, 0, FLT_MAX);
+                f = new Fragment(it->second, minFractionalIntensity, 0, __FLT_MAX__);
             } else {
-                Fragment brother(it->second, minFractionalIntensity, 0, FLT_MAX);
-                f.addFragment(&brother);
+                Fragment *brother = new Fragment(it->second, minFractionalIntensity, 0, __FLT_MAX__);
+                f->addFragment(brother);
             }
             numScansPerPrecursorMz++;
         }
 
-        f.buildConsensus(20); //TODO: refactor as parameter
-        f.consensus->sortByMz();
+        f->buildConsensus(20); //TODO: refactor as parameter
+        f->consensus->sortByMz();
 
         //TODO: actually get adductlist
         vector<Adduct*> adductList;
@@ -49,14 +52,30 @@ void DirectInfusionProcessor::processSingleSample(mzSample* sample, const vector
 
          MassCalculator massCalc;
 
+         //TODO: these values should be in the scan.
+         double minMz = static_cast<double>(mapKey);
+         double maxMz = static_cast<double>(mapKey)+1;
+
          //TODO: finish this up, fewer hacks, think about how to communicate results back to Maven GUI.
 
         //TODO: this will be very slow, restructure as map based on precursor m/z
         for (Compound *compound : compounds) {
             for (Adduct *adduct : adductList) {
+
                 double compoundMz = adduct->computeAdductMass(massCalc.computeNeutralMass(compound->getFormula()));
+
+                if (compoundMz > minMz && compoundMz < maxMz) {
+                    FragmentationMatchScore s = compound->scoreCompoundHit(f.consensus, 20, false);
+
+                    if (s.numMatches > 5) {
+                        cerr << compound->name << ": " << s.numMatches << endl;
+                    }
+                }
             }
         }
+
+        delete(f);
+        cerr << "=========================================" << endl;
 
         //cerr << "mapKey= " << mapKey << ": " << numScansPerPrecursorMz << " MS2 scans." << endl;
     }
