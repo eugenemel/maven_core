@@ -83,6 +83,7 @@ vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample(m
         DirectInfusionAnnotation *directInfusionAnnotation = new DirectInfusionAnnotation();
         directInfusionAnnotation->precMzMin = precMzMin;
         directInfusionAnnotation->precMzMax = precMzMax;
+        directInfusionAnnotation->sample = sample;
 
         vector<tuple<Compound*, Adduct*, double>> dIAnnotatedCompounds;
 
@@ -144,6 +145,8 @@ vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample(m
         if (matchCounter != 0){
             directInfusionAnnotation->compounds = dIAnnotatedCompounds;
             annotations.push_back(directInfusionAnnotation);
+        } else {
+            delete(directInfusionAnnotation);
         }
     }
 
