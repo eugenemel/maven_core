@@ -98,6 +98,10 @@ vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample(m
         for (scanIterator it = scansAtKey.first; it != scansAtKey.second; ++it) {
             if (numScansPerPrecursorMz == 0){
                 f = new Fragment(it->second, minFractionalIntensity, 0, UINT_MAX);
+
+                //TODO: allow for possibility of smarter agglomeration, instead of just taking first valid scan.
+                directInfusionAnnotation->scan = it->second;
+
             } else {
                 Fragment *brother = new Fragment(it->second, minFractionalIntensity, 0, UINT_MAX);
                 f->addFragment(brother);
