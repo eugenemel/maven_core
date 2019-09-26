@@ -47,7 +47,7 @@ public:
          * TODO: refactor to pointers for speed / storage,
          * but need to worry about memory leaks
          */
-        Fragment fragmentationPattern;
+        Fragment* fragmentationPattern;
         FragmentationMatchScore fragMatchScore;
 
         /**

@@ -94,24 +94,24 @@ vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample(m
 
         pair<scanIterator, scanIterator> scansAtKey = scansByPrecursor.equal_range(mapKey);
 
-        Fragment f;
+        Fragment *f;
         int numScansPerPrecursorMz = 0;
         for (scanIterator it = scansAtKey.first; it != scansAtKey.second; ++it) {
             if (numScansPerPrecursorMz == 0){
-                f = Fragment(it->second, minFractionalIntensity, 0, UINT_MAX);
+                f = new Fragment(it->second, minFractionalIntensity, 0, UINT_MAX);
 
                 //TODO: allow for possibility of smarter agglomeration, instead of just taking first valid scan.
                 directInfusionAnnotation->scan = it->second;
 
             } else {
                 Fragment *brother = new Fragment(it->second, minFractionalIntensity, 0, UINT_MAX);
-                f.addFragment(brother);
+                f->addFragment(brother);
             }
             numScansPerPrecursorMz++;
         }
 
-        f.buildConsensus(20); //TODO: refactor as parameter
-        f.consensus->sortByMz();
+        f->buildConsensus(20); //TODO: refactor as parameter
+        f->consensus->sortByMz();
 
         directInfusionAnnotation->fragmentationPattern = f;
 
@@ -123,7 +123,7 @@ vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample(m
 
             Compound* compound = it->second.first;
 
-            FragmentationMatchScore s = compound->scoreCompoundHit(f.consensus, 20, false); //TODO: parameters
+            FragmentationMatchScore s = compound->scoreCompoundHit(f->consensus, 20, false); //TODO: parameters
 
             if (s.numMatches > 3) {
                 if (debug) cerr << compound->name << ": " << s.numMatches << endl;
