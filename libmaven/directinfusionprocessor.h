@@ -16,6 +16,8 @@ class mzSample;
  * fields, which describe the m/z range scanned for this annotation.
  */
 class DirectInfusionAnnotation {
+
+public:
     DirectInfusionAnnotation();
     ~DirectInfusionAnnotation(){
 
@@ -27,7 +29,6 @@ class DirectInfusionAnnotation {
             delete(std::get<1>(compoundTuple));
         }
     }
-    public:
         /**
          * @brief sample
          * source sample
