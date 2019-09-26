@@ -106,7 +106,6 @@ vector<DirectInfusionAnnotation> DirectInfusionProcessor::processSingleSample(mz
         for (compoundsIterator it = compoundMatches.first; it != compoundMatches.second; ++it){
 
             Compound* compound = it->second.first;
-            Adduct* adduct = it->second.second;
 
             FragmentationMatchScore s = compound->scoreCompoundHit(f->consensus, 20, false); //TODO: parameters
 
