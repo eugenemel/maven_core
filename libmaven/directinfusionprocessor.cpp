@@ -2,13 +2,13 @@
 
 using namespace std;
 
-vector<DirectInfusionAnnotation> DirectInfusionProcessor::processSingleSample(mzSample* sample,
+vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample(mzSample* sample,
                                                                               const vector<Compound*>& compounds,
                                                                               const vector<Adduct*>& adducts,
                                                                               bool debug) {
 
     MassCalculator massCalc;
-    vector<DirectInfusionAnnotation> annotations;
+    vector<DirectInfusionAnnotation*> annotations;
 
     float minFractionalIntensity = 0.000001f; //TODO: refactor as a parameter
 
@@ -44,6 +44,9 @@ vector<DirectInfusionAnnotation> DirectInfusionProcessor::processSingleSample(mz
 
     if (debug) cerr << "Organizing database into map for fast lookup..." << endl;
 
+    //TODO: restructure this code to be processed separately
+    //TODO: prefilter compound/adduct pairs? think about handling generally.
+
     for (Compound *compound : compounds) {
         for (Adduct *adduct : adducts) {
 
@@ -76,6 +79,12 @@ vector<DirectInfusionAnnotation> DirectInfusionProcessor::processSingleSample(mz
 
         float precMzMin = mzRange.first;
         float precMzMax = mzRange.second;
+
+        DirectInfusionAnnotation *directInfusionAnnotation = new DirectInfusionAnnotation();
+        directInfusionAnnotation->precMzMin = precMzMin;
+        directInfusionAnnotation->precMzMax = precMzMax;
+
+        vector<tuple<Compound*, Adduct*, double>> dIAnnotatedCompounds;
 
         if (debug) {
             cerr << "=========================================" << endl;
@@ -111,6 +120,10 @@ vector<DirectInfusionAnnotation> DirectInfusionProcessor::processSingleSample(mz
 
             if (s.numMatches > 3) {
                 if (debug) cerr << compound->name << ": " << s.numMatches << endl;
+
+                //TODO: this should be refined with a much better algorithm
+                dIAnnotatedCompounds.push_back(make_tuple(compound, it->second.second, 0));
+
                 matchCounter++;
             }
 
@@ -122,6 +135,11 @@ vector<DirectInfusionAnnotation> DirectInfusionProcessor::processSingleSample(mz
         if (debug) {
             cerr << "Matched " << matchCounter << "/" << compCounter << " compounds." << endl;
             cerr << "=========================================" << endl;
+        }
+
+        if (matchCounter != 0){
+            directInfusionAnnotation->compounds = dIAnnotatedCompounds;
+            annotations.push_back(directInfusionAnnotation);
         }
     }
 

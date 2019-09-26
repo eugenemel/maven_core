@@ -40,7 +40,7 @@ class DirectInfusionAnnotation {
 class DirectInfusionProcessor {
 
     public:
-         static std::vector<DirectInfusionAnnotation> processSingleSample(mzSample *sample, const vector<Compound*>& compounds, const vector<Adduct*>& adducts, bool debug);
+         static std::vector<DirectInfusionAnnotation*> processSingleSample(mzSample *sample, const vector<Compound*>& compounds, const vector<Adduct*>& adducts, bool debug);
 };
 
 
