@@ -45,23 +45,6 @@ public:
          * associated with the match.
          */
         vector<tuple<Compound*,Adduct*,double>> compounds;
-
-        DirectInfusionAnnotation(){
-            sample = nullptr;
-            scan = nullptr;
-            precMzMin = -1;
-            precMzMax = -1;
-        }
-
-        ~DirectInfusionAnnotation() {
-            if (sample) delete(sample);
-            if (scan) delete(scan);
-
-            for (tuple<Compound*, Adduct*, double> compoundTuple : compounds){
-                delete(std::get<0>(compoundTuple));
-                delete(std::get<1>(compoundTuple));
-            }
-        }
 };
 
 class DirectInfusionProcessor {
