@@ -4,32 +4,72 @@ using namespace std;
 
 vector<DirectInfusionAnnotation> DirectInfusionProcessor::processSingleSample(mzSample* sample, const vector<Compound*>& compounds, const vector<Adduct*>& adducts) {
 
+    MassCalculator massCalc;
     vector<DirectInfusionAnnotation> annotations;
 
-    double minFractionalIntensity = 0.000001; //TODO: refactor as a parameter
+    float minFractionalIntensity = 0.000001f; //TODO: refactor as a parameter
 
     cerr << "Started DirectInfusionProcessor::processSingleSample()" << endl;
 
     //Organize all scans by common precursor m/z
 
     multimap<int, Scan*> scansByPrecursor = {};
+    map<int, pair<float,float>> mzRangeByPrecursor = {};
     set<int> mapKeys = {};
+
+    multimap<int, pair<Compound*, Adduct*>> compoundsByMapKey = {};
+
+    typedef multimap<int, Scan*>::iterator scanIterator;
+    typedef map<int, pair<float, float>>::iterator mzRangeIterator;
+    typedef multimap<int, pair<Compound*, Adduct*>>::iterator compoundsIterator;
 
     for (Scan* scan : sample->scans){
         if (scan->mslevel == 2){
-            int mapKey = static_cast<int>(round(scan->precursorMz+0.001)); //round to nearest int
+            int mapKey = static_cast<int>(round(scan->precursorMz+0.001f)); //round to nearest int
+
+            if (mzRangeByPrecursor.find(mapKey) == mzRangeByPrecursor.end()) {
+                float precMzMin = scan->precursorMz - 0.5f * scan->isolationWindow;
+                float precMzMax = scan->precursorMz + 0.5f * scan->isolationWindow;
+
+                mzRangeByPrecursor.insert(make_pair(mapKey, make_pair(precMzMin, precMzMax)));
+            }
 
             mapKeys.insert(mapKey);
             scansByPrecursor.insert(make_pair(mapKey, scan));
         }
     }
 
-    typedef multimap<int, Scan*>::iterator scanIterator;
+    cerr << "Organizing database into map for fast lookup..." << endl;
+
+    for (Compound *compound : compounds) {
+        for (Adduct *adduct : adducts) {
+
+            float compoundMz = adduct->computeAdductMass(massCalc.computeNeutralMass(compound->getFormula()));
+
+            //determine which map key to assocaite this compound, adduct with
+
+            for (mzRangeIterator it = mzRangeByPrecursor.begin(); it != mzRangeByPrecursor.end(); ++it) {
+                int mapKey = it->first;
+                pair<float, float> mzRange = it->second;
+
+                if (compoundMz > mzRange.first && compoundMz < mzRange.second) {
+                    compoundsByMapKey.insert(make_pair(mapKey, make_pair(compound, adduct)));
+                }
+            }
+        }
+    }
+
+    cerr << "Performing search over map keys..." << endl;
 
     for (auto mapKey : mapKeys){
 
+        pair<float,float> mzRange = mzRangeByPrecursor.at(mapKey);
+
+        float precMzMin = mzRange.first;
+        float precMzMax = mzRange.second;
+
         cerr << "=========================================" << endl;
-        cerr << "Investigating mapKey=" << mapKey << endl;
+        cerr << "Investigating precMzRange = [" << precMzMin << " - " << precMzMax << "]" << endl;
 
         pair<scanIterator, scanIterator> scansAtKey = scansByPrecursor.equal_range(mapKey);
 
@@ -48,32 +88,19 @@ vector<DirectInfusionAnnotation> DirectInfusionProcessor::processSingleSample(mz
         f->buildConsensus(20); //TODO: refactor as parameter
         f->consensus->sortByMz();
 
-        //TODO: actually get adductlist
-        vector<Adduct*> adductList;
-        adductList.push_back(MassCalculator::MinusHAdduct);
+        pair<compoundsIterator, compoundsIterator> compoundMatches = compoundsByMapKey.equal_range(mapKey);
 
-         MassCalculator massCalc;
+        for (compoundsIterator it = compoundMatches.first; it != compoundMatches.second; ++it){
 
-         //TODO: these values should be in the scan.
-         double minMz = static_cast<double>(mapKey);
-         double maxMz = static_cast<double>(mapKey)+1;
+            int mapKey = it->first;
+            Compound* compound = it->second.first;
 
-         //TODO: finish this up, fewer hacks, think about how to communicate results back to Maven GUI.
+            FragmentationMatchScore s = compound->scoreCompoundHit(f->consensus, 20, false); //TODO: parameters
 
-        //TODO: this will be very slow, restructure as map based on precursor m/z
-        for (Compound *compound : compounds) {
-            for (Adduct *adduct : adductList) {
-
-                double compoundMz = adduct->computeAdductMass(massCalc.computeNeutralMass(compound->getFormula()));
-
-                if (compoundMz > minMz && compoundMz < maxMz) {
-                    FragmentationMatchScore s = compound->scoreCompoundHit(f->consensus, 20, false);
-
-                    if (s.numMatches > 5) {
-                        cerr << compound->name << ": " << s.numMatches << endl;
-                    }
-                }
+            if (s.numMatches > 3) {
+                cerr << compound->name << ": " << s.numMatches << endl;
             }
+
         }
 
         delete(f);

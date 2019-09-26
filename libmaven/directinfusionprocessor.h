@@ -27,8 +27,8 @@ class DirectInfusionAnnotation {
          * @brief precMzMin, precMzMax
          * refers to the m/z of precursors.
          */
-        double precMzMin;
-        double precMzMax;
+        float precMzMin;
+        float precMzMax;
 
         /**
          * each tuple refers to the compound, adduct, and estimated proportion of the spectrum
