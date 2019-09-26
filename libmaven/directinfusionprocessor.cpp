@@ -2,9 +2,11 @@
 
 using namespace std;
 
-void DirectInfusionProcessor::processSingleSample(mzSample* sample, const vector<Compound*>& compounds) {
+vector<DirectInfusionAnnotation> DirectInfusionProcessor::processSingleSample(mzSample* sample, const vector<Compound*>& compounds, const vector<Adduct*>& adducts) {
 
-    double minFractionalIntensity = 0.000001;
+    vector<DirectInfusionAnnotation> annotations;
+
+    double minFractionalIntensity = 0.000001; //TODO: refactor as a parameter
 
     cerr << "Started DirectInfusionProcessor::processSingleSample()" << endl;
 
@@ -81,5 +83,7 @@ void DirectInfusionProcessor::processSingleSample(mzSample* sample, const vector
     }
 
     cerr << "Finished DirectInfusionProcessor::processSingleSample()" << endl;
+
+    return annotations;
 
 }
