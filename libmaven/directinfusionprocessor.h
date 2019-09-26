@@ -38,13 +38,25 @@ public:
          * Potentially, an average of many scans collected over different infusion times.
          * Or, may just be a scan taken right out of the mzSample.
          */
-        Scan* scan = nullptr;
+        Scan *scan = nullptr;
+
+        /**
+         * @brief fragmentationPattern and fragMatchScore
+         * fragmentation data. used ultimately for peak group display.
+         *
+         * TODO: refactor to pointers for speed / storage,
+         * but need to worry about memory leaks
+         */
+        Fragment fragmentationPattern;
+        FragmentationMatchScore fragMatchScore;
 
         /**
          * each tuple refers to the compound, adduct, and estimated proportion of the spectrum
          * associated with the match.
+         *
+         * FragmentationMatchScores are also provided.
          */
-        vector<tuple<Compound*,Adduct*,double>> compounds;
+        vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> compounds;
 };
 
 class DirectInfusionProcessor {
