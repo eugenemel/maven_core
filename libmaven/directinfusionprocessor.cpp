@@ -50,6 +50,10 @@ shared_ptr<DirectInfusionSearchSet> DirectInfusionProcessor::getSearchSet(mzSamp
 //                }
             }
 
+            if (SIGN(adduct->charge) != SIGN(compound->charge)) {
+                continue;
+            }
+
             float compoundMz = adduct->computeAdductMass(massCalc.computeNeutralMass(compound->getFormula()));
 
             //determine which map key to associate this compound, adduct with
