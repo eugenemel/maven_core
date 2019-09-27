@@ -7,7 +7,7 @@ using namespace std;
 shared_ptr<DirectInfusionSearchSet> DirectInfusionProcessor::getSearchSet(mzSample* sample,
                                                                               const vector<Compound*>& compounds,
                                                                               const vector<Adduct*>& adducts,
-                                                                              bool isRequireAdductPrecursorMatch,
+                                                                              shared_ptr<DirectInfusionSearchParameters> params,
                                                                               bool debug) {
 
     shared_ptr<DirectInfusionSearchSet> directInfusionSearchSet = shared_ptr<DirectInfusionSearchSet>(new DirectInfusionSearchSet());
@@ -36,8 +36,9 @@ shared_ptr<DirectInfusionSearchSet> DirectInfusionProcessor::getSearchSet(mzSamp
     for (Compound *compound : compounds) {
         for (Adduct *adduct : adducts) {
 
+            //TODO: use compound->adductString?
             //require adduct match to compound name, assumes that compounds have adduct as part of name
-            if (isRequireAdductPrecursorMatch){
+            if (params->isRequireAdductPrecursorMatch){
                 if(compound->name.length() < adduct->name.length() ||
                    compound->name.compare (compound->name.length() - adduct->name.length(), adduct->name.length(), adduct->name) != 0){
                     continue;
@@ -65,6 +66,7 @@ shared_ptr<DirectInfusionSearchSet> DirectInfusionProcessor::getSearchSet(mzSamp
 
 vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample(mzSample* sample,
                                                                               shared_ptr<DirectInfusionSearchSet> directInfusionSearchSet,
+                                                                              shared_ptr<DirectInfusionSearchParameters> params,
                                                                               bool debug) {
 
     MassCalculator massCalc;
@@ -138,9 +140,9 @@ vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample(m
 
             Compound* compound = it->second.first;
 
-            FragmentationMatchScore s = compound->scoreCompoundHit(f->consensus, 20, false); //TODO: parameters
+            FragmentationMatchScore s = compound->scoreCompoundHit(f->consensus, params->productPpmTolr, false);
 
-            if (s.numMatches > 3) {
+            if (s.numMatches >= params->minNumMatches) {
                 if (debug) cerr << compound->name << ": " << s.numMatches << endl;
 
                 //TODO: this should be refined with a much better algorithm
@@ -161,6 +163,7 @@ vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample(m
             directInfusionAnnotation->compounds = dIAnnotatedCompounds;
             annotations.push_back(directInfusionAnnotation);
         } else {
+            delete(directInfusionAnnotation->fragmentationPattern);
             delete(directInfusionAnnotation);
         }
     }

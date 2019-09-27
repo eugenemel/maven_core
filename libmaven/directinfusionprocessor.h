@@ -113,6 +113,20 @@ public:
      * Could use @param minNumMatches as a first filter, then this as a subsequent filter.
      */
     int minNumUniqueMatches = 0;
+
+    /**
+     * @brief isRequireAdductPrecursorMatch
+     * The compound's associated adduct must be the adduct in the supplied list of adducts,
+     * otherwise the match will be ignored.
+     */
+    bool isRequireAdductPrecursorMatch = true;
+
+    /**
+     * @brief productPpmTolr
+     * tolerance value used for matching library fragment m/z s to Scan m/z s
+     */
+    float productPpmTolr = 20;
+
 };
 
 /**
@@ -139,7 +153,7 @@ class DirectInfusionProcessor {
                  mzSample *sample,
                  const vector<Compound*>& compounds,
                  const vector<Adduct*>& adducts,
-                 bool isRequireAdductPrecursorMatch,
+                 shared_ptr<DirectInfusionSearchParameters> params,
                  bool debug);
 
          /**
@@ -159,6 +173,7 @@ class DirectInfusionProcessor {
          static vector<DirectInfusionAnnotation*> processSingleSample(
                  mzSample *sample,
                  shared_ptr<DirectInfusionSearchSet> directInfusionSearchSet,
+                 shared_ptr<DirectInfusionSearchParameters> params,
                  bool debug);
 };
 
