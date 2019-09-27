@@ -36,7 +36,6 @@ shared_ptr<DirectInfusionSearchSet> DirectInfusionProcessor::getSearchSet(mzSamp
     for (Compound *compound : compounds) {
         for (Adduct *adduct : adducts) {
 
-            //TODO: use compound->adductString?
             if (params->isRequireAdductPrecursorMatch){
 
                 if (compound->adductString != adduct->name){
