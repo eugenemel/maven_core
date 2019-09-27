@@ -2,6 +2,7 @@
 
 #include "mzSample.h"
 #include "mzUtils.h"
+#include <memory>
 
 class mzSample;
 
@@ -59,10 +60,59 @@ public:
         vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> compounds;
 };
 
+/**
+ * @brief The DirectInfusionSearchSet class
+ * Data container class
+ */
+class DirectInfusionSearchSet {
+
+public:
+
+        /**
+         *  set of all DIA ranges represented in experiment.
+         */
+        set<int> mapKeys = {};
+
+        /**
+         * mapping of each DIA range to actual m/z values
+         * <first, second> = <minMz, maxMz>
+         */
+        map<int, pair<float,float>> mzRangesByMapKey = {};
+
+        /**
+         * <key, value> = <map_key, valid pair<Compound,Adduct>>
+         */
+        multimap<int, pair<Compound*, Adduct*>> compoundsByMapKey = {};
+
+};
+
 class DirectInfusionProcessor {
 
     public:
-         static std::vector<DirectInfusionAnnotation*> processSingleSample(mzSample *sample, const vector<Compound*>& compounds, const vector<Adduct*>& adducts, bool debug);
+    /**
+          * @brief getSearchSet
+          * @param sample
+          * a representative sample - may be anything
+          * @param compounds
+          * @param adducts
+          * @param isRequireAdductPrecursorMatch
+          * @param debug
+          * @return DirectInfusionSearchSet
+          * --> all compound, adducts, organized into m/z bins.
+          *
+          * This structure can be reused if all samples in an experiment have the same organization.
+          */
+         static shared_ptr<DirectInfusionSearchSet> getSearchSet(
+                 mzSample *sample,
+                 const vector<Compound*>& compounds,
+                 const vector<Adduct*>& adducts,
+                 bool isRequireAdductPrecursorMatch,
+                 bool debug);
+
+         static vector<DirectInfusionAnnotation*> processSingleSample(
+                 mzSample *sample,
+                 shared_ptr<DirectInfusionSearchSet> directInfusionSearchSet,
+                 bool debug);
 };
 
 
