@@ -165,7 +165,12 @@ vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample(m
         }
 
         if (matchCounter != 0){
-            directInfusionAnnotation->compounds = dIAnnotatedCompounds;
+            if (params->spectralCompositionAlgorithm == SpectralDeconvolutionAlgorithm::DO_NOTHING) {
+                directInfusionAnnotation->compounds = dIAnnotatedCompounds;
+            } else {
+                //TODO: fancier algorithm here
+            }
+
             annotations.push_back(directInfusionAnnotation);
         } else {
             delete(directInfusionAnnotation->fragmentationPattern);

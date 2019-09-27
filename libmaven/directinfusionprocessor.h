@@ -6,6 +6,7 @@
 
 class mzSample;
 class DirectInfusionAnnotation;
+enum class SpectralDeconvolutionAlgorithm;
 
 /**
  * @brief The DirectInfusionSearchSet class
@@ -34,6 +35,17 @@ public:
 };
 
 /**
+ * @brief The SpectralDeconvolutionAlgorithm enum
+ *
+ * Short description of different approaches for spectral deconvolution
+ * (goal is to determine the relative proportions of different compounds)
+ */
+enum class SpectralDeconvolutionAlgorithm {
+    DO_NOTHING,
+    DO_SOMETHING
+};
+
+/**
  * @brief The DirectInfusionSearchParameters class
  *
  * single class to contain all parameters used in direct infusion search analysis.
@@ -48,7 +60,7 @@ public:
      * to match to a spectrum in order to retain this <Compound*, Adduct*>
      * as a component of the observed spectrum
      */
-    int minNumMatches = 3;
+    int minNumMatches = 5;
 
     /**
      * @brief minNumUniqueMatches
@@ -56,8 +68,9 @@ public:
      * with unique fragment m/zs, given the universe of all <Compound*, Adduct*>
      * matches searched.
      *
-     * TODO: should this be considered before or after @param minNumMatches?
-     * Could use @param minNumMatches as a first filter, then this as a subsequent filter.
+     * Considered after @param minNumMatches? - the idea is that @param minNumMatches is used
+     * to find likely IDs, and @param minNumUniqueMatches might be mroe useful for determining
+     * relative composition
      */
     int minNumUniqueMatches = 0;
 
@@ -73,6 +86,13 @@ public:
      * tolerance value used for matching library fragment m/z s to Scan m/z s
      */
     float productPpmTolr = 20;
+
+    /**
+     * @brief spectralCompositionAlgorithm
+     * By default, do nothing, just return all matches, without doing any elimination or quantitation
+     * of spectral components.
+     */
+    SpectralDeconvolutionAlgorithm spectralCompositionAlgorithm = SpectralDeconvolutionAlgorithm::DO_NOTHING;
 
 };
 
