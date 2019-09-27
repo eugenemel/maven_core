@@ -142,6 +142,20 @@ class DirectInfusionProcessor {
                  bool isRequireAdductPrecursorMatch,
                  bool debug);
 
+         /**
+          * @brief processSingleSample
+          * @param sample
+          * @param directInfusionSearchSet
+          * @param debug
+          * @return
+          *
+          * Returns DirectInfusionAnnotation assessments for a single sample.
+          * TODO: think about how to agglomerate these across samples?
+          * What to do when there are different compositions in different sample?
+          * eg, sample 1 has 70% A, 20% B, 10% C, and sample 2 and 50% A, 0% B, 0% C, and 50% D?
+          *
+          * Definitely some choices to be made here
+          */
          static vector<DirectInfusionAnnotation*> processSingleSample(
                  mzSample *sample,
                  shared_ptr<DirectInfusionSearchSet> directInfusionSearchSet,
