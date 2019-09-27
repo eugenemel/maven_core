@@ -64,6 +64,7 @@ shared_ptr<DirectInfusionSearchSet> DirectInfusionProcessor::getSearchSet(mzSamp
 
                 if (compoundMz > mzRange.first && compoundMz < mzRange.second) {
                     directInfusionSearchSet->compoundsByMapKey.insert(make_pair(mapKey, make_pair(compound, adduct)));
+                    break;
                 }
             }
         }
