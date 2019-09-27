@@ -86,6 +86,39 @@ public:
 
 };
 
+/**
+ * @brief The DirectInfusionSearchParameters class
+ *
+ * single class to contain all parameters used in direct infusion search analysis.
+ */
+class DirectInfusionSearchParameters {
+
+public:
+
+    /**
+     * @brief minNumMatches
+     * mininum number of matches for a single <Compound*, Adduct*>
+     * to match to a spectrum in order to retain this <Compound*, Adduct*>
+     * as a component of the observed spectrum
+     */
+    int minNumMatches = 3;
+
+    /**
+     * @brief minNumUniqueMatches
+     * minimum number of matches for a single <Compound*, Adduct*>
+     * with unique fragment m/zs, given the universe of all <Compound*, Adduct*>
+     * matches searched.
+     *
+     * TODO: should this be considered before or after @param minNumMatches?
+     * Could use @param minNumMatches as a first filter, then this as a subsequent filter.
+     */
+    int minNumUniqueMatches = 0;
+};
+
+/**
+ * @brief The DirectInfusionProcessor class
+ * All methods should be static - functional programming paradigm
+ */
 class DirectInfusionProcessor {
 
     public:
