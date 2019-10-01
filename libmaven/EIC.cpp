@@ -216,6 +216,9 @@ Peak* EIC::addPeak(int peakPos) {
 		
 void  EIC::getPeakPositions(int smoothWindow) {
 
+    //Need to explicitly clear out peaks, else an extra peak will be added with each getPeaks() call.
+    peaks.clear();
+
     //cerr << "getPeakPositions() " << " sWindow=" << smoothWindow << " sType=" << smootherType << endl;
 
     unsigned int N = intensity.size();
