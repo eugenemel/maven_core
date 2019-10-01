@@ -137,7 +137,7 @@ public:
      *
      * Definitely some choices to be made here
      */
-     static vector<DirectInfusionAnnotation*> processSingleSample(
+     static map<int, DirectInfusionAnnotation*> processSingleSample(
              mzSample *sample,
              shared_ptr<DirectInfusionSearchSet> directInfusionSearchSet,
              shared_ptr<DirectInfusionSearchParameters> params,

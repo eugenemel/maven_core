@@ -74,13 +74,13 @@ shared_ptr<DirectInfusionSearchSet> DirectInfusionProcessor::getSearchSet(mzSamp
 
 }
 
-vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample(mzSample* sample,
+map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample(mzSample* sample,
                                                                               shared_ptr<DirectInfusionSearchSet> directInfusionSearchSet,
                                                                               shared_ptr<DirectInfusionSearchParameters> params,
                                                                               bool debug) {
 
     MassCalculator massCalc;
-    vector<DirectInfusionAnnotation*> annotations;
+    map<int, DirectInfusionAnnotation*> annotations = {};
 
     if (debug) cerr << "Started DirectInfusionProcessor::processSingleSample()" << endl;
 
@@ -181,7 +181,7 @@ vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample(m
                 //TODO: fancier algorithm here
             }
 
-            annotations.push_back(directInfusionAnnotation);
+            annotations.insert(make_pair(mapKey, directInfusionAnnotation));
         } else {
             delete(directInfusionAnnotation->fragmentationPattern);
             delete(directInfusionAnnotation);
