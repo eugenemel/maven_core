@@ -137,7 +137,12 @@ vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample(m
             numScansPerPrecursorMz++;
         }
 
-        f->buildConsensus(20); //TODO: refactor as parameter
+        if (!f) {
+            delete(directInfusionAnnotation);
+            continue;
+        }
+
+        f->buildConsensus(params->productPpmTolr); //TODO: a separate parameter?
         f->consensus->sortByMz();
 
         directInfusionAnnotation->fragmentationPattern = f;
