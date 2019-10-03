@@ -71,12 +71,14 @@ class MassCalculator {
 
 
     MassCalculator(){}
-    double computeNeutralMass(string formula);
+    static double computeNeutralMass(string formula);
+    static map<string,int> getComposition(string formula);
+
     double computeMass(string formula, int polarity);
     double computeC13IsotopeMass(string formula);
     map<string,double>computeLabeledMasses(string formula, int polarity);
     map<string,double>computeLabeledAbundances(string formula);
-    map<string,int> getComposition(string formula);
+
     void matchMass(double mass, double ppm);
     string prettyName(int c, int h, int n, int o, int p, int s);
     vector<Match> enumerateMasses(double inputMass, double charge, double maxdiff);
@@ -89,7 +91,7 @@ class MassCalculator {
     static bool compNumMatches(const Match& a, const Match& b ) { return a.fragScore.numMatches < b.fragScore.numMatches; }
 
     private:
-        double getElementMass(string elmnt);
+        static double getElementMass(string elmnt);
 
 };
 
