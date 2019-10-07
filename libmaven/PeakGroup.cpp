@@ -450,8 +450,13 @@ void PeakGroup::groupStatistics() {
         meanMz = mzSum/nonZeroCount;
     }
 
-    //if number of samples == 1, assume minimum variation around measurment
-    if (sampleCount <= 1 or minMz == maxMz) { minMz=meanMz-0.001; maxMz=meanMz+0.001; }
+    //if number of samples == 1, assume minimum variation around measurement
+    //Issue 54: unless the samples are direct infusion samples
+    if (maxMz - minMz < 0.5) { //not direct infusion samples
+         if (sampleCount <= 1 or abs(minMz - maxMz)<1e-6) {
+             minMz=meanMz-0.001; maxMz=meanMz+0.001;
+         }
+    }
 
     groupOverlapMatrix();
 }
