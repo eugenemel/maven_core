@@ -138,6 +138,7 @@ class Scan {
     vector <float> mz;
     string scanType;
     string filterLine;
+    string filterString = "";
     mzSample* sample;
 
     void addChildScan(Scan* s) { children.push_back(s); }

@@ -416,6 +416,11 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
             rt = string2float(rtStr);
         }
 
+        string filterString = "";
+        if (scanAttr.count("filter string")){
+            filterString = scanAttr["filter string"];
+        }
+
 
         map<string,string>selectedIon = mzML_cvParams(spectrum.first_element_by_path("precursorList/precursor/selectedIonList/selectedIon"));
         string precursorMzStr = selectedIon["selected ion m/z"];
@@ -472,6 +477,7 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
         scan->intensity = intsVector;
         scan->injectionTime = injectionTime;
         scan->mz= mzVector;
+        scan->filterString = filterString;
         addScan(scan);
     }
  }
