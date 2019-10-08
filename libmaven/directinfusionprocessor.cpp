@@ -3,7 +3,6 @@
 
 using namespace std;
 
-
 shared_ptr<DirectInfusionSearchSet> DirectInfusionProcessor::getSearchSet(mzSample* sample,
                                                                               const vector<Compound*>& compounds,
                                                                               const vector<Adduct*>& adducts,
@@ -160,9 +159,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
             if (s.numMatches >= params->minNumMatches) {
                 if (debug) cerr << compound->name << ": " << s.numMatches << endl;
 
-                //TODO: this should be refined with a much better algorithm
                 dIAnnotatedCompounds.push_back(make_tuple(compound, it->second.second, 0, s));
-
                 matchCounter++;
             }
 
@@ -178,7 +175,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
             if (params->spectralDeconvolutionAlgorithm == SpectralDeconvolutionAlgorithm::NO_DECONVOLUTION) {
                 directInfusionAnnotation->compounds = dIAnnotatedCompounds;
             } else if (params->spectralDeconvolutionAlgorithm == SpectralDeconvolutionAlgorithm::ALL_SHARED_FRAGMENTS){
-                //TODO: fancier algorithm here
+               directInfusionAnnotation->compounds = DirectInfusionProcessor::deconvolveAllShared(dIAnnotatedCompounds, f->consensus, true);
             }
 
             annotations.insert(make_pair(mapKey, directInfusionAnnotation));
@@ -192,6 +189,18 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
     return annotations;
 
+}
+
+vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> DirectInfusionProcessor::deconvolveAllShared(
+        vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> allCandidates,
+        Fragment *observedSpectrum,
+        bool debug){
+
+    if (debug) {
+        cerr << "TODO: deconvolve candidates." << endl;
+    }
+    //TODO
+    return allCandidates;
 }
 
 

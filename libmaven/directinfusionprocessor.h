@@ -142,6 +142,24 @@ public:
              shared_ptr<DirectInfusionSearchSet> directInfusionSearchSet,
              shared_ptr<DirectInfusionSearchParameters> params,
              bool debug);
+
+     /**
+      * @brief deconvolveAllShared
+      * @param allCandidates
+      * @return
+      *
+      * Triggered by SpectralDeconvolutionAlgorithm::ALL_SHARED
+      *
+      * Removes compounds with all shared fragments, computes relative abundance based on
+      * unshared fragments.
+      *
+      * Input is the list of all candidates, plus the observed spectrum they all matched to
+      */
+     static vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> deconvolveAllShared(
+             vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> allCandidates,
+             Fragment *observedSpectrum,
+             bool debug
+             );
 };
 
 /**
