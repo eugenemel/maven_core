@@ -175,7 +175,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
         }
 
         if (matchCounter != 0){
-            if (params->spectralCompositionAlgorithm == SpectralDeconvolutionAlgorithm::DO_NOTHING) {
+            if (params->spectralCompositionAlgorithm == SpectralDeconvolutionAlgorithm::NO_DECONVOLUTION) {
                 directInfusionAnnotation->compounds = dIAnnotatedCompounds;
             } else {
                 //TODO: fancier algorithm here

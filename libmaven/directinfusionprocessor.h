@@ -41,8 +41,8 @@ public:
  * (goal is to determine the relative proportions of different compounds)
  */
 enum class SpectralDeconvolutionAlgorithm {
-    DO_NOTHING,
-    DO_SOMETHING
+    NO_DECONVOLUTION,
+    ALL_SHARED_FRAGMENTS
 };
 
 /**
@@ -92,7 +92,7 @@ public:
      * By default, do nothing, just return all matches, without doing any elimination or quantitation
      * of spectral components.
      */
-    SpectralDeconvolutionAlgorithm spectralCompositionAlgorithm = SpectralDeconvolutionAlgorithm::DO_NOTHING;
+    SpectralDeconvolutionAlgorithm spectralCompositionAlgorithm = SpectralDeconvolutionAlgorithm::NO_DECONVOLUTION;
 
 };
 
