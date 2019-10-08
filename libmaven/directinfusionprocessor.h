@@ -92,7 +92,7 @@ public:
      * By default, do nothing, just return all matches, without doing any elimination or quantitation
      * of spectral components.
      */
-    SpectralDeconvolutionAlgorithm spectralCompositionAlgorithm = SpectralDeconvolutionAlgorithm::NO_DECONVOLUTION;
+    SpectralDeconvolutionAlgorithm spectralDeconvolutionAlgorithm = SpectralDeconvolutionAlgorithm::NO_DECONVOLUTION;
 
 };
 
