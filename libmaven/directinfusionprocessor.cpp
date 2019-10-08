@@ -2,6 +2,7 @@
 
 
 using namespace std;
+using namespace mzUtils;
 
 shared_ptr<DirectInfusionSearchSet> DirectInfusionProcessor::getSearchSet(mzSample* sample,
                                                                               const vector<Compound*>& compounds,
@@ -195,6 +196,56 @@ vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> DirectInfusio
         vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> allCandidates,
         Fragment *observedSpectrum,
         bool debug){
+
+    map<int, vector<Compound*>> fragToCompounds = {};
+    map<Compound*, vector<int>> compoundToFrags = {};
+
+    typedef map<int, vector<Compound*>>::iterator fragToCompoundIterator;
+    typedef map<Compound*, vector<int>>::iterator compoundToFragIterator;
+
+    for (auto tuple : allCandidates) {
+        Compound *compound = get<0>(tuple);
+
+        vector<int> compoundFrags(compound->fragment_mzs.size());
+
+        for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
+
+            int fragInt = mzToIntKey(compound->fragment_mzs.at(i), 1000);
+
+            compoundFrags.at(i) = fragInt;
+
+            fragToCompoundIterator it = fragToCompounds.find(fragInt);
+
+            if (it != fragToCompounds.end()) {
+                fragToCompounds[fragInt].push_back(compound);
+            } else {
+                vector<Compound*> matchingCompounds(1);
+                matchingCompounds.at(0) = compound;
+                fragToCompounds.insert(make_pair(fragInt, matchingCompounds));
+            }
+        }
+
+        compoundToFrags.insert(make_pair(compound, compoundFrags));
+
+    }
+
+    if (debug) {
+        cerr << "Fragments --> Compounds:" << compoundToFrags.size() << endl;
+
+        //TODO
+
+        cerr << "Compounds --> Fragments:" << fragToCompounds.size() << endl;
+    }
+    /*
+     * Organize all fragments in a multimap
+     *
+     * fragment --> 1000 * m/z floored
+     *
+     * fragment --> all matching compounds
+     * compound --> all fragment ID
+     *
+     * For each compound X if there exists a compound Y that contains all fragments of X,
+     */
 
     if (debug) {
         cerr << "TODO: deconvolve candidates." << endl;
