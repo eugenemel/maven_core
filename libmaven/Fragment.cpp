@@ -372,24 +372,24 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
      * x = index of frag peak in a
      * y = index of frag peak in b
      */
-    vector<int> ranks = findFragPairsGreedyMz(a, b, maxDeltaMz);
+    s.ranks = findFragPairsGreedyMz(a, b, maxDeltaMz);
 
-    for(int rank: ranks) { if(rank != -1) s.numMatches++; }
+    for(int rank: s.ranks) { if(rank != -1) s.numMatches++; }
 
 //    cerr << "Num Matches=" << s.numMatches << endl;
 
     //annotate?
-    for(int i=0; i<ranks.size();i++) other->annotations[ranks[i]]=this->annotations[i];
+    for(int i=0; i < s.ranks.size(); i++) other->annotations[s.ranks[i]]=this->annotations[i];
 
     s.fractionMatched = s.numMatches / a->nobs();
-    s.spearmanRankCorrelation = spearmanRankCorrelation(ranks);
-    s.ticMatched = ticMatched(ranks);
-    s.mzFragError =  mzErr(ranks,b);
+    s.spearmanRankCorrelation = spearmanRankCorrelation(s.ranks);
+    s.ticMatched = ticMatched(s.ranks);
+    s.mzFragError =  mzErr(s.ranks,b);
     s.dotProduct = dotProduct(b);
     s.hypergeomScore  = SHP(s.numMatches,a->nobs(),b->nobs(),100000) + s.ticMatched; // ticMatch is tie breaker
-    s.mvhScore = MVH(ranks,b);
-    s.weightedDotProduct = mzWeightedDotProduct(ranks,b);
-    s.matchedQuantiles = matchedRankVector(ranks,b);
+    s.mvhScore = MVH(s.ranks,b);
+    s.weightedDotProduct = mzWeightedDotProduct(s.ranks,b);
+    s.matchedQuantiles = matchedRankVector(s.ranks,b);
     //s.dotProductShuffle = this->dotProductShuffle(b,2000);
 
     //cerr << "scoreMatch:\n" << a->nobs() << "\t" << b->nobs() << "\t" << s.numMatches << " hyper=" << s.hypergeomScore << "\n";

@@ -52,6 +52,7 @@ struct FragmentationMatchScore {
     double mvhScore;
     double ms2purity;
     vector<double> matchedQuantiles;
+    vector<int> ranks;
 
     static vector<string> getScoringAlgorithmNames() {
         vector<string> names;
@@ -112,6 +113,7 @@ struct FragmentationMatchScore {
 		matchedQuantiles=b.matchedQuantiles;
 		dotProductShuffle = b.dotProductShuffle;
         fractionMatched = b.fractionMatched;
+        ranks=b.ranks;
         return *this;
     }
 
