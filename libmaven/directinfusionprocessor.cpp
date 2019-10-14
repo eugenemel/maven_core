@@ -269,6 +269,36 @@ vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> DirectInfusio
 
     pair<map<int, vector<Compound*>>, map<Compound*, vector<int>>> matchInfo = DirectInfusionProcessor::getMatches(allCandidates, debug);
 
+    map<int, vector<Compound*>> fragToCompounds = matchInfo.first;
+    map<Compound*, vector<int>> compoundToFrags = matchInfo.second;
+
+    //TODO: refactor into class, subclass, etc
+    if (algorithm == SpectralCompositionAlgorithm::MEDIAN_UNIQUE) {
+
+        map<Compound*, vector<float>> compoundToUniqueFragmentIntensities = {};
+
+        for (fragToCompoundIterator iterator = fragToCompounds.begin(); iterator != fragToCompounds.end(); ++iterator) {
+            if (iterator->second.size() == 1) { // unique fragment
+
+                Compound * compound = iterator->second.at(0);
+                int fragId = iterator->first;
+
+                //TODO: need to get intensity of this fragment in observed spectrum
+                float observedFragIntensity = 0.0f; //TODO
+
+                compoundToFragIntensityIterator it = compoundToUniqueFragmentIntensities.find(compound);
+                if (it != compoundToUniqueFragmentIntensities.end()) {
+                    compoundToUniqueFragmentIntensities[compound].push_back(observedFragIntensity);
+                } else {
+                    vector<float> observedIntensities(1);
+                    observedIntensities.at(0) = observedFragIntensity;
+                    compoundToUniqueFragmentIntensities.insert(make_pair(compound, observedIntensities));
+                }
+
+            }
+        }
+    }
+
     /*
      * Organize all fragments in a multimap
      *

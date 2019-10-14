@@ -42,7 +42,7 @@ public:
  */
 enum class SpectralCompositionAlgorithm {
     ALL_CANDIDATES,
-    ALL_SHARED_FRAGMENTS
+    MEDIAN_UNIQUE
 };
 
 /**
@@ -236,5 +236,6 @@ public:
 
 typedef map<int, vector<Compound*>>::iterator fragToCompoundIterator;
 typedef map<Compound*, vector<int>>::iterator compoundToFragIterator;
+typedef map<Compound*, vector<float>>::iterator compoundToFragIntensityIterator;
 
 
