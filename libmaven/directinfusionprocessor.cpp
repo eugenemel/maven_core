@@ -112,7 +112,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
         directInfusionAnnotation->precMzMax = precMzMax;
         directInfusionAnnotation->sample = sample;
 
-        vector<DirectInfusionMatchData> dIAnnotatedCompounds;
+        vector<shared_ptr<DirectInfusionMatchData>> dIAnnotatedCompounds;
 
         if (debug) {
             cerr << "=========================================" << endl;
@@ -160,10 +160,10 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
             if (s.numMatches >= params->minNumMatches) {
                 if (debug) cerr << compound->name << ": " << s.numMatches << endl;
 
-                DirectInfusionMatchData directInfusionMatchData;
-                directInfusionMatchData.compound = compound;
-                directInfusionMatchData.adduct = it->second.second;
-                directInfusionMatchData.fragmentationMatchScore = s;
+                shared_ptr<DirectInfusionMatchData> directInfusionMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
+                directInfusionMatchData->compound = compound;
+                directInfusionMatchData->adduct = it->second.second;
+                directInfusionMatchData->fragmentationMatchScore = s;
 
                 dIAnnotatedCompounds.push_back(directInfusionMatchData);
 
@@ -199,7 +199,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 }
 
 unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInformation(
-        vector<DirectInfusionMatchData> allCandidates,
+        vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
         Fragment *observedSpectrum,
         bool debug){
 
@@ -207,8 +207,8 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
     for (auto directInfusionMatchData : allCandidates) {
 
-        Compound *compound = directInfusionMatchData.compound;
-        FragmentationMatchScore fragmentationMatchScore = directInfusionMatchData.fragmentationMatchScore;
+        Compound *compound = directInfusionMatchData->compound;
+        FragmentationMatchScore fragmentationMatchScore = directInfusionMatchData->fragmentationMatchScore;
 
         vector<int> compoundFrags(static_cast<unsigned int>(fragmentationMatchScore.numMatches));
 
@@ -275,8 +275,8 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
     return matchInfo;
 }
 
-vector<DirectInfusionMatchData> DirectInfusionProcessor::determineComposition(
-        vector<DirectInfusionMatchData> allCandidates,
+vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineComposition(
+        vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
         Fragment *observedSpectrum,
         enum SpectralCompositionAlgorithm algorithm,
         bool debug){

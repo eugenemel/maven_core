@@ -190,8 +190,8 @@ public:
       *
       * Input is the list of all candidates, plus the observed spectrum they all matched to
       */
-     static vector<DirectInfusionMatchData> determineComposition(
-             vector<DirectInfusionMatchData> allCandidates,
+     static vector<shared_ptr<DirectInfusionMatchData>> determineComposition(
+             vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
              Fragment *observedSpectrum,
              SpectralCompositionAlgorithm algorithm,
              bool debug
@@ -211,7 +211,7 @@ public:
       * the compound match data into maps.
       */
      static unique_ptr<DirectInfusionMatchInformation> getMatchInformation(
-             vector<DirectInfusionMatchData> allCandidates,
+             vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
              Fragment *observedSpectrum,
              bool debug);
 };
@@ -267,7 +267,7 @@ public:
      *
      * FragmentationMatchScores are also provided.
      */
-    vector<DirectInfusionMatchData> compounds;
+    vector<shared_ptr<DirectInfusionMatchData>> compounds;
 };
 
 typedef map<int, vector<Compound*>>::iterator fragToCompoundIterator;
