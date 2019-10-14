@@ -97,6 +97,22 @@ public:
 };
 
 /**
+ * @brief The DirectInfusionMatchInformation structure
+ *
+ * A structure to organize all fragment matches from all compound, adduct pairs that match to a single
+ * direct infusion spectrum.
+ *
+ */
+struct DirectInfusionMatchInformation {
+
+public:
+    map<int, vector<Compound*>> fragToCompounds;
+    map<Compound*, vector<int>> compoundToFrags;
+    int getIntensity(int fragId, Compound *compound);
+    int getIntensity(int fragId, Fragment *observedSpectrum);
+};
+
+/**
  * @brief The DirectInfusionProcessor class
  * All methods should be static - functional programming paradigm
  */
@@ -175,7 +191,7 @@ public:
       * Note that this function does no processing, filtering, or analysis - it simply reorganizes
       * the compound match data into maps.
       */
-     static pair<map<int, vector<Compound*>>, map<Compound*, vector<int>>> getMatches(
+     static unique_ptr<DirectInfusionMatchInformation> getMatchInformation(
              vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> allCandidates,
              bool debug);
 };

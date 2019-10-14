@@ -192,7 +192,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
 }
 
-pair<map<int, vector<Compound*>>, map<Compound*, vector<int>>> DirectInfusionProcessor::getMatches(
+unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInformation(
         vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> allCandidates,
         bool debug){
 
@@ -258,7 +258,11 @@ pair<map<int, vector<Compound*>>, map<Compound*, vector<int>>> DirectInfusionPro
         }
     }
 
-    return make_pair(fragToCompounds, compoundToFrags);
+    unique_ptr<DirectInfusionMatchInformation> matchInfo = unique_ptr<DirectInfusionMatchInformation>(new DirectInfusionMatchInformation());
+    matchInfo->compoundToFrags = compoundToFrags;
+    matchInfo->fragToCompounds = fragToCompounds;
+
+    return matchInfo;
 }
 
 vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> DirectInfusionProcessor::determineComposition(
@@ -267,17 +271,14 @@ vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> DirectInfusio
         enum SpectralCompositionAlgorithm algorithm,
         bool debug){
 
-    pair<map<int, vector<Compound*>>, map<Compound*, vector<int>>> matchInfo = DirectInfusionProcessor::getMatches(allCandidates, debug);
-
-    map<int, vector<Compound*>> fragToCompounds = matchInfo.first;
-    map<Compound*, vector<int>> compoundToFrags = matchInfo.second;
+    unique_ptr<DirectInfusionMatchInformation> matchInfo = DirectInfusionProcessor::getMatchInformation(allCandidates, debug);
 
     //TODO: refactor into class, subclass, etc
     if (algorithm == SpectralCompositionAlgorithm::MEDIAN_UNIQUE) {
 
         map<Compound*, vector<float>> compoundToUniqueFragmentIntensities = {};
 
-        for (fragToCompoundIterator iterator = fragToCompounds.begin(); iterator != fragToCompounds.end(); ++iterator) {
+        for (fragToCompoundIterator iterator = matchInfo->fragToCompounds.begin(); iterator != matchInfo->fragToCompounds.end(); ++iterator) {
             if (iterator->second.size() == 1) { // unique fragment
 
                 Compound * compound = iterator->second.at(0);
