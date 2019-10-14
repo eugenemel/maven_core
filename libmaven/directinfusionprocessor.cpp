@@ -192,21 +192,12 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
 }
 
-vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> DirectInfusionProcessor::determineComposition(
+pair<map<int, vector<Compound*>>, map<Compound*, vector<int>>> DirectInfusionProcessor::getMatches(
         vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> allCandidates,
-        Fragment *observedSpectrum,
-        enum SpectralCompositionAlgorithm algorithm,
         bool debug){
-
-    /*
-     * [1] ORGANIZE ALL FRAGMENT MATCHES IN ALL COMPOUNDS
-     */
 
     map<int, vector<Compound*>> fragToCompounds = {};
     map<Compound*, vector<int>> compoundToFrags = {};
-
-    typedef map<int, vector<Compound*>>::iterator fragToCompoundIterator;
-    typedef map<Compound*, vector<int>>::iterator compoundToFragIterator;
 
     for (auto tuple : allCandidates) {
 
@@ -266,6 +257,17 @@ vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> DirectInfusio
             cerr << endl;
         }
     }
+
+    return make_pair(fragToCompounds, compoundToFrags);
+}
+
+vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> DirectInfusionProcessor::determineComposition(
+        vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> allCandidates,
+        Fragment *observedSpectrum,
+        enum SpectralCompositionAlgorithm algorithm,
+        bool debug){
+
+    pair<map<int, vector<Compound*>>, map<Compound*, vector<int>>> matchInfo = DirectInfusionProcessor::getMatches(allCandidates, debug);
 
     /*
      * Organize all fragments in a multimap

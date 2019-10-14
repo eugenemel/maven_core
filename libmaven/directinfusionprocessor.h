@@ -161,6 +161,23 @@ public:
              SpectralCompositionAlgorithm algorithm,
              bool debug
              );
+
+     /**
+      * @brief getMatches
+      * @param allCandidates
+      *
+      * @return
+      * function to return all compound matches organized into maps, either with key as compound
+      * or fragment m/z.
+      *
+      * fragments converted m/z <--> int keys using mzToIntKey(mz, 1000) and intKeyToMz(intKey, 1000).
+      *
+      * Note that this function does no processing, filtering, or analysis - it simply reorganizes
+      * the compound match data into maps.
+      */
+     static pair<map<int, vector<Compound*>>, map<Compound*, vector<int>>> getMatches(
+             vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> allCandidates,
+             bool debug);
 };
 
 /**
@@ -216,5 +233,8 @@ public:
      */
     vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> compounds;
 };
+
+typedef map<int, vector<Compound*>>::iterator fragToCompoundIterator;
+typedef map<Compound*, vector<int>>::iterator compoundToFragIterator;
 
 
