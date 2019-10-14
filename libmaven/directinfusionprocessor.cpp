@@ -173,10 +173,10 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
         }
 
         if (matchCounter != 0){
-            if (params->spectralDeconvolutionAlgorithm == SpectralDeconvolutionAlgorithm::NO_DECONVOLUTION) {
+            if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES) {
                 directInfusionAnnotation->compounds = dIAnnotatedCompounds;
-            } else if (params->spectralDeconvolutionAlgorithm == SpectralDeconvolutionAlgorithm::ALL_SHARED_FRAGMENTS){
-               directInfusionAnnotation->compounds = DirectInfusionProcessor::deconvolveAllShared(dIAnnotatedCompounds, f->consensus, true);
+            } else {
+               directInfusionAnnotation->compounds = DirectInfusionProcessor::determineComposition(dIAnnotatedCompounds, f->consensus, params->spectralCompositionAlgorithm, true);
             }
 
             annotations.insert(make_pair(mapKey, directInfusionAnnotation));
@@ -192,10 +192,15 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
 }
 
-vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> DirectInfusionProcessor::deconvolveAllShared(
+vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> DirectInfusionProcessor::determineComposition(
         vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> allCandidates,
         Fragment *observedSpectrum,
+        enum SpectralCompositionAlgorithm algorithm,
         bool debug){
+
+    /*
+     * [1] ORGANIZE ALL FRAGMENT MATCHES IN ALL COMPOUNDS
+     */
 
     map<int, vector<Compound*>> fragToCompounds = {};
     map<Compound*, vector<int>> compoundToFrags = {};
@@ -204,15 +209,22 @@ vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> DirectInfusio
     typedef map<Compound*, vector<int>>::iterator compoundToFragIterator;
 
     for (auto tuple : allCandidates) {
+
         Compound *compound = get<0>(tuple);
+        FragmentationMatchScore fragmentationMatchScore = get<3>(tuple);
 
-        vector<int> compoundFrags(compound->fragment_mzs.size());
+        vector<int> compoundFrags(static_cast<unsigned int>(fragmentationMatchScore.numMatches));
 
+        unsigned int matchCounter = 0;
         for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
+
+            //skip unmatched peaks
+            if (fragmentationMatchScore.ranks.at(i) == -1) continue;
 
             int fragInt = mzToIntKey(compound->fragment_mzs.at(i), 1000);
 
-            compoundFrags.at(i) = fragInt;
+            compoundFrags.at(matchCounter) = fragInt;
+            matchCounter++;
 
             fragToCompoundIterator it = fragToCompounds.find(fragInt);
 
@@ -230,12 +242,31 @@ vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> DirectInfusio
     }
 
     if (debug) {
-        cerr << "Fragments --> Compounds:" << compoundToFrags.size() << endl;
+        cerr << "Fragments --> Compounds: (" << compoundToFrags.size() << " passing compounds)" << endl;
 
-        //TODO
+        for (fragToCompoundIterator iterator = fragToCompounds.begin(); iterator != fragToCompounds.end(); ++iterator) {
+            int frag = iterator->first;
+            vector<Compound*> compounds = iterator->second;
+            cerr<< "frag= " << intKeyToMz(frag, 1000) << " m/z : ";
+            for (auto compound : compounds) {
+                cerr << compound->name << "|" << compound->adductString << " ";
+            }
+            cerr << endl;
+        }
 
-        cerr << "Compounds --> Fragments:" << fragToCompounds.size() << endl;
+        cerr << "Compounds --> Fragments: (" << fragToCompounds.size() << " matched fragments)" << endl;
+
+        for (compoundToFragIterator iterator = compoundToFrags.begin(); iterator != compoundToFrags.end(); ++iterator) {
+            Compound* compound = iterator->first;
+            vector<int> frags = iterator->second;
+            cerr << "Compound= " << compound->name << "|" << compound->adductString << ": ";
+            for (auto frag : frags){
+                cerr << intKeyToMz(frag, 1000) << " ";
+            }
+            cerr << endl;
+        }
     }
+
     /*
      * Organize all fragments in a multimap
      *

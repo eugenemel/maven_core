@@ -6,7 +6,7 @@
 
 class mzSample;
 class DirectInfusionAnnotation;
-enum class SpectralDeconvolutionAlgorithm;
+enum class SpectralCompositionAlgorithm;
 
 /**
  * @brief The DirectInfusionSearchSet class
@@ -40,8 +40,8 @@ public:
  * Short description of different approaches for spectral deconvolution
  * (goal is to determine the relative proportions of different compounds)
  */
-enum class SpectralDeconvolutionAlgorithm {
-    NO_DECONVOLUTION,
+enum class SpectralCompositionAlgorithm {
+    ALL_CANDIDATES,
     ALL_SHARED_FRAGMENTS
 };
 
@@ -92,7 +92,7 @@ public:
      * By default, do nothing, just return all matches, without doing any elimination or quantitation
      * of spectral components.
      */
-    SpectralDeconvolutionAlgorithm spectralDeconvolutionAlgorithm = SpectralDeconvolutionAlgorithm::NO_DECONVOLUTION;
+    SpectralCompositionAlgorithm spectralCompositionAlgorithm = SpectralCompositionAlgorithm::ALL_CANDIDATES;
 
 };
 
@@ -155,9 +155,10 @@ public:
       *
       * Input is the list of all candidates, plus the observed spectrum they all matched to
       */
-     static vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> deconvolveAllShared(
+     static vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> determineComposition(
              vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> allCandidates,
              Fragment *observedSpectrum,
+             SpectralCompositionAlgorithm algorithm,
              bool debug
              );
 };
