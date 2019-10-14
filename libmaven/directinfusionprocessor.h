@@ -118,16 +118,16 @@ struct DirectInfusionMatchData {
 struct DirectInfusionMatchInformation {
 
 public:
-    map<int, vector<Compound*>> fragToCompounds = {};
-    map<Compound*, vector<int>> compoundToFrags = {};
-    map<pair<int, Compound*>,float> fragToTheoreticalIntensity = {};
-    map<pair<int, Compound*>,float> fragToObservedIntensity = {};
+    map<int, vector<shared_ptr<DirectInfusionMatchData>>> fragToMatchData = {};
+    map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToFrags = {};
+    map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> fragToTheoreticalIntensity = {};
+    map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> fragToObservedIntensity = {};
 
-    float getNormalizedTheoreticalIntensity(int fragId, Compound *compound){return fragToTheoreticalIntensity.at(make_pair(fragId, compound));}
-    float getObservedIntensity(int fragId, Compound *compound){return fragToObservedIntensity.at(make_pair(fragId, compound));}
+    float getNormalizedTheoreticalIntensity(int fragId, shared_ptr<DirectInfusionMatchData> matchData){return fragToTheoreticalIntensity.at(make_pair(fragId, matchData));}
+    float getObservedIntensity(int fragId, shared_ptr<DirectInfusionMatchData> matchData){return fragToObservedIntensity.at(make_pair(fragId, matchData));}
 
-    float getIntensityRatio(int fragId, Compound *compound){
-        return (getObservedIntensity(fragId, compound) / getNormalizedTheoreticalIntensity(fragId,compound));
+    float getIntensityRatio(int fragId, shared_ptr<DirectInfusionMatchData> matchData){
+        return (getObservedIntensity(fragId, matchData) / getNormalizedTheoreticalIntensity(fragId, matchData));
     }
 };
 
@@ -270,9 +270,9 @@ public:
     vector<shared_ptr<DirectInfusionMatchData>> compounds;
 };
 
-typedef map<int, vector<Compound*>>::iterator fragToCompoundIterator;
-typedef map<Compound*, vector<int>>::iterator compoundToFragIterator;
-typedef map<Compound*, vector<float>>::iterator compoundToFragIntensityIterator;
-typedef map<Compound*, float>::iterator compoundToFloatIterator;
+typedef map<int, vector<shared_ptr<DirectInfusionMatchData>>>::iterator fragToMatchDataIterator;
+typedef map<shared_ptr<DirectInfusionMatchData>, vector<int>>::iterator matchDataToFragIterator;
+typedef map<shared_ptr<DirectInfusionMatchData>, vector<float>>::iterator matchDataToFragIntensityIterator;
+typedef map<shared_ptr<DirectInfusionMatchData>, float>::iterator matchDataToFloatIterator;
 
 
