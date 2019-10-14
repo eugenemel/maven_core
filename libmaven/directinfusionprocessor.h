@@ -106,10 +106,17 @@ public:
 struct DirectInfusionMatchInformation {
 
 public:
-    map<int, vector<Compound*>> fragToCompounds;
-    map<Compound*, vector<int>> compoundToFrags;
-    int getIntensity(int fragId, Compound *compound);
-    int getIntensity(int fragId, Fragment *observedSpectrum);
+    map<int, vector<Compound*>> fragToCompounds = {};
+    map<Compound*, vector<int>> compoundToFrags = {};
+    map<pair<int, Compound*>,float> fragToTheoreticalIntensity = {};
+    map<pair<int, Compound*>,float> fragToObservedIntensity = {};
+
+    float getNormalizedTheoreticalIntensity(int fragId, Compound *compound){return fragToTheoreticalIntensity.at(make_pair(fragId, compound));}
+    float getObservedIntensity(int fragId, Compound *compound){return fragToObservedIntensity.at(make_pair(fragId, compound));}
+
+    float getIntensityRatio(int fragId, Compound *compound){
+        return (getObservedIntensity(fragId, compound) / getNormalizedTheoreticalIntensity(fragId,compound));
+    }
 };
 
 /**
@@ -193,6 +200,7 @@ public:
       */
      static unique_ptr<DirectInfusionMatchInformation> getMatchInformation(
              vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> allCandidates,
+             Fragment *observedSpectrum,
              bool debug);
 };
 
@@ -253,5 +261,6 @@ public:
 typedef map<int, vector<Compound*>>::iterator fragToCompoundIterator;
 typedef map<Compound*, vector<int>>::iterator compoundToFragIterator;
 typedef map<Compound*, vector<float>>::iterator compoundToFragIntensityIterator;
+typedef map<Compound*, float>::iterator compoundToFloatIterator;
 
 

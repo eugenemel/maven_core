@@ -194,10 +194,10 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
 unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInformation(
         vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> allCandidates,
+        Fragment *observedSpectrum,
         bool debug){
 
-    map<int, vector<Compound*>> fragToCompounds = {};
-    map<Compound*, vector<int>> compoundToFrags = {};
+    unique_ptr<DirectInfusionMatchInformation> matchInfo = unique_ptr<DirectInfusionMatchInformation>(new DirectInfusionMatchInformation());
 
     for (auto tuple : allCandidates) {
 
@@ -217,25 +217,33 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             compoundFrags.at(matchCounter) = fragInt;
             matchCounter++;
 
-            fragToCompoundIterator it = fragToCompounds.find(fragInt);
+            pair<int, Compound*> key = make_pair(fragInt, compound);
 
-            if (it != fragToCompounds.end()) {
-                fragToCompounds[fragInt].push_back(compound);
+            matchInfo->fragToTheoreticalIntensity.insert(make_pair(key, (compound->fragment_intensity.at(i))));
+
+            int observedIndex = fragmentationMatchScore.ranks.at(i);
+
+            matchInfo->fragToObservedIntensity.insert(make_pair(key, observedSpectrum->intensity_array.at(observedIndex)));
+
+            fragToCompoundIterator it = matchInfo->fragToCompounds.find(fragInt);
+
+            if (it != matchInfo->fragToCompounds.end()) {
+                matchInfo->fragToCompounds[fragInt].push_back(compound);
             } else {
                 vector<Compound*> matchingCompounds(1);
                 matchingCompounds.at(0) = compound;
-                fragToCompounds.insert(make_pair(fragInt, matchingCompounds));
+                matchInfo->fragToCompounds.insert(make_pair(fragInt, matchingCompounds));
             }
         }
 
-        compoundToFrags.insert(make_pair(compound, compoundFrags));
+        matchInfo->compoundToFrags.insert(make_pair(compound, compoundFrags));
 
     }
 
     if (debug) {
-        cerr << "Fragments --> Compounds: (" << compoundToFrags.size() << " passing compounds)" << endl;
+        cerr << "Fragments --> Compounds: (" << matchInfo->compoundToFrags.size() << " passing compounds)" << endl;
 
-        for (fragToCompoundIterator iterator = fragToCompounds.begin(); iterator != fragToCompounds.end(); ++iterator) {
+        for (fragToCompoundIterator iterator = matchInfo->fragToCompounds.begin(); iterator != matchInfo->fragToCompounds.end(); ++iterator) {
             int frag = iterator->first;
             vector<Compound*> compounds = iterator->second;
             cerr<< "frag= " << intKeyToMz(frag, 1000) << " m/z : ";
@@ -245,9 +253,9 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             cerr << endl;
         }
 
-        cerr << "Compounds --> Fragments: (" << fragToCompounds.size() << " matched fragments)" << endl;
+        cerr << "Compounds --> Fragments: (" << matchInfo->fragToCompounds.size() << " matched fragments)" << endl;
 
-        for (compoundToFragIterator iterator = compoundToFrags.begin(); iterator != compoundToFrags.end(); ++iterator) {
+        for (compoundToFragIterator iterator = matchInfo->compoundToFrags.begin(); iterator != matchInfo->compoundToFrags.end(); ++iterator) {
             Compound* compound = iterator->first;
             vector<int> frags = iterator->second;
             cerr << "Compound= " << compound->name << "|" << compound->adductString << ": ";
@@ -258,10 +266,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
         }
     }
 
-    unique_ptr<DirectInfusionMatchInformation> matchInfo = unique_ptr<DirectInfusionMatchInformation>(new DirectInfusionMatchInformation());
-    matchInfo->compoundToFrags = compoundToFrags;
-    matchInfo->fragToCompounds = fragToCompounds;
-
     return matchInfo;
 }
 
@@ -271,7 +275,7 @@ vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> DirectInfusio
         enum SpectralCompositionAlgorithm algorithm,
         bool debug){
 
-    unique_ptr<DirectInfusionMatchInformation> matchInfo = DirectInfusionProcessor::getMatchInformation(allCandidates, debug);
+    unique_ptr<DirectInfusionMatchInformation> matchInfo = DirectInfusionProcessor::getMatchInformation(allCandidates, observedSpectrum, debug);
 
     //TODO: refactor into class, subclass, etc
     if (algorithm == SpectralCompositionAlgorithm::MEDIAN_UNIQUE) {
@@ -284,37 +288,65 @@ vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> DirectInfusio
                 Compound * compound = iterator->second.at(0);
                 int fragId = iterator->first;
 
-                //TODO: need to get intensity of this fragment in observed spectrum
-                float observedFragIntensity = 0.0f; //TODO
+                float intensityRatio = matchInfo->getIntensityRatio(fragId, compound);
 
                 compoundToFragIntensityIterator it = compoundToUniqueFragmentIntensities.find(compound);
                 if (it != compoundToUniqueFragmentIntensities.end()) {
-                    compoundToUniqueFragmentIntensities[compound].push_back(observedFragIntensity);
+                    compoundToUniqueFragmentIntensities[compound].push_back(intensityRatio);
                 } else {
                     vector<float> observedIntensities(1);
-                    observedIntensities.at(0) = observedFragIntensity;
+                    observedIntensities.at(0) = intensityRatio;
                     compoundToUniqueFragmentIntensities.insert(make_pair(compound, observedIntensities));
                 }
 
             }
         }
+
+        map<Compound*, float> results = {};
+        float sumIntensity = 0;
+
+        for (compoundToFragIntensityIterator iterator = compoundToUniqueFragmentIntensities.begin(); iterator != compoundToUniqueFragmentIntensities.end(); ++iterator){
+
+            Compound* compound = iterator->first;
+            vector<float> fragIntensityRatios = iterator->second;
+
+            sort(fragIntensityRatios.begin(), fragIntensityRatios.end());
+
+            float median = 0;
+            unsigned long n = fragIntensityRatios.size();
+            if (n % 2 != 0) {
+                median = fragIntensityRatios.at(n / 2);
+            } else {
+                median = 0.5f*(fragIntensityRatios.at((n-1)/2) + fragIntensityRatios.at(n/2));
+            }
+
+            sumIntensity += median;
+            results.insert(make_pair(compound, median));
+
+            if (debug) {
+                cerr << "Compound= " << compound->name << "|" << compound->adductString << ": ";
+                for (auto frag : fragIntensityRatios){
+                    cerr << frag << " ";
+                }
+                cerr << "median=" << median << endl;
+            }
+
+        }
+
+        for (compoundToFloatIterator iterator = results.begin(); iterator != results.end(); ++iterator) {
+
+            Compound *compound = iterator->first;
+            float intensity = iterator->second;
+
+            float proportion = intensity / sumIntensity;
+
+            if (debug) {
+                cerr << "Compound= " <<compound->name << "|" << compound->adductString <<": " << proportion << endl;
+            }
+        }
+
     }
 
-    /*
-     * Organize all fragments in a multimap
-     *
-     * fragment --> 1000 * m/z floored
-     *
-     * fragment --> all matching compounds
-     * compound --> all fragment ID
-     *
-     * For each compound X if there exists a compound Y that contains all fragments of X,
-     */
-
-    if (debug) {
-        cerr << "TODO: deconvolve candidates." << endl;
-    }
-    //TODO
     return allCandidates;
 }
 
