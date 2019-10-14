@@ -97,6 +97,18 @@ public:
 };
 
 /**
+ * @brief The DirectInfusionMatchData struct
+ *
+ * A container class for organizing association data
+ */
+struct DirectInfusionMatchData {
+    Compound* compound;
+    Adduct* adduct;
+    FragmentationMatchScore fragmentationMatchScore;
+    double proportion = 0;
+};
+
+/**
  * @brief The DirectInfusionMatchInformation structure
  *
  * A structure to organize all fragment matches from all compound, adduct pairs that match to a single
@@ -178,8 +190,8 @@ public:
       *
       * Input is the list of all candidates, plus the observed spectrum they all matched to
       */
-     static vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> determineComposition(
-             vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> allCandidates,
+     static vector<DirectInfusionMatchData> determineComposition(
+             vector<DirectInfusionMatchData> allCandidates,
              Fragment *observedSpectrum,
              SpectralCompositionAlgorithm algorithm,
              bool debug
@@ -199,7 +211,7 @@ public:
       * the compound match data into maps.
       */
      static unique_ptr<DirectInfusionMatchInformation> getMatchInformation(
-             vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> allCandidates,
+             vector<DirectInfusionMatchData> allCandidates,
              Fragment *observedSpectrum,
              bool debug);
 };
@@ -250,12 +262,12 @@ public:
     FragmentationMatchScore fragMatchScore;
 
     /**
-     * each tuple refers to the compound, adduct, and estimated proportion of the spectrum
+     * compound, adduct, and estimated proportion of the spectrum
      * associated with the match.
      *
      * FragmentationMatchScores are also provided.
      */
-    vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> compounds;
+    vector<DirectInfusionMatchData> compounds;
 };
 
 typedef map<int, vector<Compound*>>::iterator fragToCompoundIterator;

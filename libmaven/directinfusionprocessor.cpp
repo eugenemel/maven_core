@@ -112,7 +112,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
         directInfusionAnnotation->precMzMax = precMzMax;
         directInfusionAnnotation->sample = sample;
 
-        vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> dIAnnotatedCompounds;
+        vector<DirectInfusionMatchData> dIAnnotatedCompounds;
 
         if (debug) {
             cerr << "=========================================" << endl;
@@ -160,7 +160,13 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
             if (s.numMatches >= params->minNumMatches) {
                 if (debug) cerr << compound->name << ": " << s.numMatches << endl;
 
-                dIAnnotatedCompounds.push_back(make_tuple(compound, it->second.second, 0, s));
+                DirectInfusionMatchData directInfusionMatchData;
+                directInfusionMatchData.compound = compound;
+                directInfusionMatchData.adduct = it->second.second;
+                directInfusionMatchData.fragmentationMatchScore = s;
+
+                dIAnnotatedCompounds.push_back(directInfusionMatchData);
+
                 matchCounter++;
             }
 
@@ -176,7 +182,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
             if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES) {
                 directInfusionAnnotation->compounds = dIAnnotatedCompounds;
             } else {
-               directInfusionAnnotation->compounds = DirectInfusionProcessor::determineComposition(dIAnnotatedCompounds, f->consensus, params->spectralCompositionAlgorithm, true);
+                directInfusionAnnotation->compounds = DirectInfusionProcessor::determineComposition(dIAnnotatedCompounds, f->consensus, params->spectralCompositionAlgorithm, true);
             }
 
             annotations.insert(make_pair(mapKey, directInfusionAnnotation));
@@ -193,16 +199,16 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 }
 
 unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInformation(
-        vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> allCandidates,
+        vector<DirectInfusionMatchData> allCandidates,
         Fragment *observedSpectrum,
         bool debug){
 
     unique_ptr<DirectInfusionMatchInformation> matchInfo = unique_ptr<DirectInfusionMatchInformation>(new DirectInfusionMatchInformation());
 
-    for (auto tuple : allCandidates) {
+    for (auto directInfusionMatchData : allCandidates) {
 
-        Compound *compound = get<0>(tuple);
-        FragmentationMatchScore fragmentationMatchScore = get<3>(tuple);
+        Compound *compound = directInfusionMatchData.compound;
+        FragmentationMatchScore fragmentationMatchScore = directInfusionMatchData.fragmentationMatchScore;
 
         vector<int> compoundFrags(static_cast<unsigned int>(fragmentationMatchScore.numMatches));
 
@@ -269,8 +275,8 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
     return matchInfo;
 }
 
-vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> DirectInfusionProcessor::determineComposition(
-        vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> allCandidates,
+vector<DirectInfusionMatchData> DirectInfusionProcessor::determineComposition(
+        vector<DirectInfusionMatchData> allCandidates,
         Fragment *observedSpectrum,
         enum SpectralCompositionAlgorithm algorithm,
         bool debug){
@@ -285,7 +291,7 @@ vector<tuple<Compound*, Adduct*, double, FragmentationMatchScore>> DirectInfusio
         for (fragToCompoundIterator iterator = matchInfo->fragToCompounds.begin(); iterator != matchInfo->fragToCompounds.end(); ++iterator) {
             if (iterator->second.size() == 1) { // unique fragment
 
-                Compound * compound = iterator->second.at(0);
+                Compound *compound = iterator->second.at(0);
                 int fragId = iterator->first;
 
                 float intensityRatio = matchInfo->getIntensityRatio(fragId, compound);
