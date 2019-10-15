@@ -182,7 +182,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
             if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES) {
                 directInfusionAnnotation->compounds = dIAnnotatedCompounds;
             } else {
-                directInfusionAnnotation->compounds = DirectInfusionProcessor::determineComposition(dIAnnotatedCompounds, f->consensus, params->spectralCompositionAlgorithm, true);
+                directInfusionAnnotation->compounds = DirectInfusionProcessor::determineComposition(dIAnnotatedCompounds, f->consensus, params->spectralCompositionAlgorithm, debug);
             }
 
             annotations.insert(make_pair(mapKey, directInfusionAnnotation));
