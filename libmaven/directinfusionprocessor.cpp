@@ -384,6 +384,8 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
 
     directInfusionGroupAnnotation->compounds = singleSampleAnnotations.at(0)->compounds;
 
+    directInfusionGroupAnnotation->fragmentationPattern = singleSampleAnnotations.at(0)->fragmentationPattern;
+
     return directInfusionGroupAnnotation;
 }
 
