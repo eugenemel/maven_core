@@ -231,12 +231,6 @@ class DirectInfusionAnnotation {
 public:
 
     /**
-     * @brief sample
-     * source sample
-     */
-    mzSample* sample = nullptr;
-
-    /**
      * @brief precMzMin, precMzMax
      * refers to the m/z of precursors.
      */
@@ -244,22 +238,23 @@ public:
     float precMzMax;
 
     /**
+     * @brief sample
+     * source sample
+     */
+    mzSample* sample = nullptr;
+
+    /**
      * @brief scan
-     * a representative scan.
-     * Potentially, an average of many scans collected over different infusion times.
-     * Or, may just be a scan taken right out of the mzSample.
+     * a single representative scan from the sample.
      */
     Scan *scan = nullptr;
 
     /**
-     * @brief fragmentationPattern and fragMatchScore
-     * fragmentation data. used ultimately for peak group display.
-     *
-     * TODO: refactor to pointers for speed / storage,
-     * but need to worry about memory leaks
+     * @brief fragmentationPattern
+     * Agglomeration of multiple DI scans (if they exist),
+     * otherwise same data as 'scan'.
      */
     Fragment* fragmentationPattern;
-    FragmentationMatchScore fragMatchScore;
 
     /**
      * compound, adduct, and estimated proportion of the spectrum
@@ -268,6 +263,25 @@ public:
      * FragmentationMatchScores are also provided.
      */
     vector<shared_ptr<DirectInfusionMatchData>> compounds;
+};
+
+/**
+ * @brief The DirectInfusionGroupAnnotation class
+ * group of DirectInfusionAnnotation results across many samples.
+ */
+class DirectInfusionGroupAnnotation : DirectInfusionAnnotation {
+
+public:
+
+    /**
+     * @brief annotationBySample
+     * retain original samples for reference.
+     */
+    map<mzSample*, DirectInfusionAnnotation*> annotationBySample = {};
+
+    void clean();
+    static DirectInfusionGroupAnnotation createByAverageProportions(vector<DirectInfusionAnnotation*> singleSampleAnnotations);
+
 };
 
 typedef map<int, vector<shared_ptr<DirectInfusionMatchData>>>::iterator fragToMatchDataIterator;

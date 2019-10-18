@@ -127,7 +127,6 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
             if (numScansPerPrecursorMz == 0){
                 f = new Fragment(it->second, 0, 0, UINT_MAX);
 
-                //TODO: allow for possibility of smarter agglomeration, instead of just taking first valid scan.
                 directInfusionAnnotation->scan = it->second;
 
             } else {
@@ -364,4 +363,27 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineCo
     return allCandidates;
 }
 
+void DirectInfusionGroupAnnotation::clean() {
+    for (map<mzSample*, DirectInfusionAnnotation*>::iterator it = annotationBySample.begin(); it != annotationBySample.end(); ++it) {
+        if (it->second) {
+            delete(it->second);
+        }
+    }
+    annotationBySample.clear();
+}
+
+DirectInfusionGroupAnnotation DirectInfusionGroupAnnotation::createByAverageProportions(vector<DirectInfusionAnnotation*> singleSampleAnnotations) {
+
+    //TODO: stubbed
+    DirectInfusionGroupAnnotation directInfusionGroupAnnotation;
+
+    directInfusionGroupAnnotation.precMzMin = singleSampleAnnotations.at(0)->precMzMin;
+    directInfusionGroupAnnotation.precMzMax = singleSampleAnnotations.at(0)->precMzMax;
+
+    directInfusionGroupAnnotation.annotationBySample.insert(make_pair(singleSampleAnnotations.at(0)->sample, singleSampleAnnotations.at(0)));
+
+    directInfusionGroupAnnotation.compounds = singleSampleAnnotations.at(0)->compounds;
+
+    return directInfusionGroupAnnotation;
+}
 
