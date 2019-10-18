@@ -280,7 +280,7 @@ public:
     map<mzSample*, DirectInfusionAnnotation*> annotationBySample = {};
 
     void clean();
-    static DirectInfusionGroupAnnotation createByAverageProportions(vector<DirectInfusionAnnotation*> singleSampleAnnotations);
+    static unique_ptr<DirectInfusionGroupAnnotation> createByAverageProportions(vector<DirectInfusionAnnotation*> singleSampleAnnotations);
 
 };
 
