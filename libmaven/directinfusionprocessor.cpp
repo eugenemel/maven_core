@@ -381,8 +381,8 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
 
     Fragment *f = nullptr;
 
-    //TODO: need to ultimately deliver a vector of DirectInfusionGroupAnnotations, consider different keys.
-    map<Compound*, float> proportionSums = {};
+    map<shared_ptr<DirectInfusionMatchData>, double, DirectInfusionMatchDataCompare> proportionSums = {};
+    map<shared_ptr<DirectInfusionMatchData>, FragmentationMatchScore, DirectInfusionMatchDataCompare> bestFragMatch = {};
 
     for (auto directInfusionAnnotation : crossSampleAnnotations){
         directInfusionGroupAnnotation->annotationBySample.insert(
@@ -397,22 +397,53 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
         }
 
         for (auto matchData : directInfusionAnnotation->compounds){
-            float runningSum = 0.0f;
-            if (proportionSums.find(matchData->compound) != proportionSums.end()){
-                runningSum += proportionSums.at(matchData->compound);
+
+            double runningSum = 0.0;
+            if (proportionSums.find(matchData) != proportionSums.end()){
+                runningSum += proportionSums.at(matchData);
             }
-            proportionSums.insert(make_pair(matchData->compound, runningSum));
+            proportionSums.insert(make_pair(matchData, runningSum));
+
+            FragmentationMatchScore bestMatch = matchData->fragmentationMatchScore;
+            if (bestFragMatch.find(matchData) != bestFragMatch.end()) {
+                FragmentationMatchScore previousBestMatch = bestFragMatch.at(matchData);
+
+                //TODO: how to decide on best match?
+                if (previousBestMatch.hypergeomScore >= bestMatch.hypergeomScore){
+                    bestMatch = previousBestMatch;
+                }
+            }
+
+            bestFragMatch.insert(make_pair(matchData, bestMatch));
         }
 
     }
 
-    //TODO
-    directInfusionGroupAnnotation->compounds = crossSampleAnnotations.at(0)->compounds;
-
-    f->buildConsensus(params->productPpmTolr); //TODO: a separate parameter?
+    f->buildConsensus(params->productPpmTolr);
     f->consensus->sortByMz();
 
     directInfusionGroupAnnotation->fragmentationPattern = f;
+
+    directInfusionGroupAnnotation->compounds.resize(proportionSums.size());
+
+    double numSamples = static_cast<double>(directInfusionGroupAnnotation->annotationBySample.size());
+
+    unsigned int annotationMatchIndex = 0;
+
+    for (auto matchDataPair : proportionSums) {
+       shared_ptr<DirectInfusionMatchData> groupMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
+
+       shared_ptr<DirectInfusionMatchData> matchData = matchDataPair.first;
+
+       groupMatchData->compound = matchData->compound;
+       groupMatchData->adduct = matchData->adduct;
+       groupMatchData->proportion = matchDataPair.second / numSamples;
+       groupMatchData->fragmentationMatchScore = bestFragMatch.at(matchData);
+
+       directInfusionGroupAnnotation->compounds.at(annotationMatchIndex) = groupMatchData;
+
+       annotationMatchIndex++;
+    }
 
     return directInfusionGroupAnnotation;
 }

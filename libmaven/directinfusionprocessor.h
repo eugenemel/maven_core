@@ -109,6 +109,21 @@ struct DirectInfusionMatchData {
 };
 
 /**
+ * @brief The DirectInfusionMatchDataCompare struct
+ *
+ * Special class for comparisons
+ */
+struct DirectInfusionMatchDataCompare {
+    bool operator() (const shared_ptr<DirectInfusionMatchData>& lhs, const shared_ptr<DirectInfusionMatchData>& rhs) const {
+        if (lhs->compound == rhs->compound) {
+            return lhs->adduct < rhs->adduct;
+        } else {
+            return lhs->compound < rhs->compound;
+        }
+    }
+};
+
+/**
  * @brief The DirectInfusionMatchInformation structure
  *
  * A structure to organize all fragment matches from all compound, adduct pairs that match to a single
