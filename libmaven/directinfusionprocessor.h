@@ -269,7 +269,7 @@ public:
  * @brief The DirectInfusionGroupAnnotation class
  * group of DirectInfusionAnnotation results across many samples.
  */
-class DirectInfusionGroupAnnotation : DirectInfusionAnnotation {
+class DirectInfusionGroupAnnotation : public DirectInfusionAnnotation {
 
 public:
 
@@ -280,7 +280,15 @@ public:
     map<mzSample*, DirectInfusionAnnotation*> annotationBySample = {};
 
     void clean();
-    static unique_ptr<DirectInfusionGroupAnnotation> createByAverageProportions(vector<DirectInfusionAnnotation*> singleSampleAnnotations);
+
+    /**
+     * @brief createByAverageProportions
+     * @param singleSampleAnnotations
+     *
+     * @return pointer to DirectInfusionGroupAnnotation object.
+     * This pointer must be deleted explicitly! Cannot use smart pointers b/c of QMetaType rules.
+     */
+    static DirectInfusionGroupAnnotation* createByAverageProportions(vector<DirectInfusionAnnotation*> singleSampleAnnotations);
 
 };
 

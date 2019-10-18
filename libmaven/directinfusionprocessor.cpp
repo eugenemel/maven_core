@@ -372,10 +372,10 @@ void DirectInfusionGroupAnnotation::clean() {
     annotationBySample.clear();
 }
 
-unique_ptr<DirectInfusionGroupAnnotation> DirectInfusionGroupAnnotation::createByAverageProportions(vector<DirectInfusionAnnotation*> singleSampleAnnotations) {
+DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAverageProportions(vector<DirectInfusionAnnotation*> singleSampleAnnotations) {
 
     //TODO: stubbed
-    unique_ptr<DirectInfusionGroupAnnotation> directInfusionGroupAnnotation = unique_ptr<DirectInfusionGroupAnnotation>(new DirectInfusionGroupAnnotation());
+    DirectInfusionGroupAnnotation *directInfusionGroupAnnotation = new DirectInfusionGroupAnnotation();
 
     directInfusionGroupAnnotation->precMzMin = singleSampleAnnotations.at(0)->precMzMin;
     directInfusionGroupAnnotation->precMzMax = singleSampleAnnotations.at(0)->precMzMax;
