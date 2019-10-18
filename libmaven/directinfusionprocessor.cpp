@@ -381,6 +381,9 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
 
     Fragment *f = nullptr;
 
+    //TODO: need to ultimately deliver a vector of DirectInfusionGroupAnnotations, consider different keys.
+    map<Compound*, float> proportionSums = {};
+
     for (auto directInfusionAnnotation : crossSampleAnnotations){
         directInfusionGroupAnnotation->annotationBySample.insert(
                     make_pair(directInfusionAnnotation->sample,
@@ -391,6 +394,14 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
         } else {
             Fragment *brother = new Fragment(directInfusionAnnotation->scan, 0, 0, UINT_MAX);
             f->addFragment(brother);
+        }
+
+        for (auto matchData : directInfusionAnnotation->compounds){
+            float runningSum = 0.0f;
+            if (proportionSums.find(matchData->compound) != proportionSums.end()){
+                runningSum += proportionSums.at(matchData->compound);
+            }
+            proportionSums.insert(make_pair(matchData->compound, runningSum));
         }
 
     }
