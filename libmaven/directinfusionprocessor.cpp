@@ -365,26 +365,43 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineCo
 
 void DirectInfusionGroupAnnotation::clean() {
     for (map<mzSample*, DirectInfusionAnnotation*>::iterator it = annotationBySample.begin(); it != annotationBySample.end(); ++it) {
-        if (it->second) {
-            delete(it->second);
-        }
+
+        if (it->second->fragmentationPattern) delete(it->second->fragmentationPattern);
+        if (it->second) delete(it->second);
     }
     annotationBySample.clear();
 }
 
-DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAverageProportions(vector<DirectInfusionAnnotation*> singleSampleAnnotations) {
+DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAverageProportions(vector<DirectInfusionAnnotation*> crossSampleAnnotations, shared_ptr<DirectInfusionSearchParameters> params) {
 
-    //TODO: stubbed
     DirectInfusionGroupAnnotation *directInfusionGroupAnnotation = new DirectInfusionGroupAnnotation();
 
-    directInfusionGroupAnnotation->precMzMin = singleSampleAnnotations.at(0)->precMzMin;
-    directInfusionGroupAnnotation->precMzMax = singleSampleAnnotations.at(0)->precMzMax;
+    directInfusionGroupAnnotation->precMzMin = crossSampleAnnotations.at(0)->precMzMin;
+    directInfusionGroupAnnotation->precMzMax = crossSampleAnnotations.at(0)->precMzMax;
 
-    directInfusionGroupAnnotation->annotationBySample.insert(make_pair(singleSampleAnnotations.at(0)->sample, singleSampleAnnotations.at(0)));
+    Fragment *f = nullptr;
 
-    directInfusionGroupAnnotation->compounds = singleSampleAnnotations.at(0)->compounds;
+    for (auto directInfusionAnnotation : crossSampleAnnotations){
+        directInfusionGroupAnnotation->annotationBySample.insert(
+                    make_pair(directInfusionAnnotation->sample,
+                              directInfusionAnnotation)
+                    );
+        if (!f){
+            f = new Fragment(directInfusionAnnotation->scan, 0, 0, UINT_MAX);
+        } else {
+            Fragment *brother = new Fragment(directInfusionAnnotation->scan, 0, 0, UINT_MAX);
+            f->addFragment(brother);
+        }
 
-    directInfusionGroupAnnotation->fragmentationPattern = singleSampleAnnotations.at(0)->fragmentationPattern;
+    }
+
+    //TODO
+    directInfusionGroupAnnotation->compounds = crossSampleAnnotations.at(0)->compounds;
+
+    f->buildConsensus(params->productPpmTolr); //TODO: a separate parameter?
+    f->consensus->sortByMz();
+
+    directInfusionGroupAnnotation->fragmentationPattern = f;
 
     return directInfusionGroupAnnotation;
 }
