@@ -408,15 +408,18 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
             compoundInSampleMatchCounter++;
 
             double runningSum = matchData->proportion;
+
             if (proportionSums.find(matchData) != proportionSums.end()){
                 runningSum += proportionSums.at(matchData);
+            } else {
+                proportionSums.insert(make_pair(matchData, 0.0));
             }
+
+            proportionSums.at(matchData) = runningSum;
 
             if (debug) {
                 cerr << "(" << matchData->compound->name << ", " << matchData->adduct->name << ", proportion=" << matchData->proportion << "): runningSum=" << runningSum << endl;
             }
-
-            proportionSums.insert(make_pair(matchData, runningSum));
 
             FragmentationMatchScore bestMatch = matchData->fragmentationMatchScore;
             if (bestFragMatch.find(matchData) != bestFragMatch.end()) {
@@ -426,9 +429,11 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
                 if (previousBestMatch.hypergeomScore >= bestMatch.hypergeomScore){
                     bestMatch = previousBestMatch;
                 }
+            } else {
+                bestFragMatch.insert(make_pair(matchData, bestMatch));
             }
 
-            bestFragMatch.insert(make_pair(matchData, bestMatch));
+            bestFragMatch.at(matchData) =  bestMatch;
         }
 
     }
