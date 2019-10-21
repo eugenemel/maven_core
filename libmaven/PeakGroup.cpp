@@ -578,7 +578,9 @@ vector<Scan*> PeakGroup::getRepresentativeFullScans() {
 }
 
 vector<Scan*> PeakGroup::getFragmentationEvents() {
-    vector<Scan*>matchedscans;
+
+    vector<Scan*> matchedscans;
+
     for(unsigned int i=0; i < peaks.size(); i++ ) {
         mzSample* sample = peaks[i].getSample();
         if (!sample) continue;

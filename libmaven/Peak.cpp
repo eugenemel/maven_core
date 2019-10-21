@@ -127,17 +127,29 @@ int Peak::getChargeState() {
 }
 
 vector<Scan*> Peak::getFragmentationEvents(float ppmWindow) {
-    vector<Scan*>matchedscans;
-    if ( sample == NULL ) return matchedscans;
+
+    vector<Scan*> matchedscans;
+
+    if (!sample) return matchedscans;
 
 	float amuTol = peakMz/1e6*ppmWindow;
+
+    double minMz = peakMz-amuTol;
+    double maxMz = peakMz-amuTol;
+
+    if (mzmax - mzmin > 0.5f) { //direct infusion peak
+        minMz = mzmin;
+        maxMz = mzmax;
+    }
 
     for( unsigned int j=0; j < sample->scans.size(); j++ ) {
          	Scan* scan = sample->scans[j];
             if (scan->mslevel <= 1) continue; //ms2 + scans only
        		if (scan->rt < rtmin) continue;
             if (scan->rt > rtmax) break;
-            if( scan->precursorMz >= peakMz-amuTol and scan->precursorMz <= peakMz+amuTol)  matchedscans.push_back(scan);
+            if( scan->precursorMz >= minMz and scan->precursorMz <= maxMz) {
+                matchedscans.push_back(scan);
+            }
     }
     return matchedscans;
 }
