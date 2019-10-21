@@ -403,10 +403,11 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
 
         for (auto matchData : directInfusionAnnotation->compounds){
 
-            double runningSum = 0.0;
+            double runningSum = matchData->proportion;
             if (proportionSums.find(matchData) != proportionSums.end()){
                 runningSum += proportionSums.at(matchData);
             }
+
             proportionSums.insert(make_pair(matchData, runningSum));
 
             FragmentationMatchScore bestMatch = matchData->fragmentationMatchScore;
@@ -422,6 +423,10 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
             bestFragMatch.insert(make_pair(matchData, bestMatch));
         }
 
+    }
+
+    if (debug) {
+        cerr << "Identified " << proportionSums.size() << "unique compound-adduct pairs in all samples." << endl;
     }
 
     f->buildConsensus(params->productPpmTolr);
