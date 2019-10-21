@@ -372,12 +372,17 @@ void DirectInfusionGroupAnnotation::clean() {
     annotationBySample.clear();
 }
 
-DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAverageProportions(vector<DirectInfusionAnnotation*> crossSampleAnnotations, shared_ptr<DirectInfusionSearchParameters> params) {
+DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAverageProportions(vector<DirectInfusionAnnotation*> crossSampleAnnotations, shared_ptr<DirectInfusionSearchParameters> params, bool debug) {
 
     DirectInfusionGroupAnnotation *directInfusionGroupAnnotation = new DirectInfusionGroupAnnotation();
 
     directInfusionGroupAnnotation->precMzMin = crossSampleAnnotations.at(0)->precMzMin;
     directInfusionGroupAnnotation->precMzMax = crossSampleAnnotations.at(0)->precMzMax;
+
+    if (debug) {
+        cerr << "=========================================" << endl;
+        cerr << "Merging peak groups in precMzRange = [" << directInfusionGroupAnnotation->precMzMin << " - " <<  directInfusionGroupAnnotation->precMzMax << "]" << endl;
+    }
 
     Fragment *f = nullptr;
 
@@ -442,7 +447,19 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
 
        directInfusionGroupAnnotation->compounds.at(annotationMatchIndex) = groupMatchData;
 
+       if (debug) {
+           cerr << "Compound: " << groupMatchData->compound->name
+                << ", Adduct: "<< groupMatchData->adduct->name
+                << ", numMatches: " << groupMatchData->fragmentationMatchScore.numMatches
+                << ", Proportion: " << groupMatchData->proportion << endl;
+       }
+
        annotationMatchIndex++;
+    }
+
+    if (debug) {
+        cerr << "Determined cross-sample proportions for " << annotationMatchIndex << " compounds." << endl;
+        cerr << "=========================================" << endl;
     }
 
     return directInfusionGroupAnnotation;

@@ -303,7 +303,10 @@ public:
      * @return pointer to DirectInfusionGroupAnnotation object.
      * This pointer must be deleted explicitly! Cannot use smart pointers b/c of QMetaType rules.
      */
-    static DirectInfusionGroupAnnotation* createByAverageProportions(vector<DirectInfusionAnnotation*> singleSampleAnnotations, shared_ptr<DirectInfusionSearchParameters> params);
+    static DirectInfusionGroupAnnotation* createByAverageProportions(
+            vector<DirectInfusionAnnotation*> singleSampleAnnotations,
+            shared_ptr<DirectInfusionSearchParameters> params,
+            bool debug);
 
 };
 
