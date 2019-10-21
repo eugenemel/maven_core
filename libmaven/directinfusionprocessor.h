@@ -111,6 +111,8 @@ struct DirectInfusionMatchData {
 /**
  * @brief The DirectInfusionMatchDataCompare struct
  *
+ * lhs->compound == rhs->compound iff lhs and rhs point to the same data, even if memory addresses are different
+ *
  * Special class for comparisons
  */
 struct DirectInfusionMatchDataCompare {
