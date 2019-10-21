@@ -11,7 +11,7 @@ addons:
     sources:
       - sourceline: 'ppa:beineri/opt-qt591-trusty'
     packages:
-      - qt58base
+      - qt59base
       - libsqlite3-dev
       - libmysqlclient-dev
       - libssl1.0.0
