@@ -413,7 +413,7 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
             }
 
             if (debug) {
-                cerr << "(" << matchData->compound->name << ", " << matchData->adduct->name << "): runningSum=" << runningSum << endl;
+                cerr << "(" << matchData->compound->name << ", " << matchData->adduct->name << ", proportion=" << matchData->proportion << "): runningSum=" << runningSum << endl;
             }
 
             proportionSums.insert(make_pair(matchData, runningSum));
