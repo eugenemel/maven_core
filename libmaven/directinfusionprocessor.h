@@ -42,7 +42,7 @@ public:
  */
 enum class SpectralCompositionAlgorithm {
     ALL_CANDIDATES,
-    MEDIAN_UNIQUE
+    MAX_THEORETICAL_INTENSITY_UNIQUE
 };
 
 /**
@@ -126,6 +126,17 @@ struct DirectInfusionMatchDataCompare {
 };
 
 /**
+ * @brief The DirectInfusionSinglePeakMatchData struct
+ *
+ * container for peak match data, used by @link DirectInfusionMatchInformation
+ */
+struct DirectInfusionSinglePeakMatchData {
+    float normalizedTheoreticalIntensity;
+    float observedIntensity;
+    float getIntensityRatio() {return (observedIntensity / normalizedTheoreticalIntensity); }
+};
+
+/**
  * @brief The DirectInfusionMatchInformation structure
  *
  * A structure to organize all fragment matches from all compound, adduct pairs that match to a single
@@ -145,6 +156,16 @@ public:
 
     float getIntensityRatio(int fragId, shared_ptr<DirectInfusionMatchData> matchData){
         return (getObservedIntensity(fragId, matchData) / getNormalizedTheoreticalIntensity(fragId, matchData));
+    }
+
+    shared_ptr<DirectInfusionSinglePeakMatchData> getSinglePeakMatchData(int fragId, shared_ptr<DirectInfusionMatchData> matchData){
+
+        shared_ptr<DirectInfusionSinglePeakMatchData> directInfusionSinglePeakMatchData = shared_ptr<DirectInfusionSinglePeakMatchData>(new DirectInfusionSinglePeakMatchData());
+
+        directInfusionSinglePeakMatchData->normalizedTheoreticalIntensity = getNormalizedTheoreticalIntensity(fragId, matchData);
+        directInfusionSinglePeakMatchData->observedIntensity = getObservedIntensity(fragId, matchData);
+
+        return directInfusionSinglePeakMatchData;
     }
 };
 
@@ -314,7 +335,7 @@ public:
 
 typedef map<int, vector<shared_ptr<DirectInfusionMatchData>>>::iterator fragToMatchDataIterator;
 typedef map<shared_ptr<DirectInfusionMatchData>, vector<int>>::iterator matchDataToFragIterator;
-typedef map<shared_ptr<DirectInfusionMatchData>, vector<float>>::iterator matchDataToFragIntensityIterator;
+typedef map<shared_ptr<DirectInfusionMatchData>, vector<shared_ptr<DirectInfusionSinglePeakMatchData>>>::iterator matchDataToFragIntensityIterator;
 typedef map<shared_ptr<DirectInfusionMatchData>, float>::iterator matchDataToFloatIterator;
 
 

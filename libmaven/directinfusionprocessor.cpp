@@ -285,9 +285,9 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineCo
     unique_ptr<DirectInfusionMatchInformation> matchInfo = DirectInfusionProcessor::getMatchInformation(allCandidates, observedSpectrum, debug);
 
     //TODO: refactor into class, subclass, etc
-    if (algorithm == SpectralCompositionAlgorithm::MEDIAN_UNIQUE) {
+    if (algorithm == SpectralCompositionAlgorithm::MAX_THEORETICAL_INTENSITY_UNIQUE) {
 
-        map<shared_ptr<DirectInfusionMatchData>, vector<float>> compoundToUniqueFragmentIntensities = {};
+        map<shared_ptr<DirectInfusionMatchData>, vector<shared_ptr<DirectInfusionSinglePeakMatchData>>> compoundToUniqueFragmentIntensities = {};
 
         for (fragToMatchDataIterator iterator = matchInfo->fragToMatchData.begin(); iterator != matchInfo->fragToMatchData.end(); ++iterator) {
             if (iterator->second.size() == 1) { // unique fragment
@@ -295,14 +295,14 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineCo
                 shared_ptr<DirectInfusionMatchData> compound = iterator->second.at(0);
                 int fragId = iterator->first;
 
-                float intensityRatio = matchInfo->getIntensityRatio(fragId, compound);
+                shared_ptr<DirectInfusionSinglePeakMatchData> intensityData = matchInfo->getSinglePeakMatchData(fragId, compound);
 
                 matchDataToFragIntensityIterator it = compoundToUniqueFragmentIntensities.find(compound);
                 if (it != compoundToUniqueFragmentIntensities.end()) {
-                    compoundToUniqueFragmentIntensities[compound].push_back(intensityRatio);
+                    compoundToUniqueFragmentIntensities[compound].push_back(intensityData);
                 } else {
-                    vector<float> observedIntensities(1);
-                    observedIntensities.at(0) = intensityRatio;
+                    vector<shared_ptr<DirectInfusionSinglePeakMatchData>> observedIntensities(1);
+                    observedIntensities.at(0) = intensityData;
                     compoundToUniqueFragmentIntensities.insert(make_pair(compound, observedIntensities));
                 }
 
@@ -315,27 +315,26 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineCo
         for (matchDataToFragIntensityIterator iterator = compoundToUniqueFragmentIntensities.begin(); iterator != compoundToUniqueFragmentIntensities.end(); ++iterator){
 
             shared_ptr<DirectInfusionMatchData> directInfusionMatchData = iterator->first;
-            vector<float> fragIntensityRatios = iterator->second;
+            vector<shared_ptr<DirectInfusionSinglePeakMatchData>> fragIntensityDataVector = iterator->second;
 
-            sort(fragIntensityRatios.begin(), fragIntensityRatios.end());
-
-            float median = 0;
-            unsigned long n = fragIntensityRatios.size();
-            if (n % 2 != 0) {
-                median = fragIntensityRatios.at(n / 2);
-            } else {
-                median = 0.5f*(fragIntensityRatios.at((n-1)/2) + fragIntensityRatios.at(n/2));
+            float representativeIntensity = 0;
+            float maxNormalizedTheoreticalIntensity = 0;
+            for (auto intensityData : fragIntensityDataVector) {
+                if (intensityData->normalizedTheoreticalIntensity > maxNormalizedTheoreticalIntensity){
+                    maxNormalizedTheoreticalIntensity = intensityData->normalizedTheoreticalIntensity;
+                    representativeIntensity = intensityData->getIntensityRatio();
+                }
             }
 
-            sumIntensity += median;
-            results.insert(make_pair(directInfusionMatchData, median));
+            sumIntensity += representativeIntensity;
+            results.insert(make_pair(directInfusionMatchData, representativeIntensity));
 
             if (debug) {
                 cerr << "Compound= " << directInfusionMatchData->compound->name << "|" << directInfusionMatchData->compound->adductString << ": ";
-                for (auto frag : fragIntensityRatios){
+                for (auto frag : fragIntensityDataVector){
                     cerr << frag << " ";
                 }
-                cerr << "median=" << median << endl;
+                cerr << "median=" << representativeIntensity << endl;
             }
 
         }
