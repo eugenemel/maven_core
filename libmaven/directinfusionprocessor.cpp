@@ -408,6 +408,10 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
                 runningSum += proportionSums.at(matchData);
             }
 
+            if (debug) {
+                cerr << "(" << matchData->compound->name << ", " << matchData->adduct->name << "): runningSum=" << runningSum << endl;
+            }
+
             proportionSums.insert(make_pair(matchData, runningSum));
 
             FragmentationMatchScore bestMatch = matchData->fragmentationMatchScore;
