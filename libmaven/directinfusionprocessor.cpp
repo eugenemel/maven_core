@@ -402,6 +402,12 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
             f->addFragment(brother);
         }
 
+        if (debug) {
+            cerr << "sample=" << directInfusionAnnotation->sample->sampleName
+                 << ": " << directInfusionAnnotation->compounds.size() << " compounds."
+                 << endl;
+        }
+
         for (auto matchData : directInfusionAnnotation->compounds){
 
             compoundInSampleMatchCounter++;
@@ -417,7 +423,11 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
             proportionSums.at(matchData) = runningSum;
 
             if (debug) {
-                cerr << "(" << matchData->compound->name << ", " << matchData->adduct->name << ", proportion=" << matchData->proportion << "): runningSum=" << runningSum << endl;
+                cerr << "sample=" << directInfusionAnnotation->sample->sampleName
+                     << "(" << matchData->compound->name
+                     << ", " << matchData->adduct->name
+                     << ", proportion=" << matchData->proportion
+                     << "): runningSum=" << runningSum << endl;
             }
 
             FragmentationMatchScore bestMatch = matchData->fragmentationMatchScore;
@@ -425,14 +435,14 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
                 FragmentationMatchScore previousBestMatch = bestFragMatch.at(matchData);
 
                 //TODO: how to decide on best match?
-                if (previousBestMatch.hypergeomScore >= bestMatch.hypergeomScore){
-                    bestMatch = previousBestMatch;
+                if (bestMatch.hypergeomScore >= previousBestMatch.hypergeomScore){
+                    bestFragMatch.at(matchData) =  bestMatch;
                 }
+
             } else {
                 bestFragMatch.insert(make_pair(matchData, bestMatch));
             }
 
-            bestFragMatch.at(matchData) =  bestMatch;
         }
 
     }
