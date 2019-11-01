@@ -1079,6 +1079,9 @@ vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float
                  //Feng note: fillInPeaks is unnecessary
                  //Phil note: fillInPeaks should probably be a configurable option
 
+                 //arbitrary order ensures consistency between runs
+                 sort(grp.peaks.begin(), grp.peaks.end(), Peak::compSampleName);
+
                  grp.groupStatistics();
             } else {	//empty group..
                 pgroups.erase(pgroups.begin()+i);
