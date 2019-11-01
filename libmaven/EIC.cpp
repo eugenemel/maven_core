@@ -1053,11 +1053,12 @@ vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float
 	//clean up peakgroup such that there is only one peak for each sample
     for(unsigned int i=0; i< pgroups.size(); i++) {
             PeakGroup& grp = pgroups[i];
-            if (grp.peaks.size() > 0 ) {
-                 grp.reduce();
+            if (grp.peaks.size() > 1) {
+                 //grp.reduce();
+
                  //grp.fillInPeaks(eics);
                  //Feng note: fillInPeaks is unnecessary
-                 //Phil note: this should probably be a configurable option
+                 //Phil note: fillInPeaks should probably be a configurable option
 
                  grp.groupStatistics();
             } else {	//empty group..
