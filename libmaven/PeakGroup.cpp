@@ -339,8 +339,9 @@ void PeakGroup::fillInPeaks(const vector<EIC*>& eics) {
 
 void PeakGroup::reduce() { // make sure there is only one peak per sample
 
-    map <mzSample*, Peak> maxPeaks;
-    map <mzSample*, Peak> :: iterator itr;
+    map<mzSample*, Peak> maxPeaks;
+    map<mzSample*, Peak>::iterator itr;
+
     if (peaks.size() < 2 ) return;
 
        //CURRENTLY NOT USED
@@ -363,9 +364,16 @@ void PeakGroup::reduce() { // make sure there is only one peak per sample
         */
 
         //In each group, take the most intense peak
-        if ( maxPeaks.count(c) == 0 || maxPeaks[c].peakIntensity < peaks[i].peakIntensity) {
-            maxPeaks[c].copyObj(peaks[i]);
+        if (maxPeaks.find(c) == maxPeaks.end()) {
+            maxPeaks.insert(make_pair(c, peaks[i]));
+        } else if (maxPeaks[c].peakIntensity < peaks[i].peakIntensity){
+            maxPeaks[c] = peaks[i];
         }
+
+        //old approach
+//        if ( maxPeaks.find(c) == maxPeaks.end() || maxPeaks[c].peakIntensity < peaks[i].peakIntensity) {
+//            maxPeaks[c].copyObj(peaks[i]);
+//        }
     }
 
     peaks.clear();
