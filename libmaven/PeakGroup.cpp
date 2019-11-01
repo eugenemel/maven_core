@@ -343,16 +343,12 @@ void PeakGroup::reduce() { // make sure there is only one peak per sample
     map <mzSample*, Peak> :: iterator itr;
     if (peaks.size() < 2 ) return;
 
-    float groupMeanRt=0;
-    float totalWeight=1;
+       //CURRENTLY NOT USED
+//    float groupMeanRt=0;
+//    float totalWeight=1;
 
-
-    for( unsigned int i=0; i < peaks.size(); i++)  { totalWeight +=  peaks[i].peakIntensity; }
-    for( unsigned int i=0; i < peaks.size(); i++)  { groupMeanRt += peaks[i].rt * peaks[i].peakIntensity/totalWeight;  }
-
-
-    //In each group, take peak that closest to the mean retention time of a group
-
+//    for( unsigned int i=0; i < peaks.size(); i++)  { totalWeight +=  peaks[i].peakIntensity; }
+//    for( unsigned int i=0; i < peaks.size(); i++)  { groupMeanRt += peaks[i].rt * peaks[i].peakIntensity/totalWeight;  }
 
 
     for( unsigned int i=0; i < peaks.size(); i++) {
@@ -366,7 +362,7 @@ void PeakGroup::reduce() { // make sure there is only one peak per sample
         }
         */
 
-        //In each group, take the hghest peak
+        //In each group, take the most intense peak
         if ( maxPeaks.count(c) == 0 || maxPeaks[c].peakIntensity < peaks[i].peakIntensity) {
             maxPeaks[c].copyObj(peaks[i]);
         }
