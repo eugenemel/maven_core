@@ -363,17 +363,18 @@ void PeakGroup::reduce() { // make sure there is only one peak per sample
         }
         */
 
-        //In each group, take the most intense peak
-        if (maxPeaks.find(c) == maxPeaks.end()) {
-            maxPeaks.insert(make_pair(c, peaks[i]));
-        } else if (maxPeaks[c].peakIntensity < peaks[i].peakIntensity){
-            maxPeaks[c] = peaks[i];
-        }
+        //new approach
+//        //In each group, take the most intense peak
+//        if (maxPeaks.find(c) == maxPeaks.end()) {
+//            maxPeaks.insert(make_pair(c, peaks[i]));
+//        } else if (maxPeaks[c].peakIntensity < peaks[i].peakIntensity){
+//            maxPeaks[c] = peaks[i];
+//        }
 
         //old approach
-//        if ( maxPeaks.find(c) == maxPeaks.end() || maxPeaks[c].peakIntensity < peaks[i].peakIntensity) {
-//            maxPeaks[c].copyObj(peaks[i]);
-//        }
+        if ( maxPeaks.find(c) == maxPeaks.end() || maxPeaks[c].peakIntensity < peaks[i].peakIntensity) {
+            maxPeaks[c].copyObj(peaks[i]);
+        }
     }
 
     peaks.clear();
