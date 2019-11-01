@@ -1048,8 +1048,6 @@ vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float
 
 //    cerr << "EIC::groupPeaks() peakgroups pre sample cleaning=" << pgroups.size() << endl;
 
-    cerr <<"TESTING: cleanup 3: original grp.reduce() map insert" << endl;
-
 	//clean up peakgroup such that there is only one peak for each sample
     for(unsigned int i=0; i< pgroups.size(); i++) {
             PeakGroup& grp = pgroups[i];
