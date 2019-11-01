@@ -479,10 +479,10 @@ class Peak {
 		bool fromBlankSample;		//true if peak is from blank sample
 
 		char label;		//classification label
-
-         private:
-		EIC* eic; 		//pointer to eic 
         mzSample *sample;  //pointer to sample
+
+    private:
+		EIC* eic; 		//pointer to eic 
 
 	public: 
 		void setEIC(EIC* e) { eic=e; }
