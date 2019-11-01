@@ -987,24 +987,25 @@ vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float
     //find peaks in merged eic
     m->getPeakPositions(smoothingWindow);
 
-    // sort(m->peaks.begin(), m->peaks.end(), Peak::compRt);
+    //return a.rt < b.rt;
+    sort(m->peaks.begin(), m->peaks.end(), Peak::compRt);
 
     //try super sort
-    sort(m->peaks.begin(), m->peaks.end(), [](const Peak& lhs, const Peak& rhs){
-        if (abs(lhs.rt - rhs.rt) < 1e-6f){
-            if (abs(lhs.rtmin - rhs.rtmin) < 1e-6f) {
-                if (abs(lhs.rtmax - rhs.rtmax) < 1e-6f) {
-                    return lhs.peakMz < rhs.peakMz; //final tiebreaker
-                } else {
-                    return lhs.rtmax < rhs.rtmax;
-                }
-            } else {
-                return lhs.rtmin < rhs.rtmin;
-            }
-        } else {
-            return lhs.rt < rhs.rt;
-        }
-    });
+//    sort(m->peaks.begin(), m->peaks.end(), [](const Peak& lhs, const Peak& rhs){
+//        if (abs(lhs.rt - rhs.rt) < 1e-6f){
+//            if (abs(lhs.rtmin - rhs.rtmin) < 1e-6f) {
+//                if (abs(lhs.rtmax - rhs.rtmax) < 1e-6f) {
+//                    return lhs.peakMz < rhs.peakMz; //final tiebreaker
+//                } else {
+//                    return lhs.rtmax < rhs.rtmax;
+//                }
+//            } else {
+//                return lhs.rtmin < rhs.rtmin;
+//            }
+//        } else {
+//            return lhs.rt < rhs.rt;
+//        }
+//    });
 
 	for(unsigned int i=0; i< m->peaks.size(); i++ ) {
 		PeakGroup grp;
@@ -1066,7 +1067,7 @@ vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float
 
 //    cerr << "EIC::groupPeaks() peakgroups pre sample cleaning=" << pgroups.size() << endl;
 
-    cerr << "EIC:groupPeaks(): super-sort peaks" << endl;
+//    cerr << "EIC:groupPeaks(): super-sort peaks" << endl;
 
 	//clean up peakgroup such that there is only one peak for each sample
     for(unsigned int i=0; i< pgroups.size(); i++) {
