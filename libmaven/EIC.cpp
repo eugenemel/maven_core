@@ -1048,21 +1048,23 @@ vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float
 
 //    cerr << "EIC::groupPeaks() peakgroups pre sample cleaning=" << pgroups.size() << endl;
 
-    cerr <<"TESTING: skip peakgroup cleanup." << endl;
+    cerr <<"TESTING: adjust peakgroup cleanup 1." << endl;
 
 	//clean up peakgroup such that there is only one peak for each sample
-//	for(unsigned int i=0; i< pgroups.size(); i++) {
-//			PeakGroup& grp = pgroups[i];
-//            if (grp.peaks.size() > 0 ) {
-//                 grp.reduce();
-//              	 //grp.fillInPeaks(eics);
-//		 //Feng note: fillInPeaks is unecessary
-//                 grp.groupStatistics();
-//            } else {	//empty group..
-//        	    pgroups.erase(pgroups.begin()+i);
-//				i--;
-//            }
-//	}
+    for(unsigned int i=0; i< pgroups.size(); i++) {
+            PeakGroup& grp = pgroups[i];
+            if (grp.peaks.size() > 0 ) {
+                 grp.reduce();
+                 //grp.fillInPeaks(eics);
+                 //Feng note: fillInPeaks is unnecessary
+                 //Phil note: this should probably be a configurable option
+
+                 grp.groupStatistics();
+            } else {	//empty group..
+                pgroups.erase(pgroups.begin()+i);
+                i--;
+            }
+    }
 
  //   cerr << "EIC::groupPeaks() peakgroups post-processing=" << pgroups.size() << endl;
 
