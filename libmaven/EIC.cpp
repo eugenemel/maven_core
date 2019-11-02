@@ -1108,7 +1108,7 @@ void EIC::interpolate() {
              lastNonZero=posi;  //if this position has nonzero intensity, mark it as lastNonZero position
         }
 
-        if (intensity[posi] == 0  and lastNonZero > 0) { //interplate
+        if (intensity[posi] == 0 and lastNonZero > 0) { //interpolate
             unsigned int nextNonZero=0;
             for(unsigned int j=posi; j<intensity.size();j++) { if (intensity[j] != 0 ) { nextNonZero=j; }}
             if( nextNonZero == 0) continue;
