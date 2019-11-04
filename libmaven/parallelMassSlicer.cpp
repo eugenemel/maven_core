@@ -219,8 +219,8 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtHalfWindowInMin) {       
                 if (scan->mslevel != 2 ) continue;
                 float rt = scan->rt;
                 float mz = scan->precursorMz;
-                float mzmax = mz + mz/1e6*ppm;
-                float mzmin = mz - mz/1e6*ppm;
+                float mzmax = mz + mz/1e6f*ppm;
+                float mzmin = mz - mz/1e6f*ppm;
 
                 mzSlice* s = new mzSlice(mzmin,mzmax, rt-rtHalfWindowInMin, rt+rtHalfWindowInMin);
                 s->rt=scan->rt;
@@ -302,8 +302,14 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtHalfWindowInMin) {       
 
 bool ParallelMassSlicer::isOverlapping(mzSlice *a, mzSlice *b){
 
-    bool isMzOverlapping = !((b->mzmin > a->mzmax || a->mzmin > b->mzmax));
-    bool isRtOverlapping = !((b->rtmin > a->rtmax || a->rtmin > b->rtmax));
+     //TODO: remove duplicated code, and comments
+      cerr << "Testing new ParallelMassSlicer::isOverlapping() method." << endl;
+
+      bool isMzOverlapping = checkOverlap(a->mzmin, a->mzmax, b->mzmin, b->mzmax) > 0.0f;
+      bool isRtOverlapping = checkOverlap(a->rtmin, a->rtmax, b->rtmin, b->rtmax) > 0.0f;
+
+//    bool isMzOverlapping = !((b->mzmin > a->mzmax || a->mzmin > b->mzmax));
+//    bool isRtOverlapping = !((b->rtmin > a->rtmax || a->rtmin > b->rtmax));
 
     //debugging
 //    cout
