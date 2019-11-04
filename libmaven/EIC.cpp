@@ -528,7 +528,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
                   << " [" << peak.mzmin << "-" << peak.mzmax << "], "
                   << peak.rt
                   << " [" << peak.rtmin << "-" << peak.rtmax
-                  << "])";
+                  << "])" << endl;
         }
     }
 
