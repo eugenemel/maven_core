@@ -308,25 +308,36 @@ void EIC::getPeakPositionsC(int smoothWindow) {
 
     enum SplineAnnotation {
         MAX,
-        MIN
+        MIN,
+        NONE
     };
 
-    vector<pair<int, SplineAnnotation>> posAndAnnotation;
+    vector<SplineAnnotation> splineAnnotation(N);
 
-    posAndAnnotation.push_back(make_pair(0, SplineAnnotation::MIN));
+    splineAnnotation[0] = SplineAnnotation::MIN;
 
     for (unsigned int i=1; i < N-1; i++ ) {
 
         if (spline[i] > spline[i-1] && spline[i] > spline[i+1]) {
-            posAndAnnotation.push_back(make_pair(i, SplineAnnotation::MAX));
+            splineAnnotation[i] = SplineAnnotation::MAX;
         } else if (spline[i] < spline[i-1] && spline[i] < spline[i+1]){
-            posAndAnnotation.push_back(make_pair(i, SplineAnnotation::MIN));
+            splineAnnotation[i] = SplineAnnotation::MIN;
+        } else {
+            splineAnnotation[i] = SplineAnnotation::NONE;
         }
     }
 
-    posAndAnnotation.push_back(make_pair(N, SplineAnnotation::MIN));
+    splineAnnotation[N-1] = SplineAnnotation::MIN;
 
     //TODO: assign maxima and minima
+    /*
+     * 1. Ultimately need MIN-MAX-MIN-MAX-MIN.... MAX-MIN
+     * (alternating MIN and MAX, starting and ending with MIN).
+     *
+     * 2. remove extra MINs
+     * 3. insert MINs between MAXs
+     * 3. remove trailing MINs (no need to insert trailing MINs)
+     */
 
     //baseline always uses Gaussian smoothing.
     computeBaseLine(baselineSmoothingWindow, baselineDropTopX);
