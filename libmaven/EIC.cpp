@@ -344,8 +344,8 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
     if (firstMax == -1) return; //no peaks determined based on 3-point max rule
 
     if (debug) {
-        cout << "===================================" << endl;
-        cout << "BEFORE ASSIGNING MINIMA:" << endl;
+        cerr << "===================================" << endl;
+        cerr << "BEFORE ASSIGNING MINIMA:" << endl;
         for (unsigned int i = 0; i < N; i++) {
             string type = "";
             if (splineAnnotation[i] == SplineAnnotation::MAX) {
@@ -358,23 +358,19 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
                 cerr << "ILLEGAL TYPE." << endl;
                 abort();
             }
-            cout << "i=" <<  i << " " << spline[i] << " " << type << endl;
+            cerr << "i=" <<  i << " " << spline[i] << " " << type << endl;
         }
-        cout << "===================================" << endl;
+        cerr << "===================================" << endl;
     }
 
     if (debug) {
-        cout << "===================================" << endl;
-        cout << "STARTING ASSIGNING MINIMA:" << endl;
+        cerr << "===================================" << endl;
+        cerr << "STARTING ASSIGNING MINIMA:" << endl;
     }
 
     for (unsigned int i = 0; i < N; i++){
 
         if (splineAnnotation[i] == SplineAnnotation::MAX) {
-
-            if (debug) {
-                cout << "i=" << i << " " << spline[i] << " MAX" << endl;
-            }
 
             if (i == firstMax) {
 
@@ -392,7 +388,8 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
                 splineAnnotation[firstMin] = SplineAnnotation::MIN;
 
                 if (debug) {
-                    cout << "i=" << firstMin << " " << spline[i] << " LEFT MIN" << endl;
+                    cerr << "i=" << firstMin << " " << spline[i] << " LEFT MIN" << endl;
+                    cerr << "i=" << i << " " << spline[i] << " MAX" << endl;
                 }
 
             }
