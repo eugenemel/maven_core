@@ -288,6 +288,59 @@ void EIC::getPeakPositionsB(int smoothWindow, float minSmoothedPeakIntensity) {
     getPeakStatistics();
 }
 
+/**
+ * @brief EIC
+ *
+ * @param smoothWindow
+ *
+ * Approach that guarantees that peaks do not have any overlap. This comes at the cost of
+ * not using the EIC::findPeakBounds() method (in EIC::getPeakStatistics()).
+ */
+void EIC::getPeakPositionsC(int smoothWindow) {
+
+    peaks.clear();
+
+    unsigned int N = intensity.size();
+    if (N == 0) return;
+
+    computeSpline(smoothWindow);
+    if (spline.size() == 0) return;
+
+    enum SplineAnnotation {
+        MAX,
+        MIN
+    };
+
+    vector<pair<int, SplineAnnotation>> posAndAnnotation;
+
+    posAndAnnotation.push_back(make_pair(0, SplineAnnotation::MIN));
+
+    for (unsigned int i=1; i < N-1; i++ ) {
+
+        if (spline[i] > spline[i-1] && spline[i] > spline[i+1]) {
+            posAndAnnotation.push_back(make_pair(i, SplineAnnotation::MAX));
+        } else if (spline[i] < spline[i-1] && spline[i] < spline[i+1]){
+            posAndAnnotation.push_back(make_pair(i, SplineAnnotation::MIN));
+        }
+    }
+
+    posAndAnnotation.push_back(make_pair(N, SplineAnnotation::MIN));
+
+    //TODO: assign maxima and minima
+
+    //baseline always uses Gaussian smoothing.
+    computeBaseLine(baselineSmoothingWindow, baselineDropTopX);
+
+    for (auto peak : peaks) {
+        getPeakDetails(peak);
+    }
+
+    //assign peak ranks based on total area of the peak
+    sort(peaks.begin(),peaks.end(),Peak::compArea);
+    for(unsigned int i=0; i<peaks.size(); i++) peaks[i].peakRank = i;
+
+}
+
 void EIC::findPeakBounds(Peak& peak) {
 	int apex = peak.pos;
 
