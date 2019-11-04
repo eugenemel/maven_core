@@ -433,6 +433,9 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
 
                     //check for intensity points coming from both directions
 
+                    int thisMaxRightMin = -1;
+                    int nextMaxLeftMin = -1;
+
                     bool foundSubBaselineFromLeft = false;
 
                     //check left max
@@ -440,6 +443,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
                         if (intensity[j] < baselineQCutVal) {
                             splineAnnotation[j] = SplineAnnotation::MIN;
                             foundSubBaselineFromLeft = true;
+                            thisMaxRightMin = j;
                             break;
                         }
                     }
@@ -452,6 +456,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
                         for (unsigned int j = nextMax - 1; j > i; j++) {
                             if (intensity[j] < baselineQCutVal) {
                                 splineAnnotation[j] = SplineAnnotation::MIN;
+                                nextMaxLeftMin = j;
                                 break;
                             }
                         }
@@ -468,8 +473,15 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
 
                         splineAnnotation[minIntensity] = SplineAnnotation::MIN;
 
+                        thisMaxRightMin = minIntensity;
+                        nextMaxLeftMin = minIntensity;
                     }
 
+                    if (debug) {
+                        cerr << "i=" << thisMaxRightMin << " " << spline[thisMaxRightMin] << " RIGHT MIN" << endl;
+                        cerr << "i=" << i << " " << spline[i] << " MAX" << endl;
+                        cerr << "i=" << nextMaxLeftMin << " " << spline[nextMaxLeftMin] << " LEFT MIN" << endl;
+                    }
 
                 }
             }
