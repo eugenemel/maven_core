@@ -300,7 +300,7 @@ void EIC::getPeakPositionsC(int smoothWindow) {
 
     peaks.clear();
 
-    unsigned int N = intensity.size();
+    unsigned int N = static_cast<unsigned int>(intensity.size());
     if (N == 0) return;
 
     computeSpline(smoothWindow);
@@ -312,22 +312,65 @@ void EIC::getPeakPositionsC(int smoothWindow) {
         NONE
     };
 
-    vector<SplineAnnotation> splineAnnotation(N);
+    vector<SplineAnnotation> splineAnnotation(N, SplineAnnotation::NONE);
 
     splineAnnotation[0] = SplineAnnotation::MIN;
+    splineAnnotation[N-1] = SplineAnnotation::MIN;
+
+    int lastMax = -1;
+    int firstMax = -1;
 
     for (unsigned int i=1; i < N-1; i++ ) {
 
         if (spline[i] > spline[i-1] && spline[i] > spline[i+1]) {
             splineAnnotation[i] = SplineAnnotation::MAX;
-        } else if (spline[i] < spline[i-1] && spline[i] < spline[i+1]){
-            splineAnnotation[i] = SplineAnnotation::MIN;
-        } else {
-            splineAnnotation[i] = SplineAnnotation::NONE;
+
+            if (firstMax == -1){ //only assigned first time MAX appears
+                firstMax = i;
+            }
+            lastMax = i; //reassigned every time MAX appears
+
         }
     }
 
-    splineAnnotation[N-1] = SplineAnnotation::MIN;
+    for (int i = 0; i < N; i++){
+        if (splineAnnotation[i] == SplineAnnotation::MAX) {
+            if (i == firstMax) {
+                //first point in spline is a MIN, everything else is NONE until max
+                for (unsigned int j = 1; j < i; j++) {
+                    splineAnnotation[j] = SplineAnnotation::NONE;
+                }
+            } else if (i == lastMax) {
+                //last point in spline is a MIN, everything following last MAX until that point is NONE
+                for (unsigned int j = i+1; j < N-1; j++) {
+                    splineAnnotation[j] = SplineAnnotation::NONE;
+                }
+            } else {
+                //find next max, if it exists
+                int nextMax = -1;
+
+                for (int j = i+1; j < N-1; j++){
+                    if (splineAnnotation[j] == SplineAnnotation::MAX) {
+                        nextMax = j;
+                        break;
+                    }
+                }
+
+                if (nextMax != -1) {
+                    //found another max
+
+                    int minIntensity = i+1;
+                    for (int j = i+1; j < nextMax; j++) {
+                        if (spline[j] < spline[minIntensity]) {
+                            minIntensity = j;
+                        }
+                    }
+
+                    spline[minIntensity] = SplineAnnotation::MIN;
+                }
+            }
+        }
+    }
 
     //TODO: assign maxima and minima
     /*
