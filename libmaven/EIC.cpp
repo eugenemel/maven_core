@@ -306,6 +306,10 @@ void EIC::getPeakPositionsC(int smoothWindow) {
     computeSpline(smoothWindow);
     if (spline.size() == 0) return;
 
+    //baseline always uses Gaussian smoothing.
+    computeBaseLine(baselineSmoothingWindow, baselineDropTopX);
+    if (baseline.size() == 0) return;
+
     enum SplineAnnotation {
         MAX,
         MIN,
@@ -333,19 +337,32 @@ void EIC::getPeakPositionsC(int smoothWindow) {
         }
     }
 
-    for (int i = 0; i < N; i++){
+    for (unsigned int i = 0; i < N; i++){
         if (splineAnnotation[i] == SplineAnnotation::MAX) {
             if (i == firstMax) {
-                //first point in spline is a MIN, everything else is NONE until max
-                for (unsigned int j = 1; j < i; j++) {
-                    splineAnnotation[j] = SplineAnnotation::NONE;
+
+                //first point less than the baseline is the first peak min. Otherwise, keep default of splineAnnotation[0] as first peak min.
+                for (unsigned int j = i-1; j > 0; j--) {
+                    if (splineAnnotation[j] <= baseline[j]) {
+                        splineAnnotation[j] = SplineAnnotation::MIN;
+                        splineAnnotation[0] = SplineAnnotation::NONE;
+                    }
                 }
-            } else if (i == lastMax) {
-                //last point in spline is a MIN, everything following last MAX until that point is NONE
+
+            }
+
+            if (i == lastMax) {
+
+                //first point less than the baseline following the last max is the last peak min. Otherwise, keep default of splineAnnotation[N-1] as last peak min.
                 for (unsigned int j = i+1; j < N-1; j++) {
-                    splineAnnotation[j] = SplineAnnotation::NONE;
+                    if (splineAnnotation[j] <= baseline[j]){
+                        splineAnnotation[j] = SplineAnnotation::MIN;
+                        splineAnnotation[N-1] = SplineAnnotation::NONE;
+                    }
                 }
+
             } else {
+
                 //find next max, if it exists
                 int nextMax = -1;
 
@@ -359,31 +376,50 @@ void EIC::getPeakPositionsC(int smoothWindow) {
                 if (nextMax != -1) {
                     //found another max
 
-                    int minIntensity = i+1;
-                    for (int j = i+1; j < nextMax; j++) {
-                        if (spline[j] < spline[minIntensity]) {
-                            minIntensity = j;
+                    //check for intensity points coming from both directions
+
+                    bool foundSubBaselineFromLeft = false;
+
+                    //check left max
+                    for (unsigned int j = i+1; j < nextMax; j++) {
+                        if (splineAnnotation[j] <= baseline[j]) {
+                            splineAnnotation[j] = SplineAnnotation::MIN;
+                            foundSubBaselineFromLeft = true;
+                            break;
                         }
                     }
 
-                    spline[minIntensity] = SplineAnnotation::MIN;
+                    if (foundSubBaselineFromLeft) {
+                        //If sub-baseline points are found from the left, there might be more that would be found first, from the right.
+                        //If there is only one sub-baseline point, looking from the right should re-discover the same point found when looking from the left.
+
+                        //check right max
+                        for (unsigned int j = nextMax - 1; j > i; j++) {
+                            if (splineAnnotation[j] <= baseline[j]) {
+                                splineAnnotation[j] = SplineAnnotation::MIN;
+                                break;
+                            }
+                        }
+
+                    } else {
+                        //if no sub-baseline peaks are found between the two maxes, take lowest intensity peak
+
+                        int minIntensity = i+1;
+                        for (int j = i+1; j < nextMax; j++) {
+                            if (spline[j] < spline[minIntensity]) {
+                                minIntensity = j;
+                            }
+                        }
+
+                        spline[minIntensity] = SplineAnnotation::MIN;
+
+                    }
+
+
                 }
             }
         }
     }
-
-    //TODO: assign maxima and minima
-    /*
-     * 1. Ultimately need MIN-MAX-MIN-MAX-MIN.... MAX-MIN
-     * (alternating MIN and MAX, starting and ending with MIN).
-     *
-     * 2. remove extra MINs
-     * 3. insert MINs between MAXs
-     * 3. remove trailing MINs (no need to insert trailing MINs)
-     */
-
-    //baseline always uses Gaussian smoothing.
-    computeBaseLine(baselineSmoothingWindow, baselineDropTopX);
 
     for (auto peak : peaks) {
         getPeakDetails(peak);
