@@ -340,6 +340,8 @@ void EIC::getPeakPositionsC(int smoothWindow) {
         }
     }
 
+    if (firstMax == -1) return; //no peaks determined based on 3-point max rule
+
     for (unsigned int i = 0; i < N; i++){
         if (splineAnnotation[i] == SplineAnnotation::MAX) {
             if (i == firstMax) {
