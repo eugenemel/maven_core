@@ -378,10 +378,10 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
 
                 //first point less than the baseline is the first peak min.
                 for (unsigned int j = i-1; j > 0; j--) {
-                    if (intensity[j] < baselineQCutVal) {
-                        firstMin = j;
-                        break;
-                    }
+//                    if (intensity[j] < baselineQCutVal) {
+//                        firstMin = j;
+//                        break;
+//                    }
                     if (spline[j] < spline[minIntensity]) {
                         minIntensity = j;
                     }
@@ -408,10 +408,10 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
 
                 //first point less than the baseline following the last max is the last peak min.
                 for (unsigned int j = i+1; j < N-1; j++) {
-                    if (intensity[j] < baselineQCutVal){
-                        lastMin = j;
-                        break;
-                    }
+//                    if (intensity[j] < baselineQCutVal){
+//                        lastMin = j;
+//                        break;
+//                    }
                     if (spline[j] < spline[minIntensity]) {
                         minIntensity = j;
                     }
@@ -444,51 +444,63 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
                 if (nextMax != -1) {
                     //found another max
 
-                    //check for intensity points coming from both directions
+                    //Testing: just take min intensity point between two maxes
 
-                    int thisMaxRightMin = -1;
-                    int nextMaxLeftMin = -1;
-
-                    bool foundSubBaselineFromLeft = false;
-
-                    //check left max
-                    for (unsigned int j = i+1; j < nextMax; j++) {
-                        if (intensity[j] < baselineQCutVal) {
-                            splineAnnotation[j] = SplineAnnotation::MIN;
-                            foundSubBaselineFromLeft = true;
-                            thisMaxRightMin = j;
-                            break;
+                    int minIntensity = i+1;
+                    for (int j = i+1; j < nextMax; j++) {
+                        if (spline[j] < spline[minIntensity]) {
+                            minIntensity = j;
                         }
                     }
 
-                    if (foundSubBaselineFromLeft) {
-                        //If sub-baseline points are found from the left, there might be more that would be found first, from the right.
-                        //If there is only one sub-baseline point, looking from the right should re-discover the same point found when looking from the left.
+                    splineAnnotation[minIntensity] = SplineAnnotation::MIN;
 
-                        //check right max
-                        for (unsigned int j = nextMax - 1; j > i; j++) {
-                            if (intensity[j] < baselineQCutVal) {
-                                splineAnnotation[j] = SplineAnnotation::MIN;
-                                nextMaxLeftMin = j;
-                                break;
-                            }
-                        }
+                    int thisMaxRightMin = minIntensity;
+                    int nextMaxLeftMin = minIntensity;
 
-                    } else {
-                        //if no sub-baseline peaks are found between the two maxes, take lowest intensity peak (smoothed values)
 
-                        int minIntensity = i+1;
-                        for (int j = i+1; j < nextMax; j++) {
-                            if (spline[j] < spline[minIntensity]) {
-                                minIntensity = j;
-                            }
-                        }
+//                    //check for intensity points coming from both directions
 
-                        splineAnnotation[minIntensity] = SplineAnnotation::MIN;
+//                    int thisMaxRightMin = -1; // traverse from left to find the right min for this max
+//                    int nextMaxLeftMin = -1; // traverse from right to find the left min for the next max
 
-                        thisMaxRightMin = minIntensity;
-                        nextMaxLeftMin = minIntensity;
-                    }
+//                    //check left max
+//                    for (unsigned int j = i+1; j < nextMax; j++) {
+//                        if (intensity[j] < baselineQCutVal) {
+//                            splineAnnotation[j] = SplineAnnotation::MIN;
+//                            thisMaxRightMin = j;
+//                            break;
+//                        }
+//                    }
+
+//                    if (thisMaxRightMin == -1) {
+//                        //If sub-baseline points are found from the left, there might be more that would be found first, from the right.
+//                        //If there is only one sub-baseline point, looking from the right should re-discover the same point found when looking from the left.
+
+//                        //check right max
+//                        for (unsigned int j = nextMax - 1; j > i; j++) {
+//                            if (intensity[j] < baselineQCutVal) {
+//                                splineAnnotation[j] = SplineAnnotation::MIN;
+//                                nextMaxLeftMin = j;
+//                                break;
+//                            }
+//                        }
+
+//                    } else {
+//                        //if no sub-baseline peaks are found between the two maxes, take lowest intensity peak (smoothed values)
+
+//                        int minIntensity = i+1;
+//                        for (int j = i+1; j < nextMax; j++) {
+//                            if (spline[j] < spline[minIntensity]) {
+//                                minIntensity = j;
+//                            }
+//                        }
+
+//                        splineAnnotation[minIntensity] = SplineAnnotation::MIN;
+
+//                        thisMaxRightMin = minIntensity;
+//                        nextMaxLeftMin = minIntensity;
+//                    }
 
                     if (debug) {
                         cerr << "i=" << thisMaxRightMin << " " << spline[thisMaxRightMin] << " RIGHT MIN" << endl;
