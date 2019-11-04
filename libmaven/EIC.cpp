@@ -111,6 +111,7 @@ void  EIC::computeBaseLine(int smoothing_window, int dropTopX) {
     if (baseline.size()) {  //delete previous baseline if exists
         baseline.clear();
         eic_noNoiseObs=0;
+        baselineQCutVal=0.0f;
     }
 
 	int n = intensity.size();
@@ -134,6 +135,7 @@ void  EIC::computeBaseLine(int smoothing_window, int dropTopX) {
         float qcut=0;
         pos < tmpv.size() ? qcut = tmpv[pos] : qcut = tmpv.back();
 
+        baselineQCutVal = qcut;
         //drop all points above maximum baseline value
 	for(int i=0; i<n; i++ ) {
 		if ( intensity[i] > qcut) {
@@ -327,7 +329,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
     for (unsigned int i=1; i < N-1; i++ ) {
 
         //only consider peaks above baseline
-        if (spline[i] > spline[i-1] && spline[i] > spline[i+1] && spline[i] > baseline[i]) {
+        if (spline[i] > spline[i-1] && spline[i] > spline[i+1] && intensity[i] > baselineQCutVal) {
 
             addPeak(static_cast<int>(i));
 
@@ -378,7 +380,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
 
                 //first point less than the baseline is the first peak min. Otherwise, keep default of splineAnnotation[0] as first peak min.
                 for (unsigned int j = i-1; j > 0; j--) {
-                    if (splineAnnotation[j] <= baseline[j]) {
+                    if (intensity[j] < baselineQCutVal) {
                         firstMin = j;
                         break;
                     }
@@ -400,7 +402,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
 
                 //first point less than the baseline following the last max is the last peak min. Otherwise, keep default of splineAnnotation[N-1] as last peak min.
                 for (unsigned int j = i+1; j < N-1; j++) {
-                    if (splineAnnotation[j] <= baseline[j]){
+                    if (intensity[j] < baselineQCutVal){
                         lastMin = j;
                         break;
                     }
@@ -435,7 +437,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
 
                     //check left max
                     for (unsigned int j = i+1; j < nextMax; j++) {
-                        if (splineAnnotation[j] <= baseline[j]) {
+                        if (intensity[j] < baselineQCutVal) {
                             splineAnnotation[j] = SplineAnnotation::MIN;
                             foundSubBaselineFromLeft = true;
                             break;
@@ -448,14 +450,14 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
 
                         //check right max
                         for (unsigned int j = nextMax - 1; j > i; j++) {
-                            if (splineAnnotation[j] <= baseline[j]) {
+                            if (intensity[j] < baselineQCutVal) {
                                 splineAnnotation[j] = SplineAnnotation::MIN;
                                 break;
                             }
                         }
 
                     } else {
-                        //if no sub-baseline peaks are found between the two maxes, take lowest intensity peak
+                        //if no sub-baseline peaks are found between the two maxes, take lowest intensity peak (smoothed values)
 
                         int minIntensity = i+1;
                         for (int j = i+1; j < nextMax; j++) {
@@ -464,7 +466,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
                             }
                         }
 
-                        spline[minIntensity] = SplineAnnotation::MIN;
+                        splineAnnotation[minIntensity] = SplineAnnotation::MIN;
 
                     }
 
@@ -476,8 +478,8 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
 
 
     if (debug) {
-        cout << "FINISHED ASSIGNING MINIMA:" << endl;
-        cout << "===================================" << endl;
+        cerr << "FINISHED ASSIGNING MINIMA:" << endl;
+        cerr << "===================================" << endl;
     }
 
     if (debug) {

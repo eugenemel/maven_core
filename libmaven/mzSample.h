@@ -380,6 +380,8 @@ class EIC {
         float rtmin;
         float rtmax;
 
+        float baselineQCutVal; // computed by EIC::computeBaseline(). Deals with raw intensities (not with spline).
+
 		Peak* addPeak(int peakPos);
 		void deletePeak(unsigned int i);
         void getPeakPositions(int smoothWindow);
