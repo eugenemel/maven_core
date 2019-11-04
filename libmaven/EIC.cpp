@@ -480,6 +480,8 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
     if (debug) {
         cerr << "FINISHED ASSIGNING MINIMA" << endl;
         cerr << "===================================" << endl;
+        cerr << "===================================" << endl;
+        cerr << "FINAL PEAKS:" << endl;
     }
 
     for (auto peak : peaks) {
@@ -507,6 +509,10 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
         }
 
         getPeakDetails(peak);
+    }
+
+    if (debug) {
+        cerr << "===================================" << endl;
     }
 
     //assign peak ranks based on total area of the peak
