@@ -388,7 +388,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
                 splineAnnotation[firstMin] = SplineAnnotation::MIN;
 
                 if (debug) {
-                    cerr << "i=" << firstMin << " " << spline[i] << " LEFT MIN" << endl;
+                    cerr << "i=" << firstMin << " " << spline[firstMin] << " LEFT MIN" << endl;
                     cerr << "i=" << i << " " << spline[i] << " MAX" << endl;
                 }
 
@@ -396,13 +396,22 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
 
             if (i == lastMax) {
 
+                int lastMin = N-1;
+
                 //first point less than the baseline following the last max is the last peak min. Otherwise, keep default of splineAnnotation[N-1] as last peak min.
                 for (unsigned int j = i+1; j < N-1; j++) {
                     if (splineAnnotation[j] <= baseline[j]){
-                        splineAnnotation[j] = SplineAnnotation::MIN;
-                        splineAnnotation[N-1] = SplineAnnotation::NONE;
+                        lastMin = j;
                         break;
                     }
+                }
+
+                splineAnnotation[N-1] = SplineAnnotation::NONE;
+                splineAnnotation[lastMin] = SplineAnnotation::MIN;
+
+                if (debug) {
+                    cerr << "i=" << i << " " << spline[i] << " MAX" << endl;
+                    cerr << "i=" << lastMin << " " << spline[lastMin] << " RIGHT MIN" << endl;
                 }
 
             } else {
