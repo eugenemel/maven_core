@@ -320,9 +320,6 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
 
     vector<SplineAnnotation> splineAnnotation(N, SplineAnnotation::NONE);
 
-    splineAnnotation[0] = SplineAnnotation::MIN;
-    splineAnnotation[N-1] = SplineAnnotation::MIN;
-
     int lastMax = -1;
     int firstMax = -1;
 
@@ -376,17 +373,25 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
 
             if (i == firstMax) {
 
-                int firstMin = 0;
+                int firstMin = -1;
+                int minIntensity = i-1;
 
-                //first point less than the baseline is the first peak min. Otherwise, keep default of splineAnnotation[0] as first peak min.
+                //first point less than the baseline is the first peak min.
                 for (unsigned int j = i-1; j > 0; j--) {
                     if (intensity[j] < baselineQCutVal) {
                         firstMin = j;
                         break;
                     }
+                    if (spline[j] < spline[minIntensity]) {
+                        minIntensity = j;
+                    }
                 }
 
-                splineAnnotation[0] = SplineAnnotation::NONE;
+                //if no points are less than the baseline, take lowest intensity point.
+                if (firstMin == -1) {
+                    firstMin = minIntensity;
+                }
+
                 splineAnnotation[firstMin] = SplineAnnotation::MIN;
 
                 if (debug) {
@@ -398,17 +403,25 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
 
             if (i == lastMax) {
 
-                int lastMin = N-1;
+                int lastMin = -1;
+                int minIntensity = i+1;
 
-                //first point less than the baseline following the last max is the last peak min. Otherwise, keep default of splineAnnotation[N-1] as last peak min.
+                //first point less than the baseline following the last max is the last peak min.
                 for (unsigned int j = i+1; j < N-1; j++) {
                     if (intensity[j] < baselineQCutVal){
                         lastMin = j;
                         break;
                     }
+                    if (spline[j] < spline[minIntensity]) {
+                        minIntensity = j;
+                    }
                 }
 
-                splineAnnotation[N-1] = SplineAnnotation::NONE;
+                //if no points are less than the baseline, take lowest intensity point.
+                if (lastMin == -1) {
+                    lastMin = minIntensity;
+                }
+
                 splineAnnotation[lastMin] = SplineAnnotation::MIN;
 
                 if (debug) {
