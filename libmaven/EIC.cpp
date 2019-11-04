@@ -327,6 +327,9 @@ void EIC::getPeakPositionsC(int smoothWindow) {
     for (unsigned int i=1; i < N-1; i++ ) {
 
         if (spline[i] > spline[i-1] && spline[i] > spline[i+1]) {
+
+            addPeak(static_cast<int>(i));
+
             splineAnnotation[i] = SplineAnnotation::MAX;
 
             if (firstMax == -1){ //only assigned first time MAX appears
@@ -366,7 +369,7 @@ void EIC::getPeakPositionsC(int smoothWindow) {
                 //find next max, if it exists
                 int nextMax = -1;
 
-                for (int j = i+1; j < N-1; j++){
+                for (unsigned int j = i+1; j < N-1; j++){
                     if (splineAnnotation[j] == SplineAnnotation::MAX) {
                         nextMax = j;
                         break;
@@ -422,6 +425,23 @@ void EIC::getPeakPositionsC(int smoothWindow) {
     }
 
     for (auto peak : peaks) {
+
+        //find left boundary
+        for (unsigned int i = peak.pos-1; i >= 0; i--) {
+            if (splineAnnotation[i] == SplineAnnotation::MIN) {
+                peak.minpos = i;
+                break;
+            }
+        }
+
+        //find right boundary
+        for (unsigned int i = peak.pos+1; i < N-1; i++) {
+            if (splineAnnotation[i] == SplineAnnotation::MIN) {
+                peak.maxpos = i;
+                break;
+            }
+        }
+
         getPeakDetails(peak);
     }
 
