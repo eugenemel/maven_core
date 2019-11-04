@@ -440,13 +440,16 @@ void EIC::getPeakPositionsC(int smoothWindow) {
             numMinima++;
             if (leftIntensity == -1.0f) {
                 leftIntensity = intensity[i];
+                cerr << "i=" << i <<" MIN=" << leftIntensity << endl;
             } else {
                 rightIntensity = intensity[i];
+                cerr << "i=" << i <<" MIN=" << rightIntensity << endl;
             }
         }
         if (splineAnnotation[i] == SplineAnnotation::MAX) {
             numMaxima++;
             maxIntensity = intensity[i];
+            cerr << "i=" << i <<" MAX=" << maxIntensity << endl;
         }
 
         if (rightIntensity > 0) {
