@@ -478,7 +478,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
 
 
     if (debug) {
-        cerr << "FINISHED ASSIGNING MINIMA:" << endl;
+        cerr << "FINISHED ASSIGNING MINIMA" << endl;
         cerr << "===================================" << endl;
     }
 
