@@ -482,46 +482,6 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
         cerr << "===================================" << endl;
     }
 
-    if (debug) {
-        int numMaxima = 0;
-        int numMinima = 0;
-
-        float leftIntensity = -1.0f;
-        float rightIntensity = -1.0f;
-        float maxIntensity = -1.0f;
-
-
-        for (unsigned int i = 0 ; i < N; i++){
-            if (splineAnnotation[i] == SplineAnnotation::MIN) {
-                numMinima++;
-                if (leftIntensity < 0) {
-                    leftIntensity = spline[i];
-                    cerr << "i=" << i <<" LEFT MIN=" << leftIntensity << " [unsmoothed = " << intensity[i] <<  "]"<< endl;
-                } else {
-                    rightIntensity = spline[i];
-                    cerr << "i=" << i <<" RIGHT MIN=" << rightIntensity << " [unsmoothed = " << intensity[i] <<  "]"<< endl;
-                }
-            }
-            if (splineAnnotation[i] == SplineAnnotation::MAX) {
-                numMaxima++;
-                maxIntensity = spline[i];
-                cerr << "i=" << i <<" MAX=" << maxIntensity  << " [unsmoothed = " << intensity[i] <<  "]"<< endl;
-            }
-
-            if (rightIntensity > 0) {
-
-                assert(maxIntensity > leftIntensity);
-                assert(maxIntensity > rightIntensity);
-
-                leftIntensity = -1.0f;
-                rightIntensity = -1.0f;
-                maxIntensity = -1.0f;
-            }
-        }
-
-        assert(numMaxima < numMinima);
-    }
-
     for (auto peak : peaks) {
 
         //find left boundary
@@ -538,6 +498,12 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
                 peak.maxpos = i;
                 break;
             }
+        }
+
+        if (debug) {
+            cerr << "i=" << peak.minpos << " LEFT MIN=" << spline[peak.minpos] << endl;
+            cerr << "i=" << peak.pos << " MAX=" << spline[peak.pos] << endl;
+            cerr << "i=" << peak.maxpos << " RIGHT MIn=" << spline[peak.maxpos] << endl;
         }
 
         getPeakDetails(peak);
