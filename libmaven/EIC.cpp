@@ -532,7 +532,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
         }
 
         //find right boundary
-        for (unsigned int i = peak.pos+1; i < N-1; i++) {
+        for (unsigned int i = peak.pos+1; i < N; i++) {
             if (splineAnnotation[i] == SplineAnnotation::MIN) {
                 peak.maxpos = i;
                 break;
