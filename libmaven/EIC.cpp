@@ -426,6 +426,44 @@ void EIC::getPeakPositionsC(int smoothWindow) {
         }
     }
 
+    //START TESTING BLOCK
+    int numMaxima = 0;
+    int numMinima = 0;
+
+    float leftIntensity = -1.0f;
+    float rightIntensity = -1.0f;
+    float maxIntensity = -1.0f;
+
+
+    for (unsigned int i = 0 ; i < N; i++){
+        if (splineAnnotation[i] == SplineAnnotation::MIN) {
+            numMinima++;
+            if (leftIntensity == -1.0f) {
+                leftIntensity = intensity[i];
+            } else {
+                rightIntensity = intensity[i];
+            }
+        }
+        if (splineAnnotation[i] == SplineAnnotation::MAX) {
+            numMaxima++;
+            maxIntensity = intensity[i];
+        }
+
+        if (rightIntensity > 0) {
+
+            assert(maxIntensity > leftIntensity);
+            assert(maxIntensity > rightIntensity);
+
+            leftIntensity = -1.0f;
+            rightIntensity = -1.0f;
+            maxIntensity = -1.0f;
+        }
+    }
+
+    assert(numMaxima < numMinima);
+
+    //END TESTING BLOCK
+
     for (auto peak : peaks) {
 
         //find left boundary
