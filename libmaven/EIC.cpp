@@ -326,7 +326,8 @@ void EIC::getPeakPositionsC(int smoothWindow) {
 
     for (unsigned int i=1; i < N-1; i++ ) {
 
-        if (spline[i] > spline[i-1] && spline[i] > spline[i+1]) {
+        //only consider peaks above baseline
+        if (spline[i] > spline[i-1] && spline[i] > spline[i+1] && spline[i] > baseline[i]) {
 
             addPeak(static_cast<int>(i));
 
