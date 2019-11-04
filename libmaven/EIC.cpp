@@ -363,17 +363,36 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
         cout << "===================================" << endl;
     }
 
+    if (debug) {
+        cout << "===================================" << endl;
+        cout << "STARTING ASSIGNING MINIMA:" << endl;
+    }
+
     for (unsigned int i = 0; i < N; i++){
 
         if (splineAnnotation[i] == SplineAnnotation::MAX) {
+
+            if (debug) {
+                cout << "i=" << i << " " << spline[i] << " MAX" << endl;
+            }
+
             if (i == firstMax) {
+
+                int firstMin = 0;
 
                 //first point less than the baseline is the first peak min. Otherwise, keep default of splineAnnotation[0] as first peak min.
                 for (unsigned int j = i-1; j > 0; j--) {
                     if (splineAnnotation[j] <= baseline[j]) {
-                        splineAnnotation[j] = SplineAnnotation::MIN;
-                        splineAnnotation[0] = SplineAnnotation::NONE;
+                        firstMin = j;
+                        break;
                     }
+                }
+
+                splineAnnotation[0] = SplineAnnotation::NONE;
+                splineAnnotation[firstMin] = SplineAnnotation::MIN;
+
+                if (debug) {
+                    cout << "i=" << firstMin << " " << spline[i] << " LEFT MIN" << endl;
                 }
 
             }
@@ -385,6 +404,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
                     if (splineAnnotation[j] <= baseline[j]){
                         splineAnnotation[j] = SplineAnnotation::MIN;
                         splineAnnotation[N-1] = SplineAnnotation::NONE;
+                        break;
                     }
                 }
 
@@ -448,6 +468,11 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
         }
     }
 
+
+    if (debug) {
+        cout << "FINISHED ASSIGNING MINIMA:" << endl;
+        cout << "===================================" << endl;
+    }
 
     if (debug) {
         int numMaxima = 0;
