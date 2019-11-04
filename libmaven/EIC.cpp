@@ -295,8 +295,25 @@ void EIC::getPeakPositionsB(int smoothWindow, float minSmoothedPeakIntensity) {
  *
  * @param smoothWindow
  *
- * Approach that guarantees that peaks do not have any overlap. This comes at the cost of
- * not using the EIC::findPeakBounds() method (in EIC::getPeakStatistics()).
+ * Approach that guarantees that peaks in the same EIC do not overlap. This approach is an alternative to
+ * the EIC::findPeakBounds() method (in EIC::getPeakStatistics()).
+ *
+ * In this approach, peaks are identified using 3-point local maxima, just as in EIC::getPeakPositions()
+ * and EIC::getPeakPositionsB().
+ *
+ * In EIC::getPeakPositionsB(), only peaks that satisfy a minimum intensity threshold are retained.
+ * In EIC::getPeakPositions(), all peaks are retained.
+ *
+ * Here, only peaks that are above the baseline are retained.
+ *
+ * After that, minima are determined by finding the minimum smoothed intensity point between two maxima,
+ *  or between a maximum and either end of the EIC.
+ *
+ * Peaks always range from one minima to another. If an EIC contains multiple maxima, adjacent maxima will share
+ * a minimum between them.
+ *
+ * @author phillipseitzer
+ * @since 20191104
  */
 void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
 
@@ -373,60 +390,39 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
 
             if (i == firstMax) {
 
-                int firstMin = -1;
                 int minIntensity = i-1;
 
                 //first point less than the baseline is the first peak min.
                 for (unsigned int j = i-1; j > 0; j--) {
-//                    if (intensity[j] < baselineQCutVal) {
-//                        firstMin = j;
-//                        break;
-//                    }
                     if (spline[j] < spline[minIntensity]) {
                         minIntensity = j;
                     }
                 }
 
-                //if no points are less than the baseline, take lowest intensity point.
-                if (firstMin == -1) {
-                    firstMin = minIntensity;
-                }
-
-                splineAnnotation[firstMin] = SplineAnnotation::MIN;
+                splineAnnotation[minIntensity] = SplineAnnotation::MIN;
 
                 if (debug) {
-                    cerr << "i=" << firstMin << " " << spline[firstMin] << " LEFT MIN" << endl;
-                    cerr << "i=" << i << " " << spline[i] << " MAX" << endl;
+                    cerr << "i=" << minIntensity << " " << spline[minIntensity] << " MIN" << endl;
                 }
 
             }
 
             if (i == lastMax) {
 
-                int lastMin = -1;
                 int minIntensity = i+1;
 
                 //first point less than the baseline following the last max is the last peak min.
                 for (unsigned int j = i+1; j < N-1; j++) {
-//                    if (intensity[j] < baselineQCutVal){
-//                        lastMin = j;
-//                        break;
-//                    }
                     if (spline[j] < spline[minIntensity]) {
                         minIntensity = j;
                     }
                 }
 
-                //if no points are less than the baseline, take lowest intensity point.
-                if (lastMin == -1) {
-                    lastMin = minIntensity;
-                }
-
-                splineAnnotation[lastMin] = SplineAnnotation::MIN;
+                splineAnnotation[minIntensity] = SplineAnnotation::MIN;
 
                 if (debug) {
                     cerr << "i=" << i << " " << spline[i] << " MAX" << endl;
-                    cerr << "i=" << lastMin << " " << spline[lastMin] << " RIGHT MIN" << endl;
+                    cerr << "i=" << minIntensity << " " << spline[minIntensity] << " MIN" << endl;
                 }
 
             } else {
@@ -444,8 +440,6 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
                 if (nextMax != -1) {
                     //found another max
 
-                    //Testing: just take min intensity point between two maxes
-
                     int minIntensity = i+1;
                     for (int j = i+1; j < nextMax; j++) {
                         if (spline[j] < spline[minIntensity]) {
@@ -455,57 +449,9 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
 
                     splineAnnotation[minIntensity] = SplineAnnotation::MIN;
 
-                    int thisMaxRightMin = minIntensity;
-                    int nextMaxLeftMin = minIntensity;
-
-
-//                    //check for intensity points coming from both directions
-
-//                    int thisMaxRightMin = -1; // traverse from left to find the right min for this max
-//                    int nextMaxLeftMin = -1; // traverse from right to find the left min for the next max
-
-//                    //check left max
-//                    for (unsigned int j = i+1; j < nextMax; j++) {
-//                        if (intensity[j] < baselineQCutVal) {
-//                            splineAnnotation[j] = SplineAnnotation::MIN;
-//                            thisMaxRightMin = j;
-//                            break;
-//                        }
-//                    }
-
-//                    if (thisMaxRightMin == -1) {
-//                        //If sub-baseline points are found from the left, there might be more that would be found first, from the right.
-//                        //If there is only one sub-baseline point, looking from the right should re-discover the same point found when looking from the left.
-
-//                        //check right max
-//                        for (unsigned int j = nextMax - 1; j > i; j++) {
-//                            if (intensity[j] < baselineQCutVal) {
-//                                splineAnnotation[j] = SplineAnnotation::MIN;
-//                                nextMaxLeftMin = j;
-//                                break;
-//                            }
-//                        }
-
-//                    } else {
-//                        //if no sub-baseline peaks are found between the two maxes, take lowest intensity peak (smoothed values)
-
-//                        int minIntensity = i+1;
-//                        for (int j = i+1; j < nextMax; j++) {
-//                            if (spline[j] < spline[minIntensity]) {
-//                                minIntensity = j;
-//                            }
-//                        }
-
-//                        splineAnnotation[minIntensity] = SplineAnnotation::MIN;
-
-//                        thisMaxRightMin = minIntensity;
-//                        nextMaxLeftMin = minIntensity;
-//                    }
-
                     if (debug) {
-                        cerr << "i=" << thisMaxRightMin << " " << spline[thisMaxRightMin] << " RIGHT MIN" << endl;
                         cerr << "i=" << i << " " << spline[i] << " MAX" << endl;
-                        cerr << "i=" << nextMaxLeftMin << " " << spline[nextMaxLeftMin] << " LEFT MIN" << endl;
+                        cerr << "i=" << minIntensity << " " << spline[minIntensity] << " MIN" << endl;
                     }
 
                 }
