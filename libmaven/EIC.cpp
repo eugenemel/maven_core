@@ -357,7 +357,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
                 cerr << "ILLEGAL TYPE." << endl;
                 abort();
             }
-            cerr << "i=" <<  i << " " << spline[i] << " " << type << endl;
+            cerr << "i=" <<  i << " " << intensity[i] << " (spline=" << spline[i] << ") " << type << endl;
         }
         cerr << "===================================" << endl;
     }
@@ -382,7 +382,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
                         firstMin = j;
                         break;
                     }
-                    if (spline[j] < spline[minIntensity]) {
+                    if (intensity[j] < intensity[minIntensity]) {
                         minIntensity = j;
                     }
                 }
@@ -412,7 +412,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
                         lastMin = j;
                         break;
                     }
-                    if (spline[j] < spline[minIntensity]) {
+                    if (intensity[j] < intensity[minIntensity]) {
                         minIntensity = j;
                     }
                 }
@@ -479,7 +479,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
 
                         int minIntensity = i+1;
                         for (int j = i+1; j < nextMax; j++) {
-                            if (spline[j] < spline[minIntensity]) {
+                            if (intensity[j] < intensity[minIntensity]) {
                                 minIntensity = j;
                             }
                         }
@@ -528,12 +528,12 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
         }
 
         if (debug) {
-            cerr << "i=" << peak.minpos << " LEFT MIN=" << spline[peak.minpos] << endl;
-            cerr << "i=" << peak.pos << " MAX=" << spline[peak.pos] << endl;
-            cerr << "i=" << peak.maxpos << " RIGHT MIN=" << spline[peak.maxpos] << endl;
+            cerr << "i=" << peak.minpos << " LEFT MIN=" << intensity[peak.minpos] << endl;
+            cerr << "i=" << peak.pos << " MAX=" << intensity[peak.pos] << endl;
+            cerr << "i=" << peak.maxpos << " RIGHT MIN=" << intensity[peak.maxpos] << endl;
 
-            assert(spline[peak.pos] > spline[peak.minpos]);
-            assert(spline[peak.pos] > spline[peak.minpos]);
+            assert(intensity[peak.pos] > intensity[peak.minpos]);
+            assert(intensity[peak.pos] > intensity[peak.minpos]);
         }
 
         getPeakDetails(peak);
