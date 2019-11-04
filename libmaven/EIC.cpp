@@ -496,7 +496,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
         cerr << "FINAL PEAKS:" << endl;
     }
 
-    for (auto peak : peaks) {
+    for (auto &peak : peaks) {
 
         //find left boundary
         for (unsigned int i = peak.pos-1; i >= 0; i--) {
