@@ -517,10 +517,19 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
         if (debug) {
             cerr << "i=" << peak.minpos << " LEFT MIN=" << spline[peak.minpos] << endl;
             cerr << "i=" << peak.pos << " MAX=" << spline[peak.pos] << endl;
-            cerr << "i=" << peak.maxpos << " RIGHT MIn=" << spline[peak.maxpos] << endl;
+            cerr << "i=" << peak.maxpos << " RIGHT MIN=" << spline[peak.maxpos] << endl;
         }
 
         getPeakDetails(peak);
+
+        if (debug) {
+             cerr << "Details: ("
+                  << peak.peakMz
+                  << " [" << peak.mzmin << "-" << peak.mzmax << "], "
+                  << peak.rt
+                  << " [" << peak.rtmin << "-" << peak.rtmax
+                  << "])";
+        }
     }
 
     if (debug) {
