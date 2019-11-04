@@ -296,7 +296,7 @@ void EIC::getPeakPositionsB(int smoothWindow, float minSmoothedPeakIntensity) {
  * Approach that guarantees that peaks do not have any overlap. This comes at the cost of
  * not using the EIC::findPeakBounds() method (in EIC::getPeakStatistics()).
  */
-void EIC::getPeakPositionsC(int smoothWindow) {
+void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
 
     peaks.clear();
 
@@ -343,7 +343,28 @@ void EIC::getPeakPositionsC(int smoothWindow) {
 
     if (firstMax == -1) return; //no peaks determined based on 3-point max rule
 
+    if (debug) {
+        cout << "===================================" << endl;
+        cout << "BEFORE ASSIGNING MINIMA:" << endl;
+        for (unsigned int i = 0; i < N; i++) {
+            string type = "";
+            if (splineAnnotation[i] == SplineAnnotation::MAX) {
+                type = "MAX";
+            } else if (splineAnnotation[i] == SplineAnnotation::MIN) {
+                type = "MIN";
+            } else if (splineAnnotation[i] == SplineAnnotation::NONE) {
+                type = "NONE";
+            } else {
+                cerr << "ILLEGAL TYPE." << endl;
+                abort();
+            }
+            cout << "i=" <<  i << " " << spline[i] << " " << type << endl;
+        }
+        cout << "===================================" << endl;
+    }
+
     for (unsigned int i = 0; i < N; i++){
+
         if (splineAnnotation[i] == SplineAnnotation::MAX) {
             if (i == firstMax) {
 
@@ -427,46 +448,46 @@ void EIC::getPeakPositionsC(int smoothWindow) {
         }
     }
 
-    //START TESTING BLOCK
-    int numMaxima = 0;
-    int numMinima = 0;
 
-    float leftIntensity = -1.0f;
-    float rightIntensity = -1.0f;
-    float maxIntensity = -1.0f;
+    if (debug) {
+        int numMaxima = 0;
+        int numMinima = 0;
+
+        float leftIntensity = -1.0f;
+        float rightIntensity = -1.0f;
+        float maxIntensity = -1.0f;
 
 
-    for (unsigned int i = 0 ; i < N; i++){
-        if (splineAnnotation[i] == SplineAnnotation::MIN) {
-            numMinima++;
-            if (leftIntensity < 0) {
-                leftIntensity = spline[i];
-                cerr << "i=" << i <<" LEFT MIN=" << leftIntensity << " [unsmoothed = " << intensity[i] <<  "]"<< endl;
-            } else {
-                rightIntensity = spline[i];
-                cerr << "i=" << i <<" RIGHT MIN=" << rightIntensity << " [unsmoothed = " << intensity[i] <<  "]"<< endl;
+        for (unsigned int i = 0 ; i < N; i++){
+            if (splineAnnotation[i] == SplineAnnotation::MIN) {
+                numMinima++;
+                if (leftIntensity < 0) {
+                    leftIntensity = spline[i];
+                    cerr << "i=" << i <<" LEFT MIN=" << leftIntensity << " [unsmoothed = " << intensity[i] <<  "]"<< endl;
+                } else {
+                    rightIntensity = spline[i];
+                    cerr << "i=" << i <<" RIGHT MIN=" << rightIntensity << " [unsmoothed = " << intensity[i] <<  "]"<< endl;
+                }
+            }
+            if (splineAnnotation[i] == SplineAnnotation::MAX) {
+                numMaxima++;
+                maxIntensity = spline[i];
+                cerr << "i=" << i <<" MAX=" << maxIntensity  << " [unsmoothed = " << intensity[i] <<  "]"<< endl;
+            }
+
+            if (rightIntensity > 0) {
+
+                assert(maxIntensity > leftIntensity);
+                assert(maxIntensity > rightIntensity);
+
+                leftIntensity = -1.0f;
+                rightIntensity = -1.0f;
+                maxIntensity = -1.0f;
             }
         }
-        if (splineAnnotation[i] == SplineAnnotation::MAX) {
-            numMaxima++;
-            maxIntensity = spline[i];
-            cerr << "i=" << i <<" MAX=" << maxIntensity  << " [unsmoothed = " << intensity[i] <<  "]"<< endl;
-        }
 
-        if (rightIntensity > 0) {
-
-            assert(maxIntensity > leftIntensity);
-            assert(maxIntensity > rightIntensity);
-
-            leftIntensity = -1.0f;
-            rightIntensity = -1.0f;
-            maxIntensity = -1.0f;
-        }
+        assert(numMaxima < numMinima);
     }
-
-    assert(numMaxima < numMinima);
-
-    //END TESTING BLOCK
 
     for (auto peak : peaks) {
 

@@ -384,7 +384,7 @@ class EIC {
 		void deletePeak(unsigned int i);
         void getPeakPositions(int smoothWindow);
         void getPeakPositionsB(int smoothWindow, float minSmoothedPeakIntensity);
-        void getPeakPositionsC(int smoothWindow);
+        void getPeakPositionsC(int smoothWindow, bool debug);
 		void getPeakDetails(Peak& peak);
 		void getPeakWidth(Peak& peak);
         void computeBaseLine(int smoothingWindow, int dropTopX);
