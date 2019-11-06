@@ -35,13 +35,14 @@ PeakGroup::PeakGroup()  {
     minMz=0;
     maxMz=0;
 
-    parent = NULL;
-    adduct = NULL;
-    compound = NULL;
+    parent = nullptr;
+    adduct = nullptr;
+    compound = nullptr;
     deletedFlag=false;
 
     isFocused=false;
     label=0;				//classification label
+    displayName="";
 
     goodPeakCount=0;
     _type = None;
@@ -97,6 +98,7 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     srmId=o.srmId;
     isFocused=o.isFocused;
     label=o.label;
+    displayName=o.displayName;
 
     goodPeakCount=o.goodPeakCount;
     _type = o._type;

@@ -540,6 +540,7 @@ class PeakGroup {
         string tagString;
         string searchTableName;
         char label;			//classification label
+        string displayName; //Issue 75: For use with tabledockwidget, other GUI displays
         string getName();               //compound name + tagString + srmid
 
         bool isFocused;
