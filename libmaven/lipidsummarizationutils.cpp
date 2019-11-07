@@ -17,7 +17,7 @@ pair<string, vector<string>> LipidSummarizationUtils::getNameComponents(string l
 //    boost::split(nameComponents, lipidName, boost::is_any_of(",()/"));
 //    vector<string> chains;
 
-    QRegExp rx("(\\, |\\( |\\) |\\/)");
+    QRegExp rx("(\\,|\\(|\\)|\\/)");
     QStringList qStringComponents = lipidNameAsQString.split(rx);
 
     vector<string> chains;
