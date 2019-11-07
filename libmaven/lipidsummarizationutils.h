@@ -10,6 +10,8 @@ private:
     LipidSummarizationUtils() {} // prevent instantiation
 
 public:
+    static std::pair<std::string, std::vector<std::string>> getNameComponents(std::string lipidName);
+
     static std::string getAcylChainLengthSummary(std::string lipidName);
     static std::string getAcylChainCompositionSummary(std::string lipidName);
     static std::string getLipidClassSummary(std::string lipidName);
