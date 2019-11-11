@@ -1,4 +1,6 @@
 #include "mzUtils.h"
+#include <QDirIterator>
+#include <QStringList>
 
 //random collection of useful functions
 
@@ -1002,6 +1004,15 @@ int mzToIntKey(const double mz, const int multFactor){
 
 double intKeyToMz(const int intKey, const int multFactor){
     return static_cast<double>(intKey) / static_cast<double>(multFactor);
+}
+
+vector<string> getMzSampleFilesFromDirectory(const char* path){
+    vector<string> fileNames;
+    QDirIterator dirIterator(QString(path), QStringList({"*.mzML", "*.mzXML"}));
+    while (dirIterator.hasNext()){
+        fileNames.push_back(dirIterator.next().toStdString());
+    }
+    return fileNames;
 }
 
 } //namespace end

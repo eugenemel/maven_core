@@ -131,6 +131,7 @@ bool fileExists(string strFilename);
 int createDir(const char* path);
 int isFile(const char* path);
 int isDir(const char* path);
+vector<string> getMzSampleFilesFromDirectory(const char* path);
 
 //fractional overlap between two line segments
 inline float checkOverlap(float a, float b, float c, float d) { 
