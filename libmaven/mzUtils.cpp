@@ -1,6 +1,5 @@
 #include "mzUtils.h"
-#include <QDirIterator>
-#include <QStringList>
+#include "glob.h"
 
 //random collection of useful functions
 
@@ -1007,12 +1006,25 @@ double intKeyToMz(const int intKey, const int multFactor){
 }
 
 vector<string> getMzSampleFilesFromDirectory(const char* path){
+    glob_t glob_result;
+    vector<string> fileNames;
+    string mzMLglob = std::string(path) + "/*.mzML*";
+    string mzXMLglob = std::string(path) + "/*.mzXML*";
+    vector<string> globpatterns { mzMLglob, mzXMLglob };
+    for( string pattern : globpatterns ) {
+        glob(pattern.c_str(), GLOB_TILDE,nullptr,&glob_result);
+        for(unsigned int i=0; i<glob_result.gl_pathc; ++i) fileNames.push_back(glob_result.gl_pathv[i]);
+    }
+    return fileNames;
+
+    /*
     vector<string> fileNames;
     QDirIterator dirIterator(QString(path), QStringList({"*.mzML", "*.mzXML"}));
     while (dirIterator.hasNext()){
         fileNames.push_back(dirIterator.next().toStdString());
     }
     return fileNames;
+    */
 }
 
 } //namespace end
