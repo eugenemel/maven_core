@@ -892,5 +892,12 @@ public:
 
 };
 
+class SummarizedCompound : public Compound {
+
+public:
+    vector<Compound*> children;
+    string summarizedName;
+
+};
 
 #endif
