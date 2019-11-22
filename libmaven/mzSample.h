@@ -734,6 +734,7 @@ class Compound {
 
             inline void setFormala(string formulastr) { formula = formulastr; }
             string getFormula() { return formula; }
+            map<string, string> metaDataMap = {};
 };
 
 
