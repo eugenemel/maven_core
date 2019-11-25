@@ -1,5 +1,5 @@
 #include "directinfusionprocessor.h"
-
+#include "lipidsummarizationutils.h"
 
 using namespace std;
 using namespace mzUtils;
@@ -243,6 +243,61 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
         matchInfo->matchDataToFrags.insert(make_pair(directInfusionMatchData, compoundFrags));
 
+    }
+
+    map<string, set<shared_ptr<DirectInfusionMatchData>>> chainLengthSummaries = {};
+    map<string, set<shared_ptr<DirectInfusionMatchData>>> compositionSummaries = {};
+
+    //Identify all cases where matchData matches to identical fragments
+    for (unsigned int i = 0; i < allCandidates.size(); i++) {
+
+        shared_ptr<DirectInfusionMatchData> iMatchData = allCandidates[i];
+
+        for (unsigned int j = i+1; j < allCandidates.size(); j++) {
+
+            shared_ptr<DirectInfusionMatchData> jMatchData = allCandidates[j];
+
+            vector<int> iFrags = matchInfo->matchDataToFrags[iMatchData];
+            vector<int> jFrags = matchInfo->matchDataToFrags[jMatchData];
+
+            if (iFrags == jFrags && iMatchData->adduct->name == jMatchData->adduct->name) {
+
+                string iChainLengthSummary;
+                if (iMatchData->compound->metaDataMap.find(LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey()) != iMatchData->compound->metaDataMap.end()){
+                    iChainLengthSummary = iMatchData->compound->metaDataMap[LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey()];
+                }
+
+                string jChainLengthSummary;
+                if (jMatchData->compound->metaDataMap.find(LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey()) != jMatchData->compound->metaDataMap.end()){
+                    jChainLengthSummary = jMatchData->compound->metaDataMap[LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey()];
+                }
+
+                if (!iChainLengthSummary.empty() && !jChainLengthSummary.empty() && iChainLengthSummary == jChainLengthSummary) {
+                    if (chainLengthSummaries.find(iChainLengthSummary) != chainLengthSummaries.end()){
+                        chainLengthSummaries[iChainLengthSummary].insert(iMatchData);
+                        chainLengthSummaries[iChainLengthSummary].insert(jMatchData);
+                    }
+                }
+
+                string iCompositionSummary;
+                if (iMatchData->compound->metaDataMap.find(LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()) != iMatchData->compound->metaDataMap.end()) {
+                     iCompositionSummary = iMatchData->compound->metaDataMap[LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()];
+                }
+
+                string jCompositionSummary;
+                if (jMatchData->compound->metaDataMap.find(LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()) != jMatchData->compound->metaDataMap.end()) {
+                    jCompositionSummary = jMatchData->compound->metaDataMap[LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()];
+                }
+
+                if (!iCompositionSummary.empty() && !jCompositionSummary.empty() && iCompositionSummary == jCompositionSummary) {
+                    if (compositionSummaries.find(iCompositionSummary) != compositionSummaries.end()) {
+                        compositionSummaries[iCompositionSummary].insert(iMatchData);
+                        compositionSummaries[jCompositionSummary].insert(jMatchData);
+                    }
+                }
+
+            }
+        }
     }
 
     if (debug) {
