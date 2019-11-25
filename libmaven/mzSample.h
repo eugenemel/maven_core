@@ -735,8 +735,20 @@ class Compound {
             inline void setFormala(string formulastr) { formula = formulastr; }
             string getFormula() { return formula; }
             map<string, string> metaDataMap = {};
+
+            virtual vector<Compound*> getChildren(){return vector<Compound*>(0);}
 };
 
+class SummarizedCompound : public Compound {
+
+public:
+    vector<Compound*> children;
+    string summarizedName;
+
+    vector<Compound*> getChildren();
+
+    virtual ~SummarizedCompound(){}
+};
 
 class Isotope {
 public:
@@ -890,15 +902,6 @@ public:
             if (isotopes[i]->deconvolutedMass > maxIsotopeMass) maxIsotopeMass=isotopes[i]->deconvolutedMass;
         }
     }
-
-};
-
-class SummarizedCompound : public Compound {
-
-public:
-    vector<Compound*> children;
-    string summarizedName;
-
 };
 
 #endif

@@ -69,3 +69,7 @@ FragmentationMatchScore Compound::scoreCompoundHit(Fragment* f, float productPpm
 
         return s;
 }
+
+vector<Compound*> SummarizedCompound::getChildren() {
+    return children;
+}
