@@ -151,6 +151,18 @@ public:
     map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> fragToTheoreticalIntensity = {};
     map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> fragToObservedIntensity = {};
 
+    /**
+      * If
+      *
+      * 1. multiple DirectInfusionMatchData match to exactly the same fragments,
+      * 2. the DirectInfusionMatchData's associated compounds can be readily summarized to a common form,
+      * and
+      * 3. the DirectInfusionMatchData's matched adducts are of the same type,
+      *
+      * these DirectInfusionMatchData can all be condensed.
+      */
+    map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToFragsCondensed  = {};
+
     float getNormalizedTheoreticalIntensity(int fragId, shared_ptr<DirectInfusionMatchData> matchData){return fragToTheoreticalIntensity.at(make_pair(fragId, matchData));}
     float getObservedIntensity(int fragId, shared_ptr<DirectInfusionMatchData> matchData){return fragToObservedIntensity.at(make_pair(fragId, matchData));}
 
