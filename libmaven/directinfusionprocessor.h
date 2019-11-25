@@ -349,5 +349,5 @@ typedef map<int, vector<shared_ptr<DirectInfusionMatchData>>>::iterator fragToMa
 typedef map<shared_ptr<DirectInfusionMatchData>, vector<int>>::iterator matchDataToFragIterator;
 typedef map<shared_ptr<DirectInfusionMatchData>, vector<shared_ptr<DirectInfusionSinglePeakMatchData>>>::iterator matchDataToFragIntensityIterator;
 typedef map<shared_ptr<DirectInfusionMatchData>, float>::iterator matchDataToFloatIterator;
-
+typedef map<string, std::set<shared_ptr<DirectInfusionMatchData>>>::iterator stringToMatchDataIterator;
 
