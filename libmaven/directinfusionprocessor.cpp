@@ -326,6 +326,32 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             }
             cerr << endl;
         }
+
+        cerr << "Chain Summaries --> Compounds:" << endl;
+
+        for (stringToMatchDataIterator iterator = chainLengthSummaries.begin(); iterator != chainLengthSummaries.end(); ++iterator){
+            string summary = iterator->first;
+            set<shared_ptr<DirectInfusionMatchData>> chainLengthMatchDataSet = iterator->second;
+
+            cerr << "Summary= " << summary << ": " << endl;
+            for (auto chainMatch : chainLengthMatchDataSet) {
+                cerr << chainMatch->compound->name << "|" << chainMatch->compound->adductString << " ";
+            }
+            cerr << endl;
+        }
+
+        cerr << "Composition Summaries --> Compounds:" << endl;
+
+        for (stringToMatchDataIterator iterator = compositionSummaries.begin(); iterator != compositionSummaries.end(); ++iterator){
+            string summary = iterator->first;
+            set<shared_ptr<DirectInfusionMatchData>> compositionMatchDataSet = iterator->second;
+
+            cerr << "Summary= " << summary << ": " << endl;
+            for (auto compMatch : compositionMatchDataSet) {
+                cerr << compMatch->compound->name << "|" << compMatch->compound->adductString << " ";
+            }
+            cerr << endl;
+        }
     }
 
     return matchInfo;
