@@ -415,6 +415,10 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
                 matchInfo->fragToTheoreticalIntensitySummarized.insert(make_pair(key, (compound->fragment_intensity.at(i))));
 
+                int observedIndex = fragmentationMatchScore.ranks.at(i);
+
+                matchInfo->fragToObservedIntensity.insert(make_pair(key, observedSpectrum->intensity_array.at(observedIndex)));
+
                 fragToMatchDataIterator it = matchInfo->fragToMatchDataSummarized.find(fragInt);
 
                 if (it != matchInfo->fragToMatchDataSummarized.end()) {
@@ -541,6 +545,8 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineCo
                 if (debug) cerr << "Found unique fragment for " << compound->compound->name << ": fragId=" << fragId << endl;
 
                 shared_ptr<DirectInfusionSinglePeakMatchData> intensityData = matchInfo->getSinglePeakMatchData(fragId, compound);
+
+                if (debug) cerr << "Retrieved intensityData for " << compound->compound->name << ": fragId=" << fragId  << "." << endl;
 
                 matchDataToFragIntensityIterator it = compoundToUniqueFragmentIntensities.find(compound);
                 if (it != compoundToUniqueFragmentIntensities.end()) {
