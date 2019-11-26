@@ -159,7 +159,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
             FragmentationMatchScore s = compound->scoreCompoundHit(f->consensus, params->productPpmTolr, false);
 
             if (s.numMatches >= params->minNumMatches) {
-                if (debug) cerr << compound->name << ": " << s.numMatches << endl;
+                if (debug) cerr << "Retain " << compound->name << ": " << s.numMatches << " matches." << endl;
 
                 shared_ptr<DirectInfusionMatchData> directInfusionMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
                 directInfusionMatchData->compound = compound;
@@ -183,6 +183,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
             if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES) {
                 directInfusionAnnotation->compounds = dIAnnotatedCompounds;
             } else {
+                if (debug) cerr << "Calling DirectInfusionProcessor::determineComposition()" << endl;
                 directInfusionAnnotation->compounds = DirectInfusionProcessor::determineComposition(dIAnnotatedCompounds, f->consensus, params->spectralCompositionAlgorithm, debug);
             }
 
@@ -204,6 +205,8 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
         Fragment *observedSpectrum,
         bool debug){
 
+    if (debug) cerr << "DirectInfusionProcessor::getMatchInformation()" << endl;
+
     unique_ptr<DirectInfusionMatchInformation> matchInfo = unique_ptr<DirectInfusionMatchInformation>(new DirectInfusionMatchInformation());
 
     for (auto directInfusionMatchData : allCandidates) {
@@ -215,6 +218,8 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
         unsigned int matchCounter = 0;
         for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
+
+            if (debug) cerr << "i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
 
             //skip unmatched peaks
             if (fragmentationMatchScore.ranks.at(i) == -1) continue;
