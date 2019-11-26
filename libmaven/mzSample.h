@@ -736,8 +736,10 @@ class Compound {
             string getFormula() { return formula; }
             map<string, string> metaDataMap = {};
 
-            virtual vector<Compound*> getChildren(){return vector<Compound*>(0);}
+            virtual vector<Compound*> getChildren();
 };
+
+vector<Compound*> Compound::getChildren() {return vector<Compound*>(0);}
 
 class SummarizedCompound : public Compound {
 
@@ -745,6 +747,9 @@ public:
     vector<Compound*> children;
     string summarizedName;
 
+    SummarizedCompound(string summarizedName, vector<Compound*> childrenCompounds) : Compound("", summarizedName, "", 0){
+        children = childrenCompounds;
+    }
     vector<Compound*> getChildren();
 
     virtual ~SummarizedCompound(){}

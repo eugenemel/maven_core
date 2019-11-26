@@ -245,7 +245,8 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
     }
 
-    //Identify all cases where matchData matches to identical fragments
+    //Identify all cases where matchData matches to identical fragments,
+    //and compounds can be naturally summarized to a higher level.
     for (unsigned int i = 0; i < allCandidates.size(); i++) {
 
         shared_ptr<DirectInfusionMatchData> iMatchData = allCandidates[i];
@@ -279,6 +280,9 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
                         matchDataSet.insert(jMatchData);
                         matchInfo->chainLengthSummaries.insert(make_pair(iChainLengthSummary, matchDataSet));
                     }
+
+                    matchInfo->originalMatchToSummaryString.insert(make_pair(iMatchData, iChainLengthSummary));
+                    matchInfo->originalMatchToSummaryString.insert(make_pair(jMatchData, iChainLengthSummary));
                 }
 
                 string iCompositionSummary;
@@ -301,9 +305,45 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
                         matchDataSet.insert(jMatchData);
                         matchInfo->compositionSummaries.insert(make_pair(iCompositionSummary, matchDataSet));
                     }
+
+                    //acyl chain length summarization takes precedence over composition summarization
+                    if (matchInfo->originalMatchToSummaryString.find(iMatchData) == matchInfo->originalMatchToSummaryString.end()) {
+                        matchInfo->originalMatchToSummaryString.insert(make_pair(iMatchData, iCompositionSummary));
+                    }
+
+                    if (matchInfo->originalMatchToSummaryString.find(jMatchData) == matchInfo->originalMatchToSummaryString.end()) {
+                        matchInfo->originalMatchToSummaryString.insert(make_pair(jMatchData, iCompositionSummary));
+                    }
                 }
 
             }
+        }
+    }
+
+    //build new candidates list
+    vector<shared_ptr<DirectInfusionMatchData>> summarizedCandidates;
+    for (auto candidate : allCandidates) {
+        if (matchInfo->originalMatchToSummaryString.find(candidate) != matchInfo->originalMatchToSummaryString.end()) {
+
+            string summarizedName = matchInfo->originalMatchToSummaryString[candidate];
+
+            //check for chain length summary
+            if (matchInfo->chainLengthSummaries.find(summarizedName) != matchInfo->chainLengthSummaries.end()) {
+
+            //check for composition summary
+            } else if (matchInfo->compositionSummaries.find(summarizedName) != matchInfo->compositionSummaries.end()) {
+
+            //problem case
+            } else {
+                cerr << "sumamrizedName=" << summarizedName << " Did not match to chain or composition summaries." << endl;
+                abort();
+            }
+
+            vector<Compound*> compounds;
+
+            SummarizedCompound summarizedCompound = SummarizedCompound(summarizedName, compounds);
+        } else {
+            summarizedCandidates.push_back(candidate);
         }
     }
 

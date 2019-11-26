@@ -163,7 +163,7 @@ public:
       *
       * When these conditions are met, the summary mappings are saved in these maps
       */
-
+    map<shared_ptr<DirectInfusionMatchData>, string> originalMatchToSummaryString = {};
     map<string, set<shared_ptr<DirectInfusionMatchData>>> chainLengthSummaries = {}; //LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey()
     map<string, set<shared_ptr<DirectInfusionMatchData>>> compositionSummaries = {}; //LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()
 
@@ -357,4 +357,5 @@ typedef map<shared_ptr<DirectInfusionMatchData>, vector<int>>::iterator matchDat
 typedef map<shared_ptr<DirectInfusionMatchData>, vector<shared_ptr<DirectInfusionSinglePeakMatchData>>>::iterator matchDataToFragIntensityIterator;
 typedef map<shared_ptr<DirectInfusionMatchData>, float>::iterator matchDataToFloatIterator;
 typedef map<string, std::set<shared_ptr<DirectInfusionMatchData>>>::iterator stringToMatchDataIterator;
+typedef map<shared_ptr<DirectInfusionMatchData>, string>::iterator matchToStringIterator;
 
