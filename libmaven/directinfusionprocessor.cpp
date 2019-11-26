@@ -527,7 +527,7 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineCo
 
         map<shared_ptr<DirectInfusionMatchData>, vector<shared_ptr<DirectInfusionSinglePeakMatchData>>> compoundToUniqueFragmentIntensities = {};
 
-        for (fragToMatchDataIterator iterator = matchInfo->fragToMatchData.begin(); iterator != matchInfo->fragToMatchData.end(); ++iterator) {
+        for (fragToMatchDataIterator iterator = matchInfo->fragToMatchDataSummarized.begin(); iterator != matchInfo->fragToMatchDataSummarized.end(); ++iterator) {
             if (iterator->second.size() == 1) { // unique fragment
 
                 shared_ptr<DirectInfusionMatchData> compound = iterator->second.at(0);
