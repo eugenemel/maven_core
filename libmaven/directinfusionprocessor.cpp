@@ -245,7 +245,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
     }
 
-    //Identify all cases where matchData matches to identical fragments,
+    //Identify all cases where matchData matches to identical fragments
     //and compounds can be naturally summarized to a higher level.
     for (unsigned int i = 0; i < allCandidates.size(); i++) {
 
@@ -320,7 +320,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
         }
     }
 
-    //build new candidates list
+    //build new candidates list, with summarized candidates (if applicable)
     vector<shared_ptr<DirectInfusionMatchData>> summarizedCandidates;
     set<string> addedSummaries;
 
@@ -329,9 +329,11 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
             string summarizedName = matchInfo->originalMatchToSummaryString[candidate];
 
+            //only add each summarized compound one time.
             if (addedSummaries.find(summarizedName) != addedSummaries.end()) {
                 continue;
             }
+            addedSummaries.insert(summarizedName);
 
             vector<Compound*> compounds;
 
@@ -368,6 +370,11 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             // deleted during DirectInfusionGroupAnnotation::clean()
             SummarizedCompound *summarizedCompound = new SummarizedCompound(summarizedName, compounds);
 
+            //TODO: think about the right way to agglomerate this data
+            summarizedCompound->fragment_mzs = compounds.at(0)->fragment_mzs;
+            summarizedCompound->fragment_intensity = compounds.at(0)->fragment_intensity;
+            summarizedCompound->adductString = compounds.at(0)->adductString;
+
             shared_ptr<DirectInfusionMatchData> summarizedMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
             summarizedMatchData->compound = summarizedCompound;
             summarizedMatchData->adduct = candidate->adduct;
@@ -377,6 +384,50 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
         } else {
             summarizedCandidates.push_back(candidate);
+        }
+    }
+
+    if (summarizedCandidates.size() == allCandidates.size()) { // no summarization occurred
+        matchInfo->fragToMatchDataSummarized = matchInfo->fragToMatchData;
+        matchInfo->matchDataToFragsSummarized = matchInfo->matchDataToFrags;
+        matchInfo->fragToTheoreticalIntensitySummarized = matchInfo->fragToTheoreticalIntensity;
+    } else {
+
+        for (auto directInfusionMatchData : summarizedCandidates) {
+
+            Compound *compound = directInfusionMatchData->compound;
+            FragmentationMatchScore fragmentationMatchScore = directInfusionMatchData->fragmentationMatchScore;
+
+            vector<int> compoundFrags(static_cast<unsigned int>(fragmentationMatchScore.numMatches));
+
+            unsigned int matchCounter = 0;
+            for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
+
+                //skip unmatched peaks
+                if (fragmentationMatchScore.ranks.at(i) == -1) continue;
+
+                int fragInt = mzToIntKey(compound->fragment_mzs.at(i), 1000);
+
+                compoundFrags.at(matchCounter) = fragInt;
+                matchCounter++;
+
+                pair<int, shared_ptr<DirectInfusionMatchData>> key = make_pair(fragInt, directInfusionMatchData);
+
+                matchInfo->fragToTheoreticalIntensitySummarized.insert(make_pair(key, (compound->fragment_intensity.at(i))));
+
+                fragToMatchDataIterator it = matchInfo->fragToMatchDataSummarized.find(fragInt);
+
+                if (it != matchInfo->fragToMatchDataSummarized.end()) {
+                    matchInfo->fragToMatchDataSummarized[fragInt].push_back(directInfusionMatchData);
+                } else {
+                    vector<shared_ptr<DirectInfusionMatchData>> matchingCompounds(1);
+                    matchingCompounds.at(0) = directInfusionMatchData;
+                    matchInfo->fragToMatchDataSummarized.insert(make_pair(fragInt, matchingCompounds));
+                }
+            }
+
+            matchInfo->matchDataToFragsSummarized.insert(make_pair(directInfusionMatchData, compoundFrags));
+
         }
     }
 
@@ -429,6 +480,32 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             cerr << "Summary= " << summary << ": ";
             for (auto compMatch : compositionMatchDataSet) {
                 cerr << compMatch->compound->name << "|" << compMatch->compound->adductString << " ";
+            }
+            cerr << endl;
+        }
+
+        cerr << "Summarized Fragments --> Summarized Compounds: (" << matchInfo->matchDataToFragsSummarized.size() << " passing compounds)" << endl;
+
+        for (fragToMatchDataIterator iterator = matchInfo->fragToMatchDataSummarized.begin(); iterator != matchInfo->fragToMatchDataSummarized.end(); ++iterator) {
+            int frag = iterator->first;
+            vector<shared_ptr<DirectInfusionMatchData>> compounds = iterator->second;
+            cerr<< "frag= " << intKeyToMz(frag, 1000) << " m/z : ";
+            for (auto matchData : compounds) {
+                cerr << matchData->compound->name << "|" << matchData->compound->adductString << " ";
+            }
+            cerr << endl;
+        }
+
+        cerr << "Summarized Compounds --> Summarized Fragments: (" << matchInfo->fragToMatchDataSummarized.size() << " matched fragments)" << endl;
+
+        for (matchDataToFragIterator iterator = matchInfo->matchDataToFragsSummarized.begin(); iterator != matchInfo->matchDataToFragsSummarized.end(); ++iterator) {
+
+            shared_ptr<DirectInfusionMatchData> directInfusionMatchData = iterator->first;
+            vector<int> frags = iterator->second;
+
+            cerr << "Compound= " << directInfusionMatchData->compound->name << "|" << directInfusionMatchData->compound->adductString << ": ";
+            for (auto frag : frags){
+                cerr << intKeyToMz(frag, 1000) << " ";
             }
             cerr << endl;
         }

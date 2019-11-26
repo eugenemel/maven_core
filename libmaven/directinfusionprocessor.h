@@ -146,10 +146,14 @@ struct DirectInfusionSinglePeakMatchData {
 struct DirectInfusionMatchInformation {
 
 public:
+
+    //observed
+    map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> fragToObservedIntensity = {};
+
+    //unsummarized
     map<int, vector<shared_ptr<DirectInfusionMatchData>>> fragToMatchData = {};
     map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToFrags = {};
     map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> fragToTheoreticalIntensity = {};
-    map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> fragToObservedIntensity = {};
 
     /**
       * If
@@ -167,8 +171,11 @@ public:
     map<string, set<shared_ptr<DirectInfusionMatchData>>> chainLengthSummaries = {}; //LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey()
     map<string, set<shared_ptr<DirectInfusionMatchData>>> compositionSummaries = {}; //LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()
 
-    //TODO?
-    map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToFragsCondensed  = {};
+    //summarized
+    map<int, vector<shared_ptr<DirectInfusionMatchData>>> fragToMatchDataSummarized = {};
+    map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToFragsSummarized  = {};
+    map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> fragToTheoreticalIntensitySummarized = {};
+
 
     float getNormalizedTheoreticalIntensity(int fragId, shared_ptr<DirectInfusionMatchData> matchData){return fragToTheoreticalIntensity.at(make_pair(fragId, matchData));}
     float getObservedIntensity(int fragId, shared_ptr<DirectInfusionMatchData> matchData){return fragToObservedIntensity.at(make_pair(fragId, matchData));}
