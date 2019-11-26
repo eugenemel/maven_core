@@ -739,8 +739,6 @@ class Compound {
             virtual vector<Compound*> getChildren();
 };
 
-vector<Compound*> Compound::getChildren() {return vector<Compound*>(0);}
-
 class SummarizedCompound : public Compound {
 
 public:
