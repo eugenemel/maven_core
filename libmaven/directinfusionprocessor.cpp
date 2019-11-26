@@ -154,6 +154,8 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
             Compound* compound = it->second.first;
 
+            if (debug) cerr << "Scoring compound hit: " <<  compound->name << "<--> f=" << f << endl;
+
             FragmentationMatchScore s = compound->scoreCompoundHit(f->consensus, params->productPpmTolr, false);
 
             if (s.numMatches >= params->minNumMatches) {
