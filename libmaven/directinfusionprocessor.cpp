@@ -322,26 +322,59 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
     //build new candidates list
     vector<shared_ptr<DirectInfusionMatchData>> summarizedCandidates;
+    set<string> addedSummaries;
+
     for (auto candidate : allCandidates) {
         if (matchInfo->originalMatchToSummaryString.find(candidate) != matchInfo->originalMatchToSummaryString.end()) {
 
             string summarizedName = matchInfo->originalMatchToSummaryString[candidate];
 
-            //check for chain length summary
-            if (matchInfo->chainLengthSummaries.find(summarizedName) != matchInfo->chainLengthSummaries.end()) {
-
-            //check for composition summary
-            } else if (matchInfo->compositionSummaries.find(summarizedName) != matchInfo->compositionSummaries.end()) {
-
-            //problem case
-            } else {
-                cerr << "sumamrizedName=" << summarizedName << " Did not match to chain or composition summaries." << endl;
-                abort();
+            if (addedSummaries.find(summarizedName) != addedSummaries.end()) {
+                continue;
             }
 
             vector<Compound*> compounds;
 
-            SummarizedCompound summarizedCompound = SummarizedCompound(summarizedName, compounds);
+            //check for chain length summary
+            if (matchInfo->chainLengthSummaries.find(summarizedName) != matchInfo->chainLengthSummaries.end()) {
+
+                set<shared_ptr<DirectInfusionMatchData>> matches = matchInfo->chainLengthSummaries[summarizedName];
+                compounds.resize(matches.size());
+
+                unsigned int counter = 0;
+                for (auto match : matches) {
+                    compounds[counter] = match->compound;
+                    counter++;
+                }
+
+            //check for composition summary
+            } else if (matchInfo->compositionSummaries.find(summarizedName) != matchInfo->compositionSummaries.end()) {
+
+                set<shared_ptr<DirectInfusionMatchData>> matches = matchInfo->compositionSummaries[summarizedName];
+                compounds.resize(matches.size());
+
+                unsigned int counter = 0;
+                for (auto match : matches) {
+                    compounds[counter] = match->compound;
+                    counter++;
+                }
+
+            //problem case
+            } else {
+                cerr << "summarizedName=" << summarizedName << " Did not match to chain or composition summaries." << endl;
+                abort();
+            }
+
+            // deleted during DirectInfusionGroupAnnotation::clean()
+            SummarizedCompound *summarizedCompound = new SummarizedCompound(summarizedName, compounds);
+
+            shared_ptr<DirectInfusionMatchData> summarizedMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
+            summarizedMatchData->compound = summarizedCompound;
+            summarizedMatchData->adduct = candidate->adduct;
+            summarizedMatchData->fragmentationMatchScore = candidate->fragmentationMatchScore;
+
+            summarizedCandidates.push_back(summarizedMatchData);
+
         } else {
             summarizedCandidates.push_back(candidate);
         }
