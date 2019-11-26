@@ -154,7 +154,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
             Compound* compound = it->second.first;
 
-            if (debug) cerr << "Scoring compound hit: " <<  compound->name << "<--> f=" << f << endl;
+//            if (debug) cerr << "Scoring compound hit: " <<  compound->name << "<--> f=" << f << endl;
 
             FragmentationMatchScore s = compound->scoreCompoundHit(f->consensus, params->productPpmTolr, false);
 
@@ -183,7 +183,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
             if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES) {
                 directInfusionAnnotation->compounds = dIAnnotatedCompounds;
             } else {
-                if (debug) cerr << "Calling DirectInfusionProcessor::determineComposition()" << endl;
+//                if (debug) cerr << "Calling DirectInfusionProcessor::determineComposition()" << endl;
                 directInfusionAnnotation->compounds = DirectInfusionProcessor::determineComposition(dIAnnotatedCompounds, f->consensus, params->spectralCompositionAlgorithm, debug);
             }
 
@@ -219,7 +219,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
         unsigned int matchCounter = 0;
         for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
 
-            if (debug) cerr << "allCandidates [start] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
+//            if (debug) cerr << "allCandidates [start] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
 
             //skip unmatched peaks
             if (fragmentationMatchScore.ranks.at(i) == -1) continue;
@@ -247,7 +247,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
                 matchInfo->fragToMatchData.insert(make_pair(fragInt, matchingCompounds));
             }
 
-            if (debug) cerr << "allCandidates [end] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
+//            if (debug) cerr << "allCandidates [end] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
         }
 
         matchInfo->matchDataToFrags.insert(make_pair(directInfusionMatchData, compoundFrags));
@@ -414,7 +414,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             unsigned int matchCounter = 0;
             for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
 
-                if (debug) cerr << "summarizedCandidates [start] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
+//                if (debug) cerr << "summarizedCandidates [start] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
 
                 //skip unmatched peaks
                 if (fragmentationMatchScore.ranks.at(i) == -1) continue;
@@ -442,7 +442,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
                     matchInfo->fragToMatchDataSummarized.insert(make_pair(fragInt, matchingCompounds));
                 }
 
-                if (debug) cerr << "summarizedCandidates [end] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
+//                if (debug) cerr << "summarizedCandidates [end] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
 
             }
 
@@ -558,11 +558,11 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineCo
                 shared_ptr<DirectInfusionMatchData> compound = iterator->second.at(0);
                 int fragId = iterator->first;
 
-                if (debug) cerr << "Found unique fragment for " << compound->compound->name << ": fragId=" << fragId << endl;
+//                if (debug) cerr << "Found unique fragment for " << compound->compound->name << ": fragId=" << fragId << endl;
 
                 shared_ptr<DirectInfusionSinglePeakMatchData> intensityData = matchInfo->getSinglePeakMatchData(fragId, compound);
 
-                if (debug) cerr << "Retrieved intensityData for " << compound->compound->name << ": fragId=" << fragId  << "." << endl;
+//                if (debug) cerr << "Retrieved intensityData for " << compound->compound->name << ": fragId=" << fragId  << "." << endl;
 
                 matchDataToFragIntensityIterator it = compoundToUniqueFragmentIntensities.find(compound);
                 if (it != compoundToUniqueFragmentIntensities.end()) {
