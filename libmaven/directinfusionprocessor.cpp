@@ -343,7 +343,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             string summary = iterator->first;
             set<shared_ptr<DirectInfusionMatchData>> chainLengthMatchDataSet = iterator->second;
 
-            cerr << "Summary= " << summary << ": " << endl;
+            cerr << "Summary= " << summary << ": ";
             for (auto chainMatch : chainLengthMatchDataSet) {
                 cerr << chainMatch->compound->name << "|" << chainMatch->compound->adductString << " ";
             }
@@ -356,7 +356,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             string summary = iterator->first;
             set<shared_ptr<DirectInfusionMatchData>> compositionMatchDataSet = iterator->second;
 
-            cerr << "Summary= " << summary << ": " << endl;
+            cerr << "Summary= " << summary << ": ";
             for (auto compMatch : compositionMatchDataSet) {
                 cerr << compMatch->compound->name << "|" << compMatch->compound->adductString << " ";
             }
