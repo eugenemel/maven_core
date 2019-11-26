@@ -269,7 +269,7 @@ public:
      static vector<shared_ptr<DirectInfusionMatchData>> determineComposition(
              vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
              Fragment *observedSpectrum,
-             SpectralCompositionAlgorithm algorithm,
+             shared_ptr<DirectInfusionSearchParameters> params,
              bool debug
              );
 
@@ -289,6 +289,7 @@ public:
      static unique_ptr<DirectInfusionMatchInformation> getMatchInformation(
              vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
              Fragment *observedSpectrum,
+             shared_ptr<DirectInfusionSearchParameters> params,
              bool debug);
 };
 

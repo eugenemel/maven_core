@@ -184,7 +184,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
                 directInfusionAnnotation->compounds = dIAnnotatedCompounds;
             } else {
 //                if (debug) cerr << "Calling DirectInfusionProcessor::determineComposition()" << endl;
-                directInfusionAnnotation->compounds = DirectInfusionProcessor::determineComposition(dIAnnotatedCompounds, f->consensus, params->spectralCompositionAlgorithm, debug);
+                directInfusionAnnotation->compounds = DirectInfusionProcessor::determineComposition(dIAnnotatedCompounds, f->consensus, params, debug);
             }
 
             annotations.insert(make_pair(mapKey, directInfusionAnnotation));
@@ -203,6 +203,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInformation(
         vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
         Fragment *observedSpectrum,
+        shared_ptr<DirectInfusionSearchParameters> params,
         bool debug){
 
     if (debug) cerr << "DirectInfusionProcessor::getMatchInformation()" << endl;
@@ -389,7 +390,9 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             shared_ptr<DirectInfusionMatchData> summarizedMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
             summarizedMatchData->compound = summarizedCompound;
             summarizedMatchData->adduct = candidate->adduct;
-            summarizedMatchData->fragmentationMatchScore = candidate->fragmentationMatchScore;
+
+            //TODO: this has to be rescored to ensure agreement with compounds.at(0). However, should probably agglomerate with data more intelligently
+            summarizedMatchData->fragmentationMatchScore = compounds.at(0)->scoreCompoundHit(observedSpectrum, params->productPpmTolr, false);
 
             summarizedCandidates.push_back(summarizedMatchData);
 
@@ -537,10 +540,12 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineComposition(
         vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
         Fragment *observedSpectrum,
-        enum SpectralCompositionAlgorithm algorithm,
+        shared_ptr<DirectInfusionSearchParameters> params,
         bool debug){
 
-    unique_ptr<DirectInfusionMatchInformation> matchInfo = DirectInfusionProcessor::getMatchInformation(allCandidates, observedSpectrum, debug);
+    enum SpectralCompositionAlgorithm algorithm = params->spectralCompositionAlgorithm;
+
+    unique_ptr<DirectInfusionMatchInformation> matchInfo = DirectInfusionProcessor::getMatchInformation(allCandidates, observedSpectrum, params, debug);
 
     if (debug) {
         cerr << "matchInfo->fragToMatchDataSummarized: " << matchInfo->fragToMatchDataSummarized.size() << " entries." << endl;
