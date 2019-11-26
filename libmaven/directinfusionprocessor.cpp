@@ -367,7 +367,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
                 abort();
             }
 
-            // deleted during DirectInfusionGroupAnnotation::clean()
+            //TODO: not ever deleted now
             SummarizedCompound *summarizedCompound = new SummarizedCompound(summarizedName, compounds);
 
             //TODO: think about the right way to agglomerate this data
@@ -621,9 +621,9 @@ void DirectInfusionGroupAnnotation::clean() {
         if (it->second->fragmentationPattern) delete(it->second->fragmentationPattern);
         for (auto matchData : it->second->compounds) {
              //SummarizedCompounds are created transiently by directinfusionprocessor, Compounds are retrieved from DB.compounds
-            if (SummarizedCompound* sc = dynamic_cast<SummarizedCompound*>(matchData->compound)){
-                delete(sc);
-            }
+//            if (SummarizedCompound* sc = dynamic_cast<SummarizedCompound*>(matchData->compound)){
+//                delete(sc);
+//            }
         }
         if (it->second) delete(it->second);
     }
