@@ -177,8 +177,20 @@ public:
     map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> fragToTheoreticalIntensitySummarized = {};
 
 
-    float getNormalizedTheoreticalIntensity(int fragId, shared_ptr<DirectInfusionMatchData> matchData){return fragToTheoreticalIntensity.at(make_pair(fragId, matchData));}
-    float getObservedIntensity(int fragId, shared_ptr<DirectInfusionMatchData> matchData){return fragToObservedIntensity.at(make_pair(fragId, matchData));}
+    float getNormalizedTheoreticalIntensity(int fragId, shared_ptr<DirectInfusionMatchData> matchData){
+        pair<int, shared_ptr<DirectInfusionMatchData>> pair = make_pair(fragId, matchData);
+        if (fragToTheoreticalIntensitySummarized.find(pair) != fragToTheoreticalIntensitySummarized.end()) {
+            return fragToTheoreticalIntensitySummarized.at(pair);
+        } else if (fragToTheoreticalIntensity.find(pair) != fragToTheoreticalIntensity.end()) {
+            return fragToTheoreticalIntensity.at(pair);
+        } else {
+            return 0.0f; //TODO: should this throw an error?
+        }
+    }
+
+    float getObservedIntensity(int fragId, shared_ptr<DirectInfusionMatchData> matchData){
+        return fragToObservedIntensity.at(make_pair(fragId, matchData));
+    }
 
     float getIntensityRatio(int fragId, shared_ptr<DirectInfusionMatchData> matchData){
         return (getObservedIntensity(fragId, matchData) / getNormalizedTheoreticalIntensity(fragId, matchData));
