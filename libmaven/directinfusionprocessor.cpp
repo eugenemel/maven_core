@@ -276,6 +276,11 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
                     if (chainLengthSummaries.find(iChainLengthSummary) != chainLengthSummaries.end()){
                         chainLengthSummaries[iChainLengthSummary].insert(iMatchData);
                         chainLengthSummaries[iChainLengthSummary].insert(jMatchData);
+                    } else {
+                        set<shared_ptr<DirectInfusionMatchData>> matchDataSet = set<shared_ptr<DirectInfusionMatchData>>();
+                        matchDataSet.insert(iMatchData);
+                        matchDataSet.insert(jMatchData);
+                        chainLengthSummaries.insert(make_pair(iChainLengthSummary, matchDataSet));
                     }
                 }
 
@@ -293,6 +298,11 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
                     if (compositionSummaries.find(iCompositionSummary) != compositionSummaries.end()) {
                         compositionSummaries[iCompositionSummary].insert(iMatchData);
                         compositionSummaries[jCompositionSummary].insert(jMatchData);
+                    } else {
+                        set<shared_ptr<DirectInfusionMatchData>> matchDataSet = set<shared_ptr<DirectInfusionMatchData>>();
+                        matchDataSet.insert(iMatchData);
+                        matchDataSet.insert(jMatchData);
+                        compositionSummaries.insert(make_pair(iCompositionSummary, matchDataSet));
                     }
                 }
 
