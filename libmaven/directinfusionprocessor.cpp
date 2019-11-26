@@ -245,9 +245,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
     }
 
-    map<string, set<shared_ptr<DirectInfusionMatchData>>> chainLengthSummaries = {};
-    map<string, set<shared_ptr<DirectInfusionMatchData>>> compositionSummaries = {};
-
     //Identify all cases where matchData matches to identical fragments
     for (unsigned int i = 0; i < allCandidates.size(); i++) {
 
@@ -273,14 +270,14 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
                 }
 
                 if (!iChainLengthSummary.empty() && !jChainLengthSummary.empty() && iChainLengthSummary == jChainLengthSummary) {
-                    if (chainLengthSummaries.find(iChainLengthSummary) != chainLengthSummaries.end()){
-                        chainLengthSummaries[iChainLengthSummary].insert(iMatchData);
-                        chainLengthSummaries[iChainLengthSummary].insert(jMatchData);
+                    if (matchInfo->chainLengthSummaries.find(iChainLengthSummary) != matchInfo->chainLengthSummaries.end()){
+                        matchInfo->chainLengthSummaries[iChainLengthSummary].insert(iMatchData);
+                        matchInfo->chainLengthSummaries[iChainLengthSummary].insert(jMatchData);
                     } else {
                         set<shared_ptr<DirectInfusionMatchData>> matchDataSet = set<shared_ptr<DirectInfusionMatchData>>();
                         matchDataSet.insert(iMatchData);
                         matchDataSet.insert(jMatchData);
-                        chainLengthSummaries.insert(make_pair(iChainLengthSummary, matchDataSet));
+                        matchInfo->chainLengthSummaries.insert(make_pair(iChainLengthSummary, matchDataSet));
                     }
                 }
 
@@ -295,14 +292,14 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
                 }
 
                 if (!iCompositionSummary.empty() && !jCompositionSummary.empty() && iCompositionSummary == jCompositionSummary) {
-                    if (compositionSummaries.find(iCompositionSummary) != compositionSummaries.end()) {
-                        compositionSummaries[iCompositionSummary].insert(iMatchData);
-                        compositionSummaries[iCompositionSummary].insert(jMatchData);
+                    if (matchInfo->compositionSummaries.find(iCompositionSummary) != matchInfo->compositionSummaries.end()) {
+                        matchInfo->compositionSummaries[iCompositionSummary].insert(iMatchData);
+                        matchInfo->compositionSummaries[iCompositionSummary].insert(jMatchData);
                     } else {
                         set<shared_ptr<DirectInfusionMatchData>> matchDataSet = set<shared_ptr<DirectInfusionMatchData>>();
                         matchDataSet.insert(iMatchData);
                         matchDataSet.insert(jMatchData);
-                        compositionSummaries.insert(make_pair(iCompositionSummary, matchDataSet));
+                        matchInfo->compositionSummaries.insert(make_pair(iCompositionSummary, matchDataSet));
                     }
                 }
 
@@ -339,7 +336,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
         cerr << "Chain Summaries --> Compounds:" << endl;
 
-        for (stringToMatchDataIterator iterator = chainLengthSummaries.begin(); iterator != chainLengthSummaries.end(); ++iterator){
+        for (stringToMatchDataIterator iterator = matchInfo->chainLengthSummaries.begin(); iterator != matchInfo->chainLengthSummaries.end(); ++iterator){
             string summary = iterator->first;
             set<shared_ptr<DirectInfusionMatchData>> chainLengthMatchDataSet = iterator->second;
 
@@ -352,7 +349,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
         cerr << "Composition Summaries --> Compounds:" << endl;
 
-        for (stringToMatchDataIterator iterator = compositionSummaries.begin(); iterator != compositionSummaries.end(); ++iterator){
+        for (stringToMatchDataIterator iterator = matchInfo->compositionSummaries.begin(); iterator != matchInfo->compositionSummaries.end(); ++iterator){
             string summary = iterator->first;
             set<shared_ptr<DirectInfusionMatchData>> compositionMatchDataSet = iterator->second;
 

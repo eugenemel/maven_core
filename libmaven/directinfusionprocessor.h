@@ -159,8 +159,15 @@ public:
       * and
       * 3. the DirectInfusionMatchData's matched adducts are of the same type,
       *
-      * these DirectInfusionMatchData can all be condensed.
+      * these DirectInfusionMatchData can be summarized.
+      *
+      * When these conditions are met, the summary mappings are saved in these maps
       */
+
+    map<string, set<shared_ptr<DirectInfusionMatchData>>> chainLengthSummaries = {}; //LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey()
+    map<string, set<shared_ptr<DirectInfusionMatchData>>> compositionSummaries = {}; //LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()
+
+    //TODO?
     map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToFragsCondensed  = {};
 
     float getNormalizedTheoreticalIntensity(int fragId, shared_ptr<DirectInfusionMatchData> matchData){return fragToTheoreticalIntensity.at(make_pair(fragId, matchData));}
