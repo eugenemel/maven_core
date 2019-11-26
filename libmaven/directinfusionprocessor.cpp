@@ -297,7 +297,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
                 if (!iCompositionSummary.empty() && !jCompositionSummary.empty() && iCompositionSummary == jCompositionSummary) {
                     if (compositionSummaries.find(iCompositionSummary) != compositionSummaries.end()) {
                         compositionSummaries[iCompositionSummary].insert(iMatchData);
-                        compositionSummaries[jCompositionSummary].insert(jMatchData);
+                        compositionSummaries[iCompositionSummary].insert(jMatchData);
                     } else {
                         set<shared_ptr<DirectInfusionMatchData>> matchDataSet = set<shared_ptr<DirectInfusionMatchData>>();
                         matchDataSet.insert(iMatchData);
