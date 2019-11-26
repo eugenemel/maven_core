@@ -219,7 +219,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
         unsigned int matchCounter = 0;
         for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
 
-            if (debug) cerr << "i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
+            if (debug) cerr << "allCandidates [start] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
 
             //skip unmatched peaks
             if (fragmentationMatchScore.ranks.at(i) == -1) continue;
@@ -246,6 +246,8 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
                 matchingCompounds.at(0) = directInfusionMatchData;
                 matchInfo->fragToMatchData.insert(make_pair(fragInt, matchingCompounds));
             }
+
+            if (debug) cerr << "allCandidates [end] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
         }
 
         matchInfo->matchDataToFrags.insert(make_pair(directInfusionMatchData, compoundFrags));
@@ -412,6 +414,8 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             unsigned int matchCounter = 0;
             for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
 
+                if (debug) cerr << "summarizedCandidates [start] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
+
                 //skip unmatched peaks
                 if (fragmentationMatchScore.ranks.at(i) == -1) continue;
 
@@ -437,6 +441,9 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
                     matchingCompounds.at(0) = directInfusionMatchData;
                     matchInfo->fragToMatchDataSummarized.insert(make_pair(fragInt, matchingCompounds));
                 }
+
+                if (debug) cerr << "summarizedCandidates [end] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
+
             }
 
             matchInfo->matchDataToFragsSummarized.insert(make_pair(directInfusionMatchData, compoundFrags));
