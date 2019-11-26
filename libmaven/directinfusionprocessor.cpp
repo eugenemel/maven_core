@@ -522,6 +522,11 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineCo
 
     unique_ptr<DirectInfusionMatchInformation> matchInfo = DirectInfusionProcessor::getMatchInformation(allCandidates, observedSpectrum, debug);
 
+    if (debug) {
+        cerr << "matchInfo->fragToMatchDataSummarized: " << matchInfo->fragToMatchDataSummarized.size() << endl;
+        cerr << "matchInfo->matchDataToFragsSummarized: " << matchInfo->matchDataToFragsSummarized.size() << endl;
+    }
+
     //TODO: refactor into class, subclass, etc
     if (algorithm == SpectralCompositionAlgorithm::MAX_THEORETICAL_INTENSITY_UNIQUE) {
 
