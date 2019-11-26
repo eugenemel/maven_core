@@ -375,6 +375,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             summarizedCompound->fragment_intensity = compounds.at(0)->fragment_intensity;
             summarizedCompound->adductString = compounds.at(0)->adductString;
             summarizedCompound->formula = compounds.at(0)->getFormula();
+            summarizedCompound->precursorMz = compounds.at(0)->precursorMz;
 
             shared_ptr<DirectInfusionMatchData> summarizedMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
             summarizedMatchData->compound = summarizedCompound;
