@@ -533,6 +533,8 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineCo
                 shared_ptr<DirectInfusionMatchData> compound = iterator->second.at(0);
                 int fragId = iterator->first;
 
+                if (debug) cerr << "Found unique fragment for " << compound->compound->name << ": fragId=" << fragId << endl;
+
                 shared_ptr<DirectInfusionSinglePeakMatchData> intensityData = matchInfo->getSinglePeakMatchData(fragId, compound);
 
                 matchDataToFragIntensityIterator it = compoundToUniqueFragmentIntensities.find(compound);
