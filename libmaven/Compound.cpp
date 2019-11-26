@@ -72,3 +72,24 @@ FragmentationMatchScore Compound::scoreCompoundHit(Fragment* f, float productPpm
 
 vector<Compound*> Compound::getChildren() {return vector<Compound*>(0);}
 vector<Compound*> SummarizedCompound::getChildren() {return children;}
+
+/**
+ * @brief SummarizedCompound::computeFragments
+ *
+ * All m/z values from all compounds are used.
+ * Intensity values are averaged based on all m/zs with some intensity value.
+ *
+ */
+void SummarizedCompound::computeFragments() {
+
+    //TODO: implement proper approach
+    fragment_mzs = getChildren().at(0)->fragment_mzs;
+    fragment_intensity = getChildren().at(0)->fragment_intensity;
+
+//    vector<int> allMzs;
+//    map<int, vector<float>> intensityVector = {};
+
+//    for (auto compound : getChildren()) {
+
+//    }
+}

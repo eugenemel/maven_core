@@ -750,6 +750,8 @@ public:
     }
     vector<Compound*> getChildren();
 
+    //Relies on children
+    void computeFragments();
     virtual ~SummarizedCompound(){}
 };
 

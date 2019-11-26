@@ -380,19 +380,22 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             //TODO: not ever deleted now
             SummarizedCompound *summarizedCompound = new SummarizedCompound(summarizedName, compounds);
 
-            //TODO: think about the right way to agglomerate this data
-            summarizedCompound->fragment_mzs = compounds.at(0)->fragment_mzs;
-            summarizedCompound->fragment_intensity = compounds.at(0)->fragment_intensity;
+            //TODO: this is guaranteed to be equal based on how the summarized compound data maps are built
             summarizedCompound->adductString = compounds.at(0)->adductString;
+
+            /**
+             * TODO: these are not guaranteed to be equal among all children comopunds.
+             * A sensible value should be selected for the maven gui to function properly.
+             */
             summarizedCompound->formula = compounds.at(0)->getFormula();
             summarizedCompound->precursorMz = compounds.at(0)->precursorMz;
+
+            summarizedCompound->computeFragments();
 
             shared_ptr<DirectInfusionMatchData> summarizedMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
             summarizedMatchData->compound = summarizedCompound;
             summarizedMatchData->adduct = candidate->adduct;
-
-            //TODO: this has to be rescored to ensure agreement with compounds.at(0). However, should probably agglomerate with data more intelligently
-            summarizedMatchData->fragmentationMatchScore = compounds.at(0)->scoreCompoundHit(observedSpectrum, params->productPpmTolr, false);
+            summarizedMatchData->fragmentationMatchScore = summarizedCompound->scoreCompoundHit(observedSpectrum, params->productPpmTolr, false);
 
             summarizedCandidates.push_back(summarizedMatchData);
 
