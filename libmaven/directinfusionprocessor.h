@@ -125,6 +125,24 @@ struct DirectInfusionMatchDataCompare {
     }
 };
 
+struct DirectInfusionMatchDataCompareByNames {
+    bool operator() (const shared_ptr<DirectInfusionMatchData>& lhs, const shared_ptr<DirectInfusionMatchData>& rhs) const {
+        if (lhs->compound && rhs->compound) {
+            if (lhs->compound->name == rhs->compound->name) {
+                if (lhs->adduct && rhs->adduct) {
+                    return lhs->adduct->name < rhs->adduct->name;
+                } else {
+                    return false;
+                }
+            } else {
+                return lhs->compound->name < rhs->compound->name;
+            }
+        } else {
+            return false;
+        }
+    }
+};
+
 /**
  * @brief The DirectInfusionSinglePeakMatchData struct
  *
