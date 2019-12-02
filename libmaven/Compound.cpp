@@ -101,6 +101,8 @@ void SummarizedCompound::computeFragments() {
     }
 
     fragment_mzs = vector<float>(intensitiesByMz.size());
+    fragment_intensity=vector<float>(intensitiesByMz.size());
+
     unsigned int vecCounter = 0;
     for (map<int, vector<float>>::iterator it = intensitiesByMz.begin(); it != intensitiesByMz.end(); ++it) {
 
