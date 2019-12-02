@@ -42,7 +42,7 @@ public:
  */
 enum class SpectralCompositionAlgorithm {
     ALL_CANDIDATES,
-    MAX_THEORETICAL_INTENSITY_UNIQUE
+    AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE
 };
 
 /**

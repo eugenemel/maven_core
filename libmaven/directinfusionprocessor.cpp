@@ -556,7 +556,7 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineCo
     }
 
     //TODO: refactor into class, subclass, etc
-    if (algorithm == SpectralCompositionAlgorithm::MAX_THEORETICAL_INTENSITY_UNIQUE) {
+    if (algorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE) {
 
         map<shared_ptr<DirectInfusionMatchData>, vector<shared_ptr<DirectInfusionSinglePeakMatchData>>> compoundToUniqueFragmentIntensities = {};
 
