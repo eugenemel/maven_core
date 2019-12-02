@@ -674,6 +674,14 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
 
     unsigned int compoundInSampleMatchCounter = 0;
 
+    /**
+     * If a sample contains no compounds, it should be excluded from calculation for cross-sample adjusted proportions.
+     *
+     * Individual proportions of compounds within a single sample all sum to 1, except when no compounds are found in the sample,
+     * in which case the individual proportions all sum to 0 (and should be excluded from re-calculating cross-sample contributions)
+     */
+    unsigned int numContributingSamples = 0;
+
     for (auto directInfusionAnnotation : crossSampleAnnotations){
         directInfusionGroupAnnotation->annotationBySample.insert(
                     make_pair(directInfusionAnnotation->sample,
@@ -690,6 +698,10 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
             cerr << "sample=" << directInfusionAnnotation->sample->sampleName
                  << ": " << directInfusionAnnotation->compounds.size() << " compounds."
                  << endl;
+        }
+
+        if (directInfusionAnnotation->compounds.size() > 0) {
+            numContributingSamples++;
         }
 
         for (auto matchData : directInfusionAnnotation->compounds){
@@ -753,7 +765,7 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
 
        groupMatchData->compound = matchData->compound;
        groupMatchData->adduct = matchData->adduct;
-       groupMatchData->proportion = matchDataPair.second / numSamples;
+       groupMatchData->proportion = matchDataPair.second / numContributingSamples;
        groupMatchData->fragmentationMatchScore = bestFragMatch.at(matchData);
 
        directInfusionGroupAnnotation->compounds.at(annotationMatchIndex) = groupMatchData;
