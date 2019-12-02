@@ -82,14 +82,39 @@ vector<Compound*> SummarizedCompound::getChildren() {return children;}
  */
 void SummarizedCompound::computeFragments() {
 
-    //TODO: implement proper approach
-    fragment_mzs = getChildren().at(0)->fragment_mzs;
-    fragment_intensity = getChildren().at(0)->fragment_intensity;
+    map<int, vector<float>> intensitiesByMz = {};
 
-//    vector<int> allMzs;
-//    map<int, vector<float>> intensityVector = {};
+    for (auto compound : getChildren()) {
+        for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
 
-//    for (auto compound : getChildren()) {
+            int mzKey = mzUtils::mzToIntKey(compound->fragment_mzs[i], 1000);
+            float intensity = compound->fragment_intensity[i];
 
-//    }
+            if (intensitiesByMz.find(mzKey) == intensitiesByMz.end()){
+                vector<float> intensities(1);
+                intensities[0] = intensity;
+                intensitiesByMz.insert(make_pair(mzKey, intensities));
+            } else {
+                intensitiesByMz[mzKey].push_back(intensity);
+            }
+        }
+    }
+
+    fragment_mzs = vector<float>(intensitiesByMz.size());
+    unsigned int vecCounter = 0;
+    for (map<int, vector<float>>::iterator it = intensitiesByMz.begin(); it != intensitiesByMz.end(); ++it) {
+
+        int mzInt = it->first;
+        vector<float> intensities = it->second;
+
+        float avgInt = 0.0f;
+        for (auto intensity : intensities) {
+            avgInt += intensity;
+        }
+        avgInt /= intensities.size();
+
+        fragment_mzs[vecCounter] = mzUtils::intKeyToMz(mzInt, 1000);
+        fragment_intensity[vecCounter] = avgInt;
+        vecCounter++;
+    }
 }
