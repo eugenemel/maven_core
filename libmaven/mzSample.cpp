@@ -113,7 +113,7 @@ void mzSample::loadSample(const char* filename, bool isCorrectPrecursor) {
 
     //recalculate precursor masses
     if (isCorrectPrecursor) {
-        cerr << "Recalculating Ms2 Precursor Masses" << endl;
+        //cerr << "Recalculating Ms2 Precursor Masses" << endl;
         for(Scan* ms2scan: scans) {
             ms2scan->precursorMz=getMS1PrecursorMass(ms2scan,20);
         }
@@ -204,7 +204,7 @@ using namespace MSToolkit;
    this->calculateMzRtRange();
 
     //recalculate precursor masses
-    cerr << "Recalculating Ms2 Precursor Masses" << endl;
+    //cerr << "Recalculating Ms2 Precursor Masses" << endl;
     for(Scan* ms2scan: this->scans) {
         if(ms2scan->mslevel==2) {
             ms2scan->precursorMz=this->getMS1PrecursorMass(ms2scan,20);
@@ -879,7 +879,7 @@ void mzSample::calculateMzRtRange() {
 		//sanity check
 		if (minRt <= 0 ) minRt = 0;
 		if (maxRt >= 1e4 ) maxRt = 1e4;
-		cerr << "calculateMzRtRange() rt=" << minRt << "-" << maxRt << " mz=" << minMz << "-" << maxMz << endl;
+        //cerr << "calculateMzRtRange() rt=" << minRt << "-" << maxRt << " mz=" << minMz << "-" << maxMz << endl;
 }
 
 mzSlice mzSample::getMinMaxDimentions(const vector<mzSample*>& samples) {
