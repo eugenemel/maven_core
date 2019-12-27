@@ -1,6 +1,4 @@
 #include "mzUtils.h"
-//#include "glob.h"
-#include <glob.h>
 
 //random collection of useful functions
 

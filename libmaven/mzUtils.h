@@ -30,6 +30,8 @@
 #include <io.h> 
 #endif  
 
+#include <glob.h>
+
 #define POW2(x) ((x)*(x))
 #define MAX(x,y) ((x)>(y)) ? (x) : (y)
 #define MIN(x,y) ((x)<(y)) ? (x) : (y)
