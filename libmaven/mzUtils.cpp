@@ -1009,7 +1009,7 @@ vector<string> getMzSampleFilesFromDirectory(const char* path){
     vector<string> fileNames;
 
     #ifdef _WIN32
-    cerr << "TODO: mzUtils::getMzSampleFilesFromDirectory() not available on windows!"
+    cerr << "TODO: mzUtils::getMzSampleFilesFromDirectory() not available on windows!" << endl;
     abort();
     #endif
 
