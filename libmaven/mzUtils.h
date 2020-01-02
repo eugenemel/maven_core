@@ -34,7 +34,7 @@
 #include <glob.h>
 #else
 #define glob_t
-#define glob()
+#define glob(const char * __restrict, int, int (*)(const char *, int){return 0;}
 #define GLOB_TILDE
 #define glob_result
 #endif
