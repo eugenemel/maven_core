@@ -30,7 +30,9 @@
 #include <io.h> 
 #endif  
 
+#ifndef _WIN32 //both 32 bit and 64 bit
 #include <glob.h>
+#endif
 
 #define POW2(x) ((x)*(x))
 #define MAX(x,y) ((x)>(y)) ? (x) : (y)

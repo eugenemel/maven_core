@@ -1005,8 +1005,15 @@ double intKeyToMz(const int intKey, const int multFactor){
 }
 
 vector<string> getMzSampleFilesFromDirectory(const char* path){
-    glob_t glob_result;
+
     vector<string> fileNames;
+
+    #ifdef _WIN32
+    cerr << "TODO: mzUtils::getMzSampleFilesFromDirectory() not available on windows!"
+    abort();
+    #endif
+
+    glob_t glob_result;
     string mzMLglob = std::string(path) + "/*.mzML*";
     string mzXMLglob = std::string(path) + "/*.mzXML*";
     vector<string> globpatterns { mzMLglob, mzXMLglob };
