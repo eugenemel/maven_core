@@ -34,7 +34,7 @@
 #include <glob.h>
 #else
 #define glob_t
-#define glob(a,b,c,d) 0
+#define glob(a,b,c,d)
 #define GLOB_TILDE
 #define glob_result
 #endif
