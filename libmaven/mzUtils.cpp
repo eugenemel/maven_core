@@ -1011,8 +1011,7 @@ vector<string> getMzSampleFilesFromDirectory(const char* path){
     #ifdef _WIN32
     cerr << "TODO: mzUtils::getMzSampleFilesFromDirectory() not available on windows!" << endl;
     abort();
-    #endif
-
+    #else
     glob_t glob_result;
     string mzMLglob = std::string(path) + "/*.mzML*";
     string mzXMLglob = std::string(path) + "/*.mzXML*";
@@ -1021,6 +1020,8 @@ vector<string> getMzSampleFilesFromDirectory(const char* path){
         glob(pattern.c_str(), GLOB_TILDE,nullptr,&glob_result);
         for(unsigned int i=0; i<glob_result.gl_pathc; ++i) fileNames.push_back(glob_result.gl_pathv[i]);
     }
+    #endif
+
     return fileNames;
 
     /*

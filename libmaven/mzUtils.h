@@ -32,11 +32,6 @@
 
 #ifndef _WIN32 //both 32 bit and 64 bit
 #include <glob.h>
-#else
-#define glob_t
-#define glob(a,b,c,d)
-#define GLOB_TILDE
-#define glob_result
 #endif
 
 #define POW2(x) ((x)*(x))
