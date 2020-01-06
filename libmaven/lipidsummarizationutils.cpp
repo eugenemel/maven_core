@@ -229,7 +229,7 @@ string LipidSummarizationUtils::getSummary(pair<string, vector<string>> lipidNam
                         if (chainBitPieces.size() == 1) {
                             chainBits.push_back(chainBit.toStdString());
                         } else if (chainBitPieces.size() == 2){
-                           //linkageType = chainBitPieces.at(0).append("-"); // not used?
+                            linkageType = chainBitPieces.at(0).toStdString().append("-");
                             chainBits.push_back(chainBitPieces.at(1).toStdString());
                         }
                     }
