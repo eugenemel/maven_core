@@ -223,6 +223,7 @@ string LipidSummarizationUtils::getSummary(pair<string, vector<string>> lipidNam
 //                        vector<string> chainBitPieces;
 //                        boost::split(chainBitPieces, chainBit, boost::is_any_of("-"));
 
+                        //Issue 124: for p- and o- linked lipids
                         QRegExp rx("-");
                         QStringList chainBitPieces = chainBit.split(rx);
 
