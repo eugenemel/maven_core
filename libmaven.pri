@@ -41,6 +41,7 @@ win32 {
 mac {
     message("using mac config")
 	QMAKE_CXXFLAGS_WARN_ON += -Wno-c++11-extensions
+    CONFIG+=sdk_no_version_check
 
     DEFINES -= CDFPARSER
     LIBS -= -lcdfread -lnetcdf
