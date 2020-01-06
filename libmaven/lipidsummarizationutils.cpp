@@ -14,9 +14,6 @@ pair<string, vector<string>> LipidSummarizationUtils::getNameComponents(string l
 
     QString lipidNameAsQString = QString(lipidName.c_str());
 
-//    boost::split(nameComponents, lipidName, boost::is_any_of(",()/"));
-//    vector<string> chains;
-
     QRegExp rx("(\\,|\\(|\\)|\\/)");
     QStringList qStringComponents = lipidNameAsQString.split(rx);
 
@@ -110,9 +107,6 @@ string LipidSummarizationUtils::getSummary(pair<string, vector<string>> lipidNam
 
                 for (auto chain : lipidNameComponents.second){
 
-//                    vector<string> chainBits;
-//                    boost::split(chainBits, chain, boost::is_any_of("-"));
-
                     QRegExp rx("-");
                     QString chainAsQString(chain.c_str());
 
@@ -186,42 +180,32 @@ string LipidSummarizationUtils::getSummary(pair<string, vector<string>> lipidNam
 
                     vector<string> chainBits;
 
-//                    vector<string> chainBitsRaw;
-//                    boost::split(chainBitsRaw, chain, boost::is_any_of(":"));
-
                     QRegExp rx(":");
                     QString chainQString(chain.c_str());
 
                     QStringList chainBitsRaw = chainQString.split(rx);
 
-                    //TODO: more complicated parsing to handle trickier chains
                     for (auto chainBit : chainBitsRaw) {
 
                         if (chainBit.startsWith("m", Qt::CaseSensitive)){
-                            //boost::starts_with(chainBit, "m")
                             numHydroxyl++;
                             string chainBitStd = chainBit.toStdString();
                             chainBitStd = chainBitStd.substr(1, chainBitStd.size()-1);
                             chainBit = QString(chainBitStd.c_str());
 
                         } else if (chainBit.startsWith("d", Qt::CaseSensitive)) {
-                            //boost::starts_with(chainBit, "d")
                             numHydroxyl = numHydroxyl + 2;
                             string chainBitStd = chainBit.toStdString();
                             chainBitStd = chainBitStd.substr(1, chainBit.size()-1);
                             chainBit = QString(chainBitStd.c_str());
 
                         } else if (chainBit.startsWith("t", Qt::CaseSensitive)) {
-                            //boost::starts_with(chainBit, "t")
                             numHydroxyl = numHydroxyl + 3;
                             string chainBitStd = chainBit.toStdString();
                             chainBitStd = chainBitStd.substr(1, chainBit.size()-1);
                             chainBit = QString(chainBitStd.c_str());
 
                         }
-
-//                        vector<string> chainBitPieces;
-//                        boost::split(chainBitPieces, chainBit, boost::is_any_of("-"));
 
                         //Issue 124: for p- and o- linked lipids
                         QRegExp rx("-");
