@@ -84,7 +84,7 @@ class MassCalculator {
     vector<Match> enumerateMasses(double inputMass, double charge, double maxdiff);
     double adjustMass(double mass,int charge);
 
-    vector<Isotope> computeIsotopes(string formula, int polarity);
+    vector<Isotope> computeIsotopes(string formula, int polarity, bool isUse13C=true, bool isUse15N=true, bool isUse34S=true, bool isUse2H=true);
     map<string,int> getPeptideComposition(const string& peptideSeq);
 
     static bool compDiff(const Match& a, const Match& b ) { return a.diff < b.diff; }
