@@ -1253,6 +1253,17 @@ float mzSample::correlation(float mz1,  float mz2, float ppm, float rt1, float r
     int mslevel=1;
     EIC* e1 = mzSample::getEIC(mz1-ppm1, mz1+ppm1, rt1, rt2, mslevel);
     EIC* e2 = mzSample::getEIC(mz2-ppm2, mz2+ppm1, rt1, rt2, mslevel);
+
+    //debugging
+    //note that if the vector is all 0s, this will still compute the correlation!
+//    cout << "mzSample::correlation() mz1=" << to_string(mz1) << ", mz2=" <<to_string(mz2) << endl;
+//    cout << "first: " << e1->intensity.size() <<", second: " << e2->intensity.size() << endl;
+
+//    for (unsigned int i = 0; i < e1->intensity.size(); i++) {
+//        cout << e1->intensity.at(i) << "\t" << e2->intensity.at(i) << endl;
+//    }
+//    cout << "===========" << endl;
+
     double correlaton = mzUtils::correlation(e1->intensity, e2->intensity);
     delete(e1);
     delete(e2);
