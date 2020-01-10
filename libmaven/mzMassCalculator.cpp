@@ -159,10 +159,10 @@ vector<Isotope> MassCalculator::computeIsotopes(string formula, int charge) {
     //const double abO16  = 0.9975716;
     //const double abO18  = 0.0020514;
 
-    const double D_Delta = 2.014101778-1.0078250321;
-    const double C_Delta = 13.0033548378-12.0;
-	const double N_Delta = 15.0001088984-14.003074052;
-    const double S_Delta = 33.9678669012-31.9720710015;
+    const double D_Delta = 2.01410177811-1.00782503224;
+    const double C_Delta = 13.00335483521-12.0;
+    const double N_Delta = 15.0001088989-14.00307400446;
+    const double S_Delta = 33.96786701-31.9720711744;
 
      vector<Isotope> isotopes;
      double parentMass=computeNeutralMass(formula);
