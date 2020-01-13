@@ -140,7 +140,7 @@ double MassCalculator::computeMass(string formula, int charge) {
     return adjustMass(mass,charge);
 }
 
-vector<Isotope> MassCalculator::computeIsotopes(string formula, int charge, bool isUse13C, bool isUse15N, bool isUse34S, bool isUse2H) {
+vector<Isotope> MassCalculator::computeIsotopes(string formula, int charge, int maxNumProtons, bool isUse13C, bool isUse15N, bool isUse34S, bool isUse2H) {
 	map<string, int> atoms = getComposition(formula);
 	int CatomCount  =  atoms["C"];
 	int NatomCount  =  atoms["N"];
@@ -172,6 +172,7 @@ vector<Isotope> MassCalculator::computeIsotopes(string formula, int charge, bool
 
     if (isUse13C){
         for (int i=1; i <= CatomCount; i++ ) {
+                if (i > maxNumProtons) break;
                 Isotope x("C13-label-"+integer2string(i), parentMass + (i*C_Delta),i,0,0,0);
                 isotopes.push_back(x);
         }
@@ -179,6 +180,7 @@ vector<Isotope> MassCalculator::computeIsotopes(string formula, int charge, bool
 
     if (isUse15N) {
         for (int i=1; i <= NatomCount; i++ ) {
+                if (i > maxNumProtons) break;
                 Isotope x("N15-label-"+integer2string(i), parentMass + (i*N_Delta),0,i,0,0);
                 isotopes.push_back(x);
         }
@@ -186,6 +188,7 @@ vector<Isotope> MassCalculator::computeIsotopes(string formula, int charge, bool
 
     if (isUse34S) {
         for (int i=1; i <= SatomCount; i++ ) {
+                if (i > maxNumProtons) break;
                 Isotope x("S34-label-"+integer2string(i), parentMass + (i*S_Delta),0,0,i,0);
                 isotopes.push_back(x);
         }
@@ -193,6 +196,7 @@ vector<Isotope> MassCalculator::computeIsotopes(string formula, int charge, bool
 
     if (isUse2H) {
         for (int i=1; i <= HatomCount; i++ ) {
+                if (i > maxNumProtons) break;
                 Isotope x("D-label-"+integer2string(i), parentMass + (i*D_Delta),0,0,0,i);
                 isotopes.push_back(x);
         }
@@ -202,6 +206,7 @@ vector<Isotope> MassCalculator::computeIsotopes(string formula, int charge, bool
     if (isUse13C && isUse15N) {
         for (int i=1; i <= CatomCount; i++ ) {
             for (int j=1; j <= NatomCount; j++ ) {
+                if ((i+j) > maxNumProtons) break;
                 string name ="C13N15-label-"+integer2string(i)+"-"+integer2string(j);
                 double mass = parentMass + (j*N_Delta) + (i*C_Delta);
                     Isotope x(name,mass,i,j,0,0);
@@ -213,6 +218,7 @@ vector<Isotope> MassCalculator::computeIsotopes(string formula, int charge, bool
     if (isUse13C && isUse34S) {
         for (int i=1; i <= CatomCount; i++ ) {
             for (int j=1; j <= SatomCount; j++ ) {
+                if ((i+j) > maxNumProtons) break;
                 string name ="C13S34-label-"+integer2string(i)+"-"+integer2string(j);
                 double mass = parentMass + (j*S_Delta) + (i*C_Delta);
                 Isotope x(name,mass,i,0,j,0);
@@ -224,6 +230,7 @@ vector<Isotope> MassCalculator::computeIsotopes(string formula, int charge, bool
     if (isUse13C && isUse2H) {
         for (int i=1; i <= CatomCount; i++ ) {
             for (int j=1; j <= HatomCount; j++ ) {
+                if ((i+j) > maxNumProtons) break;
                 string name ="C13D-label-"+integer2string(i)+"-"+integer2string(j);
                 double mass = parentMass + (j*D_Delta) + (i*C_Delta);
                 Isotope x(name,mass,i,0,0,j);
