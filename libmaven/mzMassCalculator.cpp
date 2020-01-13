@@ -140,13 +140,15 @@ double MassCalculator::computeMass(string formula, int charge) {
     return adjustMass(mass,charge);
 }
 
-vector<Isotope> MassCalculator::computeIsotopes(string formula, int charge, int maxNumProtons, bool isUse13C, bool isUse15N, bool isUse34S, bool isUse2H) {
-	map<string, int> atoms = getComposition(formula);
+vector<Isotope> MassCalculator::computeIsotopes(string compoundFormula, Adduct* adduct, int maxNumProtons, bool isUse13C, bool isUse15N, bool isUse34S, bool isUse2H) {
+    map<string, int> atoms = getComposition(compoundFormula);
 	int CatomCount  =  atoms["C"];
 	int NatomCount  =  atoms["N"];
 	int SatomCount  =  atoms["S"];
     int HatomCount  =  atoms["H"];
 
+    //TODO: remove this when adduct-based work implemented.
+    int charge = 0;
 
     const double abC12 = 0.9893;
     const double abC13 = 0.0107;
@@ -165,7 +167,7 @@ vector<Isotope> MassCalculator::computeIsotopes(string formula, int charge, int 
     const double S_Delta = 33.96786701-31.9720711744;
 
      vector<Isotope> isotopes;
-     double parentMass=computeNeutralMass(formula);
+     double parentMass=computeNeutralMass(compoundFormula);
 
       Isotope parent("C12 PARENT", parentMass);
       isotopes.push_back(parent);
