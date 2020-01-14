@@ -200,16 +200,17 @@ void MassCalculator::modifyAtoms(map<string, int>& reference, map<string, int> t
 
 }
 
-//TODO: finish filling this out
 map<string, int> MassCalculator::getAdductComponentComposition(string formula){
-    if (formula == "ACN") {
+    if (formula == "ACN") { // acetonitrile
         return map<string, int>{{"C", 2}, {"H", 3}, {"N", 1}};
-    } else if (formula == "2ACN") {
+    } else if (formula == "2ACN") { //2 * acetonitrile
         return map<string, int>{{"C", 4}, {"H", 6}, {"N", 2}};
-    } else if (formula == "TFA") {
+    } else if (formula == "3ACN") { // 3 * acetonitrile
+        return map<string, int>{{"C", 6}, {"H", 9}, {"N", 3}};
+    } else if (formula == "TFA") { //trifluoroacetate
         return map<string, int>{{"C", 2}, {"H", 1}, {"O", 2}, {"F", 3}};
-    } else if (formula == "FA") {
-        //TODO
+    } else if (formula == "FA") { //formic acid (HCOOH)
+        return map<string, int>{{"C", 1}, {"H", 2}, {"O", 2}};
     } else if (formula == "tributylamine") {
         return map<string,int>{{"C", 12}, {"H", 27}, {"N", 1}};
     } else if (formula == "3H2O") {
@@ -220,8 +221,18 @@ map<string, int> MassCalculator::getAdductComponentComposition(string formula){
         return map<string, int>{{"H", 2}};
     } else if (formula == "3H") {
         return map<string, int>{{"H", 3}};
+    } else if (formula == "AcOH" || formula == "AcO") { //acetate (C2H4O2)
+        return map<string, int>{{"C", 2}, {"H", 4}, {"O", 2}};
     } else if (formula == "NaOAc") {
-        //TODO
+        return map<string, int>{{"C", 2}, {"H", 4}, {"O", 2}, {"Na", 1}};
+    } else if (formula == "2Na") {
+        return map<string, int>{{"Na", 2}};
+    } else if (formula == "3Na") {
+        return map<string, int>{{"Na", 3}};
+    } else if (formula == "2K") {
+        return map<string, int>{{"K", 2}};
+    } else if (formula == "3K") {
+        return map<string, int>{{"K", 3}};
     } else {
         return getComposition(formula);
     }
