@@ -150,20 +150,13 @@ map<string,int> MassCalculator::getComposition(Adduct* adduct){
         }
     }
 
-    //debugging
-    cout << "FORMULAS TO ADD:" << endl;
     for (string posFormula : formulasToAdd) {
-        cout << posFormula << endl;
         addAtoms(atoms, getAdductComponentComposition(posFormula));
     }
-    cout << endl;
 
-    cout << "FORMULAS TO SUBTRACT:" << endl;
     for (string negFormula : formulasToSubtract) {
-        cout << negFormula << endl;
         subtractAtoms(atoms, getAdductComponentComposition(negFormula));
     }
-    cout << endl;
 
     return atoms;
 }
