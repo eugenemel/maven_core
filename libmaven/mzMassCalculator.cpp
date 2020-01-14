@@ -200,6 +200,33 @@ void MassCalculator::modifyAtoms(map<string, int>& reference, map<string, int> t
 
 }
 
+//TODO: finish filling this out
+map<string, int> MassCalculator::getAdductComponentComposition(string formula){
+    if (formula == "ACN") {
+        return map<string, int>{{"C", 2}, {"H", 3}, {"N", 1}};
+    } else if (formula == "2ACN") {
+        return map<string, int>{{"C", 4}, {"H", 6}, {"N", 2}};
+    } else if (formula == "TFA") {
+        return map<string, int>{{"C", 2}, {"H", 1}, {"O", 2}, {"F", 3}};
+    } else if (formula == "FA") {
+        //TODO
+    } else if (formula == "tributylamine") {
+        return map<string,int>{{"C", 12}, {"H", 27}, {"N", 1}};
+    } else if (formula == "3H2O") {
+        return map<string, int>{{"H", 6}, {"O", 3}};
+    } else if (formula == "2H2O") {
+        return map<string, int>{{"H", 4}, {"O", 2}};
+    } else if (formula == "2H") {
+        return map<string, int>{{"H", 2}};
+    } else if (formula == "3H") {
+        return map<string, int>{{"H", 3}};
+    } else if (formula == "NaOAc") {
+        //TODO
+    } else {
+        return getComposition(formula);
+    }
+}
+
 
 /*-------------- parsing function ---------------------------------------*/
 

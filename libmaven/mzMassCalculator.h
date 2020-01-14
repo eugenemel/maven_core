@@ -96,6 +96,7 @@ class MassCalculator {
     private:
         static double getElementMass(string elmnt);
         static void modifyAtoms(map<string, int>& reference, map<string, int> toAdd, bool isAddAtoms);
+        static map<string, int> getAdductComponentComposition(string formula);
 
 };
 
