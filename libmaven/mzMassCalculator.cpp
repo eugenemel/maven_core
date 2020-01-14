@@ -335,7 +335,10 @@ vector<Isotope> MassCalculator::computeIsotopes(string compoundFormula, Adduct* 
     const double N_Delta = 15.0001088989-14.00307400446;
     const double S_Delta = 33.96786701-31.9720711744;
 
+    //Issue 120: atoms are adjusted based on molarity and additions/losses.
+    //eg, [3M + H2O - H]- --> 3* formula + H2O -H
     map<string, int> atoms = getComposition(compoundFormula);
+    multiplyAtoms(atoms, adduct->nmol);
     addAtoms(atoms, getComposition(adduct));
 
     //note that this already includes any mass adjustment from the # of electrons
