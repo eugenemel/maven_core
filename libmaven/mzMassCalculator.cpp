@@ -342,7 +342,9 @@ vector<Isotope> MassCalculator::computeIsotopes(string compoundFormula, Adduct* 
     addAtoms(atoms, getComposition(adduct));
 
     //note that this already includes any mass adjustment from the # of electrons
-    double parentMass = adduct->computeAdductMass(computeNeutralMass(compoundFormula));
+    double parentMz = adduct->computeAdductMass(computeNeutralMass(compoundFormula));
+
+    float chgNum = abs(adduct->charge); //necessary for transforming from mass space to m/z space
 
     int CatomCount  =  max(atoms["C"], 0);
     int NatomCount  =  max(atoms["N"], 0);
@@ -351,13 +353,13 @@ vector<Isotope> MassCalculator::computeIsotopes(string compoundFormula, Adduct* 
 
      vector<Isotope> isotopes;
 
-     Isotope parent("C12 PARENT", parentMass);
+     Isotope parent("C12 PARENT", parentMz);
      isotopes.push_back(parent);
 
     if (isUse13C){
         for (int i=1; i <= CatomCount; i++ ) {
                 if (i > maxNumProtons) break;
-                Isotope x("C13-label-"+integer2string(i), parentMass + (i*C_Delta),i,0,0,0);
+                Isotope x("C13-label-"+integer2string(i), parentMz + ((i*C_Delta)/chgNum),i,0,0,0);
                 isotopes.push_back(x);
         }
     }
@@ -365,7 +367,7 @@ vector<Isotope> MassCalculator::computeIsotopes(string compoundFormula, Adduct* 
     if (isUse15N) {
         for (int i=1; i <= NatomCount; i++ ) {
                 if (i > maxNumProtons) break;
-                Isotope x("N15-label-"+integer2string(i), parentMass + (i*N_Delta),0,i,0,0);
+                Isotope x("N15-label-"+integer2string(i), parentMz + ((i*N_Delta)/chgNum),0,i,0,0);
                 isotopes.push_back(x);
         }
     }
@@ -373,7 +375,7 @@ vector<Isotope> MassCalculator::computeIsotopes(string compoundFormula, Adduct* 
     if (isUse34S) {
         for (int i=1; i <= SatomCount; i++ ) {
                 if (i > maxNumProtons) break;
-                Isotope x("S34-label-"+integer2string(i), parentMass + (i*S_Delta),0,0,i,0);
+                Isotope x("S34-label-"+integer2string(i), parentMz + ((i*S_Delta)/chgNum),0,0,i,0);
                 isotopes.push_back(x);
         }
     }
@@ -381,7 +383,7 @@ vector<Isotope> MassCalculator::computeIsotopes(string compoundFormula, Adduct* 
     if (isUse2H) {
         for (int i=1; i <= HatomCount; i++ ) {
                 if (i > maxNumProtons) break;
-                Isotope x("D-label-"+integer2string(i), parentMass + (i*D_Delta),0,0,0,i);
+                Isotope x("D-label-"+integer2string(i), parentMz + ((i*D_Delta)/chgNum),0,0,0,i);
                 isotopes.push_back(x);
         }
     }
@@ -392,7 +394,7 @@ vector<Isotope> MassCalculator::computeIsotopes(string compoundFormula, Adduct* 
             for (int j=1; j <= NatomCount; j++ ) {
                 if ((i+j) > maxNumProtons) break;
                 string name ="C13N15-label-"+integer2string(i)+"-"+integer2string(j);
-                double mass = parentMass + (j*N_Delta) + (i*C_Delta);
+                double mass = parentMz + ( ((j*N_Delta) + (i*C_Delta)) /chgNum);
                     Isotope x(name,mass,i,j,0,0);
                     isotopes.push_back(x);
             }
@@ -404,7 +406,7 @@ vector<Isotope> MassCalculator::computeIsotopes(string compoundFormula, Adduct* 
             for (int j=1; j <= SatomCount; j++ ) {
                 if ((i+j) > maxNumProtons) break;
                 string name ="C13S34-label-"+integer2string(i)+"-"+integer2string(j);
-                double mass = parentMass + (j*S_Delta) + (i*C_Delta);
+                double mass = parentMz + ( ((j*S_Delta) + (i*C_Delta)) /chgNum);
                 Isotope x(name,mass,i,0,j,0);
                 isotopes.push_back(x);
             }
@@ -416,7 +418,7 @@ vector<Isotope> MassCalculator::computeIsotopes(string compoundFormula, Adduct* 
             for (int j=1; j <= HatomCount; j++ ) {
                 if ((i+j) > maxNumProtons) break;
                 string name ="C13D-label-"+integer2string(i)+"-"+integer2string(j);
-                double mass = parentMass + (j*D_Delta) + (i*C_Delta);
+                double mass = parentMz + ( ((j*D_Delta) + (i*C_Delta)) /chgNum);
                 Isotope x(name,mass,i,0,0,j);
                 isotopes.push_back(x);
             }
@@ -429,6 +431,8 @@ vector<Isotope> MassCalculator::computeIsotopes(string compoundFormula, Adduct* 
                 int n=x.N15;
                 int s=x.S34;
                 int d=x.H2;
+
+        x.charge = adduct->charge;
 
 		isotopes[i].abundance=
                  mzUtils::nchoosek(CatomCount,c)*pow(abC12,CatomCount-c)*pow(abC13,c)
