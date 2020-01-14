@@ -154,12 +154,14 @@ map<string,int> MassCalculator::getComposition(Adduct* adduct){
     cout << "FORMULAS TO ADD:" << endl;
     for (string posFormula : formulasToAdd) {
         cout << posFormula << endl;
+        addAtoms(atoms, getAdductComponentComposition(posFormula));
     }
     cout << endl;
 
     cout << "FORMULAS TO SUBTRACT:" << endl;
     for (string negFormula : formulasToSubtract) {
         cout << negFormula << endl;
+        subtractAtoms(atoms, getAdductComponentComposition(negFormula));
     }
     cout << endl;
 
@@ -317,17 +319,6 @@ double MassCalculator::computeMass(string formula, int charge) {
 }
 
 vector<Isotope> MassCalculator::computeIsotopes(string compoundFormula, Adduct* adduct, int maxNumProtons, bool isUse13C, bool isUse15N, bool isUse34S, bool isUse2H) {
-    map<string, int> atoms = getComposition(compoundFormula);
-	int CatomCount  =  atoms["C"];
-	int NatomCount  =  atoms["N"];
-	int SatomCount  =  atoms["S"];
-    int HatomCount  =  atoms["H"];
-
-    //TODO: remove this when adduct-based work implemented.
-    int charge = 0;
-
-    //TODO: use this once working
-    getComposition(adduct);
 
     const double abC12 = 0.9893;
     const double abC13 = 0.0107;
@@ -345,11 +336,21 @@ vector<Isotope> MassCalculator::computeIsotopes(string compoundFormula, Adduct* 
     const double N_Delta = 15.0001088989-14.00307400446;
     const double S_Delta = 33.96786701-31.9720711744;
 
-     vector<Isotope> isotopes;
-     double parentMass=computeNeutralMass(compoundFormula);
+    map<string, int> atoms = getComposition(compoundFormula);
+    addAtoms(atoms, getComposition(adduct));
 
-      Isotope parent("C12 PARENT", parentMass);
-      isotopes.push_back(parent);
+    //note that this already includes any mass adjustment from the # of electrons
+    double parentMass = adduct->computeAdductMass(computeNeutralMass(compoundFormula));
+
+    int CatomCount  =  max(atoms["C"], 0);
+    int NatomCount  =  max(atoms["N"], 0);
+    int SatomCount  =  max(atoms["S"], 0);
+    int HatomCount  =  max(atoms["H"], 0);
+
+     vector<Isotope> isotopes;
+
+     Isotope parent("C12 PARENT", parentMass);
+     isotopes.push_back(parent);
 
     if (isUse13C){
         for (int i=1; i <= CatomCount; i++ ) {
@@ -426,8 +427,6 @@ vector<Isotope> MassCalculator::computeIsotopes(string compoundFormula, Adduct* 
                 int n=x.N15;
                 int s=x.S34;
                 int d=x.H2;
-
-        isotopes[i].mass = adjustMass(isotopes[i].mass,charge);
 
 		isotopes[i].abundance=
                  mzUtils::nchoosek(CatomCount,c)*pow(abC12,CatomCount-c)*pow(abC13,c)
