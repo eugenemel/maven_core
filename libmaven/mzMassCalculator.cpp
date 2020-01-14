@@ -166,6 +166,41 @@ map<string,int> MassCalculator::getComposition(Adduct* adduct){
     return atoms;
 }
 
+void MassCalculator::addAtoms(map<string, int>& reference, map<string, int> toAdd) {
+    modifyAtoms(reference, toAdd, true);
+}
+
+void MassCalculator::subtractAtoms(map<string, int>& reference, map<string, int> toSubtract) {
+    modifyAtoms(reference, toSubtract, false);
+}
+
+void MassCalculator::modifyAtoms(map<string, int>& reference, map<string, int> toAdjust, bool isAddAtoms) {
+
+    for (map<string, int>::iterator it = toAdjust.begin(); it != toAdjust.end(); ++it) {
+
+        string element = it->first;
+        int num = it->second;
+
+        if (reference.find(element) == reference.end()) {
+
+            if (!isAddAtoms) {
+                num *= -1;
+            }
+
+            reference.insert(make_pair(element, num));
+
+        } else {
+            if (isAddAtoms) {
+                reference[element] += num;
+            } else {
+                reference[element] -= num;
+            }
+        }
+    }
+
+}
+
+
 /*-------------- parsing function ---------------------------------------*/
 
 map<string,int> MassCalculator::getComposition(string formula) {

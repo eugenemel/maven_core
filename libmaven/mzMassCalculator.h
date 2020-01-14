@@ -74,6 +74,8 @@ class MassCalculator {
     static double computeNeutralMass(string formula);
     static map<string,int> getComposition(string formula);
     static map<string,int> getComposition(Adduct* adduct);
+    static void addAtoms(map<string, int>& reference, map<string, int> toAdd);
+    static void subtractAtoms(map<string, int>& reference, map<string, int> toSubtract);
 
     double computeMass(string formula, int polarity);
     double computeC13IsotopeMass(string formula);
@@ -93,6 +95,7 @@ class MassCalculator {
 
     private:
         static double getElementMass(string elmnt);
+        static void modifyAtoms(map<string, int>& reference, map<string, int> toAdd, bool isAddAtoms);
 
 };
 
