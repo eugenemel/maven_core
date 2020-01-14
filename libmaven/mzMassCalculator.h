@@ -73,6 +73,7 @@ class MassCalculator {
     MassCalculator(){}
     static double computeNeutralMass(string formula);
     static map<string,int> getComposition(string formula);
+    static map<string,int> getComposition(Adduct* adduct);
 
     double computeMass(string formula, int polarity);
     double computeC13IsotopeMass(string formula);

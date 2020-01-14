@@ -63,6 +63,126 @@ double MassCalculator::getElementMass(string elmnt){
 }
 /*-----------------------------------------------------------------------*/
 
+#include <regex>
+
+map<string,int> MassCalculator::getComposition(Adduct* adduct){
+
+    cout << "MassCalculator::getComposition(Adduct*)" << endl;
+
+    map<string, int> atoms {};
+
+    if (!adduct) return atoms;
+
+    string name = adduct->name;
+
+    //dummy text to make sure regex syntax correct --> this works
+    //regex ADDUCT_FORMULA_ADJUSTMENT("M");
+
+    // "\[.+?\]" --> do not check Ms
+    // "\[(|\d)M.+?\]" --> get any Ms
+    // lookahead/behing without M --> "(?<=\[).+?(?=\])"
+    //combining dm with lookahead/lookbehind: "(?<=\[(|\d)M).+?(?=\])"
+
+//    regex ADDUCT_FORMULA_ADJUSTMENT("\[.+?\]");
+
+//    smatch match;
+
+//    regex_search(name, match, ADDUCT_FORMULA_ADJUSTMENT);
+
+
+    bool isAfterM = false;
+
+    int formulaStart = -1;
+    int formulaEnd = -1;
+
+    vector<string> formulasToAdd;
+    vector<string> formulasToSubtract;
+
+    bool isAddFormula = false;
+
+    //use string tokenizer approach to build up map
+    for (int i = 0; i < name.length(); i++) {
+
+        if (isAfterM) {
+
+            if (name[i] == ']') {
+
+                //write previous entry (if appropriate)
+                if (formulaStart > 0) {
+
+                    if (isAddFormula) {
+                        formulasToAdd.push_back(name.substr(formulaStart, (formulaEnd-formulaStart+1)));
+                    } else {
+                        formulasToSubtract.push_back(name.substr(formulaStart, (formulaEnd-formulaStart+1)));
+                    }
+
+                    formulaStart = -1;
+                    formulaEnd = -1;
+                }
+
+                break;
+
+            } else if (name[i] == '-') {
+
+                //write previous entry (if appropriate)
+                if (formulaStart > 0) {
+
+                    if (isAddFormula) {
+                        formulasToAdd.push_back(name.substr(formulaStart, (formulaEnd-formulaStart+1)));
+                    } else {
+                        formulasToSubtract.push_back(name.substr(formulaStart, (formulaEnd-formulaStart+1)));
+                    }
+
+                    formulaStart = -1;
+                    formulaEnd = -1;
+                }
+
+                isAddFormula = false;
+
+            } else if (name[i] == '+') {
+
+                //write previous entry (if appropriate)
+                if (formulaStart > 0) {
+
+                    if (isAddFormula) {
+                        formulasToAdd.push_back(name.substr(formulaStart, (formulaEnd-formulaStart+1)));
+                    } else {
+                        formulasToSubtract.push_back(name.substr(formulaStart, (formulaEnd-formulaStart+1)));
+                    }
+
+                    formulaStart = -1;
+                    formulaEnd = -1;
+                }
+
+                isAddFormula = true;
+
+            } else { // in the middle of a name
+
+                if (formulaStart == -1) formulaStart = i;
+                formulaEnd = i;
+            }
+
+        } else if (name[i] == 'M') {
+            isAfterM = true;
+        }
+    }
+
+    //debugging
+    cout << "FORMULAS TO ADD:" << endl;
+    for (string posFormula : formulasToAdd) {
+        cout << posFormula << endl;
+    }
+    cout << endl;
+
+    cout << "FORMULAS TO SUBTRACT:" << endl;
+    for (string negFormula : formulasToSubtract) {
+        cout << negFormula << endl;
+    }
+    cout << endl;
+
+    return atoms;
+}
+
 /*-------------- parsing function ---------------------------------------*/
 
 map<string,int> MassCalculator::getComposition(string formula) {
@@ -149,6 +269,9 @@ vector<Isotope> MassCalculator::computeIsotopes(string compoundFormula, Adduct* 
 
     //TODO: remove this when adduct-based work implemented.
     int charge = 0;
+
+    //TODO: use this once working
+    getComposition(adduct);
 
     const double abC12 = 0.9893;
     const double abC13 = 0.0107;
