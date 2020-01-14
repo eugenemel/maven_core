@@ -63,8 +63,6 @@ double MassCalculator::getElementMass(string elmnt){
 }
 /*-----------------------------------------------------------------------*/
 
-#include <regex>
-
 map<string,int> MassCalculator::getComposition(Adduct* adduct){
 
     cout << "MassCalculator::getComposition(Adduct*)" << endl;
@@ -74,21 +72,6 @@ map<string,int> MassCalculator::getComposition(Adduct* adduct){
     if (!adduct) return atoms;
 
     string name = adduct->name;
-
-    //dummy text to make sure regex syntax correct --> this works
-    //regex ADDUCT_FORMULA_ADJUSTMENT("M");
-
-    // "\[.+?\]" --> do not check Ms
-    // "\[(|\d)M.+?\]" --> get any Ms
-    // lookahead/behing without M --> "(?<=\[).+?(?=\])"
-    //combining dm with lookahead/lookbehind: "(?<=\[(|\d)M).+?(?=\])"
-
-//    regex ADDUCT_FORMULA_ADJUSTMENT("\[.+?\]");
-
-//    smatch match;
-
-//    regex_search(name, match, ADDUCT_FORMULA_ADJUSTMENT);
-
 
     bool isAfterM = false;
 
