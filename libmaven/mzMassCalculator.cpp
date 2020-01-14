@@ -176,6 +176,12 @@ void MassCalculator::subtractAtoms(map<string, int>& reference, map<string, int>
     modifyAtoms(reference, toSubtract, false);
 }
 
+void MassCalculator::multiplyAtoms(map<string, int>& reference, int factor) {
+    for (map<string, int>::iterator it = reference.begin(); it != reference.end(); ++it){
+        reference[it->first] *= factor;
+    }
+}
+
 void MassCalculator::modifyAtoms(map<string, int>& reference, map<string, int> toAdjust, bool isAddAtoms) {
 
     for (map<string, int>::iterator it = toAdjust.begin(); it != toAdjust.end(); ++it) {

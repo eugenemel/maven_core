@@ -76,6 +76,7 @@ class MassCalculator {
     static map<string,int> getComposition(Adduct* adduct);
     static void addAtoms(map<string, int>& reference, map<string, int> toAdd);
     static void subtractAtoms(map<string, int>& reference, map<string, int> toSubtract);
+    static void multiplyAtoms(map<string, int>& reference, int factor);
 
     double computeMass(string formula, int polarity);
     double computeC13IsotopeMass(string formula);
