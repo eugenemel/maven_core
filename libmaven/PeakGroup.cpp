@@ -35,9 +35,9 @@ PeakGroup::PeakGroup()  {
     minMz=0;
     maxMz=0;
 
-    parent = nullptr;
-    adduct = nullptr;
-    compound = nullptr;
+    parent = nullptrptr;
+    adduct = nullptrptr;
+    compound = nullptrptr;
     deletedFlag=false;
 
     isFocused=false;
@@ -144,7 +144,7 @@ Peak* PeakGroup::getSamplePeak(mzSample* sample) {
     for (unsigned int i=0; i< peaks.size(); i++ ) {
         if (peaks[i].getSample() == sample )  return &peaks[i];
     }
-    return NULL;
+    return nullptr;
 }
 
 void PeakGroup::deletePeaks() { 
@@ -266,7 +266,7 @@ void PeakGroup::computeAvgBlankArea(const vector<EIC*>& eics) {
     float sum=0; int len=0;
     for(unsigned int i=0; i < eics.size(); i++ ) {
         EIC* eic = eics[i];
-        if(eic->sample != NULL && eic->sample->isBlank == false) continue;
+        if(eic->sample != nullptr && eic->sample->isBlank == false) continue;
         for(unsigned int pos=0; pos < eic->intensity.size(); pos++ ) {
             if ( eic->rt[pos] >= rtmin && eic->rt[pos] <= rtmax
                  && eic->intensity[pos] > 0) {
@@ -297,7 +297,7 @@ void PeakGroup::fillInPeaks(const vector<EIC*>& eics) {
 
     for(unsigned int i=0; i < eics.size(); i++ ) {
         EIC* eic = eics[i];
-        if (eic == NULL ) continue;
+        if (eic == nullptr ) continue;
         if (eic->spline.size() ) continue;
         if (eic->intensity.size() == 0) continue;
 
@@ -313,7 +313,7 @@ void PeakGroup::fillInPeaks(const vector<EIC*>& eics) {
         if (missing) { //fill in peak
             int maxpos = 0;
             for(unsigned int pos=1; pos < eic->intensity.size()-1; pos++ ) {
-                if ( eic != NULL && eic->intensity[pos] != 0 && eic->mz[pos] != 0 &&
+                if ( eic != nullptr && eic->intensity[pos] != 0 && eic->mz[pos] != 0 &&
                      eic->rt[pos] >= rtmin && eic->rt[pos] <= rtmax
                      && eic->spline[pos] > eic->spline[pos-1] && eic->spline[pos] > eic->spline[pos+1]
                      ) {
@@ -553,13 +553,13 @@ bool PeakGroup::operator==(const PeakGroup* o)  {
 }
 
 Peak* PeakGroup::getPeak(mzSample* s ) {
-    if ( s == NULL ) return NULL;
+    if ( s == nullptr ) return nullptr;
     for(unsigned int i=0; i < peaks.size(); i++ ) {
         if ( peaks[i].getSample() == s ) {
             return &peaks[i];
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 
@@ -567,7 +567,7 @@ void PeakGroup::reorderSamples() {
     std::sort(peaks.begin(), peaks.end(), Peak::compIntensity);
     for(unsigned int i=0; i < peaks.size(); i++ ) {
         mzSample* s = peaks[i].getSample();
-        if ( s != NULL ) s->setSampleOrder(i);
+        if ( s != nullptr ) s->setSampleOrder(i);
     }
 }
 
@@ -584,7 +584,7 @@ vector<Scan*> PeakGroup::getRepresentativeFullScans() {
     vector<Scan*>matchedscans;
     for(unsigned int i=0; i < peaks.size(); i++ ) {
         mzSample* sample = peaks[i].getSample();
-        if ( sample == NULL ) continue;
+        if ( sample == nullptr ) continue;
         Scan* scan = sample->getScan(peaks[i].scan);
         if (scan and scan->mslevel == 1) matchedscans.push_back(scan);
     }
@@ -635,7 +635,7 @@ void PeakGroup::findHighestPurityMS2Pattern(float prePpmTolr) {
     if (best) {
         fragmentationPattern = Fragment(best,0.01,1,1024);
         //for(Scan* s : ms2events) {  fragmentationPattern.addFragment(new Fragment(s,0,0.01,1024)); }
-        //fragmentationPattern.consensus = NULL;
+        //fragmentationPattern.consensus = nullptr;
         fragmentationPattern.sortByMz();;
         ms2EventCount = ms2events.size();
     }
@@ -660,7 +660,7 @@ void PeakGroup::computeFragPattern(float productPpmTolr)  {
 Scan* PeakGroup::getAverageFragmentationScan(float productPpmTolr)  {
     //build consensus ms2 specta
     computeFragPattern(productPpmTolr);
-    Scan* avgScan = new Scan(NULL,0,0,0,0,0);
+    Scan* avgScan = new Scan(nullptr,0,0,0,0,0);
 
     for(unsigned int i=0; i<fragmentationPattern.mzs.size();i++) {
         avgScan->mz.push_back(fragmentationPattern.mzs[i]);
@@ -678,11 +678,11 @@ Scan* PeakGroup::getAverageFragmenationScan(float resolution) {
     map<float,int> mz_count;
 
     vector<Scan*> scans = getFragmenationEvents();
-    if (scans.size() == 0 ) return NULL;
+    if (scans.size() == 0 ) return nullptr;
 
-    Scan* avgScan = new Scan(NULL,0,0,0,0,0);
+    Scan* avgScan = new Scan(nullptr,0,0,0,0,0);
     avgScan->deepcopy(scans[0]);
-    avgScan->sample=NULL;
+    avgScan->sample=nullptr;
 
     if (scans.size() == 1) return avgScan;
 
@@ -781,7 +781,7 @@ void PeakGroup::clusterGroups(vector<PeakGroup> &allgroups, vector<mzSample*>sam
         //cluster parent
         PeakGroup* parent = parentGroups[ metaGroupId ];
 
-        mzSample* largestSample=NULL;
+        mzSample* largestSample=nullptr;
         double maxIntensity=0;
 
         for(unsigned int i=0; i < grp1.peakCount(); i++ ) {
@@ -789,7 +789,7 @@ void PeakGroup::clusterGroups(vector<PeakGroup> &allgroups, vector<mzSample*>sam
             if ( grp1.peaks[i].peakIntensity > maxIntensity ) largestSample=sample;
         }
 
-        if (largestSample == NULL ) continue;
+        if (largestSample == nullptr ) continue;
         vector<float>peakIntensityA = grp1.getOrderedIntensityVector(samples,PeakGroup::AreaTop);
 
         for(unsigned int j=i+1; j<allgroups.size(); j++) {
