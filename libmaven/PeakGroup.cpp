@@ -738,8 +738,29 @@ Scan* PeakGroup::getAverageFragmenationScan(float resolution) {
 }
 */
 
-
-
+/**
+ * Clustering function that organizes peak groups into clusters based on several independent metrics.
+ *
+ * EIC comparisons are always done on the highest-intensity sample.
+ *
+ * TODO: PeakGroup A has most intense sample as X, Should PeakGroup B use the same sample, or just some other (more intense) sample?
+ * Should this function try to fall back to the most intense sample found in both A and B?
+ *
+ * TODO: extend this function to only consider peak groups with known m/z deltas from each other
+ * for example, isotopic peaks, or differences between common adducts, etc
+ *
+ * TODO: more information about sample correlations
+ *
+ * TODO: option to do smoothing on correlations?
+ *
+ * @brief PeakGroup::clusterGroups
+ * @param allgroups
+ * @param samples
+ * @param maxRtDiff
+ * @param minSampleCorrelation
+ * @param minPeakShapeCorrelation
+ * @param ppm
+ */
 void PeakGroup::clusterGroups(vector<PeakGroup> &allgroups, vector<mzSample*>samples, double maxRtDiff, double minSampleCorrelation, double minPeakShapeCorrelation, double ppm) {
     sort(allgroups.begin(),allgroups.end(), PeakGroup::compRt);
     int metaGroupId = 0;
