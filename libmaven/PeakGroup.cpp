@@ -760,8 +760,9 @@ Scan* PeakGroup::getAverageFragmenationScan(float resolution) {
  * @param minSampleCorrelation
  * @param minPeakShapeCorrelation
  * @param ppm
+ * @param mzDeltas
  */
-void PeakGroup::clusterGroups(vector<PeakGroup> &allgroups, vector<mzSample*>samples, double maxRtDiff, double minSampleCorrelation, double minPeakShapeCorrelation, double ppm) {
+void PeakGroup::clusterGroups(vector<PeakGroup> &allgroups, vector<mzSample*>samples, double maxRtDiff, double minSampleCorrelation, double minPeakShapeCorrelation, double ppm, vector<double> mzDeltas) {
     sort(allgroups.begin(),allgroups.end(), PeakGroup::compRt);
     int metaGroupId = 0;
 
