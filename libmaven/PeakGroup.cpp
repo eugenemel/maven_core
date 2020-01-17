@@ -35,9 +35,9 @@ PeakGroup::PeakGroup()  {
     minMz=0;
     maxMz=0;
 
-    parent = nullptrptr;
-    adduct = nullptrptr;
-    compound = nullptrptr;
+    parent = nullptr;
+    adduct = nullptr;
+    compound = nullptr;
     deletedFlag=false;
 
     isFocused=false;
