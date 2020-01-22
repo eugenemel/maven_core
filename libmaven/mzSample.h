@@ -543,6 +543,8 @@ class PeakGroup {
         string displayName; //Issue 75: For use with tabledockwidget, other GUI displays
         string getName();               //compound name + tagString + srmid
 
+        vector<char> labels; //Issue 127: for use with a more intricate tagging system
+
         bool isFocused;
 
         int groupId;

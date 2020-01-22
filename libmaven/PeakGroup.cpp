@@ -99,6 +99,7 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     isFocused=o.isFocused;
     label=o.label;
     displayName=o.displayName;
+    labels = o.labels;
 
     goodPeakCount=o.goodPeakCount;
     _type = o._type;
