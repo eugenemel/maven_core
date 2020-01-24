@@ -858,11 +858,15 @@ bool PeakGroup::isMonoisotopic( float ppm) {
 }
 
 bool PeakGroup::isGroupGood() {
-    return find(labels.begin(), labels.end(), 'g') != labels.end();
+    return isGroupLabeled('g');
 }
 
 bool PeakGroup::isGroupBad() {
-    return find(labels.begin(), labels.end(), 'b') != labels.end();
+    return isGroupLabeled('b');
+}
+
+bool PeakGroup::isGroupLabeled(char label) {
+    return find(labels.begin(), labels.end(), label) != labels.end();
 }
 
 void PeakGroup::markGroupGood() {

@@ -644,6 +644,7 @@ class PeakGroup {
 
         bool isGroupGood();
         bool isGroupBad();
+        bool isGroupLabeled(char label);
         void markGroupGood();
         void markGroupBad();
         void addLabel(char label);
