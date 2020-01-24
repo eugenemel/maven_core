@@ -909,3 +909,32 @@ void PeakGroup::toggleLabel(char c) {
     }
 }
 
+void PeakGroup::addLabel(char label) {
+    if (label == '\0') {
+        //reserved character: clear all labels
+
+        labels.clear();
+
+    } else if (find(labels.begin(), labels.end(), label) != labels.end()) {
+         //If the label already exists, do nothing
+
+        return;
+    } else if (label == 'g') {
+        //reserved character: 'good', add mark and remove 'bad' label
+
+        labels.erase(remove(labels.begin(), labels.end(), 'b'), labels.end());
+        labels.push_back('g');
+
+    } else if (label == 'b') {
+        //reserved character: 'bad', add mark and remove 'good' label
+
+        labels.erase(remove(labels.begin(), labels.end(), 'g'), labels.end());
+        labels.push_back('b');
+
+
+    } else {
+        //non-reserved character label that is not already in vector: append to vector
+
+        labels.push_back(label);
+    }
+}

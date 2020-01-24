@@ -646,7 +646,8 @@ class PeakGroup {
         bool isGroupBad();
         void markGroupGood();
         void markGroupBad();
-        void toggleLabel(char c);
+        void addLabel(char label);
+        void toggleLabel(char label);
 
 		void reduce();
 		void fillInPeaks(const vector<EIC*>& eics);
