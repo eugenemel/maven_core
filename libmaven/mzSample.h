@@ -642,6 +642,12 @@ class PeakGroup {
 		float medianRt();
 		float meanRtW();
 
+        bool isGroupGood();
+        bool isGroupBad();
+        void markGroupGood();
+        void markGroupBad();
+        void toggleLabel(char c);
+
 		void reduce();
 		void fillInPeaks(const vector<EIC*>& eics);
 		void computeAvgBlankArea(const vector<EIC*>& eics);
