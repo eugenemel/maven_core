@@ -923,3 +923,7 @@ void PeakGroup::processLabel(char label, bool isToggle) {
         labels.push_back(label);
     }
 }
+
+string PeakGroup::getPeakGroupLabel() {
+    return string(labels.begin(), labels.end());
+}
