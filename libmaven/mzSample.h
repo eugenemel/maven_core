@@ -539,9 +539,15 @@ class PeakGroup {
         string srmId;
         string tagString;
         string searchTableName;
-        char label;			//classification label
+
         string displayName; //Issue 75: For use with tabledockwidget, other GUI displays
         string getName();               //compound name + tagString + srmid
+
+        /**
+         * @deprecated label
+         * use vector<char> labels instead
+         */
+        char label;			//classification label
 
         vector<char> labels; //Issue 127: for use with a more intricate tagging system
 
