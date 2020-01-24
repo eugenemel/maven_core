@@ -878,47 +878,32 @@ void PeakGroup::markGroupBad() {
 
 }
 
-void PeakGroup::toggleLabel(char c) {
-    if (label == '\0') {
-        //reserved character: clear all labels
-
-        labels.clear();
-
-    } else if (find(labels.begin(), labels.end(), label) != labels.end()) {
-        //If the label already exists, remove it
-
-        labels.erase(remove(labels.begin(), labels.end(), label), labels.end());
-
-    } else if (label == 'g') {
-        //reserved character: 'good', add mark and remove 'bad' label
-
-        labels.erase(remove(labels.begin(), labels.end(), 'b'), labels.end());
-        labels.push_back('g');
-
-    } else if (label == 'b') {
-        //reserved character: 'bad', add mark and remove 'good' label
-
-        labels.erase(remove(labels.begin(), labels.end(), 'g'), labels.end());
-        labels.push_back('b');
-
-
-    } else {
-        //non-reserved character label that is not already in vector: append to vector
-
-        labels.push_back(label);
-    }
+void PeakGroup::toggleLabel(char label) {
+    processLabel(label, true);
 }
 
 void PeakGroup::addLabel(char label) {
+    processLabel(label, false);
+}
+
+void PeakGroup::processLabel(char label, bool isToggle) {
     if (label == '\0') {
         //reserved character: clear all labels
 
         labels.clear();
 
     } else if (find(labels.begin(), labels.end(), label) != labels.end()) {
-         //If the label already exists, do nothing
 
-        return;
+        if (isToggle){
+        //If the label already exists, remove it
+
+            labels.erase(remove(labels.begin(), labels.end(), label), labels.end());
+
+        } else {
+        //If the label already exists, do nothing
+
+           return;
+        }
     } else if (label == 'g') {
         //reserved character: 'good', add mark and remove 'bad' label
 
