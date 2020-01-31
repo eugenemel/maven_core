@@ -541,6 +541,23 @@ class PeakGroup {
         string searchTableName;
 
         string displayName; //Issue 75: For use with tabledockwidget, other GUI displays
+
+        /**
+         * @brief importedCompoundName
+         *
+         * Introduced as a part of MAVEN Issue 146
+         *
+         * For use when a peak group should be connected to a compound, but should
+         * be named something other than the linked compounds' name.
+         *
+         * The imported compound name should take precedence over the name linked compound.
+         *
+         * This is useful when an identification algorithm connects to a compound for display
+         * of an original spectrum, but suggests summarizing the compound to a higher (less specific)
+         * level (as in lipidomics).
+         */
+        string importedCompoundName;
+
         string getName();               //compound name + tagString + srmid
 
         /**

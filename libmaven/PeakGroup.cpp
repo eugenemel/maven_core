@@ -43,6 +43,7 @@ PeakGroup::PeakGroup()  {
     isFocused=false;
     label=0;				//classification label
     displayName="";
+    importedCompoundName="";
 
     goodPeakCount=0;
     _type = None;
@@ -100,6 +101,7 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     label=o.label;
     displayName=o.displayName;
     labels = o.labels;
+    importedCompoundName=o.importedCompoundName;
 
     goodPeakCount=o.goodPeakCount;
     _type = o._type;
