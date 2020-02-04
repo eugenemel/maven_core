@@ -250,6 +250,47 @@ void  EIC::getPeakPositions(int smoothWindow) {
 }
 
 /**
+ * Description:
+ * get the 5-point global maximum for this EIC.
+ * This should only be used when the EIC is thought to contain exactly one valid peak,
+ * which is also the most intense peak in the window.
+ *
+ * @brief EIC::getSingleGlobalMaxPeak
+ * @param smoothWindow
+ */
+void EIC::getSingleGlobalMaxPeak(int smoothWindow) {
+
+    //Need to explicitly clear out peaks, else an extra peak will be added with each getPeaks() call.
+    peaks.clear();
+
+    //cerr << "getPeakPositions() " << " sWindow=" << smoothWindow << " sType=" << smootherType << endl;
+
+    unsigned int N = intensity.size();
+    if ( N == 0 ) return;
+
+    computeSpline(smoothWindow);
+    if (spline.size() == 0) return;
+
+    unsigned int globalMax = 0;
+    for (unsigned int i=2; i < N-2; i++ ) {
+        if ( spline[i] > spline[i-1] && spline[i-1] > spline[i-2] &&
+             spline[i] > spline[i+1] && spline[i+1] > spline[i+2] &&
+             spline[i] > spline[globalMax]) {
+            globalMax = i;
+        }
+    }
+
+    if (globalMax > 0) {
+        addPeak(globalMax);
+    }
+
+    //baseline always uses Gaussian smoothing.
+    computeBaseLine(baselineSmoothingWindow, baselineDropTopX);
+
+    getPeakStatistics();
+}
+
+/**
  * @brief EIC::getPeakPositionsB
  * @param smoothWindow
  * @param intensityThreshold
