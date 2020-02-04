@@ -560,12 +560,6 @@ class PeakGroup {
 
         string getName();               //compound name + tagString + srmid
 
-        /**
-         * @deprecated label
-         * use vector<char> labels instead
-         */
-        char label;			//classification label
-
         vector<char> labels; //Issue 127: for use with a more intricate tagging system
 
         bool isFocused;
@@ -645,7 +639,6 @@ class PeakGroup {
 
 
 		inline void setParent(PeakGroup* p) {parent=p;}
-		inline void setLabel(char label) { this->label=label;}
         inline float ppmDist(float cmass) { return mzUtils::ppmDist(cmass,meanMz); }
 
 		inline void addPeak(const Peak& peak) { peaks.push_back(peak); peaks.back().groupNum=groupId; }
