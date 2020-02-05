@@ -375,7 +375,7 @@ void Aligner::doSegmentedAligment() {
 		for(int ii=0; ii < sample->scans.size(); ii++ ) {
 			Scan* scan = sample->scans[ii];
 
-			AligmentSegment* seg = NULL;
+            AligmentSegment* seg = nullptr;
 			for( AligmentSegment* x: alignmentSegments[sampleName] ) { 
 				if(scan->rt >= x->seg_start and scan->rt < x->seg_end) {
 						seg=x; break;
@@ -391,6 +391,6 @@ void Aligner::doSegmentedAligment() {
 			}
 		}
 
-		cerr << "doSegmentedAligment: " << sampleName << "\tcorected=" << corcount << endl;
+        cerr << "doSegmentedAligment: " << sampleName << "\tcorrected=" << corcount << endl;
 	}
 }
