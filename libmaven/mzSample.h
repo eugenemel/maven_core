@@ -861,12 +861,16 @@ struct AlignmentSegment {
 struct AnchorPoint {
 
         mzSample* sample;
-        double rt;
+        float rt;
         bool isRtFromEIC;
 
-        inline void setInterpolatedRtValue(double rt){this->rt = rt; isRtFromEIC = false;}
+        explicit AnchorPoint(mzSample* sample) {
+            this->sample = sample;
+        }
 
-        void setEICRtValue(mzSlice* slice);
+        inline void setInterpolatedRtValue(float rt){this->rt = rt; isRtFromEIC = false;}
+
+        bool setEICRtValue(mzSlice* slice, int eic_smoothingWindow = 5);
 };
 
 /**
@@ -885,13 +889,16 @@ public:
     }
 
     //computed by compute()
-    map<mzSample*, AnchorPoint*> sampleToPoints;
+    map<mzSample*, AnchorPoint*> sampleToPoints{};
 
     /**
      * @brief compute
      * Method to determine sampleToPoints map.
      */
-    void compute(const vector<mzSample*>& eicSamples, const vector<mzSample*>& allSamples);
+    void compute(const vector<mzSample*>& eicSamples, const vector<mzSample*>& allSamples, int eic_smoothingWindow=5);
+
+    int minNumObservedSamples = 2;
+    bool isValid = true;
 
 };
 

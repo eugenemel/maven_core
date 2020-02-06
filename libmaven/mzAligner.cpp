@@ -394,3 +394,106 @@ void Aligner::doSegmentedAligment() {
         cerr << "doSegmentedAligment: " << sampleName << "\tcorrected=" << corcount << endl;
 	}
 }
+
+bool AnchorPoint::setEICRtValue(mzSlice *slice, int eic_smoothingWindow){
+
+    EIC *eic = sample->getEIC(slice->mzmin, slice->mzmax, slice->rtmin, slice->rtmax, 1);
+
+    eic->getSingleGlobalMaxPeak(eic_smoothingWindow);
+
+    if (!eic->peaks.empty()){
+        this->rt = eic->peaks[0].rt;
+        this->isRtFromEIC = true;
+    } else {
+        this->isRtFromEIC = false;
+    }
+
+    if (eic) delete(eic);
+
+    return isRtFromEIC;
+}
+
+/**
+ * @brief AnchorPointSet::compute
+ *
+ * Samples must have sample IDs in injection order of machine, otherwise interpolation will
+ * not make much sense
+ *
+ * @param eicSamples
+ * @param allSamples
+ * @param eic_smoothingWindow
+ */
+void AnchorPointSet::compute(const vector<mzSample*>& eicSamples, const vector<mzSample*>& allSamples, int eic_smoothingWindow){
+
+    vector<mzSample*> foundEICSamples;
+
+    //Retrieve RTs for anchor points from samples
+    for (auto x : allSamples) {
+        AnchorPoint *anchorPoint = new AnchorPoint(x);
+
+        auto it = find(eicSamples.begin(), eicSamples.end(), x);
+        if (it != eicSamples.end()) {
+            bool isFoundEIC = anchorPoint->setEICRtValue(slice, eic_smoothingWindow);
+            if (isFoundEIC) {
+                foundEICSamples.push_back(x);
+                sampleToPoints.insert(make_pair(x, anchorPoint));
+            }
+        }
+    }
+
+    if (static_cast<int>(foundEICSamples.size()) < minNumObservedSamples) {
+        isValid = false;
+        return;
+    }
+
+    sort(foundEICSamples.begin(), foundEICSamples.end(), [](const mzSample* lhs, const mzSample* rhs){
+        return lhs->sampleId < rhs->sampleId;
+    });
+
+    //interpolate for all samples that do not have RT values from the EIC.
+    for (auto x : allSamples) {
+
+        int sampleId = x->sampleId;
+        float rt;
+
+        bool addInterpolatedSample = false;
+
+        if (sampleId <= foundEICSamples[0]->sampleId) {
+            rt = sampleToPoints[foundEICSamples[0]]->rt;
+            addInterpolatedSample = (sampleId != foundEICSamples[0]->sampleId);
+        } else if (sampleId > foundEICSamples[foundEICSamples.size()-1]->sampleId){
+            rt = sampleToPoints[foundEICSamples[foundEICSamples.size()-1]]->rt;
+            addInterpolatedSample = true;
+        } else {
+            for (unsigned int i = 1; i < foundEICSamples.size(); i++){
+                if (sampleId > foundEICSamples[i-1]->sampleId && sampleId < foundEICSamples[i]->sampleId) {
+                    int firstId = foundEICSamples[i-1]->sampleId;
+                    int secondId = foundEICSamples[i]->sampleId;
+
+                    float firstRt = sampleToPoints[foundEICSamples[i-1]]->rt;
+                    float secondRt = sampleToPoints[foundEICSamples[i]]->rt;
+
+                    float frac = static_cast<float>(sampleId-firstId) / static_cast<float>(secondId-firstId);
+
+                    float interpolatedRt = firstRt + (secondRt-firstRt) *frac;
+
+                    rt = interpolatedRt;
+                    addInterpolatedSample = true;
+                    break;
+
+                } else {
+                    rt = sampleToPoints[foundEICSamples[i]]->rt;
+                }
+            }
+        }
+
+        if (addInterpolatedSample) {
+
+            AnchorPoint *anchorPoint = new AnchorPoint(x);
+            anchorPoint->setInterpolatedRtValue(rt);
+
+            sampleToPoints.insert(make_pair(x, anchorPoint));
+        }
+
+    }
+}
