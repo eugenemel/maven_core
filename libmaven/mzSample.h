@@ -843,7 +843,7 @@ class Adduct {
 		inline float computeAdductMass(float pmz) { return (pmz*nmol+mass)/abs(charge); }
 };
 
-struct AligmentSegment {
+struct AlignmentSegment {
 		string sampleName;
 		float  seg_start;
 		float  seg_end;
@@ -872,7 +872,7 @@ class Aligner {
 		void loadAlignmentFile(string alignmentFile); //load alignment information from a file
 		void doSegmentedAligment();	 //ralign scans using guided alignment
 
-		inline void addSegment(string sampleName, AligmentSegment* s) { 
+        inline void addSegment(string sampleName, AlignmentSegment* s) {
 			alignmentSegments[sampleName].push_back(s); 
 		}
 
@@ -880,7 +880,7 @@ class Aligner {
 		vector< vector<float> > fit;
 		vector<mzSample*> samples;
 		vector<PeakGroup*> allgroups;
-		map<string,vector<AligmentSegment*> > alignmentSegments;
+        map<string,vector<AlignmentSegment*> > alignmentSegments;
 		int maxItterations;
 		int polynomialDegree;
 		

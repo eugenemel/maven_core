@@ -314,7 +314,7 @@ void Aligner::loadAlignmentFile(string alignmentFile) {
 	std::string line;
 	int lineNum=0;
 
-	AligmentSegment* lastSegment=0;
+    AlignmentSegment* lastSegment=0;
 
 	while (getline(myfile,line) ) {
 		lineNum++;
@@ -322,7 +322,7 @@ void Aligner::loadAlignmentFile(string alignmentFile) {
 		mzUtils::split(line,'\t', fields);
 
 		if (fields.size() >= 3 && lineNum > 1) {
-			AligmentSegment* seg = new AligmentSegment(); 
+            AlignmentSegment* seg = new AlignmentSegment();
 
 			seg->sampleName   = fields[0];
 			seg->seg_start = 0;
@@ -344,7 +344,7 @@ void Aligner::loadAlignmentFile(string alignmentFile) {
 	cerr << "Aligner::loadAlignmentFile() " << alignmentSegments.size() << "\t" << lineNum << endl;
 }
 
-float AligmentSegment::updateRt(float oldRt) { 
+float AlignmentSegment::updateRt(float oldRt) {
 		//fractional distance from start of a segement
 		if (oldRt >= seg_start and oldRt < seg_end) {
 			float   frac = (oldRt-seg_start)/(seg_end - seg_start);
@@ -375,8 +375,8 @@ void Aligner::doSegmentedAligment() {
 		for(int ii=0; ii < sample->scans.size(); ii++ ) {
 			Scan* scan = sample->scans[ii];
 
-            AligmentSegment* seg = nullptr;
-			for( AligmentSegment* x: alignmentSegments[sampleName] ) { 
+            AlignmentSegment* seg = nullptr;
+            for( AlignmentSegment* x: alignmentSegments[sampleName] ) {
 				if(scan->rt >= x->seg_start and scan->rt < x->seg_end) {
 						seg=x; break;
 				}
