@@ -852,7 +852,48 @@ struct AlignmentSegment {
 		float updateRt(float oldRt);
 
 };
-		
+
+/**
+ * @brief The AnchorPoint struct
+ * Container for storing information about rt value, whether or not the rt value was interpolated,
+ * and the sample associated with the rt value.
+ */
+struct AnchorPoint {
+
+        mzSample* sample;
+        double rt;
+        bool isRtFromEIC;
+
+        inline void setInterpolatedRtValue(double rt){this->rt = rt; isRtFromEIC = false;}
+
+        void setEICRtValue(mzSlice* slice);
+};
+
+/**
+ * @brief The AnchorPointSet class
+ * a collection of individual AnchorPoints, each of which know if they were interpolated
+ * across the RT range of the experiment, or if they were explicitly extracted.
+ */
+class AnchorPointSet {
+public:
+
+    //from constructor
+    mzSlice* slice;
+
+    explicit AnchorPointSet(mzSlice* slice) {
+        this->slice = slice;
+    }
+
+    //computed by compute()
+    map<mzSample*, AnchorPoint*> sampleToPoints;
+
+    /**
+     * @brief compute
+     * Method to determine sampleToPoints map.
+     */
+    void compute(const vector<mzSample*>& eicSamples, const vector<mzSample*>& allSamples);
+
+};
 
 class Aligner {
 
