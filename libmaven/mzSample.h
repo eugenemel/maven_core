@@ -861,7 +861,7 @@ struct AlignmentSegment {
 struct AnchorPoint {
 
         mzSample* sample;
-        float rt;
+        float rt;           //observedRt (AlignmentSegment.seg_start or AlignmentSegment.seg_end)
         bool isRtFromEIC;
 
         explicit AnchorPoint(mzSample* sample) {
