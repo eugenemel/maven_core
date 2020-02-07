@@ -542,9 +542,10 @@ void Aligner::exportAlignmentFile(vector<AnchorPointSet>& anchorPoints, mzSample
         return lhs.sampleToPoints.at(refSample)->rt < rhs.sampleToPoints.at(refSample)->rt;
     });
 
-    ofstream outputStream;
-    outputStream.open(outputFile);
-    outputStream << "sample\trt\trt_update\n";
+
+    //                      observedRt  referenceRt
+    //                          rt      rt_update
+    map<mzSample*, vector<pair<float, float>>> sampleToUpdatedRts{};
 
     for (auto &pt : anchorPoints) {
         for (auto it = pt.sampleToPoints.begin(); it != pt.sampleToPoints.end(); ++it) {
@@ -555,11 +556,33 @@ void Aligner::exportAlignmentFile(vector<AnchorPointSet>& anchorPoints, mzSample
             float observedRt = point->rt;
             float referenceRt = pt.sampleToPoints[refSample]->rt;
 
-            outputStream
-                    << sample->sampleName << "\t"
-                    << observedRt << "\t"
-                    << referenceRt << "\n";
+            if (sampleToUpdatedRts.find(sample) != sampleToUpdatedRts.end()) {
+                sampleToUpdatedRts[sample].push_back(make_pair(observedRt, referenceRt));
+            } else {
+                pair<float, float> rtPair = make_pair(observedRt, referenceRt);
+                vector<pair<float, float>> rtInfo = vector<pair<float, float>>{};
+                rtInfo.push_back(rtPair);
 
+                sampleToUpdatedRts.insert(make_pair(sample, rtInfo));
+            }
+
+        }
+    }
+
+    ofstream outputStream;
+    outputStream.open(outputFile);
+    outputStream << "sample\trt\trt_update\n";
+
+    for (auto &x : sampleToUpdatedRts) {
+
+        string sampleName = x.first->sampleName;
+
+        for (auto &pt : x.second) {
+
+            outputStream
+                    << sampleName << "\t"
+                    << pt.first << "\t"
+                    << pt.second << "\n";
         }
     }
 
