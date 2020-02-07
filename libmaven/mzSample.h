@@ -883,9 +883,19 @@ public:
 
     //from constructor
     mzSlice* slice;
+    vector<mzSample*> eicSamples;
 
-    explicit AnchorPointSet(mzSlice* slice) {
-        this->slice = slice;
+    explicit AnchorPointSet(const PeakGroup& pg) {
+        slice = new mzSlice(pg.minMz, pg.maxMz, pg.minRt, pg.maxRt);
+
+        if (pg.peaks.size() >= minNumObservedSamples) {
+            for (auto &p : pg.peaks) {
+                eicSamples.push_back(p.sample);
+            }
+        } else {
+            isValid = false;
+        }
+
     }
 
     //computed by compute()
@@ -895,10 +905,12 @@ public:
      * @brief compute
      * Method to determine sampleToPoints map.
      */
-    void compute(const vector<mzSample*>& eicSamples, const vector<mzSample*>& allSamples, int eic_smoothingWindow=5);
+    void compute(const vector<mzSample*>& allSamples, int eic_smoothingWindow=5);
 
     int minNumObservedSamples = 2;
     bool isValid = true;
+
+    static bool exportAlignmentFile(vector<AnchorPointSet> anchorPoints);
 
 };
 

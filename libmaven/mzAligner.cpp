@@ -395,6 +395,11 @@ void Aligner::doSegmentedAligment() {
 	}
 }
 
+/**
+ * MZ ALIGNER 2
+ * Following this point are new developments, designed for use with new manual curation max EIC approach.
+ */
+
 bool AnchorPoint::setEICRtValue(mzSlice *slice, int eic_smoothingWindow){
 
     EIC *eic = sample->getEIC(slice->mzmin, slice->mzmax, slice->rtmin, slice->rtmax, 1);
@@ -423,7 +428,10 @@ bool AnchorPoint::setEICRtValue(mzSlice *slice, int eic_smoothingWindow){
  * @param allSamples
  * @param eic_smoothingWindow
  */
-void AnchorPointSet::compute(const vector<mzSample*>& eicSamples, const vector<mzSample*>& allSamples, int eic_smoothingWindow){
+void AnchorPointSet::compute(const vector<mzSample*>& allSamples, int eic_smoothingWindow){
+
+    //This flag is set in the constructor
+    if (!isValid) return;
 
     vector<mzSample*> foundEICSamples;
 
@@ -439,11 +447,6 @@ void AnchorPointSet::compute(const vector<mzSample*>& eicSamples, const vector<m
                 sampleToPoints.insert(make_pair(x, anchorPoint));
             }
         }
-    }
-
-    if (static_cast<int>(foundEICSamples.size()) < minNumObservedSamples) {
-        isValid = false;
-        return;
     }
 
     sort(foundEICSamples.begin(), foundEICSamples.end(), [](const mzSample* lhs, const mzSample* rhs){
@@ -496,4 +499,15 @@ void AnchorPointSet::compute(const vector<mzSample*>& eicSamples, const vector<m
         }
 
     }
+}
+
+/**
+ * @brief exportAlignmentFile
+ * @param anchorPoints
+ * @return boolean flag indicating if export is successful.
+ */
+static bool exportAlignmentFile(vector<AnchorPointSet> anchorPoints, string outputFile) {
+
+    //TODO: export alignment file
+    return true;
 }
