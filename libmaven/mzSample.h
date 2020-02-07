@@ -885,7 +885,12 @@ public:
     mzSlice* slice;
     vector<mzSample*> eicSamples;
 
-    explicit AnchorPointSet(const PeakGroup& pg) {
+    //used for last point in file
+    AnchorPointSet() {
+        slice = nullptr;
+    }
+
+    AnchorPointSet(const PeakGroup& pg) {
         slice = new mzSlice(pg.minMz, pg.maxMz, pg.minRt, pg.maxRt);
 
         if (pg.peaks.size() >= minNumObservedSamples) {
@@ -910,7 +915,7 @@ public:
     int minNumObservedSamples = 2;
     bool isValid = true;
 
-    static bool exportAlignmentFile(vector<AnchorPointSet> anchorPoints, mzSample* refSample, string outputFile);
+    static AnchorPointSet lastRt(vector<mzSample*>& allSamples);
 
 };
 
@@ -935,6 +940,11 @@ class Aligner {
         inline void addSegment(string sampleName, AlignmentSegment* s) {
 			alignmentSegments[sampleName].push_back(s); 
 		}
+
+        //AnchorPoint related updates
+        vector<AnchorPointSet> groupsToAnchorPoints(vector<mzSample*>& samples, vector<PeakGroup*>& peakGroups, int eic_smoothingWindow);
+        void exportAlignmentFile(vector<AnchorPointSet>& anchorPoints, mzSample* refSample, string outputFile);
+
 
 	private:
 		vector< vector<float> > fit;

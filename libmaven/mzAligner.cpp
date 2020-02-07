@@ -501,12 +501,29 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples, int eic_smooth
     }
 }
 
+vector<AnchorPointSet> groupsToAnchorPoints(vector<mzSample*>& samples, vector<PeakGroup*>& peakGroups, int eic_smoothingWindow) {
+
+    //extra position for last RT in file
+    vector<AnchorPointSet> anchorPointSet(peakGroups.size()+1);
+
+    for (unsigned int i = 0; i < peakGroups.size(); i++) {
+
+        PeakGroup *group = peakGroups[i];
+        AnchorPointSet anchorPointSet(*group);
+        anchorPointSet.compute(samples, eic_smoothingWindow);
+
+    }
+
+    //last point in file
+    AnchorPointSet lastAnchorPointSet = AnchorPointSet::lastRt(samples);
+}
+
 /**
  * @brief exportAlignmentFile
  * @param anchorPoints
  * @return boolean flag indicating if export is successful.
  */
-static bool exportAlignmentFile(vector<AnchorPointSet>& anchorPoints, mzSample* refSample, string outputFile) {
+void Aligner::exportAlignmentFile(vector<AnchorPointSet>& anchorPoints, mzSample* refSample, string outputFile) {
 
     sort(anchorPoints.begin(), anchorPoints.end(), [refSample] (const AnchorPointSet& lhs, const AnchorPointSet& rhs){
         return lhs.sampleToPoints.at(refSample)->rt < rhs.sampleToPoints.at(refSample)->rt;
@@ -534,5 +551,25 @@ static bool exportAlignmentFile(vector<AnchorPointSet>& anchorPoints, mzSample* 
     }
 
     outputStream.close();
-    return true;
+}
+
+/**
+ * @brief AnchorPointSet::lastRt
+ * @param allSamples
+ *
+ * @return an AnchorPointSet that maps the last RT value collected from all samples together.
+ * This highly imperfect, and so other AnchorPointSets should come as close as possible to the end of the
+ * gradient.
+ */
+AnchorPointSet AnchorPointSet::lastRt(vector<mzSample*>& allSamples) {
+    AnchorPointSet lastAnchorPoint;
+    for (auto samp : allSamples) {
+
+        AnchorPoint *anchorPoint = new AnchorPoint(samp);
+        anchorPoint->setInterpolatedRtValue(samp->scans.back()->rt);
+
+        lastAnchorPoint.sampleToPoints.insert(make_pair(samp, anchorPoint));
+    }
+
+    return lastAnchorPoint;
 }
