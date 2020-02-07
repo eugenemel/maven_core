@@ -307,6 +307,8 @@ void Aligner::loadAlignmentFile(string alignmentFile) {
 	//sample  rt      rt_update
 	//DOplasma-set1-b1-blank-inj1-C18TBA-neg  0.0     1.4722584874037974
 	//DOplasma-set1-b1-blank-inj1-C18TBA-neg  0.024231014164164164    1.4910885552525142
+    //
+    //Note that this expects a block of all the same samples, then the next set of samples, etc
 
 	ifstream myfile(alignmentFile);
 	if (!myfile.is_open()) { cerr << "Can't open file " << alignmentFile; return; }
