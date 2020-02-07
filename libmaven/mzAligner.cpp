@@ -506,8 +506,33 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples, int eic_smooth
  * @param anchorPoints
  * @return boolean flag indicating if export is successful.
  */
-static bool exportAlignmentFile(vector<AnchorPointSet> anchorPoints, string outputFile) {
+static bool exportAlignmentFile(vector<AnchorPointSet>& anchorPoints, mzSample* refSample, string outputFile) {
 
-    //TODO: export alignment file
+    sort(anchorPoints.begin(), anchorPoints.end(), [refSample] (const AnchorPointSet& lhs, const AnchorPointSet& rhs){
+        return lhs.sampleToPoints.at(refSample)->rt < rhs.sampleToPoints.at(refSample)->rt;
+    });
+
+    ofstream outputStream;
+    outputStream.open(outputFile);
+    outputStream << "sample\trt\trt_update\n";
+
+    for (auto &pt : anchorPoints) {
+        for (auto it = pt.sampleToPoints.begin(); it != pt.sampleToPoints.end(); ++it) {
+
+            mzSample* sample = it->first;
+            AnchorPoint* point = it->second;
+
+            float observedRt = point->rt;
+            float referenceRt = pt.sampleToPoints[refSample]->rt;
+
+            outputStream
+                    << sample->sampleName << "\t"
+                    << observedRt << "\t"
+                    << referenceRt << "\n";
+
+        }
+    }
+
+    outputStream.close();
     return true;
 }

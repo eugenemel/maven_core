@@ -910,7 +910,7 @@ public:
     int minNumObservedSamples = 2;
     bool isValid = true;
 
-    static bool exportAlignmentFile(vector<AnchorPointSet> anchorPoints);
+    static bool exportAlignmentFile(vector<AnchorPointSet> anchorPoints, mzSample* refSample, string outputFile);
 
 };
 
