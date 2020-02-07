@@ -501,10 +501,17 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples, int eic_smooth
     }
 }
 
-vector<AnchorPointSet> groupsToAnchorPoints(vector<mzSample*>& samples, vector<PeakGroup*>& peakGroups, int eic_smoothingWindow) {
+/**
+ * @brief groupsToAnchorPoints
+ * @param samples
+ * @param peakGroups
+ * @param eic_smoothingWindow
+ * @return a vector or AnchorPoints from a set of peak groups, which can be exported using Aligner::exportPeakGroups().
+ */
+vector<AnchorPointSet> Aligner::groupsToAnchorPoints(vector<mzSample*>& samples, vector<PeakGroup*>& peakGroups, int eic_smoothingWindow) {
 
     //extra position for last RT in file
-    vector<AnchorPointSet> anchorPointSet(peakGroups.size()+1);
+    vector<AnchorPointSet> anchorPointSetVector(peakGroups.size()+1);
 
     for (unsigned int i = 0; i < peakGroups.size(); i++) {
 
@@ -512,10 +519,14 @@ vector<AnchorPointSet> groupsToAnchorPoints(vector<mzSample*>& samples, vector<P
         AnchorPointSet anchorPointSet(*group);
         anchorPointSet.compute(samples, eic_smoothingWindow);
 
+        anchorPointSetVector[i] = anchorPointSet;
     }
 
     //last point in file
     AnchorPointSet lastAnchorPointSet = AnchorPointSet::lastRt(samples);
+    anchorPointSetVector[peakGroups.size()] = lastAnchorPointSet;
+
+    return anchorPointSetVector;
 }
 
 /**
