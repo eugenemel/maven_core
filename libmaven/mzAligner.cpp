@@ -553,7 +553,16 @@ map<mzSample*, vector<pair<float, float>>> Aligner::anchorPointSetToUpdatedRtMap
             float referenceRt = pt.sampleToPoints[refSample]->rt;
 
             if (sampleToUpdatedRts.find(sample) != sampleToUpdatedRts.end()) {
-                sampleToUpdatedRts[sample].push_back(make_pair(observedRt, referenceRt));
+
+                //simplest check for monotonicity
+                pair<float, float> lastPair = sampleToUpdatedRts[sample].at(sampleToUpdatedRts[sample].size()-1);
+                float lastObserved = lastPair.first;
+                float lastReference = lastPair.second;
+
+                if (observedRt >= lastObserved && lastReference >= lastReference) {
+                    sampleToUpdatedRts[sample].push_back(make_pair(observedRt, referenceRt));
+                }
+
             } else {
                 pair<float, float> rtPair = make_pair(observedRt, referenceRt);
                 vector<pair<float, float>> rtInfo = vector<pair<float, float>>{};
