@@ -531,12 +531,8 @@ vector<AnchorPointSet> Aligner::groupsToAnchorPoints(vector<mzSample*>& samples,
     return anchorPointSetVector;
 }
 
-/**
- * @brief exportAlignmentFile
- * @param anchorPoints
- * @return boolean flag indicating if export is successful.
- */
-void Aligner::exportAlignmentFile(vector<AnchorPointSet>& anchorPoints, mzSample* refSample, string outputFile) {
+
+map<mzSample*, vector<pair<float, float>>> Aligner::anchorPointSetToUpdatedRtMap(vector<AnchorPointSet>& anchorPoints, mzSample* refSample){
 
     sort(anchorPoints.begin(), anchorPoints.end(), [refSample] (const AnchorPointSet& lhs, const AnchorPointSet& rhs){
         return lhs.sampleToPoints.at(refSample)->rt < rhs.sampleToPoints.at(refSample)->rt;
@@ -568,6 +564,18 @@ void Aligner::exportAlignmentFile(vector<AnchorPointSet>& anchorPoints, mzSample
 
         }
     }
+
+    return sampleToUpdatedRts;
+}
+
+/**
+ * @brief exportAlignmentFile
+ * @param anchorPoints
+ * @return boolean flag indicating if export is successful.
+ */
+void Aligner::exportAlignmentFile(vector<AnchorPointSet>& anchorPoints, mzSample* refSample, string outputFile) {
+
+    map<mzSample*, vector<pair<float, float>>> sampleToUpdatedRts = anchorPointSetToUpdatedRtMap(anchorPoints, refSample);
 
     ofstream outputStream;
     outputStream.open(outputFile);

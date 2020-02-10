@@ -943,6 +943,8 @@ class Aligner {
 
         //AnchorPoint related updates
         vector<AnchorPointSet> groupsToAnchorPoints(vector<mzSample*>& samples, vector<PeakGroup*>& peakGroups, int eic_smoothingWindow);
+        map<mzSample*, vector<pair<float, float>>> anchorPointSetToUpdatedRtMap(vector<AnchorPointSet>& anchorPoints, mzSample* refSample);
+
         void exportAlignmentFile(vector<AnchorPointSet>& anchorPoints, mzSample* refSample, string outputFile);
 
 
