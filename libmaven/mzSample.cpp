@@ -921,8 +921,8 @@ float mzSample::getMaxRt(const vector<mzSample*>&samples) {
 float mzSample::getAverageFullScanTime() {
 	float s=0;
 	int n=0;
-	Scan* lscan = NULL;
-	Scan* tscan = NULL;
+    Scan* lscan = nullptr;
+    Scan* tscan = nullptr;
 	if ( scans.size() == 0 ) return 0;
 
 	for(unsigned int i=1; i < scans.size(); i++ ) {
