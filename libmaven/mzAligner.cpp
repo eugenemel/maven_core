@@ -467,6 +467,15 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples){
 
     if (foundEICSamples.size() < minNumObservedSamples) {
         isValid = false; //will not use if no signal could be extracted for any samples.
+        if (slice) {
+            cerr <<
+                    "Did not find enough samples for anchor point: mz=["
+                    << slice->mzmin << " - " << slice->mzmax
+                    << "], rt=["
+                    << slice->rtmin << " - " << slice->rtmax
+                    << "]"
+                    << endl;
+        }
         return;
     }
 
