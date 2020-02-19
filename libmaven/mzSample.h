@@ -870,7 +870,7 @@ struct AnchorPoint {
 
         inline void setInterpolatedRtValue(float rt){this->rt = rt; isRtFromEIC = false;}
 
-        bool setEICRtValue(mzSlice* slice, int eic_smoothingWindow = 5);
+        bool setEICRtValue(mzSlice* slice, int eic_smoothingWindow, float minPeakIntensity);
 };
 
 /**
@@ -891,8 +891,10 @@ public:
     }
 
     //used for reading from file.
-    AnchorPointSet(double mzmin, double mzmax, double rtmin, double rtmax) {
+    AnchorPointSet(double mzmin, double mzmax, double rtmin, double rtmax, int eic_smoothingWindowVal, float minPeakIntensityVal) {
         slice = new mzSlice(mzmin, mzmax, rtmin, rtmax);
+        eic_smoothingWindow = eic_smoothingWindowVal;
+        minPeakIntensity = minPeakIntensityVal;
     }
 
     AnchorPointSet(const PeakGroup& pg) {
@@ -915,10 +917,14 @@ public:
      * @brief compute
      * Method to determine sampleToPoints map.
      */
-    void compute(const vector<mzSample*>& allSamples, int eic_smoothingWindow=5);
+    void compute(const vector<mzSample*>& allSamples);
 
     int minNumObservedSamples = 2;
     bool isValid = true;
+
+    //keep these attached as fields
+    int eic_smoothingWindow = 5;
+    float minPeakIntensity = 0.0f;
 
     static AnchorPointSet lastRt(vector<mzSample*>& allSamples);
 
@@ -947,7 +953,7 @@ class Aligner {
 		}
 
         //AnchorPoint related updates
-        vector<AnchorPointSet> groupsToAnchorPoints(vector<mzSample*>& samples, vector<PeakGroup*>& peakGroups, int eic_smoothingWindow);
+        vector<AnchorPointSet> groupsToAnchorPoints(vector<mzSample*>& samples, vector<PeakGroup*>& peakGroups, int eic_smoothingWindow, float minPeakIntensity);
         map<mzSample*, vector<pair<float, float>>> anchorPointSetToUpdatedRtMap(vector<AnchorPointSet>& anchorPoints, mzSample* refSample);
 
         void exportAlignmentFile(vector<AnchorPointSet>& anchorPoints, mzSample* refSample, string outputFile);

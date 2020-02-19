@@ -402,13 +402,13 @@ void Aligner::doSegmentedAligment() {
  * Following this point are new developments, designed for use with new manual curation max EIC approach.
  */
 
-bool AnchorPoint::setEICRtValue(mzSlice *slice, int eic_smoothingWindow){
+bool AnchorPoint::setEICRtValue(mzSlice *slice, int eic_smoothingWindow, float minPeakIntensity){
 
     EIC *eic = sample->getEIC(slice->mzmin, slice->mzmax, slice->rtmin, slice->rtmax, 1);
 
     eic->getSingleGlobalMaxPeak(eic_smoothingWindow);
 
-    if (!eic->peaks.empty()){
+    if (!eic->peaks.empty() && eic->peaks[0].peakIntensity >= minPeakIntensity){
         this->rt = eic->peaks[0].rt;
         this->isRtFromEIC = true;
     } else {
@@ -430,7 +430,7 @@ bool AnchorPoint::setEICRtValue(mzSlice *slice, int eic_smoothingWindow){
  * @param allSamples
  * @param eic_smoothingWindow
  */
-void AnchorPointSet::compute(const vector<mzSample*>& allSamples, int eic_smoothingWindow){
+void AnchorPointSet::compute(const vector<mzSample*>& allSamples){
 
     //This flag is set in the constructor
     if (!isValid) return;
@@ -443,7 +443,7 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples, int eic_smooth
 
         auto it = find(eicSamples.begin(), eicSamples.end(), x);
         if (it != eicSamples.end()) {
-            bool isFoundEIC = anchorPoint->setEICRtValue(slice, eic_smoothingWindow);
+            bool isFoundEIC = anchorPoint->setEICRtValue(slice, eic_smoothingWindow, minPeakIntensity);
             if (isFoundEIC) {
                 foundEICSamples.push_back(x);
                 sampleToPoints.insert(make_pair(x, anchorPoint));
@@ -510,7 +510,7 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples, int eic_smooth
  * @param eic_smoothingWindow
  * @return a vector or AnchorPoints from a set of peak groups, which can be exported using Aligner::exportPeakGroups().
  */
-vector<AnchorPointSet> Aligner::groupsToAnchorPoints(vector<mzSample*>& samples, vector<PeakGroup*>& peakGroups, int eic_smoothingWindow) {
+vector<AnchorPointSet> Aligner::groupsToAnchorPoints(vector<mzSample*>& samples, vector<PeakGroup*>& peakGroups, int eic_smoothingWindow, float minPeakIntensity) {
 
     //extra position for last RT in file
     vector<AnchorPointSet> anchorPointSetVector(peakGroups.size()+1);
@@ -519,7 +519,11 @@ vector<AnchorPointSet> Aligner::groupsToAnchorPoints(vector<mzSample*>& samples,
 
         PeakGroup *group = peakGroups[i];
         AnchorPointSet anchorPointSet(*group);
-        anchorPointSet.compute(samples, eic_smoothingWindow);
+
+        anchorPointSet.eic_smoothingWindow = eic_smoothingWindow;
+        anchorPointSet.minPeakIntensity = minPeakIntensity;
+
+        anchorPointSet.compute(samples);
 
         anchorPointSetVector[i] = anchorPointSet;
     }
