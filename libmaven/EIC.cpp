@@ -251,7 +251,7 @@ void  EIC::getPeakPositions(int smoothWindow) {
 
 /**
  * Description:
- * get the 3-point global maximum for this EIC.
+ * get the 5-point global maximum for this EIC.
  * This should only be used when the EIC is thought to contain exactly one valid peak,
  * which is also the most intense peak in the window.
  *
@@ -272,9 +272,9 @@ void EIC::getSingleGlobalMaxPeak(int smoothWindow) {
     if (spline.size() == 0) return;
 
     unsigned int globalMax = 0;
-    for (unsigned int i=1; i < N-1; i++ ) {
-        if ( spline[i] > spline[i-1] &&
-             spline[i] > spline[i+1] &&
+    for (unsigned int i=2; i < N-2; i++ ) {
+        if ( spline[i] > spline[i-1] && spline[i-1] > spline[i-2] &&
+             spline[i] > spline[i+1] && spline[i+1] > spline[i+2] &&
              spline[i] > spline[globalMax]) {
             globalMax = i;
         }
