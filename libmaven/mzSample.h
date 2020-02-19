@@ -890,6 +890,11 @@ public:
         slice = nullptr;
     }
 
+    //used for reading from file.
+    AnchorPointSet(double mzmin, double mzmax, double rtmin, double rtmax) {
+        slice = new mzSlice(mzmin, mzmax, rtmin, rtmax);
+    }
+
     AnchorPointSet(const PeakGroup& pg) {
         slice = new mzSlice(pg.minMz, pg.maxMz, pg.minRt, pg.maxRt);
 
