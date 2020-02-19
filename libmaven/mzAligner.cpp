@@ -523,6 +523,23 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples){
 }
 
 /**
+ * @brief AnchorPointSet::setEICSamplesByFilter
+ * @param stringFilter
+ *
+ * fill out eicSamples vector using samples that match the string filter criteria.
+ */
+void AnchorPointSet::setEICSamplesByFilter(const vector<mzSample*>& allSamples, string stringFilter){
+
+    eicSamples.clear();
+
+    for (auto &x : allSamples) {
+        if (mzUtils::mystrcasestr(x->sampleName.c_str(), stringFilter.c_str())) {
+            eicSamples.push_back(x);
+        }
+    }
+}
+
+/**
  * @brief groupsToAnchorPoints
  * @param samples
  * @param peakGroups

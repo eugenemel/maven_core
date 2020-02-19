@@ -919,6 +919,11 @@ public:
      */
     void compute(const vector<mzSample*>& allSamples);
 
+    /**
+     * @brief minNumObservedSamples
+     */
+    void setEICSamplesByFilter(const vector<mzSample*>& allSamples, string stringFilter);
+
     int minNumObservedSamples = 2;
     bool isValid = true;
 
