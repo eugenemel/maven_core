@@ -533,9 +533,12 @@ void AnchorPointSet::setEICSamplesByFilter(const vector<mzSample*>& allSamples, 
     eicSamples.clear();
 
     for (auto x : allSamples) {
+        cout << x->sampleName << " --> vs --> " << stringFilter;
         if (x->sampleName.find(stringFilter) != string::npos) {
             eicSamples.push_back(x);
+            cout << " MATCH!";
         }
+        cout << endl;
     }
 }
 
