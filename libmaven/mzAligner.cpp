@@ -543,7 +543,7 @@ void AnchorPointSet::setEICSamplesByFilter(const vector<mzSample*>& allSamples, 
 
     eicSamples.clear();
 
-    for (auto x : allSamples) {
+    for (auto &x : allSamples) {
 
         string sampleName = x->sampleName;
         transform(sampleName.begin(), sampleName.end(), sampleName.begin(), ::toupper);
@@ -590,7 +590,11 @@ vector<AnchorPointSet> Aligner::groupsToAnchorPoints(vector<mzSample*>& samples,
 map<mzSample*, vector<pair<float, float>>> Aligner::anchorPointSetToUpdatedRtMap(vector<AnchorPointSet>& anchorPoints, mzSample* refSample){
 
     sort(anchorPoints.begin(), anchorPoints.end(), [refSample] (const AnchorPointSet& lhs, const AnchorPointSet& rhs){
-        return lhs.sampleToPoints.at(refSample)->rt < rhs.sampleToPoints.at(refSample)->rt;
+        if (lhs.isValid && rhs.isValid) {
+            return lhs.sampleToPoints.at(refSample)->rt < rhs.sampleToPoints.at(refSample)->rt;
+        } else {
+            return lhs.slice->rtmax < rhs.slice->rtmax;
+        }
     });
 
 
