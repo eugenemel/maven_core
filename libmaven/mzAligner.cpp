@@ -441,14 +441,33 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples){
     for (auto x : allSamples) {
         AnchorPoint *anchorPoint = new AnchorPoint(x);
 
-        auto it = find(eicSamples.begin(), eicSamples.end(), x);
-        if (it != eicSamples.end()) {
+        bool isComputeEIC = false;
+        if (eicSamples.empty()) {
+
+            //if no EIC samples are specified, try to extract an EIC from all samples.
+            isComputeEIC = true;
+
+        } else {
+
+            // if some samples have been designated as EIC-containing samples,
+            // only try to extract an EIC for these samples.
+            auto it = find(eicSamples.begin(), eicSamples.end(), x);
+            isComputeEIC = it != eicSamples.end();
+
+        }
+
+        if (isComputeEIC) {
             bool isFoundEIC = anchorPoint->setEICRtValue(slice, eic_smoothingWindow, minPeakIntensity);
             if (isFoundEIC) {
                 foundEICSamples.push_back(x);
                 sampleToPoints.insert(make_pair(x, anchorPoint));
             }
         }
+    }
+
+    if (foundEICSamples.size() < minNumObservedSamples) {
+        isValid = false; //will not use if no signal could be extracted for any samples.
+        return;
     }
 
     sort(foundEICSamples.begin(), foundEICSamples.end(), [](const mzSample* lhs, const mzSample* rhs){
@@ -548,6 +567,10 @@ map<mzSample*, vector<pair<float, float>>> Aligner::anchorPointSetToUpdatedRtMap
     map<mzSample*, vector<pair<float, float>>> sampleToUpdatedRts{};
 
     for (auto &pt : anchorPoints) {
+
+        //invalid anchor point sets are skipped.
+        if (!pt.isValid) continue;
+
         for (auto it = pt.sampleToPoints.begin(); it != pt.sampleToPoints.end(); ++it) {
 
             mzSample* sample = it->first;
@@ -568,6 +591,7 @@ map<mzSample*, vector<pair<float, float>>> Aligner::anchorPointSetToUpdatedRtMap
                 }
 
             } else {
+
                 pair<float, float> rtPair = make_pair(observedRt, referenceRt);
                 vector<pair<float, float>> rtInfo = vector<pair<float, float>>{};
                 rtInfo.push_back(rtPair);
