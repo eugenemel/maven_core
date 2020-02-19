@@ -532,8 +532,8 @@ void AnchorPointSet::setEICSamplesByFilter(const vector<mzSample*>& allSamples, 
 
     eicSamples.clear();
 
-    for (auto &x : allSamples) {
-        if (mzUtils::mystrcasestr(x->sampleName.c_str(), stringFilter.c_str())) {
+    for (auto x : allSamples) {
+        if (x->sampleName.find(stringFilter) != string::npos) {
             eicSamples.push_back(x);
         }
     }
