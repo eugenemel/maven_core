@@ -449,7 +449,7 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples){
     vector<mzSample*> foundEICSamples;
 
     //Retrieve RTs for anchor points from samples
-    for (auto x : allSamples) {
+    for (auto &x : allSamples) {
         AnchorPoint *anchorPoint = new AnchorPoint(x);
 
         bool isComputeEIC = false;
@@ -489,7 +489,7 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples){
     });
 
     //interpolate for all samples that do not have RT values from the EIC.
-    for (auto x : allSamples) {
+    for (auto &x : allSamples) {
 
         int sampleId = x->sampleId;
         float rt;
