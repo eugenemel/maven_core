@@ -428,7 +428,7 @@ string AnchorPointSet::toString() {
             + to_string(slice->rtmin)\
             + " - "\
             + to_string(slice->rtmax)\
-            + "]";
+            + "] VALID? " + (isValid ? "true" : "false");
 }
 
 /**
@@ -601,7 +601,6 @@ map<mzSample*, vector<pair<float, float>>> Aligner::anchorPointSetToUpdatedRtMap
             return lhs.slice->rtmax < rhs.slice->rtmax;
         }
     });
-
 
     //                      observedRt  referenceRt
     //                          rt      rt_update
