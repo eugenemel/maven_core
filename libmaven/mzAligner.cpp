@@ -410,16 +410,26 @@ bool AnchorPoint::setEICRtValue(mzSlice *slice, int eic_smoothingWindow, float m
 
     //debugging
     cout << " slice: "
-         << "[" << slice->mzmin << " - " << slice->mzmax << "] - [ "
-         << slice->rtmin << " - " << slice->rtmax << " ]" << endl;
+         << "[" << slice->mzmin << " - " << slice->mzmax << "] - ["
+         << slice->rtmin << " - " << slice->rtmax << "]" << endl;
     cout << "EIC: " << eic->size() << " points. " << eic->peaks.size() << " peaks." << endl;
+    if (!eic->peaks.empty()) {
+        cout << "peaks intensity: " << eic->peaks[0].peakIntensity << endl;
+    }
 
     if (!eic->peaks.empty() && eic->peaks[0].peakIntensity >= minPeakIntensity){
         this->rt = eic->peaks[0].rt;
         this->isRtFromEIC = true;
+
+        //debugging
+        cout << "EIC RT value: " << this->rt << endl;
+
     } else {
         this->isRtFromEIC = false;
     }
+
+    //debugging
+    cout << "isRtFromEIC? " << (isRtFromEIC ? "true" : "false") << endl;
 
     if (eic) delete(eic);
 
@@ -481,6 +491,10 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples){
 
         if (isComputeEIC) {
             bool isFoundEIC = anchorPoint->setEICRtValue(slice, eic_smoothingWindow, minPeakIntensity);
+
+            //debugging
+            cout << "isFoundEIC? " << (isFoundEIC ? "true" : "false") << endl;
+
             if (isFoundEIC) {
                 foundEICSamples.push_back(x);
                 sampleToPoints.insert(make_pair(x, anchorPoint));
