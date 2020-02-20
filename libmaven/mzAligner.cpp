@@ -408,6 +408,12 @@ bool AnchorPoint::setEICRtValue(mzSlice *slice, int eic_smoothingWindow, float m
 
     eic->getSingleGlobalMaxPeak(eic_smoothingWindow);
 
+    //debugging
+    cout << " slice: "
+         << "[" << slice->mzmin << " - " << slice->mzmax << "] - [ "
+         << slice->rtmin << " - " << slice->rtmax << " ]" << endl;
+    cout << "EIC: " << eic->size() << " points. " << eic->peaks.size() << " peaks." << endl;
+
     if (!eic->peaks.empty() && eic->peaks[0].peakIntensity >= minPeakIntensity){
         this->rt = eic->peaks[0].rt;
         this->isRtFromEIC = true;
@@ -469,6 +475,9 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples){
             isComputeEIC = it != eicSamples.end();
 
         }
+
+        //debugging
+        cout << "isComputeEIC? " << (isComputeEIC ? "true" : "false") << endl;
 
         if (isComputeEIC) {
             bool isFoundEIC = anchorPoint->setEICRtValue(slice, eic_smoothingWindow, minPeakIntensity);
