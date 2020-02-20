@@ -408,28 +408,28 @@ bool AnchorPoint::setEICRtValue(mzSlice *slice, int eic_smoothingWindow, float m
 
     eic->getSingleGlobalMaxPeak(eic_smoothingWindow);
 
-    //debugging
-    cout << " slice: "
-         << "[" << slice->mzmin << " - " << slice->mzmax << "] - ["
-         << slice->rtmin << " - " << slice->rtmax << "]" << endl;
-    cout << "EIC: " << eic->size() << " points. " << eic->peaks.size() << " peaks." << endl;
-    if (!eic->peaks.empty()) {
-        cout << "peaks intensity: " << eic->peaks[0].peakIntensity << endl;
-    }
+//    //debugging
+//    cout << " slice: "
+//         << "[" << slice->mzmin << " - " << slice->mzmax << "] - ["
+//         << slice->rtmin << " - " << slice->rtmax << "]" << endl;
+//    cout << "EIC: " << eic->size() << " points. " << eic->peaks.size() << " peaks." << endl;
+//    if (!eic->peaks.empty()) {
+//        cout << "peaks intensity: " << eic->peaks[0].peakIntensity << endl;
+//    }
 
     if (!eic->peaks.empty() && eic->peaks[0].peakIntensity >= minPeakIntensity){
         this->rt = eic->peaks[0].rt;
         this->isRtFromEIC = true;
 
-        //debugging
-        cout << "EIC RT value: " << this->rt << endl;
+//        //debugging
+//        cout << "EIC RT value: " << this->rt << endl;
 
     } else {
         this->isRtFromEIC = false;
     }
 
-    //debugging
-    cout << "isRtFromEIC? " << (isRtFromEIC ? "true" : "false") << endl;
+//    //debugging
+//    cout << "isRtFromEIC? " << (isRtFromEIC ? "true" : "false") << endl;
 
     if (eic) delete(eic);
 
@@ -459,8 +459,8 @@ string AnchorPointSet::toString() {
  */
 void AnchorPointSet::compute(const vector<mzSample*>& allSamples){
 
-    //debugging
-    cout << this->toString() << endl;
+//    //debugging
+//    cout << this->toString() << endl;
 
     //This flag is set in the constructor, or in this method.
     if (!isValid) return;
@@ -486,14 +486,14 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples){
 
         }
 
-        //debugging
-        cout << "isComputeEIC? " << (isComputeEIC ? "true" : "false") << endl;
+//        //debugging
+//        cout << "isComputeEIC? " << (isComputeEIC ? "true" : "false") << endl;
 
         if (isComputeEIC) {
             bool isFoundEIC = anchorPoint->setEICRtValue(slice, eic_smoothingWindow, minPeakIntensity);
 
-            //debugging
-            cout << "isFoundEIC? " << (isFoundEIC ? "true" : "false") << endl;
+//            //debugging
+//            cout << "isFoundEIC? " << (isFoundEIC ? "true" : "false") << endl;
 
             if (isFoundEIC) {
                 foundEICSamples.push_back(x);
@@ -501,8 +501,8 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples){
             }
         }
 
-        //debugging
-        cout << x->sampleName << " ==> " << anchorPoint->rt << endl;
+//        //debugging
+//        cout << x->sampleName << " ==> " << anchorPoint->rt << endl;
     }
 
     if (foundEICSamples.size() < minNumObservedSamples) {
