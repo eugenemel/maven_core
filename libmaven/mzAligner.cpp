@@ -443,7 +443,10 @@ string AnchorPointSet::toString() {
  */
 void AnchorPointSet::compute(const vector<mzSample*>& allSamples){
 
-    //This flag is set in the constructor
+    //debugging
+    cout << this->toString() << endl;
+
+    //This flag is set in the constructor, or in this method.
     if (!isValid) return;
 
     vector<mzSample*> foundEICSamples;
@@ -474,6 +477,9 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples){
                 sampleToPoints.insert(make_pair(x, anchorPoint));
             }
         }
+
+        //debugging
+        cout << x->sampleName << " ==> " << anchorPoint->rt << endl;
     }
 
     if (foundEICSamples.size() < minNumObservedSamples) {
