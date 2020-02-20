@@ -933,6 +933,8 @@ public:
 
     static AnchorPointSet lastRt(vector<mzSample*>& allSamples);
 
+    string toString();
+
 };
 
 class Aligner {
