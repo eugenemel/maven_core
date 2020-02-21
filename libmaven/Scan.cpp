@@ -631,6 +631,27 @@ Scan* Scan::getLastFullScan(int historySize=50) {
 	return 0;
 }
 
+string Scan::getSignature(int limitSize) {
+
+    stringstream SIG;
+    map<int,bool>seen;
+
+    int mz_count=0;
+    for(int pos: intensityOrderDesc() ) {
+        float mzround = (int) mz[pos];
+        int peakIntensity = (int) intensity[pos];
+
+        if(! seen.count(mzround)) {
+            SIG << "[" << setprecision(9) << mz[pos] << "," << peakIntensity << "]";
+            seen[mzround]=true;
+        }
+
+        if (mz_count++ >= limitSize) break;
+    }
+
+    return SIG.str();
+}
+
 vector<mzPoint> Scan::getIsolatedRegion(float isolationWindowAmu=1.0) {
 
 	vector<mzPoint>isolatedSegment;

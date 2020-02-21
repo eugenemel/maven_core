@@ -153,6 +153,8 @@ class Scan {
 
     vector<Isotope> getIsotopicPattern(float centerMz, float ppm, int maxZ, int maxIsotopes);
 
+    string getSignature(int limitSize=200);
+
 private:
     	vector<Scan*> children;
         int polarity;
