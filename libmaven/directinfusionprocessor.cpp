@@ -148,6 +148,9 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
         pair<compoundsIterator, compoundsIterator> compoundMatches = directInfusionSearchSet->compoundsByMapKey.equal_range(mapKey);
 
+        //check for ID bug
+        if (debug) cerr << "Precursor m/z of fragment spectrum: " << f->consensus->precursorMz << endl;
+
         int compCounter = 0;
         int matchCounter = 0;
         for (compoundsIterator it = compoundMatches.first; it != compoundMatches.second; ++it){
@@ -394,7 +397,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             summarizedCompound->adductString = compounds.at(0)->adductString;
 
             /**
-             * TODO: these are not guaranteed to be equal among all children comopunds.
+             * TODO: these are not guaranteed to be equal among all children compounds.
              * A sensible value should be selected for the maven gui to function properly.
              */
             summarizedCompound->formula = compounds.at(0)->getFormula();
