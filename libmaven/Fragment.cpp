@@ -379,7 +379,11 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
 //    cerr << "Num Matches=" << s.numMatches << endl;
 
     //annotate?
-    for(int i=0; i < s.ranks.size(); i++) other->annotations[s.ranks[i]]=this->annotations[i];
+    for(int i=0; i < s.ranks.size(); i++){
+        if (s.ranks[i] != -1) {
+            other->annotations[s.ranks[i]]=this->annotations[i];
+        }
+    }
 
     s.fractionMatched = s.numMatches / a->nobs();
     s.spearmanRankCorrelation = spearmanRankCorrelation(s.ranks);
