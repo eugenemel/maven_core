@@ -88,6 +88,37 @@ public:
     float productPpmTolr = 20;
 
     /**
+     * @brief productMinIntensity
+     * minimum intensity value for a fragment to be considered real
+     */
+    float productMinIntensity = 0;
+
+    /**
+     * @brief isFindPrecursorIonInMS1Scan
+     * If true, only retain matches where some MS1 signal value is identified.
+     */
+    bool isFindPrecursorIonInMS1Scan = false;
+
+    /**
+     * @brief parentPpmTolr
+     * tolerance value used for matching theoretical ion m/z to an m/z peak in an MS1 scan
+     */
+    float parentPpmTolr = 5;
+
+    /**
+     * @brief parentMinIntensity
+     * min intensity value for a parent MS1 peak to be considered real
+     */
+    float parentMinIntensity = 0;
+
+    /**
+     * @brief ms1ScanFilter
+     * required substring match of this to Scan.filterString field
+     * to consider that Scan an appropriate MS1 scan.
+     */
+    string ms1ScanFilter = "";
+
+    /**
      * @brief spectralCompositionAlgorithm
      * By default, do nothing, just return all matches, without doing any elimination or quantitation
      * of spectral components.
