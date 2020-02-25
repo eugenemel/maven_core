@@ -158,7 +158,17 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
             FragmentationMatchScore s = compound->scoreCompoundHit(f->consensus, params->productPpmTolr, false);
 
-            if (s.numMatches >= params->minNumMatches) {
+            int numMatchAboveIntensityThreshold = 0;
+            for (int i=0; i < s.ranks.size(); i++) {
+
+                int y = s.ranks[i];
+
+                if (y != -1 && f->consensus->intensity_array[y] >= params->productMinIntensity) {
+                    numMatchAboveIntensityThreshold++;
+                }
+            }
+
+            if (numMatchAboveIntensityThreshold >= params->minNumMatches) {
                 if (debug) cerr << "Retain " << compound->name << ": " << s.numMatches << " matches." << endl;
 
                 shared_ptr<DirectInfusionMatchData> directInfusionMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
