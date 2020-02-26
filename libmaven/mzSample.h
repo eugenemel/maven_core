@@ -85,7 +85,10 @@ class Scan {
     inline unsigned int nobs() { return mz.size(); }
     inline mzSample* getSample() { return sample; }
     vector<int> findMatchingMzs(float mzmin, float mzmax);
+
     int findHighestIntensityPos(float mz, float ppm);		//higest intensity pos
+    int findHighestIntensityPos(float _mz, float ppmMz, float ppm); //highest intensity pos, careful calculation of delta mz
+
     int findClosestHighestIntensityPos(float mz, float amu_tolr);	//highest intensity pos nearest to the cente mz
     bool isMonoisotopicPrecursor(float monoIsotopeMz, float ppm, int charge=1);
 

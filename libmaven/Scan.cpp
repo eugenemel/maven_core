@@ -43,21 +43,33 @@ void Scan::deepcopy(Scan* b) {
 }
 
 int Scan::findHighestIntensityPos(float _mz, float ppm) {
-        float mzmin = _mz - _mz/1e6*ppm;
-        float mzmax = _mz + _mz/1e6*ppm;
+    return findHighestIntensityPos(_mz, _mz, ppm);
+}
 
-        vector<float>::iterator itr = lower_bound(mz.begin(), mz.end(), mzmin-0.1);
-        int lb = itr-mz.begin();
-        int bestPos=-1;  float highestIntensity=0;
-        for(unsigned int k=lb; k < nobs(); k++ ) {
-                if (mz[k] < mzmin) continue;
-                if (mz[k] > mzmax) break;
-                if (intensity[k] > highestIntensity ) {
-                        highestIntensity=intensity[k];
-                        bestPos=k;
-                }
-        }
-        return bestPos;
+/**
+ * @brief Scan::findHighestIntenstyPosDeltaMz
+ * @param _mz
+ * @param deltaMz
+ * @return
+ *
+ * If the ppm must depend on a different value than _mz, include this ppmMz value.
+ */
+int Scan::findHighestIntensityPos(float _mz, float ppmMz, float ppm){
+    float mzmin = _mz - ppmMz/1e6*ppm;
+    float mzmax = _mz + ppmMz/1e6*ppm;
+
+    vector<float>::iterator itr = lower_bound(mz.begin(), mz.end(), mzmin-0.1);
+    int lb = itr-mz.begin();
+    int bestPos=-1;  float highestIntensity=0;
+    for(unsigned int k=lb; k < nobs(); k++ ) {
+            if (mz[k] < mzmin) continue;
+            if (mz[k] > mzmax) break;
+            if (intensity[k] > highestIntensity ) {
+                    highestIntensity=intensity[k];
+                    bestPos=k;
+            }
+    }
+    return bestPos;
 }
 
 //AMU Matching
