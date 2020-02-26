@@ -330,7 +330,7 @@ public:
       * function to return all compound matches organized into maps, either with key as compound
       * or fragment m/z.
       *
-      * fragments converted m/z <--> int keys using mzToIntKey(mz, 1000) and intKeyToMz(intKey, 1000).
+      * fragments converted m/z <--> int keys using mzToIntKey(mz, 1000000) and intKeyToMz(intKey, 1000000).
       *
       * Note that this function does no processing, filtering, or analysis - it simply reorganizes
       * the compound match data into maps.

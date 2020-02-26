@@ -87,7 +87,7 @@ void SummarizedCompound::computeFragments() {
     for (auto compound : getChildren()) {
         for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
 
-            int mzKey = mzUtils::mzToIntKey(compound->fragment_mzs[i], 1000);
+            int mzKey = mzUtils::mzToIntKey(compound->fragment_mzs[i], 1000000);
             float intensity = compound->fragment_intensity[i];
 
             if (intensitiesByMz.find(mzKey) == intensitiesByMz.end()){
@@ -115,7 +115,7 @@ void SummarizedCompound::computeFragments() {
         }
         avgInt /= intensities.size();
 
-        fragment_mzs[vecCounter] = mzUtils::intKeyToMz(mzInt, 1000);
+        fragment_mzs[vecCounter] = mzUtils::intKeyToMz(mzInt, 1000000);
         fragment_intensity[vecCounter] = avgInt;
         vecCounter++;
     }

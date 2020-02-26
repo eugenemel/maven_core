@@ -238,7 +238,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             //skip unmatched peaks
             if (fragmentationMatchScore.ranks.at(i) == -1) continue;
 
-            int fragInt = mzToIntKey(compound->fragment_mzs.at(i), 1000);
+            int fragInt = mzToIntKey(compound->fragment_mzs.at(i), 1000000);
 
             compoundFrags.at(matchCounter) = fragInt;
             matchCounter++;
@@ -438,7 +438,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
                 //skip unmatched peaks
                 if (fragmentationMatchScore.ranks.at(i) == -1) continue;
 
-                int fragInt = mzToIntKey(compound->fragment_mzs.at(i), 1000);
+                int fragInt = mzToIntKey(compound->fragment_mzs.at(i), 1000000);
 
                 compoundFrags.at(matchCounter) = fragInt;
                 matchCounter++;
@@ -476,7 +476,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
         for (fragToMatchDataIterator iterator = matchInfo->fragToMatchData.begin(); iterator != matchInfo->fragToMatchData.end(); ++iterator) {
             int frag = iterator->first;
             vector<shared_ptr<DirectInfusionMatchData>> compounds = iterator->second;
-            cerr<< "frag= " << intKeyToMz(frag, 1000) << " m/z : ";
+            cerr<< "frag= " << intKeyToMz(frag, 1000000) << " m/z : ";
             for (auto matchData : compounds) {
                 cerr << matchData->compound->name << "|" << matchData->compound->adductString << " ";
             }
@@ -492,7 +492,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
             cerr << "Compound= " << directInfusionMatchData->compound->name << "|" << directInfusionMatchData->compound->adductString << ": ";
             for (auto frag : frags){
-                cerr << intKeyToMz(frag, 1000) << " ";
+                cerr << intKeyToMz(frag, 1000000) << " ";
             }
             cerr << endl;
         }
@@ -528,7 +528,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
         for (fragToMatchDataIterator iterator = matchInfo->fragToMatchDataSummarized.begin(); iterator != matchInfo->fragToMatchDataSummarized.end(); ++iterator) {
             int frag = iterator->first;
             vector<shared_ptr<DirectInfusionMatchData>> compounds = iterator->second;
-            cerr<< "frag= " << intKeyToMz(frag, 1000) << " m/z : ";
+            cerr<< "frag= " << intKeyToMz(frag, 1000000) << " m/z : ";
             for (auto matchData : compounds) {
                 cerr << matchData->compound->name << "|" << matchData->compound->adductString << " ";
             }
@@ -544,7 +544,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
             cerr << "Compound= " << directInfusionMatchData->compound->name << "|" << directInfusionMatchData->compound->adductString << ": ";
             for (auto frag : frags){
-                cerr << intKeyToMz(frag, 1000) << " ";
+                cerr << intKeyToMz(frag, 1000000) << " ";
             }
             cerr << endl;
         }
