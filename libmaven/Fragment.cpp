@@ -50,6 +50,7 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
 		if (mzarray[j].second < this->precursorMz-1 ) { //remove fragments higher than precursorMz
 			this->mzs.push_back(mzarray[j].second);
 			this->intensity_array.push_back(mzarray[j].first);
+            this->fragment_labels.push_back("");
 		}
     }
     this->obscount = vector<int>( this->mzs.size(), 1);
@@ -73,6 +74,7 @@ Fragment::Fragment( Fragment* other) {
     this->polarity = other->polarity;
     this->mzs = other->mzs;
     this->intensity_array = other->intensity_array;
+    this->fragment_labels = other->fragment_labels;
     this->obscount = other->obscount;
     this->consensus = other->consensus;
     this->scanNum = other->scanNum;
@@ -141,6 +143,9 @@ void Fragment::printFragment(float productPpmToll,unsigned int limitTopX=10) {
         if (annotations.count(i))  {
             string ionName = annotations[i];
             cerr  << "[" << ionName << "] "; 
+        }
+        if (!fragment_labels[i].empty()) {
+            cerr << "[" << fragment_labels[i] << "]";
         }
 
         //cerr  << "[" << (int) intensity_array[i] << "] "; 
@@ -303,7 +308,8 @@ void Fragment::printConsensusNIST(ostream& outstream, double minConsensusFractio
             outstream << (int) this->intensity_array[i] << " ";
 
             string ionName = "?";
-            if (annotations.count(i)) ionName = annotations[i]; 
+            if (annotations.count(i)) ionName = annotations[i];
+            if (!fragment_labels[i].empty()) ionName = fragment_labels[i];
             outstream << "\"" << ionName << " " << this->obscount[i]<< "\"" << endl;
         }
     }
@@ -560,6 +566,7 @@ void Fragment::truncateTopN(int n) {
 	this->sortByIntensity();
 	this->mzs.resize(n);
 	this->intensity_array.resize(n);
+    this->fragment_labels.resize(n);
 	this->obscount.resize(n);
 }
 
@@ -586,10 +593,12 @@ void Fragment::buildConsensus(float productPpmTolr) {
             if (posA >= 0)  {
                 Cons->intensity_array[ posA ] += intB;
                 Cons->obscount[ posA ] += 1;
+                Cons->fragment_labels[posA] = brother->fragment_labels[j];
             } else if ( posA == -1 ) {
                 Cons->mzs.push_back(mzB);
                 Cons->intensity_array.push_back(intB);
                 Cons->obscount.push_back(1);
+                Cons->fragment_labels.push_back(brother->fragment_labels[j]);
             }
         }
         Cons->sortByMz();
@@ -660,10 +669,13 @@ void Fragment::sortByIntensity() {
     vector<float> a(mzs.size());
     vector<float> b(intensity_array.size());
     vector<int> c(obscount.size());
+    vector<string> fragLabels(fragment_labels.size());
+
     map<int,string>d;
     for(unsigned int i=0; i<order.size(); i++) {
         b[i] = intensity_array[order[i]];
         a[i] = mzs[order[i]];
+        fragLabels[i] = fragment_labels[order[i]];
         if(order[i] < obscount.size()) c[i] = obscount[order[i]];
         if(annotations.count(order[i])>0) d[i] = annotations[order[i]];
 
@@ -672,6 +684,7 @@ void Fragment::sortByIntensity() {
     intensity_array = b;
     obscount = c;
     annotations=d;
+    fragment_labels = fragLabels;
     sortedBy = Fragment::SortType::Intensity;
 }	
 
@@ -683,11 +696,14 @@ void Fragment::sortByMz() {
     vector<float> a(mzs.size());
     vector<float> b(intensity_array.size());
     vector<int> c(obscount.size());
+    vector<string> fragLabels(fragment_labels.size());
+
     map<int,string>d;
 
     for(unsigned int i=0; i<order.size(); i++) {
         b[i] = intensity_array[order[i]];
         a[i] = mzs[order[i]];
+        fragLabels[i] = fragment_labels[order[i]];
         if(order[i] < obscount.size()) c[i] = obscount[order[i]];
         if (annotations.count(order[i])>0) d[i] = annotations[order[i]];
 
@@ -697,6 +713,7 @@ void Fragment::sortByMz() {
     intensity_array = b;
     obscount = c;
     annotations=d;
+    fragment_labels = fragLabels;
     sortedBy = Fragment::SortType::Mz;
 }
 
@@ -969,6 +986,7 @@ void Fragment::addNeutralLosses() {
         if(nLMass < -1) {
             mzs.push_back(nLMass);
             intensity_array.push_back(nLIntensity);
+            fragment_labels.push_back(fragment_labels[i]+ " NL");
             obscount.push_back(1);
         }
     }

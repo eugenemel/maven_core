@@ -38,14 +38,19 @@ FragmentationMatchScore Compound::scoreCompoundHit(Fragment* f, float productPpm
         t.mzs = cpd->fragment_mzs;
         t.intensity_array = cpd->fragment_intensity;
         t.annotations = cpd->fragment_iontype;
+        t.fragment_labels = cpd->fragment_labels;
 
         if (searchProton)  { //special case, check for loss or gain of protons
             int N = t.mzs.size();
             for(int i=0; i<N;i++) {
+
                 t.mzs.push_back( t.mzs[i] + PROTON);
                 t.intensity_array.push_back( t.intensity_array[i] );
+                t.fragment_labels.push_back(t.fragment_labels[i] +"+H");
+
                 t.mzs.push_back( t.mzs[i] - PROTON );
                 t.intensity_array.push_back( t.intensity_array[i] );
+                t.fragment_labels.push_back(t.fragment_labels[i]+"-H");
             }
         }
 
@@ -102,6 +107,7 @@ void SummarizedCompound::computeFragments() {
 
     fragment_mzs = vector<float>(intensitiesByMz.size());
     fragment_intensity=vector<float>(intensitiesByMz.size());
+    fragment_labels = vector<string>(intensitiesByMz.size());
 
     unsigned int vecCounter = 0;
     for (map<int, vector<float>>::iterator it = intensitiesByMz.begin(); it != intensitiesByMz.end(); ++it) {
@@ -117,6 +123,8 @@ void SummarizedCompound::computeFragments() {
 
         fragment_mzs[vecCounter] = mzUtils::intKeyToMz(mzInt, 1000000);
         fragment_intensity[vecCounter] = avgInt;
+        fragment_labels[vecCounter] = "";
+
         vecCounter++;
     }
 }
