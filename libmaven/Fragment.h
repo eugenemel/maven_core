@@ -127,6 +127,7 @@ class Fragment {
         int polarity;					//scan polarity 	+1 or -1
         vector<float> mzs;				//mz values
         vector<float> intensity_array;		//intensity_array
+        vector<string> fragment_labels; //Added for Issue #159
         vector<Fragment*> brothers;		//pointers to similar fragments 
         string sampleName;				//name of Sample
         int scanNum;					//scan Number

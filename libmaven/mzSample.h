@@ -757,6 +757,8 @@ class Compound {
 
             vector<float>fragment_mzs;
             vector<float>fragment_intensity;
+            vector<string>fragment_labels;  //Added in Issue 159
+
             map<int,string>fragment_iontype;
             vector<string> category;
 
