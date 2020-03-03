@@ -81,6 +81,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
     MassCalculator massCalc;
     map<int, DirectInfusionAnnotation*> annotations = {};
+    vector<Scan*> validMs1Scans;
 
     if (debug) cerr << "Started DirectInfusionProcessor::processSingleSample()" << endl;
 
@@ -96,6 +97,9 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
             int mapKey = static_cast<int>(round(scan->precursorMz+0.001f)); //round to nearest int
 
             scansByPrecursor.insert(make_pair(mapKey, scan));
+        }
+        if (params->isFindPrecursorIonInMS1Scan && scan->mslevel == 1 && scan->filterString.find(params->ms1ScanFilter) != string::npos) {
+            validMs1Scans.push_back(scan);
         }
     }
     if (debug) cerr << "Performing search over map keys..." << endl;
@@ -156,6 +160,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
         for (compoundsIterator it = compoundMatches.first; it != compoundMatches.second; ++it){
 
             Compound* compound = it->second.first;
+            Adduct *adduct = it->second.second;
 
 //            if (debug) cerr << "Scoring compound hit: " <<  compound->name << "<--> f=" << f << endl;
 
@@ -171,7 +176,33 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
                 }
             }
 
-            if (numMatchAboveIntensityThreshold >= params->minNumMatches) {
+            bool isPassesMs1PrecursorRequirements = true;
+
+            if (params->isFindPrecursorIonInMS1Scan) {
+
+                isPassesMs1PrecursorRequirements = false;
+
+                for (auto scan : validMs1Scans) {
+
+                    //Compute this way instead of using compound->precursorMz to allow for possibility of matching compound to unexpected adduct
+                    float compoundMz = adduct->computeAdductMass(massCalc.computeNeutralMass(compound->getFormula()));
+                    double precMz = adduct->computeAdductMass(compoundMz);
+
+                    double minMz = precMz - precMz*params->parentPpmTolr/1e6;
+                    double maxMz = precMz + precMz*params->parentPpmTolr/1e6;
+
+                    vector<int> matchingMzs = scan->findMatchingMzs(minMz, maxMz);
+
+                    for (auto x : matchingMzs) {
+                        if (scan->intensity[x] >= params->parentMinIntensity) {
+                            isPassesMs1PrecursorRequirements = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (numMatchAboveIntensityThreshold >= params->minNumMatches && isPassesMs1PrecursorRequirements) {
                 if (debug) cerr << "Retain " << compound->name << ": " << s.numMatches << " matches." << endl;
 
                 shared_ptr<DirectInfusionMatchData> directInfusionMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
