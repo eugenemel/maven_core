@@ -59,8 +59,11 @@ FragmentationMatchScore Compound::scoreCompoundHit(Fragment* f, float productPpm
 
 //        cerr << endl;
 //        cerr << "Compound: " << cpd->name << endl;
-//        for (float mz : t.mzs) {
-//            cerr << mz << endl;
+//        for (unsigned int i = 0; i < t.mzs.size(); i++) {
+//            float mz = t.mzs.at(i);
+//            float intensity = t.intensity_array.at(i);
+//            string label = t.fragment_labels.at(i);
+//            cerr << "mz=" << mz << ", intensity= "<< intensity << ", label=" << label << endl;
 //        }
 //        cerr << endl;
 
@@ -71,6 +74,16 @@ FragmentationMatchScore Compound::scoreCompoundHit(Fragment* f, float productPpm
 //        cerr << endl;
 
         s = t.scoreMatch(f,productPpmTolr);
+
+//        cerr << endl;
+//        cerr << "t after scoring match " << cpd->name << endl;
+//        for (unsigned int i = 0; i < t.mzs.size(); i++) {
+//            float mz = t.mzs.at(i);
+//            float intensity = t.intensity_array.at(i);
+//            string label = t.fragment_labels.at(i);
+//            cerr << "mz=" << mz << ", intensity= " << intensity << ", label=" << label << endl;
+//        }
+//        cerr << endl;
 
         return s;
 }
