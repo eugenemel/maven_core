@@ -116,7 +116,6 @@ struct FragmentationMatchScore {
         ranks=b.ranks;
         return *this;
     }
-
 };
 
 class Fragment {
@@ -208,12 +207,12 @@ class Fragment {
         bool hasNLS(float NLS, float ppmTolr);
         void addNeutralLosses();
 	void normalizeIntensity(vector<float>&x, int binSize);
+    int getNumDiagnosticFragmentsMatched(string fragLblStartsWith, vector<int> ranks);
 
         double logNchooseK(int N,int k);
         double SHP(int matched, int len1, int len2, int N);
         double MVH(const vector<int>& X, Fragment* other);
 	vector<double> matchedRankVector(const vector<int>& X, Fragment* other);
-
         static bool compPrecursorMz(const Fragment* a, const Fragment* b) { return a->precursorMz<b->precursorMz; }
         bool operator<(const Fragment* b) const{ return this->precursorMz < b->precursorMz; }
         bool operator==(const Fragment* b) const{ return fabs(this->precursorMz-b->precursorMz)<0.001; }
