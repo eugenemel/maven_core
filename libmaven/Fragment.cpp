@@ -997,6 +997,8 @@ int Fragment::getNumDiagnosticFragmentsMatched(string fragLblStartsWith, vector<
 
     int numDiagnosticFragmentsMatched = 0;
 
+    if (labels.size() != ranks.size()) return 0;
+
     for(int i=0; i < ranks.size(); i++){
         if (ranks[i] != -1) {
             if (labels[i].find(fragLblStartsWith) == 0) {
