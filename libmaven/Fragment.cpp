@@ -993,13 +993,13 @@ void Fragment::addNeutralLosses() {
     sortByIntensity();
 }
 
-int Fragment::getNumDiagnosticFragmentsMatched(string fragLblStartsWith, vector<int> ranks) {
+int Fragment::getNumDiagnosticFragmentsMatched(string fragLblStartsWith, vector<string> labels, vector<int> ranks) {
 
     int numDiagnosticFragmentsMatched = 0;
 
     for(int i=0; i < ranks.size(); i++){
         if (ranks[i] != -1) {
-            if (fragment_labels[i].find(fragLblStartsWith) == 0) {
+            if (labels[i].find(fragLblStartsWith) == 0) {
                 numDiagnosticFragmentsMatched++;
             }
         }

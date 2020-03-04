@@ -207,7 +207,7 @@ class Fragment {
         bool hasNLS(float NLS, float ppmTolr);
         void addNeutralLosses();
 	void normalizeIntensity(vector<float>&x, int binSize);
-    int getNumDiagnosticFragmentsMatched(string fragLblStartsWith, vector<int> ranks);
+    static int getNumDiagnosticFragmentsMatched(string fragLblStartsWith, vector<string> labels, vector<int> ranks);
 
         double logNchooseK(int N,int k);
         double SHP(int matched, int len1, int len2, int N);
