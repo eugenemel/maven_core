@@ -721,6 +721,7 @@ class Compound {
             float exactMass;
 
 		public:
+            Compound(string id, string name, string formula, int charge, float exactMass);
 			Compound(string id, string name, string formula, int charge );
             ~Compound(){}; //empty destructor
 

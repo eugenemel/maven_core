@@ -1,23 +1,40 @@
 #include "Fragment.h"
 #include "mzSample.h"
 
-Compound::Compound(string id, string name, string formula, int charge ) {
-		this->id = id;
-		this->name = name;
-		this->formula = formula;
-		this->charge = charge;
-        this->exactMass =  mcalc->computeNeutralMass(formula);
-		this->expectedRt = -1;
-        this->logP = 0;
-        this->isDecoy=false;
+Compound::Compound(string id, string name, string formula, int charge) {
+    this->id = id;
+    this->name = name;
+    this->formula = formula;
+    this->charge = charge;
+    this->exactMass =  mcalc->computeNeutralMass(formula);
+    this->expectedRt = -1;
+    this->logP = 0;
+    this->isDecoy=false;
 
-        cid=0;
-        ionizationMode=0;
-		precursorMz=0;
-		productMz=0;
-        collisionEnergy=0;
-        virtualFragmentation=false;
+    cid=0;
+    ionizationMode=0;
+    precursorMz=0;
+    productMz=0;
+    collisionEnergy=0;
+    virtualFragmentation=false;
+}
 
+Compound::Compound(string id, string name, string formula, int charge, float exactMass) {
+    this->id = id;
+    this->name = name;
+    this->formula = formula;
+    this->charge = charge;
+    this->exactMass =  exactMass;
+    this->expectedRt = -1;
+    this->logP = 0;
+    this->isDecoy=false;
+
+    cid=0;
+    ionizationMode=0;
+    precursorMz=0;
+    productMz=0;
+    collisionEnergy=0;
+    virtualFragmentation=false;
 }
 
 MassCalculator* Compound::mcalc = new MassCalculator();
