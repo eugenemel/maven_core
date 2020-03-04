@@ -36,6 +36,7 @@ void Scan::deepcopy(Scan* b) {
     this->mz    = b->mz;    
     this->scanType = b->scanType;
     this->filterLine = b->filterLine;
+    this->filterString = b->filterString;
     this->setPolarity( b->getPolarity() );
     this->isolationWindow = b->isolationWindow;
     this->injectionTime = b->injectionTime;
