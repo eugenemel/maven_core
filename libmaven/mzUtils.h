@@ -176,7 +176,7 @@ void delete_all(vector<T>& my_vector) {
 	for (unsigned int i = 0; i < my_vector.size(); i++ ) { 
         if ( my_vector[i] != NULL ) {
 			try { delete(my_vector[i]);  my_vector[i] = NULL; }
-			catch(...) { cerr << "delete_all() sigfaulting.. "; }
+            catch(...) { cerr << "delete_all() segfaulting.. "; }
 		}
 	}
 	my_vector.clear(); 
@@ -188,7 +188,7 @@ inline void delete_all(deque<T>& my_vector) {
 	for (unsigned int i = 0; i < my_vector.size(); i++ ) { 
 		if (  my_vector[i] != NULL ) { 
 			try { delete(my_vector[i]);  my_vector[i] = NULL; }
-			catch(...) { cerr << "delete_all() sigfaulting.. "; }
+            catch(...) { cerr << "delete_all() segfaulting.. "; }
 		}
 	}
 	my_vector.clear(); 
@@ -201,7 +201,7 @@ void delete_one(vector<T> & my_vector, unsigned int idx) {
         if ( idx < 0 || idx > my_vector.size()-1) return; 
         if ( my_vector[idx] != NULL ) { 
 		try { delete(my_vector[idx]);  my_vector[idx] = NULL; }
-		catch(...) { cerr << "delete_one() sigfaulting.. "; }
+        catch(...) { cerr << "delete_one() segfaulting.. "; }
 	}
         my_vector.erase( my_vector.begin()+idx );
 }
@@ -213,7 +213,7 @@ void delete_one(deque<T> & my_vector, unsigned int idx) {
         if ( idx > my_vector.size()-1) return; 
         if ( my_vector[idx] != NULL ) {
 		try { delete(my_vector[idx]);  my_vector[idx] = NULL; }
-		catch(...) { cerr << "delete_one() sigfaulting.. "; }
+        catch(...) { cerr << "delete_one() segfaulting.. "; }
        	} 
 	my_vector.erase( my_vector.begin()+idx );
 }
