@@ -63,6 +63,15 @@ public:
     int minNumMatches = 5;
 
     /**
+     * @brief minNumDiagnosticFragments
+     * minimum number of matches for a single <Compound*, Adduct*>
+     * to match to a spectrum in order to retain this <Compound*, Adduct*>,
+     * among the fragments marked as diagnostic.
+     * Traditionally, diagnostic fragments include a label that starts with an asterisk (*)
+     */
+    int minNumDiagnosticFragments = 0;
+
+    /**
      * @brief minNumUniqueMatches
      * minimum number of matches for a single <Compound*, Adduct*>
      * with unique fragment m/zs, given the universe of all <Compound*, Adduct*>
