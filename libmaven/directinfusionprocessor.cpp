@@ -166,7 +166,8 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
             FragmentationMatchScore s = compound->scoreCompoundHit(f->consensus, params->productPpmTolr, false);
 
-            bool isHasLabels = f->consensus->fragment_labels.size() == s.ranks.size();
+            bool isHasLabels = compound->fragment_labels.size() == s.ranks.size();
+
             int numMatchAboveIntensityThreshold = 0;
             int numDiagnosticMatches = 0;
             for (int i=0; i < s.ranks.size(); i++) {
@@ -177,7 +178,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
                     numMatchAboveIntensityThreshold++;
 
                     //Issue 187
-                    if (isHasLabels && f->consensus->fragment_labels[y].find("*") == 0) {
+                    if (isHasLabels && compound->fragment_labels[y].find("*") == 0) {
                         numDiagnosticMatches++;
                     }
                 }
