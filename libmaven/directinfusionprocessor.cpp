@@ -162,7 +162,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
             Compound* compound = it->second.first;
             Adduct *adduct = it->second.second;
 
-//            if (debug) cerr << "Scoring compound hit: " <<  compound->name << "<--> f=" << f << endl;
+            if (debug) cerr << "Scoring compound hit: " <<  compound->name << "<--> f=" << f << endl;
 
             FragmentationMatchScore s = compound->scoreCompoundHit(f->consensus, params->productPpmTolr, false);
 
@@ -183,6 +183,8 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
                     }
                 }
             }
+
+            if (debug) cerr << "numMatchAboveIntensityThreshold=" << numMatchAboveIntensityThreshold << ", numDiagnosticMatches=" << numDiagnosticMatches << endl;
 
             bool isPassesMs1PrecursorRequirements = true;
 
