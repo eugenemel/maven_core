@@ -178,7 +178,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
                     numMatchAboveIntensityThreshold++;
 
                     //Issue 187
-                    if (isHasLabels && compound->fragment_labels[y].find("*") == 0) {
+                    if (isHasLabels && compound->fragment_labels[i].find("*") == 0) {
                         numDiagnosticMatches++;
                     }
                 }
