@@ -84,7 +84,7 @@ class MassCalculator {
     map<string,double>computeLabeledAbundances(string formula);
 
     void matchMass(double mass, double ppm);
-    string prettyName(int c, int h, int n, int o, int p, int s);
+    string prettyName(int c, int h, int n, int o, int p, int s, int d=0);
     vector<Match> enumerateMasses(double inputMass, double charge, double maxdiff);
     double adjustMass(double mass,int charge);
 

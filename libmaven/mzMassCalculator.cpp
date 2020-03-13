@@ -489,11 +489,12 @@ vector<MassCalculator::Match> MassCalculator::enumerateMasses(double inputMass, 
     return matches;
 }
 
-std::string MassCalculator::prettyName(int c, int h, int n, int o, int p, int s) {
+std::string MassCalculator::prettyName(int c, int h, int n, int o, int p, int s, int d) {
 		char buf[1000];
 		string name;
 		if ( c != 0 ) { name += "C"; if (c>1) { sprintf(buf,"%d",c);  name += buf;} }
 		if ( h != 0 ) { name += "H"; if (h>1) { sprintf(buf,"%d",h);  name += buf;} }
+        if ( d != 0 ) { name += "D"; if (d>1) { sprintf(buf,"%d",d);  name += buf;} }
 		if ( n != 0 ) { name += "N"; if (n>1) { sprintf(buf,"%d",n);  name += buf;} }
 		if ( o != 0 ) { name += "O"; if (o>1) { sprintf(buf,"%d",o);  name += buf;} }
 		if ( p != 0 ) { name += "P"; if (p>1) { sprintf(buf,"%d",p);  name += buf;} }
