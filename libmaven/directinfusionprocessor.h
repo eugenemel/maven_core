@@ -134,6 +134,12 @@ public:
      */
     SpectralCompositionAlgorithm spectralCompositionAlgorithm = SpectralCompositionAlgorithm::ALL_CANDIDATES;
 
+    /**
+     * @brief isAgglomerateAcrossSamples
+     * Option to agglomerate direct infusion results across samples.
+     */
+    bool isAgglomerateAcrossSamples = false;
+
 };
 
 /**
