@@ -54,6 +54,37 @@ class DirectInfusionSearchParameters {
 
 public:
 
+    /** =======================
+     * SAMPLE DATA MANIPULATION
+     * ========================*/
+
+    /**
+     * @brief minIndividualMs2ScanIntensity
+     * minimum intensity required for a single measurement from an MS2 scan
+     * to be used to create a consensus MS2 spectrum.
+     */
+    float minIndividualMs2ScanIntensity = 0;
+
+    /**
+     * @brief minNumMs2ScansForConsensus
+     * Minimum number of times an (m/z, intensity) fragment peak
+     * must be seen with an intensity greater than @param minIndividualMs2ScanIntensity
+     * in all MS2 scans to be included in the consensus spectrum.
+     */
+    int minNumMs2ScansForConsensus = 0;
+
+    /**
+     * @brief minFractionMs2ScansForConsensus
+     * Mininum proportion of all available scans in which a given (m/z, intensity)
+     * fragment peak is observed with an intensity greater than @param minIndividualMs2ScanIntensity
+     * in order to include this peak in the consensus spectrum.
+     */
+    float minFractionMs2ScansForConsensus = 0;
+
+    /** ===================
+     * MS2 - SEARCH RELATED
+     * ==================== */
+
     /**
      * @brief minNumMatches
      * mininum number of matches for a single <Compound*, Adduct*>
@@ -82,6 +113,10 @@ public:
      * relative composition
      */
     int minNumUniqueMatches = 0;
+
+    /** ===================
+     * MS1 - SEARCH RELATED
+     * ==================== */
 
     /**
      * @brief isRequireAdductPrecursorMatch
@@ -127,6 +162,10 @@ public:
      */
     string ms1ScanFilter = "";
 
+    /** ===================
+     * == AGGLOMERATION ===
+     * ==================== */
+
     /**
      * @brief spectralCompositionAlgorithm
      * By default, do nothing, just return all matches, without doing any elimination or quantitation
@@ -139,6 +178,8 @@ public:
      * Option to agglomerate direct infusion results across samples.
      */
     bool isAgglomerateAcrossSamples = false;
+
+
 
 };
 
