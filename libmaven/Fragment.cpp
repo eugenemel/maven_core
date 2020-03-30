@@ -1,6 +1,8 @@
 #include "Fragment.h"
 #include "mzSample.h"
 
+#include "directinfusionprocessor.h"
+
 //empty constructor
 Fragment::Fragment() { 
 	precursorMz = 0; 
@@ -42,7 +44,7 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
         minSigNoiseRatio=0; 
         minFractionalIntensity=0;
     }
-	*/
+    */
 
     vector<pair<float,float> >mzarray = scan->getTopPeaks(minFractionalIntensity,minSigNoiseRatio,baseLineLevel);
 
@@ -61,6 +63,17 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
     this->sortByMz();
 }
 
+/**
+ * @brief Fragment::Fragment
+ * @param scan
+ * @param params
+ *
+ * Method to build a consensus fragment for DIMS data.
+ * Skips unnecessary steps (like computing precursor purity), respects user-defined parameters
+ */
+Fragment::Fragment(Scan *scan, shared_ptr<DirectInfusionSearchParameters> params){
+    //TODO
+}
 
 //delete
 Fragment::~Fragment() {

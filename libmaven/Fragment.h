@@ -6,12 +6,14 @@
 #include<map>
 #include<math.h>
 #include<float.h>
+#include <memory>
 
 class Compound;
 class PeakGroup;
 class Scan;
 class Adduct;
 class TMT;
+class DirectInfusionSearchParameters;
 
 using namespace std;
 
@@ -160,6 +162,9 @@ class Fragment {
 
         //build fragment based on MS2 scan
         Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRatio,unsigned int maxFragmentSize);
+
+        //build fragment based on DIMS MS2 scan
+        Fragment(Scan* scan, shared_ptr<DirectInfusionSearchParameters> params);
 
         //delete
         ~Fragment();
