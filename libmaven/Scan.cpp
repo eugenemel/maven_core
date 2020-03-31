@@ -771,3 +771,15 @@ TMT Scan::tmtQuant() {
     return tmtquant;
 }
 
+float Scan::getMinMz(){
+    if (lowerLimitMz > 0) return lowerLimitMz;
+    if (!mz.empty()) return mz[0];
+    return -1.0f;
+}
+
+float Scan::getMaxMz(){
+    if (upperLimitMz > 0) return upperLimitMz;
+    if (!mz.empty()) return mz[mz.size()-1];
+    return -1.0f;
+}
+

@@ -84,6 +84,11 @@ class Scan {
 
     inline unsigned int nobs() { return mz.size(); }
     inline mzSample* getSample() { return sample; }
+
+    //Returns instrument-set scan min/max mzs if available.  If not, fall back to observed data.
+    inline float getMinMz();
+    inline float getMaxMz();
+
     vector<int> findMatchingMzs(float mzmin, float mzmax);
 
     int findHighestIntensityPos(float mz, float ppm);		//higest intensity pos
