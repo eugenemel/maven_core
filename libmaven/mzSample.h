@@ -86,8 +86,8 @@ class Scan {
     inline mzSample* getSample() { return sample; }
 
     //Returns instrument-set scan min/max mzs if available.  If not, fall back to observed data.
-    inline float getMinMz();
-    inline float getMaxMz();
+    float getMinMz();
+    float getMaxMz();
 
     vector<int> findMatchingMzs(float mzmin, float mzmax);
 
