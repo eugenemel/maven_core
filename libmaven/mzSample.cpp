@@ -416,6 +416,18 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
             rt = string2float(rtStr);
         }
 
+        float lowerLimitMz = -1.0f;
+        float upperLimitMz = -1.0f;
+
+        xml_node scanWindowListNode = scanNode.first_element_by_path("scanWindowList/scanWindow");
+        map<string,string> scanWindowAttr = mzML_cvParams(scanWindowListNode);
+        if (scanWindowAttr.count("scan window lower limit")) {
+            lowerLimitMz = string2float(scanWindowAttr["scan window lower limit"]);
+        }
+        if (scanWindowAttr.count("scan window upper limit")) {
+            upperLimitMz = string2float(scanWindowAttr["scan window upper limit"]);
+        }
+
         string filterString = "";
         if (scanAttr.count("filter string")){
             filterString = scanAttr["filter string"];
@@ -478,6 +490,8 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
         scan->injectionTime = injectionTime;
         scan->mz= mzVector;
         scan->filterString = filterString;
+        scan->lowerLimitMz = lowerLimitMz;
+        scan->upperLimitMz = upperLimitMz;
         addScan(scan);
     }
  }
