@@ -311,7 +311,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
          << "\n\tScoring Spectral Hits: " << to_string(totalTimeScoringHits) << " s"
          << "\n\t\tMatching Spectra Time: " << to_string(totalTimeMatchingSpectra) << " s"
          << "\n\t\tFind Precursor in MS1 Scans Time: " << to_string(totalTimeFindingMs1) << " s"
-         << "=========================================" << endl;
+         << "\n=========================================" << endl;
 
     return annotations;
 
