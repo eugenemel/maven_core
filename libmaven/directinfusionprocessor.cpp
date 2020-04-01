@@ -87,6 +87,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
     double totalTimeBuildConsensus = 0;
     double totalTimeScoringHits = 0;
+    double totalTimeMatchingSpectra = 0;
 
     if (debug) cerr << "Started DirectInfusionProcessor::processSingleSample()" << endl;
 
@@ -180,7 +181,30 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
             //Issue 192: time scoring hits
             auto startScoringHit = std::chrono::system_clock::now();
 
-            FragmentationMatchScore s = compound->scoreCompoundHit(f->consensus, params->productPpmTolr, false);
+            //Issue 192: avoid unused scoring metrics
+            Fragment t;
+            t.precursorMz = compound->precursorMz;
+            t.mzs = compound->fragment_mzs;
+            t.intensity_array = compound->fragment_intensity;
+            t.fragment_labels = compound->fragment_labels;
+
+            FragmentationMatchScore s;
+
+            float maxDeltaMz = (params->productPpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
+
+            //Issue 192: time matching spectra
+            auto startMatchingSpectra = std::chrono::system_clock::now();
+
+            s.ranks = Fragment::findFragPairsGreedyMz(&t, f->consensus, maxDeltaMz);
+
+            //Issue 192: time building consensus
+            auto stopMatchingSpectra = std::chrono::system_clock::now();
+            std::chrono::duration<double> matchingSpectraTime = stopMatchingSpectra-startMatchingSpectra;
+            totalTimeMatchingSpectra += matchingSpectraTime.count();
+
+            for(int rank: s.ranks) { if(rank != -1) s.numMatches++; }
+
+            //FragmentationMatchScore s = compound->scoreCompoundHit(f->consensus, params->productPpmTolr, false);
 
             bool isHasLabels = compound->fragment_labels.size() == s.ranks.size();
 
@@ -278,6 +302,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
     cerr << "DirectInfusionProcessor::processSinglSample() performance stats:"
          << "\n\tConsensus Spectrum Formation: " << to_string(totalTimeBuildConsensus) << " s"
          << "\n\tScoring Spectral Hits: " << to_string(totalTimeScoringHits) << " s"
+         << "\n\t\tMatching Spectra Time: " << to_string(totalTimeMatchingSpectra) << " s"
          << endl;
 
     return annotations;
