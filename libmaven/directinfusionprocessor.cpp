@@ -88,6 +88,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
     double totalTimeBuildConsensus = 0;
     double totalTimeScoringHits = 0;
     double totalTimeMatchingSpectra = 0;
+    double totalTimeFindingMs1 = 0;
 
     if (debug) cerr << "Started DirectInfusionProcessor::processSingleSample()" << endl;
 
@@ -228,6 +229,8 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
             if (params->isFindPrecursorIonInMS1Scan) {
 
+                auto startFindingPrecursor = std::chrono::system_clock::now();
+
                 isPassesMs1PrecursorRequirements = false;
 
                 for (auto scan : validMs1Scans) {
@@ -251,6 +254,11 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
                     //no need to check other MS1 scans once a valid precursor has been found.
                     if (isPassesMs1PrecursorRequirements) break;
                 }
+
+                auto stopFindingPrecursor = std::chrono::system_clock::now();
+
+                std::chrono::duration<double> findMs1Time = stopBuildPrecursor-startFindingPrecursor;
+                totalTimeFindingMs1 += findMs1Time.count();
             }
 
             //Issue 192: time scoring hits
@@ -297,10 +305,11 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
     if (debug) cerr << "Finished DirectInfusionProcessor::processSingleSample()" << endl;
 
-    if (debug) cerr << "DirectInfusionProcessor::processSinglSample() performance stats:"
+    cerr << "DirectInfusionProcessor::processSingleSample() performance stats:"
                     << "\n\tConsensus Spectrum Formation: " << to_string(totalTimeBuildConsensus) << " s"
                     << "\n\tScoring Spectral Hits: " << to_string(totalTimeScoringHits) << " s"
                     << "\n\t\tMatching Spectra Time: " << to_string(totalTimeMatchingSpectra) << " s"
+                    << "\n\t\tFind Precursor in MS1 Scans Time: " << to_string(totalTimeFindingMs1) << " s"
                     << endl;
 
     return annotations;
