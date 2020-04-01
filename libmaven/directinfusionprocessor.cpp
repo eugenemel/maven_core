@@ -310,13 +310,15 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
     if (debug) cerr << "Finished DirectInfusionProcessor::processSingleSample()" << endl;
 
-    cerr << "=========================================\n"
-         << "DirectInfusionProcessor::processSingleSample() performance stats:"
-         << "\n\tConsensus Spectrum Formation: " << to_string(totalTimeBuildConsensus) << " s"
-         << "\n\tScoring Spectral Hits: " << to_string(totalTimeScoringHits) << " s"
-         << "\n\t\tMatching Spectra Time: " << to_string(totalTimeMatchingSpectra) << " s"
-         << "\n\t\tFind Precursor in MS1 Scans Time: " << to_string(totalTimeFindingMs1) << " s"
-         << "\n=========================================" << endl;
+    if (debug){
+        cerr << "=========================================\n"
+             << "DirectInfusionProcessor::processSingleSample() performance stats:"
+             << "\n\tConsensus Spectrum Formation: " << to_string(totalTimeBuildConsensus) << " s"
+             << "\n\tScoring Spectral Hits: " << to_string(totalTimeScoringHits) << " s"
+             << "\n\t\tMatching Spectra Time: " << to_string(totalTimeMatchingSpectra) << " s"
+             << "\n\t\tFind Precursor in MS1 Scans Time: " << to_string(totalTimeFindingMs1) << " s"
+             << "\n=========================================" << endl;
+    }
 
     return annotations;
 
