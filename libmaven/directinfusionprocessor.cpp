@@ -257,7 +257,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
                 auto stopFindingPrecursor = std::chrono::system_clock::now();
 
-                std::chrono::duration<double> findMs1Time = stopBuildPrecursor-startFindingPrecursor;
+                std::chrono::duration<double> findMs1Time = stopFindingPrecursor-startFindingPrecursor;
                 totalTimeFindingMs1 += findMs1Time.count();
             }
 
