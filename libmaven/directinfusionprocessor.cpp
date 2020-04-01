@@ -204,8 +204,6 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
             for(int rank: s.ranks) { if(rank != -1) s.numMatches++; }
 
-            //FragmentationMatchScore s = compound->scoreCompoundHit(f->consensus, params->productPpmTolr, false);
-
             bool isHasLabels = compound->fragment_labels.size() == s.ranks.size();
 
             int numMatchAboveIntensityThreshold = 0;
@@ -299,11 +297,11 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
     if (debug) cerr << "Finished DirectInfusionProcessor::processSingleSample()" << endl;
 
-    cerr << "DirectInfusionProcessor::processSinglSample() performance stats:"
-         << "\n\tConsensus Spectrum Formation: " << to_string(totalTimeBuildConsensus) << " s"
-         << "\n\tScoring Spectral Hits: " << to_string(totalTimeScoringHits) << " s"
-         << "\n\t\tMatching Spectra Time: " << to_string(totalTimeMatchingSpectra) << " s"
-         << endl;
+    if (debug) cerr << "DirectInfusionProcessor::processSinglSample() performance stats:"
+                    << "\n\tConsensus Spectrum Formation: " << to_string(totalTimeBuildConsensus) << " s"
+                    << "\n\tScoring Spectral Hits: " << to_string(totalTimeScoringHits) << " s"
+                    << "\n\t\tMatching Spectra Time: " << to_string(totalTimeMatchingSpectra) << " s"
+                    << endl;
 
     return annotations;
 
