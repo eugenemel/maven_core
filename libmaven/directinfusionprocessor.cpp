@@ -86,6 +86,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
     vector<Scan*> validMs1Scans;
 
     double totalTimeBuildConsensus = 0;
+    double totalTimeScoringHits = 0;
 
     if (debug) cerr << "Started DirectInfusionProcessor::processSingleSample()" << endl;
 
@@ -176,6 +177,9 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
             if (debug) cerr << "Scoring compound hit: " <<  compound->name << "<--> f=" << f << endl;
 
+            //Issue 192: time scoring hits
+            auto startScoringHit = std::chrono::system_clock::now();
+
             FragmentationMatchScore s = compound->scoreCompoundHit(f->consensus, params->productPpmTolr, false);
 
             bool isHasLabels = compound->fragment_labels.size() == s.ranks.size();
@@ -227,6 +231,11 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
                 }
             }
 
+            //Issue 192: time scoring hits
+            auto stopScoringHit = std::chrono::system_clock::now();
+            std::chrono::duration<double> scoringHitTime = stopScoringHit-startScoringHit;
+            totalTimeScoringHits += scoringHitTime.count();
+
             if (numMatchAboveIntensityThreshold >= params->minNumMatches && numDiagnosticMatches >= params->minNumDiagnosticFragments && isPassesMs1PrecursorRequirements) {
 
                 if (debug) cerr << "Retain " << compound->name << ": " << s.numMatches << " matches." << endl;
@@ -266,8 +275,9 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
     if (debug) cerr << "Finished DirectInfusionProcessor::processSingleSample()" << endl;
 
-    cerr << "DirectInfusionProcessor::processSinglSample() performance stats:\n"
-         << "\tConsensus Spectrum Formation: " << to_string(totalTimeBuildConsensus) << " s"
+    cerr << "DirectInfusionProcessor::processSinglSample() performance stats:"
+         << "\n\tConsensus Spectrum Formation: " << to_string(totalTimeBuildConsensus) << " s"
+         << "\n\tScoring SpectralHits: " << to_string(totalTimeScoringHits) << " s"
          << endl;
 
     return annotations;
