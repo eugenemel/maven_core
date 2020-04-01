@@ -231,16 +231,21 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
                 auto startFindingPrecursor = std::chrono::system_clock::now();
 
-                isPassesMs1PrecursorRequirements = false;
-
-                for (auto scan : validMs1Scans) {
+                double precMz = compound->precursorMz;
+                if (!params->isRequireAdductPrecursorMatch) {
 
                     //Compute this way instead of using compound->precursorMz to allow for possibility of matching compound to unexpected adduct
                     float compoundMz = adduct->computeAdductMass(massCalc.computeNeutralMass(compound->getFormula()));
-                    double precMz = adduct->computeAdductMass(compoundMz);
+                    precMz = adduct->computeAdductMass(compoundMz);
 
-                    double minMz = precMz - precMz*params->parentPpmTolr/1e6;
-                    double maxMz = precMz + precMz*params->parentPpmTolr/1e6;
+                }
+
+                double minMz = precMz - precMz*params->parentPpmTolr/1e6;
+                double maxMz = precMz + precMz*params->parentPpmTolr/1e6;
+
+                isPassesMs1PrecursorRequirements = false;
+
+                for (auto scan : validMs1Scans) {
 
                     vector<int> matchingMzs = scan->findMatchingMzs(minMz, maxMz);
 
