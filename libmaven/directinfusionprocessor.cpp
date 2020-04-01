@@ -209,6 +209,9 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
                             break;
                         }
                     }
+
+                    //no need to check other MS1 scans once a valid precursor has been found.
+                    if (isPassesMs1PrecursorRequirements) break;
                 }
             }
 
