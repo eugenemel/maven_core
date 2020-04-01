@@ -1,6 +1,8 @@
 #include "directinfusionprocessor.h"
 #include "lipidsummarizationutils.h"
 
+#include <chrono>
+
 using namespace std;
 using namespace mzUtils;
 
@@ -83,6 +85,8 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
     map<int, DirectInfusionAnnotation*> annotations = {};
     vector<Scan*> validMs1Scans;
 
+    double totalTimeBuildConsensus = 0;
+
     if (debug) cerr << "Started DirectInfusionProcessor::processSingleSample()" << endl;
 
     //Organize all scans by common precursor m/z
@@ -145,8 +149,16 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
             continue;
         }
 
-        f->buildConsensus(params->productPpmTolr); //TODO: a separate parameter?
+        //Issue 192: time building consensus
+        auto startBuildConsensus = std::chrono::system_clock::now();
+
+        f->buildConsensus(params->productPpmTolr); //TODO: a separate parameter?        
         f->consensus->sortByMz();
+
+        //Issue 192: time building consensus
+        auto stopBuildConsensus = std::chrono::system_clock::now();
+        std::chrono::duration<double> buildConsensusTime = stopBuildConsensus-startBuildConsensus;
+        totalTimeBuildConsensus += buildConsensusTime.count();
 
         directInfusionAnnotation->fragmentationPattern = f;
 
@@ -253,6 +265,10 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
     }
 
     if (debug) cerr << "Finished DirectInfusionProcessor::processSingleSample()" << endl;
+
+    cerr << "DirectInfusionProcessor::processSinglSample() performance stats:\n"
+         << "\tConsensus Spectrum Formation: " << to_string(totalTimeBuildConsensus) << " s"
+         << endl;
 
     return annotations;
 
