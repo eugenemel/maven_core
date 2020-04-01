@@ -277,7 +277,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
     cerr << "DirectInfusionProcessor::processSinglSample() performance stats:"
          << "\n\tConsensus Spectrum Formation: " << to_string(totalTimeBuildConsensus) << " s"
-         << "\n\tScoring SpectralHits: " << to_string(totalTimeScoringHits) << " s"
+         << "\n\tScoring Spectral Hits: " << to_string(totalTimeScoringHits) << " s"
          << endl;
 
     return annotations;
