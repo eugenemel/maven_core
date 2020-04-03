@@ -857,6 +857,8 @@ class Adduct {
 		inline float computeParentMass(float mz)  { return  (mz*abs(charge)-mass)/nmol; }
         //given perent compute adduct mass
 		inline float computeAdductMass(float pmz) { return (pmz*nmol+mass)/abs(charge); }
+
+        static vector<Adduct*> loadAdducts(string filename);
 };
 
 struct AlignmentSegment {
