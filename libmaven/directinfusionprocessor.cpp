@@ -324,6 +324,16 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
 }
 
+DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
+                                       const vector<Scan*>& ms2Scans,
+                                       const vector<Scan*>& ms1Scans,
+                                       const vector<pair<Compound*, Adduct*>> library,
+                                       shared_ptr<DirectInfusionSearchParameters> params,
+                                       bool debug){
+    //TODO
+    return nullptr;
+}
+
 unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInformation(
         vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
         Fragment *observedSpectrum,

@@ -396,6 +396,25 @@ public:
              Fragment *observedSpectrum,
              shared_ptr<DirectInfusionSearchParameters> params,
              bool debug);
+
+
+     /**
+      * Divide up search into smaller, more manageable parts
+      * mapKey --> compounds in the database
+      *        --> relevant parts of each individual sample to search
+      *
+      * --> a function to divide the raw file into relevant pieces
+      *     relevant pieces are MS2 scans of interest
+      *     ie, scansByPrecursorMap
+      */
+     //static DirectInfusionAnnotation*
+     static DirectInfusionAnnotation* processBlock(int blockNum,
+                              const vector<Scan*>& ms2Scans,
+                              const vector<Scan*>& ms1Scans,
+                              const vector<pair<Compound*, Adduct*>> library,
+                              shared_ptr<DirectInfusionSearchParameters> params,
+                              bool debug
+                              );
 };
 
 /**
