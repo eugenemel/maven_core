@@ -38,6 +38,12 @@ shared_ptr<DirectInfusionSearchSet> DirectInfusionProcessor::getSearchSet(mzSamp
     for (Compound *compound : compounds) {
         for (Adduct *adduct : adducts) {
 
+            if (SIGN(adduct->charge) != SIGN(compound->charge)) {
+                continue;
+            }
+
+            float compoundMz = compound->precursorMz;
+
             if (params->isRequireAdductPrecursorMatch){
 
                 if (compound->adductString != adduct->name){
@@ -50,13 +56,9 @@ shared_ptr<DirectInfusionSearchSet> DirectInfusionProcessor::getSearchSet(mzSamp
 //                   compound->name.compare (compound->name.length() - adduct->name.length(), adduct->name.length(), adduct->name) != 0){
 //                    continue;
 //                }
+            } else {
+                compoundMz = adduct->computeAdductMass(massCalc.computeNeutralMass(compound->getFormula()));
             }
-
-            if (SIGN(adduct->charge) != SIGN(compound->charge)) {
-                continue;
-            }
-
-            float compoundMz = adduct->computeAdductMass(massCalc.computeNeutralMass(compound->getFormula()));
 
             //determine which map key to associate this compound, adduct with
 
@@ -65,7 +67,12 @@ shared_ptr<DirectInfusionSearchSet> DirectInfusionProcessor::getSearchSet(mzSamp
                 pair<float, float> mzRange = it->second;
 
                 if (compoundMz > mzRange.first && compoundMz < mzRange.second) {
-                    directInfusionSearchSet->compoundsByMapKey.insert(make_pair(mapKey, make_pair(compound, adduct)));
+
+                    if (directInfusionSearchSet->compoundsByMapKey.find(mapKey) == directInfusionSearchSet->compoundsByMapKey.end()){
+                        directInfusionSearchSet->compoundsByMapKey.insert(make_pair(mapKey, vector<pair<Compound*, Adduct*>>()));
+                    }
+
+                    directInfusionSearchSet->compoundsByMapKey[mapKey].push_back(make_pair(compound, adduct));
                     break;
                 }
             }
@@ -96,8 +103,6 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
     map<int, vector<Scan*>> ms2ScansByBlockNumber = {};
     vector<Scan*> validMs1Scans;
 
-    typedef multimap<int, pair<Compound*, Adduct*>>::iterator compoundsIterator;
-
     for (Scan* scan : sample->scans){
         if (scan->mslevel == 2){
             int mapKey = static_cast<int>(round(scan->precursorMz+0.001f)); //round to nearest int
@@ -118,6 +123,9 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
         //need MS2 scans to identify matches
         if (ms2ScansByBlockNumber.find(mapKey) == ms2ScansByBlockNumber.end()) continue;
+
+        //need compounds to identify matches
+        if (directInfusionSearchSet->compoundsByMapKey.find(mapKey) == directInfusionSearchSet->compoundsByMapKey.end()) continue;
 
         pair<float,float> mzRange = directInfusionSearchSet->mzRangesByMapKey.at(mapKey);
 
@@ -171,17 +179,17 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
         directInfusionAnnotation->fragmentationPattern = f;
 
-        pair<compoundsIterator, compoundsIterator> compoundMatches = directInfusionSearchSet->compoundsByMapKey.equal_range(mapKey);
+        vector<pair<Compound*, Adduct*>> compoundMatches = directInfusionSearchSet->compoundsByMapKey[mapKey];
 
         //check for ID bug
         if (debug) cerr << "Precursor m/z of fragment spectrum: " << f->consensus->precursorMz << endl;
 
         int compCounter = 0;
         int matchCounter = 0;
-        for (compoundsIterator it = compoundMatches.first; it != compoundMatches.second; ++it){
+        for (auto pair : compoundMatches){
 
-            Compound* compound = it->second.first;
-            Adduct *adduct = it->second.second;
+            Compound* compound = pair.first;
+            Adduct *adduct = pair.second;
 
             if (debug) cerr << "Scoring compound hit: " <<  compound->name << "<--> f=" << f << endl;
 
@@ -283,7 +291,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
                 shared_ptr<DirectInfusionMatchData> directInfusionMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
                 directInfusionMatchData->compound = compound;
-                directInfusionMatchData->adduct = it->second.second;
+                directInfusionMatchData->adduct = adduct;
                 directInfusionMatchData->fragmentationMatchScore = s;
 
                 dIAnnotatedCompounds.push_back(directInfusionMatchData);

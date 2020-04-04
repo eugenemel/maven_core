@@ -30,7 +30,7 @@ public:
     /**
      * <key, value> = <map_key, valid pair<Compound,Adduct>>
      */
-     multimap<int, pair<Compound*, Adduct*>> compoundsByMapKey = {};
+     map<int, vector<pair<Compound*, Adduct*>>> compoundsByMapKey = {};
 
 };
 
