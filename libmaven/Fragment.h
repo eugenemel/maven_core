@@ -44,6 +44,7 @@ struct FragmentationMatchScore {
     double spearmanRankCorrelation;
     double ticMatched;
     double numMatches;
+    double numDiagnosticMatches;
     double ppmError;
     double mzFragError;
     double mergedScore;
@@ -88,6 +89,7 @@ struct FragmentationMatchScore {
         spearmanRankCorrelation=0;
         ticMatched=0;
         numMatches=0;
+        numDiagnosticMatches=0;
         ppmError=DBL_MAX;
         mzFragError=DBL_MAX;
         mergedScore=0;

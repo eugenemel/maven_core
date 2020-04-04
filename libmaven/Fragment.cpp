@@ -404,6 +404,9 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
         }
     }
 
+    //TODO: assess numDiagnosticFragments matched
+    //TODO: respect intensity thresholds?
+
     s.fractionMatched = s.numMatches / a->nobs();
     s.spearmanRankCorrelation = spearmanRankCorrelation(s.ranks);
     s.ticMatched = ticMatched(s.ranks);
