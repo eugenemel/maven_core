@@ -409,12 +409,29 @@ public:
       */
      //static DirectInfusionAnnotation*
      static DirectInfusionAnnotation* processBlock(int blockNum,
+                              const pair<float,float>& mzRange,
+                              mzSample* sample,
                               const vector<Scan*>& ms2Scans,
                               const vector<Scan*>& ms1Scans,
                               const vector<pair<Compound*, Adduct*>> library,
-                              shared_ptr<DirectInfusionSearchParameters> params,
-                              bool debug
-                              );
+                              const shared_ptr<DirectInfusionSearchParameters> params,
+                              const bool debug);
+
+     /**
+      * @brief assessMatch
+      * @param ms2Scans
+      * @param ms1Scans
+      * @param libraryMatch
+      * @param params
+      * @param debug
+      *
+      * Designed to be multithreaded, work of comparing / evaluating individual matches
+      */
+     static FragmentationMatchScore assessMatch(const Fragment *f,
+                             const vector<Scan*>& ms1Scans,
+                             const pair<Compound*, Adduct*>& libraryMatch,
+                             const shared_ptr<DirectInfusionSearchParameters> params,
+                             const bool debug);
 };
 
 /**

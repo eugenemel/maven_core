@@ -147,18 +147,15 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
         vector<Scan*> scans = ms2ScansByBlockNumber[mapKey];
 
         Fragment *f = nullptr;
-        int numScansPerPrecursorMz = 0;
+
         for (auto scan : scans) {
-            if (numScansPerPrecursorMz == 0){
+            if (!f){
                 f = new Fragment(scan, 0, 0, UINT_MAX);
-
                 directInfusionAnnotation->scan = scan;
-
             } else {
                 Fragment *brother = new Fragment(scan, 0, 0, UINT_MAX);
                 f->addFragment(brother);
             }
-            numScansPerPrecursorMz++;
         }
 
         if (!f) {
@@ -339,13 +336,170 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 }
 
 DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
+                                       const pair<float, float>& mzRange,
+                                       mzSample* sample,
                                        const vector<Scan*>& ms2Scans,
                                        const vector<Scan*>& ms1Scans,
                                        const vector<pair<Compound*, Adduct*>> library,
-                                       shared_ptr<DirectInfusionSearchParameters> params,
-                                       bool debug){
-    //TODO
+                                       const shared_ptr<DirectInfusionSearchParameters> params,
+                                       const bool debug){
+
+    //need MS2 scans and compounds to identify matches
+    if (ms2Scans.empty()) return nullptr;
+    if (library.empty()) return nullptr;
+
+    //build search spectrum
+    Fragment *f = nullptr;
+    Scan* representativeScan = nullptr;
+    for (auto& scan : ms2Scans) {
+        if (!f){
+            f = new Fragment(scan, 0, 0, UINT_MAX);
+            representativeScan = scan;
+        } else {
+            Fragment *brother = new Fragment(scan, 0, 0, UINT_MAX);
+            f->addFragment(brother);
+        }
+    }
+
+    f->buildConsensus(params->productPpmTolr); //TODO: a separate parameter?
+    f->consensus->sortByMz();
+
+    vector<shared_ptr<DirectInfusionMatchData>> libraryMatches;
+
+    //Compare to library
+    for (auto libraryEntry : library){
+
+        FragmentationMatchScore s = assessMatch(f, ms1Scans, libraryEntry, params, debug);
+
+        if (s.numMatches >= params->minNumMatches && s.numDiagnosticMatches >= params->minNumDiagnosticFragments) {
+
+            shared_ptr<DirectInfusionMatchData> directInfusionMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
+            directInfusionMatchData->compound = libraryEntry.first;
+            directInfusionMatchData->adduct = libraryEntry.second;
+            directInfusionMatchData->fragmentationMatchScore = s;
+
+            libraryMatches.push_back(directInfusionMatchData);
+        }
+    }
+
+    //agglomerate (if necessary)
+    if (!libraryMatches.empty()){
+
+        //Initialize output structure
+        DirectInfusionAnnotation *directInfusionAnnotation = new DirectInfusionAnnotation();
+        directInfusionAnnotation->precMzMin = mzRange.first;
+        directInfusionAnnotation->precMzMax = mzRange.second;
+        directInfusionAnnotation->sample = sample;
+        directInfusionAnnotation->scan = representativeScan;
+
+        if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES) {
+            directInfusionAnnotation->compounds = libraryMatches;
+        } else {
+            directInfusionAnnotation->compounds = DirectInfusionProcessor::determineComposition(
+                        libraryMatches,
+                        f->consensus,
+                        params,
+                        debug);
+        }
+
+        return directInfusionAnnotation;
+    }
+
     return nullptr;
+}
+
+FragmentationMatchScore DirectInfusionProcessor::assessMatch(const Fragment *f,
+                                                             const vector<Scan *> &ms1Scans,
+                                                             const pair<Compound*, Adduct*>& libraryEntry,
+                                                             const shared_ptr<DirectInfusionSearchParameters> params,
+                                                             const bool debug){
+    //Initialize output
+    FragmentationMatchScore s;
+
+    Compound* compound = libraryEntry.first;
+    Adduct *adduct = libraryEntry.second;
+
+    //=============================================== //
+    //START COMPARE MS1
+    //=============================================== //
+
+    bool isPassesMs1PrecursorRequirements = true;
+
+     if (params->isFindPrecursorIonInMS1Scan) {
+
+         double precMz = compound->precursorMz;
+         if (!params->isRequireAdductPrecursorMatch) {
+
+             //Compute this way instead of using compound->precursorMz to allow for possibility of matching compound to unexpected adduct
+             MassCalculator massCalc;
+             float compoundMz = adduct->computeAdductMass(massCalc.computeNeutralMass(compound->getFormula()));
+             precMz = adduct->computeAdductMass(compoundMz);
+
+         }
+
+         double minMz = precMz - precMz*params->parentPpmTolr/1e6;
+         double maxMz = precMz + precMz*params->parentPpmTolr/1e6;
+
+         isPassesMs1PrecursorRequirements = false;
+
+         for (auto& scan : ms1Scans) {
+
+             vector<int> matchingMzs = scan->findMatchingMzs(minMz, maxMz);
+
+             for (auto x : matchingMzs) {
+                 if (scan->intensity[x] >= params->parentMinIntensity) {
+                     isPassesMs1PrecursorRequirements = true;
+                     break;
+                 }
+             }
+
+             //no need to check other MS1 scans once a valid precursor has been found.
+             if (isPassesMs1PrecursorRequirements) break;
+         }
+
+     }
+
+     if (!isPassesMs1PrecursorRequirements) return FragmentationMatchScore(); // will return with no matching fragments, 0 for every score
+
+    //=============================================== //
+    //END COMPARE MS1
+    //=============================================== //
+
+    //=============================================== //
+    //START COMPARE MS2
+    //=============================================== //
+
+    Fragment t;
+    t.precursorMz = compound->precursorMz;
+    t.mzs = compound->fragment_mzs;
+    t.intensity_array = compound->fragment_intensity;
+    t.fragment_labels = compound->fragment_labels;
+
+    float maxDeltaMz = (params->productPpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
+    s.ranks = Fragment::findFragPairsGreedyMz(&t, f->consensus, maxDeltaMz);
+
+    bool isHasLabels = compound->fragment_labels.size() == s.ranks.size();
+
+    for (unsigned long i=0; i < s.ranks.size(); i++) {
+
+        int y = s.ranks[i];
+
+        if (y != -1 && f->consensus->intensity_array[y] >= params->productMinIntensity) {
+
+            s.numMatches++;
+
+            if (isHasLabels && compound->fragment_labels[i].find("*") == 0) {
+                s.numDiagnosticMatches++;
+            }
+
+        }
+    }
+
+    //=============================================== //
+    //END COMPARE MS2
+    //=============================================== //
+
+    return s;
 }
 
 unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInformation(
