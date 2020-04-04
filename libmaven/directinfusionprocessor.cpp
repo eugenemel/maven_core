@@ -83,7 +83,6 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
     MassCalculator massCalc;
     map<int, DirectInfusionAnnotation*> annotations = {};
-    vector<Scan*> validMs1Scans;
 
     double totalTimeBuildConsensus = 0;
     double totalTimeScoringHits = 0;
@@ -94,16 +93,20 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
     //Organize all scans by common precursor m/z
 
-    multimap<int, Scan*> scansByPrecursor = {};
+    map<int, vector<Scan*>> ms2ScansByBlockNumber = {};
+    vector<Scan*> validMs1Scans;
 
-    typedef multimap<int, Scan*>::iterator scanIterator;
     typedef multimap<int, pair<Compound*, Adduct*>>::iterator compoundsIterator;
 
     for (Scan* scan : sample->scans){
         if (scan->mslevel == 2){
             int mapKey = static_cast<int>(round(scan->precursorMz+0.001f)); //round to nearest int
 
-            scansByPrecursor.insert(make_pair(mapKey, scan));
+            if (ms2ScansByBlockNumber.find(mapKey) == ms2ScansByBlockNumber.end()) {
+                ms2ScansByBlockNumber.insert(make_pair(mapKey, vector<Scan*>()));
+            }
+
+            ms2ScansByBlockNumber[mapKey].push_back(scan);
         }
         if (params->isFindPrecursorIonInMS1Scan && scan->mslevel == 1 && scan->filterString.find(params->ms1ScanFilter) != string::npos) {
             validMs1Scans.push_back(scan);
@@ -112,6 +115,9 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
     if (debug) cerr << "Performing search over map keys..." << endl;
 
     for (auto mapKey : directInfusionSearchSet->mapKeys){
+
+        //need MS2 scans to identify matches
+        if (ms2ScansByBlockNumber.find(mapKey) == ms2ScansByBlockNumber.end()) continue;
 
         pair<float,float> mzRange = directInfusionSearchSet->mzRangesByMapKey.at(mapKey);
 
@@ -130,18 +136,18 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
             cerr << "Investigating precMzRange = [" << precMzMin << " - " << precMzMax << "]" << endl;
         }
 
-        pair<scanIterator, scanIterator> scansAtKey = scansByPrecursor.equal_range(mapKey);
+        vector<Scan*> scans = ms2ScansByBlockNumber[mapKey];
 
         Fragment *f = nullptr;
         int numScansPerPrecursorMz = 0;
-        for (scanIterator it = scansAtKey.first; it != scansAtKey.second; ++it) {
+        for (auto scan : scans) {
             if (numScansPerPrecursorMz == 0){
-                f = new Fragment(it->second, 0, 0, UINT_MAX);
+                f = new Fragment(scan, 0, 0, UINT_MAX);
 
-                directInfusionAnnotation->scan = it->second;
+                directInfusionAnnotation->scan = scan;
 
             } else {
-                Fragment *brother = new Fragment(it->second, 0, 0, UINT_MAX);
+                Fragment *brother = new Fragment(scan, 0, 0, UINT_MAX);
                 f->addFragment(brother);
             }
             numScansPerPrecursorMz++;
