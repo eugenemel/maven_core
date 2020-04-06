@@ -443,9 +443,12 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
         string precursorIsolationStrLower = isolationWindow["isolation window lower offset"];
         string precursorIsolationStrUpper = isolationWindow["isolation window upper offset"];
 
+        float isolationWindowLowerOffset = string2float(precursorIsolationStrLower);
+        float isolationWindowUpperOffset = string2float(precursorIsolationStrUpper);
+
         float precursorIsolationWindow=0;
-        if(string2float(precursorIsolationStrLower)>0) precursorIsolationWindow+=string2float(precursorIsolationStrLower);
-        if(string2float(precursorIsolationStrUpper)>0) precursorIsolationWindow+=string2float(precursorIsolationStrUpper);
+        if(isolationWindowLowerOffset>0) precursorIsolationWindow+=string2float(precursorIsolationStrLower);
+        if(isolationWindowUpperOffset>0) precursorIsolationWindow+=string2float(precursorIsolationStrUpper);
         if (precursorIsolationWindow <= 0) precursorIsolationWindow = 1.0; //default to 1.0
 
         float injectionTime=0;
@@ -492,6 +495,10 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
         scan->filterString = filterString;
         scan->lowerLimitMz = lowerLimitMz;
         scan->upperLimitMz = upperLimitMz;
+
+        if (isolationWindowLowerOffset>0) scan->isolationWindowLowerOffset = isolationWindowLowerOffset;
+        if (isolationWindowUpperOffset>0) scan->isolationWindowUpperOffset = isolationWindowUpperOffset;
+
         addScan(scan);
     }
  }

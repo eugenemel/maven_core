@@ -152,6 +152,10 @@ class Scan {
     float lowerLimitMz = -1.0f;
     float upperLimitMz = -1.0f;
 
+    //matters most for direct infusion data
+    float isolationWindowLowerOffset = -1.0f;
+    float isolationWindowUpperOffset = -1.0f;
+
     void addChildScan(Scan* s) { children.push_back(s); }
     vector<Scan*> getAllChildren() { return children; }
     Scan* getFirstChild() { if(children.size() == 0) return 0; else return children[0]; }
