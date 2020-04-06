@@ -179,7 +179,24 @@ public:
      */
     bool isAgglomerateAcrossSamples = false;
 
-
+    void printParams(){
+        cout << "minIndividualMs2ScanIntensity? " << minIndividualMs2ScanIntensity << endl
+             << "minNumMs2ScansForConsensus? " << minNumMs2ScansForConsensus << endl
+             << "minFractionMs2ScansForConsensus? " << minFractionMs2ScansForConsensus << endl
+             << "minNumMatches? " << minNumMatches << endl
+             << "minNumDiagnosticFragments? " << minNumDiagnosticFragments << endl
+             << "minNumUniqueMatches? " << minNumUniqueMatches << endl
+             << "isRequireAdductPrecursorMatch? " << (isRequireAdductPrecursorMatch ? "true" : "false") << endl
+             << "productPpmTolr? " << productPpmTolr << " ppm" << endl
+             << "productMinIntensity? " << productMinIntensity << endl
+             << "isFindPrecursorIonInMS1Scan? " << (isFindPrecursorIonInMS1Scan ? "true" : "false") << endl
+             << "parentPpmTolr? " << parentPpmTolr << " ppm" << endl
+             << "parentMinIntensity? " << parentMinIntensity << endl
+             << "ms1ScanFilter? " << ms1ScanFilter << endl
+             << "spectralCompositionAlgorithm? " << (spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES ? "ALL_CANDIDATES" : "OTHER") << endl
+             << "isAgglomerateAcrossSamples? " << (isAgglomerateAcrossSamples ? "true" : "false")
+             << endl;
+    }
 
 };
 
