@@ -106,6 +106,7 @@ struct FragmentationMatchScore {
         spearmanRankCorrelation=b.spearmanRankCorrelation;
         ticMatched=b.ticMatched;
         numMatches=b.numMatches;
+        numDiagnosticMatches=b.numDiagnosticMatches;
         ppmError=b.ppmError;
         mzFragError=b.mzFragError;
         mergedScore=b.mergedScore;
