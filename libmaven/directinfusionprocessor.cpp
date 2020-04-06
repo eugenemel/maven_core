@@ -382,7 +382,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         }
     }
 
-    //agglomerate (if necessary)
+    //agglomerate (if necessary), and return if valid matches exist.
     if (!libraryMatches.empty()){
 
         //Initialize output structure
