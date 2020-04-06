@@ -91,11 +91,6 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
     MassCalculator massCalc;
     map<int, DirectInfusionAnnotation*> annotations = {};
 
-    double totalTimeBuildConsensus = 0;
-    double totalTimeScoringHits = 0;
-    double totalTimeMatchingSpectra = 0;
-    double totalTimeFindingMs1 = 0;
-
     if (debug) cerr << "Started DirectInfusionProcessor::processSingleSample()" << endl;
 
     //Organize all scans by common precursor m/z
