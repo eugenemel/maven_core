@@ -177,7 +177,6 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
             directInfusionMatchData->adduct = libraryEntry.second;
             directInfusionMatchData->fragmentationMatchScore = s;
 
-
             libraryMatches.push_back(directInfusionMatchData);
         }
     }
