@@ -84,6 +84,8 @@ class Scan {
 
     inline unsigned int nobs() { return mz.size(); }
     inline mzSample* getSample() { return sample; }
+    inline float getPrecMzMin() {return precursorMz - isolationWindowLowerOffset;}
+    inline float getPrecMzMax() {return precursorMz + isolationWindowUpperOffset;}
 
     //Returns instrument-set scan min/max mzs if available.  If not, fall back to observed data.
     float getMinMz();
@@ -153,8 +155,9 @@ class Scan {
     float upperLimitMz = -1.0f;
 
     //matters most for direct infusion data
-    float isolationWindowLowerOffset = -1.0f;
-    float isolationWindowUpperOffset = -1.0f;
+    //assume 1Da window centered around precursorMz unless otherwise specified
+    float isolationWindowLowerOffset = 0.5f;
+    float isolationWindowUpperOffset = 0.5f;
 
     void addChildScan(Scan* s) { children.push_back(s); }
     vector<Scan*> getAllChildren() { return children; }
