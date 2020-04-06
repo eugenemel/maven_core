@@ -121,215 +121,226 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
     for (auto mapKey : directInfusionSearchSet->mapKeys){
 
-        //need MS2 scans to identify matches
-        if (ms2ScansByBlockNumber.find(mapKey) == ms2ScansByBlockNumber.end()) continue;
+        DirectInfusionAnnotation* directInfusionAnnotation = processBlock(mapKey,
+                                                                          directInfusionSearchSet->mzRangesByMapKey[mapKey],
+                                                                          sample,
+                                                                          ms2ScansByBlockNumber[mapKey],
+                                                                          validMs1Scans,
+                                                                          directInfusionSearchSet->compoundsByMapKey[mapKey],
+                                                                          params,
+                                                                          debug);
 
-        //need compounds to identify matches
-        if (directInfusionSearchSet->compoundsByMapKey.find(mapKey) == directInfusionSearchSet->compoundsByMapKey.end()) continue;
+        if (directInfusionAnnotation) annotations.insert(make_pair(mapKey, directInfusionAnnotation));
 
-        pair<float,float> mzRange = directInfusionSearchSet->mzRangesByMapKey.at(mapKey);
+//        //need MS2 scans to identify matches
+//        if (ms2ScansByBlockNumber.find(mapKey) == ms2ScansByBlockNumber.end()) continue;
 
-        float precMzMin = mzRange.first;
-        float precMzMax = mzRange.second;
+//        //need compounds to identify matches
+//        if (directInfusionSearchSet->compoundsByMapKey.find(mapKey) == directInfusionSearchSet->compoundsByMapKey.end()) continue;
 
-        DirectInfusionAnnotation *directInfusionAnnotation = new DirectInfusionAnnotation();
-        directInfusionAnnotation->precMzMin = precMzMin;
-        directInfusionAnnotation->precMzMax = precMzMax;
-        directInfusionAnnotation->sample = sample;
+//        pair<float,float> mzRange = directInfusionSearchSet->mzRangesByMapKey.at(mapKey);
 
-        vector<shared_ptr<DirectInfusionMatchData>> dIAnnotatedCompounds;
+//        float precMzMin = mzRange.first;
+//        float precMzMax = mzRange.second;
 
-        if (debug) {
-            cerr << "=========================================" << endl;
-            cerr << "Investigating precMzRange = [" << precMzMin << " - " << precMzMax << "]" << endl;
-        }
+//        DirectInfusionAnnotation *directInfusionAnnotation = new DirectInfusionAnnotation();
+//        directInfusionAnnotation->precMzMin = precMzMin;
+//        directInfusionAnnotation->precMzMax = precMzMax;
+//        directInfusionAnnotation->sample = sample;
 
-        vector<Scan*> scans = ms2ScansByBlockNumber[mapKey];
+//        vector<shared_ptr<DirectInfusionMatchData>> dIAnnotatedCompounds;
 
-        Fragment *f = nullptr;
+//        if (debug) {
+//            cerr << "=========================================" << endl;
+//            cerr << "Investigating precMzRange = [" << precMzMin << " - " << precMzMax << "]" << endl;
+//        }
 
-        for (auto scan : scans) {
-            if (!f){
-                f = new Fragment(scan, 0, 0, UINT_MAX);
-                directInfusionAnnotation->scan = scan;
-            } else {
-                Fragment *brother = new Fragment(scan, 0, 0, UINT_MAX);
-                f->addFragment(brother);
-            }
-        }
+//        vector<Scan*> scans = ms2ScansByBlockNumber[mapKey];
 
-        if (!f) {
-            delete(directInfusionAnnotation);
-            continue;
-        }
+//        Fragment *f = nullptr;
 
-        //Issue 192: time building consensus
-        auto startBuildConsensus = std::chrono::system_clock::now();
+//        for (auto scan : scans) {
+//            if (!f){
+//                f = new Fragment(scan, 0, 0, UINT_MAX);
+//                directInfusionAnnotation->scan = scan;
+//            } else {
+//                Fragment *brother = new Fragment(scan, 0, 0, UINT_MAX);
+//                f->addFragment(brother);
+//            }
+//        }
 
-        f->buildConsensus(params->productPpmTolr); //TODO: a separate parameter?        
-        f->consensus->sortByMz();
+//        if (!f) {
+//            delete(directInfusionAnnotation);
+//            continue;
+//        }
 
-        //Issue 192: time building consensus
-        auto stopBuildConsensus = std::chrono::system_clock::now();
-        std::chrono::duration<double> buildConsensusTime = stopBuildConsensus-startBuildConsensus;
-        totalTimeBuildConsensus += buildConsensusTime.count();
+//        //Issue 192: time building consensus
+//        auto startBuildConsensus = std::chrono::system_clock::now();
 
-        directInfusionAnnotation->fragmentationPattern = f;
+//        f->buildConsensus(params->productPpmTolr); //TODO: a separate parameter?
+//        f->consensus->sortByMz();
 
-        vector<pair<Compound*, Adduct*>> compoundMatches = directInfusionSearchSet->compoundsByMapKey[mapKey];
+//        //Issue 192: time building consensus
+//        auto stopBuildConsensus = std::chrono::system_clock::now();
+//        std::chrono::duration<double> buildConsensusTime = stopBuildConsensus-startBuildConsensus;
+//        totalTimeBuildConsensus += buildConsensusTime.count();
 
-        //check for ID bug
-        if (debug) cerr << "Precursor m/z of fragment spectrum: " << f->consensus->precursorMz << endl;
+//        directInfusionAnnotation->fragmentationPattern = f;
 
-        int compCounter = 0;
-        int matchCounter = 0;
-        for (auto pair : compoundMatches){
+//        vector<pair<Compound*, Adduct*>> compoundMatches = directInfusionSearchSet->compoundsByMapKey[mapKey];
 
-            Compound* compound = pair.first;
-            Adduct *adduct = pair.second;
+//        //check for ID bug
+//        if (debug) cerr << "Precursor m/z of fragment spectrum: " << f->consensus->precursorMz << endl;
 
-            if (debug) cerr << "Scoring compound hit: " <<  compound->name << "<--> f=" << f << endl;
+//        int compCounter = 0;
+//        int matchCounter = 0;
+//        for (auto pair : compoundMatches){
 
-            //Issue 192: time scoring hits
-            auto startScoringHit = std::chrono::system_clock::now();
+//            Compound* compound = pair.first;
+//            Adduct *adduct = pair.second;
 
-            //Issue 192: avoid unused scoring metrics
-            Fragment t;
-            t.precursorMz = compound->precursorMz;
-            t.mzs = compound->fragment_mzs;
-            t.intensity_array = compound->fragment_intensity;
-            t.fragment_labels = compound->fragment_labels;
+//            if (debug) cerr << "Scoring compound hit: " <<  compound->name << "<--> f=" << f << endl;
 
-            FragmentationMatchScore s;
+//            //Issue 192: time scoring hits
+//            auto startScoringHit = std::chrono::system_clock::now();
 
-            float maxDeltaMz = (params->productPpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
+//            //Issue 192: avoid unused scoring metrics
+//            Fragment t;
+//            t.precursorMz = compound->precursorMz;
+//            t.mzs = compound->fragment_mzs;
+//            t.intensity_array = compound->fragment_intensity;
+//            t.fragment_labels = compound->fragment_labels;
 
-            //Issue 192: time matching spectra
-            auto startMatchingSpectra = std::chrono::system_clock::now();
+//            FragmentationMatchScore s;
 
-            s.ranks = Fragment::findFragPairsGreedyMz(&t, f->consensus, maxDeltaMz);
+//            float maxDeltaMz = (params->productPpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
 
-            //Issue 192: time building consensus
-            auto stopMatchingSpectra = std::chrono::system_clock::now();
-            std::chrono::duration<double> matchingSpectraTime = stopMatchingSpectra-startMatchingSpectra;
-            totalTimeMatchingSpectra += matchingSpectraTime.count();
+//            //Issue 192: time matching spectra
+//            auto startMatchingSpectra = std::chrono::system_clock::now();
 
-            for(int rank: s.ranks) { if(rank != -1) s.numMatches++; }
+//            s.ranks = Fragment::findFragPairsGreedyMz(&t, f->consensus, maxDeltaMz);
 
-            bool isHasLabels = compound->fragment_labels.size() == s.ranks.size();
+//            //Issue 192: time building consensus
+//            auto stopMatchingSpectra = std::chrono::system_clock::now();
+//            std::chrono::duration<double> matchingSpectraTime = stopMatchingSpectra-startMatchingSpectra;
+//            totalTimeMatchingSpectra += matchingSpectraTime.count();
 
-            int numMatchAboveIntensityThreshold = 0;
-            int numDiagnosticMatches = 0;
-            for (int i=0; i < s.ranks.size(); i++) {
+//            for(int rank: s.ranks) { if(rank != -1) s.numMatches++; }
 
-                int y = s.ranks[i];
+//            bool isHasLabels = compound->fragment_labels.size() == s.ranks.size();
 
-                if (y != -1 && f->consensus->intensity_array[y] >= params->productMinIntensity) {
-                    numMatchAboveIntensityThreshold++;
+//            int numMatchAboveIntensityThreshold = 0;
+//            int numDiagnosticMatches = 0;
+//            for (int i=0; i < s.ranks.size(); i++) {
 
-                    //Issue 187
-                    if (isHasLabels && compound->fragment_labels[i].find("*") == 0) {
-                        numDiagnosticMatches++;
-                    }
-                }
-            }
+//                int y = s.ranks[i];
 
-            if (debug) cerr << "numMatchAboveIntensityThreshold=" << numMatchAboveIntensityThreshold << ", numDiagnosticMatches=" << numDiagnosticMatches << endl;
+//                if (y != -1 && f->consensus->intensity_array[y] >= params->productMinIntensity) {
+//                    numMatchAboveIntensityThreshold++;
 
-            bool isPassesMs1PrecursorRequirements = true;
+//                    //Issue 187
+//                    if (isHasLabels && compound->fragment_labels[i].find("*") == 0) {
+//                        numDiagnosticMatches++;
+//                    }
+//                }
+//            }
 
-            if (params->isFindPrecursorIonInMS1Scan) {
+//            if (debug) cerr << "numMatchAboveIntensityThreshold=" << numMatchAboveIntensityThreshold << ", numDiagnosticMatches=" << numDiagnosticMatches << endl;
 
-                auto startFindingPrecursor = std::chrono::system_clock::now();
+//            bool isPassesMs1PrecursorRequirements = true;
 
-                double precMz = compound->precursorMz;
-                if (!params->isRequireAdductPrecursorMatch) {
+//            if (params->isFindPrecursorIonInMS1Scan) {
 
-                    //Compute this way instead of using compound->precursorMz to allow for possibility of matching compound to unexpected adduct
-                    float compoundMz = adduct->computeAdductMass(massCalc.computeNeutralMass(compound->getFormula()));
-                    precMz = adduct->computeAdductMass(compoundMz);
+//                auto startFindingPrecursor = std::chrono::system_clock::now();
 
-                }
+//                double precMz = compound->precursorMz;
+//                if (!params->isRequireAdductPrecursorMatch) {
 
-                double minMz = precMz - precMz*params->parentPpmTolr/1e6;
-                double maxMz = precMz + precMz*params->parentPpmTolr/1e6;
+//                    //Compute this way instead of using compound->precursorMz to allow for possibility of matching compound to unexpected adduct
+//                    float compoundMz = adduct->computeAdductMass(massCalc.computeNeutralMass(compound->getFormula()));
+//                    precMz = adduct->computeAdductMass(compoundMz);
 
-                isPassesMs1PrecursorRequirements = false;
+//                }
 
-                for (auto scan : validMs1Scans) {
+//                double minMz = precMz - precMz*params->parentPpmTolr/1e6;
+//                double maxMz = precMz + precMz*params->parentPpmTolr/1e6;
 
-                    vector<int> matchingMzs = scan->findMatchingMzs(minMz, maxMz);
+//                isPassesMs1PrecursorRequirements = false;
 
-                    for (auto x : matchingMzs) {
-                        if (scan->intensity[x] >= params->parentMinIntensity) {
-                            isPassesMs1PrecursorRequirements = true;
-                            break;
-                        }
-                    }
+//                for (auto scan : validMs1Scans) {
 
-                    //no need to check other MS1 scans once a valid precursor has been found.
-                    if (isPassesMs1PrecursorRequirements) break;
-                }
+//                    vector<int> matchingMzs = scan->findMatchingMzs(minMz, maxMz);
 
-                auto stopFindingPrecursor = std::chrono::system_clock::now();
+//                    for (auto x : matchingMzs) {
+//                        if (scan->intensity[x] >= params->parentMinIntensity) {
+//                            isPassesMs1PrecursorRequirements = true;
+//                            break;
+//                        }
+//                    }
 
-                std::chrono::duration<double> findMs1Time = stopFindingPrecursor-startFindingPrecursor;
-                totalTimeFindingMs1 += findMs1Time.count();
-            }
+//                    //no need to check other MS1 scans once a valid precursor has been found.
+//                    if (isPassesMs1PrecursorRequirements) break;
+//                }
 
-            //Issue 192: time scoring hits
-            auto stopScoringHit = std::chrono::system_clock::now();
-            std::chrono::duration<double> scoringHitTime = stopScoringHit-startScoringHit;
-            totalTimeScoringHits += scoringHitTime.count();
+//                auto stopFindingPrecursor = std::chrono::system_clock::now();
 
-            if (numMatchAboveIntensityThreshold >= params->minNumMatches && numDiagnosticMatches >= params->minNumDiagnosticFragments && isPassesMs1PrecursorRequirements) {
+//                std::chrono::duration<double> findMs1Time = stopFindingPrecursor-startFindingPrecursor;
+//                totalTimeFindingMs1 += findMs1Time.count();
+//            }
 
-                if (debug) cerr << "Retain " << compound->name << ": " << s.numMatches << " matches." << endl;
+//            //Issue 192: time scoring hits
+//            auto stopScoringHit = std::chrono::system_clock::now();
+//            std::chrono::duration<double> scoringHitTime = stopScoringHit-startScoringHit;
+//            totalTimeScoringHits += scoringHitTime.count();
 
-                shared_ptr<DirectInfusionMatchData> directInfusionMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
-                directInfusionMatchData->compound = compound;
-                directInfusionMatchData->adduct = adduct;
-                directInfusionMatchData->fragmentationMatchScore = s;
+//            if (numMatchAboveIntensityThreshold >= params->minNumMatches && numDiagnosticMatches >= params->minNumDiagnosticFragments && isPassesMs1PrecursorRequirements) {
 
-                dIAnnotatedCompounds.push_back(directInfusionMatchData);
+//                if (debug) cerr << "Retain " << compound->name << ": " << s.numMatches << " matches." << endl;
 
-                matchCounter++;
-            }
+//                shared_ptr<DirectInfusionMatchData> directInfusionMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
+//                directInfusionMatchData->compound = compound;
+//                directInfusionMatchData->adduct = adduct;
+//                directInfusionMatchData->fragmentationMatchScore = s;
 
-            compCounter++;
-        }
+//                dIAnnotatedCompounds.push_back(directInfusionMatchData);
 
-        if (debug) {
-            cerr << "Matched " << matchCounter << "/" << compCounter << " compounds." << endl;
-            cerr << "=========================================" << endl;
-        }
+//                matchCounter++;
+//            }
 
-        if (matchCounter != 0){
-            if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES) {
-                directInfusionAnnotation->compounds = dIAnnotatedCompounds;
-            } else {
-//                if (debug) cerr << "Calling DirectInfusionProcessor::determineComposition()" << endl;
-                directInfusionAnnotation->compounds = DirectInfusionProcessor::determineComposition(dIAnnotatedCompounds, f->consensus, params, debug);
-            }
+//            compCounter++;
+//        }
 
-            annotations.insert(make_pair(mapKey, directInfusionAnnotation));
-        } else {
-            delete(directInfusionAnnotation->fragmentationPattern);
-            delete(directInfusionAnnotation);
-        }
+//        if (debug) {
+//            cerr << "Matched " << matchCounter << "/" << compCounter << " compounds." << endl;
+//            cerr << "=========================================" << endl;
+//        }
+
+//        if (matchCounter != 0){
+//            if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES) {
+//                directInfusionAnnotation->compounds = dIAnnotatedCompounds;
+//            } else {
+////                if (debug) cerr << "Calling DirectInfusionProcessor::determineComposition()" << endl;
+//                directInfusionAnnotation->compounds = DirectInfusionProcessor::determineComposition(dIAnnotatedCompounds, f->consensus, params, debug);
+//            }
+
+//            annotations.insert(make_pair(mapKey, directInfusionAnnotation));
+//        } else {
+//            delete(directInfusionAnnotation->fragmentationPattern);
+//            delete(directInfusionAnnotation);
+//        }
     }
 
-    if (debug) cerr << "Finished DirectInfusionProcessor::processSingleSample()" << endl;
+//    if (debug) cerr << "Finished DirectInfusionProcessor::processSingleSample()" << endl;
 
-    if (debug){
-        cerr << "=========================================\n"
-             << "DirectInfusionProcessor::processSingleSample() performance stats:"
-             << "\n\tConsensus Spectrum Formation: " << to_string(totalTimeBuildConsensus) << " s"
-             << "\n\tScoring Spectral Hits: " << to_string(totalTimeScoringHits) << " s"
-             << "\n\t\tMatching Spectra Time: " << to_string(totalTimeMatchingSpectra) << " s"
-             << "\n\t\tFind Precursor in MS1 Scans Time: " << to_string(totalTimeFindingMs1) << " s"
-             << "\n=========================================" << endl;
-    }
+//    if (debug){
+//        cerr << "=========================================\n"
+//             << "DirectInfusionProcessor::processSingleSample() performance stats:"
+//             << "\n\tConsensus Spectrum Formation: " << to_string(totalTimeBuildConsensus) << " s"
+//             << "\n\tScoring Spectral Hits: " << to_string(totalTimeScoringHits) << " s"
+//             << "\n\t\tMatching Spectra Time: " << to_string(totalTimeMatchingSpectra) << " s"
+//             << "\n\t\tFind Precursor in MS1 Scans Time: " << to_string(totalTimeFindingMs1) << " s"
+//             << "\n=========================================" << endl;
+//    }
 
     return annotations;
 
@@ -374,9 +385,11 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         if (s.numMatches >= params->minNumMatches && s.numDiagnosticMatches >= params->minNumDiagnosticFragments) {
 
             shared_ptr<DirectInfusionMatchData> directInfusionMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
+
             directInfusionMatchData->compound = libraryEntry.first;
             directInfusionMatchData->adduct = libraryEntry.second;
             directInfusionMatchData->fragmentationMatchScore = s;
+
 
             libraryMatches.push_back(directInfusionMatchData);
         }
@@ -391,6 +404,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         directInfusionAnnotation->precMzMax = mzRange.second;
         directInfusionAnnotation->sample = sample;
         directInfusionAnnotation->scan = representativeScan;
+        directInfusionAnnotation->fragmentationPattern = f;
 
         if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES) {
             directInfusionAnnotation->compounds = libraryMatches;
