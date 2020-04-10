@@ -46,6 +46,17 @@ enum class SpectralCompositionAlgorithm {
 };
 
 /**
+ * @brief The FragmentSpectrumFormationAlgorithm enum
+ *
+ * Determines how individual raw scans should be transformed into "Fragment" objects
+ * (which refer to an MS2 spectrum suitable for comparison to library spectra).
+ */
+enum class FragmentSpectrumFormationAlgorithm {
+    MAVEN_ORIGINAL,
+    ONLY_ABSOLUTE_THRESHOLD
+};
+
+/**
  * @brief The DirectInfusionSearchParameters class
  *
  * single class to contain all parameters used in direct infusion search analysis.
@@ -58,10 +69,12 @@ public:
      * SAMPLE DATA MANIPULATION
      * ========================*/
 
+    FragmentSpectrumFormationAlgorithm fragmentSpectrumFormationAlgorithm = FragmentSpectrumFormationAlgorithm::ONLY_ABSOLUTE_THRESHOLD;
+
     /**
      * @brief minIndividualMs2ScanIntensity
      * minimum intensity required for a single measurement from an MS2 scan
-     * to be used to create a consensus MS2 spectrum.
+     * to be used to create a single library-comparable fragment ms2 spectrum.
      */
     float minIndividualMs2ScanIntensity = 0;
 

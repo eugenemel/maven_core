@@ -72,7 +72,32 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
  * Skips unnecessary steps (like computing precursor purity), respects user-defined parameters
  */
 Fragment::Fragment(Scan *scan, shared_ptr<DirectInfusionSearchParameters> params){
-    //TODO
+
+    this->precursorMz = scan->precursorMz;
+    this->collisionEnergy = scan->collisionEnergy;
+    this->polarity = scan->getPolarity();
+    this->sampleName = scan->sample->sampleName;
+    this->scanNum = scan->scannum;
+    this->precursorCharge = scan->precursorCharge;
+    this->group = nullptr;
+    this->consensus = nullptr;
+    this->rt = scan->rt;
+    this->purity = 0;
+    this->mergeCount=0;
+    this->mergedScore=0;
+    this->clusterId=0;
+
+    if (params->fragmentSpectrumFormationAlgorithm == FragmentSpectrumFormationAlgorithm::ONLY_ABSOLUTE_THRESHOLD){
+        for (unsigned int i = 0; i < scan->nobs(); i++) {
+            if (scan->intensity[i] >= params->minIndividualMs2ScanIntensity) {
+                this->mzs.push_back(scan->mz[i]);
+                this->intensity_array.push_back(scan->intensity[i]);
+                this->fragment_labels.push_back("");
+            }
+        }
+        this->sortedBy = SortType::Mz; // scans should always be encoded in increasing m/z.
+        this->obscount = vector<int>( this->mzs.size(), 1); //used when creating consensus spectra.
+    }
 }
 
 //delete
