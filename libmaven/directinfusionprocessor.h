@@ -193,7 +193,8 @@ public:
     bool isAgglomerateAcrossSamples = false;
 
     void printParams(){
-        cout << "minIndividualMs2ScanIntensity? " << minIndividualMs2ScanIntensity << endl
+        cout << "fragmentSpectrumFormationAlgorithm? " << (fragmentSpectrumFormationAlgorithm == FragmentSpectrumFormationAlgorithm::MAVEN_ORIGINAL ? "MAVEN_ORIGINAL" : "DI_TAILORED") << endl
+             << "minIndividualMs2ScanIntensity? " << minIndividualMs2ScanIntensity << endl
              << "minNumMs2ScansForConsensus? " << minNumMs2ScansForConsensus << endl
              << "minFractionMs2ScansForConsensus? " << minFractionMs2ScansForConsensus << endl
              << "minNumMatches? " << minNumMatches << endl
