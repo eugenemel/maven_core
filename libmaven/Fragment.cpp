@@ -25,7 +25,7 @@ Fragment::Fragment() {
 
 
 //build fragment based on MS2 scan
-Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRatio,unsigned int maxFragmentSize) {
+Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRatio, unsigned int maxFragmentSize) {
     this->precursorMz = scan->precursorMz;
     this->collisionEnergy = scan->collisionEnergy;
     this->polarity = scan->getPolarity();
@@ -46,7 +46,7 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
     }
     */
 
-    vector<pair<float,float> >mzarray = scan->getTopPeaks(minFractionalIntensity,minSigNoiseRatio,baseLineLevel);
+    vector<pair<float,float> >mzarray = scan->getTopPeaks(minFractionalIntensity, minSigNoiseRatio, baseLineLevel);
 
     for(unsigned int j=0; j<mzarray.size() && j < maxFragmentSize; j++ ) {
 		if (mzarray[j].second < this->precursorMz-1 ) { //remove fragments higher than precursorMz
@@ -588,7 +588,11 @@ void Fragment::truncateTopN(int n) {
 
 
 void Fragment::buildConsensus(float productPpmTolr) {
-    if(this->consensus != NULL) {  delete(this->consensus); this->consensus=NULL; }
+
+    if(this->consensus) {
+        delete(this->consensus);
+        this->consensus=nullptr;
+    }
 
 	//find brother with largest nobs
 	Fragment* seed= this;
