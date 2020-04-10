@@ -24,8 +24,17 @@ Fragment::Fragment() {
 }
 
 
-//build fragment based on MS2 scan
-Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRatio, unsigned int maxFragmentSize) {
+/**
+ * @brief Fragment::Fragment
+ * from a single MS2 scan, create an adjusted MS2 spectrum to compare to library spectra.
+ *
+ * @param scan
+ * @param minFractionalIntensity
+ * @param minSigNoiseRatio
+ * @param maxFragmentSize
+ * @param baseLineLevel (expressed as a percentage)
+ */
+Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRatio, unsigned int maxFragmentSize, int baseLineLevel) {
     this->precursorMz = scan->precursorMz;
     this->collisionEnergy = scan->collisionEnergy;
     this->polarity = scan->getPolarity();
@@ -35,16 +44,6 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
 	this->mergeCount=0;
 	this->mergedScore=0;
 	this->clusterId=0;
-
-    int baseLineLevel=5; //lowest 5% of data are considered to be baseline
-
-    //don't worry about baseline.. keeping all points
-	/*
-    if(scan->nobs()<maxFragmentSize) { 
-        minSigNoiseRatio=0; 
-        minFractionalIntensity=0;
-    }
-    */
 
     vector<pair<float,float> >mzarray = scan->getTopPeaks(minFractionalIntensity, minSigNoiseRatio, baseLineLevel);
 
