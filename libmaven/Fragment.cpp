@@ -768,34 +768,6 @@ void Fragment::sortByMz() {
     sortedBy = Fragment::SortType::Mz;
 }
 
-void Fragment::buildConsensusAvg() { 
-    map<float,double> mz_intensity_map;
-    map<float,double> mz_bin_map;
-    map<float,int> mz_count;
-
-    vector<Fragment*> fragmentList = brothers;
-    fragmentList.push_back(this);
-
-    for(unsigned int i=0; i<fragmentList.size(); i++) {
-        Fragment* brother = fragmentList[i];
-        for(unsigned int j=0; j < brother->mzs.size(); j++) {
-            float bin = (round(brother->mzs[j]+0.5)*10)/10;
-            mz_intensity_map[bin] += ((double) brother->intensity_array[j]);
-            mz_bin_map[bin] += ((double)(brother->intensity_array[j])*(brother->mzs[j]));
-            mz_count[bin]++;
-        }
-    }
-    map<float,double>::iterator itr;
-    for(itr = mz_intensity_map.begin(); itr != mz_intensity_map.end(); ++itr ) {
-        float bin = (*itr).first;
-        double totalIntensity=(*itr).second;
-        double avgMz =  mz_bin_map[bin] / totalIntensity;
-        cerr << "\t" << setprecision(3) << avgMz << " " << totalIntensity/mz_count[bin] << endl;
-        //avgScan->mz.push_back((float)avgMz);
-        //avgScan->intensity.push_back((float) totalIntensity / mz_count[bin]);
-    }
-}
-
 
 double Fragment::spearmanRankCorrelation(const vector<int>& X) {
     double d2=0; 

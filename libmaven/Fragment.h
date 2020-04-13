@@ -198,7 +198,6 @@ class Fragment {
 
         void sortByIntensity();
         void sortByMz();
-        void buildConsensusAvg();
 		void mergeFragment(Fragment* brother, float productPpmTolr);
 
 
