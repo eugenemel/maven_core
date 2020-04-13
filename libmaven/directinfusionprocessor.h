@@ -100,9 +100,6 @@ public:
     float minFractionMs2ScansForConsensus = 0;
 
     /**
-     *
-     * ISSUE 191 TODO: not yet implemented
-     *
      * @brief isIntensityAvgByObserved
      * Consensus intensity should be averaged based on either
      * (A) all scans where a fragment m/z could have been found (isIntensityAvgByObserved=false)
@@ -112,9 +109,6 @@ public:
     bool isIntensityAvgByObserved = true;
 
     /**
-     *
-     * ISSUE 191 TODO: not yet implemented
-     *
      * @brief isNormalizeIntensityArray
      * If true, all intensities are scaled so tha the max intensity value is 10000.
      * If false, intensities values are returned as-is.

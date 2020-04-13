@@ -174,7 +174,11 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         }
     }
 
-    f->buildConsensus(params->productPpmTolr); //TODO: a separate parameter?
+    f->buildConsensus(params->productPpmTolr,
+                      params->isIntensityAvgByObserved,
+                      params->isNormalizeIntensityArray
+                      );
+
     f->consensus->sortByMz();
 
     vector<shared_ptr<DirectInfusionMatchData>> libraryMatches;
