@@ -176,7 +176,9 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 
     f->buildConsensus(params->productPpmTolr,
                       params->isIntensityAvgByObserved,
-                      params->isNormalizeIntensityArray
+                      params->isNormalizeIntensityArray,
+                      params->minNumMs2ScansForConsensus,
+                      params->minFractionMs2ScansForConsensus
                       );
 
     f->consensus->sortByMz();

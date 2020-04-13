@@ -618,7 +618,11 @@ void Fragment::truncateTopN(int n) {
 }
 
 
-void Fragment::buildConsensus(float productPpmTolr, bool isIntensityAvgByObserved, bool isNormalizeIntensityArray) {
+void Fragment::buildConsensus(float productPpmTolr,
+                              bool isIntensityAvgByObserved,
+                              bool isNormalizeIntensityArray,
+                              int minNumMs2ScansForConsensus,
+                              float minFractionMs2ScansForConsensus) {
 
     if(this->consensus) {
         delete(this->consensus);
@@ -632,6 +636,8 @@ void Fragment::buildConsensus(float productPpmTolr, bool isIntensityAvgByObserve
     Fragment* Cons = new Fragment(seed);  //make a copy of self
     this->consensus = Cons;
     Cons->sortByMz();
+
+    unsigned long N = 1 + brothers.size();
 
     for(unsigned int i=0; i<brothers.size(); i++) {
         Fragment* brother = brothers[i];
@@ -661,9 +667,32 @@ void Fragment::buildConsensus(float productPpmTolr, bool isIntensityAvgByObserve
     //compute avererage purity
     Cons->purity = this->consensusPurity();
 
+    //optionally filter values from scans based on number of observations
+    if (minNumMs2ScansForConsensus > 0 || minFractionMs2ScansForConsensus > 0) {
+
+        vector<float> filtered_mzs;
+        vector<float> filtered_intensities;
+        vector<string> filtered_fragment_labels;
+        vector<int> filtered_obscount;
+
+        for (unsigned int i = 0; i < Cons->mzs.size(); i++){
+            float frac = static_cast<float>(Cons->obscount[i]) / static_cast<float>(N);
+            if (Cons->obscount[i] >= minNumMs2ScansForConsensus && frac >= minFractionMs2ScansForConsensus) {
+                filtered_mzs.push_back(Cons->mzs[i]);
+                filtered_intensities.push_back(Cons->intensity_array[i]);
+                filtered_fragment_labels.push_back(Cons->fragment_labels[i]);
+                filtered_obscount.push_back(Cons->obscount[i]);
+            }
+        }
+
+        Cons->mzs = filtered_mzs;
+        Cons->intensity_array = filtered_intensities;
+        Cons->fragment_labels = filtered_fragment_labels;
+        Cons->obscount = filtered_obscount;
+    }
+
     //average values 
 	if( brothers.size() >= 1) {
-        unsigned long N = 1 + brothers.size();
         for(unsigned int i=0; i<Cons->intensity_array.size(); i++){
             Cons->intensity_array[i] /= (isIntensityAvgByObserved ? Cons->obscount[i] : N);
         }

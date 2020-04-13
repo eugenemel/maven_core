@@ -79,8 +79,6 @@ public:
     float minIndividualMs2ScanIntensity = 0;
 
     /**
-     * ISSUE 191 TODO: not yet implemented
-     *
      * @brief minNumMs2ScansForConsensus
      * Minimum number of times an (m/z, intensity) fragment peak
      * must be seen with an intensity greater than @param minIndividualMs2ScanIntensity
@@ -89,9 +87,6 @@ public:
     int minNumMs2ScansForConsensus = 0;
 
     /**
-     *
-     * ISSUE 191 TODO: not yet implemented
-     *
      * @brief minFractionMs2ScansForConsensus
      * Mininum proportion of all available scans in which a given (m/z, intensity)
      * fragment peak is observed with an intensity greater than @param minIndividualMs2ScanIntensity
