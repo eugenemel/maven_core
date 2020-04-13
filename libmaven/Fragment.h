@@ -191,10 +191,10 @@ class Fragment {
         static vector<int> locatePositions( Fragment* a, Fragment* b, float productPpmToll);
         static vector<int> findFragPairsGreedyMz(Fragment* a, Fragment* b, float maxMzDiff);
 
-        void buildConsensus(float productPpmTolr);
+        void buildConsensus(float productPpmTolr, bool isIntensityAvgByObserved=false, bool isNormalizeIntensityArray=true);
+
         vector<unsigned int> intensityOrderDesc();
         vector<int> mzOrderInc();
-
 
         void sortByIntensity();
         void sortByMz();

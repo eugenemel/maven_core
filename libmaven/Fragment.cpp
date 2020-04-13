@@ -618,7 +618,7 @@ void Fragment::truncateTopN(int n) {
 }
 
 
-void Fragment::buildConsensus(float productPpmTolr) {
+void Fragment::buildConsensus(float productPpmTolr, bool isIntensityAvgByObserved, bool isNormalizeIntensityArray) {
 
     if(this->consensus) {
         delete(this->consensus);
@@ -663,17 +663,22 @@ void Fragment::buildConsensus(float productPpmTolr) {
 
     //average values 
 	if( brothers.size() >= 1) {
-		int N = 1+brothers.size();
-		for(unsigned int i=0; i<Cons->intensity_array.size(); i++) Cons->intensity_array[i] /= N;
+        unsigned long N = 1 + brothers.size();
+        for(unsigned int i=0; i<Cons->intensity_array.size(); i++){
+            Cons->intensity_array[i] /= (isIntensityAvgByObserved ? Cons->obscount[i] : N);
+        }
 	}
 	
-    Cons->sortByIntensity();
-	if (Cons->intensity_array.size() > 1) {
-		float maxValue = Cons->intensity_array[0];
-		for(unsigned int i=0; i<Cons->intensity_array.size(); i++)  {
-		   	Cons->intensity_array[i] = Cons->intensity_array[i]/maxValue*10000;
-		}
-	}
+    //normalize intensities (if specified)
+    if (isNormalizeIntensityArray) {
+        Cons->sortByIntensity();
+        if (Cons->intensity_array.size() > 1) {
+            float maxValue = Cons->intensity_array[0];
+            for(unsigned int i=0; i<Cons->intensity_array.size(); i++)  {
+                Cons->intensity_array[i] = Cons->intensity_array[i]/maxValue*10000;
+            }
+        }
+    }
 
     this->consensus = Cons; 
 }
