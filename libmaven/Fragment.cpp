@@ -87,13 +87,20 @@ Fragment::Fragment(Scan *scan, shared_ptr<DirectInfusionSearchParameters> params
     this->clusterId=0;
 
     if (params->fragmentSpectrumFormationAlgorithm == FragmentSpectrumFormationAlgorithm::ONLY_ABSOLUTE_THRESHOLD){
-        for (unsigned int i = 0; i < scan->nobs(); i++) {
-            if (scan->intensity[i] >= params->minIndividualMs2ScanIntensity) {
-                this->mzs.push_back(scan->mz[i]);
-                this->intensity_array.push_back(scan->intensity[i]);
-                this->fragment_labels.push_back("");
+        if (params->minIndividualMs2ScanIntensity > 0) {
+            for (unsigned int i = 0; i < scan->nobs(); i++) {
+                if (scan->intensity[i] >= params->minIndividualMs2ScanIntensity) {
+                    this->mzs.push_back(scan->mz[i]);
+                    this->intensity_array.push_back(scan->intensity[i]);
+                    this->fragment_labels.push_back("");
+                }
             }
+        } else {
+            this->mzs = scan->mz;
+            this->intensity_array = scan->intensity;
+            this->fragment_labels = vector<string>(this->mzs.size(), "");
         }
+
         this->sortedBy = SortType::Mz; // scans should always be encoded in increasing m/z.
         this->obscount = vector<int>( this->mzs.size(), 1); //used when creating consensus spectra.
     }
