@@ -79,6 +79,8 @@ public:
     float minIndividualMs2ScanIntensity = 0;
 
     /**
+     * ISSUE 191 TODO: not yet implemented
+     *
      * @brief minNumMs2ScansForConsensus
      * Minimum number of times an (m/z, intensity) fragment peak
      * must be seen with an intensity greater than @param minIndividualMs2ScanIntensity
@@ -87,12 +89,38 @@ public:
     int minNumMs2ScansForConsensus = 0;
 
     /**
+     *
+     * ISSUE 191 TODO: not yet implemented
+     *
      * @brief minFractionMs2ScansForConsensus
      * Mininum proportion of all available scans in which a given (m/z, intensity)
      * fragment peak is observed with an intensity greater than @param minIndividualMs2ScanIntensity
      * in order to include this peak in the consensus spectrum.
      */
     float minFractionMs2ScansForConsensus = 0;
+
+    /**
+     *
+     * ISSUE 191 TODO: not yet implemented
+     *
+     * @brief isIntensityAvgByObserved
+     * Consensus intensity should be averaged based on either
+     * (A) all scans where a fragment m/z could have been found (isIntensityAvgByObserved=false)
+     * or
+     * (B) all scans where a framgnet m/z was actually found (isIntensityAvgByObserved=true)
+     */
+    bool isIntensityAvgByObserved = true;
+
+    /**
+     *
+     * ISSUE 191 TODO: not yet implemented
+     *
+     * @brief isNormalizeIntensityArray
+     * If true, all intensities are scaled so tha the max intensity value is 10000.
+     * If false, intensities values are returned as-is.
+     * In regular MAVEN, this is always true.
+     */
+    bool isNormalizeIntensityArray = false;
 
     /** ===================
      * MS2 - SEARCH RELATED
