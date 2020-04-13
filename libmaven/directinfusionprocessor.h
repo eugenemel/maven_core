@@ -104,7 +104,7 @@ public:
      * Consensus intensity should be averaged based on either
      * (A) all scans where a fragment m/z could have been found (isIntensityAvgByObserved=false)
      * or
-     * (B) all scans where a framgnet m/z was actually found (isIntensityAvgByObserved=true)
+     * (B) all scans where a framgent m/z was actually found (isIntensityAvgByObserved=true)
      */
     bool isIntensityAvgByObserved = true;
 
