@@ -240,6 +240,7 @@ struct DirectInfusionMatchData {
     Compound* compound;
     Adduct* adduct;
     FragmentationMatchScore fragmentationMatchScore;
+    float fragmentMaxObservedIntensity = 0;
     double proportion = 0;
 };
 
@@ -475,7 +476,7 @@ public:
       *
       * Designed to be multithreaded, work of comparing / evaluating individual matches
       */
-     static FragmentationMatchScore assessMatch(const Fragment *f,
+     static pair<FragmentationMatchScore, float> assessMatch(const Fragment *f,
                              const vector<Scan*>& ms1Scans,
                              const pair<Compound*, Adduct*>& libraryMatch,
                              const shared_ptr<DirectInfusionSearchParameters> params,

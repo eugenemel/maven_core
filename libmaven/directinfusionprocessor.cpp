@@ -188,7 +188,9 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
     //Compare to library
     for (auto libraryEntry : library){
 
-        FragmentationMatchScore s = assessMatch(f, ms1Scans, libraryEntry, params, debug);
+        pair<FragmentationMatchScore, float> matchAssessment = assessMatch(f, ms1Scans, libraryEntry, params, debug);
+        FragmentationMatchScore s = matchAssessment.first;
+        float fragmentMaxObservedIntensity = matchAssessment.second;
 
         if (s.numMatches >= params->minNumMatches && s.numDiagnosticMatches >= params->minNumDiagnosticFragments) {
 
@@ -197,6 +199,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
             directInfusionMatchData->compound = libraryEntry.first;
             directInfusionMatchData->adduct = libraryEntry.second;
             directInfusionMatchData->fragmentationMatchScore = s;
+            directInfusionMatchData->fragmentMaxObservedIntensity = fragmentMaxObservedIntensity;
 
             libraryMatches.push_back(directInfusionMatchData);
         }
@@ -229,7 +232,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
     return nullptr;
 }
 
-FragmentationMatchScore DirectInfusionProcessor::assessMatch(const Fragment *f,
+pair<FragmentationMatchScore, float> DirectInfusionProcessor::assessMatch(const Fragment *f,
                                                              const vector<Scan *> &ms1Scans,
                                                              const pair<Compound*, Adduct*>& libraryEntry,
                                                              const shared_ptr<DirectInfusionSearchParameters> params,
@@ -280,7 +283,7 @@ FragmentationMatchScore DirectInfusionProcessor::assessMatch(const Fragment *f,
 
      }
 
-     if (!isPassesMs1PrecursorRequirements) return FragmentationMatchScore(); // will return with no matching fragments, 0 for every score
+     if (!isPassesMs1PrecursorRequirements) return make_pair(FragmentationMatchScore(), 0); // will return with no matching fragments, 0 for every score
 
     //=============================================== //
     //END COMPARE MS1
@@ -301,9 +304,17 @@ FragmentationMatchScore DirectInfusionProcessor::assessMatch(const Fragment *f,
 
     bool isHasLabels = compound->fragment_labels.size() == s.ranks.size();
 
+    float fragmentMaxObservedIntensity = 0;
+
     for (unsigned long i=0; i < s.ranks.size(); i++) {
 
         int y = s.ranks[i];
+
+        float fragmentObservedIntensity = f->consensus->intensity_array[y];
+
+        if (fragmentObservedIntensity > fragmentMaxObservedIntensity) {
+            fragmentMaxObservedIntensity = fragmentObservedIntensity;
+        }
 
         if (y != -1 && f->consensus->intensity_array[y] >= params->productMinIntensity) {
 
@@ -320,7 +331,7 @@ FragmentationMatchScore DirectInfusionProcessor::assessMatch(const Fragment *f,
     //END COMPARE MS2
     //=============================================== //
 
-    return s;
+    return make_pair(s, fragmentMaxObservedIntensity);
 }
 
 unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInformation(
