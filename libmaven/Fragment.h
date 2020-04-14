@@ -98,7 +98,7 @@ struct FragmentationMatchScore {
         hypergeomScore=0;
         mvhScore=0;
         ms2purity=0;
-		dotProductShuffle=0;
+        dotProductShuffle=0;
     }
 
     FragmentationMatchScore& operator=(const FragmentationMatchScore& b) {
