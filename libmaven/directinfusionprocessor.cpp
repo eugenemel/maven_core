@@ -310,13 +310,13 @@ pair<FragmentationMatchScore, float> DirectInfusionProcessor::assessMatch(const 
 
         int y = s.ranks[i];
 
-        float fragmentObservedIntensity = f->consensus->intensity_array[y];
-
-        if (fragmentObservedIntensity > fragmentMaxObservedIntensity) {
-            fragmentMaxObservedIntensity = fragmentObservedIntensity;
-        }
-
         if (y != -1 && f->consensus->intensity_array[y] >= params->productMinIntensity) {
+
+            float fragmentObservedIntensity = f->consensus->intensity_array[y];
+
+            if (fragmentObservedIntensity > fragmentMaxObservedIntensity) {
+                fragmentMaxObservedIntensity = fragmentObservedIntensity;
+            }
 
             s.numMatches++;
 
