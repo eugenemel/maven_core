@@ -210,23 +210,73 @@ public:
     bool isAgglomerateAcrossSamples = false;
 
     void printParams(){
-        cout << "fragmentSpectrumFormationAlgorithm? " << (fragmentSpectrumFormationAlgorithm == FragmentSpectrumFormationAlgorithm::MAVEN_ORIGINAL ? "MAVEN_ORIGINAL" : "DI_TAILORED") << endl
-             << "minIndividualMs2ScanIntensity? " << minIndividualMs2ScanIntensity << endl
-             << "minNumMs2ScansForConsensus? " << minNumMs2ScansForConsensus << endl
-             << "minFractionMs2ScansForConsensus? " << minFractionMs2ScansForConsensus << endl
-             << "minNumMatches? " << minNumMatches << endl
-             << "minNumDiagnosticFragments? " << minNumDiagnosticFragments << endl
-             << "minNumUniqueMatches? " << minNumUniqueMatches << endl
-             << "isRequireAdductPrecursorMatch? " << (isRequireAdductPrecursorMatch ? "true" : "false") << endl
-             << "productPpmTolr? " << productPpmTolr << " ppm" << endl
-             << "productMinIntensity? " << productMinIntensity << endl
-             << "isFindPrecursorIonInMS1Scan? " << (isFindPrecursorIonInMS1Scan ? "true" : "false") << endl
-             << "parentPpmTolr? " << parentPpmTolr << " ppm" << endl
-             << "parentMinIntensity? " << parentMinIntensity << endl
-             << "ms1ScanFilter? " << ms1ScanFilter << endl
-             << "spectralCompositionAlgorithm? " << (spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES ? "ALL_CANDIDATES" : "OTHER") << endl
-             << "isAgglomerateAcrossSamples? " << (isAgglomerateAcrossSamples ? "true" : "false")
-             << endl;
+//        cout << "fragmentSpectrumFormationAlgorithm? " << (fragmentSpectrumFormationAlgorithm == FragmentSpectrumFormationAlgorithm::MAVEN_ORIGINAL ? "MAVEN_ORIGINAL" : "DI_TAILORED") << endl
+//             << "minIndividualMs2ScanIntensity? " << minIndividualMs2ScanIntensity << endl
+//             << "minNumMs2ScansForConsensus? " << minNumMs2ScansForConsensus << endl
+//             << "minFractionMs2ScansForConsensus? " << minFractionMs2ScansForConsensus << endl
+//             << "minNumMatches? " << minNumMatches << endl
+//             << "minNumDiagnosticFragments? " << minNumDiagnosticFragments << endl
+//             << "minNumUniqueMatches? " << minNumUniqueMatches << endl
+//             << "isRequireAdductPrecursorMatch? " << (isRequireAdductPrecursorMatch ? "true" : "false") << endl
+//             << "productPpmTolr? " << productPpmTolr << " ppm" << endl
+//             << "productMinIntensity? " << productMinIntensity << endl
+//             << "isFindPrecursorIonInMS1Scan? " << (isFindPrecursorIonInMS1Scan ? "true" : "false") << endl
+//             << "parentPpmTolr? " << parentPpmTolr << " ppm" << endl
+//             << "parentMinIntensity? " << parentMinIntensity << endl
+//             << "ms1ScanFilter? " << ms1ScanFilter << endl
+//             << "spectralCompositionAlgorithm? " << (spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES ? "ALL_CANDIDATES" : "OTHER") << endl
+//             << "isAgglomerateAcrossSamples? " << (isAgglomerateAcrossSamples ? "true" : "false")
+//             << endl;
+        cout << getFormattedParams() << endl;
+    }
+
+    string getFormattedParams() {
+        string formattedParams;
+
+        formattedParams += "MS2 Spectrum Formation:\n";
+        formattedParams += "fragmentSpectrumFormationAlgorithm? ";
+
+        if (fragmentSpectrumFormationAlgorithm == FragmentSpectrumFormationAlgorithm::MAVEN_ORIGINAL){
+            formattedParams += "MAVEN_ORIGINAL";
+        } else if (fragmentSpectrumFormationAlgorithm == FragmentSpectrumFormationAlgorithm::ONLY_ABSOLUTE_THRESHOLD) {
+            formattedParams += "ONLY_ABSOLUTE_THRESHOLD";
+        }
+        formattedParams += "\n";
+
+        formattedParams += "minIndividualMs2ScanIntensity? " + std::to_string(minIndividualMs2ScanIntensity) + "\n";
+        formattedParams += "minNumMs2ScansForConsensus? " + std::to_string(minNumMs2ScansForConsensus) + "\n";
+        formattedParams += "minFractionMs2ScansForConsensus? " + std::to_string(minFractionMs2ScansForConsensus) + "\n";
+
+        formattedParams += "\nLibrary Search:\n";
+        formattedParams += "minNumMatches? " + std::to_string(minNumMatches) + "\n";
+        formattedParams += "minNumDiagnosticFragments? " + std::to_string(minNumDiagnosticFragments) + "\n";
+
+        string isRequireAdductPrecursorMatchString = (isRequireAdductPrecursorMatch ? "true" : "false");
+        formattedParams += "isRequireAdductPrecursorMatch? " + isRequireAdductPrecursorMatchString + "\n";
+
+        formattedParams += "productPpmTolr? (fragment ion m/z matching tolerance) " + std::to_string(productPpmTolr) + " ppm" + "\n";
+        formattedParams += "productMinIntensity? (observed in consensus spectrum) " + std::to_string(productMinIntensity) + "\n";
+
+        string isFindPrecursorIonInMS1ScanString = (isFindPrecursorIonInMS1Scan ? "true" : "false");
+        formattedParams += "isFindPrecursorIonInMS1Scan? " + isFindPrecursorIonInMS1ScanString + "\n";
+
+        formattedParams += "parentPpmTolr? (precursor ion m/z matching tolerance) " + std::to_string(parentPpmTolr) + " ppm" + "\n";
+        formattedParams += "parentMinIntensity? (observed in any valid MS1 scan) " + std::to_string(parentMinIntensity) + "\n";
+        formattedParams += "ms1ScanFilter? (only these MS1 scans are considered valid) " + ms1ScanFilter + "\n";
+
+        formattedParams += "\nSpectral Composition and Agglomeration:\n";
+        formattedParams += "spectralCompositionAlgorithm? ";
+        if (spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES){
+            formattedParams += "ALL_CANDIDATES";
+        } else if ( spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE) {
+            formattedParams += "AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE";
+        }
+        formattedParams += "\n";
+
+        string isAgglomerateAcrossSamplesString = (isAgglomerateAcrossSamples ? "true" : "false");
+        formattedParams += "isAgglomerateAcrossSamples? " + isAgglomerateAcrossSamplesString + "\n";
+
+        return formattedParams;
     }
 
 };
