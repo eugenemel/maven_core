@@ -685,6 +685,7 @@ void Fragment::buildConsensus(float productPpmTolr,
                 Cons->fragment_labels.push_back(brother->fragment_labels[j]);
             }
         }
+        Cons->sortedBy = SortType::None;
         Cons->sortByMz();
     }
 
