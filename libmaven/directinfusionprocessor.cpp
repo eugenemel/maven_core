@@ -523,6 +523,10 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
              */
             summarizedCompound->formula = compounds.at(0)->getFormula();
             summarizedCompound->precursorMz = compounds.at(0)->precursorMz;
+            summarizedCompound->setExactMass(compounds.at(0)->getExactMass());
+            summarizedCompound->charge = compounds.at(0)->charge;
+            summarizedCompound->db = "summarized";
+            summarizedCompound->id = summarizedCompound->name + summarizedCompound->adductString;
 
             summarizedCompound->computeFragments();
 
