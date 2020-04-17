@@ -163,6 +163,9 @@ class Fragment {
         //copy constructor
         Fragment( Fragment* other);
 
+        //fragment is just a direct copy of everything in scan, with no filtering or adjustment.
+        Fragment(Scan* scan);
+
         //build fragment based on MS2 scan
         Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRatio, unsigned int maxFragmentSize, int baseLineLevel=5);
 

@@ -106,6 +106,33 @@ Fragment::Fragment(Scan *scan, shared_ptr<DirectInfusionSearchParameters> params
     }
 }
 
+/**
+ * @brief Fragment::Fragment
+ * @param scan
+ *
+ * The data from the scan is directly copied into the Fragment, with no filtering or adjusting.
+ */
+Fragment::Fragment(Scan *scan){
+    this->precursorMz = scan->precursorMz;
+    this->collisionEnergy = scan->collisionEnergy;
+    this->polarity = scan->getPolarity();
+    this->sampleName = scan->sample->sampleName;
+    this->scanNum = scan->scannum;
+    this->precursorCharge = scan->precursorCharge;
+    this->group = nullptr;
+    this->consensus = nullptr;
+    this->rt = scan->rt;
+    this->purity = 0;
+    this->mergeCount=0;
+    this->mergedScore=0;
+    this->clusterId=0;
+    this->mzs = scan->mz;
+    this->intensity_array = scan->intensity;
+    this->fragment_labels = vector<string>(this->mzs.size(), "");
+    this->sortedBy = SortType::Mz; // scans should always be encoded in increasing m/z.
+    this->obscount = vector<int>( this->mzs.size(), 1); //used when creating consensus spectra.
+}
+
 //delete
 Fragment::~Fragment() {
     mzUtils::delete_all(brothers);
