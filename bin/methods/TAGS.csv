@@ -1,0 +1,7 @@
+#tag_name,label,hotkey,icon,description
+isomers,i,1,blue_star.png,"Peak Group is chimeric, contains multiple structural isomers"
+mixture,m,2,black_circle.png,Peak Group spectrum is a mixture of multiple MS2s from non-isomeric species.
+library,l,3,pink_star.png,Peak Group spectrum is high quality enough to be reviewed to become a library spectrum for future matching.
+revisit,r,4,daffodil_triangle.png,Revisit this Peak Group later.
+coelution problem,q,5,orange_circle.png,The Coelution group of this Peak Group is incorrect.
+minor adduct,a,6,green_triangle.png,Peak Group has an unusual adduct form.
