@@ -118,12 +118,14 @@ vector<Compound*> SummarizedCompound::getChildren() {return children;}
 void SummarizedCompound::computeFragments() {
 
     map<int, vector<float>> intensitiesByMz = {};
+    map<int, vector<string>> labelsByMz = {};
 
     for (auto compound : getChildren()) {
         for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
 
             int mzKey = mzUtils::mzToIntKey(compound->fragment_mzs[i], 1000000);
             float intensity = compound->fragment_intensity[i];
+            string label = compound->fragment_labels[i];
 
             if (intensitiesByMz.find(mzKey) == intensitiesByMz.end()){
                 vector<float> intensities(1);
@@ -131,6 +133,14 @@ void SummarizedCompound::computeFragments() {
                 intensitiesByMz.insert(make_pair(mzKey, intensities));
             } else {
                 intensitiesByMz[mzKey].push_back(intensity);
+            }
+
+            if (labelsByMz.find(mzKey) == labelsByMz.end()){
+                vector<string> labels(1);
+                labels[0] = label;
+                labelsByMz.insert(make_pair(mzKey, labels));
+            } else {
+                labelsByMz[mzKey].push_back(label);
             }
         }
     }
@@ -153,7 +163,32 @@ void SummarizedCompound::computeFragments() {
 
         fragment_mzs[vecCounter] = mzUtils::intKeyToMz(mzInt, 1000000);
         fragment_intensity[vecCounter] = avgInt;
-        fragment_labels[vecCounter] = "";
+
+        vector<string> labels = labelsByMz[mzInt];
+        sort(labels.begin(), labels.end());
+        if (labels.size() > 0) {
+
+            string lastLabel = labels[0];
+            string mergedLabel = lastLabel;
+
+            if (labels.size() > 1) {
+                for (unsigned int i = 1; i < labels.size(); i++) {
+
+                    string thisLabel = labels[i];
+
+                    if (lastLabel == thisLabel) continue;
+
+                    mergedLabel = mergedLabel + "; " + thisLabel;
+
+                    lastLabel = thisLabel;
+                }
+                fragment_labels[vecCounter] = mergedLabel;
+            } else {
+                fragment_labels[vecCounter] = lastLabel;
+            }
+        } else {
+            fragment_labels[vecCounter] = "";
+        }
 
         vecCounter++;
     }
