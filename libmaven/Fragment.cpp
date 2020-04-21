@@ -17,10 +17,9 @@ Fragment::Fragment() {
     group=nullptr;
     mergeCount=0;
     purity=0;
-    consensus=nullptr;
-    group=nullptr;
     clusterId=0;
 	mergedScore=0;
+    scanNumMap={};
 }
 
 
@@ -44,6 +43,9 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
 	this->mergeCount=0;
 	this->mergedScore=0;
 	this->clusterId=0;
+    this->scanNumMap={};
+    scanNumMap.insert(make_pair(scan->sample, unordered_set<int>()));
+    scanNumMap[scan->sample].insert(scan->scannum);
 
     vector<pair<float,float> >mzarray = scan->getTopPeaks(minFractionalIntensity, minSigNoiseRatio, baseLineLevel);
 
@@ -85,6 +87,9 @@ Fragment::Fragment(Scan *scan, shared_ptr<DirectInfusionSearchParameters> params
     this->mergeCount=0;
     this->mergedScore=0;
     this->clusterId=0;
+    this->scanNumMap={};
+    scanNumMap.insert(make_pair(scan->sample, unordered_set<int>()));
+    scanNumMap[scan->sample].insert(scan->scannum);
 
     if (params->fragmentSpectrumFormationAlgorithm == FragmentSpectrumFormationAlgorithm::ONLY_ABSOLUTE_THRESHOLD){
         if (params->minIndividualMs2ScanIntensity > 0) {
@@ -131,6 +136,9 @@ Fragment::Fragment(Scan *scan){
     this->fragment_labels = vector<string>(this->mzs.size(), "");
     this->sortedBy = SortType::Mz; // scans should always be encoded in increasing m/z.
     this->obscount = vector<int>( this->mzs.size(), 1); //used when creating consensus spectra.
+    this->scanNumMap={};
+    scanNumMap.insert(make_pair(scan->sample, unordered_set<int>()));
+    scanNumMap[scan->sample].insert(scan->scannum);
 }
 
 //delete
@@ -159,6 +167,7 @@ Fragment::Fragment( Fragment* other) {
     this->tmtQuant = other->tmtQuant;
     this->clusterId= other->clusterId;
 	this->mergedScore = other->mergedScore;
+    this->scanNumMap = other->scanNumMap;
 }
 
 void Fragment::appendBrothers(Fragment* other) {
@@ -667,6 +676,7 @@ void Fragment::buildConsensus(float productPpmTolr,
     unsigned long N = 1 + brothers.size();
 
     for(unsigned int i=0; i<brothers.size(); i++) {
+
         Fragment* brother = brothers[i];
         vector<int>ranks=compareRanks(brother,Cons,productPpmTolr);	//location
 
@@ -685,8 +695,24 @@ void Fragment::buildConsensus(float productPpmTolr,
                 Cons->fragment_labels.push_back(brother->fragment_labels[j]);
             }
         }
+
         Cons->sortedBy = SortType::None;
         Cons->sortByMz();
+
+        map<mzSample*, unordered_set<int>> brotherMap = brother->scanNumMap;
+        for (auto it = brotherMap.begin(); it != brotherMap.end(); ++it) {
+
+            mzSample* sample = it->first;
+            unordered_set<int> scans = it->second;
+
+            if (scanNumMap.find(sample) == scanNumMap.end()) {
+                scanNumMap.insert(make_pair(sample, unordered_set<int>()));
+            }
+
+            for (auto x : scans) {
+                scanNumMap[sample].insert(x);
+            }
+        }
     }
 
     //compute retention time window

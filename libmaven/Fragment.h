@@ -7,6 +7,7 @@
 #include<math.h>
 #include<float.h>
 #include <memory>
+#include <unordered_set>
 
 class Compound;
 class PeakGroup;
@@ -14,6 +15,7 @@ class Scan;
 class Adduct;
 class TMT;
 class DirectInfusionSearchParameters;
+class mzSample;
 
 using namespace std;
 
@@ -144,7 +146,8 @@ class Fragment {
         float purity;
 		void truncateTopN(int n);
 		int clusterId;
-		float mergedScore;
+        float mergedScore;
+        map<mzSample*, unordered_set<int>> scanNumMap;
 
 	TMT tmtQuant;
         PeakGroup* group;
