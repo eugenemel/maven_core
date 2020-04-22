@@ -381,29 +381,21 @@ vector <pair<float,float> > Scan::getTopPeaks(float minFracCutoff, float minSNRa
 
    //compute baseline intensity
 
-//   if(baseLineLevel>0) {
-//   		float cutvalueF = (100.0-(float) baseLineLevel)/101;	// baseLineLevel=0 -> cutValue 0.99 --> baseline=1
-//        unsigned int mid = static_cast<unsigned int>(N * cutvalueF);						// baseline position
-//   		if(mid < N) baseline = intensity[positions[mid]];		// intensity at baseline
-//   }
+   if(baseLineLevel>0) {
+        float cutvalueF = (100.0-(float) baseLineLevel)/101;	// baseLineLevel=0 -> cutValue 0.99 --> baseline=1
+        unsigned int mid = static_cast<unsigned int>(N * cutvalueF);						// baseline position
+        if(mid < N) baseline = intensity[positions[mid]];		// intensity at baseline
+   }
 
-//   for(unsigned int i=0; i<N; i++) {
-//		   int pos = positions[i];
-//		   if (intensity[pos]/baseline > minSNRatio && intensity[pos]/maxI > minFracCutoff) {
-//				   selected.push_back(make_pair(intensity[pos], mz[pos]));
-//		   } else {
-//				   break;
-//		   }
-//   }
+   for(unsigned int i=0; i<N; i++) {
+           int pos = positions[i];
+           if (intensity[pos]/baseline > minSNRatio && intensity[pos]/maxI > minFracCutoff) {
+                   selected.push_back(make_pair(intensity[pos], mz[pos]));
+           } else {
+                   break;
+           }
+   }
 
-    //Issue 195 debugging: just return all but 10 least intense peaks
-    //result: Issue 195 still exists (still stochastic)
-    if (N > 3){
-        for (unsigned int i = 0; i < N-3; i++){
-            int pos = positions[i];
-            selected.push_back(make_pair(intensity[pos], mz[pos]));
-        }
-    }
     return selected;
 }
 
