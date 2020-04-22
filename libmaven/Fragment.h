@@ -176,7 +176,8 @@ class Fragment {
                  unsigned int maxNumberOfFragments,
                  int baseLineLevel=5,
                  bool isRetainFragmentsAbovePrecursorMz=false,
-                 float precursorPurityPpm=10
+                 float precursorPurityPpm=10,
+                 float minIntensity=0
                  );
 
         //build fragment based on DIMS MS2 scan
