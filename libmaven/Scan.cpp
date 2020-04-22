@@ -362,11 +362,13 @@ ChargedSpecies* Scan::deconvolute(float mzfocus, float noiseLevel, float ppmMerg
     }
 }
 
-
-//return pairing of mz,intensity values for top intensities.
-//intensities are normalized to a maximum intensity in a scan * 100
-//minFracCutoff specifies mininum relative intensity
-//for example 0.05,  filters out all intensites below 5% of maximum scan intensity
+/**
+ * @brief Scan::getTopPeaks
+ * @param minFracCutoff: below this proportion of max intensity peak, exclude
+ * @param minSNRatio: use @param baseLineLevel for noise level, only retain peaks with S:N above this value
+ * @param baseLineLevel: (expressed as a percentage): intensity percentile below which to exclude peaks
+ * @return
+ */
 vector <pair<float,float> > Scan::getTopPeaks(float minFracCutoff, float minSNRatio=1, int baseLineLevel=5) {
    unsigned int N = nobs();
    float baseline=1; 
@@ -381,7 +383,7 @@ vector <pair<float,float> > Scan::getTopPeaks(float minFracCutoff, float minSNRa
 
    if(baseLineLevel>0) {
    		float cutvalueF = (100.0-(float) baseLineLevel)/101;	// baseLineLevel=0 -> cutValue 0.99 --> baseline=1
-   		unsigned int mid = N * cutvalueF;						// baseline position
+        unsigned int mid = static_cast<unsigned int>(N * cutvalueF);						// baseline position
    		if(mid < N) baseline = intensity[positions[mid]];		// intensity at baseline 
    }
 
@@ -404,10 +406,16 @@ vector<int> Scan::intensityOrderDesc() {
         mzarray[pos] = make_pair(intensity[pos],pos);
     }
 
-   //reverse sort first key [ ie intensity ]
-   sort(mzarray.rbegin(), mzarray.rend());
+    //Issue 195: Break ties based on position in intensity array
+    sort(mzarray.begin(), mzarray.end(), [](const pair<float, int>& lhs, const pair<float, int>& rhs){
+        if (lhs.first == rhs.first) {
+            return lhs.second < rhs.second;
+        } else {
+            return lhs.first > rhs.second;
+        }
+    });
 
-   //return positions in order from highest to lowest intenisty
+   //return positions in order from highest to lowest intensity
    for(unsigned int i=0; i < mzarray.size(); i++) { position[i] = mzarray[i].second; }
    return position;
 }
