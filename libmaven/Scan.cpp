@@ -397,6 +397,7 @@ vector <pair<float,float> > Scan::getTopPeaks(float minFracCutoff, float minSNRa
 //   }
 
     //Issue 195 debugging: just return all but 10 least intense peaks
+    //result: Issue 195 still exists (still stochastic)
     if (N > 3){
         for (unsigned int i = 0; i < N-3; i++){
             int pos = positions[i];

@@ -40,6 +40,8 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
     this->sampleName = scan->sample->sampleName;
     this->scanNum = scan->scannum;
     this->precursorCharge = scan->precursorCharge;
+    this->group = nullptr;
+    this->consensus = nullptr;
 	this->mergeCount=0;
 	this->mergedScore=0;
 	this->clusterId=0;
@@ -58,10 +60,10 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
     }
     this->obscount = vector<int>( this->mzs.size(), 1);
     this->fragment_labels = vector<string>(this->mzs.size(), "");
-    this->group = nullptr;
-    this->consensus = nullptr;
+
     this->rt = scan->rt;
     this->purity = scan->getPrecursorPurity(10.00);  //this might be slow
+    this->sortedBy = SortType::None;
     this->sortByMz();
 }
 
