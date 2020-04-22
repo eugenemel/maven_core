@@ -183,7 +183,8 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 //                      );
 
 //    f->consensus->sortByMz();
-    f->consensus = new Fragment(representativeScan);
+
+    f->consensus = new Fragment(representativeScan, 0, 0, UINT_MAX);
 
     vector<shared_ptr<DirectInfusionMatchData>> libraryMatches;
 
