@@ -37,7 +37,9 @@ Fragment::Fragment(Scan* scan,
                    float minFracIntensity,
                    float minSNRatio,
                    unsigned int maxNumberOfFragments,
-                   int baseLinePercentile
+                   int baseLinePercentile,
+                   bool isRetainFragmentsAbovePrecursorMz,
+                   float precursorPurityPpm
                    ) {
     this->precursorMz = scan->precursorMz;
     this->collisionEnergy = scan->collisionEnergy;
@@ -58,7 +60,7 @@ Fragment::Fragment(Scan* scan,
     vector<pair<float,float> >mzarray = scan->getTopPeaks(minFracIntensity, minSNRatio, baseLinePercentile);
 
     for(unsigned int j=0; j<mzarray.size() && j < maxNumberOfFragments; j++ ) {
-		if (mzarray[j].second < this->precursorMz-1 ) { //remove fragments higher than precursorMz
+        if (isRetainFragmentsAbovePrecursorMz || mzarray[j].second <= this->precursorMz) { //remove fragments higher than precursorMz
 			this->mzs.push_back(mzarray[j].second);
 			this->intensity_array.push_back(mzarray[j].first);
 		}
@@ -67,7 +69,7 @@ Fragment::Fragment(Scan* scan,
     this->fragment_labels = vector<string>(this->mzs.size(), "");
 
     this->rt = scan->rt;
-    this->purity = scan->getPrecursorPurity(10.00);  //this might be slow
+    this->purity = precursorPurityPpm > 0 ? scan->getPrecursorPurity(precursorPurityPpm) : 0.0f;  //this might be slow
     this->sortedBy = SortType::None;
     this->sortByMz();
 }
