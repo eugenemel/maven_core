@@ -389,7 +389,7 @@ vector <pair<float,float> > Scan::getTopPeaks(float minFracIntensity, float minS
 
    for(unsigned int i=0; i<N; i++) {
            int pos = positions[i];
-           if (intensity[pos]/baseline >= minSNRatio && intensity[pos]/maxI >= minFracIntensity) {
+           if ((baseline < 0 || intensity[pos]/baseline >= minSNRatio) && intensity[pos]/maxI >= minFracIntensity) {
                    selected.push_back(make_pair(intensity[pos], mz[pos]));
            } else {
                    break;
