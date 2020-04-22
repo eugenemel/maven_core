@@ -366,10 +366,10 @@ ChargedSpecies* Scan::deconvolute(float mzfocus, float noiseLevel, float ppmMerg
  * @brief Scan::getTopPeaks
  * @param minFracCutoff: below this proportion of max intensity peak, exclude
  * @param minSNRatio: use @param baseLineLevel for noise level, only retain peaks with S:N above this value
- * @param baseLineLevel: (expressed as a percentage): intensity percentile corresponding to S:N ratio of 1
+ * @param baseLinePercentile: (expressed as a percentage) intensity percentile corresponding to S:N ratio of 1
  * @return
  */
-vector <pair<float,float> > Scan::getTopPeaks(float minFracCutoff, float minSNRatio=1, int baseLineLevel=5) {
+vector <pair<float,float> > Scan::getTopPeaks(float minFracCutoff, float minSNRatio=1, int baseLinePercentile=5) {
    unsigned int N = nobs();
    float baseline = -1;
 
@@ -380,10 +380,11 @@ vector <pair<float,float> > Scan::getTopPeaks(float minFracCutoff, float minSNRa
 	float maxI = intensity[positions[0]];				// intensity at highest position
 
    //compute baseline intensity --> used as proxy for noise level, SN ratio calculation
-   if(baseLineLevel>0 && baseLineLevel<100) {
-        float cutvalueF = (100.0f-static_cast<float>(baseLineLevel))/100.0f;	// baseLineLevel=0 -> cutValue 0.99 --> baseline=1
-        unsigned int mid = static_cast<unsigned int>(N * cutvalueF);			// baseline position
-        if(mid < N) baseline = intensity[positions[mid]];		// intensity at baseline
+   //note that positions vector is sorted by descending intensity, hence 100-X
+   if(baseLinePercentile>0 && baseLinePercentile<100) {
+        float cutvalueF = (100.0f-static_cast<float>(baseLinePercentile))/100.0f;	// baseLinePercentile=5 -> cutValue 0.95 --> baseline=1
+        unsigned int mid = static_cast<unsigned int>(N * cutvalueF);                // baseline position
+        if(mid < N) baseline = intensity[positions[mid]];                           // intensity at baseline
    }
 
    for(unsigned int i=0; i<N; i++) {

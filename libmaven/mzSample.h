@@ -112,7 +112,7 @@ class Scan {
     float baseMz();
 
     vector<int> intensityOrderDesc(); //return postion in a scan from higest to lowerst intensity
-    vector<pair<float,float> > getTopPeaks(float minFracCutoff,float minSigNoiseRatio,int dropTopX);
+    vector<pair<float,float> > getTopPeaks(float minFracCutoff, float minSNRatio, int baseLinePercentile);
     vector<int>assignCharges(float ppmTolr);
 
     vector<float> chargeSeries(float Mx, unsigned int Zx);
