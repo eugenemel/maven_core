@@ -705,12 +705,12 @@ void Fragment::buildConsensus(float productPpmTolr,
             mzSample* sample = it->first;
             unordered_set<int> scans = it->second;
 
-            if (scanNumMap.find(sample) == scanNumMap.end()) {
-                scanNumMap.insert(make_pair(sample, unordered_set<int>()));
+            if (Cons->scanNumMap.find(sample) == Cons->scanNumMap.end()) {
+                Cons->scanNumMap.insert(make_pair(sample, unordered_set<int>()));
             }
 
             for (auto x : scans) {
-                scanNumMap[sample].insert(x);
+                Cons->scanNumMap[sample].insert(x);
             }
         }
     }
