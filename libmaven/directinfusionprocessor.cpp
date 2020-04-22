@@ -154,7 +154,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 
             //TODO: use unified Fragment constructor
             if (params->fragmentSpectrumFormationAlgorithm == FragmentSpectrumFormationAlgorithm::MAVEN_ORIGINAL) {
-                f = new Fragment(scan, 0, 0, UINT_MAX);
+                f = new Fragment(scan, 0, 0, UINT_MAX, 0);
             } else {
                 f = new Fragment(scan, params);
             }
@@ -165,7 +165,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 
             //TODO: use unified Fragment constructor
             if (params->fragmentSpectrumFormationAlgorithm == FragmentSpectrumFormationAlgorithm::MAVEN_ORIGINAL) {
-                brother = new Fragment(scan, 0, 0, UINT_MAX);
+                brother = new Fragment(scan, 0, 0, UINT_MAX, 0);
             } else {
                 brother = new Fragment(scan, params);
             }
@@ -175,16 +175,14 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
     }
 
     //Issue 195 testing
-//    f->buildConsensus(params->productPpmTolr,
-//                      params->isIntensityAvgByObserved,
-//                      params->isNormalizeIntensityArray,
-//                      params->minNumMs2ScansForConsensus,
-//                      params->minFractionMs2ScansForConsensus
-//                      );
+    f->buildConsensus(params->productPpmTolr,
+                      params->isIntensityAvgByObserved,
+                      params->isNormalizeIntensityArray,
+                      params->minNumMs2ScansForConsensus,
+                      params->minFractionMs2ScansForConsensus
+                      );
 
-//    f->consensus->sortByMz();
-
-    f->consensus = new Fragment(representativeScan, 0, 0, UINT_MAX);
+    f->consensus->sortByMz();
 
     vector<shared_ptr<DirectInfusionMatchData>> libraryMatches;
 
