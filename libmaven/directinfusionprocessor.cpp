@@ -154,7 +154,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 
             //TODO: use unified Fragment constructor
             if (params->fragmentSpectrumFormationAlgorithm == FragmentSpectrumFormationAlgorithm::MAVEN_ORIGINAL) {
-                f = new Fragment(scan, 0, 0, UINT_MAX, 0);
+                f = new Fragment(scan, 0, 0, UINT_MAX, 0); //Issue 195 TODO: setting baseline to 0 does not fix the problem.
             } else {
                 f = new Fragment(scan, params);
             }
@@ -174,7 +174,6 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         }
     }
 
-    //Issue 195 testing
     f->buildConsensus(params->productPpmTolr,
                       params->isIntensityAvgByObserved,
                       params->isNormalizeIntensityArray,
