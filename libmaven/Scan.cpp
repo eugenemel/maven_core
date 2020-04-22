@@ -364,12 +364,12 @@ ChargedSpecies* Scan::deconvolute(float mzfocus, float noiseLevel, float ppmMerg
 
 /**
  * @brief Scan::getTopPeaks
- * @param minFracCutoff: below this proportion of max intensity peak, exclude
- * @param minSNRatio: use @param baseLineLevel for noise level, only retain peaks with S:N above this value
+ * @param minFracIntensity: retain peaks with intensity at or above this proportion of max intensity peak
+ * @param minSNRatio: retain peaks with S:N at or above this value (use @param baseLineLevel for noise level)
  * @param baseLinePercentile: (expressed as a percentage) intensity percentile corresponding to S:N ratio of 1
  * @return
  */
-vector <pair<float,float> > Scan::getTopPeaks(float minFracCutoff, float minSNRatio=1, int baseLinePercentile=5) {
+vector <pair<float,float> > Scan::getTopPeaks(float minFracIntensity, float minSNRatio=1, int baseLinePercentile=5) {
    unsigned int N = nobs();
    float baseline = -1;
 
@@ -389,7 +389,7 @@ vector <pair<float,float> > Scan::getTopPeaks(float minFracCutoff, float minSNRa
 
    for(unsigned int i=0; i<N; i++) {
            int pos = positions[i];
-           if (intensity[pos]/baseline > minSNRatio && intensity[pos]/maxI > minFracCutoff) {
+           if (intensity[pos]/baseline >= minSNRatio && intensity[pos]/maxI >= minFracIntensity) {
                    selected.push_back(make_pair(intensity[pos], mz[pos]));
            } else {
                    break;
