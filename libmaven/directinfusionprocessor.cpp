@@ -174,14 +174,16 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         }
     }
 
-    f->buildConsensus(params->productPpmTolr,
-                      params->isIntensityAvgByObserved,
-                      params->isNormalizeIntensityArray,
-                      params->minNumMs2ScansForConsensus,
-                      params->minFractionMs2ScansForConsensus
-                      );
+    //Issue 195 testing
+//    f->buildConsensus(params->productPpmTolr,
+//                      params->isIntensityAvgByObserved,
+//                      params->isNormalizeIntensityArray,
+//                      params->minNumMs2ScansForConsensus,
+//                      params->minFractionMs2ScansForConsensus
+//                      );
 
-    f->consensus->sortByMz();
+//    f->consensus->sortByMz();
+    f->consensus = new Fragment(representativeScan);
 
     vector<shared_ptr<DirectInfusionMatchData>> libraryMatches;
 
