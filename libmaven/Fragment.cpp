@@ -54,10 +54,10 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
 		if (mzarray[j].second < this->precursorMz-1 ) { //remove fragments higher than precursorMz
 			this->mzs.push_back(mzarray[j].second);
 			this->intensity_array.push_back(mzarray[j].first);
-            this->fragment_labels.push_back("");
 		}
     }
     this->obscount = vector<int>( this->mzs.size(), 1);
+    this->fragment_labels = vector<string>(this->mzs.size(), "");
     this->group = nullptr;
     this->consensus = nullptr;
     this->rt = scan->rt;
