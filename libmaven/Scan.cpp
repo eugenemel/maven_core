@@ -365,7 +365,7 @@ ChargedSpecies* Scan::deconvolute(float mzfocus, float noiseLevel, float ppmMerg
 
 //return pairing of mz,intensity values for top intensities.
 //intensities are normalized to a maximum intensity in a scan * 100
-//minFracCutoff specfies mininum relative intensity
+//minFracCutoff specifies mininum relative intensity
 //for example 0.05,  filters out all intensites below 5% of maximum scan intensity
 vector <pair<float,float> > Scan::getTopPeaks(float minFracCutoff, float minSNRatio=1, int baseLineLevel=5) {
    unsigned int N = nobs();
@@ -377,7 +377,7 @@ vector <pair<float,float> > Scan::getTopPeaks(float minFracCutoff, float minSNRa
 	vector<int> positions = this->intensityOrderDesc();	// [0]=highest-> [999]..loweset
 	float maxI = intensity[positions[0]];				// intensity at highest position
 
-   //compute baseline intensity.. 
+   //compute baseline intensity
 
    if(baseLineLevel>0) {
    		float cutvalueF = (100.0-(float) baseLineLevel)/101;	// baseLineLevel=0 -> cutValue 0.99 --> baseline=1

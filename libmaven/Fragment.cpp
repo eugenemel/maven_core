@@ -28,10 +28,10 @@ Fragment::Fragment() {
  * from a single MS2 scan, create an adjusted MS2 spectrum to compare to library spectra.
  *
  * @param scan
- * @param minFractionalIntensity
- * @param minSigNoiseRatio
- * @param maxFragmentSize
- * @param baseLineLevel (expressed as a percentage)
+ * @param minFractionalIntensity: fraction of max intensity below which to exclude peaks
+ * @param minSigNoiseRatio: use @param baseLineLevel for noise level, only retain peaks with S:N above this value
+ * @param maxFragmentSize: maximum number of spectral peaks to include
+ * @param baseLineLevel (expressed as a percentage): intensity percentile below which to exclude peaks
  */
 Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRatio, unsigned int maxFragmentSize, int baseLineLevel) {
     this->precursorMz = scan->precursorMz;
@@ -47,6 +47,7 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
     scanNumMap.insert(make_pair(scan->sample, unordered_set<int>()));
     scanNumMap[scan->sample].insert(scan->scannum);
 
+            //<intensity, mz>
     vector<pair<float,float> >mzarray = scan->getTopPeaks(minFractionalIntensity, minSigNoiseRatio, baseLineLevel);
 
     for(unsigned int j=0; j<mzarray.size() && j < maxFragmentSize; j++ ) {
