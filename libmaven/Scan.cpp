@@ -381,20 +381,25 @@ vector <pair<float,float> > Scan::getTopPeaks(float minFracCutoff, float minSNRa
 
    //compute baseline intensity
 
-   if(baseLineLevel>0) {
-   		float cutvalueF = (100.0-(float) baseLineLevel)/101;	// baseLineLevel=0 -> cutValue 0.99 --> baseline=1
-        unsigned int mid = static_cast<unsigned int>(N * cutvalueF);						// baseline position
-   		if(mid < N) baseline = intensity[positions[mid]];		// intensity at baseline 
-   }
+//   if(baseLineLevel>0) {
+//   		float cutvalueF = (100.0-(float) baseLineLevel)/101;	// baseLineLevel=0 -> cutValue 0.99 --> baseline=1
+//        unsigned int mid = static_cast<unsigned int>(N * cutvalueF);						// baseline position
+//   		if(mid < N) baseline = intensity[positions[mid]];		// intensity at baseline
+//   }
 
-   for(unsigned int i=0; i<N; i++) {
-		   int pos = positions[i];
-		   if (intensity[pos]/baseline > minSNRatio && intensity[pos]/maxI > minFracCutoff) {
-				   selected.push_back(make_pair(intensity[pos], mz[pos]));
-		   } else {
-				   break;
-		   }
-   }
+//   for(unsigned int i=0; i<N; i++) {
+//		   int pos = positions[i];
+//		   if (intensity[pos]/baseline > minSNRatio && intensity[pos]/maxI > minFracCutoff) {
+//				   selected.push_back(make_pair(intensity[pos], mz[pos]));
+//		   } else {
+//				   break;
+//		   }
+//   }
+
+    //debugging: just return 100 most intense peaks
+    for (unsigned int i = 0; i < 100; i++){
+        selected.push_back(make_pair(intensity[positions[i]], mz[positions[i]]));
+    }
     return selected;
 }
 
