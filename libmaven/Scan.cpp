@@ -397,8 +397,11 @@ vector <pair<float,float> > Scan::getTopPeaks(float minFracCutoff, float minSNRa
 //   }
 
     //Issue 195 debugging: just return all but 10 least intense peaks
-    for (unsigned int i = 0; i < positions.size()-10; i++){
-        selected.push_back(make_pair(intensity[positions[i]], mz[positions[i]]));
+    if (N > 3){
+        for (unsigned int i = 0; i < N-3; i++){
+            int pos = positions[i];
+            selected.push_back(make_pair(intensity[pos], mz[pos]));
+        }
     }
     return selected;
 }
