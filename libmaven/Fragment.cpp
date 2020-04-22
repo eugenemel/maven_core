@@ -715,6 +715,19 @@ void Fragment::buildConsensus(float productPpmTolr,
         }
     }
 
+    for (auto it = this->scanNumMap.begin(); it != scanNumMap.end(); ++it){
+        mzSample* sample = it->first;
+        unordered_set<int> scans = it->second;
+
+        if (Cons->scanNumMap.find(sample) == Cons->scanNumMap.end()) {
+            Cons->scanNumMap.insert(make_pair(sample, unordered_set<int>()));
+        }
+
+        for (auto x : scans) {
+            Cons->scanNumMap[sample].insert(x);
+        }
+    }
+
     //compute retention time window
     Cons->rt  = this->consensusRt();
 
