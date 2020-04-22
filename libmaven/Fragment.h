@@ -170,7 +170,11 @@ class Fragment {
         Fragment(Scan* scan);
 
         //build fragment based on MS2 scan
-        Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRatio, unsigned int maxFragmentSize, int baseLineLevel=5);
+        Fragment(Scan* scan,
+                 float minFractionalIntensity,
+                 float minSigNoiseRatio,
+                 unsigned int maxNumberOfFragments,
+                 int baseLineLevel=5);
 
         //build fragment based on DIMS MS2 scan
         Fragment(Scan* scan, shared_ptr<DirectInfusionSearchParameters> params);

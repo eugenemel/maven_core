@@ -30,10 +30,15 @@ Fragment::Fragment() {
  * @param scan
  * @param minFractionalIntensity: fraction of max intensity below which to exclude peaks
  * @param minSigNoiseRatio: use @param baseLineLevel for noise level, only retain peaks with S:N above this value
- * @param maxFragmentSize: maximum number of spectral peaks to include
+ * @param maxNumberOfFragments: maximum number of spectral peaks to include
  * @param baseLineLevel (expressed as a percentage): intensity percentile below which to exclude peaks
  */
-Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRatio, unsigned int maxFragmentSize, int baseLineLevel) {
+Fragment::Fragment(Scan* scan,
+                   float minFractionalIntensity,
+                   float minSigNoiseRatio,
+                   unsigned int maxNumberOfFragments,
+                   int baseLineLevel
+                   ) {
     this->precursorMz = scan->precursorMz;
     this->collisionEnergy = scan->collisionEnergy;
     this->polarity = scan->getPolarity();
@@ -52,7 +57,7 @@ Fragment::Fragment(Scan* scan, float minFractionalIntensity, float minSigNoiseRa
             //<intensity, mz>
     vector<pair<float,float> >mzarray = scan->getTopPeaks(minFractionalIntensity, minSigNoiseRatio, baseLineLevel);
 
-    for(unsigned int j=0; j<mzarray.size() && j < maxFragmentSize; j++ ) {
+    for(unsigned int j=0; j<mzarray.size() && j < maxNumberOfFragments; j++ ) {
 		if (mzarray[j].second < this->precursorMz-1 ) { //remove fragments higher than precursorMz
 			this->mzs.push_back(mzarray[j].second);
 			this->intensity_array.push_back(mzarray[j].first);
