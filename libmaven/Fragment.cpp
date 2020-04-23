@@ -60,21 +60,41 @@ Fragment::Fragment(Scan* scan,
     scanNumMap.insert(make_pair(scan->sample, unordered_set<int>()));
     scanNumMap[scan->sample].insert(scan->scannum);
 
-            //<intensity, mz>
-    vector<pair<float,float> >mzarray = scan->getTopPeaks(minFracIntensity, minSNRatio, baseLinePercentile, minIntensity);
+    //faster implementation when fewer filters specified
+    if (minSNRatio <= 0 && maxNumberOfFragments >= scan->nobs() && baseLinePercentile <= 0 && isRetainFragmentsAbovePrecursorMz){
+        if (minIntensity <= 0) {
+            this->mzs = scan->mz;
+            this->intensity_array = scan->intensity;
+        } else {
+            for (unsigned int i = 0; i < scan->nobs(); i++) {
+                if (scan->intensity[i] >= minIntensity) {
+                    this->mzs.push_back(scan->mz[i]);
+                    this->intensity_array.push_back(scan->intensity[i]);
+                }
+            }
+        }
 
-    for(unsigned int j=0; j<mzarray.size() && j < maxNumberOfFragments; j++ ) {
-        if (isRetainFragmentsAbovePrecursorMz || mzarray[j].second <= this->precursorMz) { //remove fragments higher than precursorMz
-			this->mzs.push_back(mzarray[j].second);
-			this->intensity_array.push_back(mzarray[j].first);
-		}
+        this->sortedBy = SortType::Mz;
+    } else {
+
+        //<intensity, mz>
+        vector<pair<float,float> >mzarray = scan->getTopPeaks(minFracIntensity, minSNRatio, baseLinePercentile, minIntensity);
+
+        for (unsigned int j=0; j<mzarray.size() && j < maxNumberOfFragments; j++ ) {
+            if (isRetainFragmentsAbovePrecursorMz || mzarray[j].second <= this->precursorMz) { //remove fragments higher than precursorMz
+                this->mzs.push_back(mzarray[j].second);
+                this->intensity_array.push_back(mzarray[j].first);
+            }
+        }
+
+        this->sortedBy = SortType::None;
     }
+
     this->obscount = vector<int>( this->mzs.size(), 1);
     this->fragment_labels = vector<string>(this->mzs.size(), "");
 
     this->rt = scan->rt;
     this->purity = precursorPurityPpm > 0 ? scan->getPrecursorPurity(precursorPurityPpm) : 0.0f;  //this might be slow
-    this->sortedBy = SortType::None;
     this->sortByMz();
 }
 

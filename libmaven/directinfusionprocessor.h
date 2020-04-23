@@ -71,6 +71,16 @@ public:
 
     FragmentSpectrumFormationAlgorithm fragmentSpectrumFormationAlgorithm = FragmentSpectrumFormationAlgorithm::ONLY_ABSOLUTE_THRESHOLD;
 
+    float minFracIntensity = 0;
+    float minSNRatio = 0;
+    unsigned int maxNumberOfFragments = UINT_MAX;
+    int baseLinePercentile = 0;
+    bool isRetainFragmentsAbovePrecursorMz = true;
+
+
+
+    float precursorPurityPpm = 0;
+
     /**
      * @brief minIndividualMs2ScanIntensity
      * minimum intensity required for a single measurement from an MS2 scan
