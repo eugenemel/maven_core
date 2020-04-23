@@ -69,6 +69,8 @@ public:
      * SAMPLE DATA MANIPULATION
      * ========================*/
 
+    //Issue 195 TODO: rename all of these parameters, remove FragmentSpectrumFormationAlgorithm
+
     FragmentSpectrumFormationAlgorithm fragmentSpectrumFormationAlgorithm = FragmentSpectrumFormationAlgorithm::ONLY_ABSOLUTE_THRESHOLD;
 
     float minFracIntensity = 0;
