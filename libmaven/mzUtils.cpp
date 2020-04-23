@@ -1034,5 +1034,41 @@ vector<string> getMzSampleFilesFromDirectory(const char* path){
     */
 }
 
+unordered_map<string, string> decodeParameterMap(string encodedParams){
+
+    unordered_map<string, string> decodedMap = {};
+
+    if (encodedParams.size() < 3) return decodedMap;
+
+    //remove starting/ending brackets, if they are included
+    if (encodedParams[0] == '{'){
+        encodedParams.erase(0, 1);
+    }
+    if (encodedParams[encodedParams.size()-1] == '}') {
+        encodedParams.erase(encodedParams.size()-1);
+    }
+
+    unsigned long posPrevious = 0;
+    unsigned long posCurrent = 0;
+
+    string delimiter = ";";
+
+    while ((posCurrent = encodedParams.find(delimiter, posPrevious)) != string::npos) {
+
+        string encodedParam = encodedParams.substr(posPrevious, posCurrent-posPrevious);
+        posPrevious = posCurrent + delimiter.length();
+
+        unsigned long equalCoord = encodedParam.find("=");
+
+        string paramKey = encodedParam.substr(0, equalCoord);
+        string paramVal = encodedParam.substr(equalCoord+1,encodedParam.size());
+
+        decodedMap.insert(make_pair(paramKey, paramVal));
+    }
+
+    return decodedMap;
+
+} //decodeParameterMap()
+
 } //namespace end
 
