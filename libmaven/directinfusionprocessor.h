@@ -3,6 +3,7 @@
 #include "mzSample.h"
 #include "mzUtils.h"
 #include <memory>
+#include <algorithm>
 
 class mzSample;
 class DirectInfusionAnnotation;
@@ -46,17 +47,6 @@ enum class SpectralCompositionAlgorithm {
 };
 
 /**
- * @brief The FragmentSpectrumFormationAlgorithm enum
- *
- * Determines how individual raw scans should be transformed into "Fragment" objects
- * (which refer to an MS2 spectrum suitable for comparison to library spectra).
- */
-enum class FragmentSpectrumFormationAlgorithm {
-    MAVEN_ORIGINAL,
-    ONLY_ABSOLUTE_THRESHOLD
-};
-
-/**
  * @brief The DirectInfusionSearchParameters class
  *
  * single class to contain all parameters used in direct infusion search analysis.
@@ -66,231 +56,221 @@ class DirectInfusionSearchParameters {
 public:
 
     /** =======================
-     * SAMPLE DATA MANIPULATION
+     * SCAN FILTER ASSOCIATED
+     * All parameters are arguments of Fragment::Fragment() constructor.
      * ========================*/
 
-    //Issue 195 TODO: rename all of these parameters, remove FragmentSpectrumFormationAlgorithm
+    float scanFilterMinFracIntensity = 0;
+    float scanFilterMinSNRatio = 0;
+    unsigned int scanFilterMaxNumberOfFragments = UINT_MAX;
+    int scanFilterBaseLinePercentile = 0;
+    bool scanFilterIsRetainFragmentsAbovePrecursorMz = true;
+    float scanFilterPrecursorPurityPpm = 0;
+    float scanFilterMinIntensity = 0;
 
-    FragmentSpectrumFormationAlgorithm fragmentSpectrumFormationAlgorithm = FragmentSpectrumFormationAlgorithm::ONLY_ABSOLUTE_THRESHOLD;
+    /** =======================
+     * CONSENSUS SPECTRUM ASSOCIATED
+     * All parameters are arguments Fragment::buildConsensus() method.
+     * ========================*/
 
-    float minFracIntensity = 0;
-    float minSNRatio = 0;
-    unsigned int maxNumberOfFragments = UINT_MAX;
-    int baseLinePercentile = 0;
-    bool isRetainFragmentsAbovePrecursorMz = true;
-
-
-
-    float precursorPurityPpm = 0;
-
-    /**
-     * @brief minIndividualMs2ScanIntensity
-     * minimum intensity required for a single measurement from an MS2 scan
-     * to be used to create a single library-comparable fragment ms2 spectrum.
-     */
-    float minIndividualMs2ScanIntensity = 0;
-
-    /**
-     * @brief minNumMs2ScansForConsensus
-     * Minimum number of times an (m/z, intensity) fragment peak
-     * must be seen with an intensity greater than @param minIndividualMs2ScanIntensity
-     * in all MS2 scans to be included in the consensus spectrum.
-     */
-    int minNumMs2ScansForConsensus = 0;
-
-    /**
-     * @brief minFractionMs2ScansForConsensus
-     * Mininum proportion of all available scans in which a given (m/z, intensity)
-     * fragment peak is observed with an intensity greater than @param minIndividualMs2ScanIntensity
-     * in order to include this peak in the consensus spectrum.
-     */
-    float minFractionMs2ScansForConsensus = 0;
-
-    /**
-     * @brief isIntensityAvgByObserved
-     * Consensus intensity should be averaged based on either
-     * (A) all scans where a fragment m/z could have been found (isIntensityAvgByObserved=false)
-     * or
-     * (B) all scans where a framgent m/z was actually found (isIntensityAvgByObserved=true)
-     */
-    bool isIntensityAvgByObserved = true;
-
-    /**
-     * @brief isNormalizeIntensityArray
-     * If true, all intensities are scaled so tha the max intensity value is 10000.
-     * If false, intensities values are returned as-is.
-     * In regular MAVEN, this is always true.
-     */
-    bool isNormalizeIntensityArray = false;
+    float consensusPpmTolr = 10;
+    bool consensusIsIntensityAvgByObserved = true;
+    int consensusMinNumMs2Scans = 0;
+    float consensusMinFractionMs2Scans = 0;
+    bool consensusIsNormalizeTo10K = false;
 
     /** ===================
-     * MS2 - SEARCH RELATED
+     * MS2 SEARCH RELATED
+     * @param ms2MinNumMatches: min number of reference peaks found in observed spectrum
+     * @param ms2MinNumDiagnosticMatches: min number of reference peaks labeled as diagnostic found in observed spectrum
+     * @param ms2MinNumUniqueMatches: CURRENTLY UNUSED PARAMETER
+     * @param ms2PpmTolr: m/z tolerance value used for matching reference <--> observed spectra
+     * @param ms2MinIntensity: minimum intensity value for an MS2 spectral peak to be considered real
      * ==================== */
 
-    /**
-     * @brief minNumMatches
-     * mininum number of matches for a single <Compound*, Adduct*>
-     * to match to a spectrum in order to retain this <Compound*, Adduct*>
-     * as a component of the observed spectrum
-     */
-    int minNumMatches = 5;
-
-    /**
-     * @brief minNumDiagnosticFragments
-     * minimum number of matches for a single <Compound*, Adduct*>
-     * to match to a spectrum in order to retain this <Compound*, Adduct*>,
-     * among the fragments marked as diagnostic.
-     * Traditionally, diagnostic fragments include a label that starts with an asterisk (*)
-     */
-    int minNumDiagnosticFragments = 0;
-
-    /**
-     * @brief minNumUniqueMatches
-     * minimum number of matches for a single <Compound*, Adduct*>
-     * with unique fragment m/zs, given the universe of all <Compound*, Adduct*>
-     * matches searched.
-     *
-     * Considered after @param minNumMatches? - the idea is that @param minNumMatches is used
-     * to find likely IDs, and @param minNumUniqueMatches might be mroe useful for determining
-     * relative composition
-     */
-    int minNumUniqueMatches = 0;
+    int ms2MinNumMatches = 5;
+    int ms2MinNumDiagnosticMatches = 0;
+    int ms2MinNumUniqueMatches = 0;
+    float ms2PpmTolr = 20;
+    float ms2MinIntensity = 0;
 
     /** ===================
-     * MS1 - SEARCH RELATED
+     * MS1 SEARCH RELATED
+     * @param ms1IsRequireAdductPrecursorMatch:reference compound associated adduct must == query adduct
+     * @param ms1IsFindPrecursorIon: only retain matches where precursor peak is found in MS1 scan(s).
+     * @param ms1PpmTolr: tolerance value used for matching theoretical ion m/z to an m/z peak in an MS1 scan
+     * @param ms1MinIntensity: min intensity value for a MS1 spectral peak to be considered real
+     * @param ms1ScanFilter: consider only MS1 scans that substring match in their filterString field to this
      * ==================== */
 
-    /**
-     * @brief isRequireAdductPrecursorMatch
-     * The compound's associated adduct must be the adduct in the supplied list of adducts,
-     * otherwise the match will be ignored.
-     */
-    bool isRequireAdductPrecursorMatch = true;
-
-    /**
-     * @brief productPpmTolr
-     * tolerance value used for matching library fragment m/z s to Scan m/z s
-     */
-    float productPpmTolr = 20;
-
-    /**
-     * @brief productMinIntensity
-     * minimum intensity value for a fragment to be considered real
-     */
-    float productMinIntensity = 0;
-
-    /**
-     * @brief isFindPrecursorIonInMS1Scan
-     * If true, only retain matches where some MS1 signal value is identified.
-     */
-    bool isFindPrecursorIonInMS1Scan = false;
-
-    /**
-     * @brief parentPpmTolr
-     * tolerance value used for matching theoretical ion m/z to an m/z peak in an MS1 scan
-     */
-    float parentPpmTolr = 5;
-
-    /**
-     * @brief parentMinIntensity
-     * min intensity value for a parent MS1 peak to be considered real
-     */
-    float parentMinIntensity = 0;
-
-    /**
-     * @brief ms1ScanFilter
-     * required substring match of this to Scan.filterString field
-     * to consider that Scan an appropriate MS1 scan.
-     */
+    bool ms1IsRequireAdductPrecursorMatch = true;
+    bool ms1IsFindPrecursorIon = false;
+    float ms1PpmTolr = 5;
+    float ms1MinIntensity = 0;
     string ms1ScanFilter = "";
 
     /** ===================
-     * == AGGLOMERATION ===
+     * AGGLOMERATION
+     * @param isAgglomerateAcrossSamples: If true, align results across all samples. Otherwise, return each sample results individually.
+     * @param spectralCompositionAlgorithm:
+     *      SpectralCompositionAlgorithm::ALL_CANDIDATES: Return all matches without any elimination or quantitation
+     *      SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE:
+     *          automatically summarize results to higher level if possible.
+     *          Apply parsimony to spectral matches.
      * ==================== */
 
-    /**
-     * @brief spectralCompositionAlgorithm
-     * By default, do nothing, just return all matches, without doing any elimination or quantitation
-     * of spectral components.
-     */
+    bool isAgglomerateAcrossSamples = false;
     SpectralCompositionAlgorithm spectralCompositionAlgorithm = SpectralCompositionAlgorithm::ALL_CANDIDATES;
 
-    /**
-     * @brief isAgglomerateAcrossSamples
-     * Option to agglomerate direct infusion results across samples.
-     */
-    bool isAgglomerateAcrossSamples = false;
-
     void printParams(){
-//        cout << "fragmentSpectrumFormationAlgorithm? " << (fragmentSpectrumFormationAlgorithm == FragmentSpectrumFormationAlgorithm::MAVEN_ORIGINAL ? "MAVEN_ORIGINAL" : "DI_TAILORED") << endl
-//             << "minIndividualMs2ScanIntensity? " << minIndividualMs2ScanIntensity << endl
-//             << "minNumMs2ScansForConsensus? " << minNumMs2ScansForConsensus << endl
-//             << "minFractionMs2ScansForConsensus? " << minFractionMs2ScansForConsensus << endl
-//             << "minNumMatches? " << minNumMatches << endl
-//             << "minNumDiagnosticFragments? " << minNumDiagnosticFragments << endl
-//             << "minNumUniqueMatches? " << minNumUniqueMatches << endl
-//             << "isRequireAdductPrecursorMatch? " << (isRequireAdductPrecursorMatch ? "true" : "false") << endl
-//             << "productPpmTolr? " << productPpmTolr << " ppm" << endl
-//             << "productMinIntensity? " << productMinIntensity << endl
-//             << "isFindPrecursorIonInMS1Scan? " << (isFindPrecursorIonInMS1Scan ? "true" : "false") << endl
-//             << "parentPpmTolr? " << parentPpmTolr << " ppm" << endl
-//             << "parentMinIntensity? " << parentMinIntensity << endl
-//             << "ms1ScanFilter? " << ms1ScanFilter << endl
-//             << "spectralCompositionAlgorithm? " << (spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES ? "ALL_CANDIDATES" : "OTHER") << endl
-//             << "isAgglomerateAcrossSamples? " << (isAgglomerateAcrossSamples ? "true" : "false")
-//             << endl;
-        cout << getFormattedParams() << endl;
+        string encodedParams = encodeParams();
+        replace(encodedParams.begin(), encodedParams.end(), ';', '\n');
+        replace(encodedParams.begin(), encodedParams.end(), '=', ' ');
+        cout << encodedParams << endl;
     }
 
-    string getFormattedParams() {
-        string formattedParams;
+    string encodeParams() {
 
-        formattedParams += "MS2 Spectrum Formation:\n";
-        formattedParams += "fragmentSpectrumFormationAlgorithm? ";
+        string encodedParams;
 
-        if (fragmentSpectrumFormationAlgorithm == FragmentSpectrumFormationAlgorithm::MAVEN_ORIGINAL){
-            formattedParams += "MAVEN_ORIGINAL";
-        } else if (fragmentSpectrumFormationAlgorithm == FragmentSpectrumFormationAlgorithm::ONLY_ABSOLUTE_THRESHOLD) {
-            formattedParams += "ONLY_ABSOLUTE_THRESHOLD";
+        //scan filter params
+        encodedParams = encodedParams + "scanFilterMinFracIntensity" + "=" + to_string(scanFilterMinFracIntensity) + ";";
+        encodedParams = encodedParams + "scanFilterMinSNRatio" + "=" + to_string(scanFilterMinSNRatio) + ";";
+        encodedParams = encodedParams + "scanFilterMaxNumberOfFragments" + "=" + to_string(scanFilterMaxNumberOfFragments) + ";";
+        encodedParams = encodedParams + "scanFilterBaseLinePercentile" + "=" + to_string(scanFilterBaseLinePercentile) + ";";
+        encodedParams = encodedParams + "scanFilterIsRetainFragmentsAbovePrecursorMz" + "=" + to_string(scanFilterIsRetainFragmentsAbovePrecursorMz) + ";";
+        encodedParams = encodedParams + "scanFilterPrecursorPurityPpm" + "=" + to_string(scanFilterPrecursorPurityPpm) + ";";
+        encodedParams = encodedParams + "scanFilterMinIntensity" + "=" + to_string(scanFilterMinIntensity) + ";";
+
+        //consensus spectrum params
+        encodedParams = encodedParams + "consensusPpmTolr" + "=" + to_string(consensusPpmTolr) + ";";
+        encodedParams = encodedParams + "consensusIsIntensityAvgByObserved" + "=" + to_string(consensusIsIntensityAvgByObserved) + ";";
+        encodedParams = encodedParams + "consensusMinNumMs2Scans" + "=" + to_string(consensusMinNumMs2Scans) + ";";
+        encodedParams = encodedParams + "consensusMinFractionMs2Scans" + "=" + to_string(consensusMinFractionMs2Scans) + ";";
+        encodedParams = encodedParams + "consensusIsNormalizeTo10K" + "=" + to_string(consensusIsNormalizeTo10K) + ";";
+
+        //ms2 search params
+        encodedParams = encodedParams + "ms2MinNumMatches" + "=" + to_string(ms2MinNumMatches) + ";";
+        encodedParams = encodedParams + "ms2MinNumDiagnosticMatches" + "=" + to_string(ms2MinNumDiagnosticMatches) + ";";
+        encodedParams = encodedParams + "ms2MinNumUniqueMatches" + "=" + to_string(ms2MinNumUniqueMatches) + ";";
+        encodedParams = encodedParams + "ms2PpmTolr" + "=" + to_string(ms2PpmTolr) + ";";
+        encodedParams = encodedParams + "ms2MinIntensity" + "=" + to_string(ms2MinIntensity) + ";";
+
+        //ms1 search params
+        encodedParams = encodedParams + "ms1IsRequireAdductPrecursorMatch" + "=" + to_string(ms1IsRequireAdductPrecursorMatch) + ";";
+        encodedParams = encodedParams + "ms1IsFindPrecursorIon" + "=" + to_string(ms1IsFindPrecursorIon) + ";";
+        encodedParams = encodedParams + "ms1PpmTolr" + "=" + to_string(ms1PpmTolr) + ";";
+        encodedParams = encodedParams + "ms1MinIntensity" + "=" + to_string(ms1MinIntensity) + ";";
+        encodedParams = encodedParams + "ms1ScanFilter" + "=" + ms1ScanFilter + ";";
+
+        //agglomeration params
+        encodedParams = encodedParams + "isAgglomerateAcrossSamples" + "=" + to_string(isAgglomerateAcrossSamples) + ";";
+
+        string spectralCompositionAlgorithmStr = "UNSPECIFIED";
+        if (spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES) {
+            spectralCompositionAlgorithmStr = "ALL_CANDIDATES";
+        } else if (spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE) {
+            spectralCompositionAlgorithmStr = "AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE";
         }
-        formattedParams += "\n";
+        encodedParams = encodedParams + "spectralCompositionAlgorithm" + "=" + spectralCompositionAlgorithmStr + ";";
 
-        formattedParams += "minIndividualMs2ScanIntensity? " + std::to_string(minIndividualMs2ScanIntensity) + "\n";
-        formattedParams += "minNumMs2ScansForConsensus? " + std::to_string(minNumMs2ScansForConsensus) + "\n";
-        formattedParams += "minFractionMs2ScansForConsensus? " + std::to_string(minFractionMs2ScansForConsensus) + "\n";
-
-        formattedParams += "\nLibrary Search:\n";
-        formattedParams += "minNumMatches? " + std::to_string(minNumMatches) + "\n";
-        formattedParams += "minNumDiagnosticFragments? " + std::to_string(minNumDiagnosticFragments) + "\n";
-
-        string isRequireAdductPrecursorMatchString = (isRequireAdductPrecursorMatch ? "true" : "false");
-        formattedParams += "isRequireAdductPrecursorMatch? " + isRequireAdductPrecursorMatchString + "\n";
-
-        formattedParams += "productPpmTolr? (fragment ion m/z matching tolerance) " + std::to_string(productPpmTolr) + " ppm" + "\n";
-        formattedParams += "productMinIntensity? (observed in consensus spectrum) " + std::to_string(productMinIntensity) + "\n";
-
-        string isFindPrecursorIonInMS1ScanString = (isFindPrecursorIonInMS1Scan ? "true" : "false");
-        formattedParams += "isFindPrecursorIonInMS1Scan? " + isFindPrecursorIonInMS1ScanString + "\n";
-
-        formattedParams += "parentPpmTolr? (precursor ion m/z matching tolerance) " + std::to_string(parentPpmTolr) + " ppm" + "\n";
-        formattedParams += "parentMinIntensity? (observed in any valid MS1 scan) " + std::to_string(parentMinIntensity) + "\n";
-        formattedParams += "ms1ScanFilter? (only these MS1 scans are considered valid) " + ms1ScanFilter + "\n";
-
-        formattedParams += "\nSpectral Composition and Agglomeration:\n";
-        formattedParams += "spectralCompositionAlgorithm? ";
-        if (spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES){
-            formattedParams += "ALL_CANDIDATES";
-        } else if ( spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE) {
-            formattedParams += "AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE";
-        }
-        formattedParams += "\n";
-
-        string isAgglomerateAcrossSamplesString = (isAgglomerateAcrossSamples ? "true" : "false");
-        formattedParams += "isAgglomerateAcrossSamples? " + isAgglomerateAcrossSamplesString + "\n";
-
-        return formattedParams;
+        return encodedParams;
     }
 
+    static shared_ptr<DirectInfusionSearchParameters> decode(string encodedParams){
+        shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters = shared_ptr<DirectInfusionSearchParameters>(new DirectInfusionSearchParameters());
+
+        unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams);
+
+        //scan filter params
+        if (decodedMap.find("scanFilterMinFracIntensity") != decodedMap.end()){
+            directInfusionSearchParameters->scanFilterMinFracIntensity = stof(decodedMap["scanFilterMinFracIntensity"]);
+        }
+        if (decodedMap.find("scanFilterMinSNRatio") != decodedMap.end()){
+            directInfusionSearchParameters->scanFilterMinSNRatio = stof(decodedMap["scanFilterMinSNRatio"]);
+        }
+        if (decodedMap.find("scanFilterMaxNumberOfFragments") != decodedMap.end()) {
+            directInfusionSearchParameters->scanFilterMaxNumberOfFragments = static_cast<unsigned int>(stoi(decodedMap["scanFilterMaxNumberOfFragments"]));
+        }
+        if (decodedMap.find("scanFilterBaseLinePercentile") != decodedMap.end()) {
+            directInfusionSearchParameters->scanFilterBaseLinePercentile = stoi(decodedMap["scanFilterBaseLinePercentile"]);
+        }
+        if (decodedMap.find("scanFilterIsRetainFragmentsAbovePrecursorMz") != decodedMap.end()) {
+            directInfusionSearchParameters->scanFilterIsRetainFragmentsAbovePrecursorMz = decodedMap["scanFilterIsRetainFragmentsAbovePrecursorMz"] == "1";
+        }
+        if (decodedMap.find("scanFilterPrecursorPurityPpm") != decodedMap.end()){
+            directInfusionSearchParameters->scanFilterPrecursorPurityPpm = stof(decodedMap["scanFilterPrecursorPurityPpm"]);
+        }
+        if (decodedMap.find("scanFilterMinIntensity") != decodedMap.end()){
+            directInfusionSearchParameters->scanFilterMinIntensity = stof(decodedMap["scanFilterMinIntensity"]);
+        }
+
+        //consensus spectrum params
+        if (decodedMap.find("consensusPpmTolr") != decodedMap.end()){
+            directInfusionSearchParameters->consensusPpmTolr = stof(decodedMap["consensusPpmTolr"]);
+        }
+        if (decodedMap.find("consensusIsIntensityAvgByObserved") != decodedMap.end()){
+            directInfusionSearchParameters->consensusIsIntensityAvgByObserved = decodedMap["consensusIsIntensityAvgByObserved"] == "1";
+        }
+        if (decodedMap.find("consensusMinNumMs2Scans") != decodedMap.end()){
+            directInfusionSearchParameters->consensusMinNumMs2Scans = stoi(decodedMap["consensusMinNumMs2Scans"]);
+        }
+        if (decodedMap.find("consensusMinFractionMs2Scans") != decodedMap.end()){
+            directInfusionSearchParameters->consensusMinFractionMs2Scans = stof(decodedMap["consensusMinFractionMs2Scans"]);
+        }
+        if (decodedMap.find("consensusIsNormalizeTo10K") != decodedMap.end()){
+            directInfusionSearchParameters->consensusIsNormalizeTo10K = decodedMap["consensusIsNormalizeTo10K"] == "1";
+        }
+
+        //ms2 search params
+        if (decodedMap.find("ms2MinNumMatches") != decodedMap.end()){
+            directInfusionSearchParameters->ms2MinNumMatches = stoi(decodedMap["ms2MinNumMatches"]);
+        }
+        if (decodedMap.find("ms2MinNumDiagnosticMatches") != decodedMap.end()){
+            directInfusionSearchParameters->ms2MinNumDiagnosticMatches = stoi(decodedMap["ms2MinNumDiagnosticMatches"]);
+        }
+        if (decodedMap.find("ms2MinNumUniqueMatches") != decodedMap.end()){
+            directInfusionSearchParameters->ms2MinNumUniqueMatches = stoi(decodedMap["ms2MinNumUniqueMatches"]);
+        }
+        if (decodedMap.find("ms2PpmTolr") != decodedMap.end()){
+            directInfusionSearchParameters->ms2PpmTolr = stof(decodedMap["ms2PpmTolr"]);
+        }
+        if (decodedMap.find("ms2MinIntensity") != decodedMap.end()){
+            directInfusionSearchParameters->ms2MinIntensity = stof(decodedMap["ms2MinIntensity"]);
+        }
+
+        //ms1 search params
+        if (decodedMap.find("ms1IsRequireAdductPrecursorMatch") != decodedMap.end()){
+            directInfusionSearchParameters->ms1IsRequireAdductPrecursorMatch = decodedMap["ms1IsRequireAdductPrecursorMatch"] == "1";
+        }
+        if (decodedMap.find("ms1IsFindPrecursorIon") != decodedMap.end()){
+            directInfusionSearchParameters->ms1IsFindPrecursorIon = decodedMap["ms1IsFindPrecursorIon"] == "1";
+        }
+        if (decodedMap.find("ms1PpmTolr") != decodedMap.end()){
+            directInfusionSearchParameters->ms1PpmTolr = stof(decodedMap["ms1PpmTolr"]);
+        }
+        if (decodedMap.find("ms1MinIntensity") != decodedMap.end()){
+            directInfusionSearchParameters->ms1MinIntensity = stof(decodedMap["ms1MinIntensity"]);
+        }
+        if (decodedMap.find("ms1ScanFilter") != decodedMap.end()){
+            directInfusionSearchParameters->ms1ScanFilter = decodedMap["ms1ScanFilter"];
+        }
+
+        //agglomeration params
+        if (decodedMap.find("isAgglomerateAcrossSamples") != decodedMap.end()){
+            directInfusionSearchParameters->isAgglomerateAcrossSamples = decodedMap["isAgglomerateAcrossSamples"] == "1";
+        }
+        if (decodedMap.find("spectralCompositionAlgorithm") != decodedMap.end()){
+            string spectralCompositionAlgorithmStr = decodedMap[""];
+            if (spectralCompositionAlgorithmStr == "ALL_CANDIDATES") {
+                directInfusionSearchParameters->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::ALL_CANDIDATES;
+            } else if (spectralCompositionAlgorithmStr == "ALL_CANDIDATES") {
+                directInfusionSearchParameters->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE;
+            }
+        }
+
+        return directInfusionSearchParameters;
+    }
 };
 
 /**

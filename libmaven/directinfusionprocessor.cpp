@@ -44,7 +44,7 @@ shared_ptr<DirectInfusionSearchSet> DirectInfusionProcessor::getSearchSet(mzSamp
 
             float compoundMz = compound->precursorMz;
 
-            if (params->isRequireAdductPrecursorMatch){
+            if (params->ms1IsRequireAdductPrecursorMatch){
 
                 if (compound->adductString != adduct->name){
                     continue;
@@ -108,7 +108,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
             ms2ScansByBlockNumber[mapKey].push_back(scan);
         }
-        if (params->isFindPrecursorIonInMS1Scan && scan->mslevel == 1 && scan->filterString.find(params->ms1ScanFilter) != string::npos) {
+        if (params->ms1IsFindPrecursorIon && scan->mslevel == 1 && scan->filterString.find(params->ms1ScanFilter) != string::npos) {
             validMs1Scans.push_back(scan);
         }
     }
@@ -151,48 +151,34 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
     Scan* representativeScan = nullptr;
     for (auto& scan : ms2Scans) {
         if (!f){
-
-            //TODO: use unified Fragment constructor
-            if (params->fragmentSpectrumFormationAlgorithm == FragmentSpectrumFormationAlgorithm::MAVEN_ORIGINAL) {
-                f = new Fragment(scan,
-                                 params->minFracIntensity,
-                                 params->minSNRatio,
-                                 params->maxNumberOfFragments,
-                                 params->baseLinePercentile,
-                                 params->isRetainFragmentsAbovePrecursorMz,
-                                 params->precursorPurityPpm,
-                                 params->minIndividualMs2ScanIntensity);
-            } else {
-                f = new Fragment(scan, params);
-            }
-
+            f = new Fragment(scan,
+                             params->scanFilterMinFracIntensity,
+                             params->scanFilterMinSNRatio,
+                             params->scanFilterMaxNumberOfFragments,
+                             params->scanFilterBaseLinePercentile,
+                             params->scanFilterIsRetainFragmentsAbovePrecursorMz,
+                             params->scanFilterPrecursorPurityPpm,
+                             params->scanFilterMinIntensity);
             representativeScan = scan;
         } else {
-            Fragment *brother = nullptr;
-
-            //TODO: use unified Fragment constructor
-            if (params->fragmentSpectrumFormationAlgorithm == FragmentSpectrumFormationAlgorithm::MAVEN_ORIGINAL) {
-                brother = new Fragment(scan,
-                                       params->minFracIntensity,
-                                       params->minSNRatio,
-                                       params->maxNumberOfFragments,
-                                       params->baseLinePercentile,
-                                       params->isRetainFragmentsAbovePrecursorMz,
-                                       params->precursorPurityPpm,
-                                       params->minIndividualMs2ScanIntensity);
-            } else {
-                brother = new Fragment(scan, params);
-            }
+            Fragment *brother = new Fragment(scan,
+                                             params->scanFilterMinFracIntensity,
+                                             params->scanFilterMinSNRatio,
+                                             params->scanFilterMaxNumberOfFragments,
+                                             params->scanFilterBaseLinePercentile,
+                                             params->scanFilterIsRetainFragmentsAbovePrecursorMz,
+                                             params->scanFilterPrecursorPurityPpm,
+                                             params->scanFilterMinIntensity);
 
             f->addFragment(brother);
         }
     }
 
-    f->buildConsensus(params->productPpmTolr,
-                      params->isIntensityAvgByObserved,
-                      params->isNormalizeIntensityArray,
-                      params->minNumMs2ScansForConsensus,
-                      params->minFractionMs2ScansForConsensus
+    f->buildConsensus(params->consensusPpmTolr,
+                      params->consensusIsIntensityAvgByObserved,
+                      params->consensusIsNormalizeTo10K,
+                      params->consensusMinNumMs2Scans,
+                      params->consensusMinFractionMs2Scans
                       );
 
     f->consensus->sortByMz();
@@ -206,7 +192,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         FragmentationMatchScore s = matchAssessment.first;
         float fragmentMaxObservedIntensity = matchAssessment.second;
 
-        if (s.numMatches >= params->minNumMatches && s.numDiagnosticMatches >= params->minNumDiagnosticFragments) {
+        if (s.numMatches >= params->ms2MinNumMatches && s.numDiagnosticMatches >= params->ms2MinNumDiagnosticMatches) {
 
             shared_ptr<DirectInfusionMatchData> directInfusionMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
 
@@ -263,10 +249,10 @@ pair<FragmentationMatchScore, float> DirectInfusionProcessor::assessMatch(const 
 
     bool isPassesMs1PrecursorRequirements = true;
 
-     if (params->isFindPrecursorIonInMS1Scan) {
+     if (params->ms1IsFindPrecursorIon) {
 
          double precMz = compound->precursorMz;
-         if (!params->isRequireAdductPrecursorMatch) {
+         if (!params->ms1IsRequireAdductPrecursorMatch) {
 
              //Compute this way instead of using compound->precursorMz to allow for possibility of matching compound to unexpected adduct
              MassCalculator massCalc;
@@ -275,8 +261,8 @@ pair<FragmentationMatchScore, float> DirectInfusionProcessor::assessMatch(const 
 
          }
 
-         double minMz = precMz - precMz*params->parentPpmTolr/1e6;
-         double maxMz = precMz + precMz*params->parentPpmTolr/1e6;
+         double minMz = precMz - precMz*params->ms1PpmTolr/1e6;
+         double maxMz = precMz + precMz*params->ms1PpmTolr/1e6;
 
          isPassesMs1PrecursorRequirements = false;
 
@@ -285,7 +271,7 @@ pair<FragmentationMatchScore, float> DirectInfusionProcessor::assessMatch(const 
              vector<int> matchingMzs = scan->findMatchingMzs(minMz, maxMz);
 
              for (auto x : matchingMzs) {
-                 if (scan->intensity[x] >= params->parentMinIntensity) {
+                 if (scan->intensity[x] >= params->ms1MinIntensity) {
                      isPassesMs1PrecursorRequirements = true;
                      break;
                  }
@@ -313,7 +299,7 @@ pair<FragmentationMatchScore, float> DirectInfusionProcessor::assessMatch(const 
     t.intensity_array = compound->fragment_intensity;
     t.fragment_labels = compound->fragment_labels;
 
-    float maxDeltaMz = (params->productPpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
+    float maxDeltaMz = (params->ms1PpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
     s.ranks = Fragment::findFragPairsGreedyMz(&t, f->consensus, maxDeltaMz);
 
     bool isHasLabels = compound->fragment_labels.size() == s.ranks.size();
@@ -324,7 +310,7 @@ pair<FragmentationMatchScore, float> DirectInfusionProcessor::assessMatch(const 
 
         int y = s.ranks[i];
 
-        if (y != -1 && f->consensus->intensity_array[y] >= params->productMinIntensity) {
+        if (y != -1 && f->consensus->intensity_array[y] >= params->ms2MinIntensity) {
 
             float fragmentObservedIntensity = f->consensus->intensity_array[y];
 
@@ -547,7 +533,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             shared_ptr<DirectInfusionMatchData> summarizedMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
             summarizedMatchData->compound = summarizedCompound;
             summarizedMatchData->adduct = candidate->adduct;
-            summarizedMatchData->fragmentationMatchScore = summarizedCompound->scoreCompoundHit(observedSpectrum, params->productPpmTolr, false);
+            summarizedMatchData->fragmentationMatchScore = summarizedCompound->scoreCompoundHit(observedSpectrum, params->ms1PpmTolr, false);
 
             summarizedCandidates.push_back(summarizedMatchData);
 
@@ -899,7 +885,7 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
         cerr << "Identified " << proportionSums.size() << " unique and " << compoundInSampleMatchCounter << " total compound-adduct pairs in all samples." << endl;
     }
 
-    f->buildConsensus(params->productPpmTolr);
+    f->buildConsensus(params->ms1PpmTolr);
     f->consensus->sortByMz();
 
     directInfusionGroupAnnotation->fragmentationPattern = f;
