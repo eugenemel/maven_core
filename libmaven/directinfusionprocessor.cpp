@@ -154,7 +154,14 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 
             //TODO: use unified Fragment constructor
             if (params->fragmentSpectrumFormationAlgorithm == FragmentSpectrumFormationAlgorithm::MAVEN_ORIGINAL) {
-                f = new Fragment(scan, 0, 0, UINT_MAX);
+                f = new Fragment(scan,
+                                 params->minFracIntensity,
+                                 params->minSNRatio,
+                                 params->maxNumberOfFragments,
+                                 params->baseLinePercentile,
+                                 params->isRetainFragmentsAbovePrecursorMz,
+                                 params->precursorPurityPpm,
+                                 params->minIndividualMs2ScanIntensity);
             } else {
                 f = new Fragment(scan, params);
             }
@@ -165,7 +172,14 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 
             //TODO: use unified Fragment constructor
             if (params->fragmentSpectrumFormationAlgorithm == FragmentSpectrumFormationAlgorithm::MAVEN_ORIGINAL) {
-                brother = new Fragment(scan, 0, 0, UINT_MAX);
+                brother = new Fragment(scan,
+                                       params->minFracIntensity,
+                                       params->minSNRatio,
+                                       params->maxNumberOfFragments,
+                                       params->baseLinePercentile,
+                                       params->isRetainFragmentsAbovePrecursorMz,
+                                       params->precursorPurityPpm,
+                                       params->minIndividualMs2ScanIntensity);
             } else {
                 brother = new Fragment(scan, params);
             }
