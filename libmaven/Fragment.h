@@ -164,12 +164,12 @@ class Fragment {
         Fragment();
 
         //copy constructor
-        Fragment( Fragment* other);
+        Fragment(Fragment* other);
 
         //fragment is just a direct copy of everything in scan, with no filtering or adjustment.
         Fragment(Scan* scan);
 
-        //build fragment based on MS2 scan
+        //build fragment based on MS2 scan, possibility of filtering and adjustment.
         Fragment(Scan* scan,
                  float minFractionalIntensity,
                  float minSigNoiseRatio,
@@ -179,9 +179,6 @@ class Fragment {
                  float precursorPurityPpm=10,
                  float minIntensity=0
                  );
-
-        //build fragment based on DIMS MS2 scan
-        Fragment(Scan* scan, shared_ptr<DirectInfusionSearchParameters> params);
 
         //delete
         ~Fragment();

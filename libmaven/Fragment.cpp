@@ -101,53 +101,6 @@ Fragment::Fragment(Scan* scan,
 /**
  * @brief Fragment::Fragment
  * @param scan
- * @param params
- *
- * Method to build a consensus fragment for DIMS data.
- * Skips unnecessary steps (like computing precursor purity), respects user-defined parameters
- */
-Fragment::Fragment(Scan *scan, shared_ptr<DirectInfusionSearchParameters> params){
-
-    this->precursorMz = scan->precursorMz;
-    this->collisionEnergy = scan->collisionEnergy;
-    this->polarity = scan->getPolarity();
-    this->sampleName = scan->sample->sampleName;
-    this->scanNum = scan->scannum;
-    this->precursorCharge = scan->precursorCharge;
-    this->group = nullptr;
-    this->consensus = nullptr;
-    this->rt = scan->rt;
-    this->purity = 0;
-    this->mergeCount=0;
-    this->mergedScore=0;
-    this->clusterId=0;
-    this->scanNumMap={};
-    scanNumMap.insert(make_pair(scan->sample, unordered_set<int>()));
-    scanNumMap[scan->sample].insert(scan->scannum);
-
-    if (params->fragmentSpectrumFormationAlgorithm == FragmentSpectrumFormationAlgorithm::ONLY_ABSOLUTE_THRESHOLD){
-        if (params->minIndividualMs2ScanIntensity > 0) {
-            for (unsigned int i = 0; i < scan->nobs(); i++) {
-                if (scan->intensity[i] >= params->minIndividualMs2ScanIntensity) {
-                    this->mzs.push_back(scan->mz[i]);
-                    this->intensity_array.push_back(scan->intensity[i]);
-                    this->fragment_labels.push_back("");
-                }
-            }
-        } else {
-            this->mzs = scan->mz;
-            this->intensity_array = scan->intensity;
-            this->fragment_labels = vector<string>(this->mzs.size(), "");
-        }
-
-        this->sortedBy = SortType::Mz; // scans should always be encoded in increasing m/z.
-        this->obscount = vector<int>( this->mzs.size(), 1); //used when creating consensus spectra.
-    }
-}
-
-/**
- * @brief Fragment::Fragment
- * @param scan
  *
  * The data from the scan is directly copied into the Fragment, with no filtering or adjusting.
  */
@@ -688,6 +641,14 @@ void Fragment::truncateTopN(int n) {
 }
 
 
+/**
+ * @brief Fragment::buildConsensus
+ * @param productPpmTolr: m/z tolerance for associating peaks together
+ * @param isIntensityAvgByObserved: intensity averaged by only scans where peak observed (instead of all possible scans)
+ * @param isNormalizeIntensityArray: scale all intensities so that max intensity = 10000
+ * @param minNumMs2ScansForConsensus: retain peaks found in at least this many scans
+ * @param minFractionMs2ScansForConsensus: retain peaks found in at least this proportion of scans
+ */
 void Fragment::buildConsensus(float productPpmTolr,
                               bool isIntensityAvgByObserved,
                               bool isNormalizeIntensityArray,
