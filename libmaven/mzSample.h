@@ -658,6 +658,8 @@ class PeakGroup {
         void findHighestPurityMS2Pattern(float precPpmTolr);
         Scan* getAverageFragmentationScan(float productPpmTolr);
 
+        void computeDIFragPattern(shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters);
+
         Peak* getHighestIntensityPeak();
         int getChargeStateFromMS1(float ppm);
         bool isMonoisotopic(float ppm);

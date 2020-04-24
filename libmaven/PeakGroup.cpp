@@ -658,6 +658,10 @@ void PeakGroup::computeFragPattern(float productPpmTolr)  {
     ms2EventCount = ms2events.size();
 }
 
+void PeakGroup::computeDIFragPattern(shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters){
+    cerr << "TODO: compute di frag pattern." << endl;
+}
+
 Scan* PeakGroup::getAverageFragmentationScan(float productPpmTolr)  {
     //build consensus ms2 specta
     computeFragPattern(productPpmTolr);
