@@ -39,7 +39,7 @@ Fragment::Fragment() {
 Fragment::Fragment(Scan* scan,
                    float minFracIntensity,
                    float minSNRatio,
-                   unsigned int maxNumberOfFragments,
+                   int maxNumberOfFragments,
                    int baseLinePercentile,
                    bool isRetainFragmentsAbovePrecursorMz,
                    float precursorPurityPpm,
@@ -61,7 +61,7 @@ Fragment::Fragment(Scan* scan,
     scanNumMap[scan->sample].insert(scan->scannum);
 
     //faster implementation when fewer filters specified
-    if (minSNRatio <= 0 && maxNumberOfFragments >= scan->nobs() && baseLinePercentile <= 0 && isRetainFragmentsAbovePrecursorMz){
+    if (minSNRatio <= 0 && (maxNumberOfFragments < 0 || maxNumberOfFragments >= scan->nobs()) && baseLinePercentile <= 0 && isRetainFragmentsAbovePrecursorMz){
         if (minIntensity <= 0) {
             this->mzs = scan->mz;
             this->intensity_array = scan->intensity;
@@ -79,6 +79,10 @@ Fragment::Fragment(Scan* scan,
 
         //<intensity, mz>
         vector<pair<float,float> >mzarray = scan->getTopPeaks(minFracIntensity, minSNRatio, baseLinePercentile, minIntensity);
+
+        if (maxNumberOfFragments < 0) {
+            maxNumberOfFragments = INT_MAX;
+        }
 
         for (unsigned int j=0; j<mzarray.size() && j < maxNumberOfFragments; j++ ) {
             if (isRetainFragmentsAbovePrecursorMz || mzarray[j].second <= this->precursorMz) { //remove fragments higher than precursorMz

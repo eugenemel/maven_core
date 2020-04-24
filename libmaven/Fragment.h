@@ -173,7 +173,7 @@ class Fragment {
         Fragment(Scan* scan,
                  float minFractionalIntensity,
                  float minSigNoiseRatio,
-                 unsigned int maxNumberOfFragments,
+                 int maxNumberOfFragments,
                  int baseLineLevel=5,
                  bool isRetainFragmentsAbovePrecursorMz=false,
                  float precursorPurityPpm=10,

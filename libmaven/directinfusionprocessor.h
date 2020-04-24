@@ -62,7 +62,7 @@ public:
 
     float scanFilterMinFracIntensity = 0;
     float scanFilterMinSNRatio = 0;
-    unsigned int scanFilterMaxNumberOfFragments = UINT_MAX;
+    int scanFilterMaxNumberOfFragments = -1;
     int scanFilterBaseLinePercentile = 0;
     bool scanFilterIsRetainFragmentsAbovePrecursorMz = true;
     float scanFilterPrecursorPurityPpm = 0;
@@ -190,10 +190,7 @@ public:
             directInfusionSearchParameters->scanFilterMinSNRatio = stof(decodedMap["scanFilterMinSNRatio"]);
         }
         if (decodedMap.find("scanFilterMaxNumberOfFragments") != decodedMap.end()) {
-            string scanFilterMaxNumberOfFragmentsStr = decodedMap["scanFilterMaxNumberOfFragments"];
-            try {
-                directInfusionSearchParameters->scanFilterMaxNumberOfFragments = stoul(decodedMap["scanFilterMaxNumberOfFragments"]);
-            } catch (std::out_of_range exception ){}
+            directInfusionSearchParameters->scanFilterMaxNumberOfFragments = stoi(decodedMap["scanFilterMaxNumberOfFragments"]);
         }
         if (decodedMap.find("scanFilterBaseLinePercentile") != decodedMap.end()) {
             directInfusionSearchParameters->scanFilterBaseLinePercentile = stoi(decodedMap["scanFilterBaseLinePercentile"]);
