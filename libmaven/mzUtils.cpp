@@ -1077,7 +1077,7 @@ unordered_map<string, string> decodeParameterMap(string encodedParams){
         cerr << endl;
 
         //Reached the end of the encoded string, no more words to add
-        if (posPrevious >= encodedParams.size()) break;
+//        if (posPrevious >= encodedParams.size()) break;
     }
 
     return decodedMap;
