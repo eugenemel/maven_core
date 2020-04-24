@@ -191,8 +191,6 @@ public:
         }
         if (decodedMap.find("scanFilterMaxNumberOfFragments") != decodedMap.end()) {
             string scanFilterMaxNumberOfFragmentsStr = decodedMap["scanFilterMaxNumberOfFragments"];
-
-            directInfusionSearchParameters->scanFilterMaxNumberOfFragments = UINT_MAX;
             try {
                 directInfusionSearchParameters->scanFilterMaxNumberOfFragments = stoul(decodedMap["scanFilterMaxNumberOfFragments"]);
             } catch (std::out_of_range exception ){}
