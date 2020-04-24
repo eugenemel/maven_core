@@ -190,7 +190,7 @@ public:
             directInfusionSearchParameters->scanFilterMinSNRatio = stof(decodedMap["scanFilterMinSNRatio"]);
         }
         if (decodedMap.find("scanFilterMaxNumberOfFragments") != decodedMap.end()) {
-            directInfusionSearchParameters->scanFilterMaxNumberOfFragments = static_cast<unsigned int>(stoi(decodedMap["scanFilterMaxNumberOfFragments"]));
+            directInfusionSearchParameters->scanFilterMaxNumberOfFragments = stoul(decodedMap["scanFilterMaxNumberOfFragments"]);
         }
         if (decodedMap.find("scanFilterBaseLinePercentile") != decodedMap.end()) {
             directInfusionSearchParameters->scanFilterBaseLinePercentile = stoi(decodedMap["scanFilterBaseLinePercentile"]);
