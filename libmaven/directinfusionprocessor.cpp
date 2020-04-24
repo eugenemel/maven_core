@@ -19,8 +19,8 @@ shared_ptr<DirectInfusionSearchSet> DirectInfusionProcessor::getSearchSet(mzSamp
             int mapKey = static_cast<int>(round(scan->precursorMz+0.001f)); //round to nearest int
 
             if (directInfusionSearchSet->mzRangesByMapKey.find(mapKey) == directInfusionSearchSet->mzRangesByMapKey.end()) {
-                float precMzMin = scan->precursorMz - 0.5f * scan->isolationWindow;
-                float precMzMax = scan->precursorMz + 0.5f * scan->isolationWindow;
+                float precMzMin = scan->getPrecMzMin();
+                float precMzMax = scan->getPrecMzMax();
 
                 directInfusionSearchSet->mzRangesByMapKey.insert(make_pair(mapKey, make_pair(precMzMin, precMzMax)));
             }
