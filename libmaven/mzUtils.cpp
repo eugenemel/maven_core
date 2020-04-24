@@ -1058,12 +1058,27 @@ unordered_map<string, string> decodeParameterMap(string encodedParams){
         string encodedParam = encodedParams.substr(posPrevious, posCurrent-posPrevious);
         posPrevious = posCurrent + delimiter.length();
 
+        cerr << "posCurrent=" << posCurrent << ", posPrevious=" << posPrevious << ", encodedParam=" << encodedParam;
+
         unsigned long equalCoord = encodedParam.find("=");
 
+        cerr << " ,equalCoord=" << equalCoord;
+
         string paramKey = encodedParam.substr(0, equalCoord);
+
+        cerr << " ,paramKey=" << paramKey;
+
         string paramVal = encodedParam.substr(equalCoord+1,encodedParam.size());
 
+        cerr << ", paramVal=" << paramVal;
+
         decodedMap.insert(make_pair(paramKey, paramVal));
+
+        cerr << endl;
+
+        //Reached the end of the encoded string, no more words to add
+
+        //if (posPrevious == encodedParams.size()) break;
     }
 
     return decodedMap;
