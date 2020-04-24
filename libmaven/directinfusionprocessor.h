@@ -190,7 +190,12 @@ public:
             directInfusionSearchParameters->scanFilterMinSNRatio = stof(decodedMap["scanFilterMinSNRatio"]);
         }
         if (decodedMap.find("scanFilterMaxNumberOfFragments") != decodedMap.end()) {
-            directInfusionSearchParameters->scanFilterMaxNumberOfFragments = stoul(decodedMap["scanFilterMaxNumberOfFragments"]);
+            string scanFilterMaxNumberOfFragmentsStr = decodedMap["scanFilterMaxNumberOfFragments"];
+
+            directInfusionSearchParameters->scanFilterMaxNumberOfFragments = UINT_MAX;
+            try {
+                directInfusionSearchParameters->scanFilterMaxNumberOfFragments = stoul(decodedMap["scanFilterMaxNumberOfFragments"]);
+            } catch (std::out_of_range exception ){}
         }
         if (decodedMap.find("scanFilterBaseLinePercentile") != decodedMap.end()) {
             directInfusionSearchParameters->scanFilterBaseLinePercentile = stoi(decodedMap["scanFilterBaseLinePercentile"]);
