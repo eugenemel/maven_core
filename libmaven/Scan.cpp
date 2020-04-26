@@ -417,7 +417,7 @@ vector<int> Scan::intensityOrderDesc() {
         if (lhs.first == rhs.first) {
             return lhs.second < rhs.second;
         } else {
-            return lhs.first > rhs.second;
+            return lhs.first > rhs.first;
         }
     });
 
