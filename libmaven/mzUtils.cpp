@@ -1034,7 +1034,7 @@ vector<string> getMzSampleFilesFromDirectory(const char* path){
     */
 }
 
-unordered_map<string, string> decodeParameterMap(string encodedParams){
+unordered_map<string, string> decodeParameterMap(string encodedParams, string delimiter){
 
     unordered_map<string, string> decodedMap = {};
 
@@ -1051,8 +1051,6 @@ unordered_map<string, string> decodeParameterMap(string encodedParams){
     unsigned long posPrevious = 0;
     unsigned long posCurrent = 0;
 
-    string delimiter = ";";
-
     while ((posCurrent = encodedParams.find(delimiter, posPrevious)) != string::npos) {
 
         string encodedParam = encodedParams.substr(posPrevious, posCurrent-posPrevious);
@@ -1061,7 +1059,7 @@ unordered_map<string, string> decodeParameterMap(string encodedParams){
         unsigned long equalCoord = encodedParam.find("=");
 
         string paramKey = encodedParam.substr(0, equalCoord);
-        string paramVal = encodedParam.substr(equalCoord+1,encodedParam.size());
+        string paramVal = encodedParam.substr(equalCoord + delimiter.size(),encodedParam.size());
 
         decodedMap.insert(make_pair(paramKey, paramVal));
     }
