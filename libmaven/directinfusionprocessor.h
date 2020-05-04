@@ -193,6 +193,15 @@ public:
         return encodedParams;
     }
 
+    static void addMs2MinNumDiagnosticMatchesMap(shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters, string encodedMs2MinNumDiagnosticMatchesMap){
+        unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedMs2MinNumDiagnosticMatchesMap, INTERNAL_MAP_DELIMITER);
+        for (auto it = decodedMap.begin(); it != decodedMap.end(); ++it){
+            string key = it->first;
+            int value = stoi(it->second);
+            directInfusionSearchParameters->ms2MinNumDiagnosticMatchesMap.insert(make_pair(key, value));
+        }
+    }
+
     static shared_ptr<DirectInfusionSearchParameters> decode(string encodedParams){
         shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters = shared_ptr<DirectInfusionSearchParameters>(new DirectInfusionSearchParameters());
 
@@ -256,12 +265,7 @@ public:
         }
         if (decodedMap.find("ms2MinNumDiagnosticMatchesMap") != decodedMap.end()) {
             string encodedDiagnosticFragmentsMap = decodedMap["ms2MinNumDiagnosticMatchesMap"];
-            unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedDiagnosticFragmentsMap, INTERNAL_MAP_DELIMITER);
-            for (auto it = decodedMap.begin(); it != decodedMap.end(); ++it){
-                string key = it->first;
-                int value = stoi(it->second);
-                directInfusionSearchParameters->ms2MinNumDiagnosticMatchesMap.insert(make_pair(key, value));
-            }
+            addMs2MinNumDiagnosticMatchesMap(directInfusionSearchParameters, encodedDiagnosticFragmentsMap);
         }
 
         //ms1 search params
