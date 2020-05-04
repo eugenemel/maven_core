@@ -89,10 +89,13 @@ public:
      * ==================== */
 
     int ms2MinNumMatches = 5;
-    int ms2MinNumDiagnosticMatches = 0;
+    int ms2MinNumDiagnosticMatches = 0; //Previously, diagnostic fragments always started with '*'
     int ms2MinNumUniqueMatches = 0;
     float ms2PpmTolr = 20;
     float ms2MinIntensity = 0;
+
+    /** New Param 2020-05-04 **/
+    map<string, int> ms2MinNumDiagnosticMatchesMap {};
 
     /** ===================
      * MS1 SEARCH RELATED
@@ -129,6 +132,9 @@ public:
         cout << encodedParams << endl;
     }
 
+    //RESERVED DELIMITERS - DO NOT CHANGE!
+    static constexpr const char* INTERNAL_MAP_DELIMITER = "|,|";
+
     string encodeParams() {
 
         string encodedParams;
@@ -156,6 +162,16 @@ public:
         encodedParams = encodedParams + "ms2PpmTolr" + "=" + to_string(ms2PpmTolr) + ";";
         encodedParams = encodedParams + "ms2MinIntensity" + "=" + to_string(ms2MinIntensity) + ";";
 
+        encodedParams = encodedParams + "ms2MinNumDiagnosticMatchesMap" + "=" + "{";
+
+        for (auto it = ms2MinNumDiagnosticMatchesMap.begin(); it != ms2MinNumDiagnosticMatchesMap.end(); ++it) {
+            string key = it->first;
+            string value = to_string(it->second);
+            encodedParams = encodedParams + key + "=" + value + INTERNAL_MAP_DELIMITER;
+        }
+
+        encodedParams = encodedParams + "};";
+
         //ms1 search params
         encodedParams = encodedParams + "ms1IsRequireAdductPrecursorMatch" + "=" + to_string(ms1IsRequireAdductPrecursorMatch) + ";";
         encodedParams = encodedParams + "ms1IsFindPrecursorIon" + "=" + to_string(ms1IsFindPrecursorIon) + ";";
@@ -180,7 +196,7 @@ public:
     static shared_ptr<DirectInfusionSearchParameters> decode(string encodedParams){
         shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters = shared_ptr<DirectInfusionSearchParameters>(new DirectInfusionSearchParameters());
 
-        unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams);
+        unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams); //use semicolon (default)
 
         //scan filter params
         if (decodedMap.find("scanFilterMinFracIntensity") != decodedMap.end()){
@@ -237,6 +253,15 @@ public:
         }
         if (decodedMap.find("ms2MinIntensity") != decodedMap.end()){
             directInfusionSearchParameters->ms2MinIntensity = stof(decodedMap["ms2MinIntensity"]);
+        }
+        if (decodedMap.find("ms2MinNumDiagnosticMatchesMap") != decodedMap.end()) {
+            string encodedDiagnosticFragmentsMap = decodedMap["ms2MinNumDiagnosticMatchesMap"];
+            unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedDiagnosticFragmentsMap, INTERNAL_MAP_DELIMITER);
+            for (auto it = decodedMap.begin(); it != decodedMap.end(); ++it){
+                string key = it->first;
+                int value = stoi(it->second);
+                directInfusionSearchParameters->ms2MinNumDiagnosticMatchesMap.insert(make_pair(key, value));
+            }
         }
 
         //ms1 search params
