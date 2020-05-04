@@ -195,6 +195,7 @@ class Fragment {
         float consensusRt();
         float consensusPurity();
 
+        map<string, int> getDiagnosticMatches(vector<string>& labels, vector<int>& ranks);
 
 	vector<float> asDenseVector(float mzmin, float mzmax, int nbins);
         double compareToFragment(Fragment* other, float productPPMToll);

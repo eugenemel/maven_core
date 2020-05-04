@@ -481,6 +481,30 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
     return s;
 }
 
+map<string, int> Fragment::getDiagnosticMatches(vector<string>& labels, vector<int>& ranks){
+
+    map<string, int> diagnosticMatches = {};
+
+    for (auto x : labels) {
+        diagnosticMatches.insert(make_pair(x, 0));
+    }
+
+    if (annotations.size() != mzs.size()) return diagnosticMatches;
+
+    for (unsigned int i = 0; i < ranks.size(); i++){
+
+        if (annotations[i].empty()) continue;
+
+        if (ranks[i] != -1) { //indicates a matched fragment
+
+            for (auto label : labels){
+                if (annotations[i].find(label) == 0) diagnosticMatches[label]++;
+            }
+        }
+    }
+
+    return diagnosticMatches;
+}
 
 double Fragment::compareToFragment(Fragment* other, float productPpmTolr) {
     if (mzs.size() < 2 or other->mzs.size() < 2) return 0; 	
