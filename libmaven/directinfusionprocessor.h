@@ -133,7 +133,7 @@ public:
     }
 
     //RESERVED DELIMITERS - DO NOT CHANGE!
-    static constexpr const char* INTERNAL_MAP_DELIMITER = "|,|";
+    static constexpr const char* const INTERNAL_MAP_DELIMITER = "|,|";
 
     string encodeParams() {
 
