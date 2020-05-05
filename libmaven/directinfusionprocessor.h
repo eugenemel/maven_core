@@ -125,6 +125,26 @@ public:
     bool isAgglomerateAcrossSamples = false;
     SpectralCompositionAlgorithm spectralCompositionAlgorithm = SpectralCompositionAlgorithm::ALL_CANDIDATES;
 
+    bool isDiagnosticFragmentMapAgreement(map<string, int> observedNumDiagnosticMatchesMap){
+
+        for (auto it = ms2MinNumDiagnosticMatchesMap.begin(); it != ms2MinNumDiagnosticMatchesMap.end(); ++it) {
+            string key = it->first;
+
+            if (observedNumDiagnosticMatchesMap.find(key) != observedNumDiagnosticMatchesMap.end()){
+                int numObservedDiagnosticMatches = observedNumDiagnosticMatchesMap[key];
+                if (numObservedDiagnosticMatches < it->second){
+                    return false;   //insufficient count
+                }
+            } else {
+                if (it->second > 0) {
+                    return false; //not finding a key implies count of 0
+                }
+            }
+        }
+
+        return true;
+    }
+
     void printParams(){
         string encodedParams = encodeParams();
         replace(encodedParams.begin(), encodedParams.end(), ';', '\n');
@@ -313,6 +333,17 @@ struct DirectInfusionMatchData {
     FragmentationMatchScore fragmentationMatchScore;
     float fragmentMaxObservedIntensity = 0;
     double proportion = 0;
+};
+
+/**
+ * @brief The DirectInfusionMatchAssessment struct
+ *
+ * as returned by DirectInfusionProcessor::assessMatch()
+ */
+struct DirectInfusionMatchAssessment {
+    FragmentationMatchScore fragmentationMatchScore;
+    map<string, int> diagnosticFragmentMatchMap = {};
+    float fragmentMaxObservedIntensity = 0;
 };
 
 /**
@@ -547,7 +578,7 @@ public:
       *
       * Designed to be multithreaded, work of comparing / evaluating individual matches
       */
-     static pair<FragmentationMatchScore, float> assessMatch(const Fragment *f,
+     static unique_ptr<DirectInfusionMatchAssessment> assessMatch(const Fragment *f,
                              const vector<Scan*>& ms1Scans,
                              const pair<Compound*, Adduct*>& libraryMatch,
                              const shared_ptr<DirectInfusionSearchParameters> params,

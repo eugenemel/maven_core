@@ -188,11 +188,13 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
     //Compare to library
     for (auto libraryEntry : library){
 
-        pair<FragmentationMatchScore, float> matchAssessment = assessMatch(f, ms1Scans, libraryEntry, params, debug);
-        FragmentationMatchScore s = matchAssessment.first;
-        float fragmentMaxObservedIntensity = matchAssessment.second;
+        unique_ptr<DirectInfusionMatchAssessment> matchAssessment = assessMatch(f, ms1Scans, libraryEntry, params, debug);
+        FragmentationMatchScore s = matchAssessment->fragmentationMatchScore;
+        float fragmentMaxObservedIntensity = matchAssessment->fragmentMaxObservedIntensity;
 
-        if (s.numMatches >= params->ms2MinNumMatches && s.numDiagnosticMatches >= params->ms2MinNumDiagnosticMatches) {
+        if (s.numMatches >= params->ms2MinNumMatches &&
+                s.numDiagnosticMatches >= params->ms2MinNumDiagnosticMatches &&
+                params->isDiagnosticFragmentMapAgreement(matchAssessment->diagnosticFragmentMatchMap)) {
 
             shared_ptr<DirectInfusionMatchData> directInfusionMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
 
@@ -232,13 +234,13 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
     return nullptr;
 }
 
-pair<FragmentationMatchScore, float> DirectInfusionProcessor::assessMatch(const Fragment *f,
+unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(const Fragment *f,
                                                              const vector<Scan *> &ms1Scans,
                                                              const pair<Compound*, Adduct*>& libraryEntry,
                                                              const shared_ptr<DirectInfusionSearchParameters> params,
                                                              const bool debug){
     //Initialize output
-    FragmentationMatchScore s;
+    unique_ptr<DirectInfusionMatchAssessment> directInfusionMatchAssessment = unique_ptr<DirectInfusionMatchAssessment>(new DirectInfusionMatchAssessment());
 
     Compound* compound = libraryEntry.first;
     Adduct *adduct = libraryEntry.second;
@@ -283,7 +285,7 @@ pair<FragmentationMatchScore, float> DirectInfusionProcessor::assessMatch(const 
 
      }
 
-     if (!isPassesMs1PrecursorRequirements) return make_pair(FragmentationMatchScore(), 0); // will return with no matching fragments, 0 for every score
+     if (!isPassesMs1PrecursorRequirements) return move(directInfusionMatchAssessment); // will return with no matching fragments, 0 for every score
 
     //=============================================== //
     //END COMPARE MS1
@@ -300,15 +302,20 @@ pair<FragmentationMatchScore, float> DirectInfusionProcessor::assessMatch(const 
     t.fragment_labels = compound->fragment_labels;
 
     float maxDeltaMz = (params->ms1PpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
-    s.ranks = Fragment::findFragPairsGreedyMz(&t, f->consensus, maxDeltaMz);
+    directInfusionMatchAssessment->fragmentationMatchScore.ranks = Fragment::findFragPairsGreedyMz(&t, f->consensus, maxDeltaMz);
 
-    bool isHasLabels = compound->fragment_labels.size() == s.ranks.size();
+    bool isHasLabels = compound->fragment_labels.size() == directInfusionMatchAssessment->fragmentationMatchScore.ranks.size();
 
     float fragmentMaxObservedIntensity = 0;
 
-    for (unsigned long i=0; i < s.ranks.size(); i++) {
+    map<string, int> diagnosticMatchesMap = {};
+    for (auto it = params->ms2MinNumDiagnosticMatchesMap.begin(); it != params->ms2MinNumDiagnosticMatchesMap.end(); ++it){
+        diagnosticMatchesMap.insert(make_pair(it->first, 0));
+    }
 
-        int y = s.ranks[i];
+    for (unsigned long i=0; i < directInfusionMatchAssessment->fragmentationMatchScore.ranks.size(); i++) {
+
+        int y = directInfusionMatchAssessment->fragmentationMatchScore.ranks[i];
 
         if (y != -1 && f->consensus->intensity_array[y] >= params->ms2MinIntensity) {
 
@@ -318,20 +325,32 @@ pair<FragmentationMatchScore, float> DirectInfusionProcessor::assessMatch(const 
                 fragmentMaxObservedIntensity = fragmentObservedIntensity;
             }
 
-            s.numMatches++;
+            directInfusionMatchAssessment->fragmentationMatchScore.numMatches++;
 
-            if (isHasLabels && compound->fragment_labels[i].find("*") == 0) {
-                s.numDiagnosticMatches++;
+            if (!isHasLabels) continue;
+
+            if (compound->fragment_labels[i].find("*") == 0) {
+                directInfusionMatchAssessment->fragmentationMatchScore.numDiagnosticMatches++;
+            }
+
+            for (auto it = params->ms2MinNumDiagnosticMatchesMap.begin(); it != params->ms2MinNumDiagnosticMatchesMap.end(); ++it){
+                string diagnosticFragLabel = it->first;
+                if (compound->fragment_labels[i].find(diagnosticFragLabel) == 0) {
+                    diagnosticMatchesMap[diagnosticFragLabel]++;
+                }
             }
 
         }
     }
 
+    directInfusionMatchAssessment->diagnosticFragmentMatchMap = diagnosticMatchesMap;
+    directInfusionMatchAssessment->fragmentMaxObservedIntensity = fragmentMaxObservedIntensity;
+
     //=============================================== //
     //END COMPARE MS2
     //=============================================== //
 
-    return make_pair(s, fragmentMaxObservedIntensity);
+    return move(directInfusionMatchAssessment);
 }
 
 unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInformation(
