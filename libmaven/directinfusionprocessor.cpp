@@ -228,6 +228,8 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
                         debug);
         }
 
+        //TODO: more filtering based on unique fragments criteria (or other criteria)
+
         return directInfusionAnnotation;
     }
 
@@ -421,7 +423,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             vector<int> iFrags = matchInfo->matchDataToFrags[iMatchData];
             vector<int> jFrags = matchInfo->matchDataToFrags[jMatchData];
 
-            if (iFrags == jFrags && iMatchData->adduct->name == jMatchData->adduct->name) {
+            if (iFrags == jFrags && iMatchData->adduct->name == jMatchData->adduct->name) { //TODO: require same adduct?
 
                 string iChainLengthSummary;
                 if (iMatchData->compound->metaDataMap.find(LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey()) != iMatchData->compound->metaDataMap.end()){
