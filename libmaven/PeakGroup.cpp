@@ -675,6 +675,8 @@ void PeakGroup::computeDIFragPattern(shared_ptr<DirectInfusionSearchParameters> 
         }
     }
 
+    if (ms2Scans.empty()) return;   //this can happen when a peakgroup is associated with the wrong meanMz.
+
     Fragment *f = nullptr;
     for (auto& scan : ms2Scans) {
         if (!f){
