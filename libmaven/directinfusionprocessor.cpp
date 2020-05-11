@@ -375,12 +375,12 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
         unsigned int matchCounter = 0;
         for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
 
-//            if (debug) cerr << "allCandidates [start] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
-
             int observedIndex = fragmentationMatchScore.ranks[i];
 
             //Issue 209: peaks may be unmatched based on intensity as well as ranks[] position
             if (observedIndex == -1 || observedSpectrum->intensity_array[observedIndex] < params->ms2MinIntensity) continue;
+
+            if (debug) cerr << "allCandidates[" << i << "]: " << compound->name << "|" << compound->adductString << " observedIndex=" << observedIndex << endl;
 
             int fragInt = mzToIntKey(compound->fragment_mzs[i], 1000000);
 
