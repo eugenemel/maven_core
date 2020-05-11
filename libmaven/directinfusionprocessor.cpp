@@ -579,23 +579,23 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             unsigned int matchCounter = 0;
             for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
 
-                if (debug) cerr << "summarizedCandidates [start] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
+                int observedIndex = fragmentationMatchScore.ranks[i];
 
-                //skip unmatched peaks
-                if (fragmentationMatchScore.ranks.at(i) == -1) continue;
+                //Issue 209: peaks may be unmatched based on intensity as well as ranks[] position
+                if (observedIndex == -1 || observedSpectrum->intensity_array[observedIndex] < params->ms2MinIntensity) continue;
 
-                int fragInt = mzToIntKey(compound->fragment_mzs.at(i), 1000000);
+                if (debug) cerr << "allCandidates[" << i << "]: " << compound->name << "|" << compound->adductString << " observedIndex=" << observedIndex << endl;
 
-                compoundFrags.at(matchCounter) = fragInt;
+                int fragInt = mzToIntKey(compound->fragment_mzs[i], 1000000);
+
+                compoundFrags[matchCounter] = fragInt;
                 matchCounter++;
 
                 pair<int, shared_ptr<DirectInfusionMatchData>> key = make_pair(fragInt, directInfusionMatchData);
 
-                matchInfo->fragToTheoreticalIntensitySummarized.insert(make_pair(key, (compound->fragment_intensity.at(i))));
+                matchInfo->fragToTheoreticalIntensitySummarized.insert(make_pair(key, (compound->fragment_intensity[i])));
 
-                int observedIndex = fragmentationMatchScore.ranks.at(i);
-
-                matchInfo->fragToObservedIntensity.insert(make_pair(key, observedSpectrum->intensity_array.at(observedIndex)));
+                matchInfo->fragToObservedIntensity.insert(make_pair(key, observedSpectrum->intensity_array[observedIndex]));
 
                 fragToMatchDataIterator it = matchInfo->fragToMatchDataSummarized.find(fragInt);
 
@@ -603,12 +603,9 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
                     matchInfo->fragToMatchDataSummarized[fragInt].push_back(directInfusionMatchData);
                 } else {
                     vector<shared_ptr<DirectInfusionMatchData>> matchingCompounds(1);
-                    matchingCompounds.at(0) = directInfusionMatchData;
+                    matchingCompounds[0] = directInfusionMatchData;
                     matchInfo->fragToMatchDataSummarized.insert(make_pair(fragInt, matchingCompounds));
                 }
-
-                if (debug) cerr << "summarizedCandidates [end] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
-
             }
 
             matchInfo->matchDataToFragsSummarized.insert(make_pair(directInfusionMatchData, compoundFrags));
@@ -722,7 +719,7 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineCo
         for (fragToMatchDataIterator iterator = matchInfo->fragToMatchDataSummarized.begin(); iterator != matchInfo->fragToMatchDataSummarized.end(); ++iterator) {
             if (iterator->second.size() == 1) { // unique fragment
 
-                shared_ptr<DirectInfusionMatchData> compound = iterator->second.at(0);
+                shared_ptr<DirectInfusionMatchData> compound = iterator->second[0];
                 int fragId = iterator->first;
 
 //                if (debug) cerr << "Found unique fragment for " << compound->compound->name << ": fragId=" << fragId << endl;
@@ -736,7 +733,7 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineCo
                     compoundToUniqueFragmentIntensities[compound].push_back(intensityData);
                 } else {
                     vector<shared_ptr<DirectInfusionSinglePeakMatchData>> observedIntensities(1);
-                    observedIntensities.at(0) = intensityData;
+                    observedIntensities[0] = intensityData;
                     compoundToUniqueFragmentIntensities.insert(make_pair(compound, observedIntensities));
                 }
 
