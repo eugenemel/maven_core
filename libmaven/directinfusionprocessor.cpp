@@ -377,10 +377,10 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
 //            if (debug) cerr << "allCandidates [start] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
 
-            int y = fragmentationMatchScore.ranks[i];
+            int observedIndex = fragmentationMatchScore.ranks[i];
 
             //Issue 209: peaks may be unmatched based on intensity as well as ranks[] position
-            if (y == -1 || observedSpectrum->intensity_array[y] < params->ms2MinIntensity) continue;
+            if (observedIndex == -1 || observedSpectrum->intensity_array[observedIndex] < params->ms2MinIntensity) continue;
 
             int fragInt = mzToIntKey(compound->fragment_mzs.at(i), 1000000);
 
@@ -389,11 +389,9 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
             pair<int, shared_ptr<DirectInfusionMatchData>> key = make_pair(fragInt, directInfusionMatchData);
 
-            matchInfo->fragToTheoreticalIntensity.insert(make_pair(key, (compound->fragment_intensity.at(i))));
+            matchInfo->fragToTheoreticalIntensity.insert(make_pair(key, (compound->fragment_intensity[i])));
 
-            int observedIndex = fragmentationMatchScore.ranks.at(i);
-
-            matchInfo->fragToObservedIntensity.insert(make_pair(key, observedSpectrum->intensity_array.at(observedIndex)));
+            matchInfo->fragToObservedIntensity.insert(make_pair(key, observedSpectrum->intensity_array[observedIndex]));
 
             fragToMatchDataIterator it = matchInfo->fragToMatchData.find(fragInt);
 
@@ -401,7 +399,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
                 matchInfo->fragToMatchData[fragInt].push_back(directInfusionMatchData);
             } else {
                 vector<shared_ptr<DirectInfusionMatchData>> matchingCompounds(1);
-                matchingCompounds.at(0) = directInfusionMatchData;
+                matchingCompounds[0] = directInfusionMatchData;
                 matchInfo->fragToMatchData.insert(make_pair(fragInt, matchingCompounds));
             }
 
