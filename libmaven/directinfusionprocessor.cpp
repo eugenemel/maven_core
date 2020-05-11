@@ -377,8 +377,10 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
 //            if (debug) cerr << "allCandidates [start] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
 
-            //skip unmatched peaks
-            if (fragmentationMatchScore.ranks.at(i) == -1) continue;
+            int y = fragmentationMatchScore.ranks[i];
+
+            //Issue 209: peaks may be unmatched based on intensity as well as ranks[] position
+            if (y == -1 || observedSpectrum->intensity_array[y] < params->ms2MinIntensity) continue;
 
             int fragInt = mzToIntKey(compound->fragment_mzs.at(i), 1000000);
 
@@ -693,10 +695,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
                 cerr << intKeyToMz(frag, 1000000) << " ";
             }
             cerr << endl;
-
-            if (directInfusionMatchData->compound->name == "PS(16:0/18:3)" && directInfusionMatchData->compound->adductString == "[M-H]-") {
-                cerr << "Issue 209: Compound before crashing." << endl;
-            }
         }
     }
 
