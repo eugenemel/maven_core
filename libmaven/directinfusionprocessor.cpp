@@ -382,9 +382,9 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             //Issue 209: peaks may be unmatched based on intensity as well as ranks[] position
             if (observedIndex == -1 || observedSpectrum->intensity_array[observedIndex] < params->ms2MinIntensity) continue;
 
-            int fragInt = mzToIntKey(compound->fragment_mzs.at(i), 1000000);
+            int fragInt = mzToIntKey(compound->fragment_mzs[i], 1000000);
 
-            compoundFrags.at(matchCounter) = fragInt;
+            compoundFrags[matchCounter] = fragInt;
             matchCounter++;
 
             pair<int, shared_ptr<DirectInfusionMatchData>> key = make_pair(fragInt, directInfusionMatchData);
