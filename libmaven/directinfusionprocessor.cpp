@@ -786,6 +786,9 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineCo
 
             if (debug) {
                 cerr << "Compound= " << directInfusionMatchData->compound->name << "|" << directInfusionMatchData->compound->adductString <<": " << proportion << endl;
+                if (directInfusionMatchData->compound->name == "directInfusionMatchData->compound->name" && directInfusionMatchData->compound->adductString == "[M-H]-") {
+                    cerr << "Issue 209: Compound before crashing." << endl;
+                }
             }
         }
 
