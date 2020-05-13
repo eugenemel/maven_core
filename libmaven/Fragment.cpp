@@ -784,6 +784,16 @@ void Fragment::buildConsensus(float productPpmTolr,
     //average values 
 	if( brothers.size() >= 1) {
         for(unsigned int i=0; i<Cons->intensity_array.size(); i++){
+
+            //Issue 213: Debugging
+            if (Cons->mzs[i] > 140.0f && Cons->mzs[i] < 140.1f) {
+                cerr << "i=" << i << " mz=" << mzs[i]
+                        << ", intensity=" << intensity_array[i]
+                           << ", obscount=" << Cons->obscount[i]
+                           << ", avg=" << (Cons->intensity_array[i]/Cons->obscount[i])
+                           << endl;
+            }
+
             Cons->intensity_array[i] /= (isIntensityAvgByObserved ? Cons->obscount[i] : N);
         }
 	}
