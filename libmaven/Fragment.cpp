@@ -690,15 +690,6 @@ void Fragment::buildConsensus(float productPpmTolr,
 
     Fragment* seed= this;
 
-    //START Issue 213 debugging
-    cerr << "original seed: "<< &(seed) << " scan" << seed->scanNum << endl;
-    cerr << "original brothers: " << brothers.size() <<": ";
-    for (auto &x : brothers) {
-        cerr << &(x) << " ";
-    }
-    cerr << endl;
-    //END Issue 213 debugging
-
     //find brother with largest nobs
     for(Fragment* b: brothers) if (b->nobs() > seed->nobs()) seed = b;
 
@@ -708,15 +699,6 @@ void Fragment::buildConsensus(float productPpmTolr,
         brothers.erase(remove(brothers.begin(), brothers.end(), seed), brothers.end());
         brothers.push_back(this);
     }
-
-    //START Issue 213 debugging
-    cerr << "adjusted seed: " << &(seed) << " scan" << seed->scanNum << endl;
-    cerr << "adjusted brothers: " << brothers.size() << ": ";
-    for (auto &x : brothers) {
-        cerr << &(x) << " ";
-    }
-    cerr << endl;
-    //END Issue 213 debugging
 
     Fragment* Cons = new Fragment(seed);  //make a copy of self
     this->consensus = Cons;
@@ -810,16 +792,6 @@ void Fragment::buildConsensus(float productPpmTolr,
     //average values 
 	if( brothers.size() >= 1) {
         for(unsigned int i=0; i<Cons->intensity_array.size(); i++){
-
-            //Issue 213: Debugging
-            if (Cons->mzs[i] > 140.0f && Cons->mzs[i] < 140.1f) {
-                cerr << "i=" << i << " mz=" << mzs[i]
-                        << ", intensity=" << intensity_array[i]
-                           << ", obscount=" << Cons->obscount[i]
-                           << ", avg=" << (Cons->intensity_array[i]/Cons->obscount[i])
-                           << endl;
-            }
-
             Cons->intensity_array[i] /= (isIntensityAvgByObserved ? Cons->obscount[i] : N);
         }
 	}
