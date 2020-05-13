@@ -688,9 +688,35 @@ void Fragment::buildConsensus(float productPpmTolr,
         this->consensus=nullptr;
     }
 
-	//find brother with largest nobs
-	Fragment* seed= this;
+    Fragment* seed= this;
+
+    //START Issue 213 debugging
+    cerr << "original seed: "<< &(seed) << " scan" << seed->scanNum << endl;
+    cerr << "original brothers: " << brothers.size() <<": ";
+    for (auto &x : brothers) {
+        cerr << &(x) << " ";
+    }
+    cerr << endl;
+    //END Issue 213 debugging
+
+    //find brother with largest nobs
     for(Fragment* b: brothers) if (b->nobs() > seed->nobs()) seed = b;
+
+    //Issue 213: if the seed was changed, reassign brothers appropriately.
+    vector<Fragment*> brothers = this->brothers;
+    if (seed != this) {
+        brothers.erase(remove(brothers.begin(), brothers.end(), seed), brothers.end());
+        brothers.push_back(this);
+    }
+
+    //START Issue 213 debugging
+    cerr << "adjusted seed: " << &(seed) << " scan" << seed->scanNum << endl;
+    cerr << "adjusted brothers: " << brothers.size() << ": ";
+    for (auto &x : brothers) {
+        cerr << &(x) << " ";
+    }
+    cerr << endl;
+    //END Issue 213 debugging
 
     Fragment* Cons = new Fragment(seed);  //make a copy of self
     this->consensus = Cons;
