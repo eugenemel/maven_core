@@ -59,6 +59,7 @@ double MassCalculator::getElementMass(string elmnt){
     else if (elmnt == "As")  val_atome = 74.921596;
     else if (elmnt == "Si")  val_atome = 27.9769265325;
     else if (elmnt == "Fe")  val_atome = 55.934939;
+    else if (elmnt == "Li")  val_atome = 7.016003437;
     return(val_atome);
 }
 /*-----------------------------------------------------------------------*/
@@ -222,10 +223,14 @@ map<string, int> MassCalculator::getAdductComponentComposition(string formula){
         return map<string, int>{{"H", 2}};
     } else if (formula == "3H") {
         return map<string, int>{{"H", 3}};
-    } else if (formula == "AcOH" || formula == "AcO") { //acetate (C2H4O2)
+    } else if (formula == "AcOH") { //protonated acetate (C2H4O2)
         return map<string, int>{{"C", 2}, {"H", 4}, {"O", 2}};
-    } else if (formula == "NaOAc") {
-        return map<string, int>{{"C", 2}, {"H", 4}, {"O", 2}, {"Na", 1}};
+    } else if (formula == "AcO") { //deprotonated acetate (C2H3O2)
+        return map<string, int>{{"C", 2}, {"H", 3}, {"O", 2}};
+    } else if (formula == "NaAcOH") { //Na + protonated acetate (C2H4O2)
+        return map<string, int>{{"C", 2}, {"H", 4}, {"Na", 1}, {"O", 2}};
+    } else if (formula == "NaAcO") { //Na + deprotonated acetate (C2H3O2)
+        return map<string, int>{{"C", 2}, {"H", 3}, {"Na", 1}, {"O", 2}};
     } else if (formula == "2Na") {
         return map<string, int>{{"Na", 2}};
     } else if (formula == "3Na") {
@@ -234,6 +239,18 @@ map<string, int> MassCalculator::getAdductComponentComposition(string formula){
         return map<string, int>{{"K", 2}};
     } else if (formula == "3K") {
         return map<string, int>{{"K", 3}};
+    } else if (formula == "DMSO") { //Dimethyl sulfoxide (C2H6OS)
+        return map<string, int>{{"C", 2}, {"H", 6}, {"O", 1}, {"S", 1}};
+    } else if (formula == "IsoProp") { //Isopropylene (C3H8O)
+        return map<string, int>{{"C", 3}, {"H", 8}, {"O", 1}};
+    } else if (formula == "CH3OH") {
+        return map<string, int>{{"C", 1}, {"H", 4}, {"O", 1}};
+    } else if (formula == "Na2O2CH") {
+        return map<string, int>{{"C", 1}, {"H", 1}, {"Na", 2}, {"O", 2}};
+    } else if (formula == "NaHO2CH") {
+        return map<string, int>{{"C", 1}, {"H", 2}, {"Na", 1}, {"O", 2}};
+    } else if (formula == "NaO2CH") {
+        return map<string, int>{{"C", 1}, {"H", 1}, {"Na", 1}, {"O", 2}};
     } else {
         return getComposition(formula);
     }
