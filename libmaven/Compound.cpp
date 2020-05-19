@@ -123,7 +123,7 @@ void SummarizedCompound::computeSummarizedData() {
     map<int, vector<float>> intensitiesByMz = {};
     map<int, vector<string>> labelsByMz = {};
 
-    map<pair<string, string>, int> summarizedMetaDataMap{};
+    map<pair<string, string>, unsigned long> summarizedMetaDataMap{};
 
     for (auto compound : getChildren()) {
         for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
@@ -147,6 +147,23 @@ void SummarizedCompound::computeSummarizedData() {
             } else {
                 labelsByMz[mzKey].push_back(label);
             }
+        }
+
+        //Issue 216: metadata
+        for (auto it = compound->metaDataMap.begin(); it != compound->metaDataMap.end(); ++it){
+            pair<string, string> metaDataPair = pair<string, string>(it->first, it->second);
+            if (summarizedMetaDataMap.find(metaDataPair) == summarizedMetaDataMap.end()){
+                summarizedMetaDataMap.insert(make_pair(metaDataPair, 0));
+            }
+            summarizedMetaDataMap[metaDataPair]++;
+        }
+    }
+
+    //Issue 216: metadata
+    for (auto it = summarizedMetaDataMap.begin(); it != summarizedMetaDataMap.end(); ++it){
+        pair<string, string> metaDataPair = it->first;
+        if (it->second == getChildren().size()) {
+            this->metaDataMap.insert(metaDataPair);
         }
     }
 
