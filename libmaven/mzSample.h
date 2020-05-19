@@ -812,7 +812,7 @@ public:
     vector<Compound*> getChildren();
 
     //Relies on children
-    void computeFragments();
+    void computeSummarizedData();
     virtual ~SummarizedCompound(){}
 };
 

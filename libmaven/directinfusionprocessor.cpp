@@ -549,7 +549,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             summarizedCompound->db = "summarized";
             summarizedCompound->id = summarizedCompound->name + summarizedCompound->adductString;
 
-            summarizedCompound->computeFragments();
+            summarizedCompound->computeSummarizedData();
 
             shared_ptr<DirectInfusionMatchData> summarizedMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
             summarizedMatchData->compound = summarizedCompound;

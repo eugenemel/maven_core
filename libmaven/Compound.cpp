@@ -109,16 +109,21 @@ vector<Compound*> Compound::getChildren() {return vector<Compound*>(0);}
 vector<Compound*> SummarizedCompound::getChildren() {return children;}
 
 /**
- * @brief SummarizedCompound::computeFragments
+ * @brief SummarizedCompound::computeSummarizedData
  *
+ * fragment information:
  * All m/z values from all compounds are used.
  * Intensity values are averaged based on all m/zs with some intensity value.
  *
+ * metadata information:
+ * retain all metdata associated with every compound.
  */
-void SummarizedCompound::computeFragments() {
+void SummarizedCompound::computeSummarizedData() {
 
     map<int, vector<float>> intensitiesByMz = {};
     map<int, vector<string>> labelsByMz = {};
+
+    map<pair<string, string>, int> summarizedMetaDataMap{};
 
     for (auto compound : getChildren()) {
         for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
