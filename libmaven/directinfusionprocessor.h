@@ -51,51 +51,9 @@ enum class SpectralCompositionAlgorithm {
  *
  * single class to contain all parameters used in direct infusion search analysis.
  */
-class DirectInfusionSearchParameters {
+class DirectInfusionSearchParameters : public SearchParameters {
 
 public:
-
-    /** =======================
-     * SCAN FILTER ASSOCIATED
-     * All parameters are arguments of Fragment::Fragment() constructor.
-     * ========================*/
-
-    float scanFilterMinFracIntensity = 0;
-    float scanFilterMinSNRatio = 0;
-    int scanFilterMaxNumberOfFragments = -1;
-    int scanFilterBaseLinePercentile = 0;
-    bool scanFilterIsRetainFragmentsAbovePrecursorMz = true;
-    float scanFilterPrecursorPurityPpm = 0;
-    float scanFilterMinIntensity = 0;
-
-    /** =======================
-     * CONSENSUS SPECTRUM ASSOCIATED
-     * All parameters are arguments Fragment::buildConsensus() method.
-     * ========================*/
-
-    float consensusPpmTolr = 10;
-    bool consensusIsIntensityAvgByObserved = true;
-    int consensusMinNumMs2Scans = 0;
-    float consensusMinFractionMs2Scans = 0;
-    bool consensusIsNormalizeTo10K = false;
-
-    /** ===================
-     * MS2 SEARCH RELATED
-     * @param ms2MinNumMatches: min number of reference peaks found in observed spectrum
-     * @param ms2MinNumDiagnosticMatches: min number of reference peaks labeled as diagnostic found in observed spectrum
-     * @param ms2MinNumUniqueMatches: CURRENTLY UNUSED PARAMETER
-     * @param ms2PpmTolr: m/z tolerance value used for matching reference <--> observed spectra
-     * @param ms2MinIntensity: minimum intensity value for an MS2 spectral peak to be considered real
-     * ==================== */
-
-    int ms2MinNumMatches = 5;
-    int ms2MinNumDiagnosticMatches = 0; //Previously, diagnostic fragments always started with '*'
-    int ms2MinNumUniqueMatches = 0;
-    float ms2PpmTolr = 20;
-    float ms2MinIntensity = 0;
-
-    /** New Param 2020-05-04 **/
-    map<string, int> ms2MinNumDiagnosticMatchesMap {};
 
     /** ===================
      * MS1 SEARCH RELATED
