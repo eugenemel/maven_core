@@ -274,7 +274,7 @@ public:
     Scan* getScan(unsigned int scanNum);				//get indexes for a given scan
     Scan* getAverageScan(float rtmin, float rtmax, int mslevel, int polarity, float resolution);
 
-    EIC* getEIC(float,float,float,float,int);	//get eic based on minMz, maxMz, minRt, maxRt,mslevel
+    EIC* getEIC(float minMz, float maxMz, float minRt, float maxRt, int mslevel, string scanFilterString="");	//get eic based on minMz, maxMz, minRt, maxRt, mslevel
     EIC* getEIC(string srmId);	//get eic based on srmId
     EIC* getEIC(float precursorMz, float collisionEnergy, float productMz, float amuQ1, float amuQ2 );
     EIC* getTIC(float,float,int);		//get Total Ion Chromatogram

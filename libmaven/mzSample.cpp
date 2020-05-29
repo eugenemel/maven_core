@@ -1076,7 +1076,7 @@ EIC* mzSample::getEIC(string srm) {
 }
 
 
-EIC* mzSample::getEIC(float mzmin,float mzmax, float rtmin, float rtmax, int mslevel) { 
+EIC* mzSample::getEIC(float mzmin, float mzmax, float rtmin, float rtmax, int mslevel, string scanFilterString) {
 
     //ajust EIC retention time window to match sample retentention times
 	if (rtmin < this->minRt ) rtmin = this->minRt;
