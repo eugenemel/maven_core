@@ -1138,6 +1138,9 @@ EIC* mzSample::getEIC(float mzmin, float mzmax, float rtmin, float rtmax, int ms
             //sim scan outside the range
             if (mslevel == 1 && (scan->mz.front() > mzmax || scan->mz.back() < mzmin)) continue;
 
+            //Issue 222: respect filter string
+            if (!scanFilterString.empty() && scan->filterString.find(scanFilterString) == string::npos) continue;
+
             float __maxMz=0;
             float __maxIntensity=0;
 
