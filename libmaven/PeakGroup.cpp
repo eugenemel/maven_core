@@ -703,6 +703,7 @@ void PeakGroup::computeDIFragPattern(shared_ptr<DirectInfusionSearchParameters> 
     }
 
     f->buildConsensus(params->consensusPpmTolr,
+                      Fragment::ConsensusIntensityAgglomerationType::Mean, //TODO: Issue 217
                       params->consensusIsIntensityAvgByObserved,
                       params->consensusIsNormalizeTo10K,
                       params->consensusMinNumMs2Scans,

@@ -672,12 +672,14 @@ void Fragment::truncateTopN(int n) {
 /**
  * @brief Fragment::buildConsensus
  * @param productPpmTolr: m/z tolerance for associating peaks together
+ * @param consensusIntensityAgglomerationType: method to agglomerate intensities
  * @param isIntensityAvgByObserved: intensity averaged by only scans where peak observed (instead of all possible scans)
  * @param isNormalizeIntensityArray: scale all intensities so that max intensity = 10000
  * @param minNumMs2ScansForConsensus: retain peaks found in at least this many scans
  * @param minFractionMs2ScansForConsensus: retain peaks found in at least this proportion of scans
  */
 void Fragment::buildConsensus(float productPpmTolr,
+                              ConsensusIntensityAgglomerationType consensusIntensityAgglomerationType,
                               bool isIntensityAvgByObserved,
                               bool isNormalizeIntensityArray,
                               int minNumMs2ScansForConsensus,
@@ -706,6 +708,9 @@ void Fragment::buildConsensus(float productPpmTolr,
 
     unsigned long N = 1 + brothers.size();
 
+    //Issue 217
+    map<int, vector<float>> posToIntensityMap{};
+
     for(unsigned int i=0; i<brothers.size(); i++) {
 
         Fragment* brother = brothers[i];
@@ -726,6 +731,8 @@ void Fragment::buildConsensus(float productPpmTolr,
                 Cons->fragment_labels.push_back(brother->fragment_labels[j]);
             }
         }
+
+        vector<int> mzOrderInc = Cons->mzOrderInc();
 
         Cons->sortedBy = SortType::None;
         Cons->sortByMz();
