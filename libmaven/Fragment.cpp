@@ -731,15 +731,6 @@ void Fragment::buildConsensus(float productPpmTolr,
                 //Issue 217
                 posToIntensityMap[posA].push_back(intB);
 
-                //debugging
-                if (mzB > 350.9 && mzB < 351.0) {
-                    cerr << posA << ": ";
-                    for (auto x : posToIntensityMap[posA]) {
-                       cerr << x << " ";
-                    }
-                    cerr << endl;
-                }
-
             } else if ( posA == -1 ) {
                 Cons->mzs.push_back(mzB);
                 Cons->intensity_array.push_back(intB);
@@ -761,16 +752,6 @@ void Fragment::buildConsensus(float productPpmTolr,
             int sortedPos = j;
             int unsortedPos = mzOrderInc[j];
 
-            //Issue 217 debugging
-            float mzB = Cons->mzs[unsortedPos];
-            if (mzB > 350.9 && mzB < 351.0) {
-                cerr << unsortedPos << ": ";
-                for (auto x : posToIntensityMap[unsortedPos]) {
-                   cerr << x << " ";
-                }
-                cerr << endl;
-            }
-
             auto entry = posToIntensityMap.find(unsortedPos);
             if (entry != end(posToIntensityMap)) {
                 auto const value = std::move(entry->second);
@@ -779,37 +760,12 @@ void Fragment::buildConsensus(float productPpmTolr,
                 //should never happen
             }
 
-//            if (sortedPos != unsortedPos) {
-//                auto entry = posToIntensityMap.find(unsortedPos);
-//                if (entry != end(posToIntensityMap)) {
-
-//                    auto const value = std::move(entry->second);
-//                    posToIntensityMap.erase(entry);
-//                    posToIntensityMap.insert({sortedPos, std::move(value)});
-
-//                } else {
-//                    //this should never happen!
-//                }
-//            }
-
         };
 
         posToIntensityMap = posToIntensityMapSorted;
 
         Cons->sortedBy = SortType::None;
         Cons->sortByMz();
-
-        //Issue 217 debugging
-        for (unsigned int j = 0; j < Cons->intensity_array.size(); j++){
-            float mzB = Cons->mzs[j];
-            if (mzB > 350.9 && mzB < 351.0) {
-                cerr << j << ": ";
-                for (auto x : posToIntensityMap[j]) {
-                   cerr << x << " ";
-                }
-                cerr << endl;
-            }
-        }
 
         map<mzSample*, unordered_set<int>> brotherMap = brother->scanNumMap;
         for (auto it = brotherMap.begin(); it != brotherMap.end(); ++it) {
