@@ -924,6 +924,7 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
        groupMatchData->adduct = matchData->adduct;
        groupMatchData->proportion = matchDataPair.second / numContributingSamples;
        groupMatchData->fragmentationMatchScore = bestFragMatch.at(matchData);
+       groupMatchData->fragmentMaxObservedIntensity = matchData->fragmentMaxObservedIntensity;
 
        directInfusionGroupAnnotation->compounds.at(annotationMatchIndex) = groupMatchData;
 
@@ -931,7 +932,9 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
            cerr << "Compound: " << groupMatchData->compound->name
                 << ", Adduct: "<< groupMatchData->adduct->name
                 << ", numMatches: " << groupMatchData->fragmentationMatchScore.numMatches
-                << ", Proportion: " << groupMatchData->proportion << endl;
+                << ", Proportion: " << groupMatchData->proportion
+                << ", Fragment Max Observed Intensity: " << groupMatchData->fragmentMaxObservedIntensity
+                << endl;
        }
 
        annotationMatchIndex++;
