@@ -710,6 +710,9 @@ void Fragment::buildConsensus(float productPpmTolr,
 
     //Issue 217
     map<int, vector<float>> posToIntensityMap{};
+    for (unsigned int i = 0; i < Cons->intensity_array.size(); i++){
+        posToIntensityMap.insert(make_pair(i, vector<float>{Cons->intensity_array[i]}));
+    }
 
     for(unsigned int i=0; i<brothers.size(); i++) {
 
@@ -724,18 +727,76 @@ void Fragment::buildConsensus(float productPpmTolr,
                 Cons->intensity_array[ posA ] += intB;
                 Cons->obscount[ posA ] += 1;
                 Cons->fragment_labels[posA] = brother->fragment_labels[j];
+
+                //Issue 217
+                posToIntensityMap[posA].push_back(intB);
+
+                //debugging
+                if (mzB > 350.9 && mzB < 351.0) {
+                    cerr << posA << ": ";
+                    for (auto x : posToIntensityMap[posA]) {
+                       cerr << x << " ";
+                    }
+                    cerr << endl;
+                }
+
             } else if ( posA == -1 ) {
                 Cons->mzs.push_back(mzB);
                 Cons->intensity_array.push_back(intB);
                 Cons->obscount.push_back(1);
                 Cons->fragment_labels.push_back(brother->fragment_labels[j]);
+
+                //Issue 217
+                posToIntensityMap.insert(make_pair(Cons->mzs.size()-1,vector<float>{intB}));
             }
         }
 
+        //Issue 217: keep track of original intensity values
         vector<int> mzOrderInc = Cons->mzOrderInc();
+
+        for(unsigned int j = 0; j < mzOrderInc.size(); j++) {
+
+            int pos = mzOrderInc[j];
+
+            //Issue 217 debugging
+            float mzB = Cons->mzs[j];
+            if (mzB > 350.9 && mzB < 351.0) {
+                cerr << j << ": ";
+                for (auto x : posToIntensityMap[j]) {
+                   cerr << x << " ";
+                }
+                cerr << endl;
+            }
+
+            if (pos != j) {
+                auto entry = posToIntensityMap.find(j);
+                if (entry != end(posToIntensityMap)) {
+
+                    auto const value = std::move(entry->second);
+                    posToIntensityMap.erase(entry);
+                    posToIntensityMap.insert({pos, std::move(value)});
+
+                } else {
+                    //this should never happen!
+                }
+            }
+
+        };
 
         Cons->sortedBy = SortType::None;
         Cons->sortByMz();
+
+        //Issue 217 debugging
+        for (unsigned int j = 0; j < Cons->intensity_array.size(); j++){
+            float mzB = Cons->mzs[j];
+            if (mzB > 350.9 && mzB < 351.0) {
+                cerr << j << ": ";
+                for (auto x : posToIntensityMap[j]) {
+                   cerr << x << " ";
+                }
+                cerr << endl;
+            }
+        }
 
         map<mzSample*, unordered_set<int>> brotherMap = brother->scanNumMap;
         for (auto it = brotherMap.begin(); it != brotherMap.end(); ++it) {
@@ -796,10 +857,27 @@ void Fragment::buildConsensus(float productPpmTolr,
         Cons->obscount = filtered_obscount;
     }
 
-    //average values 
+    //agglomerate intensity values
 	if( brothers.size() >= 1) {
-        for(unsigned int i=0; i<Cons->intensity_array.size(); i++){
-            Cons->intensity_array[i] /= (isIntensityAvgByObserved ? Cons->obscount[i] : N);
+        if (consensusIntensityAgglomerationType == Mean) {
+            for( unsigned int i=0; i < Cons->intensity_array.size(); i++){
+                Cons->intensity_array[i] /= (isIntensityAvgByObserved ? Cons->obscount[i] : N);
+            }
+        } else if (consensusIntensityAgglomerationType == Median) {
+            for( unsigned int i=0; i < Cons->intensity_array.size(); i++){
+
+                //Issue 217 debugging
+                float mzB = Cons->mzs[i];
+                if (mzB > 350.9 && mzB < 351.0) {
+                    cerr << i << ": ";
+                    for (auto x : posToIntensityMap[i]) {
+                       cerr << x << " ";
+                    }
+                    cerr << endl;
+                }
+
+                Cons->intensity_array[i] = mzUtils::median(posToIntensityMap[i]);
+            }
         }
 	}
 	
