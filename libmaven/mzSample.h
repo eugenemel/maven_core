@@ -1090,6 +1090,7 @@ class SearchParameters {
      * ========================*/
 
     float consensusPpmTolr = 10;
+    Fragment::ConsensusIntensityAgglomerationType consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
     bool consensusIsIntensityAvgByObserved = true;
     int consensusMinNumMs2Scans = 0;
     float consensusMinFractionMs2Scans = 0;

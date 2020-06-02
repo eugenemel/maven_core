@@ -2,6 +2,7 @@
 
 #include "mzSample.h"
 #include "mzUtils.h"
+#include "Fragment.h"
 #include <memory>
 #include <algorithm>
 
@@ -133,6 +134,14 @@ public:
         encodedParams = encodedParams + "consensusMinFractionMs2Scans" + "=" + to_string(consensusMinFractionMs2Scans) + ";";
         encodedParams = encodedParams + "consensusIsNormalizeTo10K" + "=" + to_string(consensusIsNormalizeTo10K) + ";";
 
+        string consensusIntensityAgglomerationTypeStr = "UNSPECIFIED";
+        if (consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
+            consensusIntensityAgglomerationTypeStr = "MEAN";
+        } else if (consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
+            consensusIntensityAgglomerationTypeStr = "MEDIAN";
+        }
+        encodedParams = encodedParams + "consensusIntensityAgglomerationType" + "=" + consensusIntensityAgglomerationTypeStr + ";";
+
         //ms2 search params
         encodedParams = encodedParams + "ms2MinNumMatches" + "=" + to_string(ms2MinNumMatches) + ";";
         encodedParams = encodedParams + "ms2MinNumDiagnosticMatches" + "=" + to_string(ms2MinNumDiagnosticMatches) + ";";
@@ -225,6 +234,15 @@ public:
             directInfusionSearchParameters->consensusIsNormalizeTo10K = decodedMap["consensusIsNormalizeTo10K"] == "1";
         }
 
+        if (decodedMap.find("consensusIntensityAgglomerationType") != decodedMap.end()) {
+            string consensusIntensityAgglomerationTypeStr = decodedMap["consensusIntensityAgglomerationType"];
+            if (consensusIntensityAgglomerationTypeStr == "MEAN") {
+                directInfusionSearchParameters->consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
+            } else if (consensusIntensityAgglomerationTypeStr == "MEDIAN") {
+                directInfusionSearchParameters->consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
+            }
+        }
+
         //ms2 search params
         if (decodedMap.find("ms2MinNumMatches") != decodedMap.end()){
             directInfusionSearchParameters->ms2MinNumMatches = stoi(decodedMap["ms2MinNumMatches"]);
@@ -268,10 +286,10 @@ public:
             directInfusionSearchParameters->isAgglomerateAcrossSamples = decodedMap["isAgglomerateAcrossSamples"] == "1";
         }
         if (decodedMap.find("spectralCompositionAlgorithm") != decodedMap.end()){
-            string spectralCompositionAlgorithmStr = decodedMap[""];
+            string spectralCompositionAlgorithmStr = decodedMap["spectralCompositionAlgorithm"];
             if (spectralCompositionAlgorithmStr == "ALL_CANDIDATES") {
                 directInfusionSearchParameters->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::ALL_CANDIDATES;
-            } else if (spectralCompositionAlgorithmStr == "ALL_CANDIDATES") {
+            } else if (spectralCompositionAlgorithmStr == "AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE") {
                 directInfusionSearchParameters->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE;
             }
         }
