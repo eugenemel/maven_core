@@ -754,34 +754,47 @@ void Fragment::buildConsensus(float productPpmTolr,
         //Issue 217: keep track of original intensity values
         vector<int> mzOrderInc = Cons->mzOrderInc();
 
+        map<int, vector<float>> posToIntensityMapSorted{};
+
         for(unsigned int j = 0; j < mzOrderInc.size(); j++) {
 
-            int pos = mzOrderInc[j];
+            int sortedPos = j;
+            int unsortedPos = mzOrderInc[j];
 
             //Issue 217 debugging
-            float mzB = Cons->mzs[j];
+            float mzB = Cons->mzs[unsortedPos];
             if (mzB > 350.9 && mzB < 351.0) {
-                cerr << j << ": ";
-                for (auto x : posToIntensityMap[j]) {
+                cerr << unsortedPos << ": ";
+                for (auto x : posToIntensityMap[unsortedPos]) {
                    cerr << x << " ";
                 }
                 cerr << endl;
             }
 
-            if (pos != j) {
-                auto entry = posToIntensityMap.find(j);
-                if (entry != end(posToIntensityMap)) {
-
-                    auto const value = std::move(entry->second);
-                    posToIntensityMap.erase(entry);
-                    posToIntensityMap.insert({pos, std::move(value)});
-
-                } else {
-                    //this should never happen!
-                }
+            auto entry = posToIntensityMap.find(unsortedPos);
+            if (entry != end(posToIntensityMap)) {
+                auto const value = std::move(entry->second);
+                posToIntensityMapSorted.insert({sortedPos, std::move(value)});
+            } else {
+                //should never happen
             }
 
+//            if (sortedPos != unsortedPos) {
+//                auto entry = posToIntensityMap.find(unsortedPos);
+//                if (entry != end(posToIntensityMap)) {
+
+//                    auto const value = std::move(entry->second);
+//                    posToIntensityMap.erase(entry);
+//                    posToIntensityMap.insert({sortedPos, std::move(value)});
+
+//                } else {
+//                    //this should never happen!
+//                }
+//            }
+
         };
+
+        posToIntensityMap = posToIntensityMapSorted;
 
         Cons->sortedBy = SortType::None;
         Cons->sortByMz();
