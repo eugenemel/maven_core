@@ -847,14 +847,32 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
 
         //Issue 218
         if (!f){
-            f = new Fragment(directInfusionAnnotation->fragmentationPattern);
+
+            //Issue 218: START OLD
+            f = new Fragment(directInfusionAnnotation->scan, 0, 0, UINT_MAX);
+            //Issue 218: END OLD
+
+//            //Issue 218: START NEW
+//            f = new Fragment(directInfusionAnnotation->fragmentationPattern);
+//            //Issue 218: END NEW
+
         } else {
-            f->addFragment(new Fragment(directInfusionAnnotation->fragmentationPattern));
+
+//            //Issue 218: START NEW
+//            f->addFragment(new Fragment(directInfusionAnnotation->fragmentationPattern));
+//            //Issue 218: END NEW
+
+            //Issue 218: START OLD
+            Fragment *brother = new Fragment(directInfusionAnnotation->scan, 0, 0, UINT_MAX);
+            f->addFragment(brother);
+            //Issue 218: END OLD
         }
 
-        for (auto fragment : directInfusionAnnotation->fragmentationPattern->brothers){
-            f->addFragment(new Fragment(fragment));
-        }
+//        //Issue 218: START NEW
+//        for (auto fragment : directInfusionAnnotation->fragmentationPattern->brothers){
+//            f->addFragment(new Fragment(fragment));
+//        }
+//        //Issue 218: END NEW
 
         if (debug) {
             cerr << "sample=" << directInfusionAnnotation->sample->sampleName
