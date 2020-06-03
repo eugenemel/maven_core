@@ -868,6 +868,17 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
             //Issue 218: END OLD
         }
 
+        //Issue 218: START NEW
+        if (directInfusionAnnotation->fragmentationPattern) {
+            for (auto fragment : directInfusionAnnotation->fragmentationPattern->brothers) {
+                if (fragment) {
+                    Fragment *brother = new Fragment(fragment);
+                    f->addFragment(brother);
+                }
+            }
+        }
+        //Issue 218: END NEW
+
 //        //Issue 218: START NEW
 //        for (auto fragment : directInfusionAnnotation->fragmentationPattern->brothers){
 //            f->addFragment(new Fragment(fragment));
