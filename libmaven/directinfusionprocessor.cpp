@@ -844,11 +844,16 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
                     make_pair(directInfusionAnnotation->sample,
                               directInfusionAnnotation)
                     );
+
+        //Issue 218
         if (!f){
-            f = new Fragment(directInfusionAnnotation->scan, 0, 0, UINT_MAX);
+            f = new Fragment(directInfusionAnnotation->fragmentationPattern);
         } else {
-            Fragment *brother = new Fragment(directInfusionAnnotation->scan, 0, 0, UINT_MAX);
-            f->addFragment(brother);
+            f->addFragment(new Fragment(directInfusionAnnotation->fragmentationPattern));
+        }
+
+        for (auto fragment : directInfusionAnnotation->fragmentationPattern->brothers){
+            f->addFragment(new Fragment(fragment));
         }
 
         if (debug) {
@@ -904,7 +909,13 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
         cerr << "Identified " << proportionSums.size() << " unique and " << compoundInSampleMatchCounter << " total compound-adduct pairs in all samples." << endl;
     }
 
-    f->buildConsensus(params->ms1PpmTolr);
+    f->buildConsensus(params->consensusPpmTolr,
+                      params->consensusIntensityAgglomerationType,
+                      params->consensusIsIntensityAvgByObserved,
+                      params->consensusIsNormalizeTo10K,
+                      params->consensusMinNumMs2Scans,
+                      params->consensusMinFractionMs2Scans
+                      );
     f->consensus->sortByMz();
 
     directInfusionGroupAnnotation->fragmentationPattern = f;
