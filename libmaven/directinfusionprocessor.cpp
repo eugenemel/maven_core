@@ -847,12 +847,6 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
 
         //Issue 218
         if (!f){
-
-//            //Issue 218: START OLD
-//            f = new Fragment(directInfusionAnnotation->scan, 0, 0, UINT_MAX);
-//            //Issue 218: END OLD
-
-            //Issue 218: START NEW
             f = new Fragment(directInfusionAnnotation->scan,
                              params->scanFilterMinFracIntensity,
                              params->scanFilterMinSNRatio,
@@ -861,15 +855,7 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
                              params->scanFilterIsRetainFragmentsAbovePrecursorMz,
                              params->scanFilterPrecursorPurityPpm,
                              params->scanFilterMinIntensity);
-            //Issue 218: END NEW
-
-//            //Issue 218: START NEW
-//            f = new Fragment(directInfusionAnnotation->fragmentationPattern);
-//            //Issue 218: END NEW
-
         } else {
-
-            //Issue 218: START NEW
             Fragment *brother = new Fragment(directInfusionAnnotation->scan,
                                              params->scanFilterMinFracIntensity,
                                              params->scanFilterMinSNRatio,
@@ -880,16 +866,6 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
                                              params->scanFilterMinIntensity);
 
             f->addFragment(brother);
-            //Issue 218: END NEW
-
-//            //Issue 218: START NEW
-//            f->addFragment(new Fragment(directInfusionAnnotation->fragmentationPattern));
-//            //Issue 218: END NEW
-
-//            //Issue 218: START OLD
-//            Fragment *brother = new Fragment(directInfusionAnnotation->scan, 0, 0, UINT_MAX);
-//            f->addFragment(brother);
-//            //Issue 218: END OLD
         }
 
         //Issue 218
@@ -955,6 +931,7 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
         cerr << "Identified " << proportionSums.size() << " unique and " << compoundInSampleMatchCounter << " total compound-adduct pairs in all samples." << endl;
     }
 
+    //Issue 218
     f->buildConsensus(params->consensusPpmTolr,
                       params->consensusIntensityAgglomerationType,
                       params->consensusIsIntensityAvgByObserved,
