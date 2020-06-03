@@ -868,7 +868,7 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
             //Issue 218: END OLD
         }
 
-        //Issue 218: START NEW
+        //Issue 218
         if (directInfusionAnnotation->fragmentationPattern) {
             for (auto fragment : directInfusionAnnotation->fragmentationPattern->brothers) {
                 if (fragment) {
@@ -877,13 +877,6 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
                 }
             }
         }
-        //Issue 218: END NEW
-
-//        //Issue 218: START NEW
-//        for (auto fragment : directInfusionAnnotation->fragmentationPattern->brothers){
-//            f->addFragment(new Fragment(fragment));
-//        }
-//        //Issue 218: END NEW
 
         if (debug) {
             cerr << "sample=" << directInfusionAnnotation->sample->sampleName
