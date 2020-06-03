@@ -767,7 +767,7 @@ void Fragment::buildConsensus(float productPpmTolr,
                     abort();
                 }
 
-            };
+            }
 
             posToIntensityMap = posToIntensityMapSorted;
         }
