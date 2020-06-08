@@ -362,13 +362,59 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getFragmentM
         shared_ptr<DirectInfusionSearchParameters> params,
         bool debug){
 
-    unique_ptr<DirectInfusionMatchInformation> matchInfo = unique_ptr<DirectInfusionMatchInformation>(new DirectInfusionMatchInformation());
+       if (debug) cerr << "DirectInfusionProcessor::getFragmentMatchMaps()" << endl;
 
-    //TODO
+       unique_ptr<DirectInfusionMatchInformation> matchInfo = unique_ptr<DirectInfusionMatchInformation>(new DirectInfusionMatchInformation());
 
-    return matchInfo;
+       for (auto directInfusionMatchData : allCandidates) {
+
+           Compound *compound = directInfusionMatchData->compound;
+           FragmentationMatchScore fragmentationMatchScore = directInfusionMatchData->fragmentationMatchScore;
+
+           vector<int> compoundFrags(static_cast<unsigned int>(fragmentationMatchScore.numMatches));
+
+           unsigned int matchCounter = 0;
+           for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
+
+               int observedIndex = fragmentationMatchScore.ranks[i];
+
+               //Issue 209: peaks may be unmatched based on intensity as well as ranks[] position
+               if (observedIndex == -1 || observedSpectrum->intensity_array[observedIndex] < params->ms2MinIntensity) continue;
+
+               if (debug) cerr << "allCandidates[" << i << "]: " << compound->name << "|" << compound->adductString << " observedIndex=" << observedIndex << endl;
+
+               int fragInt = mzToIntKey(compound->fragment_mzs[i], 1000000);
+
+               compoundFrags[matchCounter] = fragInt;
+               matchCounter++;
+
+               pair<int, shared_ptr<DirectInfusionMatchData>> key = make_pair(fragInt, directInfusionMatchData);
+
+               matchInfo->fragToTheoreticalIntensity.insert(make_pair(key, (compound->fragment_intensity[i])));
+
+               matchInfo->fragToObservedIntensity.insert(make_pair(key, observedSpectrum->intensity_array[observedIndex]));
+
+               fragToMatchDataIterator it = matchInfo->fragToMatchData.find(fragInt);
+
+               if (it != matchInfo->fragToMatchData.end()) {
+                   matchInfo->fragToMatchData[fragInt].push_back(directInfusionMatchData);
+               } else {
+                   vector<shared_ptr<DirectInfusionMatchData>> matchingCompounds(1);
+                   matchingCompounds[0] = directInfusionMatchData;
+                   matchInfo->fragToMatchData.insert(make_pair(fragInt, matchingCompounds));
+               }
+
+   //            if (debug) cerr << "allCandidates [end] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
+           }
+
+           matchInfo->matchDataToFrags.insert(make_pair(directInfusionMatchData, compoundFrags));
+
+       }
+
+       return matchInfo;
 
 }
+
 unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInformation(
         vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
         Fragment *observedSpectrum,
