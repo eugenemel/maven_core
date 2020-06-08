@@ -637,208 +637,210 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
     unique_ptr<DirectInfusionMatchInformation> matchInfo = getFragmentMatchMaps(allCandidates, observedSpectrum, params, debug);
 
-    //Identify all cases where matchData matches to identical fragments
-    //and compounds can be naturally summarized to a higher level.
-    for (unsigned int i = 0; i < allCandidates.size(); i++) {
+    matchInfo = summarizeByAcylChainsAndSumComposition(allCandidates, move(matchInfo), observedSpectrum, params, debug);
 
-        shared_ptr<DirectInfusionMatchData> iMatchData = allCandidates[i];
+//    //Identify all cases where matchData matches to identical fragments
+//    //and compounds can be naturally summarized to a higher level.
+//    for (unsigned int i = 0; i < allCandidates.size(); i++) {
 
-        for (unsigned int j = i+1; j < allCandidates.size(); j++) {
+//        shared_ptr<DirectInfusionMatchData> iMatchData = allCandidates[i];
 
-            shared_ptr<DirectInfusionMatchData> jMatchData = allCandidates[j];
+//        for (unsigned int j = i+1; j < allCandidates.size(); j++) {
 
-            vector<int> iFrags = matchInfo->matchDataToFrags[iMatchData];
-            vector<int> jFrags = matchInfo->matchDataToFrags[jMatchData];
+//            shared_ptr<DirectInfusionMatchData> jMatchData = allCandidates[j];
 
-            if (iFrags == jFrags && iMatchData->adduct->name == jMatchData->adduct->name) {
+//            vector<int> iFrags = matchInfo->matchDataToFrags[iMatchData];
+//            vector<int> jFrags = matchInfo->matchDataToFrags[jMatchData];
 
-                string iChainLengthSummary;
-                if (iMatchData->compound->metaDataMap.find(LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey()) != iMatchData->compound->metaDataMap.end()){
-                    iChainLengthSummary = iMatchData->compound->metaDataMap[LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey()];
-                }
+//            if (iFrags == jFrags && iMatchData->adduct->name == jMatchData->adduct->name) {
 
-                string jChainLengthSummary;
-                if (jMatchData->compound->metaDataMap.find(LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey()) != jMatchData->compound->metaDataMap.end()){
-                    jChainLengthSummary = jMatchData->compound->metaDataMap[LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey()];
-                }
+//                string iChainLengthSummary;
+//                if (iMatchData->compound->metaDataMap.find(LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey()) != iMatchData->compound->metaDataMap.end()){
+//                    iChainLengthSummary = iMatchData->compound->metaDataMap[LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey()];
+//                }
 
-                if (!iChainLengthSummary.empty() && !jChainLengthSummary.empty() && iChainLengthSummary == jChainLengthSummary) {
-                    if (matchInfo->chainLengthSummaries.find(iChainLengthSummary) != matchInfo->chainLengthSummaries.end()){
-                        matchInfo->chainLengthSummaries[iChainLengthSummary].insert(iMatchData);
-                        matchInfo->chainLengthSummaries[iChainLengthSummary].insert(jMatchData);
-                    } else {
-                        set<shared_ptr<DirectInfusionMatchData>> matchDataSet = set<shared_ptr<DirectInfusionMatchData>>();
-                        matchDataSet.insert(iMatchData);
-                        matchDataSet.insert(jMatchData);
-                        matchInfo->chainLengthSummaries.insert(make_pair(iChainLengthSummary, matchDataSet));
-                    }
+//                string jChainLengthSummary;
+//                if (jMatchData->compound->metaDataMap.find(LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey()) != jMatchData->compound->metaDataMap.end()){
+//                    jChainLengthSummary = jMatchData->compound->metaDataMap[LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey()];
+//                }
 
-                    matchInfo->originalMatchToSummaryString.insert(make_pair(iMatchData, iChainLengthSummary));
-                    matchInfo->originalMatchToSummaryString.insert(make_pair(jMatchData, iChainLengthSummary));
-                }
+//                if (!iChainLengthSummary.empty() && !jChainLengthSummary.empty() && iChainLengthSummary == jChainLengthSummary) {
+//                    if (matchInfo->chainLengthSummaries.find(iChainLengthSummary) != matchInfo->chainLengthSummaries.end()){
+//                        matchInfo->chainLengthSummaries[iChainLengthSummary].insert(iMatchData);
+//                        matchInfo->chainLengthSummaries[iChainLengthSummary].insert(jMatchData);
+//                    } else {
+//                        set<shared_ptr<DirectInfusionMatchData>> matchDataSet = set<shared_ptr<DirectInfusionMatchData>>();
+//                        matchDataSet.insert(iMatchData);
+//                        matchDataSet.insert(jMatchData);
+//                        matchInfo->chainLengthSummaries.insert(make_pair(iChainLengthSummary, matchDataSet));
+//                    }
 
-                string iCompositionSummary;
-                if (iMatchData->compound->metaDataMap.find(LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()) != iMatchData->compound->metaDataMap.end()) {
-                     iCompositionSummary = iMatchData->compound->metaDataMap[LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()];
-                }
+//                    matchInfo->originalMatchToSummaryString.insert(make_pair(iMatchData, iChainLengthSummary));
+//                    matchInfo->originalMatchToSummaryString.insert(make_pair(jMatchData, iChainLengthSummary));
+//                }
 
-                string jCompositionSummary;
-                if (jMatchData->compound->metaDataMap.find(LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()) != jMatchData->compound->metaDataMap.end()) {
-                    jCompositionSummary = jMatchData->compound->metaDataMap[LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()];
-                }
+//                string iCompositionSummary;
+//                if (iMatchData->compound->metaDataMap.find(LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()) != iMatchData->compound->metaDataMap.end()) {
+//                     iCompositionSummary = iMatchData->compound->metaDataMap[LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()];
+//                }
 
-                if (!iCompositionSummary.empty() && !jCompositionSummary.empty() && iCompositionSummary == jCompositionSummary) {
-                    if (matchInfo->compositionSummaries.find(iCompositionSummary) != matchInfo->compositionSummaries.end()) {
-                        matchInfo->compositionSummaries[iCompositionSummary].insert(iMatchData);
-                        matchInfo->compositionSummaries[iCompositionSummary].insert(jMatchData);
-                    } else {
-                        set<shared_ptr<DirectInfusionMatchData>> matchDataSet = set<shared_ptr<DirectInfusionMatchData>>();
-                        matchDataSet.insert(iMatchData);
-                        matchDataSet.insert(jMatchData);
-                        matchInfo->compositionSummaries.insert(make_pair(iCompositionSummary, matchDataSet));
-                    }
+//                string jCompositionSummary;
+//                if (jMatchData->compound->metaDataMap.find(LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()) != jMatchData->compound->metaDataMap.end()) {
+//                    jCompositionSummary = jMatchData->compound->metaDataMap[LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()];
+//                }
 
-                    //acyl chain length summarization takes precedence over composition summarization
-                    if (matchInfo->originalMatchToSummaryString.find(iMatchData) == matchInfo->originalMatchToSummaryString.end()) {
-                        matchInfo->originalMatchToSummaryString.insert(make_pair(iMatchData, iCompositionSummary));
-                    }
+//                if (!iCompositionSummary.empty() && !jCompositionSummary.empty() && iCompositionSummary == jCompositionSummary) {
+//                    if (matchInfo->compositionSummaries.find(iCompositionSummary) != matchInfo->compositionSummaries.end()) {
+//                        matchInfo->compositionSummaries[iCompositionSummary].insert(iMatchData);
+//                        matchInfo->compositionSummaries[iCompositionSummary].insert(jMatchData);
+//                    } else {
+//                        set<shared_ptr<DirectInfusionMatchData>> matchDataSet = set<shared_ptr<DirectInfusionMatchData>>();
+//                        matchDataSet.insert(iMatchData);
+//                        matchDataSet.insert(jMatchData);
+//                        matchInfo->compositionSummaries.insert(make_pair(iCompositionSummary, matchDataSet));
+//                    }
 
-                    if (matchInfo->originalMatchToSummaryString.find(jMatchData) == matchInfo->originalMatchToSummaryString.end()) {
-                        matchInfo->originalMatchToSummaryString.insert(make_pair(jMatchData, iCompositionSummary));
-                    }
-                }
+//                    //acyl chain length summarization takes precedence over composition summarization
+//                    if (matchInfo->originalMatchToSummaryString.find(iMatchData) == matchInfo->originalMatchToSummaryString.end()) {
+//                        matchInfo->originalMatchToSummaryString.insert(make_pair(iMatchData, iCompositionSummary));
+//                    }
 
-            }
-        }
-    }
+//                    if (matchInfo->originalMatchToSummaryString.find(jMatchData) == matchInfo->originalMatchToSummaryString.end()) {
+//                        matchInfo->originalMatchToSummaryString.insert(make_pair(jMatchData, iCompositionSummary));
+//                    }
+//                }
 
-    //build new candidates list, with summarized candidates (if applicable)
-    vector<shared_ptr<DirectInfusionMatchData>> summarizedCandidates;
-    set<string> addedSummaries;
+//            }
+//        }
+//    }
 
-    for (auto candidate : allCandidates) {
-        if (matchInfo->originalMatchToSummaryString.find(candidate) != matchInfo->originalMatchToSummaryString.end()) {
+//    //build new candidates list, with summarized candidates (if applicable)
+//    vector<shared_ptr<DirectInfusionMatchData>> summarizedCandidates;
+//    set<string> addedSummaries;
 
-            string summarizedName = matchInfo->originalMatchToSummaryString[candidate];
+//    for (auto candidate : allCandidates) {
+//        if (matchInfo->originalMatchToSummaryString.find(candidate) != matchInfo->originalMatchToSummaryString.end()) {
 
-            //only add each summarized compound one time.
-            if (addedSummaries.find(summarizedName) != addedSummaries.end()) {
-                continue;
-            }
-            addedSummaries.insert(summarizedName);
+//            string summarizedName = matchInfo->originalMatchToSummaryString[candidate];
 
-            vector<Compound*> compounds;
+//            //only add each summarized compound one time.
+//            if (addedSummaries.find(summarizedName) != addedSummaries.end()) {
+//                continue;
+//            }
+//            addedSummaries.insert(summarizedName);
 
-            //check for chain length summary
-            if (matchInfo->chainLengthSummaries.find(summarizedName) != matchInfo->chainLengthSummaries.end()) {
+//            vector<Compound*> compounds;
 
-                set<shared_ptr<DirectInfusionMatchData>> matches = matchInfo->chainLengthSummaries[summarizedName];
-                compounds.resize(matches.size());
+//            //check for chain length summary
+//            if (matchInfo->chainLengthSummaries.find(summarizedName) != matchInfo->chainLengthSummaries.end()) {
 
-                unsigned int counter = 0;
-                for (auto match : matches) {
-                    compounds[counter] = match->compound;
-                    counter++;
-                }
+//                set<shared_ptr<DirectInfusionMatchData>> matches = matchInfo->chainLengthSummaries[summarizedName];
+//                compounds.resize(matches.size());
 
-            //check for composition summary
-            } else if (matchInfo->compositionSummaries.find(summarizedName) != matchInfo->compositionSummaries.end()) {
+//                unsigned int counter = 0;
+//                for (auto match : matches) {
+//                    compounds[counter] = match->compound;
+//                    counter++;
+//                }
 
-                set<shared_ptr<DirectInfusionMatchData>> matches = matchInfo->compositionSummaries[summarizedName];
-                compounds.resize(matches.size());
+//            //check for composition summary
+//            } else if (matchInfo->compositionSummaries.find(summarizedName) != matchInfo->compositionSummaries.end()) {
 
-                unsigned int counter = 0;
-                for (auto match : matches) {
-                    compounds[counter] = match->compound;
-                    counter++;
-                }
+//                set<shared_ptr<DirectInfusionMatchData>> matches = matchInfo->compositionSummaries[summarizedName];
+//                compounds.resize(matches.size());
 
-            //problem case
-            } else {
-                cerr << "summarizedName=" << summarizedName << " Did not match to chain or composition summaries." << endl;
-                abort();
-            }
+//                unsigned int counter = 0;
+//                for (auto match : matches) {
+//                    compounds[counter] = match->compound;
+//                    counter++;
+//                }
 
-            //TODO: not ever deleted now
-            SummarizedCompound *summarizedCompound = new SummarizedCompound(summarizedName, compounds);
+//            //problem case
+//            } else {
+//                cerr << "summarizedName=" << summarizedName << " Did not match to chain or composition summaries." << endl;
+//                abort();
+//            }
 
-            //TODO: this is guaranteed to be equal based on how the summarized compound data maps are built
-            summarizedCompound->adductString = compounds.at(0)->adductString;
+//            //TODO: not ever deleted now
+//            SummarizedCompound *summarizedCompound = new SummarizedCompound(summarizedName, compounds);
 
-            /**
-             * TODO: these are not guaranteed to be equal among all children compounds.
-             * A sensible value should be selected for the maven gui to function properly.
-             */
-            summarizedCompound->formula = compounds.at(0)->getFormula();
-            summarizedCompound->precursorMz = compounds.at(0)->precursorMz;
-            summarizedCompound->setExactMass(compounds.at(0)->getExactMass());
-            summarizedCompound->charge = compounds.at(0)->charge;
-            summarizedCompound->db = "summarized";
-            summarizedCompound->id = summarizedCompound->name + summarizedCompound->adductString;
+//            //TODO: this is guaranteed to be equal based on how the summarized compound data maps are built
+//            summarizedCompound->adductString = compounds.at(0)->adductString;
 
-            summarizedCompound->computeSummarizedData();
+//            /**
+//             * TODO: these are not guaranteed to be equal among all children compounds.
+//             * A sensible value should be selected for the maven gui to function properly.
+//             */
+//            summarizedCompound->formula = compounds.at(0)->getFormula();
+//            summarizedCompound->precursorMz = compounds.at(0)->precursorMz;
+//            summarizedCompound->setExactMass(compounds.at(0)->getExactMass());
+//            summarizedCompound->charge = compounds.at(0)->charge;
+//            summarizedCompound->db = "summarized";
+//            summarizedCompound->id = summarizedCompound->name + summarizedCompound->adductString;
 
-            shared_ptr<DirectInfusionMatchData> summarizedMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
-            summarizedMatchData->compound = summarizedCompound;
-            summarizedMatchData->adduct = candidate->adduct;
-            summarizedMatchData->fragmentationMatchScore = summarizedCompound->scoreCompoundHit(observedSpectrum, params->ms1PpmTolr, false);
+//            summarizedCompound->computeSummarizedData();
 
-            summarizedCandidates.push_back(summarizedMatchData);
+//            shared_ptr<DirectInfusionMatchData> summarizedMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
+//            summarizedMatchData->compound = summarizedCompound;
+//            summarizedMatchData->adduct = candidate->adduct;
+//            summarizedMatchData->fragmentationMatchScore = summarizedCompound->scoreCompoundHit(observedSpectrum, params->ms1PpmTolr, false);
 
-        } else {
-            summarizedCandidates.push_back(candidate);
-        }
-    }
+//            summarizedCandidates.push_back(summarizedMatchData);
 
-    if (summarizedCandidates.size() == allCandidates.size()) { // no summarization occurred
-        matchInfo->fragToMatchDataSummarized = matchInfo->fragToMatchData;
-        matchInfo->matchDataToFragsSummarized = matchInfo->matchDataToFrags;
-        matchInfo->fragToTheoreticalIntensitySummarized = matchInfo->fragToTheoreticalIntensity;
-    } else {
+//        } else {
+//            summarizedCandidates.push_back(candidate);
+//        }
+//    }
 
-        for (auto directInfusionMatchData : summarizedCandidates) {
+//    if (summarizedCandidates.size() == allCandidates.size()) { // no summarization occurred
+//        matchInfo->fragToMatchDataSummarized = matchInfo->fragToMatchData;
+//        matchInfo->matchDataToFragsSummarized = matchInfo->matchDataToFrags;
+//        matchInfo->fragToTheoreticalIntensitySummarized = matchInfo->fragToTheoreticalIntensity;
+//    } else {
 
-            Compound *compound = directInfusionMatchData->compound;
-            FragmentationMatchScore fragmentationMatchScore = directInfusionMatchData->fragmentationMatchScore;
+//        for (auto directInfusionMatchData : summarizedCandidates) {
 
-            vector<int> compoundFrags(static_cast<unsigned int>(fragmentationMatchScore.numMatches));
+//            Compound *compound = directInfusionMatchData->compound;
+//            FragmentationMatchScore fragmentationMatchScore = directInfusionMatchData->fragmentationMatchScore;
 
-            unsigned int matchCounter = 0;
-            for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
+//            vector<int> compoundFrags(static_cast<unsigned int>(fragmentationMatchScore.numMatches));
 
-                int observedIndex = fragmentationMatchScore.ranks[i];
+//            unsigned int matchCounter = 0;
+//            for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
 
-                //Issue 209: peaks may be unmatched based on intensity as well as ranks[] position
-                if (observedIndex == -1 || observedSpectrum->intensity_array[observedIndex] < params->ms2MinIntensity) continue;
+//                int observedIndex = fragmentationMatchScore.ranks[i];
 
-                if (debug) cerr << "allCandidates[" << i << "]: " << compound->name << "|" << compound->adductString << " observedIndex=" << observedIndex << endl;
+//                //Issue 209: peaks may be unmatched based on intensity as well as ranks[] position
+//                if (observedIndex == -1 || observedSpectrum->intensity_array[observedIndex] < params->ms2MinIntensity) continue;
 
-                int fragInt = mzToIntKey(compound->fragment_mzs[i], 1000000);
+//                if (debug) cerr << "allCandidates[" << i << "]: " << compound->name << "|" << compound->adductString << " observedIndex=" << observedIndex << endl;
 
-                compoundFrags[matchCounter] = fragInt;
-                matchCounter++;
+//                int fragInt = mzToIntKey(compound->fragment_mzs[i], 1000000);
 
-                pair<int, shared_ptr<DirectInfusionMatchData>> key = make_pair(fragInt, directInfusionMatchData);
+//                compoundFrags[matchCounter] = fragInt;
+//                matchCounter++;
 
-                matchInfo->fragToTheoreticalIntensitySummarized.insert(make_pair(key, (compound->fragment_intensity[i])));
+//                pair<int, shared_ptr<DirectInfusionMatchData>> key = make_pair(fragInt, directInfusionMatchData);
 
-                matchInfo->fragToObservedIntensity.insert(make_pair(key, observedSpectrum->intensity_array[observedIndex]));
+//                matchInfo->fragToTheoreticalIntensitySummarized.insert(make_pair(key, (compound->fragment_intensity[i])));
 
-                fragToMatchDataIterator it = matchInfo->fragToMatchDataSummarized.find(fragInt);
+//                matchInfo->fragToObservedIntensity.insert(make_pair(key, observedSpectrum->intensity_array[observedIndex]));
 
-                if (it != matchInfo->fragToMatchDataSummarized.end()) {
-                    matchInfo->fragToMatchDataSummarized[fragInt].push_back(directInfusionMatchData);
-                } else {
-                    vector<shared_ptr<DirectInfusionMatchData>> matchingCompounds(1);
-                    matchingCompounds[0] = directInfusionMatchData;
-                    matchInfo->fragToMatchDataSummarized.insert(make_pair(fragInt, matchingCompounds));
-                }
-            }
+//                fragToMatchDataIterator it = matchInfo->fragToMatchDataSummarized.find(fragInt);
 
-            matchInfo->matchDataToFragsSummarized.insert(make_pair(directInfusionMatchData, compoundFrags));
+//                if (it != matchInfo->fragToMatchDataSummarized.end()) {
+//                    matchInfo->fragToMatchDataSummarized[fragInt].push_back(directInfusionMatchData);
+//                } else {
+//                    vector<shared_ptr<DirectInfusionMatchData>> matchingCompounds(1);
+//                    matchingCompounds[0] = directInfusionMatchData;
+//                    matchInfo->fragToMatchDataSummarized.insert(make_pair(fragInt, matchingCompounds));
+//                }
+//            }
 
-        }
-    }
+//            matchInfo->matchDataToFragsSummarized.insert(make_pair(directInfusionMatchData, compoundFrags));
+
+//        }
+//    }
 
     if (debug) {
         cerr << "Fragments --> Compounds: (" << matchInfo->matchDataToFrags.size() << " passing compounds)" << endl;
