@@ -625,6 +625,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
         }
     }
 
+    return matchInfo;
 }
 
 unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInformation(
