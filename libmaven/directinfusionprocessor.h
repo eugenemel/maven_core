@@ -532,7 +532,7 @@ public:
       * @param params
       * @param debug
       */
-     static void summarizeByAcylChainAndSummedComposition(
+     static unique_ptr<DirectInfusionMatchInformation> summarizeByAcylChainsAndSumComposition(
              vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
              unique_ptr<DirectInfusionMatchInformation> matchInfo,
              Fragment *observedSpectrum,

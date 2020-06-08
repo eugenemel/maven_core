@@ -415,7 +415,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getFragmentM
 
 }
 
-unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByAcylChainsAndSummedComposition(
+unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByAcylChainsAndSumComposition(
         vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
         unique_ptr<DirectInfusionMatchInformation> matchInfo,
         Fragment *observedSpectrum,
