@@ -288,7 +288,7 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
 
      }
 
-     if (!isPassesMs1PrecursorRequirements) return move(directInfusionMatchAssessment); // will return with no matching fragments, 0 for every score
+     if (!isPassesMs1PrecursorRequirements) return directInfusionMatchAssessment; // will return with no matching fragments, 0 for every score
 
     //=============================================== //
     //END COMPARE MS1
@@ -353,9 +353,22 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
     //END COMPARE MS2
     //=============================================== //
 
-    return move(directInfusionMatchAssessment);
+    return directInfusionMatchAssessment;
 }
 
+unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getFragmentMatchMaps(
+        vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
+        Fragment *observedSpectrum,
+        shared_ptr<DirectInfusionSearchParameters> params,
+        bool debug){
+
+    unique_ptr<DirectInfusionMatchInformation> matchInfo = unique_ptr<DirectInfusionMatchInformation>(new DirectInfusionMatchInformation());
+
+    //TODO
+
+    return matchInfo;
+
+}
 unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInformation(
         vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
         Fragment *observedSpectrum,

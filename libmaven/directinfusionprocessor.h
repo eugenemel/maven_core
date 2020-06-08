@@ -371,8 +371,10 @@ struct DirectInfusionSinglePeakMatchData {
 /**
  * @brief The DirectInfusionMatchInformation structure
  *
- * A structure to organize all fragment matches from all compound, adduct pairs that match to a single
+ * A structure to organize all fragment matches from all (compound, adduct) pairs that match to a single
  * direct infusion spectrum.
+ *
+ * Provides maps of individual fragments to compound matches, and compound to fragment matches.
  *
  */
 struct DirectInfusionMatchInformation {
@@ -504,6 +506,23 @@ public:
              shared_ptr<DirectInfusionSearchParameters> params,
              bool debug
              );
+
+     /**
+      * @brief DirectInfusionProcessor::getFragmentMatchMaps
+      * @param allCandidates
+      * @param observedSpectrum
+      * @param params
+      * @param debug
+      * @return
+      *
+      * Determine maps of fragments to compounds based on current match information.
+      */
+     static unique_ptr<DirectInfusionMatchInformation> getFragmentMatchMaps(
+             vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
+             Fragment *observedSpectrum,
+             shared_ptr<DirectInfusionSearchParameters> params,
+             bool debug);
+
 
      /**
       * @brief getMatches
