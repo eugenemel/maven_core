@@ -525,6 +525,21 @@ public:
 
 
      /**
+      * @brief summarizeByAcylChainAndSummedComposition
+      * @param allCandidates
+      * @param matchInfo
+      * @param observedSpectrum
+      * @param params
+      * @param debug
+      */
+     static void summarizeByAcylChainAndSummedComposition(
+             vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
+             unique_ptr<DirectInfusionMatchInformation> matchInfo,
+             Fragment *observedSpectrum,
+             shared_ptr<DirectInfusionSearchParameters> params,
+             bool debug);
+
+     /**
       * @brief getMatches
       * @param allCandidates
       *
