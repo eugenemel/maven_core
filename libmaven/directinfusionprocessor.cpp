@@ -247,7 +247,6 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         } else if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE){
 
             processedMatchData = DirectInfusionProcessor::determineComposition(
-                        libraryMatches,
                         matchInfo.get(),
                         f->consensus,
                         params,
@@ -765,7 +764,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 }
 
 vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineComposition(
-        vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
         DirectInfusionMatchInformation *matchInfo,
         Fragment *observedSpectrum,
         shared_ptr<DirectInfusionSearchParameters> params,
@@ -773,94 +771,84 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineCo
 
     enum SpectralCompositionAlgorithm algorithm = params->spectralCompositionAlgorithm;
 
-    //Issue 210 testing
-//    unique_ptr<DirectInfusionMatchInformation> matchInfo = DirectInfusionProcessor::getMatchInformation(allCandidates, observedSpectrum, params, debug);
-
     if (debug) {
         cerr << "matchInfo->fragToMatchDataSummarized: " << matchInfo->fragToMatchDataSummarized.size() << " entries." << endl;
         cerr << "matchInfo->matchDataToFragsSummarized: " << matchInfo->matchDataToFragsSummarized.size() << " entries." << endl;
     }
 
-    //TODO: refactor into class, subclass, etc
-    if (algorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE) {
+    map<shared_ptr<DirectInfusionMatchData>, vector<shared_ptr<DirectInfusionSinglePeakMatchData>>> compoundToUniqueFragmentIntensities = {};
 
-        map<shared_ptr<DirectInfusionMatchData>, vector<shared_ptr<DirectInfusionSinglePeakMatchData>>> compoundToUniqueFragmentIntensities = {};
+    for (fragToMatchDataIterator iterator = matchInfo->fragToMatchDataSummarized.begin(); iterator != matchInfo->fragToMatchDataSummarized.end(); ++iterator) {
+        if (iterator->second.size() == 1) { // unique fragment
 
-        for (fragToMatchDataIterator iterator = matchInfo->fragToMatchDataSummarized.begin(); iterator != matchInfo->fragToMatchDataSummarized.end(); ++iterator) {
-            if (iterator->second.size() == 1) { // unique fragment
-
-                shared_ptr<DirectInfusionMatchData> compound = iterator->second[0];
-                int fragId = iterator->first;
+            shared_ptr<DirectInfusionMatchData> compound = iterator->second[0];
+            int fragId = iterator->first;
 
 //                if (debug) cerr << "Found unique fragment for " << compound->compound->name << ": fragId=" << fragId << endl;
 
-                shared_ptr<DirectInfusionSinglePeakMatchData> intensityData = matchInfo->getSinglePeakMatchData(fragId, compound);
+            shared_ptr<DirectInfusionSinglePeakMatchData> intensityData = matchInfo->getSinglePeakMatchData(fragId, compound);
 
 //                if (debug) cerr << "Retrieved intensityData for " << compound->compound->name << ": fragId=" << fragId  << "." << endl;
 
-                matchDataToFragIntensityIterator it = compoundToUniqueFragmentIntensities.find(compound);
-                if (it != compoundToUniqueFragmentIntensities.end()) {
-                    compoundToUniqueFragmentIntensities[compound].push_back(intensityData);
-                } else {
-                    vector<shared_ptr<DirectInfusionSinglePeakMatchData>> observedIntensities(1);
-                    observedIntensities[0] = intensityData;
-                    compoundToUniqueFragmentIntensities.insert(make_pair(compound, observedIntensities));
-                }
-
-            }
-        }
-
-        map<shared_ptr<DirectInfusionMatchData>, float> results = {};
-        float sumIntensity = 0;
-
-        for (matchDataToFragIntensityIterator iterator = compoundToUniqueFragmentIntensities.begin(); iterator != compoundToUniqueFragmentIntensities.end(); ++iterator){
-
-            shared_ptr<DirectInfusionMatchData> directInfusionMatchData = iterator->first;
-            vector<shared_ptr<DirectInfusionSinglePeakMatchData>> fragIntensityDataVector = iterator->second;
-
-            float representativeIntensity = 0;
-            float maxNormalizedTheoreticalIntensity = 0;
-            for (auto intensityData : fragIntensityDataVector) {
-                if (intensityData->normalizedTheoreticalIntensity > maxNormalizedTheoreticalIntensity){
-                    maxNormalizedTheoreticalIntensity = intensityData->normalizedTheoreticalIntensity;
-                    representativeIntensity = intensityData->getIntensityRatio();
-                }
-            }
-
-            sumIntensity += representativeIntensity;
-            results.insert(make_pair(directInfusionMatchData, representativeIntensity));
-
-            if (debug) {
-                cerr << "Compound= " << directInfusionMatchData->compound->name << "|" << directInfusionMatchData->compound->adductString << ": ";
-                for (auto frag : fragIntensityDataVector){
-                    cerr << frag << " ";
-                }
-                cerr << "median=" << representativeIntensity << endl;
+            matchDataToFragIntensityIterator it = compoundToUniqueFragmentIntensities.find(compound);
+            if (it != compoundToUniqueFragmentIntensities.end()) {
+                compoundToUniqueFragmentIntensities[compound].push_back(intensityData);
+            } else {
+                vector<shared_ptr<DirectInfusionSinglePeakMatchData>> observedIntensities(1);
+                observedIntensities[0] = intensityData;
+                compoundToUniqueFragmentIntensities.insert(make_pair(compound, observedIntensities));
             }
 
         }
+    }
 
-        vector<shared_ptr<DirectInfusionMatchData>> passingMatchData;
-        for (matchDataToFloatIterator iterator = results.begin(); iterator != results.end(); ++iterator) {
+    map<shared_ptr<DirectInfusionMatchData>, float> results = {};
+    float sumIntensity = 0;
 
-            shared_ptr<DirectInfusionMatchData> directInfusionMatchData = iterator->first;
-            float intensity = iterator->second;
+    for (matchDataToFragIntensityIterator iterator = compoundToUniqueFragmentIntensities.begin(); iterator != compoundToUniqueFragmentIntensities.end(); ++iterator){
 
-            double proportion = static_cast<double>(intensity/sumIntensity);
+        shared_ptr<DirectInfusionMatchData> directInfusionMatchData = iterator->first;
+        vector<shared_ptr<DirectInfusionSinglePeakMatchData>> fragIntensityDataVector = iterator->second;
 
-            directInfusionMatchData->proportion = proportion;
-            passingMatchData.push_back(directInfusionMatchData);
-
-            if (debug) {
-                cerr << "Compound= " << directInfusionMatchData->compound->name << "|" << directInfusionMatchData->compound->adductString <<": " << proportion << endl;
+        float representativeIntensity = 0;
+        float maxNormalizedTheoreticalIntensity = 0;
+        for (auto intensityData : fragIntensityDataVector) {
+            if (intensityData->normalizedTheoreticalIntensity > maxNormalizedTheoreticalIntensity){
+                maxNormalizedTheoreticalIntensity = intensityData->normalizedTheoreticalIntensity;
+                representativeIntensity = intensityData->getIntensityRatio();
             }
         }
 
-        return passingMatchData;
+        sumIntensity += representativeIntensity;
+        results.insert(make_pair(directInfusionMatchData, representativeIntensity));
+
+        if (debug) {
+            cerr << "Compound= " << directInfusionMatchData->compound->name << "|" << directInfusionMatchData->compound->adductString << ": ";
+            for (auto frag : fragIntensityDataVector){
+                cerr << frag << " ";
+            }
+            cerr << "median=" << representativeIntensity << endl;
+        }
 
     }
 
-    return allCandidates;
+    vector<shared_ptr<DirectInfusionMatchData>> passingMatchData;
+    for (matchDataToFloatIterator iterator = results.begin(); iterator != results.end(); ++iterator) {
+
+        shared_ptr<DirectInfusionMatchData> directInfusionMatchData = iterator->first;
+        float intensity = iterator->second;
+
+        double proportion = static_cast<double>(intensity/sumIntensity);
+
+        directInfusionMatchData->proportion = proportion;
+        passingMatchData.push_back(directInfusionMatchData);
+
+        if (debug) {
+            cerr << "Compound= " << directInfusionMatchData->compound->name << "|" << directInfusionMatchData->compound->adductString <<": " << proportion << endl;
+        }
+    }
+
+    return passingMatchData;
 }
 
 void DirectInfusionProcessor::addBlockSpecificMatchInfo(
@@ -868,6 +856,8 @@ void DirectInfusionProcessor::addBlockSpecificMatchInfo(
         Fragment *observedSpectrum,
         shared_ptr<DirectInfusionSearchParameters> params,
         bool debug){
+
+
     // TODO
     // use matchInfo->matchDataToFragsSummarized <K, V> = <DirectInfusionMatchData, vector<int>(frags)>
     // to iterate through compounds

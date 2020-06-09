@@ -505,7 +505,6 @@ public:
       * Input is the list of all candidates, plus the observed spectrum they all matched to
       */
      static vector<shared_ptr<DirectInfusionMatchData>> determineComposition(
-             vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
              DirectInfusionMatchInformation *directInfusionMatchInformationPtr,
              Fragment *observedSpectrum,
              shared_ptr<DirectInfusionSearchParameters> params,
