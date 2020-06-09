@@ -878,7 +878,7 @@ void DirectInfusionProcessor::addBlockSpecificMatchInfo(
         if (compounds.size() == 1) { // unique fragment
 
             shared_ptr<DirectInfusionMatchData> matchData = compounds[0];
-            double fragMzVal = intKeyToMz(fragMzKey, 1000000);
+            double fragMzVal = intKeyToMz(fragMzKey, 1000000) - 0.00001; // possible rounding error in int -> float conversion
 
             auto lb_it = lower_bound(matchData->compound->fragment_mzs.begin(), matchData->compound->fragment_mzs.end(), fragMzVal);
             long lb = lb_it - matchData->compound->fragment_mzs.begin();
