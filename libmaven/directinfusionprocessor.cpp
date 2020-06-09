@@ -227,7 +227,6 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
                     params,
                     debug);
 
-        //Issue 210
         DirectInfusionProcessor::addBlockSpecificMatchInfo(matchInfo.get(), f->consensus, params, debug);
 
         vector<shared_ptr<DirectInfusionMatchData>> processedMatchData{};
@@ -253,9 +252,18 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
                         debug);
         }
 
-        directInfusionAnnotation->compounds = processedMatchData;
+        //Issue 210: uniqueness filter
+        if (params->ms2MinNumUniqueMatches > 0) {
+            vector<shared_ptr<DirectInfusionMatchData>> uniqueFilteredMatchData;
+            for (auto compound : processedMatchData){
+                if (compound->numUniqueFragments >= params->ms2MinNumUniqueMatches) {
+                    uniqueFilteredMatchData.push_back(compound);
+                }
+            }
+            processedMatchData = uniqueFilteredMatchData;
+        }
 
-        //TODO: more filtering based on unique fragments criteria (or other criteria)
+        directInfusionAnnotation->compounds = processedMatchData;
 
         return directInfusionAnnotation;
     }
