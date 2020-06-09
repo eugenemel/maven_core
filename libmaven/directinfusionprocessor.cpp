@@ -857,10 +857,29 @@ void DirectInfusionProcessor::addBlockSpecificMatchInfo(
         shared_ptr<DirectInfusionSearchParameters> params,
         bool debug){
 
+    for (auto it = matchInfo->matchDataToFragsSummarized.begin(); it != matchInfo->matchDataToFragsSummarized.end(); ++it){
+        shared_ptr<DirectInfusionMatchData> compound = it->first;
+        compound->isFragmentUnique = vector<bool>(compound->compound->fragment_mzs.size(), false);
+    }
 
-    // TODO
-    // use matchInfo->matchDataToFragsSummarized <K, V> = <DirectInfusionMatchData, vector<int>(frags)>
-    // to iterate through compounds
+    for (auto it = matchInfo->fragToMatchDataSummarized.begin(); it != matchInfo->fragToMatchDataSummarized.end(); ++it){
+
+        int fragMzKey = it->first;
+        vector<shared_ptr<DirectInfusionMatchData>> compounds = it->second;
+
+        if (compounds.size() == 1) { // unique fragment
+
+            shared_ptr<DirectInfusionMatchData> matchData = compounds[0];
+            double fragMzVal = intKeyToMz(fragMzKey, 1000000);
+
+            auto lb_it = lower_bound(matchData->compound->fragment_mzs.begin(), matchData->compound->fragment_mzs.end(), fragMzVal);
+            long lb = lb_it - matchData->compound->fragment_mzs.begin();
+
+            matchData->isFragmentUnique[lb] = true;
+            matchData->numUniqueFragments++;
+        }
+
+    }
 }
 
 void DirectInfusionGroupAnnotation::clean() {

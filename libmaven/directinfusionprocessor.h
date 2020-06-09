@@ -312,7 +312,7 @@ struct DirectInfusionMatchData {
 
     //Issue 210
     int numUniqueFragments = 0;
-    map<int, bool> isUniqueMap = {}; //int = m/z-sorted position, bool = isUnique
+    vector<bool> isFragmentUnique; //follows m/z-sorted Compound* fragment vectors
 };
 
 /**
