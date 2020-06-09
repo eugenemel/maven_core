@@ -506,6 +506,7 @@ public:
       */
      static vector<shared_ptr<DirectInfusionMatchData>> determineComposition(
              vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
+             DirectInfusionMatchInformation *directInfusionMatchInformationPtr,
              Fragment *observedSpectrum,
              shared_ptr<DirectInfusionSearchParameters> params,
              bool debug
@@ -537,7 +538,6 @@ public:
       * @param debug
       */
      static unique_ptr<DirectInfusionMatchInformation> summarizeByAcylChainsAndSumComposition(
-             vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
              unique_ptr<DirectInfusionMatchInformation> matchInfo,
              Fragment *observedSpectrum,
              shared_ptr<DirectInfusionSearchParameters> params,
@@ -564,7 +564,6 @@ public:
 
 
      static void addBlockSpecificMatchInfo(
-             vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
              DirectInfusionMatchInformation *matchInfo,
              Fragment *observedSpectrum,
              shared_ptr<DirectInfusionSearchParameters> params,

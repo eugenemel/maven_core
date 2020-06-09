@@ -220,6 +220,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         directInfusionAnnotation->fragmentationPattern = f;
 
         //determine fragment match maps, and mutate compounds, if needed.
+        //includes agglomerating compounds into SummarizedCompounds.
         unique_ptr<DirectInfusionMatchInformation> matchInfo = DirectInfusionProcessor::getMatchInformation(
                     libraryMatches,
                     f->consensus,
@@ -227,22 +228,33 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
                     debug);
 
         //Issue 210
-        DirectInfusionProcessor::addBlockSpecificMatchInfo(
-                 libraryMatches,
-                 matchInfo.get(),
-                 f->consensus,
-                 params,
-                 debug);
+        DirectInfusionProcessor::addBlockSpecificMatchInfo(matchInfo.get(), f->consensus, params, debug);
+
+        vector<shared_ptr<DirectInfusionMatchData>> processedMatchData{};
 
         if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES) {
-            directInfusionAnnotation->compounds = libraryMatches;
-        } else {
-            directInfusionAnnotation->compounds = DirectInfusionProcessor::determineComposition(
+
+            processedMatchData.resize(matchInfo->matchDataToFragsSummarized.size());
+
+            unsigned int i = 0;
+            for (auto it = matchInfo->matchDataToFragsSummarized.begin(); it != matchInfo->matchDataToFragsSummarized.end(); ++it){
+                processedMatchData[i] = it->first;
+                i++;
+            }
+
+            directInfusionAnnotation->compounds = processedMatchData;
+
+        } else if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE){
+
+            processedMatchData = DirectInfusionProcessor::determineComposition(
                         libraryMatches,
+                        matchInfo.get(),
                         f->consensus,
                         params,
                         debug);
         }
+
+        directInfusionAnnotation->compounds = processedMatchData;
 
         //TODO: more filtering based on unique fragments criteria (or other criteria)
 
@@ -431,11 +443,17 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getFragmentM
 }
 
 unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByAcylChainsAndSumComposition(
-        vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
         unique_ptr<DirectInfusionMatchInformation> matchInfo,
         Fragment *observedSpectrum,
         shared_ptr<DirectInfusionSearchParameters> params,
         bool debug) {
+
+    vector<shared_ptr<DirectInfusionMatchData>> allCandidates(matchInfo->matchDataToFrags.size());
+    unsigned int i = 0;
+    for (auto it = matchInfo->matchDataToFrags.begin(); it != matchInfo->matchDataToFrags.end(); ++it){
+        allCandidates[i] = it->first;
+        i++;
+    }
 
     //Identify all cases where matchData matches to identical fragments
     //and compounds can be naturally summarized to a higher level.
@@ -653,7 +671,15 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
     unique_ptr<DirectInfusionMatchInformation> matchInfo = getFragmentMatchMaps(allCandidates, observedSpectrum, params, debug);
 
-    matchInfo = summarizeByAcylChainsAndSumComposition(allCandidates, move(matchInfo), observedSpectrum, params, debug);
+    if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES){
+
+         //summarized compounds are identical to unsummarized compounds
+         matchInfo->fragToMatchDataSummarized = matchInfo->fragToMatchData;
+         matchInfo->matchDataToFragsSummarized = matchInfo->matchDataToFrags;
+
+    } else if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE) {
+         matchInfo = summarizeByAcylChainsAndSumComposition(move(matchInfo), observedSpectrum, params, debug);
+    }
 
     if (debug) {
         cerr << "Fragments --> Compounds: (" << matchInfo->matchDataToFrags.size() << " passing compounds)" << endl;
@@ -740,13 +766,15 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
 vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineComposition(
         vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
+        DirectInfusionMatchInformation *matchInfo,
         Fragment *observedSpectrum,
         shared_ptr<DirectInfusionSearchParameters> params,
         bool debug){
 
     enum SpectralCompositionAlgorithm algorithm = params->spectralCompositionAlgorithm;
 
-    unique_ptr<DirectInfusionMatchInformation> matchInfo = DirectInfusionProcessor::getMatchInformation(allCandidates, observedSpectrum, params, debug);
+    //Issue 210 testing
+//    unique_ptr<DirectInfusionMatchInformation> matchInfo = DirectInfusionProcessor::getMatchInformation(allCandidates, observedSpectrum, params, debug);
 
     if (debug) {
         cerr << "matchInfo->fragToMatchDataSummarized: " << matchInfo->fragToMatchDataSummarized.size() << " entries." << endl;
@@ -836,12 +864,13 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineCo
 }
 
 void DirectInfusionProcessor::addBlockSpecificMatchInfo(
-        vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
         DirectInfusionMatchInformation *matchInfo,
         Fragment *observedSpectrum,
         shared_ptr<DirectInfusionSearchParameters> params,
         bool debug){
-    //TODO
+    // TODO
+    // use matchInfo->matchDataToFragsSummarized <K, V> = <DirectInfusionMatchData, vector<int>(frags)>
+    // to iterate through compounds
 }
 
 void DirectInfusionGroupAnnotation::clean() {
