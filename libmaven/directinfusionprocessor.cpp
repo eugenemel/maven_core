@@ -211,13 +211,28 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
     //agglomerate (if necessary), and return if valid matches exist.
     if (!libraryMatches.empty()){
 
-        //Initialize output structure
+        //output
         DirectInfusionAnnotation *directInfusionAnnotation = new DirectInfusionAnnotation();
         directInfusionAnnotation->precMzMin = mzRange.first;
         directInfusionAnnotation->precMzMax = mzRange.second;
         directInfusionAnnotation->sample = sample;
         directInfusionAnnotation->scan = representativeScan;
         directInfusionAnnotation->fragmentationPattern = f;
+
+        //determine fragment match maps, and mutate compounds, if needed.
+        unique_ptr<DirectInfusionMatchInformation> matchInfo = DirectInfusionProcessor::getMatchInformation(
+                    libraryMatches,
+                    f->consensus,
+                    params,
+                    debug);
+
+        //Issue 210
+        DirectInfusionProcessor::addBlockSpecificMatchInfo(
+                 libraryMatches,
+                 matchInfo.get(),
+                 f->consensus,
+                 params,
+                 debug);
 
         if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES) {
             directInfusionAnnotation->compounds = libraryMatches;
@@ -818,6 +833,15 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineCo
     }
 
     return allCandidates;
+}
+
+void DirectInfusionProcessor::addBlockSpecificMatchInfo(
+        vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
+        DirectInfusionMatchInformation *matchInfo,
+        Fragment *observedSpectrum,
+        shared_ptr<DirectInfusionSearchParameters> params,
+        bool debug){
+    //TODO
 }
 
 void DirectInfusionGroupAnnotation::clean() {

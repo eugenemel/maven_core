@@ -309,6 +309,10 @@ struct DirectInfusionMatchData {
     FragmentationMatchScore fragmentationMatchScore;
     float fragmentMaxObservedIntensity = 0;
     double proportion = 0;
+
+    //Issue 210
+    int numUniqueFragments = 0;
+    map<int, bool> isUniqueMap = {}; //int = m/z-sorted position, bool = isUnique
 };
 
 /**
@@ -558,6 +562,13 @@ public:
              shared_ptr<DirectInfusionSearchParameters> params,
              bool debug);
 
+
+     static void addBlockSpecificMatchInfo(
+             vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
+             DirectInfusionMatchInformation *matchInfo,
+             Fragment *observedSpectrum,
+             shared_ptr<DirectInfusionSearchParameters> params,
+             bool debug);
 
      /**
       * Divide up search into smaller, more manageable parts
