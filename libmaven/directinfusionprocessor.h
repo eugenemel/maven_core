@@ -552,6 +552,12 @@ public:
              shared_ptr<DirectInfusionSearchParameters> params,
              bool debug);
 
+     static unique_ptr<DirectInfusionMatchInformation> summarizeByIdenticalFragmentMatches(
+             unique_ptr<DirectInfusionMatchInformation> matchInfo,
+             Fragment *observedSpectrum,
+             shared_ptr<DirectInfusionSearchParameters> params,
+             bool debug);
+
      /**
       * @brief getMatches
       * @param allCandidates

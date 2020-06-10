@@ -663,6 +663,16 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
     return matchInfo;
 }
 
+unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByIdenticalFragmentMatches(
+        unique_ptr<DirectInfusionMatchInformation> matchInfo,
+        Fragment *observedSpectrum,
+        shared_ptr<DirectInfusionSearchParameters> params,
+        bool debug){
+
+    //TODO
+    return matchInfo;
+}
+
 unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInformation(
         vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
         Fragment *observedSpectrum,
@@ -682,6 +692,8 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
     } else if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE ||
                params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_ACYL_CHAINS_SUM_COMPOSITION) {
          matchInfo = summarizeByAcylChainsAndSumComposition(move(matchInfo), observedSpectrum, params, debug);
+    } else if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_IDENTICAL_FRAGMENTS) {
+        matchInfo = summarizeByIdenticalFragmentMatches(move(matchInfo), observedSpectrum, params, debug);
     }
 
     if (debug) {
