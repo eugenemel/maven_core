@@ -339,7 +339,7 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
     t.intensity_array = compound->fragment_intensity;
     t.fragment_labels = compound->fragment_labels;
 
-    float maxDeltaMz = (params->ms1PpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
+    float maxDeltaMz = (params->ms2PpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
     directInfusionMatchAssessment->fragmentationMatchScore.ranks = Fragment::findFragPairsGreedyMz(&t, f->consensus, maxDeltaMz);
 
     bool isHasLabels = compound->fragment_labels.size() == directInfusionMatchAssessment->fragmentationMatchScore.ranks.size();
@@ -588,13 +588,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
             //TODO: not ever deleted now
             SummarizedCompound *summarizedCompound = new SummarizedCompound(summarizedName, compounds);
 
-            //TODO: this is guaranteed to be equal based on how the summarized compound data maps are built
             summarizedCompound->adductString = compounds.at(0)->adductString;
-
-            /**
-             * TODO: these are not guaranteed to be equal among all children compounds.
-             * A sensible value should be selected for the maven gui to function properly.
-             */
             summarizedCompound->formula = compounds.at(0)->getFormula();
             summarizedCompound->precursorMz = compounds.at(0)->precursorMz;
             summarizedCompound->setExactMass(compounds.at(0)->getExactMass());
@@ -607,7 +601,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
             shared_ptr<DirectInfusionMatchData> summarizedMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
             summarizedMatchData->compound = summarizedCompound;
             summarizedMatchData->adduct = candidate->adduct;
-            summarizedMatchData->fragmentationMatchScore = summarizedCompound->scoreCompoundHit(observedSpectrum, params->ms1PpmTolr, false);
+            summarizedMatchData->fragmentationMatchScore = summarizedCompound->scoreCompoundHit(observedSpectrum, params->ms2PpmTolr, false);
 
             summarizedCandidates.push_back(summarizedMatchData);
 
