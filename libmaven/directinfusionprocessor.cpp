@@ -468,12 +468,11 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
     for (unsigned int i = 0; i < allCandidates.size(); i++) {
 
         shared_ptr<DirectInfusionMatchData> iMatchData = allCandidates[i];
+        vector<int> iFrags = matchInfo->matchDataToFrags[iMatchData];
 
         for (unsigned int j = i+1; j < allCandidates.size(); j++) {
 
             shared_ptr<DirectInfusionMatchData> jMatchData = allCandidates[j];
-
-            vector<int> iFrags = matchInfo->matchDataToFrags[iMatchData];
             vector<int> jFrags = matchInfo->matchDataToFrags[jMatchData];
 
             if (iFrags == jFrags && iMatchData->adduct->name == jMatchData->adduct->name) {
@@ -585,7 +584,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
                 abort();
             }
 
-            //TODO: not ever deleted now
+            //TODO: memory leak (never deleted)
             SummarizedCompound *summarizedCompound = new SummarizedCompound(summarizedName, compounds);
 
             summarizedCompound->adductString = compounds.at(0)->adductString;
@@ -593,7 +592,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
             summarizedCompound->precursorMz = compounds.at(0)->precursorMz;
             summarizedCompound->setExactMass(compounds.at(0)->getExactMass());
             summarizedCompound->charge = compounds.at(0)->charge;
-            summarizedCompound->db = "summarized";
             summarizedCompound->id = summarizedCompound->name + summarizedCompound->adductString;
 
             summarizedCompound->computeSummarizedData();
@@ -669,7 +667,128 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByI
         shared_ptr<DirectInfusionSearchParameters> params,
         bool debug){
 
-    //TODO
+        //<K, V> = fraglist, compound_info
+    map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> fragListToCompounds{};
+
+    for (auto it = matchInfo->matchDataToFrags.begin(); it != matchInfo->matchDataToFrags.end(); ++it){
+        vector<int> fragList = it->second;
+        if (fragListToCompounds.find(fragList) == fragListToCompounds.end()) {
+            fragListToCompounds.insert(make_pair(fragList, vector<shared_ptr<DirectInfusionMatchData>>()));
+        }
+        fragListToCompounds[fragList].push_back(it->first);
+    }
+
+    for (auto it = fragListToCompounds.begin(); it != fragListToCompounds.end(); ++it){
+
+        vector<shared_ptr<DirectInfusionMatchData>> compoundList = it->second;
+
+        shared_ptr<DirectInfusionMatchData> summarizedMatchData;
+
+        if (compoundList.size() == 1) {
+            summarizedMatchData = compoundList[0];
+        } else {
+            string summarizedName("{");
+
+            string adductString("");
+            string formulaString("");
+            double precursorMz = 0;
+            float exactMass = 0;
+            int charge = 0;
+
+            map<string, int> adductStringMap{};
+            map<string, int> formulaStringMap{};
+
+            vector<Compound*> compoundPtrs(compoundList.size());
+
+            for (unsigned int i = 0; i < compoundList.size(); i++) {
+                shared_ptr<DirectInfusionMatchData> compound = compoundList[i];
+
+                compoundPtrs[i] = compound->compound;
+
+                if (i > 0) {
+                    summarizedName += ";";
+                }
+
+                summarizedName = summarizedName + compound->compound->name + "|" + compound->adduct->name;
+
+                precursorMz += compound->compound->precursorMz;
+                exactMass += compound->compound->getExactMass();
+                charge += compound->compound->charge;
+
+                if (adductStringMap.find(compound->adduct->name) == adductStringMap.end()){
+                    adductStringMap.insert(make_pair(compound->adduct->name, 0));
+                }
+                adductStringMap[compound->adduct->name]++;
+
+                if (formulaStringMap.find(compound->compound->formula) == formulaStringMap.end()) {
+                    formulaStringMap.insert(make_pair(compound->compound->formula, 0));
+                }
+                formulaStringMap[compound->compound->formula]++;
+            }
+
+            precursorMz /= compoundList.size();
+            exactMass /= compoundList.size();
+            charge = static_cast<int>(charge/compoundList.size());
+
+            vector<pair<string, int>> adductNameCounts{};
+            for (auto it = adductStringMap.begin(); it != adductStringMap.end(); ++it){
+                adductNameCounts.push_back(make_pair(it->first, it->second));
+            }
+
+            vector<pair<string, int>> formulaNameCounts{};
+            for (auto it = formulaStringMap.begin(); it != formulaStringMap.end(); ++it){
+                formulaNameCounts.push_back(make_pair(it->first, it->second));
+            }
+
+            sort(adductNameCounts.begin(), adductNameCounts.end(), [](pair<string, int>& lhs, pair<string, int>& rhs){
+                if (lhs.second == rhs.second) {
+                    return lhs.first.compare(rhs.first);
+                } else {
+                    return lhs.second - rhs.second;
+                }
+            });
+
+            sort(formulaNameCounts.begin(), formulaNameCounts.end(), [](pair<string, int>& lhs, pair<string, int>& rhs){
+                if (lhs.second == rhs.second) {
+                    return lhs.first.compare(rhs.first);
+                } else {
+                    return lhs.second - rhs.second;
+                }
+            });
+
+            adductString = adductNameCounts[0].first;
+            formulaString = formulaNameCounts[0].first;
+
+            Adduct *adduct = nullptr;
+            for (auto match : compoundList){
+                if (match->adduct->name == adductString) {
+                    adduct = match->adduct;
+                    break;
+                }
+            }
+            summarizedName += "}";
+
+            SummarizedCompound *summarizedCompound = new SummarizedCompound(summarizedName, compoundPtrs);
+
+            summarizedCompound->adductString = adductString;
+            summarizedCompound->formula = formulaString;
+            summarizedCompound->precursorMz = precursorMz;
+            summarizedCompound->setExactMass(exactMass);
+            summarizedCompound->charge = charge;
+            summarizedCompound->id = summarizedName + adductString;
+
+            summarizedCompound->computeSummarizedData();
+
+            summarizedMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
+            summarizedMatchData->compound = summarizedCompound;
+            summarizedMatchData->adduct = adduct;
+            summarizedMatchData->fragmentationMatchScore = summarizedCompound->scoreCompoundHit(observedSpectrum, params->ms2PpmTolr, false);
+
+        }
+
+        matchInfo->matchDataToFragsSummarized.insert(make_pair(summarizedMatchData, it->first));
+    }
+
     return matchInfo;
 }
 

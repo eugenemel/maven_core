@@ -808,6 +808,7 @@ public:
     SummarizedCompound(string summarizedName, vector<Compound*> childrenCompounds) : Compound("", summarizedName, "", 0){
         children = childrenCompounds;
         this->summarizedName = summarizedName;
+        this->db = "summarized";
     }
     vector<Compound*> getChildren();
 
