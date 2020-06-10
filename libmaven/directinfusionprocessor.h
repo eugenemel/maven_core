@@ -43,8 +43,9 @@ public:
  * (goal is to determine the relative proportions of different compounds)
  */
 enum class SpectralCompositionAlgorithm {
-    ALL_CANDIDATES,
-    AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE
+    ALL_CANDIDATES,                                     // no summarization, no quant
+    AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE,   // uses lipid summarizations + quant approach
+    AUTO_SUMMARIZED_ACYL_CHAINS_SUM_COMPOSITION         // lipid summarization without quant
 };
 
 /**
@@ -504,7 +505,7 @@ public:
       *
       * Input is the list of all candidates, plus the observed spectrum they all matched to
       */
-     static vector<shared_ptr<DirectInfusionMatchData>> determineComposition(
+     static vector<shared_ptr<DirectInfusionMatchData>> calculateRankByMaxTheoreticalIntensityOfUniqueFragments(
              DirectInfusionMatchInformation *directInfusionMatchInformationPtr,
              Fragment *observedSpectrum,
              shared_ptr<DirectInfusionSearchParameters> params,

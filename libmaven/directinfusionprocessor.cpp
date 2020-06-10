@@ -231,7 +231,16 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 
         vector<shared_ptr<DirectInfusionMatchData>> processedMatchData{};
 
-        if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES) {
+        if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE){
+
+            processedMatchData = DirectInfusionProcessor::calculateRankByMaxTheoreticalIntensityOfUniqueFragments(
+                        matchInfo.get(),
+                        f->consensus,
+                        params,
+                        debug);
+        } else {
+
+            //do not bother to compute rank
 
             processedMatchData.resize(matchInfo->matchDataToFragsSummarized.size());
 
@@ -242,14 +251,6 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
             }
 
             directInfusionAnnotation->compounds = processedMatchData;
-
-        } else if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE){
-
-            processedMatchData = DirectInfusionProcessor::determineComposition(
-                        matchInfo.get(),
-                        f->consensus,
-                        params,
-                        debug);
         }
 
         //Issue 210: uniqueness filter
@@ -771,13 +772,11 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
     return matchInfo;
 }
 
-vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineComposition(
+vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::calculateRankByMaxTheoreticalIntensityOfUniqueFragments(
         DirectInfusionMatchInformation *matchInfo,
         Fragment *observedSpectrum,
         shared_ptr<DirectInfusionSearchParameters> params,
         bool debug){
-
-    enum SpectralCompositionAlgorithm algorithm = params->spectralCompositionAlgorithm;
 
     if (debug) {
         cerr << "matchInfo->fragToMatchDataSummarized: " << matchInfo->fragToMatchDataSummarized.size() << " entries." << endl;
@@ -854,6 +853,17 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::determineCo
         if (debug) {
             cerr << "Compound= " << directInfusionMatchData->compound->name << "|" << directInfusionMatchData->compound->adductString <<": " << proportion << endl;
         }
+    }
+
+    //Issue 210: Retain match data that do not have any unique fragments.
+    for (auto it = matchInfo->matchDataToFragsSummarized.begin(); it != matchInfo->matchDataToFragsSummarized.end(); ++it){
+
+        shared_ptr<DirectInfusionMatchData> directInfusionMatchData = it->first;
+
+        if (results.find(directInfusionMatchData) == results.end()) {
+            passingMatchData.push_back(directInfusionMatchData);
+        }
+
     }
 
     return passingMatchData;
