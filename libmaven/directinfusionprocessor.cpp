@@ -685,7 +685,8 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
          matchInfo->fragToMatchDataSummarized = matchInfo->fragToMatchData;
          matchInfo->matchDataToFragsSummarized = matchInfo->matchDataToFrags;
 
-    } else if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE) {
+    } else if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE ||
+               params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_ACYL_CHAINS_SUM_COMPOSITION) {
          matchInfo = summarizeByAcylChainsAndSumComposition(move(matchInfo), observedSpectrum, params, debug);
     }
 
