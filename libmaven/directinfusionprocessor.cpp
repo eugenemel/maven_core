@@ -789,6 +789,18 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByI
         matchInfo->matchDataToFragsSummarized.insert(make_pair(summarizedMatchData, it->first));
     }
 
+    for (auto it = matchInfo->matchDataToFragsSummarized.begin(); it != matchInfo->matchDataToFragsSummarized.end(); ++it) {
+
+        vector<int> fragList = it->second;
+
+        for (auto frag : fragList) {
+            if (matchInfo->fragToMatchDataSummarized.find(frag) == matchInfo->fragToMatchDataSummarized.end()) {
+                matchInfo->fragToMatchDataSummarized.insert(make_pair(frag, vector<shared_ptr<DirectInfusionMatchData>>()));
+            }
+            matchInfo->fragToMatchDataSummarized[frag].push_back(it->first);
+        }
+    }
+
     return matchInfo;
 }
 
