@@ -845,6 +845,12 @@ void Fragment::buildConsensus(float productPpmTolr,
 
                 vector<float> intensityValues = posToIntensityMap[static_cast<int>(i)];
 
+                //Issue 227 debugging
+                if (Cons->mzs[i] > 124 && Cons->mzs[i] < 124.1) {
+                    cerr << "i=" << i << ", mz=" << Cons->mzs[i] << ", intensity vec=" << intensityValues.size() << endl;
+                }
+
+                //Issue 227
                 if (isIntensityAvgByObserved) {
                     intensityValues.erase(remove_if(
                                               intensityValues.begin(), intensityValues.end(),
