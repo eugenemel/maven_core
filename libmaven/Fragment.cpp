@@ -856,6 +856,15 @@ void Fragment::buildConsensus(float productPpmTolr,
                 //Issue 227
                 if (consensusIntensityAgglomerationType != ConsensusIntensityAgglomerationType::Mean){
                     medianIntensities.push_back(posToIntensityMap[i]);
+
+                    //Issue 227 debugging
+                    if (filtered_mzs[filtered_mzs.size()-1] > 124.0f && filtered_mzs[filtered_mzs.size()-1] < 124.10f){
+                        cerr << "i=" << i << ": ";
+                        for (auto x : posToIntensityMap[i]){
+                            cerr << x << " ";
+                        }
+                        cerr << endl;
+                    }
                 }
             }
         }
@@ -869,6 +878,16 @@ void Fragment::buildConsensus(float productPpmTolr,
         if (consensusIntensityAgglomerationType != ConsensusIntensityAgglomerationType::Mean){
             map<int, vector<float>> posToIntensityMap{};
             for (unsigned int i = 0; i < medianIntensities.size(); i++){
+
+                //Issue 227 debugging
+                if (Cons->mzs[i] > 124.0f && Cons->mzs[i] < 124.10f){
+                    cerr << "i=" << i << ": ";
+                    for (auto intensity : medianIntensities[i]){
+                        cerr << intensity << " ";
+                    }
+                    cerr << endl;
+                }
+
                 posToIntensityMap.insert(make_pair(i, medianIntensities[i]));
             }
         }
