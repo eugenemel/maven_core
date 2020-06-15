@@ -842,6 +842,9 @@ void Fragment::buildConsensus(float productPpmTolr,
         vector<string> filtered_fragment_labels;
         vector<int> filtered_obscount;
 
+        //Issue 227
+        vector<vector<float>> medianIntensities;
+
         for (unsigned int i = 0; i < Cons->mzs.size(); i++){
             float frac = static_cast<float>(Cons->obscount[i]) / static_cast<float>(N);
             if (Cons->obscount[i] >= minNumMs2ScansForConsensus && frac >= minFractionMs2ScansForConsensus) {
@@ -849,6 +852,11 @@ void Fragment::buildConsensus(float productPpmTolr,
                 filtered_intensities.push_back(Cons->intensity_array[i]);
                 filtered_fragment_labels.push_back(Cons->fragment_labels[i]);
                 filtered_obscount.push_back(Cons->obscount[i]);
+
+                //Issue 227
+                if (consensusIntensityAgglomerationType != ConsensusIntensityAgglomerationType::Mean){
+                    medianIntensities.push_back(posToIntensityMap[i]);
+                }
             }
         }
 
@@ -856,6 +864,14 @@ void Fragment::buildConsensus(float productPpmTolr,
         Cons->intensity_array = filtered_intensities;
         Cons->fragment_labels = filtered_fragment_labels;
         Cons->obscount = filtered_obscount;
+
+        //Issue 227
+        if (consensusIntensityAgglomerationType != ConsensusIntensityAgglomerationType::Mean){
+            map<int, vector<float>> posToIntensityMap{};
+            for (unsigned int i = 0; i < medianIntensities.size(); i++){
+                posToIntensityMap.insert(make_pair(i, medianIntensities[i]));
+            }
+        }
     }
 
     //agglomerate intensity values
