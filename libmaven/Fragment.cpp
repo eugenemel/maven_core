@@ -876,7 +876,7 @@ void Fragment::buildConsensus(float productPpmTolr,
 
         //Issue 227
         if (consensusIntensityAgglomerationType != ConsensusIntensityAgglomerationType::Mean){
-            map<int, vector<float>> posToIntensityMap{};
+            posToIntensityMap.clear();
             for (unsigned int i = 0; i < medianIntensities.size(); i++){
 
                 //Issue 227 debugging
