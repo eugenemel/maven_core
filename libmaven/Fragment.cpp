@@ -842,7 +842,19 @@ void Fragment::buildConsensus(float productPpmTolr,
             }
         } else if (consensusIntensityAgglomerationType == Median) {
             for( unsigned int i=0; i < Cons->intensity_array.size(); i++){
-                Cons->intensity_array[i] = mzUtils::median(posToIntensityMap[i]);
+
+                vector<float> intensityValues = posToIntensityMap[static_cast<int>(i)];
+
+                if (isIntensityAvgByObserved) {
+                    intensityValues.erase(remove_if(
+                                              intensityValues.begin(), intensityValues.end(),
+                                          [](const float& intensity){
+                                            return intensity <= 0;
+                                        }), intensityValues.end()
+                                );
+
+                }
+                Cons->intensity_array[i] = mzUtils::median(intensityValues);
             }
         }
 	}
