@@ -821,6 +821,20 @@ class Ms3Compound : public Compound {
     map<float, vector<float>> ms3_fragment_mzs;
     map<float, vector<float>> ms3_fragment_intensity;
     map<float, vector<string>> ms3_fragment_labels;
+
+    Compound* baseCompound = nullptr;
+
+    Ms3Compound(Compound* baseCompound) : Compound(string(baseCompound->id+"-ms3"), baseCompound->name, baseCompound->formula, baseCompound->charge, baseCompound->getExactMass()){
+        this->baseCompound = baseCompound;
+        computeMs3Spectra();
+    }
+
+    virtual ~Ms3Compound(){}
+
+    //Relies on ms2 fragment labels
+    void computeMs3Spectra();
+
+    vector<Compound*> getChildren();
 };
 
 class Isotope {
