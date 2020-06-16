@@ -215,3 +215,65 @@ void SummarizedCompound::computeSummarizedData() {
         vecCounter++;
     }
 }
+
+/**
+ * @brief Ms3Compound::computeMs3Spectra
+ *
+ * relies on baseCompound, specifically that baseCompound has labels appropriately.
+ *
+ * eg
+ * 325.243 76 ms3-{605.2}-NL Acyl Chain 1
+ *
+ * need to start with "ms3-"
+ * then the ms2 precursor m/z in {brackets}
+ * followed by the rest of the name, after a hyphen
+ */
+void Ms3Compound::computeMs3Spectra() {
+    for (unsigned int i = 0; i < baseCompound->fragment_labels.size(); i++){
+
+        string label = baseCompound->fragment_labels[i];
+        float fragMz = baseCompound->fragment_mzs[i];
+        float fragIntensity = baseCompound->fragment_intensity[i];
+
+        if (label.find("ms3-{") == 0) {
+            unsigned long firstCloseBracket = label.find("}");
+
+            if (firstCloseBracket != string::npos && firstCloseBracket > 5 && firstCloseBracket < label.size()-1){
+
+                string ms3precMzStr = label.substr(5,firstCloseBracket-1);
+                string ms3precLabel = label.substr(firstCloseBracket+1, label.size());
+
+                float ms3precMz = -1.0f;
+                try {
+                    ms3precMz = stof(ms3precMzStr);
+                } catch (...) {}
+
+                if (ms3precMz > -1.0f){
+
+                    if (ms3_fragment_mzs.find(ms3precMz) == ms3_fragment_mzs.end()) {
+                        ms3_fragment_mzs.insert(make_pair(ms3precMz, vector<float>()));
+                    }
+                    if (ms3_fragment_intensity.find(ms3precMz) == ms3_fragment_intensity.end()){
+                        ms3_fragment_intensity.insert(make_pair(ms3precMz, vector<float>()));
+                    }
+                    if (ms3_fragment_labels.find(ms3precMz) == ms3_fragment_labels.end()){
+                        ms3_fragment_labels.insert(make_pair(ms3precMz, vector<string>()));
+                    }
+
+                    ms3_fragment_mzs[ms3precMz].push_back(fragMz);
+                    ms3_fragment_intensity[ms3precMz].push_back(fragIntensity);
+                    ms3_fragment_labels[ms3precMz].push_back(ms3precLabel);
+                }
+
+            }
+        } else {
+            fragment_labels.push_back(label);
+            fragment_mzs.push_back(fragMz);
+            fragment_intensity.push_back(fragIntensity);
+        }
+    }
+}
+
+vector<Compound*> Ms3Compound::getChildren(){
+    return vector<Compound*>{baseCompound};
+}
