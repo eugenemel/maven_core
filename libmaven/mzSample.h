@@ -818,6 +818,7 @@ public:
 };
 
 class Ms3Compound : public Compound {
+public:
     map<float, vector<float>> ms3_fragment_mzs;
     map<float, vector<float>> ms3_fragment_intensity;
     map<float, vector<string>> ms3_fragment_labels;
