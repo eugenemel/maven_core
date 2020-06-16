@@ -235,8 +235,8 @@ void Ms3Compound::computeMs3Spectra() {
         float fragMz = baseCompound->fragment_mzs[i];
         float fragIntensity = baseCompound->fragment_intensity[i];
 
-        if (label.find("ms3-{") == 0) {
-            unsigned long firstCloseBracket = label.find("}");
+        if (label.find("ms3-\\{") == 0) {
+            unsigned long firstCloseBracket = label.find("\\}");
 
             if (firstCloseBracket != string::npos && firstCloseBracket > 5 && firstCloseBracket < label.size()-1){
 
