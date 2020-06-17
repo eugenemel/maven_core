@@ -243,26 +243,28 @@ void Ms3Compound::computeMs3Spectra() {
                 string ms3precMzStr = label.substr(5,firstCloseBracket-6);
                 string ms3precLabel = label.substr(firstCloseBracket+2, label.size());
 
-                float ms3precMz = -1.0f;
+                double ms3precMz = -1.0;
                 try {
-                    ms3precMz = stof(ms3precMzStr);
+                    ms3precMz = stod(ms3precMzStr);
                 } catch (...) {}
 
-                if (ms3precMz > -1.0f){
+                if (ms3precMz > -1.0){
 
-                    if (ms3_fragment_mzs.find(ms3precMz) == ms3_fragment_mzs.end()) {
-                        ms3_fragment_mzs.insert(make_pair(ms3precMz, vector<float>()));
+                    int mzKey = mzToIntKey(ms3precMz, MULT_FACTOR);
+
+                    if (ms3_fragment_mzs.find(mzKey) == ms3_fragment_mzs.end()) {
+                        ms3_fragment_mzs.insert(make_pair(mzKey, vector<float>()));
                     }
-                    if (ms3_fragment_intensity.find(ms3precMz) == ms3_fragment_intensity.end()){
-                        ms3_fragment_intensity.insert(make_pair(ms3precMz, vector<float>()));
+                    if (ms3_fragment_intensity.find(mzKey) == ms3_fragment_intensity.end()){
+                        ms3_fragment_intensity.insert(make_pair(mzKey, vector<float>()));
                     }
-                    if (ms3_fragment_labels.find(ms3precMz) == ms3_fragment_labels.end()){
-                        ms3_fragment_labels.insert(make_pair(ms3precMz, vector<string>()));
+                    if (ms3_fragment_labels.find(mzKey) == ms3_fragment_labels.end()){
+                        ms3_fragment_labels.insert(make_pair(mzKey, vector<string>()));
                     }
 
-                    ms3_fragment_mzs[ms3precMz].push_back(fragMz);
-                    ms3_fragment_intensity[ms3precMz].push_back(fragIntensity);
-                    ms3_fragment_labels[ms3precMz].push_back(ms3precLabel);
+                    ms3_fragment_mzs[mzKey].push_back(fragMz);
+                    ms3_fragment_intensity[mzKey].push_back(fragIntensity);
+                    ms3_fragment_labels[mzKey].push_back(ms3precLabel);
                 }
 
             }

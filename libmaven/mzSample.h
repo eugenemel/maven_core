@@ -819,9 +819,18 @@ public:
 
 class Ms3Compound : public Compound {
 public:
-    map<float, vector<float>> ms3_fragment_mzs;
-    map<float, vector<float>> ms3_fragment_intensity;
-    map<float, vector<string>> ms3_fragment_labels;
+
+    /**
+     * @brief ms3_fragment_mzs, ms3_fragment_intensity, ms3_fragment_labels
+     *
+     * key is "int" value from mzUtils::mzToIntKey() and mzUtils::intKeyToMz()
+     * using MULT_FACTOR
+     */
+    static constexpr int MULT_FACTOR = 100000000;
+
+    map<int, vector<float>> ms3_fragment_mzs;
+    map<int, vector<float>> ms3_fragment_intensity;
+    map<int, vector<string>> ms3_fragment_labels;
 
     Compound* baseCompound = nullptr;
 
