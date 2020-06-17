@@ -128,8 +128,8 @@ float ppmDist(const float mz1, const float mz2);
 double ppmDist(const double mz1, const double mz2);
 float ppmround(const float mz1, const float resolution);
 bool withinXppm( float mz1, float mz2, int ppmWindow );
-int mzToIntKey(const double mz, const int multFactor);
-double intKeyToMz(const int intKey, const int multFactor);
+int mzToIntKey(const double mz, const int multFactor=1000000);
+double intKeyToMz(const int intKey, const int multFactor=1000000);
 
 /* file system functions */
 bool fileExists(string strFilename);
