@@ -250,7 +250,7 @@ void Ms3Compound::computeMs3Spectra() {
 
                 if (ms3precMz > -1.0){
 
-                    int mzKey = mzToIntKey(ms3precMz, MULT_FACTOR);
+                    int mzKey = mzToIntKey(ms3precMz);
 
                     if (ms3_fragment_mzs.find(mzKey) == ms3_fragment_mzs.end()) {
                         ms3_fragment_mzs.insert(make_pair(mzKey, vector<float>()));
