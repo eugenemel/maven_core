@@ -73,6 +73,31 @@ public:
     float ms1MinIntensity = 0;
     string ms1ScanFilter = "";
 
+    //Issue 226: Ms3 Parameters START
+    /** ===================
+     * MS3 SEARCH RELATED
+     * @param ms3IsMs3Search: if experimental data contains MS3 scans
+     * @param ms3MinNumMatches: Minimum number of reference MS3 peaks found in observed MS3 spectrum
+     * @param ms3PrecursorPpmTolr: m/z tolerance value used for matching reference MS2 m/z <--> MS3 scan precursor m/z
+     * @param ms3PpmTolr: m/z tolerance value used for matching reference <--> observed spectral peaks in MS3 spectrum
+     * ==================== */
+    bool ms3IsMs3Search = false;
+    int ms3MinNumMatches = 0;
+    float ms3PrecursorPpmTolr = 20;
+    float ms3PpmTolr = 20;
+
+    /** =======================
+     * MS3 CONSENSUS SPECTRUM ASSOCIATED
+     * @param consensusMs3PpmTolr: if experimental data contains MS3 scans
+     * @param consensusMinNumMs3Scans: Minimum number of reference MS3 peaks found in observed MS2 spectrum
+     * @param consensusMinFractionMs3Scans: m/z tolerance value used for matching reference <--> observed spectra in MS3 spectrum
+     * ========================*/
+    float consensusMs3PpmTolr = 10;
+    int consensusMinNumMs3Scans = 0;
+    float consensusMinFractionMs3Scans = 0;
+    //Issue 226: Ms3 Parameters END
+    //TODO: encoding/decoding
+
     /** ===================
      * AGGLOMERATION
      * @param isAgglomerateAcrossSamples: If true, align results across all samples. Otherwise, return each sample results individually.
