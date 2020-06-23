@@ -82,7 +82,7 @@ public:
      * @param ms3PpmTolr: m/z tolerance value used for matching reference <--> observed spectral peaks in MS3 spectrum
      * ==================== */
     bool ms3IsMs3Search = false;
-    int ms3MinNumMatches = 0;
+    int ms3MinNumMatches = 2;
     float ms3PrecursorPpmTolr = 20;
     float ms3PpmTolr = 20;
 
