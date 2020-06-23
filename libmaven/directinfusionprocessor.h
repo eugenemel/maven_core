@@ -96,7 +96,7 @@ public:
     int consensusMinNumMs3Scans = 0;
     float consensusMinFractionMs3Scans = 0;
     //Issue 226: Ms3 Parameters END
-    //TODO: encoding/decoding
+    //TODO: decoding
 
     /** ===================
      * AGGLOMERATION
@@ -168,6 +168,17 @@ public:
             consensusIntensityAgglomerationTypeStr = "MEDIAN";
         }
         encodedParams = encodedParams + "consensusIntensityAgglomerationType" + "=" + consensusIntensityAgglomerationTypeStr + ";";
+
+        //ms3 search params
+        encodedParams = encodedParams + "ms3IsMs3Search" + "=" + to_string(ms3IsMs3Search) + ";";
+        encodedParams = encodedParams + "ms3MinNumMatches" + "=" + to_string(ms3MinNumMatches) + ";";
+        encodedParams = encodedParams + "ms3PrecursorPpmTolr" + "=" + to_string(ms3PrecursorPpmTolr) + ";";
+        encodedParams = encodedParams + "ms3PpmTolr" + "=" + to_string(ms3PrecursorPpmTolr) + ";";
+
+        //ms3 consensus ms3 search params
+        encodedParams = encodedParams + "consensusMs3PpmTolr" + "=" + to_string(consensusMs3PpmTolr) + ";";
+        encodedParams = encodedParams + "consensusMinNumMs3Scans" + "=" + to_string(consensusMinNumMs3Scans) + ";";
+        encodedParams = encodedParams + "consensusMinFractionMs3Scans" + "=" + to_string(consensusMinFractionMs3Scans) + ";";
 
         //ms2 search params
         encodedParams = encodedParams + "ms2MinNumMatches" + "=" + to_string(ms2MinNumMatches) + ";";
