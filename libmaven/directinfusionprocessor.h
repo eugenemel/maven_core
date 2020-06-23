@@ -96,7 +96,6 @@ public:
     int consensusMinNumMs3Scans = 0;
     float consensusMinFractionMs3Scans = 0;
     //Issue 226: Ms3 Parameters END
-    //TODO: decoding
 
     /** ===================
      * AGGLOMERATION
@@ -283,6 +282,36 @@ public:
             } else if (consensusIntensityAgglomerationTypeStr == "MEDIAN") {
                 directInfusionSearchParameters->consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
             }
+        }
+
+        //ms3 search params
+        if (decodedMap.find("ms3IsMs3Search") != decodedMap.end()) {
+            directInfusionSearchParameters->ms3IsMs3Search = decodedMap["ms3IsMs3Search"] == "1";
+        }
+
+        if (decodedMap.find("ms3MinNumMatches") != decodedMap.end()) {
+            directInfusionSearchParameters->ms3MinNumMatches = stoi(decodedMap["ms3MinNumMatches"]);
+        }
+
+        if (decodedMap.find("ms3PrecursorPpmTolr") != decodedMap.end()) {
+            directInfusionSearchParameters->ms3PrecursorPpmTolr = stof(decodedMap["ms3PrecursorPpmTolr"]);
+        }
+
+        if (decodedMap.find("ms3PpmTolr") != decodedMap.end()) {
+            directInfusionSearchParameters->ms3PpmTolr = stof(decodedMap["ms3PpmTolr"]);
+        }
+
+        //ms3 consensus ms3 search params
+        if (decodedMap.find("consensusMs3PpmTolr") != decodedMap.end()) {
+            directInfusionSearchParameters->consensusMs3PpmTolr = stof(decodedMap["consensusMs3PpmTolr"]);
+        }
+
+        if (decodedMap.find("consensusMinNumMs3Scans") != decodedMap.end()) {
+            directInfusionSearchParameters->consensusMinNumMs3Scans = stoi(decodedMap["consensusMinNumMs3Scans"]);
+        }
+
+        if (decodedMap.find("consensusMinFractionMs3Scans") != decodedMap.end()) {
+            directInfusionSearchParameters->consensusMinFractionMs3Scans = stof(decodedMap["consensusMinFractionMs3Scans"]);
         }
 
         //ms2 search params
