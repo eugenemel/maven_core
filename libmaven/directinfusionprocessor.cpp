@@ -83,6 +83,22 @@ shared_ptr<DirectInfusionSearchSet> DirectInfusionProcessor::getSearchSet(mzSamp
 
 }
 
+vector<Ms3Compound*> DirectInfusionProcessor::getMs3CompoundSet(const vector<Compound*>& compounds,
+                                                                bool debug){
+    vector<Ms3Compound*> ms3Compounds(compounds.size());
+
+    for (unsigned int i = 0; i < compounds.size(); i++) {
+
+        auto compound = compounds[i];
+        Ms3Compound *ms3Compound = new Ms3Compound(compound);
+        ms3Compound->computeMs3Spectra();
+
+        ms3Compounds[i] = ms3Compound;
+    }
+
+    return ms3Compounds;
+}
+
 map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample(mzSample* sample,
                                                                               shared_ptr<DirectInfusionSearchSet> directInfusionSearchSet,
                                                                               shared_ptr<DirectInfusionSearchParameters> params,

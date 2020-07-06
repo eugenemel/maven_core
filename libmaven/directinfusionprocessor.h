@@ -547,6 +547,9 @@ public:
              shared_ptr<DirectInfusionSearchParameters> params,
              bool debug);
 
+     static vector<Ms3Compound*> getMs3CompoundSet(const vector<Compound*>& compounds,
+                                                   bool debug);
+
     /**
      * @brief processSingleSample
      * @param sample
