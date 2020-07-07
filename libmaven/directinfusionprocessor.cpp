@@ -99,10 +99,13 @@ vector<Ms3Compound*> DirectInfusionProcessor::getMs3CompoundSet(const vector<Com
     return ms3Compounds;
 }
 
-vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleMs3Sample(mzSample* sample,
+vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mzSample* sample,
                                                                                   const vector<Ms3Compound*>& ms3Compounds,
                                                                                   shared_ptr<DirectInfusionSearchParameters> params,
                                                                                   bool debug){
+
+    //initialize output
+    vector<Ms3SingleSampleMatch*> output;
 
     map<int, vector<Scan>> ms3ScansByMzPrecursor{};
 
@@ -237,6 +240,7 @@ vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleMs3Sampl
     for (auto ms3Compound : ms3Compounds) {
 
         int numMs3Matches = 0;
+        map<int, pair<Fragment*, vector<int>>> matchData{};
 
         for (auto it = ms3Compound->ms3_fragment_mzs.begin(); it != ms3Compound->ms3_fragment_mzs.end(); ++it){
             double precMz = mzUtils::intKeyToMz(it->first);
@@ -261,6 +265,9 @@ vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleMs3Sampl
                     float maxDeltaMz = (params->ms3PpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
                     vector<int> ranks = Fragment::findFragPairsGreedyMz(&t, data.second->consensus, maxDeltaMz);
 
+                    //                        precMz,            consensus Fragment*, ranks
+                    matchData.insert(make_pair(it->first, make_pair(data.second, ranks)));
+
                     for (unsigned long i = 0; i < ranks.size(); i++) {
 
                         int y = ranks[i];
@@ -272,13 +279,21 @@ vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleMs3Sampl
                 }
             } // end ms3Compound m/z map
 
-            if (numMs3Matches > params->ms3MinNumMatches) {
+            if (numMs3Matches >= params->ms3MinNumMatches) {
+
+                Ms3SingleSampleMatch *ms3SingleSampleMatch = new Ms3SingleSampleMatch;
+                ms3SingleSampleMatch->ms3Compound = ms3Compound;
+                ms3SingleSampleMatch->sample = sample;
+                ms3SingleSampleMatch->numMs3Matches = numMs3Matches;
+                ms3SingleSampleMatch->matchData = matchData;
+
+                output.push_back(ms3SingleSampleMatch);
                 if (debug) cout << ms3Compound->baseCompound->name << " " << ms3Compound->baseCompound->adductString << ": " << numMs3Matches << " matches" << endl;
             }
         }
     }
 
-    return vector<DirectInfusionAnnotation*>(); //TODO: placeholder
+    return output;
 }
 
 map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample(mzSample* sample,

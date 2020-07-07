@@ -8,6 +8,7 @@
 
 class mzSample;
 class DirectInfusionAnnotation;
+class Ms3SingleSampleMatch;
 enum class SpectralCompositionAlgorithm;
 
 /**
@@ -578,7 +579,7 @@ public:
       * TODO: MS3 spectra are organized into groups to build consensus spectra,
       * based on MS2 precursor m/z.
       */
-     static vector<DirectInfusionAnnotation*> processSingleMs3Sample(
+     static vector<Ms3SingleSampleMatch*> processSingleMs3Sample(
              mzSample* sample,
              const vector<Ms3Compound*>& ms3Compounds,
              shared_ptr<DirectInfusionSearchParameters> params,
@@ -748,6 +749,28 @@ public:
      * FragmentationMatchScores are also provided.
      */
     vector<shared_ptr<DirectInfusionMatchData>> compounds;
+};
+
+/**
+ * @brief The Ms3SingleSampleMatch class
+ *
+ * Unlike @class{DirectInfusionAnnotation}, which is data-centric, this class is compound-centric.
+ *
+ * This class contains an Ms3 compound, a sample, and a path to all matching information
+ * associated with the compound.
+ */
+class Ms3SingleSampleMatch {
+
+public:
+
+    Ms3Compound *ms3Compound = nullptr;
+
+    mzSample *sample = nullptr;
+
+    int numMs3Matches = 0;
+
+    //precMz,            <consensus Fragment*, ranks>
+    map<int, pair<Fragment*, vector<int>>> matchData{};
 };
 
 /**
