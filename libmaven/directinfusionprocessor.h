@@ -558,11 +558,6 @@ public:
      * @return
      *
      * Returns DirectInfusionAnnotation assessments for a single sample.
-     * TODO: think about how to agglomerate these across samples?
-     * What to do when there are different compositions in different sample?
-     * eg, sample 1 has 70% A, 20% B, 10% C, and sample 2 and 50% A, 0% B, 0% C, and 50% D?
-     *
-     * Definitely some choices to be made here
      */
      static map<int, DirectInfusionAnnotation*> processSingleSample(
              mzSample *sample,
@@ -570,6 +565,24 @@ public:
              shared_ptr<DirectInfusionSearchParameters> params,
              bool debug);
 
+     /**
+      * @brief processSingleMs3Sample
+      * @param sample
+      * @param ms3Compounds
+      * @param params
+      * @param debug
+      * @return
+      *
+      * DirectInfusionAnnotation assessments for a single sample.
+      *
+      * TODO: MS3 spectra are organized into groups to build consensus spectra,
+      * based on MS2 precursor m/z.
+      */
+     static vector<DirectInfusionAnnotation*> processSingleMs3Sample(
+             mzSample* sample,
+             const vector<Ms3Compound*>& ms3Compounds,
+             shared_ptr<DirectInfusionSearchParameters> params,
+             bool debug);
      /**
       * @brief deconvolveAllShared
       * @param allCandidates

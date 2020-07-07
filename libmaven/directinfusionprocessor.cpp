@@ -99,6 +99,98 @@ vector<Ms3Compound*> DirectInfusionProcessor::getMs3CompoundSet(const vector<Com
     return ms3Compounds;
 }
 
+vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleMs3Sample(mzSample* sample,
+                                                                                  const vector<Ms3Compound*>& ms3Compounds,
+                                                                                  shared_ptr<DirectInfusionSearchParameters> params,
+                                                                                  bool debug){
+
+    map<int, vector<Scan>> ms3ScansByMzPrecursor{};
+
+    vector<pair<double, Scan*>> allMs3Scans;
+
+    for (Scan* scan : sample->scans) {
+        if (scan->mslevel == 3) {
+            allMs3Scans.push_back(make_pair(scan->precursorMz, scan));
+        }
+    }
+
+    sort(allMs3Scans.begin(), allMs3Scans.end(), [](const pair<double, Scan*>& lhs, const pair<double, Scan*>& rhs){
+        if (lhs.first == rhs.first) {
+            return lhs.second->scannum < rhs.second->scannum;
+        } else {
+            return lhs.first < rhs.first;
+        }
+    });
+
+    vector<vector<pair<double, Scan*>>> ms3ScanGroups;
+    vector<pair<double,Scan*>> scanGroup;
+    double lastPrecMz = 0.0;
+    unsigned int numProcessedPairs = 0;
+
+    for (unsigned int i = 0; i < allMs3Scans.size(); i++) {
+
+        scanGroup = vector<pair<double,Scan*>>();
+
+        pair<double, Scan*> ithScanPair = allMs3Scans[i];
+        lastPrecMz = ithScanPair.first;
+
+        scanGroup.push_back(ithScanPair);
+
+        for (unsigned int j = i+1; j < allMs3Scans.size(); j++) {
+
+            pair<double, Scan*> jthScanPair = allMs3Scans[j];
+
+            if (mzUtils::ppmDist(jthScanPair.first, ithScanPair.first) > static_cast<double>(params->ms3PrecursorPpmTolr)) {
+                i = j;
+                ms3ScanGroups.push_back(scanGroup);
+
+                numProcessedPairs += scanGroup.size();
+
+                if (debug) cout << "i=" << i << ", numProcessedPairs= " << numProcessedPairs << endl;
+
+                i--; // necessary b/c outer for loop will increment i
+                break;
+            } else {
+                scanGroup.push_back(jthScanPair);
+                lastPrecMz = jthScanPair.first;
+
+                if (j == allMs3Scans.size()-1) {
+                    i = static_cast<unsigned int>(allMs3Scans.size()); //avoid outer loop
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!scanGroup.empty()){
+        ms3ScanGroups.push_back(scanGroup);
+        numProcessedPairs += scanGroup.size();
+        if (debug) cout << "i=" << allMs3Scans.size() << ", numProcessedPairs="<< numProcessedPairs << endl;
+    }
+
+    //debugging
+    if (debug) {
+
+        unsigned int spCounter = 0;
+        unsigned int grpCounter = 0;
+        for (auto sg : ms3ScanGroups) {
+
+            grpCounter++;
+            cout<< "group #" << grpCounter << endl;
+            for (auto sp : sg) {
+                cout << to_string(sp.first) << ": #" << sp.second->scannum << endl;
+            }
+            cout << endl;
+
+            spCounter += sg.size();
+        }
+
+        cout << "ms3 scans: # all=" << allMs3Scans.size() << ", # grouped=" << spCounter << endl;
+    }
+
+    return vector<DirectInfusionAnnotation*>(); //TODO: placeholder
+}
+
 map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample(mzSample* sample,
                                                                               shared_ptr<DirectInfusionSearchSet> directInfusionSearchSet,
                                                                               shared_ptr<DirectInfusionSearchParameters> params,
