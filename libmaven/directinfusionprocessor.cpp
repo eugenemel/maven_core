@@ -232,7 +232,51 @@ vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleMs3Sampl
         consensusMs3Spectra[i] = make_pair(avgPrecMz, f);
     }
 
-    sort(consensusMs3Spectra.begin(), consensusMs3Spectra.end()); // by default, will be based on first in pair
+    sort(consensusMs3Spectra.begin(), consensusMs3Spectra.end()); // by default, sorted according to pair.first
+
+    for (auto ms3Compound : ms3Compounds) {
+
+        int numMs3Matches = 0;
+
+        for (auto it = ms3Compound->ms3_fragment_mzs.begin(); it != ms3Compound->ms3_fragment_mzs.end(); ++it){
+            double precMz = mzUtils::intKeyToMz(it->first);
+
+            double minMz = precMz - precMz * params->ms3PrecursorPpmTolr/1000000.0;
+            auto lb = lower_bound(consensusMs3Spectra.begin(), consensusMs3Spectra.end(), minMz, [](const pair<double, Fragment*>& lhs, const double& rhs){
+                return lhs.first < rhs;
+            });
+
+            unsigned int pos = lb - consensusMs3Spectra.begin();
+
+            for (unsigned int pos = lb - consensusMs3Spectra.begin(); pos < consensusMs3Spectra.size(); pos++) {
+                pair<double, Fragment*> data = consensusMs3Spectra[pos];
+                if (mzUtils::ppmDist(data.first, precMz) <= params->ms3PrecursorPpmTolr) {
+
+                    Fragment t;
+                    t.precursorMz = precMz;
+                    t.mzs = it->second;
+                    t.intensity_array = ms3Compound->ms3_fragment_intensity[it->first];
+                    t.fragment_labels = ms3Compound->ms3_fragment_labels[it->first];
+
+                    float maxDeltaMz = (params->ms3PpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
+                    vector<int> ranks = Fragment::findFragPairsGreedyMz(&t, data.second->consensus, maxDeltaMz);
+
+                    for (unsigned long i = 0; i < ranks.size(); i++) {
+
+                        int y = ranks[i];
+
+                        if (y != -1) {
+                            numMs3Matches++;
+                        }
+                    }
+                }
+            } // end ms3Compound m/z map
+
+            if (numMs3Matches > params->ms3MinNumMatches) {
+                if (debug) cout << ms3Compound->baseCompound->name << " " << ms3Compound->baseCompound->adductString << ": " << numMs3Matches << " matches" << endl;
+            }
+        }
+    }
 
     return vector<DirectInfusionAnnotation*>(); //TODO: placeholder
 }
