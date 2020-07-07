@@ -188,6 +188,52 @@ vector<DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleMs3Sampl
         cout << "ms3 scans: # all=" << allMs3Scans.size() << ", # grouped=" << spCounter << endl;
     }
 
+    vector<pair<double, Fragment*>> consensusMs3Spectra(ms3ScanGroups.size());
+
+    for (unsigned int i = 0; i < ms3ScanGroups.size(); i++) {
+
+        auto pairVector = ms3ScanGroups[i];
+        Fragment *f = nullptr;
+        double avgPrecMz = 0;
+
+        for (auto pair : pairVector) {
+            avgPrecMz += pair.first;
+            if (!f) {
+                f = new Fragment(pair.second,
+                                 params->scanFilterMinIntensity,
+                                 params->scanFilterMinSNRatio,
+                                 params->scanFilterMaxNumberOfFragments,
+                                 params->scanFilterIsRetainFragmentsAbovePrecursorMz,
+                                 params->scanFilterPrecursorPurityPpm,
+                                 params->scanFilterMinIntensity);
+            } else {
+                Fragment *brother = new Fragment(pair.second,
+                                                 params->scanFilterMinIntensity,
+                                                 params->scanFilterMinSNRatio,
+                                                 params->scanFilterMaxNumberOfFragments,
+                                                 params->scanFilterIsRetainFragmentsAbovePrecursorMz,
+                                                 params->scanFilterPrecursorPurityPpm,
+                                                 params->scanFilterMinIntensity);
+                f->addFragment(brother);
+            }
+        }
+
+        avgPrecMz /= pairVector.size();
+
+        f->buildConsensus(params->consensusMs3PpmTolr,
+                          params->consensusIntensityAgglomerationType,
+                          params->consensusIsIntensityAvgByObserved,
+                          params->consensusIsNormalizeTo10K,
+                          params->consensusMinNumMs3Scans,
+                          params->consensusMinFractionMs3Scans
+                          );
+
+        f->consensus->sortByMz();
+        consensusMs3Spectra[i] = make_pair(avgPrecMz, f);
+    }
+
+    sort(consensusMs3Spectra.begin(), consensusMs3Spectra.end()); // by default, will be based on first in pair
+
     return vector<DirectInfusionAnnotation*>(); //TODO: placeholder
 }
 
