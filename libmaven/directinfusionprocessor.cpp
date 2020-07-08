@@ -265,16 +265,20 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                     float maxDeltaMz = (params->ms3PpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
                     vector<int> ranks = Fragment::findFragPairsGreedyMz(&t, data.second->consensus, maxDeltaMz);
 
-                    //                        precMz,            consensus Fragment*, ranks
-                    matchData.insert(make_pair(it->first, make_pair(data.second, ranks)));
-
+                    bool isHasMatch = false;
                     for (unsigned long i = 0; i < ranks.size(); i++) {
 
                         int y = ranks[i];
 
                         if (y != -1) {
                             numMs3Matches++;
+                            isHasMatch = true;
                         }
+                    }
+
+                    if (isHasMatch) {
+                        //                        precMz,            consensus Fragment*, ranks
+                        matchData.insert(make_pair(it->first, make_pair(data.second, ranks)));
                     }
                 }
             } // end ms3Compound m/z map
