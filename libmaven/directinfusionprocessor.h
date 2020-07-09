@@ -386,6 +386,9 @@ struct DirectInfusionMatchData {
     float fragmentMaxObservedIntensity = 0;
     double proportion = 0;
 
+    //Issue 232
+    float observedMs1Intensity = 0;
+
     //Issue 210
     int numUniqueFragments = 0;
     vector<bool> isFragmentUnique; //follows m/z-sorted Compound* fragment vectors
@@ -400,7 +403,7 @@ struct DirectInfusionMatchAssessment {
     FragmentationMatchScore fragmentationMatchScore;
     map<string, int> diagnosticFragmentMatchMap = {};
     float fragmentMaxObservedIntensity = 0;
-    float ms1Intensity = 0;
+    float observedMs1Intensity = 0;
 };
 
 /**

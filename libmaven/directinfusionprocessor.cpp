@@ -445,6 +445,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         unique_ptr<DirectInfusionMatchAssessment> matchAssessment = assessMatch(f, ms1Fragment, libraryEntry, params, debug);
         FragmentationMatchScore s = matchAssessment->fragmentationMatchScore;
         float fragmentMaxObservedIntensity = matchAssessment->fragmentMaxObservedIntensity;
+        float observedMs1Intensity = matchAssessment->observedMs1Intensity;
 
         if (s.numMatches >= params->ms2MinNumMatches &&
                 s.numDiagnosticMatches >= params->ms2MinNumDiagnosticMatches &&
@@ -456,6 +457,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
             directInfusionMatchData->adduct = libraryEntry.second;
             directInfusionMatchData->fragmentationMatchScore = s;
             directInfusionMatchData->fragmentMaxObservedIntensity = fragmentMaxObservedIntensity;
+            directInfusionMatchData->observedMs1Intensity = observedMs1Intensity;
 
             libraryMatches.push_back(directInfusionMatchData);
         }
@@ -540,7 +542,7 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
     //START COMPARE MS1
     //=============================================== //
 
-    float ms1Intensity = 0.0f;
+    float observedMs1Intensity = 0.0f;
 
     double precMz = compound->precursorMz;
     if (!params->ms1IsRequireAdductPrecursorMatch) {
@@ -561,15 +563,15 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
 
     for (unsigned int i = pos; i < ms1Fragment->mzs.size(); i++) {
         if (ms1Fragment->mzs[i] <= maxMz) {
-            if (ms1Fragment->intensity_array[i] > ms1Intensity) {
-                ms1Intensity = ms1Fragment->intensity_array[i];
+            if (ms1Fragment->intensity_array[i] > observedMs1Intensity) {
+                observedMs1Intensity = ms1Fragment->intensity_array[i];
             }
         } else {
             break;
         }
     }
 
-    bool isPassesMs1PrecursorRequirements = !params->ms1IsFindPrecursorIon || (ms1Intensity > 0.0f && ms1Intensity >= params->ms1MinIntensity);
+    bool isPassesMs1PrecursorRequirements = !params->ms1IsFindPrecursorIon || (observedMs1Intensity > 0.0f && observedMs1Intensity >= params->ms1MinIntensity);
 
     if (!isPassesMs1PrecursorRequirements) return directInfusionMatchAssessment; // will return with no matching fragments, 0 for every score
 
@@ -631,7 +633,7 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
 
     directInfusionMatchAssessment->diagnosticFragmentMatchMap = diagnosticMatchesMap;
     directInfusionMatchAssessment->fragmentMaxObservedIntensity = fragmentMaxObservedIntensity;
-    directInfusionMatchAssessment->ms1Intensity = ms1Intensity;
+    directInfusionMatchAssessment->observedMs1Intensity = observedMs1Intensity;
 
     //=============================================== //
     //END COMPARE MS2
@@ -1452,6 +1454,7 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
        groupMatchData->proportion = matchDataPair.second / numContributingSamples;
        groupMatchData->fragmentationMatchScore = bestFragMatch.at(matchData);
        groupMatchData->fragmentMaxObservedIntensity = matchData->fragmentMaxObservedIntensity;
+       groupMatchData->observedMs1Intensity = matchData->observedMs1Intensity;
 
        directInfusionGroupAnnotation->compounds.at(annotationMatchIndex) = groupMatchData;
 
