@@ -403,10 +403,46 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 
     vector<shared_ptr<DirectInfusionMatchData>> libraryMatches;
 
+    //For MS1 quant
+    Fragment *ms1Fragment = nullptr;
+    for (auto & scan: ms1Scans) {
+        if (!ms1Fragment) {
+            ms1Fragment = new Fragment(scan,
+                                       params->scanFilterMinFracIntensity,
+                                       params->scanFilterMinSNRatio,
+                                       params->scanFilterMaxNumberOfFragments,
+                                       params->scanFilterBaseLinePercentile,
+                                       params->scanFilterIsRetainFragmentsAbovePrecursorMz,
+                                       params->scanFilterPrecursorPurityPpm,
+                                       params->scanFilterMinIntensity);
+        } else {
+            Fragment *ms1Brother = new Fragment(scan,
+                                             params->scanFilterMinFracIntensity,
+                                             params->scanFilterMinSNRatio,
+                                             params->scanFilterMaxNumberOfFragments,
+                                             params->scanFilterBaseLinePercentile,
+                                             params->scanFilterIsRetainFragmentsAbovePrecursorMz,
+                                             params->scanFilterPrecursorPurityPpm,
+                                             params->scanFilterMinIntensity);
+
+            ms1Fragment->addFragment(ms1Brother);
+        }
+    }
+
+    ms1Fragment->buildConsensus(params->consensusPpmTolr,
+                                params->consensusIntensityAgglomerationType,
+                                params->consensusIsIntensityAvgByObserved,
+                                params->consensusIsNormalizeTo10K,
+                                0, //params->consensusMinNumMs2Scans TODO: MS1 equivalent
+                                0  //params->consensusMinFractionMs2Scans TODO: MS1 equivalent
+                                );
+
+    ms1Fragment->consensus->sortByMz();
+
     //Compare to library
     for (auto libraryEntry : library){
 
-        unique_ptr<DirectInfusionMatchAssessment> matchAssessment = assessMatch(f, ms1Scans, libraryEntry, params, debug);
+        unique_ptr<DirectInfusionMatchAssessment> matchAssessment = assessMatch(f, ms1Fragment, libraryEntry, params, debug);
         FragmentationMatchScore s = matchAssessment->fragmentationMatchScore;
         float fragmentMaxObservedIntensity = matchAssessment->fragmentMaxObservedIntensity;
 
@@ -489,8 +525,8 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
     return nullptr;
 }
 
-unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(const Fragment *f,
-                                                             const vector<Scan *> &ms1Scans,
+unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(const Fragment *f, //ms2 fragment
+                                                             const Fragment *ms1Fragment,
                                                              const pair<Compound*, Adduct*>& libraryEntry,
                                                              const shared_ptr<DirectInfusionSearchParameters> params,
                                                              const bool debug){
@@ -504,43 +540,38 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
     //START COMPARE MS1
     //=============================================== //
 
-    bool isPassesMs1PrecursorRequirements = true;
+    float ms1Intensity = 0.0f;
 
-     if (params->ms1IsFindPrecursorIon) {
+    double precMz = compound->precursorMz;
+    if (!params->ms1IsRequireAdductPrecursorMatch) {
 
-         double precMz = compound->precursorMz;
-         if (!params->ms1IsRequireAdductPrecursorMatch) {
+        //Compute this way instead of using compound->precursorMz to allow for possibility of matching compound to unexpected adduct
+        MassCalculator massCalc;
+        float compoundMz = adduct->computeAdductMass(massCalc.computeNeutralMass(compound->getFormula()));
+        precMz = adduct->computeAdductMass(compoundMz);
 
-             //Compute this way instead of using compound->precursorMz to allow for possibility of matching compound to unexpected adduct
-             MassCalculator massCalc;
-             float compoundMz = adduct->computeAdductMass(massCalc.computeNeutralMass(compound->getFormula()));
-             precMz = adduct->computeAdductMass(compoundMz);
+    }
 
-         }
+    double minMz = precMz - precMz*params->ms1PpmTolr/1e6;
+    double maxMz = precMz + precMz*params->ms1PpmTolr/1e6;
 
-         double minMz = precMz - precMz*params->ms1PpmTolr/1e6;
-         double maxMz = precMz + precMz*params->ms1PpmTolr/1e6;
+    auto lb = lower_bound(ms1Fragment->mzs.begin(), ms1Fragment->mzs.end(), minMz);
 
-         isPassesMs1PrecursorRequirements = false;
+    auto pos = lb - ms1Fragment->mzs.begin();
 
-         for (auto& scan : ms1Scans) {
+    for (unsigned int i = pos; i < ms1Fragment->mzs.size(); i++) {
+        if (ms1Fragment->mzs[i] <= maxMz) {
+            if (ms1Fragment->intensity_array[i] > ms1Intensity) {
+                ms1Intensity = ms1Fragment->intensity_array[i];
+            }
+        } else {
+            break;
+        }
+    }
 
-             vector<int> matchingMzs = scan->findMatchingMzs(minMz, maxMz);
+    bool isPassesMs1PrecursorRequirements = !params->ms1IsFindPrecursorIon || (ms1Intensity > 0.0f && ms1Intensity >= params->ms1MinIntensity);
 
-             for (auto x : matchingMzs) {
-                 if (scan->intensity[x] >= params->ms1MinIntensity) {
-                     isPassesMs1PrecursorRequirements = true;
-                     break;
-                 }
-             }
-
-             //no need to check other MS1 scans once a valid precursor has been found.
-             if (isPassesMs1PrecursorRequirements) break;
-         }
-
-     }
-
-     if (!isPassesMs1PrecursorRequirements) return directInfusionMatchAssessment; // will return with no matching fragments, 0 for every score
+    if (!isPassesMs1PrecursorRequirements) return directInfusionMatchAssessment; // will return with no matching fragments, 0 for every score
 
     //=============================================== //
     //END COMPARE MS1
@@ -600,6 +631,7 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
 
     directInfusionMatchAssessment->diagnosticFragmentMatchMap = diagnosticMatchesMap;
     directInfusionMatchAssessment->fragmentMaxObservedIntensity = fragmentMaxObservedIntensity;
+    directInfusionMatchAssessment->ms1Intensity = ms1Intensity;
 
     //=============================================== //
     //END COMPARE MS2

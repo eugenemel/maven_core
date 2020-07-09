@@ -400,6 +400,7 @@ struct DirectInfusionMatchAssessment {
     FragmentationMatchScore fragmentationMatchScore;
     map<string, int> diagnosticFragmentMatchMap = {};
     float fragmentMaxObservedIntensity = 0;
+    float ms1Intensity = 0;
 };
 
 /**
@@ -695,8 +696,8 @@ public:
       *
       * Designed to be multithreaded, work of comparing / evaluating individual matches
       */
-     static unique_ptr<DirectInfusionMatchAssessment> assessMatch(const Fragment *f,
-                             const vector<Scan*>& ms1Scans,
+     static unique_ptr<DirectInfusionMatchAssessment> assessMatch(const Fragment *f, //ms2 fragment
+                             const Fragment *ms1Fragment,
                              const pair<Compound*, Adduct*>& libraryMatch,
                              const shared_ptr<DirectInfusionSearchParameters> params,
                              const bool debug);
