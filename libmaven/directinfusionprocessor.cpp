@@ -250,8 +250,6 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                 return lhs.first < rhs;
             });
 
-            unsigned int pos = lb - consensusMs3Spectra.begin();
-
             for (unsigned int pos = lb - consensusMs3Spectra.begin(); pos < consensusMs3Spectra.size(); pos++) {
                 pair<double, Fragment*> data = consensusMs3Spectra[pos];
                 if (mzUtils::ppmDist(data.first, precMz) <= params->ms3PrecursorPpmTolr) {
