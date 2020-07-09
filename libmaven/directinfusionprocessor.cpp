@@ -386,6 +386,10 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
     }
 
+    //Issue 232: prevent memory leak
+    if (ms1Fragment) delete ms1Fragment;
+    ms1Fragment = nullptr;
+
     return annotations;
 
 }
