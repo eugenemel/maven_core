@@ -684,7 +684,7 @@ public:
                               const pair<float,float>& mzRange,
                               mzSample* sample,
                               const vector<Scan*>& ms2Scans,
-                              const vector<Scan*>& ms1Scans,
+                              Fragment *ms1Fragment, //only one per sample, computed at the same time that ms1 scans are retrieved.
                               const vector<pair<Compound*, Adduct*>> library,
                               const shared_ptr<DirectInfusionSearchParameters> params,
                               const bool debug);
