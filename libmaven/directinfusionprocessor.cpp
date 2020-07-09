@@ -564,7 +564,7 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
 
         auto lb = lower_bound(ms1Fragment->consensus->mzs.begin(), ms1Fragment->consensus->mzs.end(), minMz);
 
-        auto pos = lb - ms1Fragment->mzs.begin();
+        auto pos = lb - ms1Fragment->consensus->mzs.begin();
 
         for (unsigned int i = pos; i < ms1Fragment->consensus->mzs.size(); i++) {
             if (ms1Fragment->consensus->mzs[i] <= maxMz) {
