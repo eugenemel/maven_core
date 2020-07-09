@@ -359,15 +359,17 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
         }
     }
 
-    ms1Fragment->buildConsensus(params->consensusPpmTolr,
-                                params->consensusIntensityAgglomerationType,
-                                params->consensusIsIntensityAvgByObserved,
-                                params->consensusIsNormalizeTo10K,
-                                0, //params->consensusMinNumMs2Scans TODO: MS1 equivalent
-                                0  //params->consensusMinFractionMs2Scans TODO: MS1 equivalent
-                                );
+    if (ms1Fragment){
+        ms1Fragment->buildConsensus(params->consensusPpmTolr,
+                                    params->consensusIntensityAgglomerationType,
+                                    params->consensusIsIntensityAvgByObserved,
+                                    params->consensusIsNormalizeTo10K,
+                                    0, //params->consensusMinNumMs2Scans TODO: MS1 equivalent
+                                    0  //params->consensusMinFractionMs2Scans TODO: MS1 equivalent
+                                    );
 
-    ms1Fragment->consensus->sortByMz();
+        ms1Fragment->consensus->sortByMz();
+    }
 
     if (debug) cerr << "Finished computing consensus MS1 scan." << endl;
 
@@ -394,7 +396,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
                                        const pair<float, float>& mzRange,
                                        mzSample* sample,
                                        const vector<Scan*>& ms2Scans,
-                                       Fragment *ms1Fragment,
+                                       const Fragment *ms1Fragment,
                                        const vector<pair<Compound*, Adduct*>> library,
                                        const shared_ptr<DirectInfusionSearchParameters> params,
                                        const bool debug){
@@ -548,7 +550,7 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
 
     float observedMs1Intensity = 0.0f;
 
-    if (!ms1Fragment) {
+    if (ms1Fragment && ms1Fragment->consensus) {
         double precMz = compound->precursorMz;
         if (!params->ms1IsRequireAdductPrecursorMatch) {
 
@@ -562,14 +564,14 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
         double minMz = precMz - precMz*params->ms1PpmTolr/1e6;
         double maxMz = precMz + precMz*params->ms1PpmTolr/1e6;
 
-        auto lb = lower_bound(ms1Fragment->mzs.begin(), ms1Fragment->mzs.end(), minMz);
+        auto lb = lower_bound(ms1Fragment->consensus->mzs.begin(), ms1Fragment->consensus->mzs.end(), minMz);
 
         auto pos = lb - ms1Fragment->mzs.begin();
 
-        for (unsigned int i = pos; i < ms1Fragment->mzs.size(); i++) {
-            if (ms1Fragment->mzs[i] <= maxMz) {
-                if (ms1Fragment->intensity_array[i] > observedMs1Intensity) {
-                    observedMs1Intensity = ms1Fragment->intensity_array[i];
+        for (unsigned int i = pos; i < ms1Fragment->consensus->mzs.size(); i++) {
+            if (ms1Fragment->consensus->mzs[i] <= maxMz) {
+                if (ms1Fragment->consensus->intensity_array[i] > observedMs1Intensity) {
+                    observedMs1Intensity = ms1Fragment->consensus->intensity_array[i];
                 }
             } else {
                 break;
