@@ -1001,7 +1001,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByI
                 formulaNameCounts.push_back(make_pair(it->first, it->second));
             }
 
-            sort(adductNameCounts.begin(), adductNameCounts.end(), [](pair<string, int>& lhs, pair<string, int>& rhs){
+            sort(adductNameCounts.begin(), adductNameCounts.end(), [](const pair<string, int>& lhs, const pair<string, int>& rhs){
                 if (lhs.second == rhs.second) {
                     return lhs.first.compare(rhs.first);
                 } else {
@@ -1009,7 +1009,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByI
                 }
             });
 
-            sort(formulaNameCounts.begin(), formulaNameCounts.end(), [](pair<string, int>& lhs, pair<string, int>& rhs){
+            sort(formulaNameCounts.begin(), formulaNameCounts.end(), [](const pair<string, int>& lhs, const pair<string, int>& rhs){
                 if (lhs.second == rhs.second) {
                     return lhs.first.compare(rhs.first);
                 } else {
