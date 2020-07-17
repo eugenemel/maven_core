@@ -1033,12 +1033,22 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
                 abort();
             }
 
+            //This is necessary, as the summarized form may actually map to multiple fragments (e.g., multiple TG(60:7)).
+            string summarizedId("{" + summarizedCompound->name + summarizedCompound->adductString + "}={");
+            for (unsigned int i = 0; i < compoundList.size(); i++) {
+                if (i > 0) {
+                    summarizedId += ";";
+                }
+                summarizedId += compoundList[i]->compound->name;
+            }
+            summarizedId += "}";
+
             summarizedCompound->adductString = compounds.at(0)->adductString;
             summarizedCompound->formula = compounds.at(0)->getFormula();
             summarizedCompound->precursorMz = compounds.at(0)->precursorMz;
             summarizedCompound->setExactMass(compounds.at(0)->getExactMass());
             summarizedCompound->charge = compounds.at(0)->charge;
-            summarizedCompound->id = summarizedCompound->name + summarizedCompound->adductString;
+            summarizedCompound->id = summarizedId;
 
             summarizedCompound->computeSummarizedData();
 
