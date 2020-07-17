@@ -638,6 +638,22 @@ public:
              shared_ptr<DirectInfusionSearchParameters> params,
              bool debug);
 
+     /**
+      * @brief summarizeByAcylChainsAndSumComposition2
+      * Issue 233: Possible off-by-one / strange counting errors
+      *
+      * @param matchInfo
+      * @param observedSpectrum
+      * @param params
+      * @param debug
+      * @return
+      */
+     static unique_ptr<DirectInfusionMatchInformation> summarizeByAcylChainsAndSumComposition2(
+             unique_ptr<DirectInfusionMatchInformation> matchInfo,
+             Fragment *observedSpectrum,
+             shared_ptr<DirectInfusionSearchParameters> params,
+             bool debug);
+
      static unique_ptr<DirectInfusionMatchInformation> summarizeByIdenticalFragmentMatches(
              unique_ptr<DirectInfusionMatchInformation> matchInfo,
              Fragment *observedSpectrum,
