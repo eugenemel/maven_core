@@ -1042,7 +1042,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
 
             summarizedCompound->computeSummarizedData();
 
-            shared_ptr<DirectInfusionMatchData> summarizedMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
+            summarizedMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
             summarizedMatchData->compound = summarizedCompound;
             summarizedMatchData->adduct = adduct;
             summarizedMatchData->fragmentationMatchScore = summarizedCompound->scoreCompoundHit(observedSpectrum, params->ms2PpmTolr, false);
