@@ -711,6 +711,16 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getFragmentM
 
 }
 
+/**
+ * @brief DirectInfusionProcessor::summarizeByAcylChainsAndSumComposition
+ * @param matchInfo
+ * @param observedSpectrum
+ * @param params
+ * @param debug
+ * @return
+ *
+ * @deprecated
+ */
 unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByAcylChainsAndSumComposition(
         unique_ptr<DirectInfusionMatchInformation> matchInfo,
         Fragment *observedSpectrum,

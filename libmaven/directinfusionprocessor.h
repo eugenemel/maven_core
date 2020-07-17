@@ -631,6 +631,10 @@ public:
       * @param observedSpectrum
       * @param params
       * @param debug
+      *
+      *  @deprecated
+      * Issue 233: This should eventually be deleted, as summarizeByAcylChainsAndSumComposition2()
+      * is now the preferred method.
       */
      static unique_ptr<DirectInfusionMatchInformation> summarizeByAcylChainsAndSumComposition(
              unique_ptr<DirectInfusionMatchInformation> matchInfo,
