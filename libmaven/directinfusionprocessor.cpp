@@ -862,6 +862,8 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
             summarizedMatchData->adduct = candidate->adduct;
             summarizedMatchData->fragmentationMatchScore = summarizedCompound->scoreCompoundHit(observedSpectrum, params->ms2PpmTolr, false);
 
+            summarizedMatchData->observedMs1Intensity = candidate->observedMs1Intensity;
+
             summarizedCandidates.push_back(summarizedMatchData);
 
         } else {
