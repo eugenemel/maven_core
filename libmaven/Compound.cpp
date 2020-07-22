@@ -113,24 +113,25 @@ vector<Compound*> SummarizedCompound::getChildren() {
     vector<Compound*> descendants;
 
     //becomes the next childset (in the next iteration)
-    vector<Compound*> summarizedCompounds;
+    vector<Compound*> nextGeneration;
 
     //Initial condition
-    vector<Compound*> childSet = children;
+    vector<Compound*> thisGeneration = children;
 
     //continue iterating until no more children to retrieve
-    while (childSet.size() > 0) {
+    while (thisGeneration.size() > 0) {
 
-        for (auto compound : childSet) {
-            if (instanceof<SummarizedCompound>(compound)) {
-                summarizedCompounds.push_back(compound);
+        for (auto compound : thisGeneration) {
+            if (compound->db == "summarized") {
+                vector<Compound*> compoundChildren = compound->getChildren();
+                nextGeneration.insert(nextGeneration.end(), compoundChildren.begin(), compoundChildren.end());
             } else {
                 descendants.push_back(compound);
             }
         }
 
-        childSet = summarizedCompounds;
-        summarizedCompounds.clear();
+        thisGeneration = nextGeneration;
+        nextGeneration.clear();
     }
 
     return descendants;

@@ -815,11 +815,6 @@ public:
     //Relies on children
     void computeSummarizedData();
     virtual ~SummarizedCompound(){}
-
-    template<typename Base, typename T>
-    inline bool instanceof(const T*) {
-       return is_base_of<Base, T>::value;
-    }
 };
 
 class Ms3Compound : public Compound {
