@@ -106,7 +106,35 @@ FragmentationMatchScore Compound::scoreCompoundHit(Fragment* f, float productPpm
 }
 
 vector<Compound*> Compound::getChildren() {return vector<Compound*>(0);}
-vector<Compound*> SummarizedCompound::getChildren() {return children;}
+
+//breadth-first search
+vector<Compound*> SummarizedCompound::getChildren() {
+    //output
+    vector<Compound*> descendants;
+
+    //becomes the next childset (in the next iteration)
+    vector<Compound*> summarizedCompounds;
+
+    //Initial condition
+    vector<Compound*> childSet = children;
+
+    //continue iterating until no more children to retrieve
+    while (childSet.size() > 0) {
+
+        for (auto compound : childSet) {
+            if (instanceof<SummarizedCompound>(compound)) {
+                summarizedCompounds.push_back(compound);
+            } else {
+                descendants.push_back(compound);
+            }
+        }
+
+        childSet = summarizedCompounds;
+        summarizedCompounds.clear();
+    }
+
+    return descendants;
+}
 
 /**
  * @brief SummarizedCompound::computeSummarizedData
