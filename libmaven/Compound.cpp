@@ -113,7 +113,8 @@ vector<Compound*> SummarizedCompound::getChildren() {return children;}
  *
  * fragment information:
  * All m/z values from all compounds are used.
- * Intensity values are averaged based on all m/zs with some intensity value.
+ * Intensity values are averaged when an m/z is found in more than one compound.
+ * Labels should be combined for all summarized compounds.
  *
  * metadata information:
  * retain all metdata associated with every compound.
