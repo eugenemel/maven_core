@@ -111,11 +111,56 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
     vector<pair<double, Scan*>> allMs3Scans;
 
+    vector<Scan*> validMs1Scans;
+
     for (Scan* scan : sample->scans) {
         if (scan->mslevel == 3) {
             allMs3Scans.push_back(make_pair(scan->precursorMz, scan));
+        } else if (scan->mslevel == 1 && scan->filterString.find(params->ms1ScanFilter) != string::npos) {
+            validMs1Scans.push_back(scan);
         }
     }
+
+    if (debug) cerr << "Computing consensus MS1 scan..." << endl;
+
+    Fragment *ms1Fragment = nullptr;
+    for (auto & scan: validMs1Scans) {
+        if (!ms1Fragment) {
+            ms1Fragment = new Fragment(scan,
+                                       params->scanFilterMinFracIntensity,
+                                       params->scanFilterMinSNRatio,
+                                       params->scanFilterMaxNumberOfFragments,
+                                       params->scanFilterBaseLinePercentile,
+                                       params->scanFilterIsRetainFragmentsAbovePrecursorMz,
+                                       params->scanFilterPrecursorPurityPpm,
+                                       params->scanFilterMinIntensity);
+        } else {
+            Fragment *ms1Brother = new Fragment(scan,
+                                             params->scanFilterMinFracIntensity,
+                                             params->scanFilterMinSNRatio,
+                                             params->scanFilterMaxNumberOfFragments,
+                                             params->scanFilterBaseLinePercentile,
+                                             params->scanFilterIsRetainFragmentsAbovePrecursorMz,
+                                             params->scanFilterPrecursorPurityPpm,
+                                             params->scanFilterMinIntensity);
+
+            ms1Fragment->addFragment(ms1Brother);
+        }
+    }
+
+    if (ms1Fragment){
+        ms1Fragment->buildConsensus(params->consensusPpmTolr,
+                                    params->consensusIntensityAgglomerationType,
+                                    params->consensusIsIntensityAvgByObserved,
+                                    params->consensusIsNormalizeTo10K,
+                                    0, //params->consensusMinNumMs2Scans TODO: MS1 equivalent
+                                    0  //params->consensusMinFractionMs2Scans TODO: MS1 equivalent
+                                    );
+
+        ms1Fragment->consensus->sortByMz();
+    }
+
+    if (debug) cerr << "Finished computing consensus MS1 scan." << endl;
 
     sort(allMs3Scans.begin(), allMs3Scans.end(), [](const pair<double, Scan*>& lhs, const pair<double, Scan*>& rhs){
         if (lhs.first == rhs.first) {
@@ -281,13 +326,40 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                 }
             } // end ms3Compound m/z map
 
-            if (numMs3Matches >= params->ms3MinNumMatches) {
+            //Issue 240: ms1 precursor
+            float observedMs1Intensity = 0.0f;
+
+            if (params->ms1IsFindPrecursorIon && ms1Fragment && ms1Fragment->consensus) {
+                double precMz = ms3Compound->precursorMz;
+
+                double minMz = precMz - precMz*params->ms1PpmTolr/1e6;
+                double maxMz = precMz + precMz*params->ms1PpmTolr/1e6;
+
+                auto lb = lower_bound(ms1Fragment->consensus->mzs.begin(), ms1Fragment->consensus->mzs.end(), minMz);
+
+                auto pos = lb - ms1Fragment->consensus->mzs.begin();
+
+                for (unsigned int i = pos; i < ms1Fragment->consensus->mzs.size(); i++) {
+                    if (ms1Fragment->consensus->mzs[i] <= maxMz) {
+                        if (ms1Fragment->consensus->intensity_array[i] > observedMs1Intensity) {
+                            observedMs1Intensity = ms1Fragment->consensus->intensity_array[i];
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+
+            bool isPassesMs1PrecursorRequirements = !params->ms1IsFindPrecursorIon || (observedMs1Intensity > 0.0f && observedMs1Intensity >= params->ms1MinIntensity);
+
+            if (numMs3Matches >= params->ms3MinNumMatches && isPassesMs1PrecursorRequirements) {
 
                 Ms3SingleSampleMatch *ms3SingleSampleMatch = new Ms3SingleSampleMatch;
                 ms3SingleSampleMatch->ms3Compound = ms3Compound;
                 ms3SingleSampleMatch->sample = sample;
                 ms3SingleSampleMatch->numMs3Matches = numMs3Matches;
                 ms3SingleSampleMatch->matchData = matchData;
+                ms3SingleSampleMatch->observedMs1Intensity = observedMs1Intensity;
 
                 output.push_back(ms3SingleSampleMatch);
                 if (debug) cout << ms3Compound->baseCompound->name << " " << ms3Compound->baseCompound->adductString << ": " << numMs3Matches << " matches" << endl;

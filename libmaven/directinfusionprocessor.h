@@ -792,6 +792,7 @@ public:
     mzSample *sample = nullptr;
 
     int numMs3Matches = 0;
+    float observedMs1Intensity = 0;
 
     //precMz,            <consensus Fragment*, ranks>
     map<int, pair<Fragment*, vector<int>>> matchData{};
