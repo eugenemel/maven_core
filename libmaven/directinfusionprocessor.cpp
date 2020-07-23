@@ -330,7 +330,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
             float observedMs1Intensity = 0.0f;
 
             if (params->ms1IsFindPrecursorIon && ms1Fragment && ms1Fragment->consensus) {
-                double precMz = ms3Compound->precursorMz;
+                double precMz = ms3Compound->baseCompound->precursorMz;
 
                 double minMz = precMz - precMz*params->ms1PpmTolr/1e6;
                 double maxMz = precMz + precMz*params->ms1PpmTolr/1e6;
