@@ -149,12 +149,12 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
     }
 
     if (ms1Fragment){
-        ms1Fragment->buildConsensus(params->consensusPpmTolr,
+        ms1Fragment->buildConsensus(params->consensusMs1PpmTolr,
                                     params->consensusIntensityAgglomerationType,
                                     params->consensusIsIntensityAvgByObserved,
                                     params->consensusIsNormalizeTo10K,
-                                    0, //params->consensusMinNumMs2Scans TODO: MS1 equivalent
-                                    0  //params->consensusMinFractionMs2Scans TODO: MS1 equivalent
+                                    params->consensusMinNumMs1Scans,
+                                    params->consensusMinFractionMs1Scans
                                     );
 
         ms1Fragment->consensus->sortByMz();
@@ -430,12 +430,12 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
     }
 
     if (ms1Fragment){
-        ms1Fragment->buildConsensus(params->consensusPpmTolr,
+        ms1Fragment->buildConsensus(params->consensusMs1PpmTolr,
                                     params->consensusIntensityAgglomerationType,
                                     params->consensusIsIntensityAvgByObserved,
                                     params->consensusIsNormalizeTo10K,
-                                    0, //params->consensusMinNumMs2Scans TODO: MS1 equivalent
-                                    0  //params->consensusMinFractionMs2Scans TODO: MS1 equivalent
+                                    params->consensusMinNumMs1Scans,
+                                    params->consensusMinFractionMs1Scans
                                     );
 
         ms1Fragment->consensus->sortByMz();
