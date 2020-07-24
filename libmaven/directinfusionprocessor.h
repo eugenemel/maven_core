@@ -93,9 +93,12 @@ public:
      * @param consensusMinNumMs3Scans: Minimum number of reference MS3 peaks found in observed MS2 spectrum
      * @param consensusMinFractionMs3Scans: m/z tolerance value used for matching reference <--> observed spectra in MS3 spectrum
      * ========================*/
+
+    //consensus spectrum formation of MS2 scans
     float consensusMs3PpmTolr = 10;
     int consensusMinNumMs3Scans = 0;
     float consensusMinFractionMs3Scans = 0;
+
     //Issue 226: Ms3 Parameters END
 
     /** ===================
@@ -154,13 +157,9 @@ public:
         encodedParams = encodedParams + "scanFilterPrecursorPurityPpm" + "=" + to_string(scanFilterPrecursorPurityPpm) + ";";
         encodedParams = encodedParams + "scanFilterMinIntensity" + "=" + to_string(scanFilterMinIntensity) + ";";
 
-        //consensus spectrum params
-        encodedParams = encodedParams + "consensusPpmTolr" + "=" + to_string(consensusPpmTolr) + ";";
+        //consensus spectrum params (all ms levels)
         encodedParams = encodedParams + "consensusIsIntensityAvgByObserved" + "=" + to_string(consensusIsIntensityAvgByObserved) + ";";
-        encodedParams = encodedParams + "consensusMinNumMs2Scans" + "=" + to_string(consensusMinNumMs2Scans) + ";";
-        encodedParams = encodedParams + "consensusMinFractionMs2Scans" + "=" + to_string(consensusMinFractionMs2Scans) + ";";
         encodedParams = encodedParams + "consensusIsNormalizeTo10K" + "=" + to_string(consensusIsNormalizeTo10K) + ";";
-
         string consensusIntensityAgglomerationTypeStr = "UNSPECIFIED";
         if (consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
             consensusIntensityAgglomerationTypeStr = "MEAN";
@@ -169,16 +168,26 @@ public:
         }
         encodedParams = encodedParams + "consensusIntensityAgglomerationType" + "=" + consensusIntensityAgglomerationTypeStr + ";";
 
+        //ms1 consensus spectrum params
+        encodedParams = encodedParams + "consensusMs1PpmTolr" + "=" + to_string(consensusMs1PpmTolr) + ";";
+        encodedParams = encodedParams + "consensusMinNumMs1Scans" + "=" + to_string(consensusMinNumMs1Scans) + ";";
+        encodedParams = encodedParams + "consensusMinFractionMs1Scans" + "=" + to_string(consensusMinFractionMs1Scans) + ";";
+
+        //ms2 consensus spectrum params
+        encodedParams = encodedParams + "consensusPpmTolr" + "=" + to_string(consensusPpmTolr) + ";";
+        encodedParams = encodedParams + "consensusMinNumMs2Scans" + "=" + to_string(consensusMinNumMs2Scans) + ";";
+        encodedParams = encodedParams + "consensusMinFractionMs2Scans" + "=" + to_string(consensusMinFractionMs2Scans) + ";";
+
+        //ms3 consensus spectrum params
+        encodedParams = encodedParams + "consensusMs3PpmTolr" + "=" + to_string(consensusMs3PpmTolr) + ";";
+        encodedParams = encodedParams + "consensusMinNumMs3Scans" + "=" + to_string(consensusMinNumMs3Scans) + ";";
+        encodedParams = encodedParams + "consensusMinFractionMs3Scans" + "=" + to_string(consensusMinFractionMs3Scans) + ";";
+
         //ms3 search params
         encodedParams = encodedParams + "ms3IsMs3Search" + "=" + to_string(ms3IsMs3Search) + ";";
         encodedParams = encodedParams + "ms3MinNumMatches" + "=" + to_string(ms3MinNumMatches) + ";";
         encodedParams = encodedParams + "ms3PrecursorPpmTolr" + "=" + to_string(ms3PrecursorPpmTolr) + ";";
         encodedParams = encodedParams + "ms3PpmTolr" + "=" + to_string(ms3PrecursorPpmTolr) + ";";
-
-        //ms3 consensus ms3 search params
-        encodedParams = encodedParams + "consensusMs3PpmTolr" + "=" + to_string(consensusMs3PpmTolr) + ";";
-        encodedParams = encodedParams + "consensusMinNumMs3Scans" + "=" + to_string(consensusMinNumMs3Scans) + ";";
-        encodedParams = encodedParams + "consensusMinFractionMs3Scans" + "=" + to_string(consensusMinFractionMs3Scans) + ";";
 
         //ms2 search params
         encodedParams = encodedParams + "ms2MinNumMatches" + "=" + to_string(ms2MinNumMatches) + ";";
@@ -259,23 +268,14 @@ public:
             directInfusionSearchParameters->scanFilterMinIntensity = stof(decodedMap["scanFilterMinIntensity"]);
         }
 
-        //consensus spectrum params
-        if (decodedMap.find("consensusPpmTolr") != decodedMap.end()){
-            directInfusionSearchParameters->consensusPpmTolr = stof(decodedMap["consensusPpmTolr"]);
-        }
+        //consensus spectrum params (all ms levels)
+
         if (decodedMap.find("consensusIsIntensityAvgByObserved") != decodedMap.end()){
             directInfusionSearchParameters->consensusIsIntensityAvgByObserved = decodedMap["consensusIsIntensityAvgByObserved"] == "1";
-        }
-        if (decodedMap.find("consensusMinNumMs2Scans") != decodedMap.end()){
-            directInfusionSearchParameters->consensusMinNumMs2Scans = stoi(decodedMap["consensusMinNumMs2Scans"]);
-        }
-        if (decodedMap.find("consensusMinFractionMs2Scans") != decodedMap.end()){
-            directInfusionSearchParameters->consensusMinFractionMs2Scans = stof(decodedMap["consensusMinFractionMs2Scans"]);
         }
         if (decodedMap.find("consensusIsNormalizeTo10K") != decodedMap.end()){
             directInfusionSearchParameters->consensusIsNormalizeTo10K = decodedMap["consensusIsNormalizeTo10K"] == "1";
         }
-
         if (decodedMap.find("consensusIntensityAgglomerationType") != decodedMap.end()) {
             string consensusIntensityAgglomerationTypeStr = decodedMap["consensusIntensityAgglomerationType"];
             if (consensusIntensityAgglomerationTypeStr == "MEAN") {
@@ -285,34 +285,51 @@ public:
             }
         }
 
-        //ms3 search params
-        if (decodedMap.find("ms3IsMs3Search") != decodedMap.end()) {
-            directInfusionSearchParameters->ms3IsMs3Search = decodedMap["ms3IsMs3Search"] == "1";
+        //ms1 consensus spectrum params
+        if (decodedMap.find("consensusMs1PpmTolr") != decodedMap.end()){
+            directInfusionSearchParameters->consensusMs1PpmTolr = stof(decodedMap["consensusMs1PpmTolr"]);
+        }
+        if (decodedMap.find("consensusMinNumMs1Scans") != decodedMap.end()){
+            directInfusionSearchParameters->consensusMinNumMs1Scans = stoi(decodedMap["consensusMinNumMs1Scans"]);
+        }
+        if (decodedMap.find("consensusMinFractionMs1Scans") != decodedMap.end()){
+            directInfusionSearchParameters->consensusMinFractionMs1Scans = stof(decodedMap["consensusMinFractionMs1Scans"]);
         }
 
-        if (decodedMap.find("ms3MinNumMatches") != decodedMap.end()) {
-            directInfusionSearchParameters->ms3MinNumMatches = stoi(decodedMap["ms3MinNumMatches"]);
+        //ms2 consensus spectrum params
+        if (decodedMap.find("consensusPpmTolr") != decodedMap.end()){
+            directInfusionSearchParameters->consensusPpmTolr = stof(decodedMap["consensusPpmTolr"]);
         }
-
-        if (decodedMap.find("ms3PrecursorPpmTolr") != decodedMap.end()) {
-            directInfusionSearchParameters->ms3PrecursorPpmTolr = stof(decodedMap["ms3PrecursorPpmTolr"]);
+        if (decodedMap.find("consensusMinNumMs2Scans") != decodedMap.end()){
+            directInfusionSearchParameters->consensusMinNumMs2Scans = stoi(decodedMap["consensusMinNumMs2Scans"]);
         }
-
-        if (decodedMap.find("ms3PpmTolr") != decodedMap.end()) {
-            directInfusionSearchParameters->ms3PpmTolr = stof(decodedMap["ms3PpmTolr"]);
+        if (decodedMap.find("consensusMinFractionMs2Scans") != decodedMap.end()){
+            directInfusionSearchParameters->consensusMinFractionMs2Scans = stof(decodedMap["consensusMinFractionMs2Scans"]);
         }
 
         //ms3 consensus ms3 search params
         if (decodedMap.find("consensusMs3PpmTolr") != decodedMap.end()) {
             directInfusionSearchParameters->consensusMs3PpmTolr = stof(decodedMap["consensusMs3PpmTolr"]);
         }
-
         if (decodedMap.find("consensusMinNumMs3Scans") != decodedMap.end()) {
             directInfusionSearchParameters->consensusMinNumMs3Scans = stoi(decodedMap["consensusMinNumMs3Scans"]);
         }
-
         if (decodedMap.find("consensusMinFractionMs3Scans") != decodedMap.end()) {
             directInfusionSearchParameters->consensusMinFractionMs3Scans = stof(decodedMap["consensusMinFractionMs3Scans"]);
+        }
+
+        //ms3 search params
+        if (decodedMap.find("ms3IsMs3Search") != decodedMap.end()) {
+            directInfusionSearchParameters->ms3IsMs3Search = decodedMap["ms3IsMs3Search"] == "1";
+        }
+        if (decodedMap.find("ms3MinNumMatches") != decodedMap.end()) {
+            directInfusionSearchParameters->ms3MinNumMatches = stoi(decodedMap["ms3MinNumMatches"]);
+        }
+        if (decodedMap.find("ms3PrecursorPpmTolr") != decodedMap.end()) {
+            directInfusionSearchParameters->ms3PrecursorPpmTolr = stof(decodedMap["ms3PrecursorPpmTolr"]);
+        }
+        if (decodedMap.find("ms3PpmTolr") != decodedMap.end()) {
+            directInfusionSearchParameters->ms3PpmTolr = stof(decodedMap["ms3PpmTolr"]);
         }
 
         //ms2 search params

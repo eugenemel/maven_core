@@ -1118,13 +1118,19 @@ class SearchParameters {
      * CONSENSUS SPECTRUM ASSOCIATED
      * All parameters are arguments Fragment::buildConsensus() method.
      * ========================*/
-
-    float consensusPpmTolr = 10;
     Fragment::ConsensusIntensityAgglomerationType consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
     bool consensusIsIntensityAvgByObserved = true;
+    bool consensusIsNormalizeTo10K = false;
+
+    //consensus spectrum formation of MS1 scans
+    float consensusMs1PpmTolr = 10;
+    int consensusMinNumMs1Scans = 0;
+    float consensusMinFractionMs1Scans = 0;
+
+    //consensus spectrum formation of MS2 scans
+    float consensusPpmTolr = 10;
     int consensusMinNumMs2Scans = 0;
     float consensusMinFractionMs2Scans = 0;
-    bool consensusIsNormalizeTo10K = false;
 
     /** ===================
      * MS2 SEARCH RELATED
