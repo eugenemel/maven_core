@@ -94,7 +94,7 @@ public:
      * @param consensusMinFractionMs3Scans: m/z tolerance value used for matching reference <--> observed spectra in MS3 spectrum
      * ========================*/
 
-    //consensus spectrum formation of MS2 scans
+    //consensus spectrum formation of MS3 scans
     float consensusMs3PpmTolr = 10;
     int consensusMinNumMs3Scans = 0;
     float consensusMinFractionMs3Scans = 0;
