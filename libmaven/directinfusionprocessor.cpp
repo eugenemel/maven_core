@@ -91,7 +91,6 @@ vector<Ms3Compound*> DirectInfusionProcessor::getMs3CompoundSet(const vector<Com
 
         auto compound = compounds[i];
         Ms3Compound *ms3Compound = new Ms3Compound(compound);
-        ms3Compound->computeMs3Spectra();
 
         ms3Compounds[i] = ms3Compound;
     }
