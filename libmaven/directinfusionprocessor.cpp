@@ -320,7 +320,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                     }
 
                     if (isHasMatch) {
-                        //                        precMz,            consensus Fragment*, ranks
+                        //                        precMz,           <consensus Fragment*, ranks>
                         matchData.insert(make_pair(it->first, make_pair(data.second, ranks)));
                     }
                 }
