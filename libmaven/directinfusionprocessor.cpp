@@ -88,11 +88,7 @@ vector<Ms3Compound*> DirectInfusionProcessor::getMs3CompoundSet(const vector<Com
     vector<Ms3Compound*> ms3Compounds(compounds.size());
 
     for (unsigned int i = 0; i < compounds.size(); i++) {
-
-        auto compound = compounds[i];
-        Ms3Compound *ms3Compound = new Ms3Compound(compound);
-
-        ms3Compounds[i] = ms3Compound;
+        ms3Compounds[i] = new Ms3Compound(compounds[i]); //WARNING: this delete this at some point to avoid memory leak
     }
 
     return ms3Compounds;
