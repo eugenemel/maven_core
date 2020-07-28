@@ -111,9 +111,18 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
     vector<Scan*> validMs1Scans;
 
     for (Scan* scan : sample->scans) {
-        if (scan->mslevel == 3) {
+
+        if (scan->mslevel == 3 &&
+                (params->scanFilterMs3MinRt <= -1.0f || scan->rt >= params->scanFilterMs3MinRt) &&
+                (params->scanFilterMs3MaxRt <= -1.0f || scan->rt <= params->scanFilterMs3MaxRt)) {
+
             allMs3Scans.push_back(make_pair(scan->precursorMz, scan));
-        } else if (scan->mslevel == 1 && scan->filterString.find(params->ms1ScanFilter) != string::npos) {
+
+        } else if (scan->mslevel == 1 &&
+                              scan->filterString.find(params->ms1ScanFilter) != string::npos &&
+                              (params->scanFilterMs1MinRt <= -1.0f || scan->rt >= params->scanFilterMs1MinRt) &&
+                              (params->scanFilterMs1MaxRt <= -1.0f || scan->rt <= params->scanFilterMs1MaxRt)) {
+
             validMs1Scans.push_back(scan);
         }
     }
@@ -411,7 +420,11 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
     vector<Scan*> validMs1Scans;
 
     for (Scan* scan : sample->scans){
-        if (scan->mslevel == 2){
+
+        if (scan->mslevel == 2 &&
+                (params->scanFilterMs2MinRt <= -1.0f || scan->rt >= params->scanFilterMs2MinRt) &&
+                (params->scanFilterMs2MaxRt <= -1.0f || scan->rt <= params->scanFilterMs2MaxRt)){
+
             int mapKey = static_cast<int>(round(scan->precursorMz+0.001f)); //round to nearest int
 
             if (ms2ScansByBlockNumber.find(mapKey) == ms2ScansByBlockNumber.end()) {
@@ -420,7 +433,10 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 
             ms2ScansByBlockNumber[mapKey].push_back(scan);
         }
-        if (scan->mslevel == 1 && scan->filterString.find(params->ms1ScanFilter) != string::npos) {
+        if (scan->mslevel == 1 &&
+                scan->filterString.find(params->ms1ScanFilter) != string::npos &&
+                (params->scanFilterMs1MinRt <= -1.0f || scan->rt >= params->scanFilterMs1MinRt) &&
+                (params->scanFilterMs1MaxRt <= -1.0f || scan->rt <= params->scanFilterMs1MaxRt)) {
             validMs1Scans.push_back(scan);
         }
     }
