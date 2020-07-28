@@ -376,7 +376,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
         //Issue 244
         if (debug) cout << "Finished comparing compound #" << compoundCounter
                         << " (" << ms3Compound->baseCompound->name << " " << ms3Compound->baseCompound->adductString
-                        << "). # matches so far: " << output.size() << endl;
+                        << "). number of Ms3SingleSampleMatch matches so far: " << output.size() << endl;
 
         compoundCounter++;
     }
