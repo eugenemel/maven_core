@@ -156,7 +156,7 @@ public:
 
         string encodedParams;
 
-        //scan filter params
+        //scan filter params (all ms levels)
         encodedParams = encodedParams + "scanFilterMinFracIntensity" + "=" + to_string(scanFilterMinFracIntensity) + ";";
         encodedParams = encodedParams + "scanFilterMinSNRatio" + "=" + to_string(scanFilterMinSNRatio) + ";";
         encodedParams = encodedParams + "scanFilterMaxNumberOfFragments" + "=" + to_string(scanFilterMaxNumberOfFragments) + ";";
@@ -164,6 +164,18 @@ public:
         encodedParams = encodedParams + "scanFilterIsRetainFragmentsAbovePrecursorMz" + "=" + to_string(scanFilterIsRetainFragmentsAbovePrecursorMz) + ";";
         encodedParams = encodedParams + "scanFilterPrecursorPurityPpm" + "=" + to_string(scanFilterPrecursorPurityPpm) + ";";
         encodedParams = encodedParams + "scanFilterMinIntensity" + "=" + to_string(scanFilterMinIntensity) + ";";
+
+        //scan filter for MS1 scans
+        encodedParams = encodedParams + "scanFilterMs1MinRt" + "=" + to_string(scanFilterMs1MinRt);
+        encodedParams = encodedParams + "scanFilterMs1MaxRt" + "=" + to_string(scanFilterMs1MaxRt);
+
+        //scan filter for MS2 scans
+        encodedParams = encodedParams + "scanFilterMs2MinRt" + "=" + to_string(scanFilterMs2MinRt);
+        encodedParams = encodedParams + "scanFilterMs2MaxRt" + "=" + to_string(scanFilterMs2MaxRt);
+
+        //scan filter for MS3 scans
+        encodedParams = encodedParams + "scanFilterMs3MinRt" + "=" + to_string(scanFilterMs3MinRt);
+        encodedParams = encodedParams + "scanFilterMs3MaxRt" + "=" + to_string(scanFilterMs3MaxRt);
 
         //consensus spectrum params (all ms levels)
         encodedParams = encodedParams + "consensusIsIntensityAvgByObserved" + "=" + to_string(consensusIsIntensityAvgByObserved) + ";";
@@ -274,6 +286,30 @@ public:
         }
         if (decodedMap.find("scanFilterMinIntensity") != decodedMap.end()){
             directInfusionSearchParameters->scanFilterMinIntensity = stof(decodedMap["scanFilterMinIntensity"]);
+        }
+
+        //scan filter for MS1 scans
+        if (decodedMap.find("scanFilterMs1MinRt") != decodedMap.end()) {
+            directInfusionSearchParameters->scanFilterMs1MinRt = stof(decodedMap["scanFilterMs1MinRt"]);
+        }
+        if (decodedMap.find("scanFilterMs1MaxRt") != decodedMap.end()) {
+            directInfusionSearchParameters->scanFilterMs1MaxRt = stof(decodedMap["scanFilterMs1MaxRt"]);
+        }
+
+        //scan filter for MS2 scans
+        if (decodedMap.find("scanFilterMs2MinRt") != decodedMap.end()) {
+            directInfusionSearchParameters->scanFilterMs2MinRt = stof(decodedMap["scanFilterMs2MinRt"]);
+        }
+        if (decodedMap.find("scanFilterMs2MaxRt") != decodedMap.end()) {
+            directInfusionSearchParameters->scanFilterMs2MaxRt = stof(decodedMap["scanFilterMs2MaxRt"]);
+        }
+
+        //scan filter for MS3 scans
+        if (decodedMap.find("scanFilterMs3MinRt") != decodedMap.end()) {
+            directInfusionSearchParameters->scanFilterMs3MinRt = stof(decodedMap["scanFilterMs3MinRt"]);
+        }
+        if (decodedMap.find("scanFilterMs3MaxRt") != decodedMap.end()) {
+            directInfusionSearchParameters->scanFilterMs3MaxRt = stof(decodedMap["scanFilterMs3MaxRt"]);
         }
 
         //consensus spectrum params (all ms levels)
