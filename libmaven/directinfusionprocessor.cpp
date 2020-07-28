@@ -313,7 +313,10 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                             numMs3Matches++;
                             isHasMatch = true;
                             if (debug) {
-                                matchInfoDebugString = matchInfoDebugString + "\t" + t.fragment_labels[i] + " " + to_string(t.mzs[i]) + " <==> " + to_string(data.second->mzs[y]) + "\n";
+                                matchInfoDebugString = matchInfoDebugString + "\t"
+                                        + t.fragment_labels[i] + " " + to_string(t.mzs[i])
+                                        + " <==> "
+                                        + to_string(data.second->consensus->mzs[y]) + "(intensity=" + to_string(data.second->consensus->intensity_array[y]) + ")\n";
                             }
                         }
                     }
