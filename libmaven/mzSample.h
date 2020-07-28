@@ -1114,6 +1114,14 @@ class SearchParameters {
     float scanFilterPrecursorPurityPpm = 0;
     float scanFilterMinIntensity = 0;
 
+    //scan filter for MS1 scans
+    float scanFilterMs1MinRt = -1.0f;
+    float scanFilterMs1MaxRt = -1.0f;
+
+    //scan filter for MS2 scans
+    float scanFilterMs2MinRt = -1.0f;
+    float scanFilterMs2MaxRt = -1.0f;
+
     /** =======================
      * CONSENSUS SPECTRUM ASSOCIATED
      * All parameters are arguments Fragment::buildConsensus() method.

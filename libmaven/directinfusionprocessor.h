@@ -89,6 +89,14 @@ public:
 
     /** =======================
      * MS3 CONSENSUS SPECTRUM ASSOCIATED
+     * @param scanFilterMs3MinRt: min RT for valid MS3 scan (otherwise excluded from consensus formation). -1 to ignore.
+     * @param scanFilterMs3MaxRt: max RT for valid MS3 scan (otherwise excluded from consensus formation). -1 to ignore.
+     * ========================*/
+    float scanFilterMs3MinRt = -1.0f;
+    float scanFilterMs3MaxRt = -1.0f;
+
+    /** =======================
+     * MS3 CONSENSUS SPECTRUM ASSOCIATED
      * @param consensusMs3PpmTolr: if experimental data contains MS3 scans
      * @param consensusMinNumMs3Scans: Minimum number of reference MS3 peaks found in observed MS2 spectrum
      * @param consensusMinFractionMs3Scans: m/z tolerance value used for matching reference <--> observed spectra in MS3 spectrum
