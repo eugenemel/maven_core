@@ -91,6 +91,8 @@ vector<Ms3Compound*> DirectInfusionProcessor::getMs3CompoundSet(const vector<Com
         ms3Compounds[i] = new Ms3Compound(compounds[i]); //WARNING: this delete this at some point to avoid memory leak
     }
 
+    if (debug) cout << "Created database of " << ms3Compounds.size() << " Ms3Compounds." << endl;
+
     return ms3Compounds;
 }
 
