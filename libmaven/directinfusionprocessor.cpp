@@ -221,9 +221,9 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
         for (auto sg : ms3ScanGroups) {
 
             grpCounter++;
-            cout<< "group #" << grpCounter << endl;
+            cout<< "group #" << grpCounter << ": scans=";
             for (auto sp : sg) {
-                cout << to_string(sp.first) << ": #" << sp.second->scannum << endl;
+                cout << sp.second->scannum << ", ";
             }
             cout << endl;
 
