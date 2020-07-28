@@ -279,6 +279,8 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
     sort(consensusMs3Spectra.begin(), consensusMs3Spectra.end()); // by default, sorted according to pair.first
 
+    unsigned int compoundCounter = 0;
+
     for (auto ms3Compound : ms3Compounds) {
 
         int numMs3Matches = 0;
@@ -370,6 +372,13 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                 if (debug) cout << matchInfoDebugString;
             }
         }
+
+        //Issue 244
+        if (debug) cout << "Finished comparing compound #" << compoundCounter
+                        << " (" << ms3Compound->baseCompound->name << " " << ms3Compound->baseCompound->adductString
+                        << "). # matches so far: " << output.size() << endl;
+
+        compoundCounter++;
     }
 
     if (debug){
