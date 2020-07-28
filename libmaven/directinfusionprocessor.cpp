@@ -316,7 +316,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                                 matchInfoDebugString = matchInfoDebugString + "\t"
                                         + t.fragment_labels[i] + " " + to_string(t.mzs[i])
                                         + " <==> "
-                                        + to_string(data.second->consensus->mzs[y]) + "(intensity=" + to_string(data.second->consensus->intensity_array[y]) + ")\n";
+                                        + to_string(data.second->consensus->mzs[y]) + " (intensity=" + to_string(data.second->consensus->intensity_array[y]) + ")\n";
                             }
                         }
                     }
