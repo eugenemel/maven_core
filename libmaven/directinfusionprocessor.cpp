@@ -333,47 +333,47 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
             } // END ms3Compound m/z map
 
-            //Issue 240: ms1 precursor
-            float observedMs1Intensity = 0.0f;
+        } //END for (auto it = ms3Compound->ms3_fragment_mzs.begin();
 
-            if (params->ms1IsFindPrecursorIon && ms1Fragment && ms1Fragment->consensus) {
-                double precMz = ms3Compound->baseCompound->precursorMz;
+        //Issue 240: ms1 precursor
+        float observedMs1Intensity = 0.0f;
 
-                double minMz = precMz - precMz*params->ms1PpmTolr/1e6;
-                double maxMz = precMz + precMz*params->ms1PpmTolr/1e6;
+        if (params->ms1IsFindPrecursorIon && ms1Fragment && ms1Fragment->consensus) {
+            double precMz = ms3Compound->baseCompound->precursorMz;
 
-                auto lb = lower_bound(ms1Fragment->consensus->mzs.begin(), ms1Fragment->consensus->mzs.end(), minMz);
+            double minMz = precMz - precMz*params->ms1PpmTolr/1e6;
+            double maxMz = precMz + precMz*params->ms1PpmTolr/1e6;
 
-                auto pos = lb - ms1Fragment->consensus->mzs.begin();
+            auto lb = lower_bound(ms1Fragment->consensus->mzs.begin(), ms1Fragment->consensus->mzs.end(), minMz);
 
-                for (unsigned int i = pos; i < ms1Fragment->consensus->mzs.size(); i++) {
-                    if (ms1Fragment->consensus->mzs[i] <= maxMz) {
-                        if (ms1Fragment->consensus->intensity_array[i] > observedMs1Intensity) {
-                            observedMs1Intensity = ms1Fragment->consensus->intensity_array[i];
-                        }
-                    } else {
-                        break;
+            auto pos = lb - ms1Fragment->consensus->mzs.begin();
+
+            for (unsigned int i = pos; i < ms1Fragment->consensus->mzs.size(); i++) {
+                if (ms1Fragment->consensus->mzs[i] <= maxMz) {
+                    if (ms1Fragment->consensus->intensity_array[i] > observedMs1Intensity) {
+                        observedMs1Intensity = ms1Fragment->consensus->intensity_array[i];
                     }
+                } else {
+                    break;
                 }
             }
+        }
 
-            bool isPassesMs1PrecursorRequirements = !params->ms1IsFindPrecursorIon || (observedMs1Intensity > 0.0f && observedMs1Intensity >= params->ms1MinIntensity);
+        bool isPassesMs1PrecursorRequirements = !params->ms1IsFindPrecursorIon || (observedMs1Intensity > 0.0f && observedMs1Intensity >= params->ms1MinIntensity);
 
-            if (numMs3Matches >= params->ms3MinNumMatches && isPassesMs1PrecursorRequirements) {
+        if (numMs3Matches >= params->ms3MinNumMatches && isPassesMs1PrecursorRequirements) {
 
-                Ms3SingleSampleMatch *ms3SingleSampleMatch = new Ms3SingleSampleMatch;
-                ms3SingleSampleMatch->ms3Compound = ms3Compound;
-                ms3SingleSampleMatch->sample = sample;
-                ms3SingleSampleMatch->numMs3Matches = numMs3Matches;
-                ms3SingleSampleMatch->matchData = matchData;
-                ms3SingleSampleMatch->observedMs1Intensity = observedMs1Intensity;
+            Ms3SingleSampleMatch *ms3SingleSampleMatch = new Ms3SingleSampleMatch;
+            ms3SingleSampleMatch->ms3Compound = ms3Compound;
+            ms3SingleSampleMatch->sample = sample;
+            ms3SingleSampleMatch->numMs3Matches = numMs3Matches;
+            ms3SingleSampleMatch->matchData = matchData;
+            ms3SingleSampleMatch->observedMs1Intensity = observedMs1Intensity;
 
-                output.push_back(ms3SingleSampleMatch);
-                if (debug) cout << ms3Compound->baseCompound->name << " " << ms3Compound->baseCompound->adductString << ": " << numMs3Matches << " matches; observedMs1Intensity=" << ms3SingleSampleMatch->observedMs1Intensity << endl;
-                if (debug) cout << matchInfoDebugString;
-            }
-
-        } //END for (auto it = ms3Compound->ms3_fragment_mzs.begin();
+            output.push_back(ms3SingleSampleMatch);
+            if (debug) cout << ms3Compound->baseCompound->name << " " << ms3Compound->baseCompound->adductString << ": " << numMs3Matches << " matches; observedMs1Intensity=" << ms3SingleSampleMatch->observedMs1Intensity << endl;
+            if (debug) cout << matchInfoDebugString;
+        }
 
         //Issue 244
         if (debug) cout << "Finished comparing compound #" << compoundCounter
