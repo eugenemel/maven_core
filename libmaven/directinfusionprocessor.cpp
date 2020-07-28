@@ -370,6 +370,14 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
         }
     }
 
+    if (debug){
+        long numOutputRows = 0;
+        for (auto match : output) {
+          numOutputRows += match->numMs3Matches;
+        }
+        cout << "Identified " << output.size() << " Ms3SingleSampleMatches, with a total of " << numOutputRows << " fragments matched." << endl;
+    }
+
     return output;
 }
 
