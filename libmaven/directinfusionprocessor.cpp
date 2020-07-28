@@ -330,7 +330,8 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                         matchData.insert(make_pair(it->first, make_pair(data.second, ranks)));
                     }
                 }
-            } // end ms3Compound m/z map
+
+            } // END ms3Compound m/z map
 
             //Issue 240: ms1 precursor
             float observedMs1Intensity = 0.0f;
@@ -371,7 +372,8 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                 if (debug) cout << ms3Compound->baseCompound->name << " " << ms3Compound->baseCompound->adductString << ": " << numMs3Matches << " matches; observedMs1Intensity=" << ms3SingleSampleMatch->observedMs1Intensity << endl;
                 if (debug) cout << matchInfoDebugString;
             }
-        }
+
+        } //END for (auto it = ms3Compound->ms3_fragment_mzs.begin();
 
         //Issue 244
         if (debug) cout << "Finished comparing compound #" << compoundCounter
@@ -379,7 +381,8 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                         << "). number of Ms3SingleSampleMatch matches so far: " << output.size() << endl;
 
         compoundCounter++;
-    }
+
+    } // END for (auto ms3Compound : ms3Compounds)
 
     if (debug){
         long numOutputRows = 0;
