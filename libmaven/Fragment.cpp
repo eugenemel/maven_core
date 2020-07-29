@@ -716,6 +716,26 @@ void Fragment::buildConsensus(float productPpmTolr,
         }
     }
 
+    //Issue 245: ensure that a precursor m/z is set for all Fragment* where the m/z is missing.
+    //Will always be a problem for MS1 scans.
+    double precursorMzIfMissing = 0.0;
+    if (!seed->mzs.empty()) precursorMzIfMissing = static_cast<double>(seed->mzs[seed->mzs.size()-1]);
+
+    for (auto brother : brothers) {
+        if (!brother->mzs.empty()){
+            double candidatePrecursorMz = static_cast<double>(brother->mzs[brother->mzs.size()-1]);
+            if (candidatePrecursorMz > precursorMzIfMissing) {
+                precursorMzIfMissing = candidatePrecursorMz;
+            }
+        }
+    }
+
+    if (seed->precursorMz <= 0.0) seed->precursorMz = precursorMzIfMissing;
+
+    for (auto brother : brothers) {
+        if (brother->precursorMz <= 0.0) brother->precursorMz = precursorMzIfMissing;
+    }
+
     for(unsigned int i=0; i<brothers.size(); i++) {
 
         Fragment* brother = brothers[i];
