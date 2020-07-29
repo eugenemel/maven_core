@@ -169,6 +169,15 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
     if (debug) cout << "Finished computing consensus MS1 scan." << endl;
 
+    //Issue 245 debugging line
+    if (debug) {
+        for (unsigned int i = 0; i < ms1Fragment->consensus->mzs.size(); i++) {
+            if (ms1Fragment->consensus->mzs[i] > 818.7 && ms1Fragment->consensus->mzs[i] < 818.8) {
+                cout << "i=" << i << ": mz=" << to_string(ms1Fragment->consensus->mzs[i]) << ", intensity=" << to_string(ms1Fragment->consensus->intensity_array[i]) << endl;
+            }
+        }
+    }
+
     if (debug) {
         for (auto it = ms1Fragment->consensus->scanNumMap.begin(); it != ms1Fragment->consensus->scanNumMap.end(); ++it){
             cout << it->first->sampleName << ": " << endl;
