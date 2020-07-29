@@ -168,6 +168,12 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
     }
 
     if (debug) cout << "Finished computing consensus MS1 scan." << endl;
+    if (debug){
+        cout << "ms1Fragment->buildConsensus() parameters:" << endl;
+        cout << "\tconsensusMs1PpmTolr: " << to_string(params->consensusMs1PpmTolr) << endl;
+        cout << "\tconsensusMinNumMs1Scans: " << to_string(params->consensusMinNumMs1Scans) << endl;
+        cout << "\tconsensusMinFractionMs1Scans: " <<to_string(params->consensusMinFractionMs1Scans) << endl;
+    }
 
     if (debug) {
         cout << "scans in consensus MS1 scan:" << endl;
