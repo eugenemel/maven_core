@@ -124,6 +124,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                               (params->scanFilterMs1MaxRt <= -1.0f || scan->rt <= params->scanFilterMs1MaxRt)) {
 
             validMs1Scans.push_back(scan);
+            if (debug) cerr << "Added valid MS1 scan: " << scan->scannum << " " << scan->filterString << endl;
         }
     }
 
