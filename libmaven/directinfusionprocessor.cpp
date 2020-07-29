@@ -169,6 +169,16 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
     if (debug) cerr << "Finished computing consensus MS1 scan." << endl;
 
+    if (debug) {
+        for (auto it = ms1Fragment->consensus->scanNumMap.begin(); it != ms1Fragment->consensus->scanNumMap.end(); ++it){
+            cerr << it->first->sampleName << ": " << endl;
+            for (auto x : it->second) {
+                cerr << x << " ";
+            }
+            cerr << endl;
+        }
+    }
+
     sort(allMs3Scans.begin(), allMs3Scans.end(), [](const pair<double, Scan*>& lhs, const pair<double, Scan*>& rhs){
         if (lhs.first == rhs.first) {
             return lhs.second->scannum < rhs.second->scannum;
