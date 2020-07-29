@@ -128,7 +128,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
         }
     }
 
-    if (debug) cerr << "Computing consensus MS1 scan..." << endl;
+    if (debug) cerr << "Computing consensus MS1 scan from " << validMs1Scans.size() << " MS1 scans..." << endl;
 
     Fragment *ms1Fragment = nullptr;
     for (auto & scan: validMs1Scans) {
