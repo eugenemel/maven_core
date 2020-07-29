@@ -124,11 +124,11 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                               (params->scanFilterMs1MaxRt <= -1.0f || scan->rt <= params->scanFilterMs1MaxRt)) {
 
             validMs1Scans.push_back(scan);
-            if (debug) cerr << "Added valid MS1 scan: " << scan->scannum << " " << scan->filterString << endl;
+            if (debug) cout << "Added valid MS1 scan: " << scan->scannum << " " << scan->filterString << endl;
         }
     }
 
-    if (debug) cerr << "Computing consensus MS1 scan from " << validMs1Scans.size() << " MS1 scans..." << endl;
+    if (debug) cout << "Computing consensus MS1 scan from " << validMs1Scans.size() << " MS1 scans..." << endl;
 
     Fragment *ms1Fragment = nullptr;
     for (auto & scan: validMs1Scans) {
@@ -167,15 +167,15 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
         ms1Fragment->consensus->sortByMz();
     }
 
-    if (debug) cerr << "Finished computing consensus MS1 scan." << endl;
+    if (debug) cout << "Finished computing consensus MS1 scan." << endl;
 
     if (debug) {
         for (auto it = ms1Fragment->consensus->scanNumMap.begin(); it != ms1Fragment->consensus->scanNumMap.end(); ++it){
-            cerr << it->first->sampleName << ": " << endl;
+            cout << it->first->sampleName << ": " << endl;
             for (auto x : it->second) {
-                cerr << x << " ";
+                cout << x << " ";
             }
-            cerr << endl;
+            cout << endl;
         }
     }
 
