@@ -186,17 +186,6 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
         }
     }
 
-    //Issue 245 debugging line
-    if (debug) {
-        cout << "# m/zs in consensus ms1 scan: " << ms1Fragment->consensus->mzs.size() << endl;
-        cout << "m/z values between 818.7 and 818.8 in consensus ms1 scan:" << endl;
-        for (unsigned int i = 0; i < ms1Fragment->consensus->mzs.size(); i++) {
-            if (ms1Fragment->consensus->mzs[i] > 818.7 && ms1Fragment->consensus->mzs[i] < 818.8) {
-                cout << "i=" << i << ": mz=" << to_string(ms1Fragment->consensus->mzs[i]) << ", intensity=" << to_string(ms1Fragment->consensus->intensity_array[i]) << endl;
-            }
-        }
-    }
-
     sort(allMs3Scans.begin(), allMs3Scans.end(), [](const pair<double, Scan*>& lhs, const pair<double, Scan*>& rhs){
         if (lhs.first == rhs.first) {
             return lhs.second->scannum < rhs.second->scannum;
