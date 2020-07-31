@@ -392,8 +392,8 @@ class EIC {
 
         mzSample* sample;       //pointer to originating sample
         float color[4];         //color of the eic line, [r,g,b, alpha]
-        vector<float> spline;          //pointer to smoothed intentsity array
-        vector<float> baseline;        //pointer to baseline array
+        vector<float> spline;   //smoothed intensity values
+        vector<float> baseline; //baseline
 
         float maxIntensity;     //maxItensity in eics
         float totalIntensity;   //sum of all intensities in EIC
