@@ -1164,9 +1164,50 @@ class SearchParameters {
  * @brief The PeaksSearchParameters class
  *
  * Used by Peaks Dialog in maven GUI
+ * TODO: finish (Issue #197)
  */
 class PeaksSearchParameters : public SearchParameters {
 
+    //baseline
+    float baselineSmoothingWindow = 0;
+    int baselineDropTopX = 80;
+
+    //eic
+    float eicSmoothingWindow = 0;
+    string eicEicSmoothingAlgorithm = "GAUSSIAN";
+    float eicMaxPeakGroupRtDiff = 0.5;
+    int eic_noNoiseObs = 0;
+
+    //quality
+    float qualitySignalBaselineRatio = 1.00;
+    float qualitySignalBlankRatio = 1.00;
+    float qualityMinPeakGroupIntensity = 10000;
+    int qualityMinPeakWidth = 5; //scans, no noise observations
+    float qualityMinGoodPeakPerGroup = 0;
+    float qualityMinPeakQuality = 0;
+    string qualityClassifierModelName = "default.model";
+
+    //isotopes
+    bool isotopesIsExcludeIsotopicPeaks = true;
+
+    //ms1 matching
+    bool  ms1IsMatchRtFlag = false;
+    bool  ms1PpmTolr = 20;
+
+    //ms2 matching
+    bool ms2IsMatchMs2 = false;
+    //ms2MinNumMatches (SearchParameters)
+    //ms2MinNumDiagnosticMatches (SearchParameters)
+    //ms2PpmTolr (SearchParameters)
+    string ms2ScoringAlgorithm = "HyperGeomScore";
+    float ms2MinScore = 0.0;
+
+    //matching options
+    bool matchingIsRequireAdductPrecursorMatch = true;
+    bool matchingIsRetainUnknowns = false;
+    bool matchingIsClusterPeakGroups = false;
+
 };
+
 
 #endif
