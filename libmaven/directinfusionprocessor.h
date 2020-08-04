@@ -669,6 +669,22 @@ public:
              );
 
      /**
+      * @brief organizeMs3ScansByPrecursor
+      * @param allMs3Scans
+      * @param debug
+      * @return
+      *
+      * Group MS3 Scans together by MS2 precursors, according to tolerance parameter:
+      *
+      * params->ms3PrecursorPpmTolr
+      *
+      */
+     static vector<vector<pair<double, Scan*>>> organizeMs3ScansByPrecursor(
+             vector<pair<double, Scan*>> allMs3Scans,
+             shared_ptr<DirectInfusionSearchParameters> params,
+             bool debug);
+
+     /**
       * @brief DirectInfusionProcessor::getFragmentMatchMaps
       * @param allCandidates
       * @param observedSpectrum

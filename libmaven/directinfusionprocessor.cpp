@@ -96,6 +96,89 @@ vector<Ms3Compound*> DirectInfusionProcessor::getMs3CompoundSet(const vector<Com
     return ms3Compounds;
 }
 
+
+vector<vector<pair<double, Scan*>>> DirectInfusionProcessor::organizeMs3ScansByPrecursor(
+        vector<pair<double, Scan*>> allMs3Scans,
+        shared_ptr<DirectInfusionSearchParameters> params,
+        bool debug){
+
+    sort(allMs3Scans.begin(), allMs3Scans.end(), [](const pair<double, Scan*>& lhs, const pair<double, Scan*>& rhs){
+        if (lhs.first == rhs.first) {
+            return lhs.second->scannum < rhs.second->scannum;
+        } else {
+            return lhs.first < rhs.first;
+        }
+    });
+
+    vector<vector<pair<double, Scan*>>> ms3ScanGroups;
+    vector<pair<double,Scan*>> scanGroup;
+    double lastPrecMz = 0.0;
+    unsigned int numProcessedPairs = 0;
+
+    for (unsigned int i = 0; i < allMs3Scans.size(); i++) {
+
+        scanGroup = vector<pair<double,Scan*>>();
+
+        pair<double, Scan*> ithScanPair = allMs3Scans[i];
+        lastPrecMz = ithScanPair.first;
+
+        scanGroup.push_back(ithScanPair);
+
+        for (unsigned int j = i+1; j < allMs3Scans.size(); j++) {
+
+            pair<double, Scan*> jthScanPair = allMs3Scans[j];
+
+            if (mzUtils::ppmDist(jthScanPair.first, ithScanPair.first) > static_cast<double>(params->ms3PrecursorPpmTolr)) {
+                i = j;
+                ms3ScanGroups.push_back(scanGroup);
+
+                numProcessedPairs += scanGroup.size();
+
+                if (debug) cout << "i=" << i << ", numProcessedPairs= " << numProcessedPairs << endl;
+
+                i--; // necessary b/c outer for loop will increment i
+                break;
+            } else {
+                scanGroup.push_back(jthScanPair);
+                lastPrecMz = jthScanPair.first;
+
+                if (j == allMs3Scans.size()-1) {
+                    i = static_cast<unsigned int>(allMs3Scans.size()); //avoid outer loop
+                    break;
+                }
+            }
+        }
+    }
+
+    if (!scanGroup.empty()){
+        ms3ScanGroups.push_back(scanGroup);
+        numProcessedPairs += scanGroup.size();
+        if (debug) cout << "i=" << allMs3Scans.size() << ", numProcessedPairs="<< numProcessedPairs << endl;
+    }
+
+    //debugging
+    if (debug) {
+
+        unsigned int spCounter = 0;
+        unsigned int grpCounter = 0;
+        for (auto sg : ms3ScanGroups) {
+
+            grpCounter++;
+            cout<< "group #" << grpCounter << ": scans=";
+            for (auto sp : sg) {
+                cout << sp.second->scannum << ", ";
+            }
+            cout << endl;
+
+            spCounter += sg.size();
+        }
+
+        cout << "ms3 scans: # all=" << allMs3Scans.size() << ", # grouped=" << spCounter << endl;
+    }
+
+    return ms3ScanGroups;
+}
+
 vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mzSample* sample,
                                                                                   const vector<Ms3Compound*>& ms3Compounds,
                                                                                   shared_ptr<DirectInfusionSearchParameters> params,
@@ -186,79 +269,81 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
         }
     }
 
-    sort(allMs3Scans.begin(), allMs3Scans.end(), [](const pair<double, Scan*>& lhs, const pair<double, Scan*>& rhs){
-        if (lhs.first == rhs.first) {
-            return lhs.second->scannum < rhs.second->scannum;
-        } else {
-            return lhs.first < rhs.first;
-        }
-    });
+    vector<vector<pair<double, Scan*>>> ms3ScanGroups = DirectInfusionProcessor::organizeMs3ScansByPrecursor(allMs3Scans, params, debug);
 
-    vector<vector<pair<double, Scan*>>> ms3ScanGroups;
-    vector<pair<double,Scan*>> scanGroup;
-    double lastPrecMz = 0.0;
-    unsigned int numProcessedPairs = 0;
+//    sort(allMs3Scans.begin(), allMs3Scans.end(), [](const pair<double, Scan*>& lhs, const pair<double, Scan*>& rhs){
+//        if (lhs.first == rhs.first) {
+//            return lhs.second->scannum < rhs.second->scannum;
+//        } else {
+//            return lhs.first < rhs.first;
+//        }
+//    });
 
-    for (unsigned int i = 0; i < allMs3Scans.size(); i++) {
+//    vector<vector<pair<double, Scan*>>> ms3ScanGroups;
+//    vector<pair<double,Scan*>> scanGroup;
+//    double lastPrecMz = 0.0;
+//    unsigned int numProcessedPairs = 0;
 
-        scanGroup = vector<pair<double,Scan*>>();
+//    for (unsigned int i = 0; i < allMs3Scans.size(); i++) {
 
-        pair<double, Scan*> ithScanPair = allMs3Scans[i];
-        lastPrecMz = ithScanPair.first;
+//        scanGroup = vector<pair<double,Scan*>>();
 
-        scanGroup.push_back(ithScanPair);
+//        pair<double, Scan*> ithScanPair = allMs3Scans[i];
+//        lastPrecMz = ithScanPair.first;
 
-        for (unsigned int j = i+1; j < allMs3Scans.size(); j++) {
+//        scanGroup.push_back(ithScanPair);
 
-            pair<double, Scan*> jthScanPair = allMs3Scans[j];
+//        for (unsigned int j = i+1; j < allMs3Scans.size(); j++) {
 
-            if (mzUtils::ppmDist(jthScanPair.first, ithScanPair.first) > static_cast<double>(params->ms3PrecursorPpmTolr)) {
-                i = j;
-                ms3ScanGroups.push_back(scanGroup);
+//            pair<double, Scan*> jthScanPair = allMs3Scans[j];
 
-                numProcessedPairs += scanGroup.size();
+//            if (mzUtils::ppmDist(jthScanPair.first, ithScanPair.first) > static_cast<double>(params->ms3PrecursorPpmTolr)) {
+//                i = j;
+//                ms3ScanGroups.push_back(scanGroup);
 
-                if (debug) cout << "i=" << i << ", numProcessedPairs= " << numProcessedPairs << endl;
+//                numProcessedPairs += scanGroup.size();
 
-                i--; // necessary b/c outer for loop will increment i
-                break;
-            } else {
-                scanGroup.push_back(jthScanPair);
-                lastPrecMz = jthScanPair.first;
+//                if (debug) cout << "i=" << i << ", numProcessedPairs= " << numProcessedPairs << endl;
 
-                if (j == allMs3Scans.size()-1) {
-                    i = static_cast<unsigned int>(allMs3Scans.size()); //avoid outer loop
-                    break;
-                }
-            }
-        }
-    }
+//                i--; // necessary b/c outer for loop will increment i
+//                break;
+//            } else {
+//                scanGroup.push_back(jthScanPair);
+//                lastPrecMz = jthScanPair.first;
 
-    if (!scanGroup.empty()){
-        ms3ScanGroups.push_back(scanGroup);
-        numProcessedPairs += scanGroup.size();
-        if (debug) cout << "i=" << allMs3Scans.size() << ", numProcessedPairs="<< numProcessedPairs << endl;
-    }
+//                if (j == allMs3Scans.size()-1) {
+//                    i = static_cast<unsigned int>(allMs3Scans.size()); //avoid outer loop
+//                    break;
+//                }
+//            }
+//        }
+//    }
 
-    //debugging
-    if (debug) {
+//    if (!scanGroup.empty()){
+//        ms3ScanGroups.push_back(scanGroup);
+//        numProcessedPairs += scanGroup.size();
+//        if (debug) cout << "i=" << allMs3Scans.size() << ", numProcessedPairs="<< numProcessedPairs << endl;
+//    }
 
-        unsigned int spCounter = 0;
-        unsigned int grpCounter = 0;
-        for (auto sg : ms3ScanGroups) {
+//    //debugging
+//    if (debug) {
 
-            grpCounter++;
-            cout<< "group #" << grpCounter << ": scans=";
-            for (auto sp : sg) {
-                cout << sp.second->scannum << ", ";
-            }
-            cout << endl;
+//        unsigned int spCounter = 0;
+//        unsigned int grpCounter = 0;
+//        for (auto sg : ms3ScanGroups) {
 
-            spCounter += sg.size();
-        }
+//            grpCounter++;
+//            cout<< "group #" << grpCounter << ": scans=";
+//            for (auto sp : sg) {
+//                cout << sp.second->scannum << ", ";
+//            }
+//            cout << endl;
 
-        cout << "ms3 scans: # all=" << allMs3Scans.size() << ", # grouped=" << spCounter << endl;
-    }
+//            spCounter += sg.size();
+//        }
+
+//        cout << "ms3 scans: # all=" << allMs3Scans.size() << ", # grouped=" << spCounter << endl;
+//    }
 
     vector<pair<double, Fragment*>> consensusMs3Spectra(ms3ScanGroups.size());
 
