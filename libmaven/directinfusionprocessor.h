@@ -674,14 +674,16 @@ public:
       * @param debug
       * @return
       *
-      * Group MS3 Scans together by MS2 precursors, according to tolerance parameter:
+      * Group MS3 Scans together by MS2 precursors, according to ms3 precursor ppm tolerance parameter.
+      *
+      * This parameter is often stored in DirectInfusionSearchParameters as
       *
       * params->ms3PrecursorPpmTolr
       *
       */
      static vector<vector<pair<double, Scan*>>> organizeMs3ScansByPrecursor(
              vector<pair<double, Scan*>> allMs3Scans,
-             shared_ptr<DirectInfusionSearchParameters> params,
+             double ms3PrecursorPpmTolr,
              bool debug);
 
      /**

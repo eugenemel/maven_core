@@ -99,7 +99,7 @@ vector<Ms3Compound*> DirectInfusionProcessor::getMs3CompoundSet(const vector<Com
 
 vector<vector<pair<double, Scan*>>> DirectInfusionProcessor::organizeMs3ScansByPrecursor(
         vector<pair<double, Scan*>> allMs3Scans,
-        shared_ptr<DirectInfusionSearchParameters> params,
+        double ms3PrecursorPpmTolr,
         bool debug){
 
     sort(allMs3Scans.begin(), allMs3Scans.end(), [](const pair<double, Scan*>& lhs, const pair<double, Scan*>& rhs){
@@ -128,7 +128,7 @@ vector<vector<pair<double, Scan*>>> DirectInfusionProcessor::organizeMs3ScansByP
 
             pair<double, Scan*> jthScanPair = allMs3Scans[j];
 
-            if (mzUtils::ppmDist(jthScanPair.first, ithScanPair.first) > static_cast<double>(params->ms3PrecursorPpmTolr)) {
+            if (mzUtils::ppmDist(jthScanPair.first, ithScanPair.first) > ms3PrecursorPpmTolr) {
                 i = j;
                 ms3ScanGroups.push_back(scanGroup);
 
@@ -269,7 +269,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
         }
     }
 
-    vector<vector<pair<double, Scan*>>> ms3ScanGroups = DirectInfusionProcessor::organizeMs3ScansByPrecursor(allMs3Scans, params, debug);
+    vector<vector<pair<double, Scan*>>> ms3ScanGroups = DirectInfusionProcessor::organizeMs3ScansByPrecursor(allMs3Scans, static_cast<double>(params->ms3PrecursorPpmTolr), debug);
 
     vector<pair<double, Fragment*>> consensusMs3Spectra(ms3ScanGroups.size());
 
