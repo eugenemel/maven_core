@@ -385,8 +385,8 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
     //Iterate through spectrums
     int scannum=0;
 
-    for (xml_node spectrum  = spectrumList.child("spectrum");
-            spectrum; spectrum = spectrum.next_sibling("spectrum")) {
+    for (xml_node spectrum  = spectrumList.child("spectrum"); spectrum; spectrum = spectrum.next_sibling("spectrum")) {
+
         string spectrumId = spectrum.attribute("id").value();
         //cerr << "Processing: " << spectrumId << endl;
 
