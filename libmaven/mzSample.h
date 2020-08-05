@@ -177,6 +177,9 @@ class Scan {
 
     string getSignature(int limitSize=200);
 
+    //Issue 256
+    float ms1PrecursorForMs3 = 0.0f;
+
 private:
     	vector<Scan*> children;
         int polarity;

@@ -393,7 +393,6 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
         if (spectrum.empty()) continue;
         map<string,string>cvParams = mzML_cvParams(spectrum);
 
-
          int mslevel=1;
             int scanpolarity=0;
         float rt=0;
@@ -433,30 +432,95 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
             filterString = scanAttr["filter string"];
         }
 
-
-        map<string,string>selectedIon = mzML_cvParams(spectrum.first_element_by_path("precursorList/precursor/selectedIonList/selectedIon"));
-        string precursorMzStr = selectedIon["selected ion m/z"];
-
-		map<string,string>isolationWindow = mzML_cvParams(spectrum.first_element_by_path("precursorList/precursor/isolationWindow"));
-		if ( precursorMzStr.length() == 0) precursorMzStr = isolationWindow["isolation window target m/z"];
-
-        string precursorIsolationStrLower = isolationWindow["isolation window lower offset"];
-        string precursorIsolationStrUpper = isolationWindow["isolation window upper offset"];
-
-        float isolationWindowLowerOffset = string2float(precursorIsolationStrLower);
-        float isolationWindowUpperOffset = string2float(precursorIsolationStrUpper);
+        string precursorMzStr;
+        float precursorMz = 0;
+        float ms1PrecursorForMs3=0;
 
         float precursorIsolationWindow=0;
-        if(isolationWindowLowerOffset>0) precursorIsolationWindow+=string2float(precursorIsolationStrLower);
-        if(isolationWindowUpperOffset>0) precursorIsolationWindow+=string2float(precursorIsolationStrUpper);
-        if (precursorIsolationWindow <= 0) precursorIsolationWindow = 1.0; //default to 1.0
+        float isolationWindowLowerOffset=0;
+        float isolationWindowUpperOffset=0;
+
+        //Issue 256: Support targeted MS3 experiments
+        if (mslevel == 3) {
+            xml_node precursorList = spectrum.first_element_by_path("precursorList");
+            for (xml_node precursor  = precursorList.child("precursor"); precursor; precursor = precursor.next_sibling("precursor")) {
+
+                bool isMs1Precursor = false;
+
+                map<string, string> selectedIon = mzML_cvParams(precursor.first_element_by_path("selectedIonList/selectedIon"));
+                precursorMzStr = selectedIon["selected ion m/z"];
+
+                map<string,string>isolationWindow = mzML_cvParams(precursor.first_element_by_path("isolationWindow"));
+                if ( precursorMzStr.length() == 0 && isolationWindow.find("isolation window target m/z") != isolationWindow.end()){
+                    precursorMzStr = isolationWindow["isolation window target m/z"];
+                }
+
+                xml_node isolationWindowNode = precursor.first_element_by_path("isolationWindow");
+
+                for (xml_node cv = isolationWindowNode.child("userParam"); cv; cv = cv.next_sibling("userParam")) {
+                    string name = cv.attribute("name").value();
+                    string value = cv.attribute("value").value();
+                    if (name == "ms level" && value == "1") {
+                        isMs1Precursor = true;
+                        break;
+                    }
+                }
+
+                if (isolationWindow.find("isolation window lower offset") != isolationWindow.end()) {
+                    string precursorIsolationStrLower = isolationWindow["isolation window lower offset"];
+                    isolationWindowLowerOffset = string2float(precursorIsolationStrLower);
+                    if(isolationWindowLowerOffset>0) precursorIsolationWindow+=string2float(precursorIsolationStrLower);
+                }
+                if (isolationWindow.find("isolation window upper offset") != isolationWindow.end()) {
+                    string precursorIsolationStrUpper = isolationWindow["isolation window upper offset"];
+                    isolationWindowUpperOffset = string2float(precursorIsolationStrUpper);
+                    if(isolationWindowUpperOffset>0) precursorIsolationWindow+=string2float(precursorIsolationStrUpper);
+                }
+
+                if (precursorIsolationWindow <= 0) precursorIsolationWindow = 1.0; //default to 1.0
+
+                if(string2float(precursorMzStr)>0){
+                    if (isMs1Precursor) {
+                        ms1PrecursorForMs3=string2float(precursorMzStr);
+                    } else { //ms2 precursor, or the true precursor
+                        precursorMz=string2float(precursorMzStr);
+                    }
+                }
+            }
+        } else { //no precursor (mslevel == 1) or a single precursor (mslevel == 2). ms level higher than 3 is not supported
+
+            map<string,string>selectedIon = mzML_cvParams(spectrum.first_element_by_path("precursorList/precursor/selectedIonList/selectedIon"));
+
+            precursorMzStr = selectedIon["selected ion m/z"];
+
+            map<string,string>isolationWindow = mzML_cvParams(spectrum.first_element_by_path("precursorList/precursor/isolationWindow"));
+
+            if ( precursorMzStr.length() == 0 && isolationWindow.find("isolation window target m/z") != isolationWindow.end()){
+                precursorMzStr = isolationWindow["isolation window target m/z"];
+            }
+
+            if (isolationWindow.find("isolation window upper offset") != isolationWindow.end()) {
+                string precursorIsolationStrLower = isolationWindow["isolation window lower offset"];
+                isolationWindowLowerOffset = string2float(precursorIsolationStrLower);
+                if(isolationWindowLowerOffset>0) precursorIsolationWindow+=string2float(precursorIsolationStrLower);
+            }
+
+            if (isolationWindow.find("isolation window upper offset") != isolationWindow.end()) {
+                string precursorIsolationStrUpper = isolationWindow["isolation window upper offset"];
+                isolationWindowUpperOffset = string2float(precursorIsolationStrUpper);
+                if(isolationWindowUpperOffset>0) precursorIsolationWindow+=string2float(precursorIsolationStrUpper);
+            }
+
+            if (precursorIsolationWindow <= 0) precursorIsolationWindow = 1.0; //default to 1.0
+
+            if(string2float(precursorMzStr)>0){
+                precursorMz=string2float(precursorMzStr);
+            }
+        }
 
         float injectionTime=0;
         string injectionTimeStr = scanAttr["ion injection time"];
         if(string2float(injectionTimeStr)>0) injectionTime=string2float(injectionTimeStr);
-
-        float precursorMz = 0; 
-		if(string2float(precursorMzStr)>0) precursorMz=string2float(precursorMzStr);
 
         string productMzStr = spectrum.first_element_by_path("product/isolationWindow/cvParam").attribute("value").value();
         float productMz = 0;   if(string2float(productMzStr)>0)   productMz=string2float(productMzStr);
@@ -495,6 +559,7 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
         scan->filterString = filterString;
         scan->lowerLimitMz = lowerLimitMz;
         scan->upperLimitMz = upperLimitMz;
+        scan->ms1PrecursorForMs3 = ms1PrecursorForMs3;
 
         if (isolationWindowLowerOffset>0) scan->isolationWindowLowerOffset = isolationWindowLowerOffset;
         if (isolationWindowUpperOffset>0) scan->isolationWindowUpperOffset = isolationWindowUpperOffset;
