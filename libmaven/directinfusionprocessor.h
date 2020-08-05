@@ -84,6 +84,7 @@ public:
      * ==================== */
     bool ms3IsMs3Search = false;
     int ms3MinNumMatches = 2;
+    float ms3AnalysisMs1PrecursorPpmTolr = 20; //TODO: encode/decode
     float ms3PrecursorPpmTolr = 20;
     float ms3PpmTolr = 20;
 
@@ -681,8 +682,9 @@ public:
       * params->ms3PrecursorPpmTolr
       *
       */
-     static vector<vector<pair<double, Scan*>>> organizeMs3ScansByPrecursor(
-             vector<pair<double, Scan*>> allMs3Scans,
+     static vector<vector<tuple<double, double, Scan*>>> organizeMs3ScansByPrecursor(
+             vector<tuple<double, double, Scan*>> allMs3Scans,
+             double ms2PrecursorPpmTolr,
              double ms3PrecursorPpmTolr,
              bool debug);
 
