@@ -908,6 +908,11 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getFragmentM
 
                if (debug) cerr << "allCandidates[" << i << "]: " << compound->name << "|" << compound->adductString << " observedIndex=" << observedIndex << endl;
 
+               //Issue 269: debugging illegal string access
+               if (i == 11 && compound->name == "Ceramide(t18:0/m2:3)" && observedIndex == 85) {
+                   cerr << "Debugging point!" << endl;
+               }
+
                int fragInt = mzToIntKey(compound->fragment_mzs[i]);
 
                compoundFrags[matchCounter] = fragInt;
