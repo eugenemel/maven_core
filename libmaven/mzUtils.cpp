@@ -1004,6 +1004,12 @@ double intKeyToMz(const int intKey, const int multFactor){
     return static_cast<double>(intKey) / static_cast<double>(multFactor);
 }
 
+//Issue 270: implement match parsimony
+vector<int> simpleParsimonyReducer(vector<int> originalSet){
+    //TODO
+    return originalSet;
+}
+
 vector<string> getMzSampleFilesFromDirectory(const char* path){
 
     vector<string> fileNames;
