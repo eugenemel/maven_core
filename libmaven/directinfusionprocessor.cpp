@@ -908,11 +908,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getFragmentM
 
                if (debug) cerr << "allCandidates[" << i << "]: " << compound->name << "|" << compound->adductString << " observedIndex=" << observedIndex << endl;
 
-               //Issue 269: debugging illegal string access
-               if (i == 11 && compound->name == "Ceramide(t18:0/m2:3)" && observedIndex == 85) {
-                   cerr << "Debugging point!" << endl;
-               }
-
                int fragInt = mzToIntKey(compound->fragment_mzs[i]);
 
                compoundFrags[matchCounter] = fragInt;
@@ -1196,6 +1191,8 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
         shared_ptr<DirectInfusionSearchParameters> params,
         bool debug) {
 
+    if (debug) cout << "DirectInfusionProcessor::summarizeByAcylChainsAndSumComposition2()" << endl;
+
     //<K, V> = fraglist, compound_info
     map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> fragListToCompounds{};
 
@@ -1304,6 +1301,8 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
             summarizedMatchData->observedMs1Intensity = observedMs1Intensity;
 
         } else { //fall back to general summarization based on identical fragments
+
+            if (debug) cout << "Creating general summarization based on identical fragments." << endl;
 
             string summarizedName("{");
 
