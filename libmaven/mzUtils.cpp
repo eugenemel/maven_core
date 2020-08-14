@@ -2,6 +2,8 @@
 
 //random collection of useful functions
 
+using namespace std;
+
 namespace mzUtils { 
 
 std::string makeLowerCase(string &s) {
@@ -1005,9 +1007,55 @@ double intKeyToMz(const int intKey, const int multFactor){
 }
 
 //Issue 270: implement match parsimony
-vector<int> simpleParsimonyReducer(vector<int> originalSet){
-    //TODO
-    return originalSet;
+vector<vector<int>> simpleParsimonyReducer(vector<vector<int>> input){
+
+    if (input.empty() || input.size() == 1) {
+        return input;
+    }
+
+    sort(input.begin(), input.end(), [](const vector<int>& lhs, const vector<int>& rhs){
+        return lhs.size() < rhs.size();
+    });
+
+    unordered_set<unsigned int> idsToSkip{};
+
+    for (unsigned int i = 0; i < input.size(); i++) {
+
+        vector<int> ith = input[i];
+        unordered_set<int> ithIds;
+
+        for (unsigned int j = i+1; j < input.size(); j++) {
+
+            vector<int> jth = input[j];
+
+            //removal requires same element in group with more members
+            if (jth.size() > ith.size()) {
+                vector<int> intersection;
+                std::set_intersection(ith.begin(), ith.end(), jth.begin(), jth.end(), back_inserter(intersection));
+                for (auto x : intersection) {
+                    ithIds.insert(x);
+                }
+            }
+
+            //skip this id
+            if (ithIds.size() == ith.size()) {
+                idsToSkip.insert(i);
+                break;
+            }
+
+        }
+    }
+
+    unsigned int counter = 0;
+    vector<vector<int>> output(input.size()-idsToSkip.size());
+    for (unsigned int i = 0; i < input.size(); i++) {
+        if (idsToSkip.find(i) == idsToSkip.end()) {
+            output[counter] = input[i];
+            counter++;
+        }
+    }
+
+    return output;
 }
 
 vector<string> getMzSampleFilesFromDirectory(const char* path){

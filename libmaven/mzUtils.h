@@ -12,6 +12,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <iomanip>
+#include <unordered_set>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <string.h>
@@ -131,7 +132,7 @@ bool withinXppm( float mz1, float mz2, int ppmWindow );
 int mzToIntKey(const double mz, const int multFactor=1000000);
 double intKeyToMz(const int intKey, const int multFactor=1000000);
 
-vector<int> simpleParsimonyReducer(vector<int> originalSet);
+vector<vector<int>> simpleParsimonyReducer(vector<vector<int>> originalSet);
 
 /* file system functions */
 bool fileExists(string strFilename);
