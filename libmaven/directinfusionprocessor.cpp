@@ -1251,6 +1251,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
             }
         }
         observedMs1Intensity /= compoundList.size();
+        observedMs1Intensity = round(observedMs1Intensity * 10000.0f) / 10000.0f; // 4 decimal places
 
         /*
          * try to summarize to acyl chain level, then composition level, then finally fall back to identical fragment matches.
