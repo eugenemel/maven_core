@@ -1236,7 +1236,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
 
             compounds.push_back(matchData->compound);
             adduct = matchData->adduct;
-            observedMs1Intensity = matchData->observedMs1Intensity;
+            observedMs1Intensity += matchData->observedMs1Intensity;
 
             if (matchData->compound->metaDataMap.find(LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()) != matchData->compound->metaDataMap.end()){
                 compositionLevel.insert(matchData->compound->metaDataMap[LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()]);
@@ -1250,6 +1250,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
                 isMissingAcylChainLevel = true;
             }
         }
+        observedMs1Intensity /= compoundList.size();
 
         /*
          * try to summarize to acyl chain level, then composition level, then finally fall back to identical fragment matches.
