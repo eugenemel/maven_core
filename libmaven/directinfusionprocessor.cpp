@@ -1204,18 +1204,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
 
     if (debug) cout << "DirectInfusionProcessor::summarizeByAcylChainsAndSumComposition2()" << endl;
 
-    //<K, V> = fraglist, compound_info
-    map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> fragListToCompounds{};
-
-    for (auto it = matchInfo->matchDataToFrags.begin(); it != matchInfo->matchDataToFrags.end(); ++it){
-        vector<int> fragList = it->second;
-        if (fragListToCompounds.find(fragList) == fragListToCompounds.end()) {
-            fragListToCompounds.insert(make_pair(fragList, vector<shared_ptr<DirectInfusionMatchData>>()));
-        }
-        fragListToCompounds[fragList].push_back(it->first);
-    }
-
-    for (auto it = fragListToCompounds.begin(); it != fragListToCompounds.end(); ++it) {
+    for (auto it = matchInfo->fragListToCompounds.begin(); it != matchInfo->fragListToCompounds.end(); ++it) {
 
         vector<shared_ptr<DirectInfusionMatchData>> compoundList = it->second;
 
@@ -1445,18 +1434,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByI
         shared_ptr<DirectInfusionSearchParameters> params,
         bool debug){
 
-        //<K, V> = fraglist, compound_info
-    map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> fragListToCompounds{};
-
-    for (auto it = matchInfo->matchDataToFrags.begin(); it != matchInfo->matchDataToFrags.end(); ++it){
-        vector<int> fragList = it->second;
-        if (fragListToCompounds.find(fragList) == fragListToCompounds.end()) {
-            fragListToCompounds.insert(make_pair(fragList, vector<shared_ptr<DirectInfusionMatchData>>()));
-        }
-        fragListToCompounds[fragList].push_back(it->first);
-    }
-
-    for (auto it = fragListToCompounds.begin(); it != fragListToCompounds.end(); ++it){
+    for (auto it = matchInfo->fragListToCompounds.begin(); it != matchInfo->fragListToCompounds.end(); ++it){
 
         vector<shared_ptr<DirectInfusionMatchData>> compoundList = it->second;
 
