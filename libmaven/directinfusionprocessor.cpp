@@ -1319,7 +1319,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
             vector<Compound*> compoundPtrs(compoundList.size());
 
             //Issue 267: consistent name order
-            sort(compoundList.begin(), compoundList.end(), [](const shared_ptr<DirectInfusionMatchData>& lhs, const const shared_ptr<DirectInfusionMatchData>& rhs){
+            sort(compoundList.begin(), compoundList.end(), [](const shared_ptr<DirectInfusionMatchData>& lhs, const shared_ptr<DirectInfusionMatchData>& rhs){
                return lhs->compound->name < rhs->compound->name;
             });
 
@@ -1460,7 +1460,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByI
             float observedMs1Intensity = 0.0f;
 
             //Issue 267: consistent name order
-            sort(compoundList.begin(), compoundList.end(), [](const shared_ptr<DirectInfusionMatchData>& lhs, const const shared_ptr<DirectInfusionMatchData>& rhs){
+            sort(compoundList.begin(), compoundList.end(), [](const shared_ptr<DirectInfusionMatchData>& lhs, const shared_ptr<DirectInfusionMatchData>& rhs){
                return lhs->compound->name < rhs->compound->name;
             });
 
