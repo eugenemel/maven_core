@@ -123,6 +123,9 @@ public:
     bool isAgglomerateAcrossSamples = false;
     SpectralCompositionAlgorithm spectralCompositionAlgorithm = SpectralCompositionAlgorithm::ALL_CANDIDATES;
 
+    //Issue 270
+    bool isReduceBySimpleParsimony = false;
+
     bool isDiagnosticFragmentMapAgreement(map<string, int> observedNumDiagnosticMatchesMap){
 
         for (auto it = ms2MinNumDiagnosticMatchesMap.begin(); it != ms2MinNumDiagnosticMatchesMap.end(); ++it) {
@@ -248,6 +251,8 @@ public:
             spectralCompositionAlgorithmStr = "AUTO_SUMMARIZED_IDENTICAL_FRAGMENTS";
         }
         encodedParams = encodedParams + "spectralCompositionAlgorithm" + "=" + spectralCompositionAlgorithmStr + ";";
+
+        encodedParams = encodedParams + "isReduceBySimpleParsimony" + "=" + to_string(isReduceBySimpleParsimony);
 
         return encodedParams;
     }
@@ -430,6 +435,9 @@ public:
             } else if (spectralCompositionAlgorithmStr == "AUTO_SUMMARIZED_IDENTICAL_FRAGMENTS") {
                 directInfusionSearchParameters->spectralCompositionAlgorithm = SpectralCompositionAlgorithm::AUTO_SUMMARIZED_IDENTICAL_FRAGMENTS;
             }
+        }
+        if (decodedMap.find("isReduceBySimpleParsimony") != decodedMap.end()) {
+            directInfusionSearchParameters->isReduceBySimpleParsimony = decodedMap["isReduceBySimpleParsimony"] == "1";
         }
 
         return directInfusionSearchParameters;
