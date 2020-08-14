@@ -534,6 +534,7 @@ public:
     map<int, vector<shared_ptr<DirectInfusionMatchData>>> fragToMatchData = {};
     map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToFrags = {};
     map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> fragToTheoreticalIntensity = {};
+    map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> fragListToCompounds = {};
 
     /**
       * If

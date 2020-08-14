@@ -932,8 +932,19 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getFragmentM
    //            if (debug) cerr << "allCandidates [end] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
            }
 
+           //Issue 270: need these to be sorted
+           sort(compoundFrags.begin(), compoundFrags.end());
            matchInfo->matchDataToFrags.insert(make_pair(directInfusionMatchData, compoundFrags));
 
+       }
+
+       //Issue 270: helpful to keep this here
+       for (auto it = matchInfo->matchDataToFrags.begin(); it != matchInfo->matchDataToFrags.end(); ++it){
+           vector<int> fragList = it->second;
+           if (matchInfo->fragListToCompounds.find(fragList) == matchInfo->fragListToCompounds.end()) {
+               matchInfo->fragListToCompounds.insert(make_pair(fragList, vector<shared_ptr<DirectInfusionMatchData>>()));
+           }
+           matchInfo->fragListToCompounds[fragList].push_back(it->first);
        }
 
        return matchInfo;
