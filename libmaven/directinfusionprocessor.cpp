@@ -1571,6 +1571,17 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByI
     return matchInfo;
 }
 
+//Issue 270
+unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::reduceBySimpleParsimony(
+        unique_ptr<DirectInfusionMatchInformation> matchInfo,
+        shared_ptr<DirectInfusionSearchParameters> params,
+        bool debug){
+
+    //TODO
+
+    return matchInfo;
+}
+
 unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInformation(
         vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
         Fragment *observedSpectrum,

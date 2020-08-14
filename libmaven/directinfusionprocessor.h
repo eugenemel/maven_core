@@ -747,6 +747,26 @@ public:
              bool debug);
 
      /**
+      * @brief reduceBySimpleParsimony
+      * @param matchInfo
+      * @param params
+      * @param debug
+      * @return
+      * Issue 270
+      *
+      * Adjusts data structure and reduces based on simple parsimony
+      *
+      * Remove a fragment group if the fragments in that group are all
+      * also found in fragment groups that contain more fragments.
+      *
+      * Also need to make corresponding adjustments to other data structures
+      * in DirectInfusionMatchInformation.
+      */
+     static unique_ptr<DirectInfusionMatchInformation> reduceBySimpleParsimony(
+             unique_ptr<DirectInfusionMatchInformation> matchInfo,
+             shared_ptr<DirectInfusionSearchParameters> params,
+             bool debug);
+     /**
       * @brief getMatches
       * @param allCandidates
       *
