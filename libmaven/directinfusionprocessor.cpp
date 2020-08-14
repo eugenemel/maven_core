@@ -1577,7 +1577,55 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::reduceBySimp
         shared_ptr<DirectInfusionSearchParameters> params,
         bool debug){
 
-    //TODO
+    vector<vector<int>> fragmentGroups(matchInfo->fragListToCompounds.size());
+    unsigned int counter = 0;
+    for (auto it = matchInfo->fragListToCompounds.begin(); it != matchInfo->fragListToCompounds.end(); ++it) {
+        fragmentGroups[counter] = it->first;
+        counter++;
+    }
+
+    map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> reducedFragListToCompounds{};
+    map<shared_ptr<DirectInfusionMatchData>, vector<int>> reducedMatchDataToFrags{};
+
+    map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> reducedFragToObservedIntensity{};
+    map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> reducedFragToTheoreticalIntensity = {};
+
+    map<int, vector<shared_ptr<DirectInfusionMatchData>>> reducedFragToMatchData = {};
+
+    vector<vector<int>> fragmentGroupsReducedyByParsimony = mzUtils::simpleParsimonyReducer(fragmentGroups);
+
+    for (vector<int> group : fragmentGroupsReducedyByParsimony) {
+
+        vector<shared_ptr<DirectInfusionMatchData>> compounds = matchInfo->fragListToCompounds[group];
+
+        reducedFragListToCompounds.insert(make_pair(group, compounds));
+
+        for (shared_ptr<DirectInfusionMatchData> compound : compounds) {
+
+            reducedMatchDataToFrags.insert(make_pair(compound, group));
+
+            for (int frag : group) {
+
+                pair<int, shared_ptr<DirectInfusionMatchData>> key = make_pair(frag, compound);
+
+                reducedFragToObservedIntensity.insert(make_pair(key, matchInfo->fragToObservedIntensity[key]));
+                reducedFragToTheoreticalIntensity.insert(make_pair(key, matchInfo->fragToTheoreticalIntensity[key]));
+
+                if (reducedFragToMatchData.find(frag) == reducedFragToMatchData.end()) {
+                    reducedFragToMatchData.insert(make_pair(frag, vector<shared_ptr<DirectInfusionMatchData>>{}));
+                }
+                reducedFragToMatchData[frag].push_back(compound);
+
+            }
+        }
+
+    }
+
+    matchInfo->fragListToCompounds = reducedFragListToCompounds;
+    matchInfo->matchDataToFrags = reducedMatchDataToFrags;
+    matchInfo->fragToObservedIntensity = reducedFragToObservedIntensity;
+    matchInfo->fragToTheoreticalIntensity = reducedFragToTheoreticalIntensity;
+    matchInfo->fragToMatchData = reducedFragToMatchData;
 
     return matchInfo;
 }
@@ -1591,6 +1639,10 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
     if (debug) cerr << "DirectInfusionProcessor::getMatchInformation()" << endl;
 
     unique_ptr<DirectInfusionMatchInformation> matchInfo = getFragmentMatchMaps(allCandidates, observedSpectrum, params, debug);
+
+    if (params->isReduceBySimpleParsimony) {
+        matchInfo = reduceBySimpleParsimony(move(matchInfo), params, debug);
+    }
 
     if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::ALL_CANDIDATES){
 
