@@ -1232,6 +1232,12 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
         vector<Compound*> compounds;
         float observedMs1Intensity = 0.0f;
 
+        //Issue 267: consistent name order
+        //Issue 272: avoid rounding errors by always computing average in the same order
+        sort(compoundList.begin(), compoundList.end(), [](const shared_ptr<DirectInfusionMatchData>& lhs, const shared_ptr<DirectInfusionMatchData>& rhs){
+           return lhs->compound->name < rhs->compound->name;
+        });
+
         for (auto matchData : compoundList) {
 
             compounds.push_back(matchData->compound);
@@ -1251,7 +1257,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
             }
         }
         observedMs1Intensity /= compoundList.size();
-        observedMs1Intensity = round(observedMs1Intensity * 10000.0f) / 10000.0f; // 4 decimal places
 
         /*
          * try to summarize to acyl chain level, then composition level, then finally fall back to identical fragment matches.
@@ -1318,11 +1323,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
             map<string, int> formulaStringMap{};
 
             vector<Compound*> compoundPtrs(compoundList.size());
-
-            //Issue 267: consistent name order
-            sort(compoundList.begin(), compoundList.end(), [](const shared_ptr<DirectInfusionMatchData>& lhs, const shared_ptr<DirectInfusionMatchData>& rhs){
-               return lhs->compound->name < rhs->compound->name;
-            });
 
             for (unsigned int i = 0; i < compoundList.size(); i++) {
                 shared_ptr<DirectInfusionMatchData> compound = compoundList[i];
