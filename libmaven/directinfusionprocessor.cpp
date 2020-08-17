@@ -905,10 +905,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getFragmentM
 
                pair<int, shared_ptr<DirectInfusionMatchData>> key = make_pair(fragInt, directInfusionMatchData);
 
-               matchInfo->fragToTheoreticalIntensity.insert(make_pair(key, (compound->fragment_intensity[i])));
-
-               matchInfo->fragToObservedIntensity.insert(make_pair(key, observedSpectrum->intensity_array[observedIndex]));
-
                fragToMatchDataIterator it = matchInfo->fragToMatchData.find(fragInt);
 
                if (it != matchInfo->fragToMatchData.end()) {
@@ -1209,9 +1205,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::reduceBySimp
     map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> reducedFragListToCompounds{};
     map<shared_ptr<DirectInfusionMatchData>, vector<int>> reducedMatchDataToFrags{};
 
-    map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> reducedFragToObservedIntensity{};
-    map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> reducedFragToTheoreticalIntensity = {};
-
     map<int, vector<shared_ptr<DirectInfusionMatchData>>> reducedFragToMatchData = {};
 
     vector<vector<int>> fragmentGroupsReducedyByParsimony = mzUtils::simpleParsimonyReducer(fragmentGroups);
@@ -1230,9 +1223,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::reduceBySimp
 
                 pair<int, shared_ptr<DirectInfusionMatchData>> key = make_pair(frag, compound);
 
-                reducedFragToObservedIntensity.insert(make_pair(key, matchInfo->fragToObservedIntensity[key]));
-                reducedFragToTheoreticalIntensity.insert(make_pair(key, matchInfo->fragToTheoreticalIntensity[key]));
-
                 if (reducedFragToMatchData.find(frag) == reducedFragToMatchData.end()) {
                     reducedFragToMatchData.insert(make_pair(frag, vector<shared_ptr<DirectInfusionMatchData>>{}));
                 }
@@ -1245,8 +1235,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::reduceBySimp
 
     matchInfo->fragListToCompounds = reducedFragListToCompounds;
     matchInfo->matchDataToFrags = reducedMatchDataToFrags;
-    matchInfo->fragToObservedIntensity = reducedFragToObservedIntensity;
-    matchInfo->fragToTheoreticalIntensity = reducedFragToTheoreticalIntensity;
     matchInfo->fragToMatchData = reducedFragToMatchData;
 
     return matchInfo;
