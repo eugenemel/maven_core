@@ -544,56 +544,10 @@ public:
     map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> fragToTheoreticalIntensity = {};
     map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> fragListToCompounds = {};
 
-    /**
-      * If
-      *
-      * 1. multiple DirectInfusionMatchData match to exactly the same fragments,
-      * 2. the DirectInfusionMatchData's associated compounds can be readily summarized to a common form,
-      * and
-      * 3. the DirectInfusionMatchData's matched adducts are of the same type,
-      *
-      * these DirectInfusionMatchData can be summarized.
-      *
-      * When these conditions are met, the summary mappings are saved in these maps
-      */
-    map<shared_ptr<DirectInfusionMatchData>, string> originalMatchToSummaryString = {};
-    map<string, set<shared_ptr<DirectInfusionMatchData>>> chainLengthSummaries = {}; //LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey()
-    map<string, set<shared_ptr<DirectInfusionMatchData>>> compositionSummaries = {}; //LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()
-
     //summarized
     map<int, vector<shared_ptr<DirectInfusionMatchData>>> fragToMatchDataSummarized = {};
     map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToFragsSummarized  = {};
     map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> fragToTheoreticalIntensitySummarized = {};
-
-
-    float getNormalizedTheoreticalIntensity(int fragId, shared_ptr<DirectInfusionMatchData> matchData){
-        pair<int, shared_ptr<DirectInfusionMatchData>> pair = make_pair(fragId, matchData);
-        if (fragToTheoreticalIntensitySummarized.find(pair) != fragToTheoreticalIntensitySummarized.end()) {
-            return fragToTheoreticalIntensitySummarized.at(pair);
-        } else if (fragToTheoreticalIntensity.find(pair) != fragToTheoreticalIntensity.end()) {
-            return fragToTheoreticalIntensity.at(pair);
-        } else {
-            return 0.0f; //TODO: should this throw an error?
-        }
-    }
-
-    float getObservedIntensity(int fragId, shared_ptr<DirectInfusionMatchData> matchData){
-        return fragToObservedIntensity.at(make_pair(fragId, matchData));
-    }
-
-    float getIntensityRatio(int fragId, shared_ptr<DirectInfusionMatchData> matchData){
-        return (getObservedIntensity(fragId, matchData) / getNormalizedTheoreticalIntensity(fragId, matchData));
-    }
-
-    shared_ptr<DirectInfusionSinglePeakMatchData> getSinglePeakMatchData(int fragId, shared_ptr<DirectInfusionMatchData> matchData){
-
-        shared_ptr<DirectInfusionSinglePeakMatchData> directInfusionSinglePeakMatchData = shared_ptr<DirectInfusionSinglePeakMatchData>(new DirectInfusionSinglePeakMatchData());
-
-        directInfusionSinglePeakMatchData->normalizedTheoreticalIntensity = getNormalizedTheoreticalIntensity(fragId, matchData);
-        directInfusionSinglePeakMatchData->observedIntensity = getObservedIntensity(fragId, matchData);
-
-        return directInfusionSinglePeakMatchData;
-    }
 };
 
 /**
