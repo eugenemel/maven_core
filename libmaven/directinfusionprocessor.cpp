@@ -952,34 +952,28 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getFragmentM
 }
 
 /**
- * @brief DirectInfusionProcessor::summarizeByAcylChainsAndSumComposition2
+ * @brief DirectInfusionProcessor::summarizeFragmentGroups
  * @param matchInfo
  * @param observedSpectrum
  * @param params
  * @param debug
  * @return
  *
- * First, organize all compounds based on identical fragment matches.
+ * A "fragment group" is the set of m/zs matched.
  *
- * Subdivide each group of identical fragment matches into composition summary groups, acyl summary groups,
- * or none (return original compound).
+ * The set of all fragments that match to exactly the same set of m/zs can be condensed into a summarized compound.
  *
- * Summarize to the most specific level possible within each group of fragment matches.
- *
- * In order for the summarization to take place, all of the entries have to agree.
- *
- * If even one disagrees, do not try to summarize at that level.
- *
- * If there are no levels left to summarize, revert to the general case (name-based summarization).
+ * Depending on the type of summarization, this may involve naming the fragment according to summed composition,
+ * chain length summary, or in the most general, a collection of all compounds names with no adjustments.
  *
  */
-unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByAcylChainsAndSumComposition2(
+unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFragmentGroups(
         unique_ptr<DirectInfusionMatchInformation> matchInfo,
         Fragment *observedSpectrum,
         shared_ptr<DirectInfusionSearchParameters> params,
         bool debug) {
 
-    if (debug) cout << "DirectInfusionProcessor::summarizeByAcylChainsAndSumComposition2()" << endl;
+    if (debug) cout << "irectInfusionProcessor::summarizeFragmentGroups()" << endl;
 
     for (auto it = matchInfo->fragListToCompounds.begin(); it != matchInfo->fragListToCompounds.end(); ++it) {
 
@@ -1035,13 +1029,15 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
         }
         observedMs1Intensity /= compoundList.size();
 
-        /*
-         * try to summarize to acyl chain level, then composition level, then finally fall back to identical fragment matches.
-         */
+        bool isUseAcylChainOrCompositionSummarization = params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_ACYL_CHAINS_SUM_COMPOSITION &&
+                ((!isMissingAcylChainLevel && acylChainLevel.size() == 1) || (!isMissingCompositionLevel && compositionLevel.size() == 1));
 
-        bool isUseSummarized = (!isMissingAcylChainLevel && acylChainLevel.size() == 1) || (!isMissingCompositionLevel && compositionLevel.size() == 1);
+        if (isUseAcylChainOrCompositionSummarization) {
 
-        if (isUseSummarized) {
+            /*
+             * try to summarize to acyl chain level, then composition level, then finally fall back to identical fragment matches,
+             * if these summarizations are not possible.
+             */
 
             SummarizedCompound *summarizedCompound = nullptr;
 
@@ -1207,149 +1203,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
 
 }
 
-unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByIdenticalFragmentMatches(
-        unique_ptr<DirectInfusionMatchInformation> matchInfo,
-        Fragment *observedSpectrum,
-        shared_ptr<DirectInfusionSearchParameters> params,
-        bool debug){
-
-    for (auto it = matchInfo->fragListToCompounds.begin(); it != matchInfo->fragListToCompounds.end(); ++it){
-
-        vector<shared_ptr<DirectInfusionMatchData>> compoundList = it->second;
-
-        shared_ptr<DirectInfusionMatchData> summarizedMatchData;
-
-        if (compoundList.size() == 1) {
-            summarizedMatchData = compoundList[0];
-        } else {
-            string summarizedName("{");
-
-            string adductString("");
-            string formulaString("");
-            double precursorMz = 0;
-            float exactMass = 0;
-            int charge = 0;
-
-            map<string, int> adductStringMap{};
-            map<string, int> formulaStringMap{};
-
-            vector<Compound*> compoundPtrs(compoundList.size());
-
-            float observedMs1Intensity = 0.0f;
-
-            //Issue 267: consistent name order
-            sort(compoundList.begin(), compoundList.end(), [](const shared_ptr<DirectInfusionMatchData>& lhs, const shared_ptr<DirectInfusionMatchData>& rhs){
-               return lhs->compound->name < rhs->compound->name;
-            });
-
-            for (unsigned int i = 0; i < compoundList.size(); i++) {
-                shared_ptr<DirectInfusionMatchData> compound = compoundList[i];
-
-                compoundPtrs[i] = compound->compound;
-
-                observedMs1Intensity = compound->observedMs1Intensity;
-
-                if (i > 0) {
-                    summarizedName += ";";
-                }
-
-                summarizedName = summarizedName + compound->compound->name + "|" + compound->adduct->name;
-
-                precursorMz += compound->compound->precursorMz;
-                exactMass += compound->compound->getExactMass();
-                charge += compound->compound->charge;
-
-                if (adductStringMap.find(compound->adduct->name) == adductStringMap.end()){
-                    adductStringMap.insert(make_pair(compound->adduct->name, 0));
-                }
-                adductStringMap[compound->adduct->name]++;
-
-                if (formulaStringMap.find(compound->compound->formula) == formulaStringMap.end()) {
-                    formulaStringMap.insert(make_pair(compound->compound->formula, 0));
-                }
-                formulaStringMap[compound->compound->formula]++;
-            }
-
-            precursorMz /= compoundList.size();
-            exactMass /= compoundList.size();
-            charge = static_cast<int>(charge/compoundList.size());
-
-            vector<pair<string, int>> adductNameCounts{};
-            for (auto it = adductStringMap.begin(); it != adductStringMap.end(); ++it){
-                adductNameCounts.push_back(make_pair(it->first, it->second));
-            }
-
-            vector<pair<string, int>> formulaNameCounts{};
-            for (auto it = formulaStringMap.begin(); it != formulaStringMap.end(); ++it){
-                formulaNameCounts.push_back(make_pair(it->first, it->second));
-            }
-
-            sort(adductNameCounts.begin(), adductNameCounts.end(), [](const pair<string, int>& lhs, const pair<string, int>& rhs){
-                if (lhs.second == rhs.second) {
-                    return lhs.first.compare(rhs.first);
-                } else {
-                    return lhs.second - rhs.second;
-                }
-            });
-
-            sort(formulaNameCounts.begin(), formulaNameCounts.end(), [](const pair<string, int>& lhs, const pair<string, int>& rhs){
-                if (lhs.second == rhs.second) {
-                    return lhs.first.compare(rhs.first);
-                } else {
-                    return lhs.second - rhs.second;
-                }
-            });
-
-            adductString = adductNameCounts[0].first;
-            formulaString = formulaNameCounts[0].first;
-
-            Adduct *adduct = nullptr;
-            for (auto match : compoundList){
-                if (match->adduct->name == adductString) {
-                    adduct = match->adduct;
-                    break;
-                }
-            }
-            summarizedName += "}";
-
-            SummarizedCompound *summarizedCompound = new SummarizedCompound(summarizedName, compoundPtrs);
-
-            summarizedCompound->adductString = adductString;
-            summarizedCompound->formula = formulaString;
-            summarizedCompound->precursorMz = precursorMz;
-            summarizedCompound->setExactMass(exactMass);
-            summarizedCompound->charge = charge;
-            summarizedCompound->id = summarizedName + adductString;
-
-            summarizedCompound->computeSummarizedData();
-
-            summarizedMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
-            summarizedMatchData->compound = summarizedCompound;
-            summarizedMatchData->adduct = adduct;
-            summarizedMatchData->fragmentationMatchScore = summarizedCompound->scoreCompoundHit(observedSpectrum, params->ms2PpmTolr, false);
-
-            summarizedMatchData->observedMs1Intensity = observedMs1Intensity;
-
-        }
-
-        matchInfo->matchDataToFragsSummarized.insert(make_pair(summarizedMatchData, it->first));
-    }
-
-    for (auto it = matchInfo->matchDataToFragsSummarized.begin(); it != matchInfo->matchDataToFragsSummarized.end(); ++it) {
-
-        vector<int> fragList = it->second;
-
-        for (auto frag : fragList) {
-            if (matchInfo->fragToMatchDataSummarized.find(frag) == matchInfo->fragToMatchDataSummarized.end()) {
-                matchInfo->fragToMatchDataSummarized.insert(make_pair(frag, vector<shared_ptr<DirectInfusionMatchData>>()));
-            }
-            matchInfo->fragToMatchDataSummarized[frag].push_back(it->first);
-        }
-    }
-
-    return matchInfo;
-}
-
 //Issue 270
 unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::reduceBySimpleParsimony(
         unique_ptr<DirectInfusionMatchInformation> matchInfo,
@@ -1429,11 +1282,9 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
          matchInfo->fragToMatchDataSummarized = matchInfo->fragToMatchData;
          matchInfo->matchDataToFragsSummarized = matchInfo->matchDataToFrags;
 
-    } else if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE ||
-               params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_ACYL_CHAINS_SUM_COMPOSITION) {
-         matchInfo = summarizeByAcylChainsAndSumComposition2(move(matchInfo), observedSpectrum, params, debug);
-    } else if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_IDENTICAL_FRAGMENTS) {
-        matchInfo = summarizeByIdenticalFragmentMatches(move(matchInfo), observedSpectrum, params, debug);
+    } else {
+        //Issue 273: all summarization approaches based on identical fragment groups
+        matchInfo = summarizeFragmentGroups(move(matchInfo), observedSpectrum, params, debug);
     }
 
     if (debug) {
