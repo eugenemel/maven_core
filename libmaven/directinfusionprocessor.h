@@ -535,19 +535,20 @@ struct DirectInfusionMatchInformation {
 
 public:
 
-    //observed
+    //intensity information from corresponding Fragment* or Scan*
+    map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> fragToTheoreticalIntensity = {};
     map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> fragToObservedIntensity = {};
 
     //unsummarized
     map<int, vector<shared_ptr<DirectInfusionMatchData>>> fragToMatchData = {};
     map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToFrags = {};
-    map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> fragToTheoreticalIntensity = {};
-    map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> fragListToCompounds = {};
 
     //summarized
     map<int, vector<shared_ptr<DirectInfusionMatchData>>> fragToMatchDataSummarized = {};
     map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToFragsSummarized  = {};
-    map<pair<int, shared_ptr<DirectInfusionMatchData>>,float> fragToTheoreticalIntensitySummarized = {};
+
+    //by fragment group
+    map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> fragListToCompounds = {};
 };
 
 /**
