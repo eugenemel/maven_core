@@ -959,7 +959,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
         shared_ptr<DirectInfusionSearchParameters> params,
         bool debug) {
 
-    if (debug) cout << "irectInfusionProcessor::summarizeFragmentGroups()" << endl;
+    if (debug) cout << "directInfusionProcessor::summarizeFragmentGroups()" << endl;
 
     for (auto it = matchInfo->fragListToCompounds.begin(); it != matchInfo->fragListToCompounds.end(); ++it) {
 
