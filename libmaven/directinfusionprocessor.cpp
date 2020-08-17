@@ -1303,58 +1303,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             }
             cerr << endl;
         }
-
-        cerr << "Chain Summaries --> Compounds:" << endl;
-
-        for (stringToMatchDataIterator iterator = matchInfo->chainLengthSummaries.begin(); iterator != matchInfo->chainLengthSummaries.end(); ++iterator){
-            string summary = iterator->first;
-            set<shared_ptr<DirectInfusionMatchData>> chainLengthMatchDataSet = iterator->second;
-
-            cerr << "Summary= " << summary << ": ";
-            for (auto chainMatch : chainLengthMatchDataSet) {
-                cerr << chainMatch->compound->name << "|" << chainMatch->compound->adductString << " ";
-            }
-            cerr << endl;
-        }
-
-        cerr << "Composition Summaries --> Compounds:" << endl;
-
-        for (stringToMatchDataIterator iterator = matchInfo->compositionSummaries.begin(); iterator != matchInfo->compositionSummaries.end(); ++iterator){
-            string summary = iterator->first;
-            set<shared_ptr<DirectInfusionMatchData>> compositionMatchDataSet = iterator->second;
-
-            cerr << "Summary= " << summary << ": ";
-            for (auto compMatch : compositionMatchDataSet) {
-                cerr << compMatch->compound->name << "|" << compMatch->compound->adductString << " ";
-            }
-            cerr << endl;
-        }
-
-        cerr << "Summarized Fragments --> Summarized Compounds: (" << matchInfo->matchDataToFragsSummarized.size() << " passing compounds)" << endl;
-
-        for (fragToMatchDataIterator iterator = matchInfo->fragToMatchDataSummarized.begin(); iterator != matchInfo->fragToMatchDataSummarized.end(); ++iterator) {
-            int frag = iterator->first;
-            vector<shared_ptr<DirectInfusionMatchData>> compounds = iterator->second;
-            cerr<< "frag= " << intKeyToMz(frag) << " m/z : ";
-            for (auto matchData : compounds) {
-                cerr << matchData->compound->name << "|" << matchData->compound->adductString << " ";
-            }
-            cerr << endl;
-        }
-
-        cerr << "Summarized Compounds --> Summarized Fragments: (" << matchInfo->fragToMatchDataSummarized.size() << " matched fragments)" << endl;
-
-        for (matchDataToFragIterator iterator = matchInfo->matchDataToFragsSummarized.begin(); iterator != matchInfo->matchDataToFragsSummarized.end(); ++iterator) {
-
-            shared_ptr<DirectInfusionMatchData> directInfusionMatchData = iterator->first;
-            vector<int> frags = iterator->second;
-
-            cerr << "Compound= " << directInfusionMatchData->compound->name << "|" << directInfusionMatchData->compound->adductString << ": ";
-            for (auto frag : frags){
-                cerr << intKeyToMz(frag) << " ";
-            }
-            cerr << endl;
-        }
     }
 
     return matchInfo;
