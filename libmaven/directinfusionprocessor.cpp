@@ -995,6 +995,12 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
             continue;
         }
 
+        //Issue 267: consistent name order
+        //Issue 272: avoid rounding errors by always computing average in the same order
+        sort(compoundList.begin(), compoundList.end(), [](const shared_ptr<DirectInfusionMatchData>& lhs, const shared_ptr<DirectInfusionMatchData>& rhs){
+           return lhs->compound->name < rhs->compound->name;
+        });
+
         /*
          *  Determine how to summarize identical fragment matched compounds (acyl chain, composition, or general)
          */
@@ -1008,12 +1014,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeByA
         Adduct *adduct = nullptr;
         vector<Compound*> compounds;
         float observedMs1Intensity = 0.0f;
-
-        //Issue 267: consistent name order
-        //Issue 272: avoid rounding errors by always computing average in the same order
-        sort(compoundList.begin(), compoundList.end(), [](const shared_ptr<DirectInfusionMatchData>& lhs, const shared_ptr<DirectInfusionMatchData>& rhs){
-           return lhs->compound->name < rhs->compound->name;
-        });
 
         for (auto matchData : compoundList) {
 
