@@ -721,25 +721,6 @@ public:
              shared_ptr<DirectInfusionSearchParameters> params,
              bool debug);
 
-
-     /**
-      * @brief summarizeByAcylChainAndSummedComposition
-      * @param allCandidates
-      * @param matchInfo
-      * @param observedSpectrum
-      * @param params
-      * @param debug
-      *
-      *  @deprecated
-      * Issue 233: This should eventually be deleted, as summarizeByAcylChainsAndSumComposition2()
-      * is now the preferred method.
-      */
-     static unique_ptr<DirectInfusionMatchInformation> summarizeByAcylChainsAndSumComposition(
-             unique_ptr<DirectInfusionMatchInformation> matchInfo,
-             Fragment *observedSpectrum,
-             shared_ptr<DirectInfusionSearchParameters> params,
-             bool debug);
-
      /**
       * @brief summarizeByAcylChainsAndSumComposition2
       * Issue 233: Possible off-by-one / strange counting errors
