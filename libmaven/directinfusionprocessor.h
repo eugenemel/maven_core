@@ -535,15 +535,17 @@ struct DirectInfusionMatchInformation {
 
 public:
 
-    //unsummarized
+    //single fragment m/z ==> all identified compounds containing fragment
     map<int, vector<shared_ptr<DirectInfusionMatchData>>> fragToMatchData = {};
+
+    //single compound ==> all identified fragment mz/s
     map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToFrags = {};
 
     //summarized
     map<int, vector<shared_ptr<DirectInfusionMatchData>>> fragToMatchDataSummarized = {};
     map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToFragsSummarized  = {};
 
-    //by fragment group
+    //group of identified fragment m/zs ==> all identified compounds
     map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> fragListToCompounds = {};
 };
 
