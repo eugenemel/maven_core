@@ -723,27 +723,17 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 
         vector<shared_ptr<DirectInfusionMatchData>> processedMatchData{};
 
-        if (params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_MAX_THEORETICAL_INTENSITY_UNIQUE){
+        //Issue 273: do not bother to compute rank for any available spectral agglomeration option.
 
-            processedMatchData = DirectInfusionProcessor::calculateRankByMaxTheoreticalIntensityOfUniqueFragments(
-                        matchInfo.get(),
-                        f->consensus,
-                        params,
-                        debug);
-        } else {
+        processedMatchData.resize(matchInfo->matchDataToFragsSummarized.size());
 
-            //do not bother to compute rank
-
-            processedMatchData.resize(matchInfo->matchDataToFragsSummarized.size());
-
-            unsigned int i = 0;
-            for (auto it = matchInfo->matchDataToFragsSummarized.begin(); it != matchInfo->matchDataToFragsSummarized.end(); ++it){
-                processedMatchData[i] = it->first;
-                i++;
-            }
-
-            directInfusionAnnotation->compounds = processedMatchData;
+        unsigned int i = 0;
+        for (auto it = matchInfo->matchDataToFragsSummarized.begin(); it != matchInfo->matchDataToFragsSummarized.end(); ++it){
+            processedMatchData[i] = it->first;
+            i++;
         }
+
+        directInfusionAnnotation->compounds = processedMatchData;
 
         //Issue 210: uniqueness filter
         if (params->ms2MinNumUniqueMatches > 0) {
@@ -1370,102 +1360,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
     return matchInfo;
 }
 
-vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionProcessor::calculateRankByMaxTheoreticalIntensityOfUniqueFragments(
-        DirectInfusionMatchInformation *matchInfo,
-        Fragment *observedSpectrum,
-        shared_ptr<DirectInfusionSearchParameters> params,
-        bool debug){
-
-    if (debug) {
-        cerr << "matchInfo->fragToMatchDataSummarized: " << matchInfo->fragToMatchDataSummarized.size() << " entries." << endl;
-        cerr << "matchInfo->matchDataToFragsSummarized: " << matchInfo->matchDataToFragsSummarized.size() << " entries." << endl;
-    }
-
-    map<shared_ptr<DirectInfusionMatchData>, vector<shared_ptr<DirectInfusionSinglePeakMatchData>>> compoundToUniqueFragmentIntensities = {};
-
-    for (fragToMatchDataIterator iterator = matchInfo->fragToMatchDataSummarized.begin(); iterator != matchInfo->fragToMatchDataSummarized.end(); ++iterator) {
-        if (iterator->second.size() == 1) { // unique fragment
-
-            shared_ptr<DirectInfusionMatchData> compound = iterator->second[0];
-            int fragId = iterator->first;
-
-//                if (debug) cerr << "Found unique fragment for " << compound->compound->name << ": fragId=" << fragId << endl;
-
-            shared_ptr<DirectInfusionSinglePeakMatchData> intensityData = matchInfo->getSinglePeakMatchData(fragId, compound);
-
-//                if (debug) cerr << "Retrieved intensityData for " << compound->compound->name << ": fragId=" << fragId  << "." << endl;
-
-            matchDataToFragIntensityIterator it = compoundToUniqueFragmentIntensities.find(compound);
-            if (it != compoundToUniqueFragmentIntensities.end()) {
-                compoundToUniqueFragmentIntensities[compound].push_back(intensityData);
-            } else {
-                vector<shared_ptr<DirectInfusionSinglePeakMatchData>> observedIntensities(1);
-                observedIntensities[0] = intensityData;
-                compoundToUniqueFragmentIntensities.insert(make_pair(compound, observedIntensities));
-            }
-
-        }
-    }
-
-    map<shared_ptr<DirectInfusionMatchData>, float> results = {};
-    float sumIntensity = 0;
-
-    for (matchDataToFragIntensityIterator iterator = compoundToUniqueFragmentIntensities.begin(); iterator != compoundToUniqueFragmentIntensities.end(); ++iterator){
-
-        shared_ptr<DirectInfusionMatchData> directInfusionMatchData = iterator->first;
-        vector<shared_ptr<DirectInfusionSinglePeakMatchData>> fragIntensityDataVector = iterator->second;
-
-        float representativeIntensity = 0;
-        float maxNormalizedTheoreticalIntensity = 0;
-        for (auto intensityData : fragIntensityDataVector) {
-            if (intensityData->normalizedTheoreticalIntensity > maxNormalizedTheoreticalIntensity){
-                maxNormalizedTheoreticalIntensity = intensityData->normalizedTheoreticalIntensity;
-                representativeIntensity = intensityData->getIntensityRatio();
-            }
-        }
-
-        sumIntensity += representativeIntensity;
-        results.insert(make_pair(directInfusionMatchData, representativeIntensity));
-
-        if (debug) {
-            cerr << "Compound= " << directInfusionMatchData->compound->name << "|" << directInfusionMatchData->compound->adductString << ": ";
-            for (auto frag : fragIntensityDataVector){
-                cerr << frag << " ";
-            }
-            cerr << "median=" << representativeIntensity << endl;
-        }
-
-    }
-
-    vector<shared_ptr<DirectInfusionMatchData>> passingMatchData;
-    for (matchDataToFloatIterator iterator = results.begin(); iterator != results.end(); ++iterator) {
-
-        shared_ptr<DirectInfusionMatchData> directInfusionMatchData = iterator->first;
-        float intensity = iterator->second;
-
-        double proportion = static_cast<double>(intensity/sumIntensity);
-
-        directInfusionMatchData->proportion = proportion;
-        passingMatchData.push_back(directInfusionMatchData);
-
-        if (debug) {
-            cerr << "Compound= " << directInfusionMatchData->compound->name << "|" << directInfusionMatchData->compound->adductString <<": " << proportion << endl;
-        }
-    }
-
-    //Issue 210: Retain match data that do not have any unique fragments.
-    for (auto it = matchInfo->matchDataToFragsSummarized.begin(); it != matchInfo->matchDataToFragsSummarized.end(); ++it){
-
-        shared_ptr<DirectInfusionMatchData> directInfusionMatchData = it->first;
-
-        if (results.find(directInfusionMatchData) == results.end()) {
-            passingMatchData.push_back(directInfusionMatchData);
-        }
-
-    }
-
-    return passingMatchData;
-}
 
 void DirectInfusionProcessor::addBlockSpecificMatchInfo(
         DirectInfusionMatchInformation *matchInfo,

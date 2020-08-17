@@ -667,24 +667,6 @@ public:
              const vector<Ms3Compound*>& ms3Compounds,
              shared_ptr<DirectInfusionSearchParameters> params,
              bool debug);
-     /**
-      * @brief deconvolveAllShared
-      * @param allCandidates
-      * @return
-      *
-      * Triggered by SpectralDeconvolutionAlgorithm::ALL_SHARED
-      *
-      * Removes compounds with all shared fragments, computes relative abundance based on
-      * unshared fragments.
-      *
-      * Input is the list of all candidates, plus the observed spectrum they all matched to
-      */
-     static vector<shared_ptr<DirectInfusionMatchData>> calculateRankByMaxTheoreticalIntensityOfUniqueFragments(
-             DirectInfusionMatchInformation *directInfusionMatchInformationPtr,
-             Fragment *observedSpectrum,
-             shared_ptr<DirectInfusionSearchParameters> params,
-             bool debug
-             );
 
      /**
       * @brief organizeMs3ScansByPrecursor
