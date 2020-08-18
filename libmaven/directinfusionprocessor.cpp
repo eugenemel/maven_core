@@ -719,6 +719,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
                     debug);
 
         directInfusionAnnotation->compounds = matchInfo->getCompounds();
+        directInfusionAnnotation->matchInformation = move(matchInfo);
 
         return directInfusionAnnotation;
     }

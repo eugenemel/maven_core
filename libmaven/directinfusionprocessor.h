@@ -754,7 +754,6 @@ public:
       *     relevant pieces are MS2 scans of interest
       *     ie, scansByPrecursorMap
       */
-     //static DirectInfusionAnnotation*
      static DirectInfusionAnnotation* processBlock(int blockNum,
                               const pair<float,float>& mzRange,
                               mzSample* sample,
@@ -820,6 +819,12 @@ public:
      * otherwise same data as 'scan'.
      */
     Fragment* fragmentationPattern;
+
+    /**
+     * @brief matchInformation
+     * series mappings between compounds and identified ms2 fragments
+     */
+    unique_ptr<DirectInfusionMatchInformation> matchInformation;
 
     /**
      * compound, adduct, and estimated proportion of the spectrum
