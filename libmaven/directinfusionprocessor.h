@@ -544,6 +544,30 @@ public:
     //single fragment m/z ==> all identified compounds containing fragment
     map<int, unordered_set<shared_ptr<DirectInfusionMatchData>>> fragToMatchData = {};
 
+    /**
+     * @brief getCompounds
+     *
+     * method to compute current set of compounds, based on the current status of the
+     * data within this struct
+     *
+     * This is intentionally left as a method instead of a field to avoid duplicated state
+     * dependencies.
+     *
+     * @return
+     */
+    vector<shared_ptr<DirectInfusionMatchData>> getCompounds() {
+
+        vector<shared_ptr<DirectInfusionMatchData>> compounds(matchDataToFrags.size());
+
+        unsigned int i = 0;
+        for (auto it = matchDataToFrags.begin(); it != matchDataToFrags.end(); ++it){
+            compounds[i] = it->first;
+            i++;
+        }
+
+        return compounds;
+    }
+
 };
 
 /**

@@ -711,24 +711,14 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         directInfusionAnnotation->scan = representativeScan;
         directInfusionAnnotation->fragmentationPattern = f;
 
-        //determine fragment match maps, and mutate compounds, if needed.
-        //includes agglomerating compounds into SummarizedCompounds.
+        //determine fragment match maps, apply filters, and agglomerate compounds (if needed)
         unique_ptr<DirectInfusionMatchInformation> matchInfo = DirectInfusionProcessor::getMatchInformation(
                     libraryMatches,
                     f->consensus,
                     params,
                     debug);
 
-        //TODO: relocate match info
-        vector<shared_ptr<DirectInfusionMatchData>> processedMatchData(matchInfo->matchDataToFrags.size());
-
-        unsigned int i = 0;
-        for (auto it = matchInfo->matchDataToFrags.begin(); it != matchInfo->matchDataToFrags.end(); ++it){
-            processedMatchData[i] = it->first;
-            i++;
-        }
-
-        directInfusionAnnotation->compounds = processedMatchData;
+        directInfusionAnnotation->compounds = matchInfo->getCompounds();
 
         return directInfusionAnnotation;
     }
