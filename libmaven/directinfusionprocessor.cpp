@@ -676,7 +676,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 
     vector<shared_ptr<DirectInfusionMatchData>> libraryMatches;
 
-    //Compare to library
+    //Compare data to library
     for (auto libraryEntry : library){
 
         unique_ptr<DirectInfusionMatchAssessment> matchAssessment = assessMatch(f, ms1Fragment, libraryEntry, params, debug);
@@ -684,6 +684,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         float fragmentMaxObservedIntensity = matchAssessment->fragmentMaxObservedIntensity;
         float observedMs1Intensity = matchAssessment->observedMs1Intensity;
 
+        //individual compound matches
         if (s.numMatches >= params->ms2MinNumMatches &&
                 s.numDiagnosticMatches >= params->ms2MinNumDiagnosticMatches &&
                 params->isDiagnosticFragmentMapAgreement(matchAssessment->diagnosticFragmentMatchMap)) {
