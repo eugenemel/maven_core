@@ -719,27 +719,13 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
                     params,
                     debug);
 
-        DirectInfusionProcessor::addBlockSpecificMatchInfo(matchInfo.get(), f->consensus, params, debug);
-
+        //TODO: relocate match info
         vector<shared_ptr<DirectInfusionMatchData>> processedMatchData(matchInfo->matchDataToFrags.size());
 
         unsigned int i = 0;
         for (auto it = matchInfo->matchDataToFrags.begin(); it != matchInfo->matchDataToFrags.end(); ++it){
             processedMatchData[i] = it->first;
             i++;
-        }
-
-        directInfusionAnnotation->compounds = processedMatchData;
-
-        //Issue 210: uniqueness filter
-        if (params->ms2MinNumUniqueMatches > 0) {
-            vector<shared_ptr<DirectInfusionMatchData>> uniqueFilteredMatchData;
-            for (auto compound : processedMatchData){
-                if (compound->numUniqueFragments >= params->ms2MinNumUniqueMatches) {
-                    uniqueFilteredMatchData.push_back(compound);
-                }
-            }
-            processedMatchData = uniqueFilteredMatchData;
         }
 
         directInfusionAnnotation->compounds = processedMatchData;
@@ -1206,7 +1192,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::reduceBySimp
     map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> reducedFragListToCompounds{};
 
     map<shared_ptr<DirectInfusionMatchData>, vector<int>> reducedMatchDataToFrags{};
-    map<int, vector<shared_ptr<DirectInfusionMatchData>>> reducedFragToMatchData = {};
+    map<int, vector<shared_ptr<DirectInfusionMatchData>>> reducedFragToMatchData{};
 
     vector<vector<int>> fragmentGroupsReducedyByParsimony = mzUtils::simpleParsimonyReducer(fragmentGroups);
 
@@ -1222,11 +1208,10 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::reduceBySimp
 
             for (int frag : group) {
 
-                pair<int, shared_ptr<DirectInfusionMatchData>> key = make_pair(frag, compound);
-
                 if (reducedFragToMatchData.find(frag) == reducedFragToMatchData.end()) {
                     reducedFragToMatchData.insert(make_pair(frag, vector<shared_ptr<DirectInfusionMatchData>>{}));
                 }
+
                 reducedFragToMatchData[frag].push_back(compound);
 
             }
@@ -1237,6 +1222,52 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::reduceBySimp
     matchInfo->fragListToCompounds = reducedFragListToCompounds;
     matchInfo->matchDataToFrags = reducedMatchDataToFrags;
     matchInfo->fragToMatchData = reducedFragToMatchData;
+
+    return matchInfo;
+}
+
+
+unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::reduceByUniqueMatches(
+            unique_ptr<DirectInfusionMatchInformation> matchInfo,
+            Fragment* observedSpectrum,
+            shared_ptr<DirectInfusionSearchParameters> params,
+        bool debug){
+
+    map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> reducedFragListToCompounds{};
+
+    map<shared_ptr<DirectInfusionMatchData>, vector<int>> reducedMatchDataToFrags{};
+    map<int, vector<shared_ptr<DirectInfusionMatchData>>> reducedFragToMatchData = {};
+
+
+    for (auto it = matchInfo->matchDataToFrags.begin(); it != matchInfo->matchDataToFrags.end(); ++it){
+
+        shared_ptr<DirectInfusionMatchData> matchData = it->first;
+        vector<int> matchDataFrags = it->second;
+
+        if (matchData->numUniqueFragments >= params->ms2MinNumUniqueMatches) {
+
+            reducedMatchDataToFrags.insert(make_pair(matchData, matchDataFrags));
+
+            if (reducedFragListToCompounds.find(matchDataFrags) == reducedFragListToCompounds.end()) {
+                reducedFragListToCompounds.insert(make_pair(matchDataFrags, vector<shared_ptr<DirectInfusionMatchData>>()));
+            }
+            reducedFragListToCompounds[matchDataFrags].push_back(matchData);
+
+            //TODO: how to prevent duplicates here?
+            for (auto frag : matchDataFrags) {
+                if (reducedFragToMatchData.find(frag) == reducedFragToMatchData.end()) {
+                    reducedFragToMatchData.insert(make_pair(frag, vector<shared_ptr<DirectInfusionMatchData>>()));
+                }
+                reducedFragToMatchData[frag].push_back(matchData);
+            }
+        }
+    }
+
+    matchInfo->fragListToCompounds = reducedFragListToCompounds;
+    matchInfo->matchDataToFrags = reducedMatchDataToFrags;
+    matchInfo->fragToMatchData = reducedFragToMatchData;
+
+    //TODO: not finished yet, see previous TODO
 
     return matchInfo;
 }
@@ -1258,6 +1289,12 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
     //Issue 273: all summarization approaches based on identical fragment groups
     if (params->spectralCompositionAlgorithm != SpectralCompositionAlgorithm::ALL_CANDIDATES){
         matchInfo = summarizeFragmentGroups(move(matchInfo), observedSpectrum, params, debug);
+    }
+
+    addBlockSpecificMatchInfo(matchInfo.get(), observedSpectrum, params, debug);
+
+    if (params->ms2MinNumUniqueMatches > 0) {
+        matchInfo = reduceByUniqueMatches(move(matchInfo), observedSpectrum, params, debug);
     }
 
     if (debug) {

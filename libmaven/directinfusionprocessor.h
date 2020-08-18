@@ -538,11 +538,12 @@ public:
     //group of identified fragment m/zs ==> all identified compounds
     map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> fragListToCompounds = {};
 
+    //single compound ==> all identified fragment mz/s
+    map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToFrags = {};
+
     //single fragment m/z ==> all identified compounds containing fragment
     map<int, vector<shared_ptr<DirectInfusionMatchData>>> fragToMatchData = {};
 
-    //single compound ==> all identified fragment mz/s
-    map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToFrags = {};
 };
 
 /**
@@ -637,6 +638,25 @@ public:
              bool debug);
 
      /**
+      * @brief getMatches
+      * @param allCandidates
+      *
+      * @return
+      * function to return all compound matches organized into maps, either with key as compound
+      * or fragment m/z.
+      *
+      * fragments converted m/z <--> int keys using mzToIntKey(mz, 1000000) and intKeyToMz(intKey, 1000000).
+      *
+      * Note that this function does no processing, filtering, or analysis - it simply reorganizes
+      * the compound match data into maps.
+      */
+     static unique_ptr<DirectInfusionMatchInformation> getMatchInformation(
+             vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
+             Fragment *observedSpectrum,
+             shared_ptr<DirectInfusionSearchParameters> params,
+             bool debug);
+
+     /**
       * @brief DirectInfusionProcessor::getFragmentMatchMaps
       * @param allCandidates
       * @param observedSpectrum
@@ -648,20 +668,6 @@ public:
       */
      static unique_ptr<DirectInfusionMatchInformation> getFragmentMatchMaps(
              vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
-             Fragment *observedSpectrum,
-             shared_ptr<DirectInfusionSearchParameters> params,
-             bool debug);
-
-     /**
-      * @brief DirectInfusionProcessor::summarizeFragmentGroups
-      * @param matchInfo
-      * @param observedSpectrum
-      * @param params
-      * @param debug
-      * @return
-      */
-     static unique_ptr<DirectInfusionMatchInformation> summarizeFragmentGroups(
-             unique_ptr<DirectInfusionMatchInformation> matchInfo,
              Fragment *observedSpectrum,
              shared_ptr<DirectInfusionSearchParameters> params,
              bool debug);
@@ -686,24 +692,27 @@ public:
              unique_ptr<DirectInfusionMatchInformation> matchInfo,
              shared_ptr<DirectInfusionSearchParameters> params,
              bool debug);
+
      /**
-      * @brief getMatches
-      * @param allCandidates
-      *
+      * @brief DirectInfusionProcessor::summarizeFragmentGroups
+      * @param matchInfo
+      * @param observedSpectrum
+      * @param params
+      * @param debug
       * @return
-      * function to return all compound matches organized into maps, either with key as compound
-      * or fragment m/z.
-      *
-      * fragments converted m/z <--> int keys using mzToIntKey(mz, 1000000) and intKeyToMz(intKey, 1000000).
-      *
-      * Note that this function does no processing, filtering, or analysis - it simply reorganizes
-      * the compound match data into maps.
       */
-     static unique_ptr<DirectInfusionMatchInformation> getMatchInformation(
-             vector<shared_ptr<DirectInfusionMatchData>> allCandidates,
+     static unique_ptr<DirectInfusionMatchInformation> summarizeFragmentGroups(
+             unique_ptr<DirectInfusionMatchInformation> matchInfo,
              Fragment *observedSpectrum,
              shared_ptr<DirectInfusionSearchParameters> params,
              bool debug);
+
+
+    static unique_ptr<DirectInfusionMatchInformation> reduceByUniqueMatches(
+            unique_ptr<DirectInfusionMatchInformation> matchInfo,
+            Fragment* observedSpectrum,
+            shared_ptr<DirectInfusionSearchParameters> params,
+            bool debug);
 
 
      static void addBlockSpecificMatchInfo(
