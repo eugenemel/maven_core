@@ -1249,7 +1249,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::reduceByUniq
             }
             reducedFragListToCompounds[matchDataFrags].push_back(matchData);
 
-            //TODO: how to prevent duplicates here?
             for (auto frag : matchDataFrags) {
                 if (reducedFragToMatchData.find(frag) == reducedFragToMatchData.end()) {
                     reducedFragToMatchData.insert(make_pair(frag, unordered_set<shared_ptr<DirectInfusionMatchData>>()));
@@ -1262,8 +1261,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::reduceByUniq
     matchInfo->fragListToCompounds = reducedFragListToCompounds;
     matchInfo->matchDataToFrags = reducedMatchDataToFrags;
     matchInfo->fragToMatchData = reducedFragToMatchData;
-
-    //TODO: not finished yet, see previous TODO
 
     return matchInfo;
 }
