@@ -1173,6 +1173,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
         summarizedFragListToCompounds.insert(make_pair(fragList, matchDataVector));
     }
 
+    matchInfo->fragListToCompounds = summarizedFragListToCompounds;
     matchInfo->fragToMatchData = summarizedFragToMatchData;
     matchInfo->matchDataToFrags = summarizedMatchDataToFrags;
 
