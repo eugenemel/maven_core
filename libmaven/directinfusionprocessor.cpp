@@ -939,6 +939,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
 
     if (debug) cout << "directInfusionProcessor::summarizeFragmentGroups()" << endl;
 
+    map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> summarizedFragListToCompounds{};
     map<shared_ptr<DirectInfusionMatchData>, vector<int>> summarizedMatchDataToFrags{};
     map<int, unordered_set<shared_ptr<DirectInfusionMatchData>>> summarizedFragToMatchData{};
 
@@ -1153,8 +1154,10 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
 
         summarizedMatchDataToFrags.insert(make_pair(summarizedMatchData, it->first));
     }
+
     for (auto it = summarizedMatchDataToFrags.begin(); it != summarizedMatchDataToFrags.end(); ++it) {
 
+        shared_ptr<DirectInfusionMatchData> matchData = it->first;
         vector<int> fragList = it->second;
 
         for (auto frag : fragList) {
@@ -1163,6 +1166,11 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
             }
             summarizedFragToMatchData[frag].insert(it->first);
         }
+
+        //after summarization, every fragList corresponds to only one compound
+        vector<shared_ptr<DirectInfusionMatchData>> matchDataVector = vector<shared_ptr<DirectInfusionMatchData>>(1);
+        matchDataVector[0] = matchData;
+        summarizedFragListToCompounds.insert(make_pair(fragList, matchDataVector));
     }
 
     matchInfo->fragToMatchData = summarizedFragToMatchData;
