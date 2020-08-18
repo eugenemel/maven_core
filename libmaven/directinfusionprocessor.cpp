@@ -887,8 +887,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getFragmentM
 
                pair<int, shared_ptr<DirectInfusionMatchData>> key = make_pair(fragInt, directInfusionMatchData);
 
-               fragToMatchDataIterator it = matchInfo->fragToMatchData.find(fragInt);
-
                if (matchInfo->fragToMatchData.find(fragInt) == matchInfo->fragToMatchData.end()) {
                    matchInfo->fragToMatchData.insert(make_pair(fragInt, unordered_set<shared_ptr<DirectInfusionMatchData>>()));
                }
@@ -1298,7 +1296,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
     if (debug) {
         cerr << "Fragments --> Compounds: (" << matchInfo->matchDataToFrags.size() << " passing compounds)" << endl;
 
-        for (fragToMatchDataIterator iterator = matchInfo->fragToMatchData.begin(); iterator != matchInfo->fragToMatchData.end(); ++iterator) {
+        for (auto iterator = matchInfo->fragToMatchData.begin(); iterator != matchInfo->fragToMatchData.end(); ++iterator) {
             int frag = iterator->first;
             unordered_set<shared_ptr<DirectInfusionMatchData>> compounds = iterator->second;
             cerr<< "frag= " << intKeyToMz(frag) << " m/z : ";
@@ -1310,7 +1308,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
         cerr << "Compounds --> Fragments: (" << matchInfo->fragToMatchData.size() << " matched fragments)" << endl;
 
-        for (matchDataToFragIterator iterator = matchInfo->matchDataToFrags.begin(); iterator != matchInfo->matchDataToFrags.end(); ++iterator) {
+        for (auto iterator = matchInfo->matchDataToFrags.begin(); iterator != matchInfo->matchDataToFrags.end(); ++iterator) {
 
             shared_ptr<DirectInfusionMatchData> directInfusionMatchData = iterator->first;
             vector<int> frags = iterator->second;

@@ -858,11 +858,3 @@ public:
             bool debug);
 
 };
-
-typedef map<int, unordered_set<shared_ptr<DirectInfusionMatchData>>>::iterator fragToMatchDataIterator;
-typedef map<shared_ptr<DirectInfusionMatchData>, vector<int>>::iterator matchDataToFragIterator;
-typedef map<shared_ptr<DirectInfusionMatchData>, vector<shared_ptr<DirectInfusionSinglePeakMatchData>>>::iterator matchDataToFragIntensityIterator;
-typedef map<shared_ptr<DirectInfusionMatchData>, float>::iterator matchDataToFloatIterator;
-typedef map<string, std::set<shared_ptr<DirectInfusionMatchData>>>::iterator stringToMatchDataIterator;
-typedef map<shared_ptr<DirectInfusionMatchData>, string>::iterator matchToStringIterator;
-
