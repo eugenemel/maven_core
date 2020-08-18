@@ -542,7 +542,7 @@ public:
     map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToFrags = {};
 
     //single fragment m/z ==> all identified compounds containing fragment
-    map<int, vector<shared_ptr<DirectInfusionMatchData>>> fragToMatchData = {};
+    map<int, unordered_set<shared_ptr<DirectInfusionMatchData>>> fragToMatchData = {};
 
 };
 
@@ -859,7 +859,7 @@ public:
 
 };
 
-typedef map<int, vector<shared_ptr<DirectInfusionMatchData>>>::iterator fragToMatchDataIterator;
+typedef map<int, unordered_set<shared_ptr<DirectInfusionMatchData>>>::iterator fragToMatchDataIterator;
 typedef map<shared_ptr<DirectInfusionMatchData>, vector<int>>::iterator matchDataToFragIterator;
 typedef map<shared_ptr<DirectInfusionMatchData>, vector<shared_ptr<DirectInfusionSinglePeakMatchData>>>::iterator matchDataToFragIntensityIterator;
 typedef map<shared_ptr<DirectInfusionMatchData>, float>::iterator matchDataToFloatIterator;

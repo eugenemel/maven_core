@@ -889,13 +889,11 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getFragmentM
 
                fragToMatchDataIterator it = matchInfo->fragToMatchData.find(fragInt);
 
-               if (it != matchInfo->fragToMatchData.end()) {
-                   matchInfo->fragToMatchData[fragInt].push_back(directInfusionMatchData);
-               } else {
-                   vector<shared_ptr<DirectInfusionMatchData>> matchingCompounds(1);
-                   matchingCompounds[0] = directInfusionMatchData;
-                   matchInfo->fragToMatchData.insert(make_pair(fragInt, matchingCompounds));
+               if (matchInfo->fragToMatchData.find(fragInt) == matchInfo->fragToMatchData.end()) {
+                   matchInfo->fragToMatchData.insert(make_pair(fragInt, unordered_set<shared_ptr<DirectInfusionMatchData>>()));
                }
+
+               matchInfo->fragToMatchData[fragInt].insert(directInfusionMatchData);
 
    //            if (debug) cerr << "allCandidates [end] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
            }
@@ -944,7 +942,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
     if (debug) cout << "directInfusionProcessor::summarizeFragmentGroups()" << endl;
 
     map<shared_ptr<DirectInfusionMatchData>, vector<int>> summarizedMatchDataToFrags{};
-    map<int, vector<shared_ptr<DirectInfusionMatchData>>> summarizedFragToMatchData{};
+    map<int, unordered_set<shared_ptr<DirectInfusionMatchData>>> summarizedFragToMatchData{};
 
     for (auto it = matchInfo->fragListToCompounds.begin(); it != matchInfo->fragListToCompounds.end(); ++it) {
 
@@ -1163,9 +1161,9 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
 
         for (auto frag : fragList) {
             if (summarizedFragToMatchData.find(frag) == summarizedFragToMatchData.end()) {
-                summarizedFragToMatchData.insert(make_pair(frag, vector<shared_ptr<DirectInfusionMatchData>>()));
+                summarizedFragToMatchData.insert(make_pair(frag, unordered_set<shared_ptr<DirectInfusionMatchData>>()));
             }
-            summarizedFragToMatchData[frag].push_back(it->first);
+            summarizedFragToMatchData[frag].insert(it->first);
         }
     }
 
@@ -1192,7 +1190,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::reduceBySimp
     map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> reducedFragListToCompounds{};
 
     map<shared_ptr<DirectInfusionMatchData>, vector<int>> reducedMatchDataToFrags{};
-    map<int, vector<shared_ptr<DirectInfusionMatchData>>> reducedFragToMatchData{};
+    map<int, unordered_set<shared_ptr<DirectInfusionMatchData>>> reducedFragToMatchData{};
 
     vector<vector<int>> fragmentGroupsReducedyByParsimony = mzUtils::simpleParsimonyReducer(fragmentGroups);
 
@@ -1209,10 +1207,10 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::reduceBySimp
             for (int frag : group) {
 
                 if (reducedFragToMatchData.find(frag) == reducedFragToMatchData.end()) {
-                    reducedFragToMatchData.insert(make_pair(frag, vector<shared_ptr<DirectInfusionMatchData>>{}));
+                    reducedFragToMatchData.insert(make_pair(frag, unordered_set<shared_ptr<DirectInfusionMatchData>>{}));
                 }
 
-                reducedFragToMatchData[frag].push_back(compound);
+                reducedFragToMatchData[frag].insert(compound);
 
             }
         }
@@ -1236,7 +1234,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::reduceByUniq
     map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> reducedFragListToCompounds{};
 
     map<shared_ptr<DirectInfusionMatchData>, vector<int>> reducedMatchDataToFrags{};
-    map<int, vector<shared_ptr<DirectInfusionMatchData>>> reducedFragToMatchData = {};
+    map<int, unordered_set<shared_ptr<DirectInfusionMatchData>>> reducedFragToMatchData = {};
 
 
     for (auto it = matchInfo->matchDataToFrags.begin(); it != matchInfo->matchDataToFrags.end(); ++it){
@@ -1256,9 +1254,9 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::reduceByUniq
             //TODO: how to prevent duplicates here?
             for (auto frag : matchDataFrags) {
                 if (reducedFragToMatchData.find(frag) == reducedFragToMatchData.end()) {
-                    reducedFragToMatchData.insert(make_pair(frag, vector<shared_ptr<DirectInfusionMatchData>>()));
+                    reducedFragToMatchData.insert(make_pair(frag, unordered_set<shared_ptr<DirectInfusionMatchData>>()));
                 }
-                reducedFragToMatchData[frag].push_back(matchData);
+                reducedFragToMatchData[frag].insert(matchData);
             }
         }
     }
@@ -1302,7 +1300,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
 
         for (fragToMatchDataIterator iterator = matchInfo->fragToMatchData.begin(); iterator != matchInfo->fragToMatchData.end(); ++iterator) {
             int frag = iterator->first;
-            vector<shared_ptr<DirectInfusionMatchData>> compounds = iterator->second;
+            unordered_set<shared_ptr<DirectInfusionMatchData>> compounds = iterator->second;
             cerr<< "frag= " << intKeyToMz(frag) << " m/z : ";
             for (auto matchData : compounds) {
                 cerr << matchData->compound->name << "|" << matchData->compound->adductString << " ";
@@ -1343,11 +1341,11 @@ void DirectInfusionProcessor::addBlockSpecificMatchInfo(
     for (auto it = matchInfo->fragToMatchData.begin(); it != matchInfo->fragToMatchData.end(); ++it){
 
         int fragMzKey = it->first;
-        vector<shared_ptr<DirectInfusionMatchData>> compounds = it->second;
+        unordered_set<shared_ptr<DirectInfusionMatchData>> compounds = it->second;
 
         if (compounds.size() == 1) { // unique fragment
 
-            shared_ptr<DirectInfusionMatchData> matchData = compounds[0];
+            shared_ptr<DirectInfusionMatchData> matchData = *compounds.begin();
             double fragMzVal = intKeyToMz(fragMzKey) - 0.00001; // possible rounding error in int -> float conversion
 
             auto lb_it = lower_bound(matchData->compound->fragment_mzs.begin(), matchData->compound->fragment_mzs.end(), fragMzVal);
