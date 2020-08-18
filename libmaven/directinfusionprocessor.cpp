@@ -961,6 +961,9 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
 
     if (debug) cout << "directInfusionProcessor::summarizeFragmentGroups()" << endl;
 
+    map<shared_ptr<DirectInfusionMatchData>, vector<int>> summarizedMatchDataToFrags{};
+    map<int, vector<shared_ptr<DirectInfusionMatchData>>> summarizedFragToMatchData{};
+
     for (auto it = matchInfo->fragListToCompounds.begin(); it != matchInfo->fragListToCompounds.end(); ++it) {
 
         vector<shared_ptr<DirectInfusionMatchData>> compoundList = it->second;
@@ -971,7 +974,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
         //Case: if only one match, do not try to do any summarization.
         if (compoundList.size() == 1) {
             summarizedMatchData = compoundList[0];
-            matchInfo->matchDataToFragsSummarized.insert(make_pair(summarizedMatchData, it->first));
+            summarizedMatchDataToFrags.insert(make_pair(summarizedMatchData, it->first));
             continue;
         }
 
@@ -1170,20 +1173,22 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
             summarizedMatchData->observedMs1Intensity = observedMs1Intensity;
         }
 
-        matchInfo->matchDataToFragsSummarized.insert(make_pair(summarizedMatchData, it->first));
+        summarizedMatchDataToFrags.insert(make_pair(summarizedMatchData, it->first));
     }
-
-    for (auto it = matchInfo->matchDataToFragsSummarized.begin(); it != matchInfo->matchDataToFragsSummarized.end(); ++it) {
+    for (auto it = summarizedMatchDataToFrags.begin(); it != summarizedMatchDataToFrags.end(); ++it) {
 
         vector<int> fragList = it->second;
 
         for (auto frag : fragList) {
-            if (matchInfo->fragToMatchDataSummarized.find(frag) == matchInfo->fragToMatchDataSummarized.end()) {
-                matchInfo->fragToMatchDataSummarized.insert(make_pair(frag, vector<shared_ptr<DirectInfusionMatchData>>()));
+            if (summarizedFragToMatchData.find(frag) == summarizedFragToMatchData.end()) {
+                summarizedFragToMatchData.insert(make_pair(frag, vector<shared_ptr<DirectInfusionMatchData>>()));
             }
-            matchInfo->fragToMatchDataSummarized[frag].push_back(it->first);
+            summarizedFragToMatchData[frag].push_back(it->first);
         }
     }
+
+    matchInfo->fragToMatchDataSummarized = summarizedFragToMatchData;
+    matchInfo->matchDataToFragsSummarized = summarizedMatchDataToFrags;
 
     return matchInfo;
 
@@ -1203,8 +1208,8 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::reduceBySimp
     }
 
     map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> reducedFragListToCompounds{};
-    map<shared_ptr<DirectInfusionMatchData>, vector<int>> reducedMatchDataToFrags{};
 
+    map<shared_ptr<DirectInfusionMatchData>, vector<int>> reducedMatchDataToFrags{};
     map<int, vector<shared_ptr<DirectInfusionMatchData>>> reducedFragToMatchData = {};
 
     vector<vector<int>> fragmentGroupsReducedyByParsimony = mzUtils::simpleParsimonyReducer(fragmentGroups);
