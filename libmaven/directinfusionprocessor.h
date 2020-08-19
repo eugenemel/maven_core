@@ -5,6 +5,7 @@
 #include "Fragment.h"
 #include <memory>
 #include <algorithm>
+#include <sstream>
 
 class mzSample;
 class DirectInfusionAnnotation;
@@ -566,6 +567,33 @@ public:
         }
 
         return compounds;
+    }
+
+    //Issue 275
+    string getFragmentGroupId(shared_ptr<DirectInfusionMatchData> compound) {
+
+        if (matchDataToFrags.find(compound) != matchDataToFrags.end()) {
+            vector<int> frags = matchDataToFrags[compound];
+
+            ostringstream s;
+            s << "(";
+
+            for (unsigned int i = 0; i < frags.size(); i++) {
+
+                if (i > 0) {
+                    s << ", ";
+                }
+
+                double fragMz = mzUtils::intKeyToMz(frags[i]);
+                s << printf("%.2f", fragMz);
+            }
+
+            s << ")";
+
+            return s.str();
+        } else {
+            return "";
+        }
     }
 
 };
