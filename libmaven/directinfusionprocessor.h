@@ -570,12 +570,13 @@ public:
     }
 
     //Issue 275
-    string getFragmentGroupId(shared_ptr<DirectInfusionMatchData> compound) {
+    string getFragmentGroupId(shared_ptr<DirectInfusionMatchData> compound, int precision=2) {
 
         if (matchDataToFrags.find(compound) != matchDataToFrags.end()) {
             vector<int> frags = matchDataToFrags[compound];
 
-            ostringstream s;
+            stringstream s;
+            s << std::fixed << setprecision(precision);
             s << "(";
 
             for (unsigned int i = 0; i < frags.size(); i++) {
@@ -584,8 +585,7 @@ public:
                     s << ", ";
                 }
 
-                double fragMz = mzUtils::intKeyToMz(frags[i]);
-                s << printf("%.2f", fragMz);
+                s << mzUtils::intKeyToMz(frags[i]);
             }
 
             s << ")";
