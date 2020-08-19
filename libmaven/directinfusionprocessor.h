@@ -572,6 +572,14 @@ public:
     //Issue 275
     string getFragmentGroupId(shared_ptr<DirectInfusionMatchData> compound, int precision=2) {
 
+
+        //guard to avoid nonsensical output
+        if (precision < 0) {
+            precision = 0;
+        } else if (precision > 6) {
+            precision = 6;
+        }
+
         if (matchDataToFrags.find(compound) != matchDataToFrags.end()) {
             vector<int> frags = matchDataToFrags[compound];
 
