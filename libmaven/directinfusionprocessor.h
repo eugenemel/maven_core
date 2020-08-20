@@ -935,24 +935,24 @@ public:
 
 };
 
-//Issue 276: data containers
-struct DIPipelineInternalStandardsData {
-
-    //precursor
-    map<pair<string, string>, float> precursorQuantNormalizationIntensityMap = {};
-    map<pair<string, string>, float> precursorQuantNormalizationMzMap = {};
-
-    //fragments
-    map<tuple<string, string, string>, float> fragmentQuantNormalizationMap = {};
-};
-
+/**
+ * @brief The DIPipelineSampleData struct
+ * container for a single DI sample,
+ * which encompasses a search vs. spiked-in standards
+ * and a search vs. a regular library.
+ *
+ * Results from these two searches are combined to perform normalizations.
+ */
 struct DIPipelineSampleData {
 
-    //data
+    //Data
+
     mzSample* sample = nullptr;
     vector<Scan*> validMs1Scans = {};
     Fragment* ms1Fragment = nullptr;
     map<int, vector<Scan*>> ms2ScansByBlockNumber = {};
+
+    //Search Results
 
     //is results
     long searchNumOutputRows = 0;
@@ -961,4 +961,13 @@ struct DIPipelineSampleData {
     //search results
     long isNumOutputRows = 0;
     map<int, DirectInfusionAnnotation*> isAnnotationsByBlockNumber = {};
+
+    //Internal Standards Normalization
+
+    //precursor
+    map<pair<string, string>, float> precursorQuantNormalizationIntensityMap = {};
+    map<pair<string, string>, float> precursorQuantNormalizationMzMap = {};
+
+    //fragments
+    map<tuple<string, string, string>, float> fragmentQuantNormalizationMap = {};
 };
