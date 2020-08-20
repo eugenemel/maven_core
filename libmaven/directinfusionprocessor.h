@@ -6,6 +6,7 @@
 #include <memory>
 #include <algorithm>
 #include <sstream>
+#include <numeric>
 
 class mzSample;
 class DirectInfusionAnnotation;
@@ -869,6 +870,16 @@ public:
      * FragmentationMatchScores are also provided.
      */
     vector<shared_ptr<DirectInfusionMatchData>> compounds;
+};
+
+class DirectInfusionUtils {
+public:
+    static float findNormalizedIntensity(vector<Scan*>& scans,
+                                         float queryMz,
+                                         float standardMz,
+                                         shared_ptr<DirectInfusionSearchParameters> params,
+                                         bool debug = false);
+
 };
 
 /**

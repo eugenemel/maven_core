@@ -1543,3 +1543,37 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
     return directInfusionGroupAnnotation;
 }
 
+//returns -1 if no valid scans found.
+float DirectInfusionUtils::findNormalizedIntensity(vector<Scan*>& scans,
+                                                   float queryMz,
+                                                   float standardMz,
+                                                   shared_ptr<DirectInfusionSearchParameters> params,
+                                                   bool debug
+                                                   ){
+    vector<float> normalizedIntensities;
+
+    for (auto scan : scans) {
+
+        float singleScanNormalizedIntensity = scan->findNormalizedIntensity(queryMz, standardMz, params->ms1PpmTolr);
+
+        if (singleScanNormalizedIntensity < 0) continue;
+
+        if (debug) cout << "Scan #" << scan->scannum << ", " << scan->filterString << ": normalized intensity=" << to_string(singleScanNormalizedIntensity) << endl;
+
+        normalizedIntensities.push_back(singleScanNormalizedIntensity);
+    }
+
+    if (debug) cout << "Found " << normalizedIntensities.size() << " scans." << endl;
+
+    if (normalizedIntensities.empty()) return -1.0f;
+
+    if (params->consensusIntensityAgglomerationType == Fragment::Mean) {
+        return accumulate(normalizedIntensities.begin(), normalizedIntensities.end(), 0.0f) / normalizedIntensities.size();
+    } else if (params->consensusIntensityAgglomerationType == Fragment::Median) {
+        return median(normalizedIntensities);
+    } else { //unsupported type
+        if (debug) cout << "Unsupported quant agglomeration type, DirectInfusionUtils::findNormalizedIntensity() returning -1.0f" << endl;
+        return -1.0f;
+    }
+}
+
