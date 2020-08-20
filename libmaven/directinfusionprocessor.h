@@ -954,7 +954,11 @@ struct DIPipelineSampleData {
     Fragment* ms1Fragment = nullptr;
     map<int, vector<Scan*>> ms2ScansByBlockNumber = {};
 
-    //results
-    long numOutputRows = 0;
-    map<int, DirectInfusionAnnotation*> annotationsByBlockNumber = {};
+    //is results
+    long searchNumOutputRows = 0;
+    map<int, DirectInfusionAnnotation*> searchAnnotationsByBlockNumber = {};
+
+    //search results
+    long isNumOutputRows = 0;
+    map<int, DirectInfusionAnnotation*> isAnnotationsByBlockNumber = {};
 };
