@@ -934,3 +934,27 @@ public:
             bool debug);
 
 };
+
+//Issue 276: data containers
+struct DIPipelineInternalStandardsData {
+
+    //precursor
+    map<pair<string, string>, float> precursorQuantNormalizationIntensityMap = {};
+    map<pair<string, string>, float> precursorQuantNormalizationMzMap = {};
+
+    //fragments
+    map<tuple<string, string, string>, float> fragmentQuantNormalizationMap = {};
+};
+
+struct DIPipelineSampleData {
+
+    //data
+    mzSample* sample = nullptr;
+    vector<Scan*> validMs1Scans = {};
+    Fragment* ms1Fragment = nullptr;
+    map<int, vector<Scan*>> ms2ScansByBlockNumber = {};
+
+    //results
+    long numOutputRows = 0;
+    map<int, DirectInfusionAnnotation*> annotationsByBlockNumber = {};
+};
