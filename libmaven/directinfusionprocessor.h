@@ -950,7 +950,7 @@ struct DIPipelineSampleData {
     mzSample* sample = nullptr;
     vector<Scan*> validMs1Scans = {};
     Fragment* ms1Fragment = nullptr;
-    map<int, vector<Scan*>> ms2ScansByBlockNumber = {};
+    map<int, vector<Scan*>> ms2ScansByPrecursorRangeId = {};
 
     //Search Results
 
