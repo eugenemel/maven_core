@@ -115,6 +115,63 @@ vector<int> Scan::findMatchingMzs(float mzmin, float mzmax) {
 	return matches;
 }
 
+//returns -1 if not found
+//find closest m/z to queryMz if multiple hits
+float Scan::findNormalizedIntensity(float queryMz, float standardMz, float ppm){
+
+    float normalizedIntensity = -1.0f;
+
+    float queryIntensity = -1.0f;
+    float standardIntensity = -1.0f;
+
+    //m/zs cannot possibly be found in the range
+    if (queryMz < getMinMz() || queryMz > getMaxMz() || standardMz < getMinMz() || standardMz > getMaxMz()) return normalizedIntensity;
+
+    float minQueryMz = queryMz - queryMz*ppm/1e6f;
+    float maxQueryMz = queryMz + queryMz*ppm/1e6f;
+
+    auto lbQuery = lower_bound(mz.begin(), mz.end(), minQueryMz);
+    auto lbQueryPos = static_cast<unsigned int>(lbQuery - mz.begin());
+
+    float mzDist = 99999999;
+    for (unsigned int i = lbQueryPos; i < mz.size(); i++) {
+        if (mz[i] <= maxQueryMz) {
+            if (abs(mz[i]-queryMz) < mzDist) {
+                mzDist = mz[i]-queryMz;
+                queryIntensity = intensity[i];
+            }
+        } else {
+            break;
+        }
+    }
+
+    if (queryIntensity < 0) return normalizedIntensity; // could not find query m/z in scan
+
+    float minStandardMz = standardMz - standardMz*ppm/1e6f;
+    float maxStandardMz = standardMz + standardMz*ppm/1e6f;
+
+    auto lbStandard = lower_bound(mz.begin(), mz.end(), minStandardMz);
+    auto lbStandardPos = static_cast<unsigned int>(lbStandard-mz.begin());
+
+    mzDist = 99999999;
+    for (unsigned int i = lbStandardPos; i < mz.size(); i++) {
+        if (mz[i] <= maxStandardMz) {
+            if (abs(mz[i]-standardMz) < mzDist) {
+                mzDist = mz[i]-standardMz;
+                standardIntensity = intensity[i];
+            }
+        } else {
+            break;
+        }
+    }
+
+    if (standardIntensity < 0) return normalizedIntensity; // could not find query m/z in scan
+
+    normalizedIntensity = queryIntensity/standardIntensity;
+
+    return normalizedIntensity;
+}
+
 //removes intensities from scan that lower than X
 void Scan::quantileFilter(int minQuantile) {
         if (intensity.size() == 0 ) return;

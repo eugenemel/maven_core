@@ -99,6 +99,9 @@ class Scan {
     int findClosestHighestIntensityPos(float mz, float amu_tolr);	//highest intensity pos nearest to the cente mz
     bool isMonoisotopicPrecursor(float monoIsotopeMz, float ppm, int charge=1);
 
+    //returns -1 if not found
+    float findNormalizedIntensity(float queryMz, float standardMz, float ppm);
+
     bool hasMz(float mz, float ppm);
     bool isCentroided() { return centroided; }
     bool isProfile()    { return !centroided; }
