@@ -874,7 +874,7 @@ public:
 
 class DirectInfusionUtils {
 public:
-    static float findNormalizedIntensity(vector<Scan*>& scans,
+    static float findNormalizedIntensity(const vector<Scan*>& scans,
                                          float queryMz,
                                          float standardMz,
                                          shared_ptr<DirectInfusionSearchParameters> params,

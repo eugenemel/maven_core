@@ -1544,7 +1544,7 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
 }
 
 //returns -1 if no valid scans found.
-float DirectInfusionUtils::findNormalizedIntensity(vector<Scan*>& scans,
+float DirectInfusionUtils::findNormalizedIntensity(const vector<Scan*>& scans,
                                                    float queryMz,
                                                    float standardMz,
                                                    shared_ptr<DirectInfusionSearchParameters> params,
