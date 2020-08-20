@@ -956,11 +956,11 @@ struct DIPipelineSampleData {
 
     //is results
     long searchNumOutputRows = 0;
-    map<int, DirectInfusionAnnotation*> searchAnnotationsByBlockNumber = {};
+    map<int, DirectInfusionAnnotation*> searchAnnotationsByPrecursorRangeId = {};
 
     //search results
     long isNumOutputRows = 0;
-    map<int, DirectInfusionAnnotation*> isAnnotationsByBlockNumber = {};
+    map<int, DirectInfusionAnnotation*> isAnnotationsByPrecursorRangeId = {};
 
     //Internal Standards Normalization
 
