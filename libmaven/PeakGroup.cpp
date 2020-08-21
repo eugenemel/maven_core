@@ -44,6 +44,8 @@ PeakGroup::PeakGroup()  {
     isFocused=false;
     displayName="";
     importedCompoundName="";
+    compoundId="";
+    compoundDb="";
 
     goodPeakCount=0;
     _type = None;
@@ -95,6 +97,9 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     parent = o.parent;
     compound = o.compound;
     adduct = o.adduct;
+
+    compoundId = o.compoundId;
+    compoundDb = o.compoundDb;
 
     srmId=o.srmId;
     isFocused=o.isFocused;

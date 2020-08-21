@@ -571,6 +571,10 @@ class PeakGroup {
         string tagString;
         string searchTableName;
 
+        //Issue 271: enables lookup of compound information when loaded compound dbs change
+        string compoundId;
+        string compoundDb;
+
         string displayName; //Issue 75: For use with tabledockwidget, other GUI displays
 
         /**
