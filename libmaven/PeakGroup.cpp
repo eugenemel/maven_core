@@ -145,6 +145,11 @@ void PeakGroup::clear() {
     deleteChildren();
     meanMz  = 0;
     groupRank=INT_MAX;
+
+    //Issue 235: try forcing these connections to nullptr
+    parent = nullptr;
+    compound = nullptr;
+    adduct = nullptr;
 }
 
 Peak* PeakGroup::getSamplePeak(mzSample* sample) { 
