@@ -548,21 +548,10 @@ struct DirectInfusionMatchDataCompareByNames {
 };
 
 /**
- * @brief The DirectInfusionSinglePeakMatchData struct
- *
- * container for peak match data, used by @link DirectInfusionMatchInformation
- */
-struct DirectInfusionSinglePeakMatchData {
-    float normalizedTheoreticalIntensity;
-    float observedIntensity;
-    float getIntensityRatio() {return (observedIntensity / normalizedTheoreticalIntensity); }
-};
-
-/**
  * @brief The DirectInfusionMatchInformation structure
  *
  * A structure to organize all fragment matches from all (compound, adduct) pairs that match to a single
- * direct infusion spectrum.
+ * direct infusion ms2 spectrum.
  *
  * Provides maps of individual fragments to compound matches, and compound to fragment matches.
  *
