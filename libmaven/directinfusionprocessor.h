@@ -591,120 +591,15 @@ public:
      *
      * @return
      */
-    vector<shared_ptr<DirectInfusionMatchData>> getCompounds() {
-
-        vector<shared_ptr<DirectInfusionMatchData>> compounds(matchDataToFrags.size());
-
-        unsigned int i = 0;
-        for (auto it = matchDataToFrags.begin(); it != matchDataToFrags.end(); ++it){
-            compounds[i] = it->first;
-            i++;
-        }
-
-        return compounds;
-    }
+    vector<shared_ptr<DirectInfusionMatchData>> getCompounds();
 
     //Issue 275
-    string getFragmentGroupId(shared_ptr<DirectInfusionMatchData> compound, int precision=2) {
-
-
-        //guard to avoid nonsensical output
-        if (precision < 0) {
-            precision = 0;
-        } else if (precision > 6) {
-            precision = 6;
-        }
-
-        if (matchDataToFrags.find(compound) != matchDataToFrags.end()) {
-            vector<int> frags = matchDataToFrags[compound];
-
-            stringstream s;
-            s << std::fixed << setprecision(precision);
-            s << "(";
-
-            for (unsigned int i = 0; i < frags.size(); i++) {
-
-                if (i > 0) {
-                    s << ", ";
-                }
-
-                s << mzUtils::intKeyToMz(frags[i]);
-            }
-
-            s << ")";
-
-            return s.str();
-        } else {
-            return "";
-        }
-    }
+    string getFragmentGroupId(shared_ptr<DirectInfusionMatchData> compound, int precision=2);
 
     //Issue 288
     void computeMs1PartitionFractions(const Fragment *ms1Fragment,
                                       const shared_ptr<DirectInfusionSearchParameters> params,
-                                      const bool debug) {
-
-        if (!ms1Fragment || !ms1Fragment->consensus) return;
-
-        map<int, vector<shared_ptr<DirectInfusionMatchData>>> partitionMap{};
-
-        for (auto it = matchDataToFrags.begin(); it != matchDataToFrags.end(); ++it){
-
-            int key = it->first->ms1IntensityCoord;
-
-            if (key == -1) continue; //no intensity detected
-
-            if (partitionMap.find(key) == partitionMap.end()) {
-                partitionMap.insert(make_pair(key, vector<shared_ptr<DirectInfusionMatchData>>()));
-            }
-            partitionMap[key].push_back(it->first);
-        }
-
-        for (auto it = partitionMap.begin(); it != partitionMap.end(); ++it){
-            if (it->second.size() > 1) {
-
-                float allFragIntensity = 0.0f;
-                map<shared_ptr<DirectInfusionMatchData>, float> totalFragIntensityByCompound{};
-
-                for (auto matchData : it->second) {
-
-                    float compoundFragIntensity = 0.0f;
-
-                    vector<int> ranks = matchData->fragmentationMatchScore.ranks;
-
-                    for (unsigned int i = 0; i < ranks.size(); i++) {
-                        int y = ranks[i];
-
-                        if (y == -1) continue;
-
-                        float fragObservedIntensity = ms1Fragment->consensus->intensity_array[y];
-
-                        if (fragObservedIntensity >= params->ms2MinIntensity) {
-
-                            string fragmentLabel = matchData->compound->fragment_labels[i];
-
-                            auto it = std::find(params->ms1PartitionIntensityByFragments.begin(), params->ms1PartitionIntensityByFragments.end(), fragmentLabel);
-
-                            if (it != params->ms1PartitionIntensityByFragments.end()) {
-                                compoundFragIntensity += fragObservedIntensity;
-                            }
-                        }
-                    }
-
-                    totalFragIntensityByCompound.insert(make_pair(matchData, compoundFragIntensity));
-                    allFragIntensity += compoundFragIntensity;
-                }
-
-                for (auto it = totalFragIntensityByCompound.begin(); it != totalFragIntensityByCompound.end(); ++it) {
-                    float compoundFragIntensity = it->second;
-                    if (allFragIntensity > 0.0f) {
-                        it->first->ms1PartitionFraction = compoundFragIntensity / allFragIntensity;
-                    }
-                }
-            }
-        }
-    }
-
+                                      const bool debug);
 };
 
 /**
