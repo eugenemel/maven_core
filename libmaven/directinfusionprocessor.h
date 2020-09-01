@@ -125,6 +125,13 @@ public:
     bool isAgglomerateAcrossSamples = false;
     SpectralCompositionAlgorithm spectralCompositionAlgorithm = SpectralCompositionAlgorithm::ALL_CANDIDATES;
 
+    /** ===================
+     * INTENSITY COMPUTATION
+     * @param ms1PartitionIntensityByFragments: list of fragments to sum to determine a fractional value
+     *      for splitting ms1 intensity, when multiple compounds map to the same ms1 intensity value.
+     * ==================== */
+    vector<string> ms1PartitionIntensityByFragments{"sn1","sn2"};
+
     //Issue 270
     bool isReduceBySimpleParsimony = false;
 
