@@ -723,7 +723,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 
         //Issue 288
         if (!params->ms1PartitionIntensityByFragments.empty()) {
-            matchInfo->computeMs1PartitionFractions(f, params, debug);
+            matchInfo->computeMs1PartitionFractions(f, params, true);
         }
 
         directInfusionAnnotation->compounds = matchInfo->getCompounds();
@@ -1681,6 +1681,10 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const Fragment
 
             for (auto matchData : it->second) {
 
+                if (debug) {
+                    cout << "compound: " << matchData->compound->name << ", adduct: " << matchData->compound->adductString << endl;
+                }
+
                 float compoundFragIntensity = 0.0f;
 
                 vector<int> ranks = matchData->fragmentationMatchScore.ranks;
@@ -1699,6 +1703,11 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const Fragment
                         auto it = std::find(params->ms1PartitionIntensityByFragments.begin(), params->ms1PartitionIntensityByFragments.end(), fragmentLabel);
 
                         if (it != params->ms1PartitionIntensityByFragments.end()) {
+
+                            if (debug) {
+                                cout << "fragment label: " << fragmentLabel << ", intensity=" << fragObservedIntensity << endl;
+                            }
+
                             compoundFragIntensity += fragObservedIntensity;
                         }
                     }
@@ -1712,6 +1721,13 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const Fragment
                 float compoundFragIntensity = it->second;
                 if (allFragIntensity > 0.0f) {
                     it->first->ms1PartitionFraction = compoundFragIntensity / allFragIntensity;
+                    if (debug) {
+                        cout << "compound: " << it->first->compound->name
+                             << ", adduct: " << it->first->compound->adductString
+                             << ", compoundFragIntensity/allFragIntensity = " << compoundFragIntensity << "/" << allFragIntensity
+                             << " = " << it->first->ms1PartitionFraction
+                             << endl;
+                    }
                 }
             }
         }
