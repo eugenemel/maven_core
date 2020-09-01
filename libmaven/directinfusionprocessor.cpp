@@ -723,7 +723,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 
         //Issue 288
         if (!params->ms1PartitionIntensityByFragments.empty()) {
-            matchInfo->computeMs1PartitionFractions();
+            matchInfo->computeMs1PartitionFractions(ms1Fragment, params, debug);
         }
 
         directInfusionAnnotation->compounds = matchInfo->getCompounds();
@@ -1596,4 +1596,3 @@ float DirectInfusionUtils::findNormalizedIntensity(const vector<Scan*>& scans,
         return -1.0f;
     }
 }
-
