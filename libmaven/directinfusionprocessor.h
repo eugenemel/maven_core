@@ -639,6 +639,15 @@ public:
         }
     }
 
+    //Issue 288
+    void computeMs1PartitionFractions() {
+        //TODO
+        //test
+        for (auto it = matchDataToFrags.begin(); it != matchDataToFrags.end(); ++it){
+            it->first->ms1PartitionFraction = 0.8f; //TODO this is only a test
+        }
+    }
+
 };
 
 /**

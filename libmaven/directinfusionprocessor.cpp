@@ -721,6 +721,11 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
                     params,
                     debug);
 
+        //Issue 288
+        if (!params->ms1PartitionIntensityByFragments.empty()) {
+            matchInfo->computeMs1PartitionFractions();
+        }
+
         directInfusionAnnotation->compounds = matchInfo->getCompounds();
         directInfusionAnnotation->matchInformation = move(matchInfo);
 
