@@ -1680,6 +1680,10 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
             float allFragIntensity = 0.0f;
             map<shared_ptr<DirectInfusionMatchData>, float> totalFragIntensityByCompound{};
 
+            //Issue 292
+            map<Scan*, float> totalFragIntensityByScan{};
+            map<Scan*, map<shared_ptr<DirectInfusionMatchData>, float>> compoundFragIntensityByScan{};
+
             for (auto matchData : it->second) {
 
                 if (debug) {
@@ -1716,6 +1720,48 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
 
                 totalFragIntensityByCompound.insert(make_pair(matchData, compoundFragIntensity));
                 allFragIntensity += compoundFragIntensity;
+
+                map<int, vector<float>> partitionFractionsByNumFragmentsPresent{};
+
+                vector<float> partitionFragmentMzs;
+                for (unsigned int i = 0; i < matchData->compound->fragment_labels.size(); i++) {
+
+                    string fragmentLabel = matchData->compound->fragment_labels[i];
+                    float fragmentMz = matchData->compound->fragment_mzs[i];
+
+                    auto it = std::find(params->ms1PartitionIntensityByFragments.begin(), params->ms1PartitionIntensityByFragments.end(), fragmentLabel);
+
+                    if (it != params->ms1PartitionIntensityByFragments.end()) {
+                        partitionFragmentMzs.push_back(fragmentMz);
+                    }
+                }
+
+                for (auto scan : ms2Scans) {
+
+                    float scanSumIntensity = 0.0f;
+
+                    for (auto queryMz : partitionFragmentMzs) {
+                        float queryIntensity = scan->findClosestMzIntensity(queryMz, params->ms2PpmTolr);
+                        if (queryIntensity > 0) {
+                            scanSumIntensity += queryIntensity;
+                        }
+                    }
+
+                    if (totalFragIntensityByScan.find(scan) == totalFragIntensityByScan.end()) {
+                        totalFragIntensityByScan.insert(make_pair(scan, 0.0f));
+                    }
+
+                    if (scanSumIntensity <= 0.0f) continue;
+
+                    totalFragIntensityByScan[scan] += scanSumIntensity;
+
+                    if (compoundFragIntensityByScan.find(scan) == compoundFragIntensityByScan.end()) {
+                        compoundFragIntensityByScan.insert(make_pair(scan, map<shared_ptr<DirectInfusionMatchData>, float>()));
+                    }
+                    compoundFragIntensityByScan[scan].insert(make_pair(matchData, scanSumIntensity));
+
+                }
+
             }
 
             for (auto it = totalFragIntensityByCompound.begin(); it != totalFragIntensityByCompound.end(); ++it) {
@@ -1728,6 +1774,51 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                              << ", compoundFragIntensity/allFragIntensity = " << compoundFragIntensity << "/" << allFragIntensity
                              << " = " << it->first->ms1PartitionFraction
                              << endl;
+                    }
+                }
+            }
+
+            //Issue 292
+            map<shared_ptr<DirectInfusionMatchData>, vector<float>> scanPartitionFractions{};
+
+            for (auto it = compoundFragIntensityByScan.begin(); it != compoundFragIntensityByScan.end(); ++it){
+
+                Scan* scan = it->first;
+                map<shared_ptr<DirectInfusionMatchData>, float> fragIntensityByCompound = it->second;
+                float totalScanIntensity = totalFragIntensityByScan[scan];
+
+                if (totalScanIntensity < 0.0f) {
+                    for (auto it2 = fragIntensityByCompound.begin(); it2 != fragIntensityByCompound.end(); ++it2) {
+
+                        shared_ptr<DirectInfusionMatchData> matchData = it2->first;
+                        float compoundTotalIntensity = it2->second;
+
+                        float scanPartitionFraction = compoundTotalIntensity / totalScanIntensity;
+
+                        if (scanPartitionFractions.find(matchData) == scanPartitionFractions.end()) {
+                            scanPartitionFractions.insert(make_pair(matchData, vector<float>()));
+                        }
+                        scanPartitionFractions[matchData].push_back(scanPartitionFraction);
+
+                        //Issue 292
+                        if (debug) {
+                            cout << "compound: " << matchData->compound->name
+                                 << ", scan #" << scan->scannum
+                                 << ": fraction= " << scanPartitionFraction
+                                 << endl;
+                        }
+                    }
+                }
+            }
+
+            for (auto it = scanPartitionFractions.begin(); it != scanPartitionFractions.end(); ++it) {
+                vector<float> intensities = it->second;
+                sort(intensities.begin(), intensities.end());
+                if (!intensities.empty()) {
+                    if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
+                        it->first->ms1PartitionFractionByScan = accumulate(intensities.begin(), intensities.end(), 0.0f) / intensities.size();
+                    } else if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
+                        it->first->ms1PartitionFractionByScan = median(intensities);
                     }
                 }
             }
