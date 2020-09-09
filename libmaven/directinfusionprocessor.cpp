@@ -1804,7 +1804,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                 map<shared_ptr<DirectInfusionMatchData>, float> fragIntensityByCompound = it->second;
                 float totalScanIntensity = totalFragIntensityByScan[scan];
 
-                if (totalScanIntensity < 0.0f) {
+                if (totalScanIntensity > 0.0f) {
                     for (auto it2 = fragIntensityByCompound.begin(); it2 != fragIntensityByCompound.end(); ++it2) {
 
                         shared_ptr<DirectInfusionMatchData> matchData = it2->first;
