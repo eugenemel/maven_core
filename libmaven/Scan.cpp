@@ -116,6 +116,36 @@ vector<int> Scan::findMatchingMzs(float mzmin, float mzmax) {
 }
 
 //returns -1 if not found
+//find closes m/z to queryMz if multiple hits
+float Scan::findClosestMzIntensity(float queryMz, float ppm) {
+
+    float queryIntensity = -1.0f;
+
+    //m/zs cannot possibly be found in the range
+    if (queryMz < getMinMz() || queryMz > getMaxMz()) return queryIntensity;
+
+    float minQueryMz = queryMz - queryMz*ppm/1e6f;
+    float maxQueryMz = queryMz + queryMz*ppm/1e6f;
+
+    auto lbQuery = lower_bound(mz.begin(), mz.end(), minQueryMz);
+    auto lbQueryPos = static_cast<unsigned int>(lbQuery - mz.begin());
+
+    float mzDist = 99999999;
+    for (unsigned int i = lbQueryPos; i < mz.size(); i++) {
+        if (mz[i] <= maxQueryMz) {
+            if (abs(mz[i]-queryMz) < mzDist) {
+                mzDist = mz[i]-queryMz;
+                queryIntensity = intensity[i];
+            }
+        } else {
+            break;
+        }
+    }
+
+    return queryIntensity;
+}
+
+//returns -1 if not found
 //find closest m/z to queryMz if multiple hits
 float Scan::findNormalizedIntensity(float queryMz, float standardMz, float ppm){
 

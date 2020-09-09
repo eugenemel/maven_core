@@ -101,6 +101,7 @@ class Scan {
 
     //returns -1 if not found
     float findNormalizedIntensity(float queryMz, float standardMz, float ppm);
+    float findClosestMzIntensity(float queryMz, float ppm);
 
     bool hasMz(float mz, float ppm);
     bool isCentroided() { return centroided; }
