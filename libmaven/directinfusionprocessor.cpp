@@ -1736,16 +1736,31 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                     }
                 }
 
+                if (debug) {
+                    cout << matchData->compound->name << " partitionMzs: ";
+                    for (auto partitionMz : partitionFragmentMzs) {
+                        cout << partitionMz << " ";
+                    }
+                    cout << endl;
+                }
+
                 for (auto scan : ms2Scans) {
+
+                    if (debug) cout << "scan #" << scan->scannum << ": ";
 
                     float scanSumIntensity = 0.0f;
 
                     for (auto queryMz : partitionFragmentMzs) {
+                        if (debug) cout << "mz=" << queryMz << ": ";
                         float queryIntensity = scan->findClosestMzIntensity(queryMz, params->ms2PpmTolr);
                         if (queryIntensity > 0) {
                             scanSumIntensity += queryIntensity;
+                            if (debug) cout << queryIntensity << " ";
+                        } else {
+                            if (debug) cout << "NA ";
                         }
                     }
+                    if (debug) cout << endl;
 
                     if (totalFragIntensityByScan.find(scan) == totalFragIntensityByScan.end()) {
                         totalFragIntensityByScan.insert(make_pair(scan, 0.0f));
@@ -1759,6 +1774,8 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                         compoundFragIntensityByScan.insert(make_pair(scan, map<shared_ptr<DirectInfusionMatchData>, float>()));
                     }
                     compoundFragIntensityByScan[scan].insert(make_pair(matchData, scanSumIntensity));
+
+                    if (debug) cout << "scanSumIntensity (so far): " << scanSumIntensity << endl;
 
                 }
 
