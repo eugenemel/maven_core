@@ -723,7 +723,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 
         //Issue 288
         if (!params->ms1PartitionIntensityByFragments.empty()) {
-            matchInfo->computeMs1PartitionFractions(f, params, debug);
+            matchInfo->computeMs1PartitionFractions(ms2Scans, f, params, debug);
         }
 
         directInfusionAnnotation->compounds = matchInfo->getCompounds();
@@ -1653,8 +1653,9 @@ string DirectInfusionMatchInformation::getFragmentGroupId(shared_ptr<DirectInfus
     }
 }
 
-//Issue 288
-void DirectInfusionMatchInformation::computeMs1PartitionFractions(const Fragment *ms2Fragment,
+//Issue 288, 292
+void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<Scan*>& ms2Scans,
+                                                                  const Fragment *ms2Fragment,
                                                                   const shared_ptr<DirectInfusionSearchParameters> params,
                                                                   const bool debug) {
     if (!ms2Fragment || !ms2Fragment->consensus) return;

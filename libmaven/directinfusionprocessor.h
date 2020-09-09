@@ -497,6 +497,9 @@ struct DirectInfusionMatchData {
     //Issue 288
     int ms1IntensityCoord = -1;
     float ms1PartitionFraction = 1.0f;
+
+    //Issue 292
+    float ms1PartitionFractionByScan = 1.0f;
 };
 
 /**
@@ -585,10 +588,12 @@ public:
     //Issue 275
     string getFragmentGroupId(shared_ptr<DirectInfusionMatchData> compound, int precision=2);
 
-    //Issue 288
-    void computeMs1PartitionFractions(const Fragment *ms1Fragment,
+    //Issue 288, 292
+    void computeMs1PartitionFractions(const vector<Scan*>& ms2Scans,
+                                      const Fragment *ms1Fragment,
                                       const shared_ptr<DirectInfusionSearchParameters> params,
                                       const bool debug);
+
 };
 
 /**
