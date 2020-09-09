@@ -1760,7 +1760,6 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                             if (debug) cout << "NA ";
                         }
                     }
-                    if (debug) cout << endl;
 
                     if (totalFragIntensityByScan.find(scan) == totalFragIntensityByScan.end()) {
                         totalFragIntensityByScan.insert(make_pair(scan, 0.0f));
@@ -1775,7 +1774,8 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                     }
                     compoundFragIntensityByScan[scan].insert(make_pair(matchData, scanSumIntensity));
 
-                    if (debug) cout << "scanSumIntensity (so far): " << scanSumIntensity << endl;
+                    if (debug) cout << ", compound total: " << scanSumIntensity << ", all total: " << totalFragIntensityByScan[scan] << endl;
+                    if (debug) cout << endl;
 
                 }
 
