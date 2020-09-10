@@ -1775,7 +1775,6 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                     compoundFragIntensityByScan[scan].insert(make_pair(matchData, scanSumIntensity));
 
                     if (debug) cout << ", compound total: " << scanSumIntensity << ", all total: " << totalFragIntensityByScan[scan] << endl;
-                    if (debug) cout << endl;
 
                 }
 
