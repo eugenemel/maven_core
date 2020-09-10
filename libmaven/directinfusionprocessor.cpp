@@ -1820,7 +1820,8 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                         if (debug) {
                             cout << "compound: " << matchData->compound->name
                                  << ", scan #" << scan->scannum
-                                 << ": fraction= " << scanPartitionFraction
+                                 << ", compoundFragIntensity/allFragIntensity = " << compoundTotalIntensity << "/" << totalScanIntensity
+                                 << ", fraction = " << scanPartitionFraction
                                  << endl;
                         }
                     }
@@ -1829,14 +1830,27 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
 
             for (auto it = scanPartitionFractions.begin(); it != scanPartitionFractions.end(); ++it) {
                 vector<float> intensities = it->second;
+
+                if (debug) {
+                    cout << "compound: " << it->first->compound->name
+                         << ", scan partition value ";
+                }
+
                 sort(intensities.begin(), intensities.end());
                 if (!intensities.empty()) {
                     if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
                         it->first->ms1PartitionFractionByScan = accumulate(intensities.begin(), intensities.end(), 0.0f) / intensities.size();
+
+                        if (debug) cout << "[mean] = ";
+
                     } else if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
                         it->first->ms1PartitionFractionByScan = median(intensities);
+
+                        if (debug) cout << "[median] = ";
                     }
                 }
+
+                if (debug) cout << it->first->ms1PartitionFractionByScan << endl;
             }
         }
     }
