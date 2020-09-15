@@ -889,6 +889,8 @@ public:
 
     int numMs3Matches = 0;
     float observedMs1Intensity = 0;
+
+    //Issue 293: record total ms3 intensity
     float totalMs3FragmentIntensity = 0;
 
     //precMz,            <consensus Fragment*, ranks>
