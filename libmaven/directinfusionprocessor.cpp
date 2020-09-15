@@ -405,6 +405,8 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
             return get<0>(lhs) < rhs;
         });
 
+        float totalMs3FragmentIntensity = 0.0f;
+
         for (auto it = ms3Compound->ms3_fragment_mzs.begin(); it != ms3Compound->ms3_fragment_mzs.end(); ++it){
 
             double ms2PrecMz = mzUtils::intKeyToMz(it->first);
@@ -438,6 +440,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                         if (y != -1) {
                             numMs3Matches++;
                             isHasMatch = true;
+                            totalMs3FragmentIntensity += get<2>(data)->consensus->intensity_array[y];
                             if (debug) {
                                 matchInfoDebugString = matchInfoDebugString + "\t"
                                         + t.fragment_labels[i] + " " + to_string(t.mzs[i])
@@ -494,6 +497,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
             ms3SingleSampleMatch->numMs3Matches = numMs3Matches;
             ms3SingleSampleMatch->matchData = matchData;
             ms3SingleSampleMatch->observedMs1Intensity = observedMs1Intensity;
+            ms3SingleSampleMatch->totalMs3FragmentIntensity = totalMs3FragmentIntensity;
 
             output.push_back(ms3SingleSampleMatch);
             if (debug) cout << ms3Compound->baseCompound->name << " " << ms3Compound->baseCompound->adductString << ": " << numMs3Matches << " matches; observedMs1Intensity=" << ms3SingleSampleMatch->observedMs1Intensity << endl;
