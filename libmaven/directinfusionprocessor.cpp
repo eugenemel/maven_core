@@ -319,74 +319,27 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                 static_cast<double>(params->ms3PrecursorPpmTolr),   //refers to ms2 target m/z
                 debug);
 
-    vector<tuple<double, double, Fragment*>> consensusMs3Spectra(ms3ScanGroups.size());
+    //restructure as map for more efficient search
+    map<pair<double, double>, vector<Scan*>> ms3ScanGroupMap{};
 
-    for (unsigned int i = 0; i < ms3ScanGroups.size(); i++) {
+    for (auto ms3ScanGroup : ms3ScanGroups) {
 
-        auto pairVector = ms3ScanGroups[i];
-        Fragment *f = nullptr;
+        double ms1PrecMz = 0;
+        double ms2PrecMz = 0;
 
-        double avgMs1PrecMz = 0;
-        double avgMs2PrecMz = 0;
+        vector<Scan*> scans(ms3ScanGroup.size());
+        for (unsigned int i = 0; i < ms3ScanGroup.size(); i++) {
 
-        for (auto pair : pairVector) {
-            avgMs1PrecMz += get<0>(pair);
-            avgMs2PrecMz += get<1>(pair);
-            if (!f) {
-                f = new Fragment(get<2>(pair),
-                                 params->scanFilterMinIntensity,
-                                 params->scanFilterMinSNRatio,
-                                 params->scanFilterMaxNumberOfFragments,
-                                 params->scanFilterIsRetainFragmentsAbovePrecursorMz,
-                                 params->scanFilterPrecursorPurityPpm,
-                                 params->scanFilterMinIntensity);
-            } else {
-                Fragment *brother = new Fragment(get<2>(pair),
-                                                 params->scanFilterMinIntensity,
-                                                 params->scanFilterMinSNRatio,
-                                                 params->scanFilterMaxNumberOfFragments,
-                                                 params->scanFilterIsRetainFragmentsAbovePrecursorMz,
-                                                 params->scanFilterPrecursorPurityPpm,
-                                                 params->scanFilterMinIntensity);
-                f->addFragment(brother);
+            if (i == 0) {
+                ms1PrecMz = get<0>(ms3ScanGroup[i]);
+                ms2PrecMz = get<1>(ms3ScanGroup[i]);
             }
+
+            scans[i] = get<2>(ms3ScanGroup[i]);
+
         }
 
-        avgMs1PrecMz /= pairVector.size();
-        avgMs2PrecMz /= pairVector.size();
-
-        f->buildConsensus(params->consensusMs3PpmTolr,
-                          params->consensusIntensityAgglomerationType,
-                          params->consensusIsIntensityAvgByObserved,
-                          params->consensusIsNormalizeTo10K,
-                          params->consensusMinNumMs3Scans,
-                          params->consensusMinFractionMs3Scans
-                          );
-
-        f->consensus->sortByMz();
-        consensusMs3Spectra[i] = tuple<double, double, Fragment*>(avgMs1PrecMz, avgMs2PrecMz, f);
     }
-
-    sort(consensusMs3Spectra.begin(), consensusMs3Spectra.end(), [](const tuple<double, double, Fragment*>& lhs, const tuple<double, double, Fragment*>& rhs){
-        double lhsMs1PrecMz = get<0>(lhs);
-        double rhsMs1PrecMz = get<0>(rhs);
-
-        double lhsMs2PrecMz = get<1>(lhs);
-        double rhsMs2PrecMz = get<1>(rhs);
-
-        int lhsScanNum = get<2>(lhs)->scanNum;
-        int rhsScanNum = get<2>(rhs)->scanNum;
-
-        if (abs(lhsMs1PrecMz - rhsMs1PrecMz) < 1e-7) {
-            if (abs(lhsMs2PrecMz - rhsMs2PrecMz) < 1e-7) {
-                return lhsScanNum < rhsScanNum;
-            } else {
-                return lhsMs2PrecMz < rhsMs2PrecMz;
-            }
-        } else {
-            return lhsMs1PrecMz < rhsMs1PrecMz;
-        }
-    });
 
     unsigned int compoundCounter = 0;
 
@@ -401,62 +354,24 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
         double ms1MinMz = ms1PrecMz - ms1PrecMz * params->ms3AnalysisMs1PrecursorPpmTolr/1000000.0;
         double ms1MaxMz = ms1PrecMz + ms1PrecMz * params->ms3AnalysisMs1PrecursorPpmTolr/1000000.0;
 
-        auto lb = lower_bound(consensusMs3Spectra.begin(), consensusMs3Spectra.end(), ms1MinMz, [](const tuple<double, double, Fragment*>& lhs, const double& rhs){
-            return get<0>(lhs) < rhs;
-        });
-
-        float totalMs3FragmentIntensity = 0.0f;
-
         for (auto it = ms3Compound->ms3_fragment_mzs.begin(); it != ms3Compound->ms3_fragment_mzs.end(); ++it){
 
             double ms2PrecMz = mzUtils::intKeyToMz(it->first);
 
-            for (unsigned int pos = lb - consensusMs3Spectra.begin(); pos < consensusMs3Spectra.size(); pos++) {
+            for (auto it = ms3ScanGroupMap.begin(); it != ms3ScanGroupMap.end(); ++it) {
 
-                tuple<double, double, Fragment*> data = consensusMs3Spectra[pos];
-
-                double targetMs1PrecMz = get<0>(data);
-                double targetMs2PrecMz = get<1>(data);
+                double targetMs1PrecMz = it->first.first;
+                double targetMs2PrecMz = it->first.second;
 
                 bool isMatchingMs1PrecursorTolr = mzUtils::ppmDist(targetMs1PrecMz, ms1PrecMz) <= params->ms3AnalysisMs1PrecursorPpmTolr;
                 bool isMatchingMs2PrecursorTolr = mzUtils::ppmDist(targetMs2PrecMz, ms2PrecMz) <= params->ms3PrecursorPpmTolr;
 
                 if (isMatchingMs1PrecursorTolr && isMatchingMs2PrecursorTolr) {
 
-                    Fragment t;
-                    t.precursorMz = ms2PrecMz;
-                    t.mzs = it->second;
-                    t.intensity_array = ms3Compound->ms3_fragment_intensity[it->first];
-                    t.fragment_labels = ms3Compound->ms3_fragment_labels[it->first];
+                    vector<Scan*> scans = it->second;
 
-                    float maxDeltaMz = (params->ms3PpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
-                    vector<int> ranks = Fragment::findFragPairsGreedyMz(&t, get<2>(data)->consensus, maxDeltaMz);
+                    //TODO
 
-                    bool isHasMatch = false;
-                    for (unsigned long i = 0; i < ranks.size(); i++) {
-
-                        int y = ranks[i];
-
-                        if (y != -1) {
-                            numMs3Matches++;
-                            isHasMatch = true;
-                            totalMs3FragmentIntensity += get<2>(data)->consensus->intensity_array[y];
-                            if (debug) {
-                                matchInfoDebugString = matchInfoDebugString + "\t"
-                                        + t.fragment_labels[i] + " " + to_string(t.mzs[i])
-                                        + " <==> "
-                                        + to_string(get<2>(data)->consensus->mzs[y]) + " (intensity=" + to_string(get<2>(data)->consensus->intensity_array[y]) + ")\n";
-                            }
-                        }
-                    }
-
-                    if (isHasMatch) {
-                        //                        precMz,           <consensus Fragment*, ranks>
-                        matchData.insert(make_pair(it->first, make_pair(get<2>(data), ranks)));
-                    }
-                } else if (targetMs1PrecMz > ms1MaxMz) {
-                    //all subsequent consensus ms3 scans will not be associated with proper ms1 target m/z
-                    break;
                 }
 
             } // END ms3Compound m/z map
@@ -495,9 +410,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
             ms3SingleSampleMatch->ms3Compound = ms3Compound;
             ms3SingleSampleMatch->sample = sample;
             ms3SingleSampleMatch->numMs3Matches = numMs3Matches;
-            ms3SingleSampleMatch->matchData = matchData;
             ms3SingleSampleMatch->observedMs1Intensity = observedMs1Intensity;
-            ms3SingleSampleMatch->totalMs3FragmentIntensity = totalMs3FragmentIntensity;
 
             output.push_back(ms3SingleSampleMatch);
             if (debug) cout << ms3Compound->baseCompound->name << " " << ms3Compound->baseCompound->adductString << ": " << numMs3Matches << " matches; observedMs1Intensity=" << ms3SingleSampleMatch->observedMs1Intensity << endl;
