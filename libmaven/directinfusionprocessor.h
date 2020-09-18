@@ -890,11 +890,13 @@ public:
     int numMs3Matches = 0;
     float observedMs1Intensity = 0;
 
+    map<tuple<int, int, int>, vector<float>> scanIntensitiesByMs1Ms2Ms3Mzs{};
+
     //Issue 295: Keep track of all fragment intensities from all scans,
     //Even if these ms3 fragments are detected from different precursors.
     //
     //ms3FragMz
-    map<int, vector<float>> scanIntensities{};
+    map<int, vector<float>> scanIntensitiesByMs3Mz{};
 };
 
 /**
