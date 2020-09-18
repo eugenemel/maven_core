@@ -339,6 +339,8 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
         }
 
+        ms3ScanGroupMap.insert(make_pair(make_pair(ms1PrecMz, ms2PrecMz), scans));
+
     }
 
     unsigned int compoundCounter = 0;
