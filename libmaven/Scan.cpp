@@ -103,14 +103,20 @@ int Scan::findClosestHighestIntensityPos(float _mz, float tolr) {
 
 
 vector<int> Scan::findMatchingMzs(float mzmin, float mzmax) {
-	vector<int>matches;
-	vector<float>::iterator itr = lower_bound(mz.begin(), mz.end(), mzmin-1);
-	int lb = itr-mz.begin();
-	for(unsigned int k=lb; k < nobs(); k++ ) {
-		if (mz[k] < mzmin) continue;
-		if (mz[k] > mzmax) break;
-		matches.push_back(k);
+
+    vector<int> matches;
+    auto itr = lower_bound(mz.begin(), mz.end(), mzmin);
+
+    auto lb = static_cast<unsigned int>(itr - mz.begin());
+
+    for(unsigned int k = lb; k < nobs(); k++ ) {
+        if (mz[k] <= mzmax) {
+            matches.push_back(static_cast<int>(k));
+        } else {
+            break;
+        }
 	}
+
 //	cerr << "matches:" << mzmin << " " << mzmax << " " << matches.size() << endl;
 	return matches;
 }
