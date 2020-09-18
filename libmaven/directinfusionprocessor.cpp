@@ -341,15 +341,16 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
         ms3ScanGroupMap.insert(make_pair(make_pair(ms1PrecMz, ms2PrecMz), scans));
 
+        if (debug) cout << "(" << ms1PrecMz << ", " << ms2PrecMz << "): " << scans.size() << " scans." << endl;
+
     }
 
     unsigned int compoundCounter = 0;
 
     for (auto ms3Compound : ms3Compounds) {
 
-        int numMs3Matches = 0;
         map<int, vector<float>> scanIntensitiesByMs3Mz{};
-        map<tuple<int, int, int>, vector<float>> scanIntensitiesByMs1Ms2Ms3Mzs{};
+        map<pair<int, int>, vector<float>> scanIntensitiesByMs1Ms2Ms3Mzs{};
 
         string matchInfoDebugString("");
 
@@ -416,12 +417,13 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                           }
 
                           if (ms3_intensity > 0.0f) {
+
                             if (scanIntensitiesByMs3Mz.find(ms3MzKey) == scanIntensitiesByMs3Mz.end()) {
                                 scanIntensitiesByMs3Mz.insert(make_pair(ms3MzKey, vector<float>()));
                             }
                             scanIntensitiesByMs3Mz[ms3MzKey].push_back(ms3_intensity);
 
-                            tuple<int, int, int> mzKey(ms1MzKey, ms2MzKey, i);
+                            pair<int, int> mzKey(ms2MzKey, i);
                             if (scanIntensitiesByMs1Ms2Ms3Mzs.find(mzKey)  == scanIntensitiesByMs1Ms2Ms3Mzs.end()) {
                                 scanIntensitiesByMs1Ms2Ms3Mzs.insert(make_pair(mzKey, vector<float>()));
                             }
@@ -465,9 +467,9 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
         bool isPassesMs1PrecursorRequirements = !params->ms1IsFindPrecursorIon || (observedMs1Intensity > 0.0f && observedMs1Intensity >= params->ms1MinIntensity);
 
-        if (numMs3Matches >= params->ms3MinNumMatches && isPassesMs1PrecursorRequirements) {
+        if (scanIntensitiesByMs1Ms2Ms3Mzs.size() >= params->ms3MinNumMatches && isPassesMs1PrecursorRequirements) {
 
-            map<tuple<int, int, int>, float> intensityByMs1Ms2Ms3Mzs{};
+            map<pair<int, int>, float> intensityByMs1Ms2Ms3Mzs{};
 
             for (auto it = scanIntensitiesByMs1Ms2Ms3Mzs.begin(); it != scanIntensitiesByMs1Ms2Ms3Mzs.end(); ++it) {
                 sort(it->second.begin(), it->second.end());
@@ -507,7 +509,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
             Ms3SingleSampleMatch *ms3SingleSampleMatch = new Ms3SingleSampleMatch;
             ms3SingleSampleMatch->ms3Compound = ms3Compound;
             ms3SingleSampleMatch->sample = sample;
-            ms3SingleSampleMatch->numMs3Matches = numMs3Matches;
+            ms3SingleSampleMatch->numMs3Matches = intensityByMs1Ms2Ms3Mzs.size();
             ms3SingleSampleMatch->observedMs1Intensity = observedMs1Intensity;
             ms3SingleSampleMatch->scanIntensitiesByMs1Ms2Ms3Mzs = scanIntensitiesByMs1Ms2Ms3Mzs;
             ms3SingleSampleMatch->scanIntensitiesByMs3Mz = scanIntensitiesByMs3Mz;
@@ -516,7 +518,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
             ms3SingleSampleMatch->sumMs3MzIntensity = sumMs3MzIntensity;
 
             output.push_back(ms3SingleSampleMatch);
-            if (debug) cout << ms3Compound->baseCompound->name << " " << ms3Compound->baseCompound->adductString << ": " << numMs3Matches << " matches; observedMs1Intensity=" << ms3SingleSampleMatch->observedMs1Intensity << endl;
+            if (debug) cout << ms3Compound->baseCompound->name << " " << ms3Compound->baseCompound->adductString << ": " << intensityByMs1Ms2Ms3Mzs.size() << " matches; observedMs1Intensity=" << ms3SingleSampleMatch->observedMs1Intensity << endl;
             if (debug) cout << matchInfoDebugString;
         }
 

@@ -894,13 +894,13 @@ public:
 
     //Issue 295: Keep track of al fragment intensities from all scans, preserving precursors
     //
-    //<ms1, ms2, vector position in Ms3Compound maps>
-    map<tuple<int, int, int>, vector<float>> scanIntensitiesByMs1Ms2Ms3Mzs{};
+    //<ms2 m/z, vector position in Ms3Compound maps>
+    map<pair<int, int>, vector<float>> scanIntensitiesByMs1Ms2Ms3Mzs{};
 
     //Issue 295: summarize each ms3 m/z values into a single intensity
     //
-    // <ms1, ms2, vector position in Ms3Compound maps>
-    map<tuple<int, int, int>, float> intensityByMs1Ms2Ms3Mzs{};
+    // <ms2 m/z, vector position in Ms3Compound maps>
+    map<pair<int, int>, float> intensityByMs1Ms2Ms3Mzs{};
 
     // ---------------------------------------------------- //
 
