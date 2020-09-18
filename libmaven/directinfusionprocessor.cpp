@@ -346,35 +346,92 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
     for (auto ms3Compound : ms3Compounds) {
 
         int numMs3Matches = 0;
-        map<int, pair<Fragment*, vector<int>>> matchData{};
+        map<int, vector<float>> scanIntensitiesByMs3Mz{};
+        map<tuple<int, int, int>, vector<float>> scanIntensitiesByMs1Ms2Ms3Mzs{};
+
         string matchInfoDebugString("");
 
         double ms1PrecMz = ms3Compound->baseCompound->precursorMz;
+
+        int ms1MzKey = mzUtils::mzToIntKey(ms1PrecMz);
 
         double ms1MinMz = ms1PrecMz - ms1PrecMz * params->ms3AnalysisMs1PrecursorPpmTolr/1000000.0;
         double ms1MaxMz = ms1PrecMz + ms1PrecMz * params->ms3AnalysisMs1PrecursorPpmTolr/1000000.0;
 
         for (auto it = ms3Compound->ms3_fragment_mzs.begin(); it != ms3Compound->ms3_fragment_mzs.end(); ++it){
 
-            double ms2PrecMz = mzUtils::intKeyToMz(it->first);
+            int ms2MzKey = it->first;
 
-            for (auto it = ms3ScanGroupMap.begin(); it != ms3ScanGroupMap.end(); ++it) {
+            double ms2PrecMz = mzUtils::intKeyToMz(ms2MzKey);
 
-                double targetMs1PrecMz = it->first.first;
-                double targetMs2PrecMz = it->first.second;
+            for (float ms3_mz : it->second) {
 
-                bool isMatchingMs1PrecursorTolr = mzUtils::ppmDist(targetMs1PrecMz, ms1PrecMz) <= params->ms3AnalysisMs1PrecursorPpmTolr;
-                bool isMatchingMs2PrecursorTolr = mzUtils::ppmDist(targetMs2PrecMz, ms2PrecMz) <= params->ms3PrecursorPpmTolr;
+                double ms3_mz_min = ms3_mz - params->ms3MatchTolrInDa;
+                double ms3_mz_max = ms3_mz + params->ms3MatchTolrInDa;
 
-                if (isMatchingMs1PrecursorTolr && isMatchingMs2PrecursorTolr) {
+                int ms3MzKey = mzUtils::mzToIntKey(ms3_mz);
 
-                    vector<Scan*> scans = it->second;
+                for (auto it2 = ms3ScanGroupMap.begin(); it2 != ms3ScanGroupMap.end(); ++it) {
 
-                    //TODO
+                    double targetMs1PrecMz = it2->first.first;
+                    double targetMs2PrecMz = it2->first.second;
 
-                }
+                    bool isMatchingMs1PrecursorTolr = mzUtils::ppmDist(targetMs1PrecMz, ms1PrecMz) <= params->ms3AnalysisMs1PrecursorPpmTolr;
+                    bool isMatchingMs2PrecursorTolr = mzUtils::ppmDist(targetMs2PrecMz, ms2PrecMz) <= params->ms3PrecursorPpmTolr;
 
-            } // END ms3Compound m/z map
+                    if (isMatchingMs1PrecursorTolr && isMatchingMs2PrecursorTolr) {
+
+                        vector<Scan*> scans = it2->second;
+
+                        for (auto scan : scans) {
+
+                          auto lb_ms3 = lower_bound(scan->mz.begin(), scan->mz.end(), ms3_mz_min);
+
+                          float ms3_intensity = 0.0f;
+                          float deltaMz = 99999;
+
+                          for (unsigned int ms3_pos = lb_ms3 - scan->mz.begin(); ms3_pos < scan->mz.size(); ms3_pos++) {
+
+                            if (scan->mz[ms3_pos] > ms3_mz_max) {
+                              break;
+                            }
+
+                            if (params->ms3IntensityType == Ms3IntensityType::ALL_MATCHES) {
+                              ms3_intensity += scan->intensity[ms3_pos];
+                            } else if (params->ms3IntensityType == Ms3IntensityType::MAX_INTENSITY) {
+                              if (scan->intensity[ms3_pos] > ms3_intensity) {
+                                ms3_intensity = scan->intensity[ms3_pos];
+                              }
+                            } else if (params->ms3IntensityType == Ms3IntensityType::CLOSEST_MZ) {
+                              if (abs(scan->mz[ms3_pos] - ms3_mz) < deltaMz) {
+                                deltaMz = abs(scan->mz[ms3_pos] - ms3_mz);
+                                ms3_intensity = scan->mz[ms3_pos];
+                              }
+                            }
+
+                          }
+
+                          if (ms3_intensity > 0.0f) {
+                            if (scanIntensitiesByMs3Mz.find(ms3MzKey) == scanIntensitiesByMs3Mz.end()) {
+                                scanIntensitiesByMs3Mz.insert(make_pair(ms3MzKey, vector<float>()));
+                            }
+                            scanIntensitiesByMs3Mz[ms3MzKey].push_back(ms3_intensity);
+
+                            tuple<int, int, int> mzKey(ms1MzKey, ms2MzKey, ms3MzKey);
+                            if (scanIntensitiesByMs1Ms2Ms3Mzs.find(mzKey)  == scanIntensitiesByMs1Ms2Ms3Mzs.end()) {
+                                scanIntensitiesByMs1Ms2Ms3Mzs.insert(make_pair(mzKey, vector<float>()));
+                            }
+                            scanIntensitiesByMs1Ms2Ms3Mzs[mzKey].push_back(ms3_intensity);
+
+                          }
+
+                        } // END scans
+
+                    } //END matching precursor m/z
+
+                } // END ms3ScanGroupMap
+
+            } // END ms3Compound->ms3_fragment_mzs vector<float>
 
         } //END for (auto it = ms3Compound->ms3_fragment_mzs.begin();
 
@@ -406,11 +463,39 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
         if (numMs3Matches >= params->ms3MinNumMatches && isPassesMs1PrecursorRequirements) {
 
+            for (auto it = scanIntensitiesByMs1Ms2Ms3Mzs.begin(); it != scanIntensitiesByMs1Ms2Ms3Mzs.end(); ++it) {
+                sort(it->second.begin(), it->second.end());
+            }
+
+            map<int, float> intensityByMs3Mz{};
+            float sumMs3MzIntensity = 0.0f;
+
+            for (auto it = scanIntensitiesByMs3Mz.begin(); it != scanIntensitiesByMs3Mz.end(); ++it) {
+                sort(it->second.begin(), it->second.end());
+
+                float ms3MzIntensity = 0.0f;
+
+                if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
+                    ms3MzIntensity = accumulate(it->second.begin(), it->second.end(), 0.0f) / it->second.size();
+                } else if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
+                    ms3MzIntensity = median(it->second);
+                }
+
+                intensityByMs3Mz.insert(make_pair(it->first, ms3MzIntensity));
+
+                sumMs3MzIntensity += ms3MzIntensity;
+
+            }
+
             Ms3SingleSampleMatch *ms3SingleSampleMatch = new Ms3SingleSampleMatch;
             ms3SingleSampleMatch->ms3Compound = ms3Compound;
             ms3SingleSampleMatch->sample = sample;
             ms3SingleSampleMatch->numMs3Matches = numMs3Matches;
             ms3SingleSampleMatch->observedMs1Intensity = observedMs1Intensity;
+            ms3SingleSampleMatch->scanIntensitiesByMs1Ms2Ms3Mzs = scanIntensitiesByMs1Ms2Ms3Mzs;
+            ms3SingleSampleMatch->scanIntensitiesByMs3Mz = scanIntensitiesByMs3Mz;
+            ms3SingleSampleMatch->intensityByMs3Mz = intensityByMs3Mz;
+            ms3SingleSampleMatch->sumMs3MzIntensity = sumMs3MzIntensity;
 
             output.push_back(ms3SingleSampleMatch);
             if (debug) cout << ms3Compound->baseCompound->name << " " << ms3Compound->baseCompound->adductString << ": " << numMs3Matches << " matches; observedMs1Intensity=" << ms3SingleSampleMatch->observedMs1Intensity << endl;
