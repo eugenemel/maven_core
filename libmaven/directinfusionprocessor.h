@@ -52,6 +52,12 @@ enum class SpectralCompositionAlgorithm {
     AUTO_SUMMARIZED_IDENTICAL_FRAGMENTS                 // summarize compounds with identical matches together, regardless of structural relationships
 };
 
+enum class Ms3IntensityType{
+    ALL_MATCHES,                //sum of all intensity of all Ms3 matches in tolerance
+    MAX_INTENSITY,              // highest intensity peak in tolerance
+    CLOSEST_MZ                  // closest m/z to theoretical match
+};
+
 /**
  * @brief The DirectInfusionSearchParameters class
  *
@@ -76,7 +82,6 @@ public:
     float ms1MinIntensity = 0;
     string ms1ScanFilter = "";
 
-    //Issue 226: Ms3 Parameters START
     /** ===================
      * MS3 SEARCH RELATED
      * @param ms3IsMs3Search: if experimental data contains MS3 scans
@@ -86,31 +91,18 @@ public:
      * ==================== */
     bool ms3IsMs3Search = false;
     int ms3MinNumMatches = 2;
-    float ms3AnalysisMs1PrecursorPpmTolr = 20; //TODO: encode/decode
+    float ms3AnalysisMs1PrecursorPpmTolr = 20;
     float ms3PrecursorPpmTolr = 20;
-    float ms3PpmTolr = 20;
+    float ms3MatchTolrInDa = 0.5f;
+    Ms3IntensityType ms3IntensityType = Ms3IntensityType::MAX_INTENSITY;
 
     /** =======================
-     * MS3 CONSENSUS SPECTRUM ASSOCIATED
-     * @param scanFilterMs3MinRt: min RT for valid MS3 scan (otherwise excluded from consensus formation). -1 to ignore.
-     * @param scanFilterMs3MaxRt: max RT for valid MS3 scan (otherwise excluded from consensus formation). -1 to ignore.
+     * MS3 SCAN ASSOCIATED
+     * @param scanFilterMs3MinRt: min RT for valid MS3 scan (otherwise excluded). -1 to ignore.
+     * @param scanFilterMs3MaxRt: max RT for valid MS3 scan (otherwise excluded). -1 to ignore.
      * ========================*/
     float scanFilterMs3MinRt = -1.0f;
     float scanFilterMs3MaxRt = -1.0f;
-
-    /** =======================
-     * MS3 CONSENSUS SPECTRUM ASSOCIATED
-     * @param consensusMs3PpmTolr: if experimental data contains MS3 scans
-     * @param consensusMinNumMs3Scans: Minimum number of reference MS3 peaks found in observed MS2 spectrum
-     * @param consensusMinFractionMs3Scans: m/z tolerance value used for matching reference <--> observed spectra in MS3 spectrum
-     * ========================*/
-
-    //consensus spectrum formation of MS3 scans
-    float consensusMs3PpmTolr = 10;
-    int consensusMinNumMs3Scans = 0;
-    float consensusMinFractionMs3Scans = 0;
-
-    //Issue 226: Ms3 Parameters END
 
     /** ===================
      * AGGLOMERATION
@@ -211,16 +203,22 @@ public:
         encodedParams = encodedParams + "consensusMinNumMs2Scans" + "=" + to_string(consensusMinNumMs2Scans) + ";";
         encodedParams = encodedParams + "consensusMinFractionMs2Scans" + "=" + to_string(consensusMinFractionMs2Scans) + ";";
 
-        //ms3 consensus spectrum params
-        encodedParams = encodedParams + "consensusMs3PpmTolr" + "=" + to_string(consensusMs3PpmTolr) + ";";
-        encodedParams = encodedParams + "consensusMinNumMs3Scans" + "=" + to_string(consensusMinNumMs3Scans) + ";";
-        encodedParams = encodedParams + "consensusMinFractionMs3Scans" + "=" + to_string(consensusMinFractionMs3Scans) + ";";
-
         //ms3 search params
         encodedParams = encodedParams + "ms3IsMs3Search" + "=" + to_string(ms3IsMs3Search) + ";";
         encodedParams = encodedParams + "ms3MinNumMatches" + "=" + to_string(ms3MinNumMatches) + ";";
+        encodedParams = encodedParams + "ms3AnalysisMs1PrecursorPpmTolr" + "=" + to_string(ms3AnalysisMs1PrecursorPpmTolr) + ";";
         encodedParams = encodedParams + "ms3PrecursorPpmTolr" + "=" + to_string(ms3PrecursorPpmTolr) + ";";
-        encodedParams = encodedParams + "ms3PpmTolr" + "=" + to_string(ms3PrecursorPpmTolr) + ";";
+        encodedParams = encodedParams + "ms3MatchTolrInDa" + "=" + to_string(ms3MatchTolrInDa) + ";";
+
+        string ms3IntensityTypeStr = "UNSPECIFIED";
+        if (ms3IntensityType == Ms3IntensityType::CLOSEST_MZ) {
+            ms3IntensityTypeStr = "CLOSEST_MZ";
+        } else if (ms3IntensityType == Ms3IntensityType::MAX_INTENSITY) {
+            ms3IntensityTypeStr = "MAX_INTENSITY";
+        } else if (ms3IntensityType == Ms3IntensityType::ALL_MATCHES) {
+            ms3IntensityTypeStr = "ALL_MATCHES";
+        }
+        encodedParams = encodedParams + "ms3IntensityType" + "=" + ms3IntensityTypeStr;
 
         //ms2 search params
         encodedParams = encodedParams + "ms2MinNumMatches" + "=" + to_string(ms2MinNumMatches) + ";";
@@ -335,7 +333,7 @@ public:
             directInfusionSearchParameters->scanFilterMs2MaxRt = stof(decodedMap["scanFilterMs2MaxRt"]);
         }
 
-        //scan filter for MS3 scans
+        //scan filter for MS3 scan
         if (decodedMap.find("scanFilterMs3MinRt") != decodedMap.end()) {
             directInfusionSearchParameters->scanFilterMs3MinRt = stof(decodedMap["scanFilterMs3MinRt"]);
         }
@@ -382,17 +380,6 @@ public:
             directInfusionSearchParameters->consensusMinFractionMs2Scans = stof(decodedMap["consensusMinFractionMs2Scans"]);
         }
 
-        //ms3 consensus ms3 search params
-        if (decodedMap.find("consensusMs3PpmTolr") != decodedMap.end()) {
-            directInfusionSearchParameters->consensusMs3PpmTolr = stof(decodedMap["consensusMs3PpmTolr"]);
-        }
-        if (decodedMap.find("consensusMinNumMs3Scans") != decodedMap.end()) {
-            directInfusionSearchParameters->consensusMinNumMs3Scans = stoi(decodedMap["consensusMinNumMs3Scans"]);
-        }
-        if (decodedMap.find("consensusMinFractionMs3Scans") != decodedMap.end()) {
-            directInfusionSearchParameters->consensusMinFractionMs3Scans = stof(decodedMap["consensusMinFractionMs3Scans"]);
-        }
-
         //ms3 search params
         if (decodedMap.find("ms3IsMs3Search") != decodedMap.end()) {
             directInfusionSearchParameters->ms3IsMs3Search = decodedMap["ms3IsMs3Search"] == "1";
@@ -400,11 +387,24 @@ public:
         if (decodedMap.find("ms3MinNumMatches") != decodedMap.end()) {
             directInfusionSearchParameters->ms3MinNumMatches = stoi(decodedMap["ms3MinNumMatches"]);
         }
+        if (decodedMap.find("ms3AnalysisMs1PrecursorPpmTolr") != decodedMap.end()) {
+            directInfusionSearchParameters->ms3AnalysisMs1PrecursorPpmTolr = stof(decodedMap["ms3AnalysisMs1PrecursorPpmTolr"]);
+        }
         if (decodedMap.find("ms3PrecursorPpmTolr") != decodedMap.end()) {
             directInfusionSearchParameters->ms3PrecursorPpmTolr = stof(decodedMap["ms3PrecursorPpmTolr"]);
         }
-        if (decodedMap.find("ms3PpmTolr") != decodedMap.end()) {
-            directInfusionSearchParameters->ms3PpmTolr = stof(decodedMap["ms3PpmTolr"]);
+        if (decodedMap.find("ms3MatchTolrInDa") != decodedMap.end()) {
+            directInfusionSearchParameters->ms3MatchTolrInDa = stof(decodedMap["ms3MatchTolrInDa"]);
+        }
+        if (decodedMap.find("ms3IntensityType") != decodedMap.end()) {
+            string ms3IntensityTypeStr = decodedMap["ms3IntensityType"];
+            if (ms3IntensityTypeStr == "CLOSEST_MZ") {
+                directInfusionSearchParameters->ms3IntensityType = Ms3IntensityType::CLOSEST_MZ;
+            } else if (ms3IntensityTypeStr == "MAX_INTENSITY") {
+                directInfusionSearchParameters->ms3IntensityType = Ms3IntensityType::MAX_INTENSITY;
+            } else if (ms3IntensityTypeStr == "ALL_MATCHES") {
+                directInfusionSearchParameters->ms3IntensityType = Ms3IntensityType::ALL_MATCHES;
+            }
         }
 
         //ms2 search params
@@ -890,13 +890,8 @@ public:
     int numMs3Matches = 0;
     float observedMs1Intensity = 0;
 
-    //Issue 293: record total ms3 intensity
-    float totalMs3FragmentIntensity = 0;
-
-    //precMz,            <consensus Fragment*, ranks>
-    map<int, pair<Fragment*, vector<int>>> matchData{};
-
-    //Issue 295: Keep track of all fragment intensities across different precursors
+    //Issue 295: Keep track of all fragment intensities from all scans,
+    //Even if these ms3 fragments are detected from different precursors.
     //
     //ms3FragMz
     map<int, vector<float>> scanIntensities{};
