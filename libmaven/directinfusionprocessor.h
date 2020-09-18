@@ -895,6 +895,11 @@ public:
 
     //precMz,            <consensus Fragment*, ranks>
     map<int, pair<Fragment*, vector<int>>> matchData{};
+
+    //Issue 295: Keep track of all fragment intensities across different precursors
+    //
+    //ms3FragMz
+    map<int, vector<float>> scanIntensities{};
 };
 
 /**
