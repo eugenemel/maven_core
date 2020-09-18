@@ -364,7 +364,9 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
             double ms2PrecMz = mzUtils::intKeyToMz(ms2MzKey);
 
-            for (float ms3_mz : it->second) {
+            for (unsigned int i = 0; i < it->second.size(); i++) {
+
+                float ms3_mz = it->second[i];
 
                 double ms3_mz_min = ms3_mz - params->ms3MatchTolrInDa;
                 double ms3_mz_max = ms3_mz + params->ms3MatchTolrInDa;
@@ -417,7 +419,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                             }
                             scanIntensitiesByMs3Mz[ms3MzKey].push_back(ms3_intensity);
 
-                            tuple<int, int, int> mzKey(ms1MzKey, ms2MzKey, ms3MzKey);
+                            tuple<int, int, int> mzKey(ms1MzKey, ms2MzKey, i);
                             if (scanIntensitiesByMs1Ms2Ms3Mzs.find(mzKey)  == scanIntensitiesByMs1Ms2Ms3Mzs.end()) {
                                 scanIntensitiesByMs1Ms2Ms3Mzs.insert(make_pair(mzKey, vector<float>()));
                             }
@@ -463,8 +465,21 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
         if (numMs3Matches >= params->ms3MinNumMatches && isPassesMs1PrecursorRequirements) {
 
+            map<tuple<int, int, int>, float> intensityByMs1Ms2Ms3Mzs{};
+
             for (auto it = scanIntensitiesByMs1Ms2Ms3Mzs.begin(); it != scanIntensitiesByMs1Ms2Ms3Mzs.end(); ++it) {
                 sort(it->second.begin(), it->second.end());
+
+                float ms3MzIntensity = 0.0f;
+
+                if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
+                    ms3MzIntensity = accumulate(it->second.begin(), it->second.end(), 0.0f) / it->second.size();
+                } else if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
+                    ms3MzIntensity = median(it->second);
+                }
+
+                intensityByMs1Ms2Ms3Mzs.insert(make_pair(it->first, ms3MzIntensity));
+
             }
 
             map<int, float> intensityByMs3Mz{};
