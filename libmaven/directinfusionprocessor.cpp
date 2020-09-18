@@ -509,6 +509,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
             ms3SingleSampleMatch->observedMs1Intensity = observedMs1Intensity;
             ms3SingleSampleMatch->scanIntensitiesByMs1Ms2Ms3Mzs = scanIntensitiesByMs1Ms2Ms3Mzs;
             ms3SingleSampleMatch->scanIntensitiesByMs3Mz = scanIntensitiesByMs3Mz;
+            ms3SingleSampleMatch->intensityByMs1Ms2Ms3Mzs = intensityByMs1Ms2Ms3Mzs;
             ms3SingleSampleMatch->intensityByMs3Mz = intensityByMs3Mz;
             ms3SingleSampleMatch->sumMs3MzIntensity = sumMs3MzIntensity;
 
