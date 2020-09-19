@@ -376,7 +376,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
                 int ms3MzKey = mzUtils::mzToIntKey(ms3_mz);
 
-                for (auto it2 = ms3ScanGroupMap.begin(); it2 != ms3ScanGroupMap.end(); ++it) {
+                for (auto it2 = ms3ScanGroupMap.begin(); it2 != ms3ScanGroupMap.end(); ++it2) {
 
                     double targetMs1PrecMz = it2->first.first;
                     double targetMs2PrecMz = it2->first.second;
