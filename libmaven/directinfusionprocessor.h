@@ -895,6 +895,7 @@ public:
     mzSample *sample = nullptr;
 
     int numMs3Matches = 0;
+    int numMs3MzMatches = 0;
     float observedMs1Intensity = 0;
 
     //MS3 VALUES ARE MAPPED BASED ON POSITIONS IN Ms3Compound

@@ -506,10 +506,14 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
             }
 
+            //Issue 296: skip IDs with too few params matching
+            if (intensityByMs3Mz.size() < params->ms3MinNumMs3MzMatches) continue;
+
             Ms3SingleSampleMatch *ms3SingleSampleMatch = new Ms3SingleSampleMatch;
             ms3SingleSampleMatch->ms3Compound = ms3Compound;
             ms3SingleSampleMatch->sample = sample;
             ms3SingleSampleMatch->numMs3Matches = intensityByMs1Ms2Ms3Mzs.size();
+            ms3SingleSampleMatch->numMs3MzMatches = intensityByMs3Mz.size();
             ms3SingleSampleMatch->observedMs1Intensity = observedMs1Intensity;
             ms3SingleSampleMatch->scanIntensitiesByMs1Ms2Ms3Mzs = scanIntensitiesByMs1Ms2Ms3Mzs;
             ms3SingleSampleMatch->scanIntensitiesByMs3Mz = scanIntensitiesByMs3Mz;
