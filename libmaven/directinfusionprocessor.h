@@ -85,12 +85,15 @@ public:
     /** ===================
      * MS3 SEARCH RELATED
      * @param ms3IsMs3Search: if experimental data contains MS3 scans
-     * @param ms3MinNumMatches: Minimum number of reference MS3 peaks found in observed MS3 spectrum
+     * @param ms3MinNumMatches: Minimum number of reference MS3 peaks found in observed MS3 scans
+     * @param ms3MinNumMs3MzMatches: Minimum number of reference MS3 m/zs found in observed MS3 scans, regardless of precursor m/zs
+     * @param ms3AnalysisMs1PrecursorPpmTolr: m/z tolerance used for matching reference MS1 <--> MS3 scan precursor m/z
      * @param ms3PrecursorPpmTolr: m/z tolerance value used for matching reference MS2 m/z <--> MS3 scan precursor m/z
      * @param ms3PpmTolr: m/z tolerance value used for matching reference <--> observed spectral peaks in MS3 spectrum
      * ==================== */
     bool ms3IsMs3Search = false;
     int ms3MinNumMatches = 2;
+    int ms3MinNumMs3MzMatches = 2;
     float ms3AnalysisMs1PrecursorPpmTolr = 20;
     float ms3PrecursorPpmTolr = 20;
     float ms3MatchTolrInDa = 0.5f;
@@ -206,6 +209,7 @@ public:
         //ms3 search params
         encodedParams = encodedParams + "ms3IsMs3Search" + "=" + to_string(ms3IsMs3Search) + ";";
         encodedParams = encodedParams + "ms3MinNumMatches" + "=" + to_string(ms3MinNumMatches) + ";";
+        encodedParams = encodedParams + "ms3MinNumMs3MzMatches" + "=" + to_string(ms3MinNumMs3MzMatches) + ";";
         encodedParams = encodedParams + "ms3AnalysisMs1PrecursorPpmTolr" + "=" + to_string(ms3AnalysisMs1PrecursorPpmTolr) + ";";
         encodedParams = encodedParams + "ms3PrecursorPpmTolr" + "=" + to_string(ms3PrecursorPpmTolr) + ";";
         encodedParams = encodedParams + "ms3MatchTolrInDa" + "=" + to_string(ms3MatchTolrInDa) + ";";
@@ -386,6 +390,9 @@ public:
         }
         if (decodedMap.find("ms3MinNumMatches") != decodedMap.end()) {
             directInfusionSearchParameters->ms3MinNumMatches = stoi(decodedMap["ms3MinNumMatches"]);
+        }
+        if (decodedMap.find("ms3MinNumMs3MzMatches") != decodedMap.end()) {
+            directInfusionSearchParameters->ms3MinNumMs3MzMatches = stoi(decodedMap["ms3MinNumMs3MzMatches"]);
         }
         if (decodedMap.find("ms3AnalysisMs1PrecursorPpmTolr") != decodedMap.end()) {
             directInfusionSearchParameters->ms3AnalysisMs1PrecursorPpmTolr = stof(decodedMap["ms3AnalysisMs1PrecursorPpmTolr"]);
