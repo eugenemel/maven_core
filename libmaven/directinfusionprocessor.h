@@ -878,6 +878,12 @@ public:
 
 };
 
+//Issue 226
+class Ms3Annotation {
+public:
+    map<mzSample*,Ms3SingleSampleMatch*> matchesBySample{};
+};
+
 /**
  * @brief The Ms3SingleSampleMatch class
  *
