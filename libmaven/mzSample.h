@@ -94,6 +94,8 @@ class Scan {
     vector<int> findMatchingMzs(float mzmin, float mzmax);
 
     int findHighestIntensityPos(float mz, float ppm);		//higest intensity pos
+    int findHighestIntensityPosAMU(float mz, float amu_tolr); //higehst intensity pos, tol in amu
+
     int findHighestIntensityPos(float _mz, float ppmMz, float ppm); //highest intensity pos, careful calculation of delta mz
 
     int findClosestHighestIntensityPos(float mz, float amu_tolr);	//highest intensity pos nearest to the cente mz

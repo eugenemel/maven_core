@@ -74,6 +74,36 @@ int Scan::findHighestIntensityPos(float _mz, float ppmMz, float ppm){
     return bestPos;
 }
 
+//returns -1 if not found
+//find highest intensity peak if multiple hits
+int Scan::findHighestIntensityPosAMU(float queryMz, float tolr) {
+
+    int pos = -1;
+
+    //m/zs cannot possibly be found in the range
+    if (queryMz < getMinMz() || queryMz > getMaxMz()) return pos;
+
+    float minQueryMz = queryMz - tolr;
+    float maxQueryMz = queryMz + tolr;
+
+    auto lbQuery = lower_bound(mz.begin(), mz.end(), minQueryMz);
+    auto lbQueryPos = static_cast<unsigned int>(lbQuery - mz.begin());
+
+    float highestIntensity = -1;
+    for (unsigned int i = lbQueryPos; i < mz.size(); i++) {
+        if (mz[i] <= maxQueryMz) {
+            if (intensity[i] > highestIntensity) {
+                highestIntensity = intensity[i];
+                pos = static_cast<int>(i);
+            }
+        } else {
+            break;
+        }
+    }
+
+    return pos;
+}
+
 //AMU Matching
 int Scan::findClosestHighestIntensityPos(float _mz, float tolr) {
 			float mzmin = _mz - tolr-0.001;
@@ -122,7 +152,7 @@ vector<int> Scan::findMatchingMzs(float mzmin, float mzmax) {
 }
 
 //returns -1 if not found
-//find closes m/z to queryMz if multiple hits
+//find closest m/z to queryMz if multiple hits
 float Scan::findClosestMzIntensity(float queryMz, float ppm) {
 
     float queryIntensity = -1.0f;
