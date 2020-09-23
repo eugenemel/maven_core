@@ -755,7 +755,7 @@ class Compound {
 		public:
             Compound(string id, string name, string formula, int charge, float exactMass);
 			Compound(string id, string name, string formula, int charge );
-            ~Compound(){}; //empty destructor
+            virtual ~Compound(){} //empty destructor
 
             PeakGroup* getPeakGroup() { return &_group; }
 			void setPeakGroup(const PeakGroup& group ) { _group = group; _group.compound = this; }
