@@ -486,7 +486,31 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
             }
 
+            // Issue 226
+            map<int, float> sumMs3IntensityByMs2Mz{};
+            map<int, unordered_set<int>> matchingCoordsByMs2{};
+
+            for (auto it = intensityByMs1Ms2Ms3Mzs.begin(); it != intensityByMs1Ms2Ms3Mzs.end(); ++it) {
+                int ms2MzKey = it->first.first;
+
+                if (sumMs3IntensityByMs2Mz.find(ms2MzKey) == sumMs3IntensityByMs2Mz.end()) {
+                    sumMs3IntensityByMs2Mz.insert(make_pair(ms2MzKey, 0.0f));
+                }
+                if (matchingCoordsByMs2.find(ms2MzKey) == matchingCoordsByMs2.end()){
+                    matchingCoordsByMs2.insert(make_pair(ms2MzKey, unordered_set<int>()));
+                }
+
+                sumMs3IntensityByMs2Mz[ms2MzKey] += it->second; //agglomerated measured intensity value
+                matchingCoordsByMs2[ms2MzKey].insert(it->first.second); //coord in reference ms2 spectrum
+            }
+
+            map<int, int> ms3MatchesByMs2Mz{};
+            for (auto it = matchingCoordsByMs2.begin(); it != matchingCoordsByMs2.end(); ++it){
+                ms3MatchesByMs2Mz.insert(make_pair(it->first, it->second.size()));
+            }
+
             map<int, float> intensityByMs3Mz{};
+
             float sumMs3MzIntensity = 0.0f;
 
             for (auto it = scanIntensitiesByMs3Mz.begin(); it != scanIntensitiesByMs3Mz.end(); ++it) {
@@ -520,6 +544,9 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
             ms3SingleSampleMatch->intensityByMs1Ms2Ms3Mzs = intensityByMs1Ms2Ms3Mzs;
             ms3SingleSampleMatch->intensityByMs3Mz = intensityByMs3Mz;
             ms3SingleSampleMatch->sumMs3MzIntensity = sumMs3MzIntensity;
+            ms3SingleSampleMatch->matchingCoordsByMs2 = matchingCoordsByMs2;
+            ms3SingleSampleMatch->ms3MatchesByMs2Mz = ms3MatchesByMs2Mz;
+            ms3SingleSampleMatch->sumMs3IntensityByMs2Mz = sumMs3IntensityByMs2Mz;
 
             output.push_back(ms3SingleSampleMatch);
             if (debug) cout << ms3Compound->baseCompound->name << " " << ms3Compound->baseCompound->adductString << ": " << intensityByMs1Ms2Ms3Mzs.size() << " matches; observedMs1Intensity=" << ms3SingleSampleMatch->observedMs1Intensity << endl;

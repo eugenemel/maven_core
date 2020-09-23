@@ -918,7 +918,7 @@ public:
 
     // ---------------------------------------------------- //
 
-    // MS3 VALUES ARE MAPPED BASED ON m/z key
+    // MS3 VALUES ARE MAPPED BASED ON MS3 FRAGMENT m/z KEY
 
     //Issue 295: Keep track of all fragment intensities from all scans,
     //Even if these ms3 fragments are detected from different precursors.
@@ -931,9 +931,16 @@ public:
     //ms3MzKey
     map<int, float> intensityByMs3Mz{};
 
+    float sumMs3MzIntensity = 0.0f;
+
     // ---------------------------------------------------- //
 
-    float sumMs3MzIntensity = 0.0f;
+    // SUMMARIES BASED ON MS2 m/z KEY
+
+    // <ms2 m/z>
+    map<int, unordered_set<int>> matchingCoordsByMs2{};
+    map<int, int> ms3MatchesByMs2Mz{};
+    map<int, float> sumMs3IntensityByMs2Mz{};
 };
 
 /**
