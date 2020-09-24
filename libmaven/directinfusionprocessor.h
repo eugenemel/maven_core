@@ -214,7 +214,7 @@ public:
         encodedParams = encodedParams + "ms3AnalysisMs1PrecursorPpmTolr" + "=" + to_string(ms3AnalysisMs1PrecursorPpmTolr) + ";";
         encodedParams = encodedParams + "ms3PrecursorPpmTolr" + "=" + to_string(ms3PrecursorPpmTolr) + ";";
         encodedParams = encodedParams + "ms3MatchTolrInDa" + "=" + to_string(ms3MatchTolrInDa) + ";";
-        encodedParams = encodedParams + "ms3MinIntensity" + "=" + to_string(ms3MinIntensity);
+        encodedParams = encodedParams + "ms3MinIntensity" + "=" + to_string(ms3MinIntensity) + ";";
 
         string ms3IntensityTypeStr = "UNSPECIFIED";
         if (ms3IntensityType == Ms3IntensityType::CLOSEST_MZ) {
