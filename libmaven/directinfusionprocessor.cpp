@@ -168,26 +168,6 @@ vector<vector<tuple<double, double, Scan*>>> DirectInfusionProcessor::organizeMs
                 i--; // necessary b/c outer for loop will increment i
                 break;
             }
-
-//            if (mzUtils::ppmDist(jthScanPair.first, ithScanPair.first) > ms3PrecursorPpmTolr) {
-//                i = j;
-//                ms3ScanGroups.push_back(scanGroup);
-
-//                numProcessedPairs += scanGroup.size();
-
-//                if (debug) cout << "i=" << i << ", numProcessedPairs= " << numProcessedPairs << endl;
-
-//                i--; // necessary b/c outer for loop will increment i
-//                break;
-//            } else {
-//                scanGroup.push_back(jthScanPair);
-//                lastPrecMz = jthScanPair.first;
-
-//                if (j == allMs3Scans.size()-1) {
-//                    i = static_cast<unsigned int>(allMs3Scans.size()); //avoid outer loop
-//                    break;
-//                }
-//            }
         }
     }
 
