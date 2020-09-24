@@ -97,6 +97,7 @@ public:
     float ms3AnalysisMs1PrecursorPpmTolr = 20;
     float ms3PrecursorPpmTolr = 20;
     float ms3MatchTolrInDa = 0.5f;
+    float ms3MinIntensity = 0;
     Ms3IntensityType ms3IntensityType = Ms3IntensityType::MAX_INTENSITY;
 
     /** =======================
@@ -213,6 +214,7 @@ public:
         encodedParams = encodedParams + "ms3AnalysisMs1PrecursorPpmTolr" + "=" + to_string(ms3AnalysisMs1PrecursorPpmTolr) + ";";
         encodedParams = encodedParams + "ms3PrecursorPpmTolr" + "=" + to_string(ms3PrecursorPpmTolr) + ";";
         encodedParams = encodedParams + "ms3MatchTolrInDa" + "=" + to_string(ms3MatchTolrInDa) + ";";
+        encodedParams = encodedParams + "ms3MinIntensity" + "=" + to_string(ms3MinIntensity);
 
         string ms3IntensityTypeStr = "UNSPECIFIED";
         if (ms3IntensityType == Ms3IntensityType::CLOSEST_MZ) {
@@ -402,6 +404,9 @@ public:
         }
         if (decodedMap.find("ms3MatchTolrInDa") != decodedMap.end()) {
             directInfusionSearchParameters->ms3MatchTolrInDa = stof(decodedMap["ms3MatchTolrInDa"]);
+        }
+        if (decodedMap.find("ms3MinIntensity") != decodedMap.end()) {
+            directInfusionSearchParameters->ms3MinIntensity = stof(decodedMap["ms3MinIntensity"]);
         }
         if (decodedMap.find("ms3IntensityType") != decodedMap.end()) {
             string ms3IntensityTypeStr = decodedMap["ms3IntensityType"];
