@@ -253,7 +253,7 @@ public:
         //ms1 intensity options
         encodedParams = encodedParams + "ms1PartitionIntensityByFragments" + "=" + "{";
         for (auto fragmentLabel : ms1PartitionIntensityByFragments) {
-            encodedParams = encodedParams + fragmentLabel + "=" + fragmentLabel + INTERNAL_MAP_DELIMITER;
+            encodedParams = encodedParams + fragmentLabel + INTERNAL_MAP_DELIMITER;
         }
         encodedParams = encodedParams + "};";
 
@@ -283,15 +283,6 @@ public:
             string key = it->first;
             int value = stoi(it->second);
             directInfusionSearchParameters->ms2MinNumDiagnosticMatchesMap.insert(make_pair(key, value));
-        }
-    }
-
-    static void addMs1PartitionIntensityByFragmentsInfo(shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters, string encodedMs1PartitionIntensityByFragments){
-        directInfusionSearchParameters->ms1PartitionIntensityByFragments.clear();
-        unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedMs1PartitionIntensityByFragments, INTERNAL_MAP_DELIMITER);
-        for (auto it = decodedMap.begin(); it != decodedMap.end(); ++it){
-            string key = it->first;
-            directInfusionSearchParameters->ms1PartitionIntensityByFragments.push_back(key);
         }
     }
 
@@ -460,7 +451,7 @@ public:
         //ms1 intensity options
         if (decodedMap.find("ms1PartitionIntensityByFragments") != decodedMap.end()){
             string encodedMs1PartitionIntensityByFragments = decodedMap["ms1PartitionIntensityByFragments"];
-            addMs1PartitionIntensityByFragmentsInfo(directInfusionSearchParameters, encodedMs1PartitionIntensityByFragments);
+            directInfusionSearchParameters->ms1PartitionIntensityByFragments = mzUtils::decodeParameterVector(encodedMs1PartitionIntensityByFragments, INTERNAL_MAP_DELIMITER);
         }
 
         //agglomeration params
