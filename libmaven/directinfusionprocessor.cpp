@@ -396,7 +396,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
                           }
 
-                          if (ms3_intensity > params->ms3MinIntensity) {
+                          if (ms3_intensity >= params->ms3MinIntensity) {
 
                             if (scanIntensitiesByMs3Mz.find(ms3MzKey) == scanIntensitiesByMs3Mz.end()) {
                                 scanIntensitiesByMs3Mz.insert(make_pair(ms3MzKey, vector<float>()));
