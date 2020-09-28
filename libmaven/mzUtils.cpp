@@ -1122,5 +1122,30 @@ unordered_map<string, string> decodeParameterMap(string encodedParams, string de
 
 } //decodeParameterMap()
 
+vector<string> decodeParameterVector(string encodedParams, string delimiter) {
+    vector<string> decodedVector{};
+
+    if (encodedParams.size() < 3) return decodedVector;
+
+    //remove starting/ending brackets, if they are included
+    if (encodedParams[0] == '{'){
+        encodedParams.erase(0, 1);
+    }
+    if (encodedParams[encodedParams.size()-1] == '}') {
+        encodedParams.erase(encodedParams.size()-1);
+    }
+
+    unsigned long posPrevious = 0;
+    unsigned long posCurrent = 0;
+
+    while ((posCurrent = encodedParams.find(delimiter, posPrevious)) != string::npos) {
+        string encodedParam = encodedParams.substr(posPrevious, posCurrent-posPrevious);
+        decodedVector.push_back(encodedParam);
+    }
+
+    return decodedVector;
+
+} //decodeParameterVector()
+
 } //namespace end
 
