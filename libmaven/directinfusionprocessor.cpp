@@ -1653,6 +1653,7 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionMatchInformation::getC
     return compounds;
 }
 
+//WARNING: not rounded to nearest precision, just output that many digits
 string DirectInfusionMatchInformation::getFragmentGroupId(shared_ptr<DirectInfusionMatchData> compound, int precision){
 
     //guard to avoid nonsensical output
