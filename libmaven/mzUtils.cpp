@@ -1139,9 +1139,12 @@ vector<string> decodeParameterVector(string encodedParams, string delimiter) {
     unsigned long posCurrent = 0;
 
     while ((posCurrent = encodedParams.find(delimiter, posPrevious)) != string::npos) {
-        posPrevious = posCurrent + delimiter.length();
+
         string encodedParam = encodedParams.substr(posPrevious, posCurrent-posPrevious);
+        posPrevious = posCurrent + delimiter.length();
+
         decodedVector.push_back(encodedParam);
+
     }
 
     return decodedVector;
