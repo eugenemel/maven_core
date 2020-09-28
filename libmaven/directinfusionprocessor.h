@@ -175,16 +175,16 @@ public:
         encodedParams = encodedParams + "scanFilterMinIntensity" + "=" + to_string(scanFilterMinIntensity) + ";";
 
         //scan filter for MS1 scans
-        encodedParams = encodedParams + "scanFilterMs1MinRt" + "=" + to_string(scanFilterMs1MinRt);
-        encodedParams = encodedParams + "scanFilterMs1MaxRt" + "=" + to_string(scanFilterMs1MaxRt);
+        encodedParams = encodedParams + "scanFilterMs1MinRt" + "=" + to_string(scanFilterMs1MinRt) + ";";
+        encodedParams = encodedParams + "scanFilterMs1MaxRt" + "=" + to_string(scanFilterMs1MaxRt) + ";";
 
         //scan filter for MS2 scans
-        encodedParams = encodedParams + "scanFilterMs2MinRt" + "=" + to_string(scanFilterMs2MinRt);
-        encodedParams = encodedParams + "scanFilterMs2MaxRt" + "=" + to_string(scanFilterMs2MaxRt);
+        encodedParams = encodedParams + "scanFilterMs2MinRt" + "=" + to_string(scanFilterMs2MinRt) + ";";
+        encodedParams = encodedParams + "scanFilterMs2MaxRt" + "=" + to_string(scanFilterMs2MaxRt) + ";";
 
         //scan filter for MS3 scans
-        encodedParams = encodedParams + "scanFilterMs3MinRt" + "=" + to_string(scanFilterMs3MinRt);
-        encodedParams = encodedParams + "scanFilterMs3MaxRt" + "=" + to_string(scanFilterMs3MaxRt);
+        encodedParams = encodedParams + "scanFilterMs3MinRt" + "=" + to_string(scanFilterMs3MinRt) + ";";
+        encodedParams = encodedParams + "scanFilterMs3MaxRt" + "=" + to_string(scanFilterMs3MaxRt) + ";";
 
         //consensus spectrum params (all ms levels)
         encodedParams = encodedParams + "consensusIsIntensityAvgByObserved" + "=" + to_string(consensusIsIntensityAvgByObserved) + ";";
@@ -224,7 +224,7 @@ public:
         } else if (ms3IntensityType == Ms3IntensityType::ALL_MATCHES) {
             ms3IntensityTypeStr = "ALL_MATCHES";
         }
-        encodedParams = encodedParams + "ms3IntensityType" + "=" + ms3IntensityTypeStr;
+        encodedParams = encodedParams + "ms3IntensityType" + "=" + ms3IntensityTypeStr + ";";
 
         //ms2 search params
         encodedParams = encodedParams + "ms2MinNumMatches" + "=" + to_string(ms2MinNumMatches) + ";";
@@ -255,7 +255,7 @@ public:
         for (auto fragmentLabel : ms1PartitionIntensityByFragments) {
             encodedParams = encodedParams + fragmentLabel + "=" + fragmentLabel + INTERNAL_MAP_DELIMITER;
         }
-        encodedParams = encodedParams + "}";
+        encodedParams = encodedParams + "};";
 
         //agglomeration params
         encodedParams = encodedParams + "isAgglomerateAcrossSamples" + "=" + to_string(isAgglomerateAcrossSamples) + ";";
@@ -272,7 +272,7 @@ public:
         }
         encodedParams = encodedParams + "spectralCompositionAlgorithm" + "=" + spectralCompositionAlgorithmStr + ";";
 
-        encodedParams = encodedParams + "isReduceBySimpleParsimony" + "=" + to_string(isReduceBySimpleParsimony);
+        encodedParams = encodedParams + "isReduceBySimpleParsimony" + "=" + to_string(isReduceBySimpleParsimony) + ";";
 
         return encodedParams;
     }
