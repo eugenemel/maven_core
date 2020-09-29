@@ -1171,6 +1171,8 @@ class SearchParameters {
     /** New Param 2020-05-04 **/
     map<string, int> ms2MinNumDiagnosticMatchesMap {};
 
+    virtual ~SearchParameters() = default; //c++11 way
+
 };
 
 /**
