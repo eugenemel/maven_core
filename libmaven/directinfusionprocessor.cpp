@@ -1605,11 +1605,22 @@ float DirectInfusionUtils::findNormalizedIntensity(const vector<Scan*>& scans,
                                                    ){
     vector<float> normalizedIntensities;
 
+    map<int, vector<float>> normalizedIntensitiesByMassDiff{};
+    vector<int> keys{};
+
     for (auto scan : scans) {
 
         float singleScanNormalizedIntensity = scan->findNormalizedIntensity(queryMz, standardMz, params->ms1PpmTolr);
 
         if (singleScanNormalizedIntensity < 0) continue;
+
+        int massDiff = static_cast<int>(round(scan->getMaxMz()-scan->getMinMz()));
+
+        if (normalizedIntensitiesByMassDiff.find(massDiff) == normalizedIntensitiesByMassDiff.end()) {
+            normalizedIntensitiesByMassDiff.insert(make_pair(massDiff, vector<float>()));
+            keys.push_back(massDiff);
+        }
+        normalizedIntensitiesByMassDiff[massDiff].push_back(singleScanNormalizedIntensity);
 
         if (debug) cout << "Scan #"
                         << scan->scannum << ", "
@@ -1622,6 +1633,19 @@ float DirectInfusionUtils::findNormalizedIntensity(const vector<Scan*>& scans,
                         << endl;
 
         normalizedIntensities.push_back(singleScanNormalizedIntensity);
+    }
+
+    //Issue 481
+    if (params->isPreferSmallestScanMassWindow) {
+        sort(keys.begin(), keys.end());
+        if (!keys.empty() && normalizedIntensitiesByMassDiff.find(keys[0]) != normalizedIntensitiesByMassDiff.end()) {
+
+            if (debug) cout << "Using mzDiffKey "
+                            << keys[0]
+                            << endl;
+
+            normalizedIntensities = normalizedIntensitiesByMassDiff[keys[0]];
+        }
     }
 
     if (debug) cout << "Found " << normalizedIntensities.size() << " scans." << endl;
