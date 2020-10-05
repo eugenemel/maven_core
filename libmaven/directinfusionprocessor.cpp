@@ -1614,13 +1614,14 @@ float DirectInfusionUtils::findNormalizedIntensity(const vector<Scan*>& scans,
 
         if (singleScanNormalizedIntensity < 0) continue;
 
-        int massDiff = static_cast<int>(round(scan->getMaxMz()-scan->getMinMz()));
-
-        if (normalizedIntensitiesByMassDiff.find(massDiff) == normalizedIntensitiesByMassDiff.end()) {
-            normalizedIntensitiesByMassDiff.insert(make_pair(massDiff, vector<float>()));
-            keys.push_back(massDiff);
+        if (params->isPreferSmallestScanMassWindow) {
+            int massDiff = static_cast<int>(round(scan->getMaxMz()-scan->getMinMz()));
+            if (normalizedIntensitiesByMassDiff.find(massDiff) == normalizedIntensitiesByMassDiff.end()) {
+                normalizedIntensitiesByMassDiff.insert(make_pair(massDiff, vector<float>()));
+                keys.push_back(massDiff);
+            }
+            normalizedIntensitiesByMassDiff[massDiff].push_back(singleScanNormalizedIntensity);
         }
-        normalizedIntensitiesByMassDiff[massDiff].push_back(singleScanNormalizedIntensity);
 
         if (debug) cout << "Scan #"
                         << scan->scannum << ", "
