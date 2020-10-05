@@ -131,7 +131,7 @@ public:
      *       Agglomerate results from all individual scans based on mass window lengths.
      * ==================== */
     vector<string> ms1PartitionIntensityByFragments{"sn1","sn2"};
-    bool isPreferSmallestScanMassWindow = false;
+    bool isPreferSmallestScanMassWindow = true;
 
     //Issue 270
     bool isReduceBySimpleParsimony = false;
