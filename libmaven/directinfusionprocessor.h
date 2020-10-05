@@ -104,6 +104,8 @@ public:
      * MS3 SCAN ASSOCIATED
      * @param scanFilterMs3MinRt: min RT for valid MS3 scan (otherwise excluded). -1 to ignore.
      * @param scanFilterMs3MaxRt: max RT for valid MS3 scan (otherwise excluded). -1 to ignore.
+     * @param isPreferSmallestMassWindow: used in DirectInfusionUtils::findNormalizedIntensity().
+     *              Agglomerate results from all individual scans based on mass window lengths.
      * ========================*/
     float scanFilterMs3MinRt = -1.0f;
     float scanFilterMs3MaxRt = -1.0f;
@@ -125,8 +127,11 @@ public:
      * INTENSITY COMPUTATION
      * @param ms1PartitionIntensityByFragments: list of fragments to sum to determine a fractional value
      *      for splitting ms1 intensity, when multiple compounds map to the same ms1 intensity value.
+     * @param isPreferSmallestMassWindow: used in DirectInfusionUtils::findNormalizedIntensity().
+     *       Agglomerate results from all individual scans based on mass window lengths.
      * ==================== */
     vector<string> ms1PartitionIntensityByFragments{"sn1","sn2"};
+    bool isPreferSmallestScanMassWindow = false;
 
     //Issue 270
     bool isReduceBySimpleParsimony = false;
@@ -250,12 +255,13 @@ public:
         encodedParams = encodedParams + "ms1MinIntensity" + "=" + to_string(ms1MinIntensity) + ";";
         encodedParams = encodedParams + "ms1ScanFilter" + "=" + ms1ScanFilter + ";";
 
-        //ms1 intensity options
+        //DIMS intensity options
         encodedParams = encodedParams + "ms1PartitionIntensityByFragments" + "=" + "{";
         for (auto fragmentLabel : ms1PartitionIntensityByFragments) {
             encodedParams = encodedParams + fragmentLabel + INTERNAL_MAP_DELIMITER;
         }
         encodedParams = encodedParams + "};";
+        encodedParams = encodedParams + "isPreferSmallestScanMassWindow" + "=" + to_string(isPreferSmallestScanMassWindow) + ";";
 
         //agglomeration params
         encodedParams = encodedParams + "isAgglomerateAcrossSamples" + "=" + to_string(isAgglomerateAcrossSamples) + ";";
@@ -448,10 +454,13 @@ public:
             directInfusionSearchParameters->ms1ScanFilter = decodedMap["ms1ScanFilter"];
         }
 
-        //ms1 intensity options
+        //DIMS intensity options
         if (decodedMap.find("ms1PartitionIntensityByFragments") != decodedMap.end()){
             string encodedMs1PartitionIntensityByFragments = decodedMap["ms1PartitionIntensityByFragments"];
             directInfusionSearchParameters->ms1PartitionIntensityByFragments = mzUtils::decodeParameterVector(encodedMs1PartitionIntensityByFragments, INTERNAL_MAP_DELIMITER);
+        }
+        if (decodedMap.find("isPreferSmallestScanMassWindow") != decodedMap.end()) {
+            directInfusionSearchParameters->isPreferSmallestScanMassWindow = decodedMap["isPreferSmallestScanMassWindow"] == "1";
         }
 
         //agglomeration params
