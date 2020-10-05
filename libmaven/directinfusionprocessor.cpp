@@ -1611,7 +1611,15 @@ float DirectInfusionUtils::findNormalizedIntensity(const vector<Scan*>& scans,
 
         if (singleScanNormalizedIntensity < 0) continue;
 
-        if (debug) cout << "Scan #" << scan->scannum << ", " << scan->filterString << ": normalized intensity=" << to_string(singleScanNormalizedIntensity) << endl;
+        if (debug) cout << "Scan #"
+                        << scan->scannum << ", "
+                        << scan->filterString
+                        << ", minMz: " << scan->getMinMz()
+                        << ", maxMz: " << scan->getMaxMz()
+                        << ", mzWidth: " << (scan->getMaxMz()-scan->getMinMz())
+                        << ": normalized intensity="
+                        << to_string(singleScanNormalizedIntensity)
+                        << endl;
 
         normalizedIntensities.push_back(singleScanNormalizedIntensity);
     }
