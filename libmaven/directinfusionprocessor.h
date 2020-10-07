@@ -84,8 +84,8 @@ public:
     float ms1PpmTolr = 5;
     float ms1MinIntensity = 0;
     string ms1ScanFilter = "";
-    bool isRequireMonoisotopic = true;
-    float mMinusOnePeakMaxIntensityFraction = 1.0f;
+    bool ms1IsRequireMonoisotopic = true;
+    float ms1MMinusOnePeakMaxIntensityFraction = 1.0f;
 
     /** ===================
      * MS3 SEARCH RELATED
@@ -259,8 +259,8 @@ public:
         encodedParams = encodedParams + "ms1PpmTolr" + "=" + to_string(ms1PpmTolr) + ";";
         encodedParams = encodedParams + "ms1MinIntensity" + "=" + to_string(ms1MinIntensity) + ";";
         encodedParams = encodedParams + "ms1ScanFilter" + "=" + ms1ScanFilter + ";";
-        encodedParams = encodedParams + "isRequireMonoisotopic" + "=" + to_string(isRequireMonoisotopic) + ";";
-        encodedParams = encodedParams + "mMinusOnePeakMaxIntensityFraction" + "=" + to_string(mMinusOnePeakMaxIntensityFraction) + ";";
+        encodedParams = encodedParams + "ms1IsRequireMonoisotopic" + "=" + to_string(ms1IsRequireMonoisotopic) + ";";
+        encodedParams = encodedParams + "ms1MMinusOnePeakMaxIntensityFraction" + "=" + to_string(ms1MMinusOnePeakMaxIntensityFraction) + ";";
 
         //DIMS intensity options
         encodedParams = encodedParams + "ms1PartitionIntensityByFragments" + "=" + "{";
@@ -460,11 +460,11 @@ public:
         if (decodedMap.find("ms1ScanFilter") != decodedMap.end()){
             directInfusionSearchParameters->ms1ScanFilter = decodedMap["ms1ScanFilter"];
         }
-        if (decodedMap.find("isRequireMonoisotopic") != decodedMap.end()) {
-            directInfusionSearchParameters->isRequireMonoisotopic = decodedMap["isRequireMonoisotopic"] == "1";
+        if (decodedMap.find("ms1IsRequireMonoisotopic") != decodedMap.end()) {
+            directInfusionSearchParameters->ms1IsRequireMonoisotopic = decodedMap["ms1IsRequireMonoisotopic"] == "1";
         }
-        if (decodedMap.find("mMinusOnePeakMaxIntensityFraction") != decodedMap.end()) {
-            directInfusionSearchParameters->mMinusOnePeakMaxIntensityFraction = stof(decodedMap["mMinusOnePeakMaxIntensityFraction"]);
+        if (decodedMap.find("ms1MMinusOnePeakMaxIntensityFraction") != decodedMap.end()) {
+            directInfusionSearchParameters->ms1MMinusOnePeakMaxIntensityFraction = stof(decodedMap["ms1MMinusOnePeakMaxIntensityFraction"]);
         }
 
         //DIMS intensity options

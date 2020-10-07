@@ -816,7 +816,7 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
         }
 
         //Issue 303
-        if (observedMs1Intensity > 0.0f && params->isRequireMonoisotopic) {
+        if (observedMs1Intensity > 0.0f && params->ms1IsRequireMonoisotopic) {
 
             double minMMinusOneMz = minMz - DirectInfusionUtils::C_13_MASS;
             double maxMMinusOneMz = maxMz + DirectInfusionUtils::C_13_MASS;
@@ -837,7 +837,7 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
             }
 
             float mMinusOneToCandidateFraction = maxMinusOneIntensity / observedMs1Intensity;
-            if (mMinusOneToCandidateFraction > params->mMinusOnePeakMaxIntensityFraction) {
+            if (mMinusOneToCandidateFraction > params->ms1MMinusOnePeakMaxIntensityFraction) {
                 observedMs1Intensity = 0.0f; //disqualify observed ms1 intensity based on presence of [M-1] peak
             }
         }
