@@ -74,6 +74,9 @@ public:
      * @param ms1PpmTolr: tolerance value used for matching theoretical ion m/z to an m/z peak in an MS1 scan
      * @param ms1MinIntensity: min intensity value for a MS1 spectral peak to be considered real
      * @param ms1ScanFilter: consider only MS1 scans that substring match in their filterString field to this
+     * @param isRequireMonoisotopic: disqualify candidate MS1 peak if there is a peak exactly one 13C-12C width behind
+     * @param mMinusOnePeakMaxIntensityFraction: Avoid disqualifying candidate MS1 peak
+     *          if candidate monoisotopic peak intensity / candidate MS1 peak intensity <= this fraction
      * ==================== */
 
     bool ms1IsRequireAdductPrecursorMatch = true;
@@ -81,6 +84,8 @@ public:
     float ms1PpmTolr = 5;
     float ms1MinIntensity = 0;
     string ms1ScanFilter = "";
+    bool isRequireMonoisotopic = true;
+    float mMinusOnePeakMaxIntensityFraction = 1.0f;
 
     /** ===================
      * MS3 SEARCH RELATED
@@ -254,6 +259,8 @@ public:
         encodedParams = encodedParams + "ms1PpmTolr" + "=" + to_string(ms1PpmTolr) + ";";
         encodedParams = encodedParams + "ms1MinIntensity" + "=" + to_string(ms1MinIntensity) + ";";
         encodedParams = encodedParams + "ms1ScanFilter" + "=" + ms1ScanFilter + ";";
+        encodedParams = encodedParams + "isRequireMonoisotopic" + "=" + to_string(isRequireMonoisotopic) + ";";
+        encodedParams = encodedParams + "mMinusOnePeakMaxIntensityFraction" + "=" + to_string(mMinusOnePeakMaxIntensityFraction) + ";";
 
         //DIMS intensity options
         encodedParams = encodedParams + "ms1PartitionIntensityByFragments" + "=" + "{";
@@ -452,6 +459,12 @@ public:
         }
         if (decodedMap.find("ms1ScanFilter") != decodedMap.end()){
             directInfusionSearchParameters->ms1ScanFilter = decodedMap["ms1ScanFilter"];
+        }
+        if (decodedMap.find("isRequireMonoisotopic") != decodedMap.end()) {
+            directInfusionSearchParameters->isRequireMonoisotopic = decodedMap["isRequireMonoisotopic"] == "1";
+        }
+        if (decodedMap.find("mMinusOnePeakMaxIntensityFraction") != decodedMap.end()) {
+            directInfusionSearchParameters->mMinusOnePeakMaxIntensityFraction = stof(decodedMap["mMinusOnePeakMaxIntensityFraction"]);
         }
 
         //DIMS intensity options
