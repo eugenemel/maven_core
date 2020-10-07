@@ -814,6 +814,9 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
                 break;
             }
         }
+
+        //Issue 481: check for mMinusOneIon
+        //TODO
     }
 
     bool isPassesMs1PrecursorRequirements = !params->ms1IsFindPrecursorIon || (observedMs1Intensity > 0.0f && observedMs1Intensity >= params->ms1MinIntensity);
