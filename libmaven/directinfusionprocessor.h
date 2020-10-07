@@ -894,6 +894,8 @@ public:
                                          shared_ptr<DirectInfusionSearchParameters> params,
                                          bool debug = false);
 
+    static constexpr double C_13_MASS = 1.00335483521;
+
 };
 
 //Issue 226

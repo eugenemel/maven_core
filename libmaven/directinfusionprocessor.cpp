@@ -815,8 +815,32 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
             }
         }
 
-        //Issue 481: check for mMinusOneIon
-        //TODO
+        //Issue 303
+        if (observedMs1Intensity > 0.0f && params->isRequireMonoisotopic) {
+
+            double minMMinusOneMz = minMz - DirectInfusionUtils::C_13_MASS;
+            double maxMMinusOneMz = maxMz + DirectInfusionUtils::C_13_MASS;
+
+            auto lb = lower_bound(ms1Fragment->consensus->mzs.begin(), ms1Fragment->consensus->mzs.end(), minMMinusOneMz);
+
+            auto pos = lb - ms1Fragment->consensus->mzs.begin();
+
+            float maxMinusOneIntensity = -1.0f;
+            for (unsigned int i = pos; i < ms1Fragment->consensus->mzs.size(); i++) {
+                if (ms1Fragment->consensus->mzs[i] <= maxMMinusOneMz) {
+                    if (ms1Fragment->consensus->intensity_array[i] > maxMinusOneIntensity) {
+                        maxMinusOneIntensity = ms1Fragment->consensus->intensity_array[i];
+                    }
+                } else {
+                    break;
+                }
+            }
+
+            float mMinusOneToCandidateFraction = maxMinusOneIntensity / observedMs1Intensity;
+            if (mMinusOneToCandidateFraction > params->mMinusOnePeakMaxIntensityFraction) {
+                observedMs1Intensity = 0.0f; //disqualify observed ms1 intensity based on presence of [M-1] peak
+            }
+        }
     }
 
     bool isPassesMs1PrecursorRequirements = !params->ms1IsFindPrecursorIon || (observedMs1Intensity > 0.0f && observedMs1Intensity >= params->ms1MinIntensity);
