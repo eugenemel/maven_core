@@ -1690,6 +1690,87 @@ float DirectInfusionUtils::findNormalizedIntensity(const vector<Scan*>& scans,
     }
 }
 
+//returns -1.0f if not able to find scans
+//expects MS1 scans to be sorted in increasing order by scan number
+float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*>& scans,
+                                                              float queryMz,
+                                                              float standardMz,
+                                                              shared_ptr<DirectInfusionSearchParameters> params,
+                                                              bool debug){
+
+    vector<float> normalizedIntensities;
+
+    float queryMzIntensity = -1.0f;
+    float standardMzIntensity = -1.0f;
+
+    for (auto scan : scans) {
+
+        float queryMzIntensityCandidate = scan->findClosestMzIntensity(queryMz, params->ms1PpmTolr);
+
+        if (queryMzIntensityCandidate > 0.0f) {
+            queryMzIntensity = queryMzIntensityCandidate;
+
+            if (debug) cout << "Scan #"
+                            << scan->scannum << ", "
+                            << scan->filterString
+                            << ", minMz: " << scan->getMinMz()
+                            << ", maxMz: " << scan->getMaxMz()
+                            << ", mzWidth: " << (scan->getMaxMz()-scan->getMinMz())
+                            << ": query m/z=" << queryMz
+                            << ", query intensity="
+                            << to_string(queryMzIntensity)
+                            << endl;
+        }
+
+        float standardMzIntensityCandidate = scan->findClosestMzIntensity(standardMz, params->ms1PpmTolr);
+
+        if (standardMzIntensityCandidate > 0.0f) {
+            standardMzIntensity = standardMzIntensityCandidate;
+
+            if (debug) cout << "Scan #"
+                            << scan->scannum << ", "
+                            << scan->filterString
+                            << ", minMz: " << scan->getMinMz()
+                            << ", maxMz: " << scan->getMaxMz()
+                            << ", mzWidth: " << (scan->getMaxMz()-scan->getMinMz())
+                            << ": standard m/z=" << standardMz
+                            << ", standard intensity="
+                            << to_string(standardMzIntensity)
+                            << endl;
+        }
+
+        if (queryMzIntensity > 0.0f && standardMzIntensity > 0.0f) {
+
+            float intensityRatio = queryMzIntensity/standardMzIntensity;
+
+            if (debug) cout << "Added intensity ratio "
+                            << to_string(queryMzIntensity) << "/" << to_string(standardMzIntensity)
+                            << ": " << intensityRatio
+                            << endl;
+
+            normalizedIntensities.push_back(queryMzIntensity/standardMzIntensity);
+
+            //Once an intensity is involved in a ratio measurement, it cannot be involved in any other ratio measurement.
+            queryMzIntensity = -1.0f;
+            standardMzIntensity = -1.0f;
+        }
+
+    }
+
+    if (debug) cout << "Found " << normalizedIntensities.size() << " scans." << endl;
+
+    if (normalizedIntensities.empty()) return -1.0f;
+
+    if (params->consensusIntensityAgglomerationType == Fragment::Mean) {
+        return accumulate(normalizedIntensities.begin(), normalizedIntensities.end(), 0.0f) / normalizedIntensities.size();
+    } else if (params->consensusIntensityAgglomerationType == Fragment::Median) {
+        return median(normalizedIntensities);
+    } else { //unsupported type
+        if (debug) cout << "Unsupported quant agglomeration type, DirectInfusionUtils::findNormalizedIntensity() returning -1.0f" << endl;
+        return -1.0f;
+    }
+}
+
 /**
  * @brief getCompounds
  *
