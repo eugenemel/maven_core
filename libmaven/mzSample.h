@@ -825,6 +825,8 @@ public:
     }
     vector<Compound*> getChildren();
 
+    static vector<pair<string, string>> parseCompoundId(string generalSummarizedCompoundName, bool debug=false);
+
     //Relies on children
     void computeSummarizedData();
     virtual ~SummarizedCompound(){}

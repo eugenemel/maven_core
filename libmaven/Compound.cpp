@@ -309,3 +309,69 @@ void Ms3Compound::computeMs3Spectra() {
 vector<Compound*> Ms3Compound::getChildren(){
     return vector<Compound*>{baseCompound};
 }
+
+vector<pair<string, string>> SummarizedCompound::parseCompoundId(string compoundId, bool debug){
+    auto adductPart = compoundId.find("}[");
+
+    string compoundIdNoAdduct = compoundId.substr(0, adductPart+1);
+
+    if (debug) cout << "compound Id no adduct: " << compoundIdNoAdduct << endl;
+
+    auto compositionSummaryStart = compoundId.find("}={");
+
+    vector<pair<string, string>> compoundAdductPairs{};
+
+    if (compositionSummaryStart == string::npos) {
+
+        //general
+        string generalSummaryCompoundList = compoundIdNoAdduct.substr(1, compoundIdNoAdduct.size()-2) + ";";
+
+        if (debug) cout << "general summary compound list: " << generalSummaryCompoundList << endl;
+
+        vector<string> encodedCompoundAdductPairs{};
+
+        unsigned long posPrevious = 0;
+        unsigned long posCurrent = 0;
+
+        while ((posCurrent = generalSummaryCompoundList.find(";", posPrevious)) != string::npos) {
+            string encodedCompoundAdductPair = generalSummaryCompoundList.substr(posPrevious, posCurrent-posPrevious);
+            posPrevious = posCurrent + 1;
+
+            encodedCompoundAdductPairs.push_back(encodedCompoundAdductPair);
+
+            if (debug) cout << "encoded compound-adduct pair: " << encodedCompoundAdductPair << endl;
+        }
+
+        for (auto encodedPair : encodedCompoundAdductPairs) {
+            auto splitPos = encodedPair.find("|");
+            string compound = encodedPair.substr(0, splitPos);
+            string adduct = encodedPair.substr(splitPos+1, encodedPair.size());
+
+            if (debug) cout << "encoded compound: " << compound << ", encoded adduct: " << adduct << endl;
+
+            compoundAdductPairs.push_back(make_pair(compound, adduct));
+        }
+
+    } else {
+        //summarized
+        string compositionSummaryAdduct = compoundId.substr(adductPart+1);
+        if (debug) cout << "composition summary adduct: " << compositionSummaryAdduct << endl;
+
+        string compositionSummaryCompoundList = compoundIdNoAdduct.substr(compositionSummaryStart+3);
+        compositionSummaryCompoundList = compositionSummaryCompoundList.substr(0, compositionSummaryCompoundList.size()-1) + ";";
+
+        if (debug) cout << "composition summary compound list: " << compositionSummaryCompoundList << endl;
+
+        unsigned long posPrevious = 0;
+        unsigned long posCurrent = 0;
+
+        while ((posCurrent = compositionSummaryCompoundList.find(";", posPrevious)) != string::npos) {
+            string compoundName = compositionSummaryCompoundList.substr(posPrevious, posCurrent-posPrevious);
+            posPrevious = posCurrent + 1;
+
+            compoundAdductPairs.push_back(make_pair(compoundName, compositionSummaryAdduct));
+        }
+    }
+
+    return compoundAdductPairs;
+}
