@@ -1101,6 +1101,9 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
             }
             summarizedId += "}";
 
+            //Issue 305: include adduct information
+            summarizedId += compounds.at(0)->adductString;
+
             summarizedCompound->adductString = compounds.at(0)->adductString;
             summarizedCompound->formula = compounds.at(0)->getFormula();
             summarizedCompound->precursorMz = compounds.at(0)->precursorMz;
