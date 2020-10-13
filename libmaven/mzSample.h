@@ -805,7 +805,7 @@ class Compound {
             inline float getExactMass() { return exactMass; }
             void setExactMass(float value) { exactMass = value; }
 
-            inline void setFormala(string formulastr) { formula = formulastr; }
+            inline void setFormula(string formulastr) { formula = formulastr; }
             string getFormula() { return formula; }
             map<string, string> metaDataMap = {};
 
