@@ -697,15 +697,17 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         }
     }
 
-    f->buildConsensus(params->consensusPpmTolr,
-                      params->consensusIntensityAgglomerationType,
-                      params->consensusIsIntensityAvgByObserved,
-                      params->consensusIsNormalizeTo10K,
-                      params->consensusMinNumMs2Scans,
-                      params->consensusMinFractionMs2Scans
-                      );
+    if(f) {
+        f->buildConsensus(params->consensusPpmTolr,
+                          params->consensusIntensityAgglomerationType,
+                          params->consensusIsIntensityAvgByObserved,
+                          params->consensusIsNormalizeTo10K,
+                          params->consensusMinNumMs2Scans,
+                          params->consensusMinFractionMs2Scans
+                          );
 
-    f->consensus->sortByMz();
+        f->consensus->sortByMz();
+    }
 
     vector<shared_ptr<DirectInfusionMatchData>> libraryMatches;
 
@@ -861,14 +863,16 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
     t.intensity_array = compound->fragment_intensity;
     t.fragment_labels = compound->fragment_labels;
 
-    float maxDeltaMz = (params->ms2PpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
-    directInfusionMatchAssessment->fragmentationMatchScore.ranks = Fragment::findFragPairsGreedyMz(&t, f->consensus, maxDeltaMz);
+    map<string, int> diagnosticMatchesMap = {};
+    float fragmentMaxObservedIntensity = 0;
+
+    if (f && f->consensus) {
+        float maxDeltaMz = (params->ms2PpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
+        directInfusionMatchAssessment->fragmentationMatchScore.ranks = Fragment::findFragPairsGreedyMz(&t, f->consensus, maxDeltaMz);
+    }
 
     bool isHasLabels = compound->fragment_labels.size() == directInfusionMatchAssessment->fragmentationMatchScore.ranks.size();
 
-    float fragmentMaxObservedIntensity = 0;
-
-    map<string, int> diagnosticMatchesMap = {};
     for (auto it = params->ms2MinNumDiagnosticMatchesMap.begin(); it != params->ms2MinNumDiagnosticMatchesMap.end(); ++it){
         diagnosticMatchesMap.insert(make_pair(it->first, 0));
     }
