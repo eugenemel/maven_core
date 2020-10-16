@@ -538,6 +538,11 @@ struct DirectInfusionMatchAssessment {
     float fragmentMaxObservedIntensity = 0;
     float observedMs1Intensity = 0;
     int ms1IntensityCoord = -1;
+
+    //Issue 303:
+    //If this is ever true, disqualify the match.
+    //Note that matches can be disqualified for other reasons, even if this flag remains false.
+    bool isDisqualifyThisMatch = false;
 };
 
 /**

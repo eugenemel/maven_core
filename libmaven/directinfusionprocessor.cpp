@@ -721,7 +721,8 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         int ms1IntensityCoord = matchAssessment->ms1IntensityCoord;
 
         //individual compound matches
-        if (s.numMatches >= params->ms2MinNumMatches &&
+        if (!matchAssessment->isDisqualifyThisMatch &&
+                s.numMatches >= params->ms2MinNumMatches &&
                 s.numDiagnosticMatches >= params->ms2MinNumDiagnosticMatches &&
                 params->isDiagnosticFragmentMapAgreement(matchAssessment->diagnosticFragmentMatchMap)) {
 
@@ -847,7 +848,10 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
 
     bool isPassesMs1PrecursorRequirements = !params->ms1IsFindPrecursorIon || (observedMs1Intensity > 0.0f && observedMs1Intensity >= params->ms1MinIntensity);
 
-    if (!isPassesMs1PrecursorRequirements) return directInfusionMatchAssessment; // will return with no matching fragments, 0 for every score
+    if (!isPassesMs1PrecursorRequirements){
+        directInfusionMatchAssessment->isDisqualifyThisMatch = true;
+        return directInfusionMatchAssessment; // will return with no matching fragments, 0 for every score.
+     }
 
     //=============================================== //
     //END COMPARE MS1
