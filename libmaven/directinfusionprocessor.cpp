@@ -869,6 +869,9 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
     if (f && f->consensus) {
         float maxDeltaMz = (params->ms2PpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
         directInfusionMatchAssessment->fragmentationMatchScore.ranks = Fragment::findFragPairsGreedyMz(&t, f->consensus, maxDeltaMz);
+    } else {
+        //Issue 303: downstream analysis expects the ranks vector to exist and be the same size as the compound fragment vectors
+        directInfusionMatchAssessment->fragmentationMatchScore.ranks = vector<int>(compound->fragment_mzs.size(),-1);
     }
 
     bool isHasLabels = compound->fragment_labels.size() == directInfusionMatchAssessment->fragmentationMatchScore.ranks.size();
