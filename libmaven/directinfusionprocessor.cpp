@@ -410,7 +410,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
                         float ms3IntensityFraction = static_cast<float>(ms3Intensities.size())/static_cast<float>(scans.size());
 
-                        if (ms3IntensityFraction >= params->ms3MinFractionScans && ms3Intensities.size() >= params->ms3MinNumScans) {
+                        if (ms3IntensityFraction >= params->ms3MinFractionScans && static_cast<int>(ms3Intensities.size()) >= params->ms3MinNumScans) {
                             for (auto ms3_intensity : ms3Intensities) {
                                 if (scanIntensitiesByMs3Mz.find(ms3MzKey) == scanIntensitiesByMs3Mz.end()) {
                                     scanIntensitiesByMs3Mz.insert(make_pair(ms3MzKey, vector<float>()));
