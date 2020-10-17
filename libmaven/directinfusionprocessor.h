@@ -95,6 +95,8 @@ public:
      * @param ms3AnalysisMs1PrecursorPpmTolr: m/z tolerance used for matching reference MS1 <--> MS3 scan precursor m/z
      * @param ms3PrecursorPpmTolr: m/z tolerance value used for matching reference MS2 m/z <--> MS3 scan precursor m/z
      * @param ms3PpmTolr: m/z tolerance value used for matching reference <--> observed spectral peaks in MS3 spectrum
+     * @param ms3MinNumScans: ms3 fragment peak must be found in this many ms3 scans to count as a match
+     * @param ms3MinFractionScans: ms3 fragment peak must be found in this proportion of all appropriate ms3 scans to count as a match
      * ==================== */
     bool ms3IsMs3Search = false;
     int ms3MinNumMatches = 1;
@@ -103,6 +105,8 @@ public:
     float ms3PrecursorPpmTolr = 20;
     float ms3MatchTolrInDa = 0.5f;
     float ms3MinIntensity = 0;
+    int ms3MinNumScans = 0;
+    float ms3MinFractionScans = 0.0f;
     Ms3IntensityType ms3IntensityType = Ms3IntensityType::MAX_INTENSITY;
 
     /** =======================
@@ -225,6 +229,8 @@ public:
         encodedParams = encodedParams + "ms3PrecursorPpmTolr" + "=" + to_string(ms3PrecursorPpmTolr) + ";";
         encodedParams = encodedParams + "ms3MatchTolrInDa" + "=" + to_string(ms3MatchTolrInDa) + ";";
         encodedParams = encodedParams + "ms3MinIntensity" + "=" + to_string(ms3MinIntensity) + ";";
+        encodedParams = encodedParams + "ms3MinNumScans" + "=" + to_string(ms3MinNumScans) + ";";
+        encodedParams = encodedParams + "ms3MinFractionScans" + "=" + to_string(ms3MinFractionScans) + ";";
 
         string ms3IntensityTypeStr = "UNSPECIFIED";
         if (ms3IntensityType == Ms3IntensityType::CLOSEST_MZ) {
@@ -412,6 +418,13 @@ public:
         if (decodedMap.find("ms3MinIntensity") != decodedMap.end()) {
             directInfusionSearchParameters->ms3MinIntensity = stof(decodedMap["ms3MinIntensity"]);
         }
+        if (decodedMap.find("ms3MinNumScans") != decodedMap.end()) {
+            directInfusionSearchParameters->ms3MinNumScans = stoi(decodedMap["ms3MinNumScans"]);
+        }
+        if (decodedMap.find("ms3MinFractionScans") != decodedMap.end()) {
+            directInfusionSearchParameters->ms3MinFractionScans = stof(decodedMap["ms3MinFractionScans"]);
+        }
+
         if (decodedMap.find("ms3IntensityType") != decodedMap.end()) {
             string ms3IntensityTypeStr = decodedMap["ms3IntensityType"];
             if (ms3IntensityTypeStr == "CLOSEST_MZ") {
