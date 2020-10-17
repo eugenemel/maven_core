@@ -368,12 +368,15 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
                         vector<Scan*> scans = it2->second;
 
+                        vector<float> ms3Intensities{};
+
                         for (auto scan : scans) {
 
                           auto lb_ms3 = lower_bound(scan->mz.begin(), scan->mz.end(), ms3_mz_min);
 
                           float ms3_intensity = 0.0f;
                           float deltaMz = 99999;
+                          bool isFoundMatch = false;
 
                           for (unsigned int ms3_pos = lb_ms3 - scan->mz.begin(); ms3_pos < scan->mz.size(); ms3_pos++) {
 
@@ -383,35 +386,44 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
                             if (params->ms3IntensityType == Ms3IntensityType::ALL_MATCHES) {
                               ms3_intensity += scan->intensity[ms3_pos];
+                              isFoundMatch = true;
                             } else if (params->ms3IntensityType == Ms3IntensityType::MAX_INTENSITY) {
                               if (scan->intensity[ms3_pos] > ms3_intensity) {
                                 ms3_intensity = scan->intensity[ms3_pos];
+                                isFoundMatch = true;
                               }
                             } else if (params->ms3IntensityType == Ms3IntensityType::CLOSEST_MZ) {
                               if (abs(scan->mz[ms3_pos] - ms3_mz) < deltaMz) {
                                 deltaMz = abs(scan->mz[ms3_pos] - ms3_mz);
                                 ms3_intensity = scan->mz[ms3_pos];
+                                isFoundMatch = true;
                               }
                             }
 
-                          }
+                          } // END scans->mz
 
-                          if (ms3_intensity >= params->ms3MinIntensity) {
-
-                            if (scanIntensitiesByMs3Mz.find(ms3MzKey) == scanIntensitiesByMs3Mz.end()) {
-                                scanIntensitiesByMs3Mz.insert(make_pair(ms3MzKey, vector<float>()));
-                            }
-                            scanIntensitiesByMs3Mz[ms3MzKey].push_back(ms3_intensity);
-
-                            pair<int, int> mzKey(ms2MzKey, i);
-                            if (scanIntensitiesByMs1Ms2Ms3Mzs.find(mzKey)  == scanIntensitiesByMs1Ms2Ms3Mzs.end()) {
-                                scanIntensitiesByMs1Ms2Ms3Mzs.insert(make_pair(mzKey, vector<float>()));
-                            }
-                            scanIntensitiesByMs1Ms2Ms3Mzs[mzKey].push_back(ms3_intensity);
-
+                          if (ms3_intensity >= params->ms3MinIntensity && isFoundMatch) {
+                              ms3Intensities.push_back(ms3_intensity);
                           }
 
                         } // END scans
+
+                        float ms3IntensityFraction = static_cast<float>(ms3Intensities.size())/static_cast<float>(scans.size());
+
+                        if (ms3IntensityFraction >= params->ms3MinFractionScans && ms3Intensities.size() >= params->ms3MinNumScans) {
+                            for (auto ms3_intensity : ms3Intensities) {
+                                if (scanIntensitiesByMs3Mz.find(ms3MzKey) == scanIntensitiesByMs3Mz.end()) {
+                                    scanIntensitiesByMs3Mz.insert(make_pair(ms3MzKey, vector<float>()));
+                                }
+                                scanIntensitiesByMs3Mz[ms3MzKey].push_back(ms3_intensity);
+
+                                pair<int, int> mzKey(ms2MzKey, i);
+                                if (scanIntensitiesByMs1Ms2Ms3Mzs.find(mzKey) == scanIntensitiesByMs1Ms2Ms3Mzs.end()) {
+                                    scanIntensitiesByMs1Ms2Ms3Mzs.insert(make_pair(mzKey, vector<float>()));
+                                }
+                                scanIntensitiesByMs1Ms2Ms3Mzs[mzKey].push_back(ms3_intensity);
+                            }
+                        }
 
                     } //END matching precursor m/z
 
