@@ -469,21 +469,6 @@ void PeakGroup::groupStatistics() {
         meanMz = mzSum/nonZeroCount;
     }
 
-    /**
-      * Issue 84:
-      * Do not adjust PeakGroup minMz or maxMz.
-      * However, leaving this code here in case not adjusting
-      * these values causes a different bug.
-      */
-
-    //if number of samples == 1, assume minimum variation around measurement
-    //Issue 54: unless the samples are direct infusion samples
-//    if (maxMz - minMz < 0.5) { //not direct infusion samples
-//         if (sampleCount <= 1 or abs(minMz - maxMz)<1e-6) {
-//             minMz=meanMz-0.001; maxMz=meanMz+0.001;
-//         }
-//    }
-
     groupOverlapMatrix();
 }
 
