@@ -21,6 +21,9 @@ class DirectInfusionSearchSet {
 
 public:
 
+    //Issue 313: reserved map key for compounds that cannot have any MS2 information
+    static constexpr int NO_MS2_SCANS_MAP_KEY = -1;
+
     /**
     *  set of all DIA ranges represented in experiment.
     */
@@ -646,6 +649,7 @@ public:
 class DirectInfusionProcessor {
 
 public:
+
     /**
      * @brief getSearchSet
      * @param sample
