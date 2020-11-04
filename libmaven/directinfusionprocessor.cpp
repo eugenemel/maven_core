@@ -80,20 +80,20 @@ shared_ptr<DirectInfusionSearchSet> DirectInfusionProcessor::getSearchSet(mzSamp
             }
 
             if (!isWroteCompoundToMs2ScansRange) {
-                if (directInfusionSearchSet->compoundsByMapKey.find(DirectInfusionSearchSet::NO_MS2_SCANS_MAP_KEY) == directInfusionSearchSet->compoundsByMapKey.end()) {
-                    directInfusionSearchSet->compoundsByMapKey.insert(make_pair(DirectInfusionSearchSet::NO_MS2_SCANS_MAP_KEY, vector<pair<Compound*, Adduct*>>()));
-                    directInfusionSearchSet->mapKeys.insert(DirectInfusionSearchSet::NO_MS2_SCANS_MAP_KEY);
+                if (directInfusionSearchSet->compoundsByMapKey.find(DirectInfusionSearchSet::getNoMs2ScansMapKey()) == directInfusionSearchSet->compoundsByMapKey.end()) {
+                    directInfusionSearchSet->compoundsByMapKey.insert(make_pair(DirectInfusionSearchSet::getNoMs2ScansMapKey(), vector<pair<Compound*, Adduct*>>()));
+                    directInfusionSearchSet->mapKeys.insert(DirectInfusionSearchSet::getNoMs2ScansMapKey());
                 }
-                directInfusionSearchSet->compoundsByMapKey[DirectInfusionSearchSet::NO_MS2_SCANS_MAP_KEY].push_back(make_pair(compound, adduct));
+                directInfusionSearchSet->compoundsByMapKey[DirectInfusionSearchSet::getNoMs2ScansMapKey()].push_back(make_pair(compound, adduct));
             }
         }
     }
 
-    if (directInfusionSearchSet->compoundsByMapKey.find(DirectInfusionSearchSet::NO_MS2_SCANS_MAP_KEY) != directInfusionSearchSet->compoundsByMapKey.end()) {
+    if (directInfusionSearchSet->compoundsByMapKey.find(DirectInfusionSearchSet::getNoMs2ScansMapKey()) != directInfusionSearchSet->compoundsByMapKey.end()) {
 
         //Currently, support any possible precursor m/z for compounds missing MS2 scans,
         //however this could also be limited by the MS1 scans in the experiment
-        directInfusionSearchSet->mzRangesByMapKey.insert(make_pair(DirectInfusionSearchSet::NO_MS2_SCANS_MAP_KEY, make_pair(0.0f, FLT_MAX)));
+        directInfusionSearchSet->mzRangesByMapKey.insert(make_pair(DirectInfusionSearchSet::getNoMs2ScansMapKey(), make_pair(0.0f, FLT_MAX)));
     }
 
     return directInfusionSearchSet;
@@ -620,8 +620,8 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
     }
 
     //Issue 313
-    if (directInfusionSearchSet->mapKeys.find(DirectInfusionSearchSet::NO_MS2_SCANS_MAP_KEY) != directInfusionSearchSet->mapKeys.end()) {
-        ms2ScansByBlockNumber.insert(make_pair(DirectInfusionSearchSet::NO_MS2_SCANS_MAP_KEY, vector<Scan*>()));
+    if (directInfusionSearchSet->mapKeys.find(DirectInfusionSearchSet::getNoMs2ScansMapKey()) != directInfusionSearchSet->mapKeys.end()) {
+        ms2ScansByBlockNumber.insert(make_pair(DirectInfusionSearchSet::getNoMs2ScansMapKey(), vector<Scan*>()));
     }
 
     if (debug) cerr << "Performing search over map keys..." << endl;
