@@ -784,15 +784,19 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         directInfusionAnnotation->scan = representativeScan;
         directInfusionAnnotation->fragmentationPattern = f;
 
+        //Issue 113: Support ms1-only searches
+        Fragment *ms2ConsensusSpectrum = nullptr;
+        if (f && f->consensus) ms2ConsensusSpectrum = f->consensus;
+
         //determine fragment match maps, apply filters, and agglomerate compounds (if needed)
         unique_ptr<DirectInfusionMatchInformation> matchInfo = DirectInfusionProcessor::getMatchInformation(
                     libraryMatches,
-                    f->consensus,
+                    ms2ConsensusSpectrum,
                     params,
                     debug);
 
         //Issue 288
-        if (!params->ms1PartitionIntensityByFragments.empty()) {
+        if (!params->ms1PartitionIntensityByFragments.empty() && !ms2Scans.empty()) {
             matchInfo->computeMs1PartitionFractions(ms2Scans, f, params, debug);
         }
 
@@ -983,7 +987,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getFragmentM
                int observedIndex = fragmentationMatchScore.ranks[i];
 
                //Issue 209: peaks may be unmatched based on intensity as well as ranks[] position
-               if (observedIndex == -1 || observedSpectrum->intensity_array[observedIndex] < params->ms2MinIntensity) continue;
+               if (!observedSpectrum || observedIndex == -1 || observedSpectrum->intensity_array[static_cast<unsigned long>(observedIndex)] < params->ms2MinIntensity) continue;
 
                if (debug) cerr << "allCandidates[" << i << "]: " << compound->name << "|" << compound->adductString << " observedIndex=" << observedIndex << endl;
 
@@ -1161,7 +1165,9 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
             summarizedMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
             summarizedMatchData->compound = summarizedCompound;
             summarizedMatchData->adduct = adduct;
-            summarizedMatchData->fragmentationMatchScore = summarizedCompound->scoreCompoundHit(observedSpectrum, params->ms2PpmTolr, false);
+            if (observedSpectrum) {
+                summarizedMatchData->fragmentationMatchScore = summarizedCompound->scoreCompoundHit(observedSpectrum, params->ms2PpmTolr, false);
+            }
 
             summarizedMatchData->observedMs1Intensity = observedMs1Intensity;
             summarizedMatchData->ms1IntensityCoord = ms1IntensityCoord;
@@ -1265,7 +1271,9 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
             summarizedMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
             summarizedMatchData->compound = summarizedCompound;
             summarizedMatchData->adduct = adduct;
-            summarizedMatchData->fragmentationMatchScore = summarizedCompound->scoreCompoundHit(observedSpectrum, params->ms2PpmTolr, false);
+            if (observedSpectrum) {
+                summarizedMatchData->fragmentationMatchScore = summarizedCompound->scoreCompoundHit(observedSpectrum, params->ms2PpmTolr, false);
+            }
 
             summarizedMatchData->observedMs1Intensity = observedMs1Intensity;
             summarizedMatchData->ms1IntensityCoord = ms1IntensityCoord;
