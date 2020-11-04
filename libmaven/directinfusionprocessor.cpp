@@ -1491,14 +1491,7 @@ void DirectInfusionProcessor::addBlockSpecificMatchInfo(
 
 void DirectInfusionGroupAnnotation::clean() {
     for (map<mzSample*, DirectInfusionAnnotation*>::iterator it = annotationBySample.begin(); it != annotationBySample.end(); ++it) {
-
-        if (it->second->fragmentationPattern) delete(it->second->fragmentationPattern);
-        for (auto matchData : it->second->compounds) {
-             //SummarizedCompounds are created transiently by directinfusionprocessor, Compounds are retrieved from DB.compounds
-//            if (SummarizedCompound* sc = dynamic_cast<SummarizedCompound*>(matchData->compound)){
-//                delete(sc);
-//            }
-        }
+        if (it->second && it->second->fragmentationPattern) delete(it->second->fragmentationPattern);
         if (it->second) delete(it->second);
     }
     annotationBySample.clear();
