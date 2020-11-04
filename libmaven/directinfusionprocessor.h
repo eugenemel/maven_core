@@ -618,6 +618,9 @@ public:
     //single fragment m/z ==> all identified compounds containing fragment
     map<int, unordered_set<shared_ptr<DirectInfusionMatchData>>> fragToMatchData = {};
 
+    //Issue 311: get all fragments that had no fragment matches
+    vector<shared_ptr<DirectInfusionMatchData>> compoundsNoFragMatches{};
+
     /**
      * @brief getCompounds
      *

@@ -1007,9 +1007,13 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getFragmentM
    //            if (debug) cerr << "allCandidates [end] i=" << i << ", ranks=" << fragmentationMatchScore.ranks.size() << endl;
            }
 
-           //Issue 270: need these to be sorted
-           sort(compoundFrags.begin(), compoundFrags.end());
-           matchInfo->matchDataToFrags.insert(make_pair(directInfusionMatchData, compoundFrags));
+           if (compoundFrags.empty()) {
+               matchInfo->compoundsNoFragMatches.push_back(directInfusionMatchData);
+           } else {
+               //Issue 270: need these to be sorted
+               sort(compoundFrags.begin(), compoundFrags.end());
+               matchInfo->matchDataToFrags.insert(make_pair(directInfusionMatchData, compoundFrags));
+           }
 
        }
 
@@ -1397,6 +1401,11 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::reduceByUniq
     matchInfo->fragListToCompounds = reducedFragListToCompounds;
     matchInfo->matchDataToFrags = reducedMatchDataToFrags;
     matchInfo->fragToMatchData = reducedFragToMatchData;
+
+    //Issue 311: If number of unique fragments > 0, compounds with no frag matches must be discarded
+    if (params->ms2MinNumUniqueMatches > 0) {
+        matchInfo->compoundsNoFragMatches.clear();
+    }
 
     return matchInfo;
 }
@@ -1829,14 +1838,22 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
  * This is intentionally left as a method instead of a field to avoid duplicated state
  * dependencies.
  *
+ * Issue 311: Includes all compounds associated without any fragment matches, which are kept separate
+ * from the rest of the matches.
+ *
  * @return
  */
 vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionMatchInformation::getCompounds(){
-    vector<shared_ptr<DirectInfusionMatchData>> compounds(matchDataToFrags.size());
+    vector<shared_ptr<DirectInfusionMatchData>> compounds(matchDataToFrags.size() + compoundsNoFragMatches.size());
 
     unsigned int i = 0;
     for (auto it = matchDataToFrags.begin(); it != matchDataToFrags.end(); ++it){
         compounds[i] = it->first;
+        i++;
+    }
+
+    for (auto compound : compoundsNoFragMatches) {
+        compounds[i] = compound;
         i++;
     }
 
@@ -1883,6 +1900,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                                                                   const shared_ptr<DirectInfusionSearchParameters> params,
                                                                   const bool debug) {
     if (!ms2Fragment || !ms2Fragment->consensus) return;
+    if (ms2Scans.empty()) return;
 
     map<int, vector<shared_ptr<DirectInfusionMatchData>>> partitionMap{};
 
@@ -1896,6 +1914,19 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
             partitionMap.insert(make_pair(key, vector<shared_ptr<DirectInfusionMatchData>>()));
         }
         partitionMap[key].push_back(it->first);
+    }
+
+    //Issue 311: any matches without fragments that map to the same precursor intensity
+    //as something else will always return a partition fraction of 0.
+    for (auto compound : compoundsNoFragMatches) {
+        int key = compound->ms1IntensityCoord;
+
+        if (key == -1) continue; //no intensity detected
+
+        if (partitionMap.find(key) == partitionMap.end()) {
+            partitionMap.insert(make_pair(key, vector<shared_ptr<DirectInfusionMatchData>>()));
+        }
+        partitionMap[key].push_back(compound);
     }
 
     for (auto it = partitionMap.begin(); it != partitionMap.end(); ++it){
