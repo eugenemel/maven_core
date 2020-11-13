@@ -891,6 +891,9 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
         return directInfusionMatchAssessment; // will return with no matching fragments, 0 for every score.
      }
 
+    directInfusionMatchAssessment->observedMs1Intensity = observedMs1Intensity;
+    directInfusionMatchAssessment->ms1IntensityCoord = ms1IntensityCoord;
+
     //=============================================== //
     //END COMPARE MS1
     //=============================================== //
@@ -899,63 +902,7 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
     //START COMPARE MS2
     //=============================================== //
 
-    Fragment t;
-    t.precursorMz = compound->precursorMz;
-    t.mzs = compound->fragment_mzs;
-    t.intensity_array = compound->fragment_intensity;
-    t.fragment_labels = compound->fragment_labels;
-
-    map<string, int> diagnosticMatchesMap = {};
-    float fragmentMaxObservedIntensity = 0;
-
-    if (f && f->consensus) {
-        float maxDeltaMz = (params->ms2PpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
-        directInfusionMatchAssessment->fragmentationMatchScore.ranks = Fragment::findFragPairsGreedyMz(&t, f->consensus, maxDeltaMz);
-    } else {
-        //Issue 303: downstream analysis expects the ranks vector to exist and be the same size as the compound fragment vectors
-        directInfusionMatchAssessment->fragmentationMatchScore.ranks = vector<int>(compound->fragment_mzs.size(),-1);
-    }
-
-    bool isHasLabels = compound->fragment_labels.size() == directInfusionMatchAssessment->fragmentationMatchScore.ranks.size();
-
-    for (auto it = params->ms2MinNumDiagnosticMatchesMap.begin(); it != params->ms2MinNumDiagnosticMatchesMap.end(); ++it){
-        diagnosticMatchesMap.insert(make_pair(it->first, 0));
-    }
-
-    for (unsigned long i=0; i < directInfusionMatchAssessment->fragmentationMatchScore.ranks.size(); i++) {
-
-        int y = directInfusionMatchAssessment->fragmentationMatchScore.ranks[i];
-
-        if (y != -1 && f->consensus->intensity_array[y] >= params->ms2MinIntensity) {
-
-            float fragmentObservedIntensity = f->consensus->intensity_array[y];
-
-            if (fragmentObservedIntensity > fragmentMaxObservedIntensity) {
-                fragmentMaxObservedIntensity = fragmentObservedIntensity;
-            }
-
-            directInfusionMatchAssessment->fragmentationMatchScore.numMatches++;
-
-            if (!isHasLabels) continue;
-
-            if (compound->fragment_labels[i].find("*") == 0) {
-                directInfusionMatchAssessment->fragmentationMatchScore.numDiagnosticMatches++;
-            }
-
-            for (auto it = params->ms2MinNumDiagnosticMatchesMap.begin(); it != params->ms2MinNumDiagnosticMatchesMap.end(); ++it){
-                string diagnosticFragLabel = it->first;
-                if (compound->fragment_labels[i].find(diagnosticFragLabel) == 0) {
-                    diagnosticMatchesMap[diagnosticFragLabel]++;
-                }
-            }
-
-        }
-    }
-
-    directInfusionMatchAssessment->diagnosticFragmentMatchMap = diagnosticMatchesMap;
-    directInfusionMatchAssessment->fragmentMaxObservedIntensity = fragmentMaxObservedIntensity;
-    directInfusionMatchAssessment->observedMs1Intensity = observedMs1Intensity;
-    directInfusionMatchAssessment->ms1IntensityCoord = ms1IntensityCoord;
+    directInfusionMatchAssessment->computeMs2MatchAssessment(f, compound, params, debug);
 
     //=============================================== //
     //END COMPARE MS2
@@ -1169,8 +1116,12 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
             summarizedMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
             summarizedMatchData->compound = summarizedCompound;
             summarizedMatchData->adduct = adduct;
+
             if (observedSpectrum) {
-                summarizedMatchData->fragmentationMatchScore = summarizedCompound->scoreCompoundHit(observedSpectrum, params->ms2PpmTolr, false);
+                //Issue 313: Always use computeMs2MatchAssessment() method for computing ms2 match information
+                unique_ptr<DirectInfusionMatchAssessment> directInfusionMatchAssessment = unique_ptr<DirectInfusionMatchAssessment>(new DirectInfusionMatchAssessment());
+                directInfusionMatchAssessment->computeMs2MatchAssessment(observedSpectrum, summarizedCompound, params, debug);
+                summarizedMatchData->fragmentationMatchScore = directInfusionMatchAssessment->fragmentationMatchScore;
             }
 
             summarizedMatchData->observedMs1Intensity = observedMs1Intensity;
@@ -1275,8 +1226,12 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
             summarizedMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
             summarizedMatchData->compound = summarizedCompound;
             summarizedMatchData->adduct = adduct;
+
             if (observedSpectrum) {
-                summarizedMatchData->fragmentationMatchScore = summarizedCompound->scoreCompoundHit(observedSpectrum, params->ms2PpmTolr, false);
+                //Issue 313: Always use computeMs2MatchAssessment() method for computing ms2 match information
+                unique_ptr<DirectInfusionMatchAssessment> directInfusionMatchAssessment = unique_ptr<DirectInfusionMatchAssessment>(new DirectInfusionMatchAssessment());
+                directInfusionMatchAssessment->computeMs2MatchAssessment(observedSpectrum, summarizedCompound, params, debug);
+                summarizedMatchData->fragmentationMatchScore = directInfusionMatchAssessment->fragmentationMatchScore;
             }
 
             summarizedMatchData->observedMs1Intensity = observedMs1Intensity;
@@ -2109,4 +2064,67 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
             }
         }
     }
+}
+
+void DirectInfusionMatchAssessment::computeMs2MatchAssessment(
+                               const Fragment *f,
+                               const Compound* compound,
+                               const shared_ptr<DirectInfusionSearchParameters> params,
+                               const bool debug){
+
+    Fragment t;
+    t.precursorMz = compound->precursorMz;
+    t.mzs = compound->fragment_mzs;
+    t.intensity_array = compound->fragment_intensity;
+    t.fragment_labels = compound->fragment_labels;
+
+    if (f && f->consensus) {
+        float maxDeltaMz = (params->ms2PpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
+        fragmentationMatchScore.ranks = Fragment::findFragPairsGreedyMz(&t, f->consensus, maxDeltaMz);
+    } else {
+        //Issue 303: downstream analysis expects the ranks vector to exist and be the same size as the compound fragment vectors
+        fragmentationMatchScore.ranks = vector<int>(compound->fragment_mzs.size(),-1);
+    }
+
+    bool isHasLabels = compound->fragment_labels.size() == fragmentationMatchScore.ranks.size();
+
+    for (auto it = params->ms2MinNumDiagnosticMatchesMap.begin(); it != params->ms2MinNumDiagnosticMatchesMap.end(); ++it){
+        diagnosticFragmentMatchMap.insert(make_pair(it->first, 0));
+    }
+
+    for (unsigned long i=0; i < fragmentationMatchScore.ranks.size(); i++) {
+
+        int y = fragmentationMatchScore.ranks[i];
+
+        if (y != -1 && f->consensus->intensity_array[y] >= params->ms2MinIntensity) {
+
+            float fragmentObservedIntensity = f->consensus->intensity_array[y];
+
+            if (fragmentObservedIntensity > fragmentMaxObservedIntensity) {
+                fragmentMaxObservedIntensity = fragmentObservedIntensity;
+            }
+
+            fragmentationMatchScore.numMatches++;
+
+            if (!isHasLabels) continue;
+
+            //TODO: assess num sn1, num sn2 matches, determine if fragment label is diagnostic/sn1/sn2 or any number of these,
+
+            //TODO: then write test for all of this, potentially refactor/reorganize into separate method
+            //to facilitate more efficient usage with SummarizedCompound assessment.
+
+            if (compound->fragment_labels[i].find("*") == 0) {
+                fragmentationMatchScore.numDiagnosticMatches++;
+            }
+
+            for (auto it = params->ms2MinNumDiagnosticMatchesMap.begin(); it != params->ms2MinNumDiagnosticMatchesMap.end(); ++it){
+                string diagnosticFragLabel = it->first;
+                if (compound->fragment_labels[i].find(diagnosticFragLabel) == 0) {
+                    diagnosticFragmentMatchMap[diagnosticFragLabel]++;
+                }
+            }
+
+        }
+    }
+
 }

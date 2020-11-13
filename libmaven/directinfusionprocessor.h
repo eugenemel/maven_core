@@ -91,6 +91,22 @@ public:
     float ms1MMinusOnePeakMaxIntensityFraction = 1.0f;
 
     /** ===================
+     * MS2 SEARCH RELATED
+     * labels
+     * If a fragment label starts with any of these substrings, it is flagged with the appropriate type.
+     * Once a fragment label encounters a character that is not covered by any of the fragment labels,
+     * all labels have been assigned and the check for labeling fragments stops.
+     * @param ms2diagnosticFragmentLabel: label indicates this ms2 fragment is diagnostic.
+     * @param ms2sn1AssociatedFragmentLabel: label indicates this ms2 fragment is associated with an sn1 acyl chain.
+     * @param ms2sn2AssociatedFragmentLabel: label indicates this ms2 fragment is associated with an sn2 acyl chain.
+     * ==================== */
+    string ms2diagnosticFragmentLabel = "*";
+    string ms2sn1AssociatedFragmentLabel = "@";
+    string ms2sn2AssociatedFragmentLabel = "$";
+
+    //TODO: encode/decode
+
+    /** ===================
      * MS3 SEARCH RELATED
      * @param ms3IsMs3Search: if experimental data contains MS3 scans
      * @param ms3MinNumMatches: Minimum number of reference MS3 peaks found in observed MS3 scans
@@ -549,16 +565,28 @@ struct DirectInfusionMatchData {
  * as returned by DirectInfusionProcessor::assessMatch()
  */
 struct DirectInfusionMatchAssessment {
+
+    //ms1-associated
+    float observedMs1Intensity = 0;
+    int ms1IntensityCoord = -1;
+
+    //ms2-associated
     FragmentationMatchScore fragmentationMatchScore;
     map<string, int> diagnosticFragmentMatchMap = {};
     float fragmentMaxObservedIntensity = 0;
-    float observedMs1Intensity = 0;
-    int ms1IntensityCoord = -1;
+
 
     //Issue 303:
     //If this is ever true, disqualify the match.
     //Note that matches can be disqualified for other reasons, even if this flag remains false.
     bool isDisqualifyThisMatch = false;
+
+    //Issue 313: handles various special cases
+    //match information writes to ms2-associated fields
+    void computeMs2MatchAssessment(const Fragment *f,
+                                   const Compound* compound,
+                                   const shared_ptr<DirectInfusionSearchParameters> params,
+                                   const bool debug);
 };
 
 /**
