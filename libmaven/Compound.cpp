@@ -230,7 +230,7 @@ void SummarizedCompound::computeSummarizedData() {
 
                     if (lastLabel == thisLabel) continue;
 
-                    mergedLabel = mergedLabel + "; " + thisLabel;
+                    mergedLabel = mergedLabel + "/" + thisLabel;
 
                     lastLabel = thisLabel;
                 }
