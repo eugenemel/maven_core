@@ -598,6 +598,18 @@ struct DirectInfusionMatchAssessment {
                                    const Compound* compound,
                                    const shared_ptr<DirectInfusionSearchParameters> params,
                                    const bool debug);
+
+    //Issue 313: for a given fragmentLabel, this method returns a vector of all labels associated
+    //with the fragmentLabel.
+    //the strings match the names of the parameter in the DirectInfusionSearchParameters:
+    //
+    //ms2DiagnosticFragmentLabel
+    //ms2sn1FragmentLabel
+    //ms2sn2FragmentLabel
+    //
+    vector<string> static getFragmentLabelTags(string fragmentLabel,
+                                                 const shared_ptr<DirectInfusionSearchParameters> params,
+                                                 const bool debug);
 };
 
 /**

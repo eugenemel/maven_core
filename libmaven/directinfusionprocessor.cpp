@@ -2108,23 +2108,38 @@ void DirectInfusionMatchAssessment::computeMs2MatchAssessment(
 
             if (!isHasLabels) continue;
 
-            //TODO: assess num sn1, num sn2 matches, determine if fragment label is diagnostic/sn1/sn2 or any number of these,
+            vector<string> fragmentLabelTags = DirectInfusionMatchAssessment::getFragmentLabelTags(compound->fragment_labels[i], params, debug);
 
-            //TODO: then write test for all of this, potentially refactor/reorganize into separate method
-            //to facilitate more efficient usage with SummarizedCompound assessment.
-
-            if (compound->fragment_labels[i].find("*") == 0) {
+            if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2DiagnosticFragmentLabel") != fragmentLabelTags.end()) {
                 fragmentationMatchScore.numDiagnosticMatches++;
             }
 
-            for (auto it = params->ms2MinNumDiagnosticMatchesMap.begin(); it != params->ms2MinNumDiagnosticMatchesMap.end(); ++it){
-                string diagnosticFragLabel = it->first;
-                if (compound->fragment_labels[i].find(diagnosticFragLabel) == 0) {
-                    diagnosticFragmentMatchMap[diagnosticFragLabel]++;
-                }
+            if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn1FragmentLabel") != fragmentLabelTags.end()) {
+                fragmentationMatchScore.numSn1Matches++;
             }
+
+            if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn2FragmentLabel") != fragmentLabelTags.end()) {
+                fragmentationMatchScore.numSn2Matches++;
+            }
+
+            //TODO: leaving this here for the future for more general diagnostic fragments, but not used now
+
+//            for (auto it = params->ms2MinNumDiagnosticMatchesMap.begin(); it != params->ms2MinNumDiagnosticMatchesMap.end(); ++it){
+//                string diagnosticFragLabel = it->first;
+//                if (compound->fragment_labels[i].find(diagnosticFragLabel) == 0) {
+//                    diagnosticFragmentMatchMap[diagnosticFragLabel]++;
+//                }
+//            }
 
         }
     }
 
+}
+
+//Issue 313
+vector<string> DirectInfusionMatchAssessment::getFragmentLabelTags(string fragmentLabel,
+                                                                   const shared_ptr<DirectInfusionSearchParameters> params,
+                                                                   const bool debug){
+    //TODO: implement me
+    return vector<string>{};
 }
