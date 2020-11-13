@@ -473,7 +473,7 @@ public:
             directInfusionSearchParameters->ms2MinIntensity = stof(decodedMap["ms2MinIntensity"]);
         }
         if (decodedMap.find("ms2DiagnosticFragmentLabel") != decodedMap.end()){
-            directInfusionSearchParameters->ms2DiagnosticFragmentLabel = decodedMap["ms2MinIntensity"];
+            directInfusionSearchParameters->ms2DiagnosticFragmentLabel = decodedMap["ms2DiagnosticFragmentLabel"];
         }
         if (decodedMap.find("ms2sn1FragmentLabel") != decodedMap.end()){
             directInfusionSearchParameters->ms2sn1FragmentLabel = decodedMap["ms2sn1FragmentLabel"];
