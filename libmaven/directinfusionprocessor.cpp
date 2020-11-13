@@ -2140,6 +2140,27 @@ void DirectInfusionMatchAssessment::computeMs2MatchAssessment(
 vector<string> DirectInfusionMatchAssessment::getFragmentLabelTags(string fragmentLabel,
                                                                    const shared_ptr<DirectInfusionSearchParameters> params,
                                                                    const bool debug){
+
+    vector<string> singleFrags{};
+
+    unsigned long posPrevious = 0;
+    unsigned long posCurrent = 0;
+
+    while ((posCurrent = fragmentLabel.find("/")) != string::npos) {
+
+        string singleFragmentLabel = fragmentLabel.substr(posPrevious, posCurrent-posPrevious);
+        posPrevious = posCurrent + 1;
+
+        singleFrags.push_back(singleFragmentLabel);
+    }
+
+    if (debug) {
+        cout << "singleFrags:" << endl;
+        for (auto lbl : singleFrags) {
+            cout << lbl << endl;
+        }
+    }
+
     //TODO: implement me
     return vector<string>{};
 }
