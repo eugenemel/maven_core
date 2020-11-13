@@ -96,15 +96,13 @@ public:
      * If a fragment label starts with any of these substrings, it is flagged with the appropriate type.
      * Once a fragment label encounters a character that is not covered by any of the fragment labels,
      * all labels have been assigned and the check for labeling fragments stops.
-     * @param ms2diagnosticFragmentLabel: label indicates this ms2 fragment is diagnostic.
-     * @param ms2sn1AssociatedFragmentLabel: label indicates this ms2 fragment is associated with an sn1 acyl chain.
-     * @param ms2sn2AssociatedFragmentLabel: label indicates this ms2 fragment is associated with an sn2 acyl chain.
+     * @param ms2DiagnosticFragmentLabel: label indicates this ms2 fragment is diagnostic.
+     * @param ms2sn1FragmentLabel: label indicates this ms2 fragment is associated with an sn1 acyl chain.
+     * @param ms2sn2FragmentLabel: label indicates this ms2 fragment is associated with an sn2 acyl chain.
      * ==================== */
-    string ms2diagnosticFragmentLabel = "*";
-    string ms2sn1AssociatedFragmentLabel = "@";
-    string ms2sn2AssociatedFragmentLabel = "$";
-
-    //TODO: encode/decode
+    string ms2DiagnosticFragmentLabel = "*";
+    string ms2sn1FragmentLabel = "@";
+    string ms2sn2FragmentLabel = "$";
 
     /** ===================
      * MS3 SEARCH RELATED
@@ -267,6 +265,9 @@ public:
         encodedParams = encodedParams + "ms2MinNumUniqueMatches" + "=" + to_string(ms2MinNumUniqueMatches) + ";";
         encodedParams = encodedParams + "ms2PpmTolr" + "=" + to_string(ms2PpmTolr) + ";";
         encodedParams = encodedParams + "ms2MinIntensity" + "=" + to_string(ms2MinIntensity) + ";";
+        encodedParams = encodedParams + "ms2DiagnosticFragmentLabel" + "=" + ms2DiagnosticFragmentLabel + ";";
+        encodedParams = encodedParams + "ms2sn1FragmentLabel" + "=" + ms2sn1FragmentLabel + ";";
+        encodedParams = encodedParams + "ms2sn2FragmentLabel" + "=" + ms2sn2FragmentLabel + ";";
 
         encodedParams = encodedParams + "ms2MinNumDiagnosticMatchesMap" + "=" + "{";
 
@@ -471,6 +472,16 @@ public:
         if (decodedMap.find("ms2MinIntensity") != decodedMap.end()){
             directInfusionSearchParameters->ms2MinIntensity = stof(decodedMap["ms2MinIntensity"]);
         }
+        if (decodedMap.find("ms2DiagnosticFragmentLabel") != decodedMap.end()){
+            directInfusionSearchParameters->ms2DiagnosticFragmentLabel = decodedMap["ms2MinIntensity"];
+        }
+        if (decodedMap.find("ms2sn1FragmentLabel") != decodedMap.end()){
+            directInfusionSearchParameters->ms2sn1FragmentLabel = decodedMap["ms2sn1FragmentLabel"];
+        }
+        if (decodedMap.find("ms2sn2FragmentLabel") != decodedMap.end()){
+            directInfusionSearchParameters->ms2sn2FragmentLabel = decodedMap["ms2sn2FragmentLabel"];
+        }
+
         if (decodedMap.find("ms2MinNumDiagnosticMatchesMap") != decodedMap.end()) {
             string encodedDiagnosticFragmentsMap = decodedMap["ms2MinNumDiagnosticMatchesMap"];
             addMs2MinNumDiagnosticMatchesMap(directInfusionSearchParameters, encodedDiagnosticFragmentsMap);
