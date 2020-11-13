@@ -45,8 +45,12 @@ struct FragmentationMatchScore {
     double fractionMatched;
     double spearmanRankCorrelation;
     double ticMatched;
+
     double numMatches;
     double numDiagnosticMatches;
+    double numSn1Matches; //Issue 312
+    double numSn2Matches; //Issue 312
+
     double ppmError;
     double mzFragError;
     double mergedScore;
@@ -90,8 +94,12 @@ struct FragmentationMatchScore {
         fractionMatched=0;
         spearmanRankCorrelation=0;
         ticMatched=0;
+
         numMatches=0;
         numDiagnosticMatches=0;
+        numSn1Matches=0;
+        numSn2Matches=0;
+
         ppmError=DBL_MAX;
         mzFragError=DBL_MAX;
         mergedScore=0;
@@ -107,8 +115,12 @@ struct FragmentationMatchScore {
         fractionMatched= b.fractionMatched;
         spearmanRankCorrelation=b.spearmanRankCorrelation;
         ticMatched=b.ticMatched;
+
         numMatches=b.numMatches;
         numDiagnosticMatches=b.numDiagnosticMatches;
+        numSn1Matches=b.numSn1Matches;
+        numSn2Matches=b.numSn2Matches;
+
         ppmError=b.ppmError;
         mzFragError=b.mzFragError;
         mergedScore=b.mergedScore;
@@ -121,6 +133,7 @@ struct FragmentationMatchScore {
 		dotProductShuffle = b.dotProductShuffle;
         fractionMatched = b.fractionMatched;
         ranks=b.ranks;
+
         return *this;
     }
 };

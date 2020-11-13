@@ -462,9 +462,6 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
         }
     }
 
-    //TODO: assess numDiagnosticFragments matched
-    //TODO: respect intensity thresholds?
-
     s.fractionMatched = s.numMatches / a->nobs();
     s.spearmanRankCorrelation = spearmanRankCorrelation(s.ranks);
     s.ticMatched = ticMatched(s.ranks);
@@ -1235,6 +1232,7 @@ void Fragment::addNeutralLosses() {
     sortByIntensity();
 }
 
+//Warning: do not use this with direct infusion code. only LC-MS/MS analysis.
 int Fragment::getNumDiagnosticFragmentsMatched(string fragLblStartsWith, vector<string> labels, vector<int> ranks) {
 
     int numDiagnosticFragmentsMatched = 0;
