@@ -2141,6 +2141,10 @@ vector<string> DirectInfusionMatchAssessment::getFragmentLabelTags(string fragme
                                                                    const shared_ptr<DirectInfusionSearchParameters> params,
                                                                    const bool debug){
 
+    if (debug) {
+        cout << "fragmentLabel: " << fragmentLabel << endl;
+    }
+
     vector<string> singleFrags{};
 
     unsigned long posPrevious = 0;
