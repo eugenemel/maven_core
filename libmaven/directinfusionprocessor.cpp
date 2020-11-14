@@ -2157,6 +2157,7 @@ vector<string> DirectInfusionMatchAssessment::getFragmentLabelTags(string fragme
 
         singleFrags.push_back(singleFragmentLabel);
     }
+    singleFrags.push_back(fragmentLabel.substr(posCurrent, fragmentLabel.size()-1));
 
     if (debug) {
         cout << "singleFrags:" << endl;
