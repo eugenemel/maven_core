@@ -2175,18 +2175,40 @@ vector<string> DirectInfusionMatchAssessment::getFragmentLabelTags(string fragme
 
     for (auto singleFrag : singleFrags) {
 
-//        size_t posDiagnosticFragmentLabel = singleFrag.find(params->ms2DiagnosticFragmentLabel);
-//        size_t posSn1FragmentLabel = singleFrag.find(params->ms2sn1FragmentLabel);
-//        size_t posSn2FragmentLabel = singleFrag.find(params->ms2sn2FragmentLabel);
+        size_t posDiagnosticFragmentLabelTag = singleFrag.find(params->ms2DiagnosticFragmentLabelTag);
+        size_t posSn1FragmentLabelTag = singleFrag.find(params->ms2sn1FragmentLabelTag);
+        size_t posSn2FragmentLabelTag = singleFrag.find(params->ms2sn2FragmentLabelTag);
 
-//        if (posDiagnosticFragmentLabel == 0) {
-//            isMs2DiagnosticFragmentLabel = true;
+        if (posDiagnosticFragmentLabelTag == 0) {
+            isMs2DiagnosticFragmentLabel = true;
 
-//            //if (posSn1FragmentLabel == lenght)
-//        }
+            //starts with next position
+            if (posSn1FragmentLabelTag == params->ms2DiagnosticFragmentLabelTag.size()){
+                isMs2sn1FragmentLabel = true;
+
+                if (posSn2FragmentLabelTag == (params->ms2DiagnosticFragmentLabelTag.size()+params->ms2sn1FragmentLabelTag.size())){
+                    isMs2sn2FragmentLabel = true;
+                    break;
+                }
+            }
+
+            if (posSn2FragmentLabelTag == params->ms2DiagnosticFragmentLabelTag.size()) {
+                isMs2sn2FragmentLabel = true;
+
+                if (posSn1FragmentLabelTag == (params->ms2DiagnosticFragmentLabelTag.size()+params->ms2sn2FragmentLabelTag.size())){
+                    isMs2sn1FragmentLabel = true;
+                    break;
+                }
+            }
+        }
 
     }
 
-    //TODO: implement me
-    return vector<string>{};
+    vector<string> fragmentLabelTags{};
+
+    if (isMs2DiagnosticFragmentLabel) {
+        fragmentLabelTags.push_back("ms2DiagnosticFragmentLabelTag");
+    }
+
+    return fragmentLabelTags;
 }
