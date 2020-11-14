@@ -2150,7 +2150,7 @@ vector<string> DirectInfusionMatchAssessment::getFragmentLabelTags(string fragme
     unsigned long posPrevious = 0;
     unsigned long posCurrent = 0;
 
-    while ((posCurrent = fragmentLabel.find("/")) != string::npos) {
+    while ((posCurrent = fragmentLabel.find("/", posPrevious)) != string::npos) {
 
         string singleFragmentLabel = fragmentLabel.substr(posPrevious, posCurrent-posPrevious);
         posPrevious = posCurrent + 1;
