@@ -2110,26 +2110,17 @@ void DirectInfusionMatchAssessment::computeMs2MatchAssessment(
 
             vector<string> fragmentLabelTags = DirectInfusionMatchAssessment::getFragmentLabelTags(compound->fragment_labels[i], params, debug);
 
-            if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2DiagnosticFragmentLabel") != fragmentLabelTags.end()) {
+            if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2DiagnosticFragmentLabelTag") != fragmentLabelTags.end()) {
                 fragmentationMatchScore.numDiagnosticMatches++;
             }
 
-            if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn1FragmentLabel") != fragmentLabelTags.end()) {
+            if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn1FragmentLabelTag") != fragmentLabelTags.end()) {
                 fragmentationMatchScore.numSn1Matches++;
             }
 
-            if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn2FragmentLabel") != fragmentLabelTags.end()) {
+            if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn2FragmentLabelTag") != fragmentLabelTags.end()) {
                 fragmentationMatchScore.numSn2Matches++;
             }
-
-            //TODO: leaving this here for the future for more general diagnostic fragments, but not used now
-
-//            for (auto it = params->ms2MinNumDiagnosticMatchesMap.begin(); it != params->ms2MinNumDiagnosticMatchesMap.end(); ++it){
-//                string diagnosticFragLabel = it->first;
-//                if (compound->fragment_labels[i].find(diagnosticFragLabel) == 0) {
-//                    diagnosticFragmentMatchMap[diagnosticFragLabel]++;
-//                }
-//            }
 
         }
     }
