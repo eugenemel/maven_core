@@ -2333,11 +2333,20 @@ string DirectInfusionMatchAssessment::getFragmentLabelWithoutTags(string fragmen
 
         sort(positions.begin(), positions.end());
 
+        if (debug) {
+            cout << "positions: ";
+            for (auto position : positions) {
+                cout << position.first << " (" << position.second << ") ";
+            }
+            cout << endl;
+        }
+
         unsigned long substringPosition = 0;
         for (auto position : positions) {
             if (position.first != substringPosition) {
-                substringPosition = substringPosition + position.second.size();
                 break;
+            } else {
+                substringPosition = substringPosition + position.second.size();
             }
         }
 
