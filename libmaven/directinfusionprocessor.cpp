@@ -2150,6 +2150,10 @@ vector<string> DirectInfusionMatchAssessment::getFragmentLabelTags(string fragme
     unsigned long posPrevious = 0;
     unsigned long posCurrent = 0;
 
+    if (fragmentLabel.at(fragmentLabel.size()-1) != '/') {
+        fragmentLabel.append("/");
+    }
+
     while ((posCurrent = fragmentLabel.find("/", posPrevious)) != string::npos) {
 
         string singleFragmentLabel = fragmentLabel.substr(posPrevious, posCurrent-posPrevious);
@@ -2157,7 +2161,6 @@ vector<string> DirectInfusionMatchAssessment::getFragmentLabelTags(string fragme
 
         singleFrags.push_back(singleFragmentLabel);
     }
-    singleFrags.push_back(fragmentLabel.substr(posCurrent, fragmentLabel.size()-1));
 
     if (debug) {
         cout << "singleFrags:" << endl;
