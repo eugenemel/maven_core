@@ -2169,6 +2169,24 @@ vector<string> DirectInfusionMatchAssessment::getFragmentLabelTags(string fragme
         }
     }
 
+    bool isMs2DiagnosticFragmentLabel = false;
+    bool isMs2sn1FragmentLabel = false;
+    bool isMs2sn2FragmentLabel = false;
+
+    for (auto singleFrag : singleFrags) {
+
+//        size_t posDiagnosticFragmentLabel = singleFrag.find(params->ms2DiagnosticFragmentLabel);
+//        size_t posSn1FragmentLabel = singleFrag.find(params->ms2sn1FragmentLabel);
+//        size_t posSn2FragmentLabel = singleFrag.find(params->ms2sn2FragmentLabel);
+
+//        if (posDiagnosticFragmentLabel == 0) {
+//            isMs2DiagnosticFragmentLabel = true;
+
+//            //if (posSn1FragmentLabel == lenght)
+//        }
+
+    }
+
     //TODO: implement me
     return vector<string>{};
 }
