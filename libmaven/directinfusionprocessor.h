@@ -610,6 +610,10 @@ struct DirectInfusionMatchAssessment {
     vector<string> static getFragmentLabelTags(string fragmentLabel,
                                                  const shared_ptr<DirectInfusionSearchParameters> params,
                                                  const bool debug);
+
+    string static getFragmentLabelWithoutTags(string fragmentLabel,
+                                         const shared_ptr<DirectInfusionSearchParameters> params,
+                                         const bool debug);
 };
 
 /**

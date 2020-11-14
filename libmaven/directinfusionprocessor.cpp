@@ -2274,3 +2274,77 @@ vector<string> DirectInfusionMatchAssessment::getFragmentLabelTags(string fragme
 
     return fragmentLabelTags;
 }
+
+string DirectInfusionMatchAssessment::getFragmentLabelWithoutTags(string fragmentLabel,
+                                                                  const shared_ptr<DirectInfusionSearchParameters> params,
+                                                                  const bool debug){
+
+    if (debug) {
+        cout << "fragmentLabel: " << fragmentLabel << endl;
+    }
+
+    vector<string> singleFrags{};
+
+    unsigned long posPrevious = 0;
+    unsigned long posCurrent = 0;
+
+    if (fragmentLabel.at(fragmentLabel.size()-1) != '/') {
+        fragmentLabel.append("/");
+    }
+
+    while ((posCurrent = fragmentLabel.find("/", posPrevious)) != string::npos) {
+
+        string singleFragmentLabel = fragmentLabel.substr(posPrevious, posCurrent-posPrevious);
+        posPrevious = posCurrent + 1;
+
+        singleFrags.push_back(singleFragmentLabel);
+    }
+
+    if (debug) {
+        cout << "singleFrags:" << endl;
+        for (auto lbl : singleFrags) {
+            cout << "\t" << lbl << endl;
+        }
+    }
+
+    string cleanedFragmentLabel;
+    for (unsigned int i = 0; i < singleFrags.size(); i++) {
+
+        if (i > 0) {
+            cleanedFragmentLabel.append("/");
+        }
+
+        string singleFrag = singleFrags[i];
+
+        size_t posDiagnosticFragmentLabelTag = singleFrag.find(params->ms2DiagnosticFragmentLabelTag);
+        size_t posSn1FragmentLabelTag = singleFrag.find(params->ms2sn1FragmentLabelTag);
+        size_t posSn2FragmentLabelTag = singleFrag.find(params->ms2sn2FragmentLabelTag);
+
+        vector<pair<size_t, string>> positions{};
+        if (posDiagnosticFragmentLabelTag != string::npos) {
+            positions.push_back(make_pair(posDiagnosticFragmentLabelTag, params->ms2DiagnosticFragmentLabelTag));
+        }
+        if (posSn1FragmentLabelTag != string::npos) {
+            positions.push_back(make_pair(posSn1FragmentLabelTag, params->ms2sn1FragmentLabelTag));
+        }
+        if (posSn2FragmentLabelTag != string::npos) {
+            positions.push_back(make_pair(posSn2FragmentLabelTag, params->ms2sn2FragmentLabelTag));
+        }
+
+        sort(positions.begin(), positions.end());
+
+        unsigned long substringPosition = 0;
+        for (auto position : positions) {
+            if (position.first != substringPosition) {
+                substringPosition = substringPosition + position.second.size();
+                break;
+            }
+        }
+
+        string singleFragCleaned = singleFrag.substr(substringPosition);
+
+        cleanedFragmentLabel.append(singleFragCleaned);
+    }
+
+    return cleanedFragmentLabel;
+}
