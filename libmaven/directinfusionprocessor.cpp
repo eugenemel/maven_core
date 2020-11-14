@@ -2182,7 +2182,6 @@ vector<string> DirectInfusionMatchAssessment::getFragmentLabelTags(string fragme
         if (posDiagnosticFragmentLabelTag == 0) {
             isMs2DiagnosticFragmentLabel = true;
 
-            //starts with next position
             if (posSn1FragmentLabelTag == params->ms2DiagnosticFragmentLabelTag.size()){
                 isMs2sn1FragmentLabel = true;
 
@@ -2202,12 +2201,62 @@ vector<string> DirectInfusionMatchAssessment::getFragmentLabelTags(string fragme
             }
         }
 
+        if (posSn1FragmentLabelTag == 0) {
+            isMs2sn1FragmentLabel = true;
+
+            if (posDiagnosticFragmentLabelTag == params->ms2sn1FragmentLabelTag.size()) {
+                isMs2DiagnosticFragmentLabel = true;
+
+                if (posSn2FragmentLabelTag == (params->ms2sn1FragmentLabelTag.size() + params->ms2DiagnosticFragmentLabelTag.size())) {
+                    isMs2sn2FragmentLabel = true;
+                    break;
+                }
+            }
+
+            if (posSn2FragmentLabelTag == params->ms2sn1FragmentLabelTag.size()) {
+                isMs2sn2FragmentLabel = true;
+
+                if (posDiagnosticFragmentLabelTag == (params->ms2sn1FragmentLabelTag.size() + params->ms2sn2FragmentLabelTag.size())) {
+                    isMs2DiagnosticFragmentLabel = true;
+                    break;
+                }
+            }
+        }
+
+        if (posSn2FragmentLabelTag == 0) {
+            isMs2sn2FragmentLabel = true;
+
+            if (posDiagnosticFragmentLabelTag == params->ms2sn2FragmentLabelTag.size()) {
+                isMs2DiagnosticFragmentLabel = true;
+
+                if (posSn1FragmentLabelTag == (params->ms2sn2FragmentLabelTag.size() + params->ms2DiagnosticFragmentLabelTag.size())) {
+                    isMs2sn1FragmentLabel = true;
+                    break;
+                }
+            }
+
+            if (posSn1FragmentLabelTag == params->ms2sn2FragmentLabelTag.size()) {
+                isMs2sn1FragmentLabel = true;
+
+                if (posDiagnosticFragmentLabelTag == (params->ms2sn2FragmentLabelTag.size() + params->ms2sn1FragmentLabelTag.size())) {
+                    isMs2DiagnosticFragmentLabel = true;
+                    break;
+                }
+            }
+        }
+
     }
 
     vector<string> fragmentLabelTags{};
 
     if (isMs2DiagnosticFragmentLabel) {
         fragmentLabelTags.push_back("ms2DiagnosticFragmentLabelTag");
+    }
+    if (isMs2sn1FragmentLabel) {
+        fragmentLabelTags.push_back("ms2sn1FragmentLabelTag");
+    }
+    if (isMs2sn2FragmentLabel) {
+        fragmentLabelTags.push_back("ms2sn2FragmentLabelTag");
     }
 
     return fragmentLabelTags;
