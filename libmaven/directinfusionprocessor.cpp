@@ -2187,7 +2187,7 @@ vector<string> DirectInfusionMatchAssessment::getFragmentLabelTags(string fragme
                 sn2Tag = "NONE";
             }
 
-            cout << "TAG POSITIONS: diagnostic=" << diagTag
+            cout << "SINGLE FRAG:\""<< singleFrag << "\"; TAG POSITIONS: diagnostic=" << diagTag
                  << ", sn1=" << sn1Tag
                  << ", sn2=" << sn2Tag
                  << endl;
