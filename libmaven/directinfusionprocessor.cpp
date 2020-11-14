@@ -2165,7 +2165,7 @@ vector<string> DirectInfusionMatchAssessment::getFragmentLabelTags(string fragme
     if (debug) {
         cout << "singleFrags:" << endl;
         for (auto lbl : singleFrags) {
-            cout << lbl << endl;
+            cout << "\t" << lbl << endl;
         }
     }
 
@@ -2179,6 +2179,12 @@ vector<string> DirectInfusionMatchAssessment::getFragmentLabelTags(string fragme
         size_t posSn1FragmentLabelTag = singleFrag.find(params->ms2sn1FragmentLabelTag);
         size_t posSn2FragmentLabelTag = singleFrag.find(params->ms2sn2FragmentLabelTag);
 
+        if (debug) {
+            cout << "TAG POSITIONS: diagnostic=" << to_string(posDiagnosticFragmentLabelTag)
+                 << ", sn1=" << to_string(posSn1FragmentLabelTag)
+                 << ", sn2=" << to_string(posSn2FragmentLabelTag)
+                 << endl;
+        }
         if (posDiagnosticFragmentLabelTag == 0) {
             isMs2DiagnosticFragmentLabel = true;
 
