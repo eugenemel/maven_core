@@ -796,7 +796,8 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
                     debug);
 
         //Issue 288
-        if (!params->ms1PartitionIntensityByFragments.empty() && !ms2Scans.empty()) {
+        //TODO: consider adding a variable to decide if a partition fraction should even be attempted.
+        if (!ms2Scans.empty()) {
             matchInfo->computeMs1PartitionFractions(ms2Scans, f, params, debug);
         }
 
@@ -1952,11 +1953,19 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                     string fragmentLabel = matchData->compound->fragment_labels[i];
                     float fragmentMz = matchData->compound->fragment_mzs[i];
 
-                    auto it = std::find(params->ms1PartitionIntensityByFragments.begin(), params->ms1PartitionIntensityByFragments.end(), fragmentLabel);
+                    //Issue 313: use marked sn1/sn2 fragment label tags instead of explicit list of fragment labels
+                    vector<string> fragmentLabelTags = DirectInfusionMatchAssessment::getFragmentLabelTags(fragmentLabel, params, debug);
 
-                    if (it != params->ms1PartitionIntensityByFragments.end()) {
+                    if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn1FragmentLabelTag") != fragmentLabelTags.end() ||
+                        find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn2FragmentLabelTag") != fragmentLabelTags.end()) {
                         partitionFragmentMzs.push_back(fragmentMz);
                     }
+
+//                    auto it = std::find(params->ms1PartitionIntensityByFragments.begin(), params->ms1PartitionIntensityByFragments.end(), fragmentLabel);
+
+//                    if (it != params->ms1PartitionIntensityByFragments.end()) {
+//                        partitionFragmentMzs.push_back(fragmentMz);
+//                    }
                 }
 
                 if (debug) {
