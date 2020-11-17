@@ -1925,11 +1925,14 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                         if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn1FragmentLabelTag") != fragmentLabelTags.end() ||
                             find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn2FragmentLabelTag") != fragmentLabelTags.end()) {
 
-                            if (debug) {
-                                cout << "fragment label: " << fragmentLabel << ", intensity=" << fragObservedIntensity << endl;
-                            }
-
                             compoundFragIntensity += fragObservedIntensity;
+
+                            if (debug) {
+                                cout << "fragment label: " << fragmentLabel
+                                     << ", intensity=" << fragObservedIntensity
+                                     << ", compoundFragIntensity=" << compoundFragIntensity
+                                     << endl;
+                            }
                         }
 
 //                        auto it = std::find(params->ms1PartitionIntensityByFragments.begin(), params->ms1PartitionIntensityByFragments.end(), fragmentLabel);
@@ -1960,8 +1963,16 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                     vector<string> fragmentLabelTags = DirectInfusionMatchAssessment::getFragmentLabelTags(fragmentLabel, params, debug);
 
                     if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn1FragmentLabelTag") != fragmentLabelTags.end() ||
+
                         find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn2FragmentLabelTag") != fragmentLabelTags.end()) {
+
                         partitionFragmentMzs.push_back(fragmentMz);
+
+                        if (debug) {
+                            cout << "fragment label: " << fragmentLabel
+                                 << ", fragmentMz: " << fragmentMz
+                                 << endl;
+                        }
                     }
 
 //                    auto it = std::find(params->ms1PartitionIntensityByFragments.begin(), params->ms1PartitionIntensityByFragments.end(), fragmentLabel);
