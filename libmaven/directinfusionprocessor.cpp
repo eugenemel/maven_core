@@ -1869,9 +1869,18 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
 
     for (auto it = matchDataToFrags.begin(); it != matchDataToFrags.end(); ++it){
 
-        int key = it->first->ms1IntensityCoord;
+        //Issue 314: Prefer theoretical m/z as key over observed intensity from consensus ms1
+        //This allows fractions to be computed when ms1 intensity can be identified in ms1 scans,
+        //but not in the consensus ms1 spectrum.
+        int key = -1;
+        if (it->first->compound->precursorMz > 0){
+            key = mzUtils::mzToIntKey(static_cast<double>(it->first->compound->precursorMz));
+        } else {
+            key = it->first->ms1IntensityCoord;
+        }
 
-        if (key == -1) continue; //no intensity detected
+        //theoretical precursor m/z not provided in compound, and no intensity detected in consensus ms1 spectrum
+        if (key == -1) continue;
 
         if (partitionMap.find(key) == partitionMap.end()) {
             partitionMap.insert(make_pair(key, vector<shared_ptr<DirectInfusionMatchData>>()));
