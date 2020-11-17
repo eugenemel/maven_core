@@ -1724,7 +1724,7 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
 
     for (auto scan : scans) {
 
-        int scanWidth = static_cast<int>(round(scan->getPrecMzMax() - scan->getPrecMzMin()));
+        int scanWidth = static_cast<int>(round(scan->upperLimitMz - scan->lowerLimitMz));
 
         //only consider scans of a certain width (in Da), if argument provided.
         //otherwise, remove this scan from consideration.
