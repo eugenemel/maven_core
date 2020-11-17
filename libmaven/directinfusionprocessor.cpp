@@ -1728,7 +1728,16 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
 
         //only consider scans of a certain width (in Da), if argument provided.
         //otherwise, remove this scan from consideration.
-        if (scanWidthInDa > 0 && scanWidth != scanWidthInDa) continue;
+        if (scanWidthInDa > 0 && scanWidth != scanWidthInDa) {
+            if (debug) cout << "Scan #"
+                            << scan->scannum << ", "
+                            << scan->filterString
+                            << "has scan width of " << scanWidth
+                            << ", required scan width is " << scanWidthInDa
+                            << ". skipping this scan and continuing."
+                            << endl;
+            continue;
+        }
 
         float queryMzIntensityCandidate = scan->findClosestMzIntensity(queryMz, params->ms1PpmTolr);
 
