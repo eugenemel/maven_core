@@ -1732,7 +1732,7 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
             if (debug) cout << "Scan #"
                             << scan->scannum << ", "
                             << scan->filterString
-                            << "has scan width of " << scanWidth
+                            << " has scan width of " << scanWidth
                             << ", required scan width is " << scanWidthInDa
                             << ". skipping this scan and continuing."
                             << endl;
