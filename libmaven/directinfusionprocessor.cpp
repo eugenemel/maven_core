@@ -1714,6 +1714,7 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
                                                               float queryMz,
                                                               float standardMz,
                                                               shared_ptr<DirectInfusionSearchParameters> params,
+                                                              int scanWidthInDa,
                                                               bool debug){
 
     vector<float> normalizedIntensities;
@@ -1722,6 +1723,12 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
     float standardMzIntensity = -1.0f;
 
     for (auto scan : scans) {
+
+        int scanWidth = static_cast<int>(round(scan->getPrecMzMax() - scan->getPrecMzMin()));
+
+        //only consider scans of a certain width (in Da), if argument provided.
+        //otherwise, remove this scan from consideration.
+        if (scanWidthInDa > 0 && scanWidth != scanWidthInDa) continue;
 
         float queryMzIntensityCandidate = scan->findClosestMzIntensity(queryMz, params->ms1PpmTolr);
 

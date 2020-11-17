@@ -978,6 +978,7 @@ public:
                                                     float queryMz,
                                                     float standardMz,
                                                     shared_ptr<DirectInfusionSearchParameters> params,
+                                                    int scanWidthInDa = -1, // -1 indicates all scan widths
                                                     bool debug = false);
 
     static constexpr double C_13_MASS = 1.00335483521;
