@@ -1866,6 +1866,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
     if (ms2Scans.empty()) return;
 
     map<int, vector<shared_ptr<DirectInfusionMatchData>>> partitionMap{};
+    map<int, set<int>> partitionMapMzs{};
 
     for (auto it = matchDataToFrags.begin(); it != matchDataToFrags.end(); ++it){
 
@@ -1884,16 +1885,30 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
 
         if (partitionMap.find(key) == partitionMap.end()) {
             partitionMap.insert(make_pair(key, vector<shared_ptr<DirectInfusionMatchData>>()));
+            partitionMapMzs.insert(make_pair(key, set<int>()));
         }
         partitionMap[key].push_back(it->first);
     }
 
-    //Issue 311: any matches without fragments that map to the same precursor intensity
-    //as something else will always return a partition fraction of 0.
+    //Issue 311: any matches without fragments that have the same theoretical m/z
+    //as something else with matches
+    //will always return a partition fraction of 0 (all intensity is taken by other compounds).
+    //
+    //if there is only one theoretical m/z, partition fraction is 1.
     for (auto compound : compoundsNoFragMatches) {
-        int key = compound->ms1IntensityCoord;
 
-        if (key == -1) continue; //no intensity detected
+        //Issue 314: Prefer theoretical m/z as key over observed intensity from consensus ms1
+        //This allows fractions to be computed when ms1 intensity can be identified in ms1 scans,
+        //but not in the consensus ms1 spectrum.
+        int key = -1;
+        if (compound->compound->precursorMz > 0){
+            key = mzUtils::mzToIntKey(static_cast<double>(compound->compound->precursorMz));
+        } else {
+            key = compound->ms1IntensityCoord;
+        }
+
+        //theoretical precursor m/z not provided in compound, and no intensity detected in consensus ms1 spectrum
+        if (key == -1) continue;
 
         if (partitionMap.find(key) == partitionMap.end()) {
             partitionMap.insert(make_pair(key, vector<shared_ptr<DirectInfusionMatchData>>()));
@@ -1939,6 +1954,8 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                             find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn2FragmentLabelTag") != fragmentLabelTags.end()) {
 
                             compoundFragIntensity += fragObservedIntensity;
+
+                            partitionMapMzs[it->first].insert(mzUtils::mzToIntKey(static_cast<double>(matchData->compound->fragment_mzs[i])));
 
                             if (debug) {
                                 cout << "fragment label: " << fragmentLabel
@@ -2039,6 +2056,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
 
             }
 
+
             for (auto it = totalFragIntensityByCompound.begin(); it != totalFragIntensityByCompound.end(); ++it) {
                 float compoundFragIntensity = it->second;
                 if (allFragIntensity > 0.0f) {
@@ -2112,6 +2130,56 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                 if (debug) cout << it->first->ms1PartitionFractionByScan << endl;
             }
         }
+    }
+
+    //Issue 314: If any m/zs are shared between sets,
+    //all compounds associated with the shared m/z are invalidated -
+    //that is, the partition fraction cannot be accurately determined.
+    //in that case, the partition fraction is returned as -1 (indicating an uncomputable value).
+
+    if (partitionMapMzs.size() > 1) {
+
+        set<int> invalidatedSets{};
+
+        for (auto it = partitionMapMzs.begin(); it != partitionMapMzs.end(); ++it) {
+
+            int keyI = it->first;
+            set<int> ithSet = it->second;
+
+            for (auto it2 = partitionMapMzs.begin(); it2 != partitionMapMzs.end(); ++it2) {
+
+                int keyJ = it2->first;
+                set<int> jthSet = it2->second;
+
+                if (keyI == keyJ) continue;
+
+                vector<int> intersectionVector{};
+                set_intersection(ithSet.begin(), ithSet.end(), jthSet.begin(), jthSet.end(), back_inserter(intersectionVector));
+                if (!intersectionVector.empty()) {
+                    invalidatedSets.insert(static_cast<int>(keyI));
+                    invalidatedSets.insert(static_cast<int>(keyJ));
+                }
+
+            }
+        }
+
+        //invalidate, when appropriate
+        for (auto it = partitionMap.begin(); it != partitionMap.end(); ++it){
+            if (invalidatedSets.find(it->first) != invalidatedSets.end()) {
+                for (auto matchData : it->second) {
+                    matchData->ms1PartitionFraction = -1;
+                    matchData->ms1PartitionFractionByScan = -1;
+
+                    if (debug) {
+                        cout << matchData->compound->id
+                             << " ms1PartitionFraction and ms1PartitionFractionByScan were set to -1, indicating that a partition fraction could not be determined."
+                             << endl;
+                    }
+
+                }
+            }
+        }
+
     }
 }
 
