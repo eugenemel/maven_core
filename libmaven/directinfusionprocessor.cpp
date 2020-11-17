@@ -1855,6 +1855,9 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                                                                   const Fragment *ms2Fragment,
                                                                   const shared_ptr<DirectInfusionSearchParameters> params,
                                                                   const bool debug) {
+
+    if (debug) cout << "DirectInfusionMatchInformation::computeMs1PartitionFractions()" << endl;
+
     if (!ms2Fragment || !ms2Fragment->consensus) return;
     if (ms2Scans.empty()) return;
 
