@@ -895,6 +895,10 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
     directInfusionMatchAssessment->observedMs1Intensity = observedMs1Intensity;
     directInfusionMatchAssessment->ms1IntensityCoord = ms1IntensityCoord;
 
+    if (debug) {
+        cout << compound->id << ": observedMs1Intensity=" << observedMs1Intensity << ", ms1IntensityCoord=" << ms1IntensityCoord << endl;
+    }
+
     //=============================================== //
     //END COMPARE MS1
     //=============================================== //
