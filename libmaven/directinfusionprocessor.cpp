@@ -1717,6 +1717,8 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
                                                               int scanWidthInDa,
                                                               bool debug){
 
+    if (debug) cout << "DirectInfusionUtils::findNearestScanNormalizedIntensity()" << endl;
+
     vector<float> normalizedIntensities;
 
     float queryMzIntensity = -1.0f;
