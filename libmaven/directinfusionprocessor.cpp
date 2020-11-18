@@ -1797,6 +1797,14 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
 
     if (normalizedIntensities.empty()) return -1.0f;
 
+    if (debug) {
+        cout << " Intensities: ";
+        for (unsigned int i = 0; i < normalizedIntensities.size(); i++) {
+            cout << normalizedIntensities[i] << " ";
+        }
+        cout << endl;
+    }
+
     if (params->consensusIntensityAgglomerationType == Fragment::Mean) {
         return accumulate(normalizedIntensities.begin(), normalizedIntensities.end(), 0.0f) / normalizedIntensities.size();
     } else if (params->consensusIntensityAgglomerationType == Fragment::Median) {
