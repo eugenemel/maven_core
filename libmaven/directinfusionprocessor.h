@@ -594,7 +594,7 @@ struct DirectInfusionMatchAssessment {
 
     //Issue 313: handles various special cases
     //match information writes to ms2-associated fields
-    void computeMs2MatchAssessment(const Fragment *f,
+    void computeMs2MatchAssessment(Fragment *observedSpectrum,
                                    const Compound* compound,
                                    const shared_ptr<DirectInfusionSearchParameters> params,
                                    const bool debug);

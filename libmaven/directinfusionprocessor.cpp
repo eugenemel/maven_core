@@ -810,7 +810,8 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
     return nullptr;
 }
 
-unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(const Fragment *f, //ms2 fragment
+unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
+                                                             const Fragment *ms2Fragment,
                                                              const Fragment *ms1Fragment,
                                                              const pair<Compound*, Adduct*>& libraryEntry,
                                                              const shared_ptr<DirectInfusionSearchParameters> params,
@@ -907,7 +908,11 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(c
     //START COMPARE MS2
     //=============================================== //
 
-    directInfusionMatchAssessment->computeMs2MatchAssessment(f, compound, params, debug);
+    Fragment *observedSpectrum = nullptr;
+    if (ms2Fragment && ms2Fragment->consensus) {
+        observedSpectrum = ms2Fragment->consensus;
+    }
+    directInfusionMatchAssessment->computeMs2MatchAssessment(observedSpectrum, compound, params, debug);
 
     //=============================================== //
     //END COMPARE MS2
@@ -2210,8 +2215,8 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
 }
 
 void DirectInfusionMatchAssessment::computeMs2MatchAssessment(
-                               const Fragment *f,
-                               const Compound* compound,
+                               Fragment *observedSpectrum,
+                               const Compound *compound,
                                const shared_ptr<DirectInfusionSearchParameters> params,
                                const bool debug){
 
@@ -2221,9 +2226,9 @@ void DirectInfusionMatchAssessment::computeMs2MatchAssessment(
     t.intensity_array = compound->fragment_intensity;
     t.fragment_labels = compound->fragment_labels;
 
-    if (f && f->consensus) {
+    if (observedSpectrum) {
         float maxDeltaMz = (params->ms2PpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
-        fragmentationMatchScore.ranks = Fragment::findFragPairsGreedyMz(&t, f->consensus, maxDeltaMz);
+        fragmentationMatchScore.ranks = Fragment::findFragPairsGreedyMz(&t, observedSpectrum, maxDeltaMz);
     } else {
         //Issue 303: downstream analysis expects the ranks vector to exist and be the same size as the compound fragment vectors
         fragmentationMatchScore.ranks = vector<int>(compound->fragment_mzs.size(),-1);
@@ -2231,17 +2236,13 @@ void DirectInfusionMatchAssessment::computeMs2MatchAssessment(
 
     bool isHasLabels = compound->fragment_labels.size() == fragmentationMatchScore.ranks.size();
 
-    for (auto it = params->ms2MinNumDiagnosticMatchesMap.begin(); it != params->ms2MinNumDiagnosticMatchesMap.end(); ++it){
-        diagnosticFragmentMatchMap.insert(make_pair(it->first, 0));
-    }
-
     for (unsigned long i=0; i < fragmentationMatchScore.ranks.size(); i++) {
 
         int y = fragmentationMatchScore.ranks[i];
 
-        if (y != -1 && f->consensus->intensity_array[y] >= params->ms2MinIntensity) {
+        if (y != -1 && observedSpectrum->intensity_array[y] >= params->ms2MinIntensity) {
 
-            float fragmentObservedIntensity = f->consensus->intensity_array[y];
+            float fragmentObservedIntensity = observedSpectrum->intensity_array[y];
 
             if (fragmentObservedIntensity > fragmentMaxObservedIntensity) {
                 fragmentMaxObservedIntensity = fragmentObservedIntensity;
