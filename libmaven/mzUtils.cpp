@@ -1113,7 +1113,7 @@ unordered_map<string, string> decodeParameterMap(string encodedParams, string de
         unsigned long equalCoord = encodedParam.find("=");
 
         string paramKey = encodedParam.substr(0, equalCoord);
-        string paramVal = encodedParam.substr(equalCoord + delimiter.size(),encodedParam.size());
+        string paramVal = encodedParam.substr(equalCoord + 1, encodedParam.size());
 
         decodedMap.insert(make_pair(paramKey, paramVal));
     }
