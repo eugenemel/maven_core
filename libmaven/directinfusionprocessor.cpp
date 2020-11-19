@@ -748,6 +748,36 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
     //Compare data to library
     for (auto libraryEntry : library){
 
+        Compound *compound = libraryEntry.first;
+        Adduct *adduct = libraryEntry.second;
+
+        int minNumMatches = params->ms2MinNumMatches;
+        int minNumDiagnosticMatches = params->ms2MinNumDiagnosticMatches;
+
+        string lipidClass;
+
+        //Issue 316: check for lipid class specific, or lipid class and adduct specific search criteria.
+        if (compound->metaDataMap.find(LipidSummarizationUtils::getLipidClassSummaryKey()) != compound->metaDataMap.find(LipidSummarizationUtils::getLipidClassSummaryKey())) {
+            lipidClass = compound->metaDataMap[LipidSummarizationUtils::getLipidClassSummaryKey()];
+
+            string adductName = adduct->name;
+
+            pair<string, string> lipidClassAndAdductKey = make_pair(lipidClass, adductName);
+            pair<string, string> lipidClassKey = make_pair(lipidClass, "");
+
+            if (params->ms2MinNumMatchesByLipidClassAndAdduct.find(lipidClassAndAdductKey) != params->ms2MinNumMatchesByLipidClassAndAdduct.end()) {
+                minNumMatches = params->ms2MinNumMatchesByLipidClassAndAdduct[lipidClassAndAdductKey];
+            } else if (params->ms2MinNumMatchesByLipidClassAndAdduct.find(lipidClassKey) != params->ms2MinNumMatchesByLipidClassAndAdduct.end()) {
+                minNumMatches = params->ms2MinNumMatchesByLipidClassAndAdduct[lipidClassKey];
+            }
+
+            if (params->ms2MinNumDiagnosticMatchesByLipidClassAndAdduct.find(lipidClassAndAdductKey) != params->ms2MinNumDiagnosticMatchesByLipidClassAndAdduct.end()) {
+                minNumDiagnosticMatches = params->ms2MinNumDiagnosticMatchesByLipidClassAndAdduct[lipidClassAndAdductKey];
+            } else if (params->ms2MinNumDiagnosticMatchesByLipidClassAndAdduct.find(lipidClassKey) != params->ms2MinNumDiagnosticMatchesByLipidClassAndAdduct.end()) {
+                minNumDiagnosticMatches = params->ms2MinNumDiagnosticMatchesByLipidClassAndAdduct[lipidClassKey];
+            }
+        }
+
         unique_ptr<DirectInfusionMatchAssessment> matchAssessment = assessMatch(f, ms1Fragment, libraryEntry, params, debug);
         FragmentationMatchScore s = matchAssessment->fragmentationMatchScore;
         float fragmentMaxObservedIntensity = matchAssessment->fragmentMaxObservedIntensity;
@@ -756,14 +786,14 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 
         //individual compound matches
         if (!matchAssessment->isDisqualifyThisMatch &&
-                s.numMatches >= params->ms2MinNumMatches &&
-                s.numDiagnosticMatches >= params->ms2MinNumDiagnosticMatches &&
+                s.numMatches >= minNumMatches &&
+                s.numDiagnosticMatches >= minNumDiagnosticMatches &&
                 params->isDiagnosticFragmentMapAgreement(matchAssessment->diagnosticFragmentMatchMap)) {
 
             shared_ptr<DirectInfusionMatchData> directInfusionMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
 
-            directInfusionMatchData->compound = libraryEntry.first;
-            directInfusionMatchData->adduct = libraryEntry.second;
+            directInfusionMatchData->compound = compound;
+            directInfusionMatchData->adduct = adduct;
             directInfusionMatchData->fragmentationMatchScore = s;
             directInfusionMatchData->fragmentMaxObservedIntensity = fragmentMaxObservedIntensity;
             directInfusionMatchData->observedMs1Intensity = observedMs1Intensity;
@@ -796,7 +826,6 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
                     debug);
 
         //Issue 288
-        //TODO: consider adding a variable to decide if a partition fraction should even be attempted.
         if (!ms2Scans.empty()) {
             matchInfo->computeMs1PartitionFractions(ms2Scans, f, params, debug);
         }
