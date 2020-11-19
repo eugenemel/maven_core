@@ -197,6 +197,7 @@ public:
 
     //RESERVED DELIMITERS - DO NOT CHANGE!
     static constexpr const char* const INTERNAL_MAP_DELIMITER = "|,|";
+    static constexpr const char* const TUPLE_MAP_KEY_DELIMITER="&";
 
     string encodeParams() {
 
@@ -289,7 +290,7 @@ public:
         encodedParams = encodedParams + "ms2MinNumMatchesByLipidClassAndAdduct" +"=" + "{";
 
         for (auto it = ms2MinNumMatchesByLipidClassAndAdduct.begin(); it != ms2MinNumMatchesByLipidClassAndAdduct.end(); ++it) {
-            string key = it->first.first + "," + it->first.second;
+            string key = it->first.first + TUPLE_MAP_KEY_DELIMITER + it->first.second;
             string value = to_string(it->second);
             encodedParams = encodedParams + key + "=" + value + INTERNAL_MAP_DELIMITER;
         }
@@ -299,7 +300,7 @@ public:
         encodedParams = encodedParams + "ms2MinNumDiagnosticMatchesByLipidClassAndAdduct" +"=" + "{";
 
         for (auto it = ms2MinNumDiagnosticMatchesByLipidClassAndAdduct.begin(); it != ms2MinNumDiagnosticMatchesByLipidClassAndAdduct.end(); ++it) {
-            string key = it->first.first + "," + it->first.second;
+            string key = it->first.first + TUPLE_MAP_KEY_DELIMITER + it->first.second;
             string value = to_string(it->second);
             encodedParams = encodedParams + key + "=" + value + INTERNAL_MAP_DELIMITER;
         }
@@ -355,11 +356,13 @@ public:
     static void addByLipidClassAndAdductMap(shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters,
                                             string encodedByClassAndAdductMap,
                                             ByLipidClassAndAdduct byLipidClassAndAdduct) {
+
         unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedByClassAndAdductMap, INTERNAL_MAP_DELIMITER);
+
         for (auto it = decodedMap.begin(); it != decodedMap.end(); ++it){
             string keyEncoded = it->first;
 
-            auto pos = keyEncoded.find(",");
+            auto pos = keyEncoded.find(TUPLE_MAP_KEY_DELIMITER);
 
             string lipidClass = keyEncoded.substr(0, pos);
             string adductName;

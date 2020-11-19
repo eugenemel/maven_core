@@ -763,7 +763,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
             string adductName = adduct->name;
 
             pair<string, string> lipidClassAndAdductKey = make_pair(lipidClass, adductName);
-            pair<string, string> lipidClassKey = make_pair(lipidClass, "");
+            pair<string, string> lipidClassKey = make_pair(lipidClass, "*");
 
             if (params->ms2MinNumMatchesByLipidClassAndAdduct.find(lipidClassAndAdductKey) != params->ms2MinNumMatchesByLipidClassAndAdduct.end()) {
                 minNumMatches = params->ms2MinNumMatchesByLipidClassAndAdduct[lipidClassAndAdductKey];
