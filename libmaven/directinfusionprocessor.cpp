@@ -771,11 +771,15 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
                 minNumMatches = params->ms2MinNumMatchesByLipidClassAndAdduct[lipidClassKey];
             }
 
+            if (debug) cout << "ms2MinNumMatches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": " << minNumMatches << endl;
+
             if (params->ms2MinNumDiagnosticMatchesByLipidClassAndAdduct.find(lipidClassAndAdductKey) != params->ms2MinNumDiagnosticMatchesByLipidClassAndAdduct.end()) {
                 minNumDiagnosticMatches = params->ms2MinNumDiagnosticMatchesByLipidClassAndAdduct[lipidClassAndAdductKey];
             } else if (params->ms2MinNumDiagnosticMatchesByLipidClassAndAdduct.find(lipidClassKey) != params->ms2MinNumDiagnosticMatchesByLipidClassAndAdduct.end()) {
                 minNumDiagnosticMatches = params->ms2MinNumDiagnosticMatchesByLipidClassAndAdduct[lipidClassKey];
             }
+
+            if (debug) cout << "ms2MinNumDiagnosticMatches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": " << minNumDiagnosticMatches << endl;
         }
 
         unique_ptr<DirectInfusionMatchAssessment> matchAssessment = assessMatch(f, ms1Fragment, libraryEntry, params, debug);
