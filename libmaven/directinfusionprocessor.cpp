@@ -1817,7 +1817,7 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
 
         float queryMzIntensityCandidate = scan->findClosestMzIntensity(queryMz, params->ms1PpmTolr);
 
-        if (queryMzIntensityCandidate > 0.0f) {
+        if (queryMzIntensityCandidate > 0.0f && queryMzIntensityCandidate >= params->ms1MinScanIntensity) {
             queryMzIntensity = queryMzIntensityCandidate;
 
             if (debug) cout << "Scan #"
@@ -1834,7 +1834,7 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
 
         float standardMzIntensityCandidate = scan->findClosestMzIntensity(standardMz, params->ms1PpmTolr);
 
-        if (standardMzIntensityCandidate > 0.0f) {
+        if (standardMzIntensityCandidate > 0.0f && standardMzIntensityCandidate >= params->ms1MinScanIntensity) {
             standardMzIntensity = standardMzIntensityCandidate;
 
             if (debug) cout << "Scan #"
@@ -1849,7 +1849,8 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
                             << endl;
         }
 
-        if (queryMzIntensity > 0.0f && standardMzIntensity > 0.0f) {
+        if (queryMzIntensity > 0.0f && queryMzIntensityCandidate >= params->ms1MinScanIntensity &&
+                standardMzIntensity > 0.0f && standardMzIntensityCandidate >= params->ms1MinScanIntensity) {
 
             float intensityRatio = queryMzIntensity/standardMzIntensity;
 
