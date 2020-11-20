@@ -75,11 +75,14 @@ public:
      * @param ms1IsRequireAdductPrecursorMatch:reference compound associated adduct must == query adduct
      * @param ms1IsFindPrecursorIon: only retain matches where precursor peak is found in MS1 scan(s).
      * @param ms1PpmTolr: tolerance value used for matching theoretical ion m/z to an m/z peak in an MS1 scan
-     * @param ms1MinIntensity: min intensity value for a MS1 spectral peak to be considered real
+     * @param ms1MinIntensity: min intensity value for an MS1 spectral peak in a consensus MS1 spectrum to be considered real.
      * @param ms1ScanFilter: consider only MS1 scans that substring match in their filterString field to this
      * @param isRequireMonoisotopic: disqualify candidate MS1 peak if there is a peak exactly one 13C-12C width behind
      * @param mMinusOnePeakMaxIntensityFraction: Avoid disqualifying candidate MS1 peak
      *          if candidate monoisotopic peak intensity / candidate MS1 peak intensity <= this fraction
+     * @param ms1MinScanIntensity: min intensity value for an MS1 spectral peak in an MS1 scan to be considered real.
+     *          Note the difference between this parameter and 'scanFilterMinIntensity',
+     *          which filters spectral peaks based on intensity as a part of consensus spectrum formation.
      * ==================== */
 
     bool ms1IsRequireAdductPrecursorMatch = true;
@@ -89,6 +92,7 @@ public:
     string ms1ScanFilter = "";
     bool ms1IsRequireMonoisotopic = true;
     float ms1MMinusOnePeakMaxIntensityFraction = 1.0f;
+    float ms1MinScanIntensity = 0;
 
     /** ===================
      * MS2 SEARCH RELATED
@@ -315,6 +319,7 @@ public:
         encodedParams = encodedParams + "ms1ScanFilter" + "=" + ms1ScanFilter + ";";
         encodedParams = encodedParams + "ms1IsRequireMonoisotopic" + "=" + to_string(ms1IsRequireMonoisotopic) + ";";
         encodedParams = encodedParams + "ms1MMinusOnePeakMaxIntensityFraction" + "=" + to_string(ms1MMinusOnePeakMaxIntensityFraction) + ";";
+        encodedParams = encodedParams + "ms1MinScanIntensity" + "=" + to_string(ms1MinScanIntensity) + ";";
 
         //DIMS intensity options
         encodedParams = encodedParams + "ms1PartitionIntensityByFragments" + "=" + "{";
@@ -578,6 +583,9 @@ public:
         }
         if (decodedMap.find("ms1MMinusOnePeakMaxIntensityFraction") != decodedMap.end()) {
             directInfusionSearchParameters->ms1MMinusOnePeakMaxIntensityFraction = stof(decodedMap["ms1MMinusOnePeakMaxIntensityFraction"]);
+        }
+        if (decodedMap.find("ms1MinScanIntensity") != decodedMap.end()) {
+            directInfusionSearchParameters->ms1MinScanIntensity = stof(decodedMap["ms1MinScanIntensity"]);
         }
 
         //DIMS intensity options
