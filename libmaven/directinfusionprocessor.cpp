@@ -954,7 +954,6 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
         if (params->consensusIntensityAgglomerationType == Fragment::Mean) {
             observedMs1ScanIntensity = accumulate(ms1ScanIntensities.begin(), ms1ScanIntensities.end(), 0.0f) / ms1ScanIntensities.size();
         } else if (params->consensusIntensityAgglomerationType == Fragment::Median) {
-            sort(ms1ScanIntensities.begin(), ms1ScanIntensities.end());
             observedMs1ScanIntensity = median(ms1ScanIntensities);
         }
     }
@@ -1794,7 +1793,6 @@ float DirectInfusionUtils::findNormalizedIntensity(const vector<Scan*>& scans,
     if (params->consensusIntensityAgglomerationType == Fragment::Mean) {
         return accumulate(normalizedIntensities.begin(), normalizedIntensities.end(), 0.0f) / normalizedIntensities.size();
     } else if (params->consensusIntensityAgglomerationType == Fragment::Median) {
-        sort(normalizedIntensities.begin(), normalizedIntensities.end());
         return median(normalizedIntensities);
     } else { //unsupported type
         if (debug) cout << "Unsupported quant agglomeration type, DirectInfusionUtils::findNormalizedIntensity() returning -1.0f" << endl;
@@ -1903,7 +1901,6 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
     if (params->consensusIntensityAgglomerationType == Fragment::Mean) {
         return accumulate(normalizedIntensities.begin(), normalizedIntensities.end(), 0.0f) / normalizedIntensities.size();
     } else if (params->consensusIntensityAgglomerationType == Fragment::Median) {
-        sort(normalizedIntensities.begin(), normalizedIntensities.end());
         return median(normalizedIntensities);
     } else { //unsupported type
         if (debug) cout << "Unsupported quant agglomeration type, DirectInfusionUtils::findNormalizedIntensity() returning -1.0f" << endl;
@@ -2235,7 +2232,6 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                          << ", scan partition value ";
                 }
 
-                sort(intensities.begin(), intensities.end());
                 if (!intensities.empty()) {
                     if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
                         it->first->ms1PartitionFractionByScan = accumulate(intensities.begin(), intensities.end(), 0.0f) / intensities.size();
