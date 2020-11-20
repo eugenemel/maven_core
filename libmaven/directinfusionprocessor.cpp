@@ -700,6 +700,8 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
                                        const shared_ptr<DirectInfusionSearchParameters> params,
                                        const bool debug){
 
+    if (debug) cout << "DirectInfusionProcessor::processBlock(): block #" << blockNum << endl;
+
     //need valid compounds to identify matches
     if (library.empty()) return nullptr;
 
@@ -755,6 +757,14 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         int minNumDiagnosticMatches = params->ms2MinNumDiagnosticMatches;
 
         string lipidClass;
+
+        //Issue 316: ensure that compounds have all metadata by this point
+        if (debug) {
+            cout << "Metadata for "<< compound->name << ": " << endl;
+            for (auto it = compound->metaDataMap.begin(); it != compound->metaDataMap.end(); ++it){
+                cout << it->first << ": " << it->second << endl;
+            }
+        }
 
         //Issue 316: check for lipid class specific, or lipid class and adduct specific search criteria.
         if (compound->metaDataMap.find(LipidSummarizationUtils::getLipidClassSummaryKey()) != compound->metaDataMap.find(LipidSummarizationUtils::getLipidClassSummaryKey())) {
