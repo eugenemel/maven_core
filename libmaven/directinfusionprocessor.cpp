@@ -956,7 +956,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getFragmentM
         shared_ptr<DirectInfusionSearchParameters> params,
         bool debug){
 
-       if (debug) cerr << "DirectInfusionProcessor::getFragmentMatchMaps()" << endl;
+       if (debug) cout << "DirectInfusionProcessor::getFragmentMatchMaps()" << endl;
 
        unique_ptr<DirectInfusionMatchInformation> matchInfo = unique_ptr<DirectInfusionMatchInformation>(new DirectInfusionMatchInformation());
 
@@ -975,7 +975,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getFragmentM
                //Issue 209: peaks may be unmatched based on intensity as well as ranks[] position
                if (!observedSpectrum || observedIndex == -1 || observedSpectrum->intensity_array[static_cast<unsigned long>(observedIndex)] < params->ms2MinIntensity) continue;
 
-               if (debug) cerr << "allCandidates[" << i << "]: " << compound->name << "|" << compound->adductString << " observedIndex=" << observedIndex << endl;
+               if (debug) cout << "allCandidates[" << i << "]: " << compound->name << "|" << compound->adductString << " observedIndex=" << observedIndex << endl;
 
                int fragInt = mzToIntKey(compound->fragment_mzs[i]);
 
@@ -1410,7 +1410,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
         shared_ptr<DirectInfusionSearchParameters> params,
         bool debug){
 
-    if (debug) cerr << "DirectInfusionProcessor::getMatchInformation()" << endl;
+    if (debug) cout << "DirectInfusionProcessor::getMatchInformation()" << endl;
 
     unique_ptr<DirectInfusionMatchInformation> matchInfo = getFragmentMatchMaps(allCandidates, observedSpectrum, params, debug);
 
@@ -1430,35 +1430,35 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
     }
 
     if (debug) {
-        cerr << "Fragments --> Compounds: (" << matchInfo->matchDataToFrags.size() << " passing compounds)" << endl;
+        cout << "Fragments --> Compounds: (" << matchInfo->matchDataToFrags.size() << " passing compounds)" << endl;
 
         for (auto iterator = matchInfo->fragToMatchData.begin(); iterator != matchInfo->fragToMatchData.end(); ++iterator) {
             int frag = iterator->first;
             unordered_set<shared_ptr<DirectInfusionMatchData>> compounds = iterator->second;
-            cerr<< "frag= " << intKeyToMz(frag) << " m/z : ";
+            cout<< "frag= " << intKeyToMz(frag) << " m/z : ";
             for (auto matchData : compounds) {
-                cerr << matchData->compound->name << "|" << matchData->compound->adductString << " ";
+                cout << matchData->compound->name << "|" << matchData->compound->adductString << " ";
             }
-            cerr << endl;
+            cout << endl;
         }
 
-        cerr << "Compounds --> Fragments: (" << matchInfo->fragToMatchData.size() << " matched fragments)" << endl;
+        cout << "Compounds --> Fragments: (" << matchInfo->fragToMatchData.size() << " matched fragments)" << endl;
 
         for (auto iterator = matchInfo->matchDataToFrags.begin(); iterator != matchInfo->matchDataToFrags.end(); ++iterator) {
 
             shared_ptr<DirectInfusionMatchData> directInfusionMatchData = iterator->first;
             vector<int> frags = iterator->second;
 
-            cerr << "Compound= " << directInfusionMatchData->compound->name << "|" << directInfusionMatchData->compound->adductString << ": ";
+            cout << "Compound= " << directInfusionMatchData->compound->name << "|" << directInfusionMatchData->compound->adductString << ": ";
             for (auto frag : frags){
-                cerr << intKeyToMz(frag) << " ";
+                cout << intKeyToMz(frag) << " ";
             }
-            cerr << endl;
+            cout << endl;
         }
 
-        cerr << "Compounds with no fragment matches:" << endl;
+        cout << "Compounds with no fragment matches:" << endl;
         for (auto directInfusionMatchData : matchInfo->compoundsNoFragMatches) {
-            cerr << "Compound= " << directInfusionMatchData->compound->name << "|" << directInfusionMatchData->compound->adductString << endl;
+            cout << "Compound= " << directInfusionMatchData->compound->name << "|" << directInfusionMatchData->compound->adductString << endl;
         }
     }
 
