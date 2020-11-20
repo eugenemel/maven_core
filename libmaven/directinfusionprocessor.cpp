@@ -706,11 +706,11 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
     if (library.empty()) return nullptr;
 
     //build search spectrum
-    Fragment *f = nullptr;
+    Fragment *ms2Fragment = nullptr;
     Scan* representativeScan = nullptr;
     for (auto& scan : ms2Scans) {
-        if (!f){
-            f = new Fragment(scan,
+        if (!ms2Fragment){
+            ms2Fragment = new Fragment(scan,
                              params->scanFilterMinFracIntensity,
                              params->scanFilterMinSNRatio,
                              params->scanFilterMaxNumberOfFragments,
@@ -729,12 +729,12 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
                                              params->scanFilterPrecursorPurityPpm,
                                              params->scanFilterMinIntensity);
 
-            f->addFragment(brother);
+            ms2Fragment->addFragment(brother);
         }
     }
 
-    if(f) {
-        f->buildConsensus(params->consensusPpmTolr,
+    if(ms2Fragment) {
+        ms2Fragment->buildConsensus(params->consensusPpmTolr,
                           params->consensusIntensityAgglomerationType,
                           params->consensusIsIntensityAvgByObserved,
                           params->consensusIsNormalizeTo10K,
@@ -742,7 +742,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
                           params->consensusMinFractionMs2Scans
                           );
 
-        f->consensus->sortByMz();
+        ms2Fragment->consensus->sortByMz();
     }
 
     vector<shared_ptr<DirectInfusionMatchData>> libraryMatches;
@@ -792,7 +792,8 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
             if (debug) cout << "ms2MinNumDiagnosticMatches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": " << minNumDiagnosticMatches << endl;
         }
 
-        unique_ptr<DirectInfusionMatchAssessment> matchAssessment = assessMatch(f, ms1Fragment, libraryEntry, params, debug);
+        unique_ptr<DirectInfusionMatchAssessment> matchAssessment = assessMatch(ms2Fragment, ms1Fragment, libraryEntry, params, debug);
+
         FragmentationMatchScore s = matchAssessment->fragmentationMatchScore;
         float fragmentMaxObservedIntensity = matchAssessment->fragmentMaxObservedIntensity;
         float observedMs1Intensity = matchAssessment->observedMs1Intensity;
@@ -826,11 +827,11 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         directInfusionAnnotation->precMzMax = mzRange.second;
         directInfusionAnnotation->sample = sample;
         directInfusionAnnotation->scan = representativeScan;
-        directInfusionAnnotation->fragmentationPattern = f;
+        directInfusionAnnotation->fragmentationPattern = ms2Fragment;
 
         //Issue 113: Support ms1-only searches
         Fragment *ms2ConsensusSpectrum = nullptr;
-        if (f && f->consensus) ms2ConsensusSpectrum = f->consensus;
+        if (ms2Fragment && ms2Fragment->consensus) ms2ConsensusSpectrum = ms2Fragment->consensus;
 
         //determine fragment match maps, apply filters, and agglomerate compounds (if needed)
         unique_ptr<DirectInfusionMatchInformation> matchInfo = DirectInfusionProcessor::getMatchInformation(
@@ -841,7 +842,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 
         //Issue 288
         if (!ms2Scans.empty()) {
-            matchInfo->computeMs1PartitionFractions(ms2Scans, f, params, debug);
+            matchInfo->computeMs1PartitionFractions(ms2Scans, ms2Fragment, params, debug);
         }
 
         directInfusionAnnotation->compounds = matchInfo->getCompounds();
