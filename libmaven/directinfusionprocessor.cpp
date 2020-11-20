@@ -767,7 +767,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         }
 
         //Issue 316: check for lipid class specific, or lipid class and adduct specific search criteria.
-        if (compound->metaDataMap.find(LipidSummarizationUtils::getLipidClassSummaryKey()) != compound->metaDataMap.find(LipidSummarizationUtils::getLipidClassSummaryKey())) {
+        if (compound->metaDataMap.find(LipidSummarizationUtils::getLipidClassSummaryKey()) != compound->metaDataMap.end()) {
             lipidClass = compound->metaDataMap[LipidSummarizationUtils::getLipidClassSummaryKey()];
 
             string adductName = adduct->name;
