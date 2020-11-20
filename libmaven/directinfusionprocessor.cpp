@@ -1455,6 +1455,11 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             }
             cerr << endl;
         }
+
+        cerr << "Compounds with no fragment matches:" << endl;
+        for (auto directInfusionMatchData : matchInfo->compoundsNoFragMatches) {
+            cerr << "Compound= " << directInfusionMatchData->compound->name << "|" << directInfusionMatchData->compound->adductString << endl;
+        }
     }
 
     return matchInfo;
