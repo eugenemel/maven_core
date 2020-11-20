@@ -966,6 +966,7 @@ public:
      static DirectInfusionAnnotation* processBlock(int blockNum,
                               const pair<float,float>& mzRange,
                               mzSample* sample,
+                              const vector<Scan*>& ms1Scans,
                               const vector<Scan*>& ms2Scans,
                               const Fragment *ms1Fragment, //only one per sample, computed at the same time that ms1 scans are retrieved.
                               const vector<pair<Compound*, Adduct*>> library,
@@ -982,8 +983,10 @@ public:
       *
       * Designed to be multithreaded, work of comparing / evaluating individual matches
       */
-     static unique_ptr<DirectInfusionMatchAssessment> assessMatch(const Fragment *f, //ms2 fragment
+     static unique_ptr<DirectInfusionMatchAssessment> assessMatch(
+                             const vector<Scan*>& ms1Scans,
                              const Fragment *ms1Fragment,
+                             const Fragment *ms2Fragment,
                              const pair<Compound*, Adduct*>& libraryMatch,
                              const shared_ptr<DirectInfusionSearchParameters> params,
                              const bool debug);

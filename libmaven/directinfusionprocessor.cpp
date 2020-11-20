@@ -673,6 +673,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
         DirectInfusionAnnotation* directInfusionAnnotation = processBlock(mapKey,
                                                                           directInfusionSearchSet->mzRangesByMapKey[mapKey],
                                                                           sample,
+                                                                          validMs1Scans,
                                                                           ms2ScansByBlockNumber[mapKey],
                                                                           ms1Fragment,
                                                                           directInfusionSearchSet->compoundsByMapKey[mapKey],
@@ -694,6 +695,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
                                        const pair<float, float>& mzRange,
                                        mzSample* sample,
+                                       const vector<Scan*>& ms1Scans,
                                        const vector<Scan*>& ms2Scans,
                                        const Fragment *ms1Fragment,
                                        const vector<pair<Compound*, Adduct*>> library,
@@ -792,7 +794,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
             if (debug) cout << "ms2MinNumDiagnosticMatches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": " << minNumDiagnosticMatches << endl;
         }
 
-        unique_ptr<DirectInfusionMatchAssessment> matchAssessment = assessMatch(ms2Fragment, ms1Fragment, libraryEntry, params, debug);
+        unique_ptr<DirectInfusionMatchAssessment> matchAssessment = assessMatch(ms1Scans, ms1Fragment, ms2Fragment, libraryEntry, params, debug);
 
         FragmentationMatchScore s = matchAssessment->fragmentationMatchScore;
         float fragmentMaxObservedIntensity = matchAssessment->fragmentMaxObservedIntensity;
@@ -855,11 +857,13 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 }
 
 unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
-                                                             const Fragment *ms2Fragment,
-                                                             const Fragment *ms1Fragment,
-                                                             const pair<Compound*, Adduct*>& libraryEntry,
-                                                             const shared_ptr<DirectInfusionSearchParameters> params,
-                                                             const bool debug){
+        const vector<Scan*>& ms1Scans,
+        const Fragment *ms1Fragment,
+        const Fragment *ms2Fragment,
+        const pair<Compound*, Adduct*>& libraryEntry,
+        const shared_ptr<DirectInfusionSearchParameters> params,
+        const bool debug){
+
     //Initialize output
     unique_ptr<DirectInfusionMatchAssessment> directInfusionMatchAssessment = unique_ptr<DirectInfusionMatchAssessment>(new DirectInfusionMatchAssessment());
 
