@@ -930,9 +930,17 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
         }
     }
 
-    bool isPassesMs1PrecursorRequirements = !params->ms1IsFindPrecursorIon || (observedMs1Intensity > 0.0f && observedMs1Intensity >= params->ms1MinIntensity);
+    //an intensity of 0 always indicates absence, irrespective of the params->ms1MinIntensity value.
+    bool isMs1InConsensusSpectrum = (observedMs1Intensity >= params->ms1MinIntensity && observedMs1Intensity > 0.0f);
 
-    if (!isPassesMs1PrecursorRequirements){
+    //Issue 309: if an ms1 signal is found in an individual scan, the precursor is found.
+    //check for intensity in scans, if sufficient observedMs1Intensity was not found in consensus MS1 spectrum
+    bool isFoundMs1PrecursorIonInScans = false;
+    if (params->ms1IsFindPrecursorIon && !isMs1InConsensusSpectrum) {
+        //TODO: implement
+    }
+
+    if (params->ms1IsFindPrecursorIon && !(isMs1InConsensusSpectrum || isFoundMs1PrecursorIonInScans)){
         directInfusionMatchAssessment->isDisqualifyThisMatch = true;
         return directInfusionMatchAssessment; // will return with no matching fragments, 0 for every score.
      }
