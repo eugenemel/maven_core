@@ -877,19 +877,20 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
     float observedMs1Intensity = 0.0f;
     int ms1IntensityCoord = -1;
 
+    float precMz = compound->precursorMz;
+
+    if (!params->ms1IsRequireAdductPrecursorMatch) {
+
+        //Compute this way instead of using compound->precursorMz to allow for possibility of matching compound to unexpected adduct
+        MassCalculator massCalc;
+        float compoundMz = adduct->computeAdductMass(static_cast<float>(massCalc.computeNeutralMass(compound->getFormula())));
+        precMz = adduct->computeAdductMass(compoundMz);
+    }
+
     if (ms1Fragment && ms1Fragment->consensus) {
-        double precMz = compound->precursorMz;
-        if (!params->ms1IsRequireAdductPrecursorMatch) {
 
-            //Compute this way instead of using compound->precursorMz to allow for possibility of matching compound to unexpected adduct
-            MassCalculator massCalc;
-            float compoundMz = adduct->computeAdductMass(massCalc.computeNeutralMass(compound->getFormula()));
-            precMz = adduct->computeAdductMass(compoundMz);
-
-        }
-
-        double minMz = precMz - precMz*params->ms1PpmTolr/1e6;
-        double maxMz = precMz + precMz*params->ms1PpmTolr/1e6;
+        float minMz = precMz - precMz*params->ms1PpmTolr/1e6f;
+        float maxMz = precMz + precMz*params->ms1PpmTolr/1e6f;
 
         auto lb = lower_bound(ms1Fragment->consensus->mzs.begin(), ms1Fragment->consensus->mzs.end(), minMz);
 
@@ -909,8 +910,8 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
         //Issue 303
         if (observedMs1Intensity > 0.0f && params->ms1IsRequireMonoisotopic) {
 
-            double minMMinusOneMz = minMz - DirectInfusionUtils::C_13_MASS;
-            double maxMMinusOneMz = maxMz + DirectInfusionUtils::C_13_MASS;
+            float minMMinusOneMz = minMz - static_cast<float>(DirectInfusionUtils::C_13_MASS);
+            float maxMMinusOneMz = maxMz + static_cast<float>(DirectInfusionUtils::C_13_MASS);
 
             auto lb = lower_bound(ms1Fragment->consensus->mzs.begin(), ms1Fragment->consensus->mzs.end(), minMMinusOneMz);
 
@@ -941,7 +942,14 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
     //check for intensity in scans, if sufficient observedMs1Intensity was not found in consensus MS1 spectrum
     bool isFoundMs1PrecursorIonInScans = false;
     if (params->ms1IsFindPrecursorIon && !isMs1InConsensusSpectrum) {
-        //TODO: implement
+
+        for (auto scan : ms1Scans) {
+            float queryMzIntensityCandidate = scan->findClosestMzIntensity(precMz, params->ms1PpmTolr);
+            if (queryMzIntensityCandidate > params->ms1MinScanIntensity) {
+                isFoundMs1PrecursorIonInScans = true;
+                break;
+            }
+        }
     }
 
     if (params->ms1IsFindPrecursorIon && !(isMs1InConsensusSpectrum || isFoundMs1PrecursorIonInScans)){
