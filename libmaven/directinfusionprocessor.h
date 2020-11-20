@@ -197,7 +197,7 @@ public:
 
     //RESERVED DELIMITERS - DO NOT CHANGE!
     static constexpr const char* const INTERNAL_MAP_DELIMITER = "|,|";
-    static constexpr const char* const TUPLE_MAP_KEY_DELIMITER="&";
+    static constexpr const char* const TUPLE_MAP_KEY_DELIMITER = "&";
 
     string encodeParams() {
 
