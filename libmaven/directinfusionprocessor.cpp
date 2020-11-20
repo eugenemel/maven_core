@@ -800,6 +800,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         float fragmentMaxObservedIntensity = matchAssessment->fragmentMaxObservedIntensity;
         float observedMs1Intensity = matchAssessment->observedMs1Intensity;
         int ms1IntensityCoord = matchAssessment->ms1IntensityCoord;
+        float observedMs1ScanIntensity = matchAssessment->observedMs1ScanIntensity;
 
         //individual compound matches
         if (!matchAssessment->isDisqualifyThisMatch &&
@@ -815,6 +816,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
             directInfusionMatchData->fragmentMaxObservedIntensity = fragmentMaxObservedIntensity;
             directInfusionMatchData->observedMs1Intensity = observedMs1Intensity;
             directInfusionMatchData->ms1IntensityCoord = ms1IntensityCoord;
+            directInfusionMatchData->observedMs1ScanIntensity = observedMs1ScanIntensity;
 
             libraryMatches.push_back(directInfusionMatchData);
         }
@@ -1124,12 +1126,14 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
         vector<Compound*> compounds;
         float observedMs1Intensity = 0.0f;
         int ms1IntensityCoord = -1;
+        float observedMs1ScanIntensity = 0.0f;
 
         for (auto matchData : compoundList) {
 
             compounds.push_back(matchData->compound);
             adduct = matchData->adduct;
             observedMs1Intensity += matchData->observedMs1Intensity;
+            observedMs1ScanIntensity += matchData->observedMs1ScanIntensity;
 
             //Issue 288: intensity coordinate corresponds to the highest valid ms1 coord,
             //which will not always line up with the observed ms1 intensity.
@@ -1150,6 +1154,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
             }
         }
         observedMs1Intensity /= compoundList.size();
+        observedMs1ScanIntensity /= compoundList.size();
 
         bool isUseAcylChainOrCompositionSummarization = params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_ACYL_CHAINS_SUM_COMPOSITION &&
                 ((!isMissingAcylChainLevel && acylChainLevel.size() == 1) || (!isMissingCompositionLevel && compositionLevel.size() == 1));
@@ -1211,6 +1216,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
 
             summarizedMatchData->observedMs1Intensity = observedMs1Intensity;
             summarizedMatchData->ms1IntensityCoord = ms1IntensityCoord;
+            summarizedMatchData->observedMs1ScanIntensity = observedMs1ScanIntensity;
 
         } else { //fall back to general summarization based on identical fragments
 
@@ -1321,6 +1327,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
 
             summarizedMatchData->observedMs1Intensity = observedMs1Intensity;
             summarizedMatchData->ms1IntensityCoord = ms1IntensityCoord;
+            summarizedMatchData->observedMs1ScanIntensity = observedMs1ScanIntensity;
         }
 
         summarizedMatchDataToFrags.insert(make_pair(summarizedMatchData, it->first));
@@ -1703,6 +1710,7 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
        groupMatchData->fragmentMaxObservedIntensity = matchData->fragmentMaxObservedIntensity;
        groupMatchData->observedMs1Intensity = matchData->observedMs1Intensity;
        groupMatchData->ms1IntensityCoord = matchData->ms1IntensityCoord;
+       groupMatchData->observedMs1ScanIntensity = matchData->observedMs1ScanIntensity;
 
        directInfusionGroupAnnotation->compounds.at(annotationMatchIndex) = groupMatchData;
 

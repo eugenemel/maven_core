@@ -636,6 +636,9 @@ struct DirectInfusionMatchData {
     //Issue 232
     float observedMs1Intensity = 0;
 
+    //Issue 309
+    float observedMs1ScanIntensity = 0;
+
     //Issue 210
     int numUniqueFragments = 0;
     vector<bool> isFragmentUnique; //follows m/z-sorted Compound* fragment vectors
