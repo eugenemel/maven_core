@@ -656,8 +656,12 @@ struct DirectInfusionMatchData {
 struct DirectInfusionMatchAssessment {
 
     //ms1-associated
+    //consensus ms1 spectrum
     float observedMs1Intensity = 0;
     int ms1IntensityCoord = -1;
+
+    //ms1 scans
+    float observedMs1ScanIntensity = 0;
 
     //ms2-associated
     FragmentationMatchScore fragmentationMatchScore;
