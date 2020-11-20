@@ -102,7 +102,7 @@ class Scan {
     bool isMonoisotopicPrecursor(float monoIsotopeMz, float ppm, int charge=1);
 
     //returns -1 if not found
-    float findNormalizedIntensity(float queryMz, float standardMz, float ppm);
+    float findNormalizedIntensity(float queryMz, float standardMz, float ppm, float minScanIntensity=0.0f);
     float findClosestMzIntensity(float queryMz, float ppm);
 
     bool hasMz(float mz, float ppm);

@@ -183,7 +183,7 @@ float Scan::findClosestMzIntensity(float queryMz, float ppm) {
 
 //returns -1 if not found
 //find closest m/z to queryMz if multiple hits
-float Scan::findNormalizedIntensity(float queryMz, float standardMz, float ppm){
+float Scan::findNormalizedIntensity(float queryMz, float standardMz, float ppm, float minScanIntensity){
 
     float normalizedIntensity = -1.0f;
 
@@ -211,7 +211,8 @@ float Scan::findNormalizedIntensity(float queryMz, float standardMz, float ppm){
         }
     }
 
-    if (queryIntensity < 0) return normalizedIntensity; // could not find query m/z in scan
+    // could not find query m/z with sufficient intensity in scan
+    if (queryIntensity < 0 || queryIntensity < minScanIntensity) return normalizedIntensity;
 
     float minStandardMz = standardMz - standardMz*ppm/1e6f;
     float maxStandardMz = standardMz + standardMz*ppm/1e6f;
@@ -231,7 +232,8 @@ float Scan::findNormalizedIntensity(float queryMz, float standardMz, float ppm){
         }
     }
 
-    if (standardIntensity < 0) return normalizedIntensity; // could not find query m/z in scan
+    // could not find standard m/z with sufficient intensity in scan
+    if (standardIntensity < 0 || standardIntensity < minScanIntensity) return normalizedIntensity;
 
     normalizedIntensity = queryIntensity/standardIntensity;
 

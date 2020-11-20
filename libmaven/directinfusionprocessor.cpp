@@ -1729,7 +1729,7 @@ float DirectInfusionUtils::findNormalizedIntensity(const vector<Scan*>& scans,
 
     for (auto scan : scans) {
 
-        float singleScanNormalizedIntensity = scan->findNormalizedIntensity(queryMz, standardMz, params->ms1PpmTolr);
+        float singleScanNormalizedIntensity = scan->findNormalizedIntensity(queryMz, standardMz, params->ms1PpmTolr, params->ms1MinScanIntensity);
 
         if (singleScanNormalizedIntensity < 0) continue;
 
