@@ -634,10 +634,10 @@ struct DirectInfusionMatchData {
     double proportion = 0;
 
     //Issue 232
-    float observedMs1Intensity = 0;
+    float observedMs1Intensity = 0.0f;
 
     //Issue 309
-    float observedMs1ScanIntensity = 0;
+    float observedMs1ScanIntensity = 0.0f;
 
     //Issue 210
     int numUniqueFragments = 0;
@@ -660,16 +660,16 @@ struct DirectInfusionMatchAssessment {
 
     //ms1-associated
     //consensus ms1 spectrum
-    float observedMs1Intensity = 0;
+    float observedMs1Intensity = 0.0f;
     int ms1IntensityCoord = -1;
 
     //ms1 scans
-    float observedMs1ScanIntensity = 0;
+    float observedMs1ScanIntensity = 0.0f;
 
     //ms2-associated
     FragmentationMatchScore fragmentationMatchScore;
     map<string, int> diagnosticFragmentMatchMap = {};
-    float fragmentMaxObservedIntensity = 0;
+    float fragmentMaxObservedIntensity = 0.0f;
 
 
     //Issue 303:
