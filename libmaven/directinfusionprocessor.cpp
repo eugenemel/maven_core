@@ -945,7 +945,7 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
 
         for (auto scan : ms1Scans) {
             float queryMzIntensityCandidate = scan->findClosestMzIntensity(precMz, params->ms1PpmTolr);
-            if (queryMzIntensityCandidate > params->ms1MinScanIntensity) {
+            if (queryMzIntensityCandidate >= params->ms1MinScanIntensity) {
                 isFoundMs1PrecursorIonInScans = true;
                 break;
             }
