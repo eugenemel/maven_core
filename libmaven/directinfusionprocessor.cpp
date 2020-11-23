@@ -2083,17 +2083,6 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                                      << endl;
                             }
                         }
-
-//                        auto it = std::find(params->ms1PartitionIntensityByFragments.begin(), params->ms1PartitionIntensityByFragments.end(), fragmentLabel);
-
-//                        if (it != params->ms1PartitionIntensityByFragments.end()) {
-
-//                            if (debug) {
-//                                cout << "fragment label: " << fragmentLabel << ", intensity=" << fragObservedIntensity << endl;
-//                            }
-
-//                            compoundFragIntensity += fragObservedIntensity;
-//                        }
                     }
                 }
 
@@ -2123,12 +2112,6 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                                  << endl;
                         }
                     }
-
-//                    auto it = std::find(params->ms1PartitionIntensityByFragments.begin(), params->ms1PartitionIntensityByFragments.end(), fragmentLabel);
-
-//                    if (it != params->ms1PartitionIntensityByFragments.end()) {
-//                        partitionFragmentMzs.push_back(fragmentMz);
-//                    }
                 }
 
                 if (debug) {
