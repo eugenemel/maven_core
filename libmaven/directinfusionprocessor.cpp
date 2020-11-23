@@ -2043,207 +2043,241 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
     }
 
     for (auto it = partitionMap.begin(); it != partitionMap.end(); ++it){
-        if (it->second.size() > 1) {
 
-            float allFragIntensity = 0.0f;
-            map<shared_ptr<DirectInfusionMatchData>, float> totalFragIntensityByCompound{};
+        float allFragIntensity = 0.0f;
+        map<shared_ptr<DirectInfusionMatchData>, float> totalFragIntensityByCompound{};
 
-            //Issue 292
-            map<Scan*, float> totalFragIntensityByScan{};
-            map<Scan*, map<shared_ptr<DirectInfusionMatchData>, float>> compoundFragIntensityByScan{};
+        //Issue 292
+        map<Scan*, float> totalFragIntensityByScan{};
+        map<Scan*, map<shared_ptr<DirectInfusionMatchData>, float>> compoundFragIntensityByScan{};
 
-            for (auto matchData : it->second) {
+        for (auto matchData : it->second) {
 
-                if (debug) {
-                    cout << "compound: " << matchData->compound->name << ", adduct: " << matchData->compound->adductString << endl;
-                }
+            if (debug) {
+                cout << "compound: " << matchData->compound->name << ", adduct: " << matchData->compound->adductString << endl;
+            }
 
-                float compoundFragIntensity = 0.0f;
+            float compoundFragIntensity = 0.0f;
 
-                vector<int> ranks = matchData->fragmentationMatchScore.ranks;
+            vector<int> ranks = matchData->fragmentationMatchScore.ranks;
 
-                for (unsigned int i = 0; i < ranks.size(); i++) {
-                    int y = ranks[i];
+            for (unsigned int i = 0; i < ranks.size(); i++) {
+                int y = ranks[i];
 
-                    if (y == -1) continue;
+                if (y == -1) continue;
 
-                    float fragObservedIntensity = ms2Fragment->consensus->intensity_array[y];
+                float fragObservedIntensity = ms2Fragment->consensus->intensity_array[y];
 
-                    if (fragObservedIntensity >= params->ms2MinIntensity) {
-
-                        string fragmentLabel = matchData->compound->fragment_labels[i];
-
-                        vector<string> fragmentLabelTags = DirectInfusionMatchAssessment::getFragmentLabelTags(fragmentLabel, params, debug);
-
-                        //Issue 313: use marked sn1/sn2 fragment label tags instead of explicit list of fragment labels
-                        if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn1FragmentLabelTag") != fragmentLabelTags.end() ||
-                            find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn2FragmentLabelTag") != fragmentLabelTags.end()) {
-
-                            compoundFragIntensity += fragObservedIntensity;
-
-                            partitionMapMzs[it->first].insert(mzUtils::mzToIntKey(static_cast<double>(matchData->compound->fragment_mzs[i])));
-
-                            if (debug) {
-                                cout << "fragment label: " << fragmentLabel
-                                     << ", intensity=" << fragObservedIntensity
-                                     << ", compoundFragIntensity=" << compoundFragIntensity
-                                     << endl;
-                            }
-                        }
-                    }
-                }
-
-                totalFragIntensityByCompound.insert(make_pair(matchData, compoundFragIntensity));
-                allFragIntensity += compoundFragIntensity;
-
-                map<int, vector<float>> partitionFractionsByNumFragmentsPresent{};
-
-                vector<float> partitionFragmentMzs;
-                for (unsigned int i = 0; i < matchData->compound->fragment_labels.size(); i++) {
+                if (fragObservedIntensity >= params->ms2MinIntensity) {
 
                     string fragmentLabel = matchData->compound->fragment_labels[i];
-                    float fragmentMz = matchData->compound->fragment_mzs[i];
 
-                    //Issue 313: use marked sn1/sn2 fragment label tags instead of explicit list of fragment labels
                     vector<string> fragmentLabelTags = DirectInfusionMatchAssessment::getFragmentLabelTags(fragmentLabel, params, debug);
 
+                    //Issue 313: use marked sn1/sn2 fragment label tags instead of explicit list of fragment labels
                     if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn1FragmentLabelTag") != fragmentLabelTags.end() ||
-
                         find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn2FragmentLabelTag") != fragmentLabelTags.end()) {
 
-                        partitionFragmentMzs.push_back(fragmentMz);
+                        compoundFragIntensity += fragObservedIntensity;
+
+                        partitionMapMzs[it->first].insert(mzUtils::mzToIntKey(static_cast<double>(matchData->compound->fragment_mzs[i])));
 
                         if (debug) {
                             cout << "fragment label: " << fragmentLabel
-                                 << ", fragmentMz: " << fragmentMz
+                                 << ", intensity=" << fragObservedIntensity
+                                 << ", compoundFragIntensity=" << compoundFragIntensity
                                  << endl;
                         }
                     }
                 }
-
-                if (debug) {
-                    cout << matchData->compound->name << " partitionMzs: ";
-                    for (auto partitionMz : partitionFragmentMzs) {
-                        cout << partitionMz << " ";
-                    }
-                    cout << endl;
-                }
-
-                for (auto scan : ms2Scans) {
-
-                    if (debug) cout << "scan #" << scan->scannum << ": ";
-
-                    float scanSumIntensity = 0.0f;
-
-                    for (auto queryMz : partitionFragmentMzs) {
-                        if (debug) cout << "mz=" << queryMz << ": ";
-                        float queryIntensity = scan->findClosestMzIntensity(queryMz, params->ms2PpmTolr);
-                        if (queryIntensity > 0) {
-                            scanSumIntensity += queryIntensity;
-                            if (debug) cout << queryIntensity << " ";
-                        } else {
-                            if (debug) cout << "NA ";
-                        }
-                    }
-
-                    if (totalFragIntensityByScan.find(scan) == totalFragIntensityByScan.end()) {
-                        totalFragIntensityByScan.insert(make_pair(scan, 0.0f));
-                    }
-
-                    if (scanSumIntensity <= 0.0f) continue;
-
-                    totalFragIntensityByScan[scan] += scanSumIntensity;
-
-                    if (compoundFragIntensityByScan.find(scan) == compoundFragIntensityByScan.end()) {
-                        compoundFragIntensityByScan.insert(make_pair(scan, map<shared_ptr<DirectInfusionMatchData>, float>()));
-                    }
-                    compoundFragIntensityByScan[scan].insert(make_pair(matchData, scanSumIntensity));
-
-                    if (debug) cout << ", compound total: " << scanSumIntensity << ", all total: " << totalFragIntensityByScan[scan] << endl;
-
-                }
-
             }
 
+            totalFragIntensityByCompound.insert(make_pair(matchData, compoundFragIntensity));
+            allFragIntensity += compoundFragIntensity;
 
-            for (auto it = totalFragIntensityByCompound.begin(); it != totalFragIntensityByCompound.end(); ++it) {
-                float compoundFragIntensity = it->second;
-                if (allFragIntensity > 0.0f) {
-                    it->first->ms1PartitionFraction = compoundFragIntensity / allFragIntensity;
+            map<int, vector<float>> partitionFractionsByNumFragmentsPresent{};
+
+            vector<float> partitionFragmentMzs;
+            for (unsigned int i = 0; i < matchData->compound->fragment_labels.size(); i++) {
+
+                string fragmentLabel = matchData->compound->fragment_labels[i];
+                float fragmentMz = matchData->compound->fragment_mzs[i];
+
+                //Issue 313: use marked sn1/sn2 fragment label tags instead of explicit list of fragment labels
+                vector<string> fragmentLabelTags = DirectInfusionMatchAssessment::getFragmentLabelTags(fragmentLabel, params, debug);
+
+                if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn1FragmentLabelTag") != fragmentLabelTags.end() ||
+
+                    find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn2FragmentLabelTag") != fragmentLabelTags.end()) {
+
+                    partitionFragmentMzs.push_back(fragmentMz);
+
                     if (debug) {
-                        cout << "compound: " << it->first->compound->name
-                             << ", adduct: " << it->first->compound->adductString
-                             << ", compoundFragIntensity/allFragIntensity = " << compoundFragIntensity << "/" << allFragIntensity
-                             << " = " << it->first->ms1PartitionFraction
+                        cout << "fragment label: " << fragmentLabel
+                             << ", fragmentMz: " << fragmentMz
                              << endl;
                     }
                 }
             }
 
-            //Issue 292
-            map<shared_ptr<DirectInfusionMatchData>, vector<float>> scanPartitionFractions{};
-
-            for (auto it = compoundFragIntensityByScan.begin(); it != compoundFragIntensityByScan.end(); ++it){
-
-                Scan* scan = it->first;
-                map<shared_ptr<DirectInfusionMatchData>, float> fragIntensityByCompound = it->second;
-                float totalScanIntensity = totalFragIntensityByScan[scan];
-
-                if (totalScanIntensity > 0.0f) {
-                    for (auto it2 = fragIntensityByCompound.begin(); it2 != fragIntensityByCompound.end(); ++it2) {
-
-                        shared_ptr<DirectInfusionMatchData> matchData = it2->first;
-                        float compoundTotalIntensity = it2->second;
-
-                        float scanPartitionFraction = compoundTotalIntensity / totalScanIntensity;
-
-                        if (scanPartitionFractions.find(matchData) == scanPartitionFractions.end()) {
-                            scanPartitionFractions.insert(make_pair(matchData, vector<float>()));
-                        }
-                        scanPartitionFractions[matchData].push_back(scanPartitionFraction);
-
-                        //Issue 292
-                        if (debug) {
-                            cout << "compound: " << matchData->compound->name
-                                 << ", scan #" << scan->scannum
-                                 << ", compoundFragIntensity/allFragIntensity = " << compoundTotalIntensity << "/" << totalScanIntensity
-                                 << ", fraction = " << scanPartitionFraction
-                                 << endl;
-                        }
-                    }
+            if (debug) {
+                cout << matchData->compound->name << " partitionMzs: ";
+                for (auto partitionMz : partitionFragmentMzs) {
+                    cout << partitionMz << " ";
                 }
+                cout << endl;
             }
 
-            for (auto it = scanPartitionFractions.begin(); it != scanPartitionFractions.end(); ++it) {
-                vector<float> intensities = it->second;
+            for (auto scan : ms2Scans) {
 
-                if (debug) {
-                    cout << "compound: " << it->first->compound->name
-                         << ", scan partition value ";
-                }
+                if (debug) cout << "scan #" << scan->scannum << ": ";
 
-                if (!intensities.empty()) {
-                    if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
-                        it->first->ms1PartitionFractionByScan = accumulate(intensities.begin(), intensities.end(), 0.0f) / intensities.size();
+                float scanSumIntensity = 0.0f;
 
-                        if (debug) cout << "[mean] = ";
-
-                    } else if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
-                        it->first->ms1PartitionFractionByScan = median(intensities);
-
-                        if (debug) cout << "[median] = ";
+                for (auto queryMz : partitionFragmentMzs) {
+                    if (debug) cout << "mz=" << queryMz << ": ";
+                    float queryIntensity = scan->findClosestMzIntensity(queryMz, params->ms2PpmTolr);
+                    if (queryIntensity > 0) {
+                        scanSumIntensity += queryIntensity;
+                        if (debug) cout << queryIntensity << " ";
+                    } else {
+                        if (debug) cout << "NA ";
                     }
                 }
 
-                if (debug) cout << it->first->ms1PartitionFractionByScan << endl;
+                if (totalFragIntensityByScan.find(scan) == totalFragIntensityByScan.end()) {
+                    totalFragIntensityByScan.insert(make_pair(scan, 0.0f));
+                }
+
+                if (scanSumIntensity <= 0.0f) continue;
+
+                totalFragIntensityByScan[scan] += scanSumIntensity;
+
+                if (compoundFragIntensityByScan.find(scan) == compoundFragIntensityByScan.end()) {
+                    compoundFragIntensityByScan.insert(make_pair(scan, map<shared_ptr<DirectInfusionMatchData>, float>()));
+                }
+                compoundFragIntensityByScan[scan].insert(make_pair(matchData, scanSumIntensity));
+
+                if (debug) cout << ", compound total: " << scanSumIntensity << ", all total: " << totalFragIntensityByScan[scan] << endl;
+
+            }
+
+        }
+
+        for (auto it2 = totalFragIntensityByCompound.begin(); it2 != totalFragIntensityByCompound.end(); ++it2) {
+            float compoundFragIntensity = it2->second;
+            if (allFragIntensity > 0.0f) {
+                it2->first->ms1PartitionFraction = compoundFragIntensity / allFragIntensity;
+                if (debug) {
+                    cout << "compound: " << it2->first->compound->name
+                         << ", adduct: " << it2->first->compound->adductString
+                         << ", compoundFragIntensity/allFragIntensity = " << compoundFragIntensity << "/" << allFragIntensity
+                         << " = " << it2->first->ms1PartitionFraction
+                         << endl;
+                }
             }
         }
-    }
+
+        //Issue 292
+        map<shared_ptr<DirectInfusionMatchData>, vector<float>> scanPartitionFractions{};
+
+        for (auto it2 = compoundFragIntensityByScan.begin(); it2 != compoundFragIntensityByScan.end(); ++it2){
+
+            Scan* scan = it2->first;
+            map<shared_ptr<DirectInfusionMatchData>, float> fragIntensityByCompound = it2->second;
+            float totalScanIntensity = totalFragIntensityByScan[scan];
+
+            if (totalScanIntensity > 0.0f) {
+                for (auto it2 = fragIntensityByCompound.begin(); it2 != fragIntensityByCompound.end(); ++it2) {
+
+                    shared_ptr<DirectInfusionMatchData> matchData = it2->first;
+                    float compoundTotalIntensity = it2->second;
+
+                    float scanPartitionFraction = compoundTotalIntensity / totalScanIntensity;
+
+                    if (scanPartitionFractions.find(matchData) == scanPartitionFractions.end()) {
+                        scanPartitionFractions.insert(make_pair(matchData, vector<float>()));
+                    }
+                    scanPartitionFractions[matchData].push_back(scanPartitionFraction);
+
+                    //Issue 292
+                    if (debug) {
+                        cout << "compound: " << matchData->compound->name
+                             << ", scan #" << scan->scannum
+                             << ", compoundFragIntensity/allFragIntensity = " << compoundTotalIntensity << "/" << totalScanIntensity
+                             << ", fraction = " << scanPartitionFraction
+                             << endl;
+                    }
+                }
+            }
+
+        } // END for (auto it2 = compoundFragIntensityByScan.begin(); it2 != compoundFragIntensityByScan.end(); ++it2)
+
+        for (auto it2 = scanPartitionFractions.begin(); it2 != scanPartitionFractions.end(); ++it2) {
+
+            vector<float> intensities = it2->second;
+
+            if (debug) {
+                cout << "compound: " << it2->first->compound->name
+                     << ", scan partition value ";
+            }
+
+            if (!intensities.empty()) {
+                if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
+                    it2->first->ms1PartitionFractionByScan = accumulate(intensities.begin(), intensities.end(), 0.0f) / intensities.size();
+
+                    if (debug) cout << "[mean] = ";
+
+                } else if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
+                    it2->first->ms1PartitionFractionByScan = median(intensities);
+
+                    if (debug) cout << "[median] = ";
+                }
+            }
+
+            if (debug) cout << it2->first->ms1PartitionFractionByScan << endl;
+
+        } // END for (auto it2 = scanPartitionFractions.begin(); it2 != scanPartitionFractions.end(); ++it2)
+
+        //If only one compound exists in the IDed compounds group, it gets all of the partitioned intensity.
+        if (it->second.size() == 1) {
+            it->second[0]->ms1PartitionFraction = 1;
+            it->second[0]->ms1PartitionFractionByScan = 1;
+        }
+
+    } // END for (auto it = partitionMap.begin(); it != partitionMap.end(); ++it)
 
     //Issue 314: If any m/zs are shared between sets,
     //all compounds associated with the shared m/z are invalidated -
     //that is, the partition fraction cannot be accurately determined.
     //in that case, the partition fraction is returned as -1 (indicating an uncomputable value).
+    //
+    //Additionally, if any set is associated with multiple distinct m/zs, the partition fraction
+    //for that set cannot be determined, and is returned as -1 (indicating an uncomputable value).
+    //
+    //Any set that shares a fragment with such a multiple distinct m/z set is also invalidated.
+
+    map<int, vector<int>> multiplePrecursorMzFragmentGroups{};
+
+    //disqualify multiple sets, add singletons to map
+    for (auto it = partitionMap.begin(); it != partitionMap.end(); ++it){
+
+        int key = it->first;
+        vector<shared_ptr<DirectInfusionMatchData>> matchDataVector = it->second;
+
+        for (auto matchData : matchDataVector) {
+            vector<int> constituentMzs = matchData->compound->getConstituentMzs();
+
+            if (constituentMzs.size() > 1) {
+                //invalidate this entry
+                matchData->ms1PartitionFraction = -1;
+                matchData->ms1PartitionFractionByScan = -1;
+
+                //all fragments are associated with all constituent m/zs
+                //TODO
+            }
+        }
+    }
 
     if (partitionMapMzs.size() > 1) {
 
