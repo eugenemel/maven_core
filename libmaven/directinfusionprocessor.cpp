@@ -1096,7 +1096,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
         vector<shared_ptr<DirectInfusionMatchData>> compoundList = it->second;
 
         //Issue 314
-        vector<int> constituentMzs{};
+        unordered_set<int> constituentMzs{};
 
         //Initialize output
         shared_ptr<DirectInfusionMatchData> summarizedMatchData;
@@ -1133,6 +1133,8 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
         for (auto matchData : compoundList) {
 
             compounds.push_back(matchData->compound);
+            constituentMzs.insert(mzUtils::mzToIntKey(static_cast<double>(matchData->compound->precursorMz)));
+
             adduct = matchData->adduct;
             observedMs1Intensity += matchData->observedMs1Intensity;
             observedMs1ScanIntensity += matchData->observedMs1ScanIntensity;
@@ -1202,6 +1204,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
             summarizedCompound->setExactMass(compounds.at(0)->getExactMass());
             summarizedCompound->charge = compounds.at(0)->charge;
             summarizedCompound->id = summarizedId;
+            summarizedCompound->constituentMzsSet = constituentMzs;
 
             summarizedCompound->computeSummarizedData();
 
@@ -1313,6 +1316,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
             summarizedCompound->setExactMass(exactMass);
             summarizedCompound->charge = charge;
             summarizedCompound->id = summarizedName + adductString;
+            summarizedCompound->constituentMzsSet = constituentMzs;
 
             summarizedCompound->computeSummarizedData();
 
