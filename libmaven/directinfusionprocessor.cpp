@@ -2257,12 +2257,15 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
     //
     //Any set that shares a fragment with such a multiple distinct m/z set is also invalidated.
 
-    map<int, vector<int>> multiplePrecursorMzFragmentGroups{};
+//    map<int, vector<shared_ptr<DirectInfusionMatchData>>> partitionMap{};
+//    map<int, set<int>> partitionMapMzs{};
+
+    //reflects the true m/z <==> compounds mapping, prior to mutation by summarization.
+    map<int, vector<shared_ptr<DirectInfusionMatchData>>> constituentMzExpandedPartitionMap{};
 
     //disqualify multiple sets, add singletons to map
     for (auto it = partitionMap.begin(); it != partitionMap.end(); ++it){
 
-        int key = it->first;
         vector<shared_ptr<DirectInfusionMatchData>> matchDataVector = it->second;
 
         for (auto matchData : matchDataVector) {
@@ -2272,9 +2275,14 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                 //invalidate this entry
                 matchData->ms1PartitionFraction = -1;
                 matchData->ms1PartitionFractionByScan = -1;
+            }
 
-                //all fragments are associated with all constituent m/zs
-                //TODO
+            //re-organize compounds based on all constituent m/z values.
+            for (auto consituentMz : constituentMzs) {
+                if (constituentMzExpandedPartitionMap.find(consituentMz) == constituentMzExpandedPartitionMap.end()) {
+                    constituentMzExpandedPartitionMap.insert(make_pair(consituentMz, vector<shared_ptr<DirectInfusionMatchData>>{}));
+                }
+                constituentMzExpandedPartitionMap[consituentMz].push_back(matchData);
             }
         }
     }
@@ -2306,12 +2314,13 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
         }
 
         //invalidate, when appropriate
-        for (auto it = partitionMap.begin(); it != partitionMap.end(); ++it){
+        for (auto it = constituentMzExpandedPartitionMap.begin(); it != constituentMzExpandedPartitionMap.end(); ++it){
+
             if (invalidatedSets.find(it->first) != invalidatedSets.end()) {
 
                 //Issue 314: Groups should only be invalidated because of overlapping m/zs
                 //when the group itself contains multiple candidate compounds.
-                //Singleton groups don't require any partitioning, so ambiguity in fragment m/zs has no effect.
+                //Singleton groups don't require any partitioning, so ambiguity in fragment m/zs has no effect
                 if (it->second.size() > 1) {
 
                     for (auto matchData : it->second) {
