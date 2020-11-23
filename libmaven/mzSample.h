@@ -810,6 +810,7 @@ class Compound {
             map<string, string> metaDataMap = {};
 
             virtual vector<Compound*> getChildren();
+            virtual vector<int> getConstituentMzs();
 };
 
 class SummarizedCompound : public Compound {
@@ -817,6 +818,7 @@ class SummarizedCompound : public Compound {
 public:
     vector<Compound*> children;
     string summarizedName;
+    unordered_set<int> constituentMzsSet;
 
     SummarizedCompound(string summarizedName, vector<Compound*> childrenCompounds) : Compound("", summarizedName, "", 0){
         children = childrenCompounds;
@@ -824,6 +826,9 @@ public:
         this->db = "summarized";
     }
     vector<Compound*> getChildren();
+
+    //Issue 314
+    vector<int> getConstituentMzs();
 
     static vector<pair<string, string>> parseCompoundId(string generalSummarizedCompoundName, bool debug=false);
 

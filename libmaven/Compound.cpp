@@ -107,6 +107,8 @@ FragmentationMatchScore Compound::scoreCompoundHit(Fragment* f, float productPpm
 
 vector<Compound*> Compound::getChildren() {return vector<Compound*>(0);}
 
+vector<int> Compound::getConstituentMzs(){return vector<int>{mzUtils::mzToIntKey(precursorMz)};}
+
 //breadth-first search
 vector<Compound*> SummarizedCompound::getChildren() {
     //output
@@ -135,6 +137,10 @@ vector<Compound*> SummarizedCompound::getChildren() {
     }
 
     return descendants;
+}
+
+vector<int> SummarizedCompound::getConstituentMzs(){
+    return vector<int>(constituentMzsSet.begin(), constituentMzsSet.end());
 }
 
 /**

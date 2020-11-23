@@ -1095,6 +1095,9 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
 
         vector<shared_ptr<DirectInfusionMatchData>> compoundList = it->second;
 
+        //Issue 314
+        vector<int> constituentMzs{};
+
         //Initialize output
         shared_ptr<DirectInfusionMatchData> summarizedMatchData;
 
