@@ -818,6 +818,8 @@ class SummarizedCompound : public Compound {
 public:
     vector<Compound*> children;
     string summarizedName;
+
+    //Issue 314
     unordered_set<int> constituentMzsSet;
 
     SummarizedCompound(string summarizedName, vector<Compound*> childrenCompounds) : Compound("", summarizedName, "", 0){
