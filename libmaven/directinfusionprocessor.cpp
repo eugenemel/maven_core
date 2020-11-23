@@ -2308,17 +2308,26 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
         //invalidate, when appropriate
         for (auto it = partitionMap.begin(); it != partitionMap.end(); ++it){
             if (invalidatedSets.find(it->first) != invalidatedSets.end()) {
-                for (auto matchData : it->second) {
-                    matchData->ms1PartitionFraction = -1;
-                    matchData->ms1PartitionFractionByScan = -1;
 
-                    if (debug) {
-                        cout << matchData->compound->id
-                             << " ms1PartitionFraction and ms1PartitionFractionByScan were set to -1, indicating that a partition fraction could not be determined."
-                             << endl;
+                //Issue 314: Groups should only be invalidated because of overlapping m/zs
+                //when the group itself contains multiple candidate compounds.
+                //Singleton groups don't require any partitioning, so ambiguity in fragment m/zs has no effect.
+                if (it->second.size() > 1) {
+
+                    for (auto matchData : it->second) {
+                        matchData->ms1PartitionFraction = -1;
+                        matchData->ms1PartitionFractionByScan = -1;
+
+                        if (debug) {
+                            cout << matchData->compound->id
+                                 << " ms1PartitionFraction and ms1PartitionFractionByScan were set to -1, indicating that a partition fraction could not be determined."
+                                 << endl;
+                        }
+
                     }
 
                 }
+
             }
         }
 
