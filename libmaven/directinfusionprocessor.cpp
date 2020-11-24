@@ -1991,56 +1991,12 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
     if (!ms2Fragment || !ms2Fragment->consensus) return;
     if (ms2Scans.empty()) return;
 
-    map<int, vector<shared_ptr<DirectInfusionMatchData>>> partitionMap{};
+    //Issue 318
+    map<int, float> fragMzToSumObservedMs1ScanIntensity= getFragToSumObservedMs1ScanIntensity(debug);
+
+    map<int, vector<shared_ptr<DirectInfusionMatchData>>> partitionMap = getPrecMzPartitionMap(debug);
+
     map<int, set<int>> partitionMapMzs{};
-
-    for (auto it = matchDataToFrags.begin(); it != matchDataToFrags.end(); ++it){
-
-        //Issue 314: Prefer theoretical m/z as key over observed intensity from consensus ms1
-        //This allows fractions to be computed when ms1 intensity can be identified in ms1 scans,
-        //but not in the consensus ms1 spectrum.
-        int key = -1;
-        if (it->first->compound->precursorMz > 0){
-            key = mzUtils::mzToIntKey(static_cast<double>(it->first->compound->precursorMz));
-        } else {
-            key = it->first->ms1IntensityCoord;
-        }
-
-        //theoretical precursor m/z not provided in compound, and no intensity detected in consensus ms1 spectrum
-        if (key == -1) continue;
-
-        if (partitionMap.find(key) == partitionMap.end()) {
-            partitionMap.insert(make_pair(key, vector<shared_ptr<DirectInfusionMatchData>>()));
-            partitionMapMzs.insert(make_pair(key, set<int>()));
-        }
-        partitionMap[key].push_back(it->first);
-    }
-
-    //Issue 311: any matches without fragments that have the same theoretical m/z
-    //as something else with matches
-    //will always return a partition fraction of 0 (all intensity is taken by other compounds).
-    //
-    //if there is only one theoretical m/z, partition fraction is 1.
-    for (auto compound : compoundsNoFragMatches) {
-
-        //Issue 314: Prefer theoretical m/z as key over observed intensity from consensus ms1
-        //This allows fractions to be computed when ms1 intensity can be identified in ms1 scans,
-        //but not in the consensus ms1 spectrum.
-        int key = -1;
-        if (compound->compound->precursorMz > 0){
-            key = mzUtils::mzToIntKey(static_cast<double>(compound->compound->precursorMz));
-        } else {
-            key = compound->ms1IntensityCoord;
-        }
-
-        //theoretical precursor m/z not provided in compound, and no intensity detected in consensus ms1 spectrum
-        if (key == -1) continue;
-
-        if (partitionMap.find(key) == partitionMap.end()) {
-            partitionMap.insert(make_pair(key, vector<shared_ptr<DirectInfusionMatchData>>()));
-        }
-        partitionMap[key].push_back(compound);
-    }
 
     for (auto it = partitionMap.begin(); it != partitionMap.end(); ++it){
 
@@ -2079,6 +2035,10 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                         find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn2FragmentLabelTag") != fragmentLabelTags.end()) {
 
                         compoundFragIntensity += fragObservedIntensity;
+
+                        if (partitionMapMzs.find(it->first) == partitionMapMzs.end()) {
+                            partitionMapMzs.insert(make_pair(it->first, set<int>()));
+                        }
 
                         partitionMapMzs[it->first].insert(mzUtils::mzToIntKey(static_cast<double>(matchData->compound->fragment_mzs[i])));
 
@@ -2257,9 +2217,6 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
     //
     //Any set that shares a fragment with such a multiple distinct m/z set is also invalidated.
 
-//    map<int, vector<shared_ptr<DirectInfusionMatchData>>> partitionMap{};
-//    map<int, set<int>> partitionMapMzs{};
-
     //reflects the true m/z <==> compounds mapping, prior to mutation by summarization.
     map<int, vector<shared_ptr<DirectInfusionMatchData>>> constituentMzExpandedPartitionMap{};
 
@@ -2413,6 +2370,60 @@ map<int, float> DirectInfusionMatchInformation::getFragToSumObservedMs1ScanInten
     }
 
     return fragMzToSumObservedMs1ScanIntensity;
+}
+
+map<int, vector<shared_ptr<DirectInfusionMatchData>>> DirectInfusionMatchInformation::getPrecMzPartitionMap(const bool debug){
+
+    map<int, vector<shared_ptr<DirectInfusionMatchData>>> partitionMap{};
+
+    for (auto it = matchDataToFrags.begin(); it != matchDataToFrags.end(); ++it){
+
+        //Issue 314: Prefer theoretical m/z as key over observed intensity from consensus ms1
+        //This allows fractions to be computed when ms1 intensity can be identified in ms1 scans,
+        //but not in the consensus ms1 spectrum.
+        int key = -1;
+        if (it->first->compound->precursorMz > 0){
+            key = mzUtils::mzToIntKey(static_cast<double>(it->first->compound->precursorMz));
+        } else {
+            key = it->first->ms1IntensityCoord;
+        }
+
+        //theoretical precursor m/z not provided in compound, and no intensity detected in consensus ms1 spectrum
+        if (key == -1) continue;
+
+        if (partitionMap.find(key) == partitionMap.end()) {
+            partitionMap.insert(make_pair(key, vector<shared_ptr<DirectInfusionMatchData>>()));
+        }
+        partitionMap[key].push_back(it->first);
+    }
+
+    //Issue 311: any matches without fragments that have the same theoretical m/z
+    //as something else with matches
+    //will always return a partition fraction of 0 (all intensity is taken by other compounds).
+    //
+    //if there is only one theoretical m/z, partition fraction is 1.
+    for (auto compound : compoundsNoFragMatches) {
+
+        //Issue 314: Prefer theoretical m/z as key over observed intensity from consensus ms1
+        //This allows fractions to be computed when ms1 intensity can be identified in ms1 scans,
+        //but not in the consensus ms1 spectrum.
+        int key = -1;
+        if (compound->compound->precursorMz > 0){
+            key = mzUtils::mzToIntKey(static_cast<double>(compound->compound->precursorMz));
+        } else {
+            key = compound->ms1IntensityCoord;
+        }
+
+        //theoretical precursor m/z not provided in compound, and no intensity detected in consensus ms1 spectrum
+        if (key == -1) continue;
+
+        if (partitionMap.find(key) == partitionMap.end()) {
+            partitionMap.insert(make_pair(key, vector<shared_ptr<DirectInfusionMatchData>>()));
+        }
+        partitionMap[key].push_back(compound);
+    }
+
+    return partitionMap;
 }
 
 void DirectInfusionMatchAssessment::computeMs2MatchAssessment(
