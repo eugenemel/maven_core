@@ -2343,6 +2343,74 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
     }
 }
 
+/**
+ * @brief DirectInfusionMatchInformation::getFragToSumObservedMs1ScanIntensity
+ *
+ * Given a fragment m/z, return the total of all observedMs1ScanIntensity values
+ * associated with all compound matches that contain this fragment m/z.
+ *
+ * However, to avoid multiple-counting observedMs1ScanIntensity values, only consider
+ * a compound with a given precursor m/z value one time.  At high tolerance, this should
+ * correspond to different observedMs1ScanIntensity values.
+ *
+ * The refMs1Mz value is used instead of the observedMs1ScanIntensity value directly
+ * to handle general summarized compounds, that may contain more than one constituent m/z.
+ *
+ * These values should only be computing using real precursor m/z values, not synthetic averages
+ * from summarization.
+ *
+ * @param debug
+ * @return
+ */
+map<int, float> DirectInfusionMatchInformation::getFragToSumObservedMs1ScanIntensity(
+        const bool debug){
+
+    map<pair<int, int>, float> precFragToSumObservedMs1ScanIntensity{};
+
+    map<int, float> fragMzToSumObservedMs1ScanIntensity{};
+    map<int, unordered_set<int>> fragMzToPrecMzs{};
+
+    for (auto it = fragToMatchData.begin(); it != fragToMatchData.end(); ++it){
+
+        int fragMz = it->first;
+        unordered_set<shared_ptr<DirectInfusionMatchData>> matches = it->second;
+
+        for (auto it2 = matches.begin(); it2 != matches.end(); ++it2){
+
+            shared_ptr<DirectInfusionMatchData> matchData = *it2;
+
+            //split based on real, observed prec m/zs, not on synthetic averaged m/zs
+            vector<int> realPrecMzs = matchData->compound->getConstituentMzs();
+
+            for (int precMz : realPrecMzs) {
+
+                bool isAddIntensity = true;
+
+                if (fragMzToPrecMzs.find(fragMz) != fragMzToPrecMzs.end()) {
+                     unordered_set<int> precMzs = fragMzToPrecMzs[fragMz];
+                     if (precMzs.find(precMz) != precMzs.end()) {
+                         isAddIntensity = false;
+                     } else {
+                         fragMzToPrecMzs[precMz].insert(precMz);
+                     }
+                } else {
+                    fragMzToPrecMzs.insert(make_pair(fragMz, unordered_set<int>{precMz}));
+                }
+
+                if (isAddIntensity) {
+                    if (fragMzToSumObservedMs1ScanIntensity.find(fragMz) == fragMzToSumObservedMs1ScanIntensity.end()) {
+                        fragMzToSumObservedMs1ScanIntensity.insert(make_pair(fragMz, 0.0f));
+                    }
+                    fragMzToSumObservedMs1ScanIntensity[fragMz] += matchData->observedMs1ScanIntensity;
+                }
+
+            }
+        }
+    }
+
+    return fragMzToSumObservedMs1ScanIntensity;
+}
+
 void DirectInfusionMatchAssessment::computeMs2MatchAssessment(
                                Fragment *observedSpectrum,
                                const Compound *compound,
