@@ -2498,6 +2498,14 @@ map<int, float> DirectInfusionMatchInformation::getFragToSumObservedMs1ScanInten
         }
     }
 
+    if (debug) {
+        cout << "DirectInfusionMatchInformation::getFragToSumObservedMs1ScanIntensity(): " << endl;
+        for (auto it = fragMzToSumObservedMs1ScanIntensity.begin(); it != fragMzToSumObservedMs1ScanIntensity.end(); ++it) {
+            double fragMz = mzUtils::intKeyToMz(it->first);
+            cout << "m/z=" << fragMz << ", intensity=" << it->second << endl;
+        }
+    }
+
     return fragMzToSumObservedMs1ScanIntensity;
 }
 
