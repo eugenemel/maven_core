@@ -2133,6 +2133,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                     }
                 }
 
+                //Issue 292
                 if (totalFragIntensityByScan.find(scan) == totalFragIntensityByScan.end()) {
                     totalFragIntensityByScan.insert(make_pair(scan, 0.0f));
                 }
