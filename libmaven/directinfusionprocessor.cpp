@@ -2171,136 +2171,74 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
         computeMs1PartitionFractionFromMap(totalFragIntensityByCompound, allFragIntensity, false, debug);
         computeMs1PartitionFractionFromMap(totalFragIntensitySAFByCompound, allFragIntensitySAF, true, debug);
 
-        //Issue 292
-        map<shared_ptr<DirectInfusionMatchData>, vector<float>> scanPartitionFractions{};
+//        //Issue 292
+//        map<shared_ptr<DirectInfusionMatchData>, vector<float>> scanPartitionFractions{};
 
-        for (auto it2 = compoundFragIntensityByScan.begin(); it2 != compoundFragIntensityByScan.end(); ++it2){
+//        for (auto it2 = compoundFragIntensityByScan.begin(); it2 != compoundFragIntensityByScan.end(); ++it2){
 
-            Scan* scan = it2->first;
-            map<shared_ptr<DirectInfusionMatchData>, float> fragIntensityByCompound = it2->second;
-            float totalScanIntensity = totalFragIntensityByScan[scan];
+//            Scan* scan = it2->first;
+//            map<shared_ptr<DirectInfusionMatchData>, float> fragIntensityByCompound = it2->second;
+//            float totalScanIntensity = totalFragIntensityByScan[scan];
 
-            if (totalScanIntensity > 0.0f) {
-                for (auto it2 = fragIntensityByCompound.begin(); it2 != fragIntensityByCompound.end(); ++it2) {
+//            if (totalScanIntensity > 0.0f) {
+//                for (auto it2 = fragIntensityByCompound.begin(); it2 != fragIntensityByCompound.end(); ++it2) {
 
-                    shared_ptr<DirectInfusionMatchData> matchData = it2->first;
-                    float compoundTotalIntensity = it2->second;
+//                    shared_ptr<DirectInfusionMatchData> matchData = it2->first;
+//                    float compoundTotalIntensity = it2->second;
 
-                    float scanPartitionFraction = compoundTotalIntensity / totalScanIntensity;
+//                    float scanPartitionFraction = compoundTotalIntensity / totalScanIntensity;
 
-                    if (scanPartitionFractions.find(matchData) == scanPartitionFractions.end()) {
-                        scanPartitionFractions.insert(make_pair(matchData, vector<float>()));
-                    }
-                    scanPartitionFractions[matchData].push_back(scanPartitionFraction);
+//                    if (scanPartitionFractions.find(matchData) == scanPartitionFractions.end()) {
+//                        scanPartitionFractions.insert(make_pair(matchData, vector<float>()));
+//                    }
+//                    scanPartitionFractions[matchData].push_back(scanPartitionFraction);
 
-                    //Issue 292
-                    if (debug) {
-                        cout << "compound: " << matchData->compound->name
-                             << ", scan #" << scan->scannum
-                             << ", compoundFragIntensity/allFragIntensity = " << compoundTotalIntensity << "/" << totalScanIntensity
-                             << ", fraction = " << scanPartitionFraction
-                             << endl;
-                    }
-                }
-            }
+//                    //Issue 292
+//                    if (debug) {
+//                        cout << "compound: " << matchData->compound->name
+//                             << ", scan #" << scan->scannum
+//                             << ", compoundFragIntensity/allFragIntensity = " << compoundTotalIntensity << "/" << totalScanIntensity
+//                             << ", fraction = " << scanPartitionFraction
+//                             << endl;
+//                    }
+//                }
+//            }
 
-        } // END for (auto it2 = compoundFragIntensityByScan.begin(); it2 != compoundFragIntensityByScan.end(); ++it2)
+//        } // END for (auto it2 = compoundFragIntensityByScan.begin(); it2 != compoundFragIntensityByScan.end(); ++it2)
 
-        for (auto it2 = scanPartitionFractions.begin(); it2 != scanPartitionFractions.end(); ++it2) {
+//        for (auto it2 = scanPartitionFractions.begin(); it2 != scanPartitionFractions.end(); ++it2) {
 
-            vector<float> intensities = it2->second;
+//            vector<float> intensities = it2->second;
 
-            if (debug) {
-                cout << "compound: " << it2->first->compound->name
-                     << ", scan partition value ";
-            }
+//            if (debug) {
+//                cout << "compound: " << it2->first->compound->name
+//                     << ", scan partition value ";
+//            }
 
-            if (!intensities.empty()) {
-                if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
-                    it2->first->ms1PartitionFractionByScan = accumulate(intensities.begin(), intensities.end(), 0.0f) / intensities.size();
+//            if (!intensities.empty()) {
+//                if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
+//                    it2->first->ms1PartitionFractionByScan = accumulate(intensities.begin(), intensities.end(), 0.0f) / intensities.size();
 
-                    if (debug) cout << "[mean] = ";
+//                    if (debug) cout << "[mean] = ";
 
-                } else if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
-                    it2->first->ms1PartitionFractionByScan = median(intensities);
+//                } else if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
+//                    it2->first->ms1PartitionFractionByScan = median(intensities);
 
-                    if (debug) cout << "[median] = ";
-                }
-            }
+//                    if (debug) cout << "[median] = ";
+//                }
+//            }
 
-            if (debug) cout << it2->first->ms1PartitionFractionByScan << endl;
+//            if (debug) cout << it2->first->ms1PartitionFractionByScan << endl;
 
-        } // END for (auto it2 = scanPartitionFractions.begin(); it2 != scanPartitionFractions.end(); ++it2)
+//        } // END for (auto it2 = scanPartitionFractions.begin(); it2 != scanPartitionFractions.end(); ++it2)
+
+        computeScanMs1PartitionFractionFromMap(totalFragIntensityByScan, compoundFragIntensityByScan, false, params, debug);
+        computeScanMs1PartitionFractionFromMap(totalFragIntensitySAFByScan, compoundFragIntensitySAFByScan, true, params, debug);
 
         //If only one compound exists in the IDed compounds group, it gets all of the partitioned intensity.
         if (it->second.size() == 1) {
             it->second[0]->ms1PartitionFraction = 1;
             it->second[0]->ms1PartitionFractionByScan = 1;
-        }
-
-        //Issue 318
-        map<shared_ptr<DirectInfusionMatchData>, vector<float>> scanPartitionFractionsSAF{};
-
-        for (auto it2 = compoundFragIntensitySAFByScan.begin(); it2 != compoundFragIntensitySAFByScan.end(); ++it2){
-
-            Scan* scan = it2->first;
-            map<shared_ptr<DirectInfusionMatchData>, float> fragIntensitySAFByCompound = it2->second;
-            float totalScanIntensitySAF = totalFragIntensitySAFByScan[scan];
-
-            if (totalScanIntensitySAF > 0.0f) {
-                for (auto it2 = fragIntensitySAFByCompound.begin(); it2 != fragIntensitySAFByCompound.end(); ++it2) {
-
-                    shared_ptr<DirectInfusionMatchData> matchData = it2->first;
-                    float compoundTotalIntensitySAF = it2->second;
-
-                    float scanPartitionFractionSAF = compoundTotalIntensitySAF / totalScanIntensitySAF;
-
-                    if (scanPartitionFractionsSAF.find(matchData) == scanPartitionFractionsSAF.end()) {
-                        scanPartitionFractionsSAF.insert(make_pair(matchData, vector<float>()));
-                    }
-                    scanPartitionFractionsSAF[matchData].push_back(scanPartitionFractionSAF);
-
-                    //Issue 292
-                    if (debug) {
-                        cout << "compound: " << matchData->compound->name
-                             << ", scan #" << scan->scannum
-                             << ", compoundFragIntensity/allFragIntensity = " << compoundTotalIntensitySAF << "/" << totalScanIntensitySAF
-                             << ", fraction = " << scanPartitionFractionSAF
-                             << endl;
-                    }
-                }
-            }
-
-        } // END for (auto it2 = compoundFragIntensitySAFByScan.begin(); it2 != compoundFragIntensitySAFByScan.end(); ++it2)
-
-        for (auto it2 = scanPartitionFractionsSAF.begin(); it2 != scanPartitionFractionsSAF.end(); ++it2) {
-
-            vector<float> intensities = it2->second;
-
-            if (debug) {
-                cout << "compound: " << it2->first->compound->name
-                     << ", scan partition value ";
-            }
-
-            if (!intensities.empty()) {
-                if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
-                    it2->first->ms1PartitionFractionByScanSplitAmbiguousFragments = accumulate(intensities.begin(), intensities.end(), 0.0f) / intensities.size();
-
-                    if (debug) cout << "[mean] = ";
-
-                } else if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
-                    it2->first->ms1PartitionFractionByScanSplitAmbiguousFragments = median(intensities);
-
-                    if (debug) cout << "[median] = ";
-                }
-            }
-
-            if (debug) cout << it2->first->ms1PartitionFractionByScanSplitAmbiguousFragments << endl;
-
-        } // END for (auto it2 = scanPartitionFractionsSAF.begin(); it2 != scanPartitionFractionsSAF.end(); ++it2)
-
-        //If only one compound exists in the IDed compounds group, it gets all of the partitioned intensity.
-        if (it->second.size() == 1) {
             it->second[0]->ms1PartitionFractionSplitAmbiguousFragments = 1;
             it->second[0]->ms1PartitionFractionByScanSplitAmbiguousFragments = 1;
         }
@@ -2508,6 +2446,85 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractionFromMap(
             }
         }
     }
+}
+
+void DirectInfusionMatchInformation::computeScanMs1PartitionFractionFromMap(
+        const map<Scan*, float>& totalFragIntensityByScan,
+        const map<Scan*, map<shared_ptr<DirectInfusionMatchData>, float>>& compoundFragIntensityByScan,
+        bool isSAF,
+        const shared_ptr<DirectInfusionSearchParameters> params,
+        const bool debug){
+
+    //Issue 292
+    map<shared_ptr<DirectInfusionMatchData>, vector<float>> scanPartitionFractions{};
+
+    for (auto it2 = compoundFragIntensityByScan.begin(); it2 != compoundFragIntensityByScan.end(); ++it2){
+
+        Scan* scan = it2->first;
+        map<shared_ptr<DirectInfusionMatchData>, float> fragIntensityByCompound = it2->second;
+        float totalScanIntensity = totalFragIntensityByScan.at(scan);
+
+        if (totalScanIntensity > 0.0f) {
+            for (auto it2 = fragIntensityByCompound.begin(); it2 != fragIntensityByCompound.end(); ++it2) {
+
+                shared_ptr<DirectInfusionMatchData> matchData = it2->first;
+                float compoundTotalIntensity = it2->second;
+
+                float scanPartitionFraction = compoundTotalIntensity / totalScanIntensity;
+
+                if (scanPartitionFractions.find(matchData) == scanPartitionFractions.end()) {
+                    scanPartitionFractions.insert(make_pair(matchData, vector<float>()));
+                }
+                scanPartitionFractions[matchData].push_back(scanPartitionFraction);
+
+                //Issue 292
+                if (debug) {
+                    cout << "compound: " << matchData->compound->name
+                         << ", scan #" << scan->scannum
+                         << ", compoundFragIntensity/allFragIntensity = " << compoundTotalIntensity << "/" << totalScanIntensity
+                         << ", fraction = " << scanPartitionFraction
+                         << endl;
+                }
+            }
+        }
+
+    } // END for (auto it2 = compoundFragIntensityByScan.begin(); it2 != compoundFragIntensityByScan.end(); ++it2)
+
+    for (auto it2 = scanPartitionFractions.begin(); it2 != scanPartitionFractions.end(); ++it2) {
+
+        vector<float> intensities = it2->second;
+
+        if (debug) {
+            cout << "compound: " << it2->first->compound->name
+                 << ", scan partition value ";
+        }
+
+        if (!intensities.empty()) {
+            if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
+
+                if (isSAF) {
+                    it2->first->ms1PartitionFractionByScanSplitAmbiguousFragments = accumulate(intensities.begin(), intensities.end(), 0.0f) / intensities.size();
+                } else {
+                    it2->first->ms1PartitionFractionByScan = accumulate(intensities.begin(), intensities.end(), 0.0f) / intensities.size();
+                }
+
+                if (debug) cout << "[mean] = ";
+
+            } else if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
+                if (isSAF) {
+                    it2->first->ms1PartitionFractionByScanSplitAmbiguousFragments = median(intensities);
+                } else {
+                    it2->first->ms1PartitionFractionByScan = median(intensities);
+                }
+
+                if (debug) cout << "[median] = ";
+            }
+        }
+
+        if (debug) cout << it2->first->ms1PartitionFractionByScan << endl;
+
+    } // END for (auto it2 = scanPartitionFractions.begin(); it2 != scanPartitionFractions.end(); ++it2)
+
 }
 
 map<int, vector<shared_ptr<DirectInfusionMatchData>>> DirectInfusionMatchInformation::getPrecMzPartitionMap(const bool debug){

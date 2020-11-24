@@ -800,6 +800,13 @@ private:
             const float allFragIntensity,
             bool isSAF,
             const bool debug);
+
+    void computeScanMs1PartitionFractionFromMap(
+            const map<Scan*, float>& totalFragIntensityByScan,
+            const map<Scan*, map<shared_ptr<DirectInfusionMatchData>, float>>& compoundFragIntensityByScan,
+            bool isSAF,
+            const shared_ptr<DirectInfusionSearchParameters> params,
+            const bool debug);
 };
 
 /**
