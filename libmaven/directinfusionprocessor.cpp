@@ -2356,6 +2356,10 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
  * The refMs1Mz value is used instead of the observedMs1ScanIntensity value directly
  * to handle general summarized compounds, that may contain more than one constituent m/z.
  *
+ * Note also that if two distinct refMs1Mz values map the same observedMs1ScanIntensity value,
+ * the downstream consequences will be a 50/50 split of the fragment intensity (which is
+ * a fair estimate given no other information about the compounds or fragments).
+ *
  * These values should only be computing using real precursor m/z values, not synthetic averages
  * from summarization.
  *
