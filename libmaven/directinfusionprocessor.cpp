@@ -2168,34 +2168,37 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
 
         }
 
-        for (auto it2 = totalFragIntensityByCompound.begin(); it2 != totalFragIntensityByCompound.end(); ++it2) {
-            float compoundFragIntensity = it2->second;
-            if (allFragIntensity > 0.0f) {
-                it2->first->ms1PartitionFraction = compoundFragIntensity / allFragIntensity;
-                if (debug) {
-                    cout << "compound: " << it2->first->compound->name
-                         << ", adduct: " << it2->first->compound->adductString
-                         << ", compoundFragIntensity/allFragIntensity = " << compoundFragIntensity << "/" << allFragIntensity
-                         << " = " << it2->first->ms1PartitionFraction
-                         << endl;
-                }
-            }
-        }
+//        for (auto it2 = totalFragIntensityByCompound.begin(); it2 != totalFragIntensityByCompound.end(); ++it2) {
+//            float compoundFragIntensity = it2->second;
+//            if (allFragIntensity > 0.0f) {
+//                it2->first->ms1PartitionFraction = compoundFragIntensity / allFragIntensity;
+//                if (debug) {
+//                    cout << "compound: " << it2->first->compound->name
+//                         << ", adduct: " << it2->first->compound->adductString
+//                         << ", compoundFragIntensity/allFragIntensity = " << compoundFragIntensity << "/" << allFragIntensity
+//                         << " = " << it2->first->ms1PartitionFraction
+//                         << endl;
+//                }
+//            }
+//        }
 
-        //Issue 318
-        for (auto it2 = totalFragIntensitySAFByCompound.begin(); it2 != totalFragIntensitySAFByCompound.end(); ++it2) {
-            float compoundFragIntensitySAF = it2->second;
-            if (allFragIntensitySAF > 0.0f) {
-                it2->first->ms1PartitionFractionSplitAmbiguousFragments = compoundFragIntensitySAF / allFragIntensitySAF;
-                if (debug) {
-                    cout << "compound: " << it2->first->compound->name
-                         << ", adduct: " << it2->first->compound->adductString
-                         << ", compoundFragIntensitySAF/allFragIntensitySAF = " << compoundFragIntensitySAF << "/" << allFragIntensitySAF
-                         << " = " << it2->first->ms1PartitionFractionSplitAmbiguousFragments
-                         << endl;
-                }
-            }
-        }
+//        //Issue 318
+//        for (auto it2 = totalFragIntensitySAFByCompound.begin(); it2 != totalFragIntensitySAFByCompound.end(); ++it2) {
+//            float compoundFragIntensitySAF = it2->second;
+//            if (allFragIntensitySAF > 0.0f) {
+//                it2->first->ms1PartitionFractionSplitAmbiguousFragments = compoundFragIntensitySAF / allFragIntensitySAF;
+//                if (debug) {
+//                    cout << "compound: " << it2->first->compound->name
+//                         << ", adduct: " << it2->first->compound->adductString
+//                         << ", compoundFragIntensitySAF/allFragIntensitySAF = " << compoundFragIntensitySAF << "/" << allFragIntensitySAF
+//                         << " = " << it2->first->ms1PartitionFractionSplitAmbiguousFragments
+//                         << endl;
+//                }
+//            }
+//        }
+
+        computeMs1PartitionFractionFromMap(totalFragIntensityByCompound, allFragIntensity, false, debug);
+        computeMs1PartitionFractionFromMap(totalFragIntensitySAFByCompound, allFragIntensitySAF, true, debug);
 
         //Issue 292
         map<shared_ptr<DirectInfusionMatchData>, vector<float>> scanPartitionFractions{};
@@ -2498,6 +2501,35 @@ map<int, float> DirectInfusionMatchInformation::getFragToSumObservedMs1ScanInten
     return fragMzToSumObservedMs1ScanIntensity;
 }
 
+void DirectInfusionMatchInformation::computeMs1PartitionFractionFromMap(
+        const map<shared_ptr<DirectInfusionMatchData>, float>& totalFragIntensityByCompound,
+        const float allFragIntensity,
+        bool isSAF,
+        const bool debug){
+
+    for (auto it2 = totalFragIntensityByCompound.begin(); it2 != totalFragIntensityByCompound.end(); ++it2) {
+
+        float compoundFragIntensity = it2->second;
+        if (allFragIntensity > 0.0f) {
+
+            float partitionFraction = compoundFragIntensity / allFragIntensity;
+
+            if (isSAF) {
+                it2->first->ms1PartitionFractionSplitAmbiguousFragments = partitionFraction;
+            } else {
+                it2->first->ms1PartitionFraction = partitionFraction;
+            }
+
+            if (debug) {
+                cout << "compound: " << it2->first->compound->name
+                     << ", adduct: " << it2->first->compound->adductString
+                     << ", compoundFragIntensity/allFragIntensity = " << compoundFragIntensity << "/" << allFragIntensity
+                     << " = " << partitionFraction
+                     << endl;
+            }
+        }
+    }
+}
 map<int, vector<shared_ptr<DirectInfusionMatchData>>> DirectInfusionMatchInformation::getPrecMzPartitionMap(const bool debug){
 
     map<int, vector<shared_ptr<DirectInfusionMatchData>>> partitionMap{};

@@ -790,8 +790,16 @@ public:
     // <precursor m/z, fragment m/z> = sum of all observed ms1 scan intensity
     map<int, float> getFragToSumObservedMs1ScanIntensity(const bool debug);
 
+private:
+
     // <precursor m/z, compound match data> = for use with partitioning intensity
     map<int, vector<shared_ptr<DirectInfusionMatchData>>> getPrecMzPartitionMap(const bool debug);
+
+    void computeMs1PartitionFractionFromMap(
+            const map<shared_ptr<DirectInfusionMatchData>, float>& totalFragIntensityByCompound,
+            const float allFragIntensity,
+            bool isSAF,
+            const bool debug);
 };
 
 /**
