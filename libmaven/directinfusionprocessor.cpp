@@ -2127,7 +2127,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                         scanSumIntensity += queryIntensity;
                         scanSumSAFIntensity += queryIntensitySAF;
 
-                        if (debug) cout << "intensity=" << queryIntensity << ", SAF intensity=" << queryIntensitySAF;
+                        if (debug) cout << "intensity=" << queryIntensity << ", SAF intensity=" << queryIntensitySAF << " ";
                     } else {
                         if (debug) cout << "NA ";
                     }
@@ -2370,41 +2370,38 @@ map<int, float> DirectInfusionMatchInformation::getFragToSumObservedMs1ScanInten
     map<int, float> fragMzToSumObservedMs1ScanIntensity{};
     map<int, unordered_set<int>> fragMzToPrecMzs{};
 
-    for (auto it = fragToMatchData.begin(); it != fragToMatchData.end(); ++it){
-
-        int fragMz = it->first;
-        unordered_set<shared_ptr<DirectInfusionMatchData>> matches = it->second;
-
-        for (auto it2 = matches.begin(); it2 != matches.end(); ++it2){
-
-            shared_ptr<DirectInfusionMatchData> matchData = *it2;
+    for (auto matchData : getCompounds()){
 
             //split based on real, observed prec m/zs, not on synthetic averaged m/zs
             vector<int> realPrecMzs = matchData->compound->getConstituentMzs();
 
-            for (int precMz : realPrecMzs) {
+            for (auto fragMzVal : matchData->compound->fragment_mzs) {
 
-                bool isAddIntensity = true;
+                int fragMz = mzUtils::mzToIntKey(static_cast<double>(fragMzVal));
 
-                if (fragMzToPrecMzs.find(fragMz) != fragMzToPrecMzs.end()) {
-                     unordered_set<int> precMzs = fragMzToPrecMzs[fragMz];
-                     if (precMzs.find(precMz) != precMzs.end()) {
-                         isAddIntensity = false;
-                     } else {
-                         fragMzToPrecMzs[precMz].insert(precMz);
-                     }
-                } else {
-                    fragMzToPrecMzs.insert(make_pair(fragMz, unordered_set<int>{precMz}));
-                }
+                for (int precMz : realPrecMzs) {
 
-                if (isAddIntensity) {
-                    if (fragMzToSumObservedMs1ScanIntensity.find(fragMz) == fragMzToSumObservedMs1ScanIntensity.end()) {
-                        fragMzToSumObservedMs1ScanIntensity.insert(make_pair(fragMz, 0.0f));
+                    bool isAddIntensity = true;
+
+                    if (fragMzToPrecMzs.find(fragMz) != fragMzToPrecMzs.end()) {
+                         unordered_set<int> precMzs = fragMzToPrecMzs[fragMz];
+                         if (precMzs.find(precMz) != precMzs.end()) {
+                             isAddIntensity = false;
+                         } else {
+                             fragMzToPrecMzs[precMz].insert(precMz);
+                         }
+                    } else {
+                        fragMzToPrecMzs.insert(make_pair(fragMz, unordered_set<int>{precMz}));
                     }
-                    fragMzToSumObservedMs1ScanIntensity[fragMz] += matchData->observedMs1ScanIntensity;
-                }
 
+                    if (isAddIntensity) {
+                        if (fragMzToSumObservedMs1ScanIntensity.find(fragMz) == fragMzToSumObservedMs1ScanIntensity.end()) {
+                            fragMzToSumObservedMs1ScanIntensity.insert(make_pair(fragMz, 0.0f));
+                        }
+                        fragMzToSumObservedMs1ScanIntensity[fragMz] += matchData->observedMs1ScanIntensity;
+                    }
             }
+
         }
     }
 
