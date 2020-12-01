@@ -40,6 +40,10 @@ public:
      */
      map<int, vector<pair<Compound*, Adduct*>>> compoundsByMapKey = {};
 
+     //Issue 319:
+     //Every adduct will become a column in a matrix of observed intensities.
+     set<Adduct*> allAdducts{};
+
 };
 
 /**
@@ -1209,7 +1213,7 @@ struct DIPipelineSampleData {
     Fragment* ms1Fragment = nullptr;
     map<int, vector<Scan*>> ms2ScansByPrecursorRangeId = {};
 
-    //Search Results
+    //Pipeline Search Results
 
     //is results
     long searchNumOutputRows = 0;
