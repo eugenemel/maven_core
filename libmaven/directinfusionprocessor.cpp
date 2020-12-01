@@ -937,24 +937,6 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
         }
     }
 
-//    //Issue 309: add scan-based intensity - seeks to avoid any issues associated with consensus formation
-//    // check for intensity in scans, if sufficient observedMs1Intensity was not found in consensus MS1 spectrum
-//    vector<float> ms1ScanIntensities{};
-//    for (auto scan : ms1Scans) {
-//        float queryMzIntensityCandidate = scan->findClosestMzIntensity(precMz, params->ms1PpmTolr);
-//        if (queryMzIntensityCandidate >= params->ms1MinIntensity && queryMzIntensityCandidate > 0.0f) {
-//            ms1ScanIntensities.push_back(queryMzIntensityCandidate);
-//        }
-//    }
-
-//    if (!ms1ScanIntensities.empty()) {
-//        if (params->consensusIntensityAgglomerationType == Fragment::Mean) {
-//            observedMs1ScanIntensity = accumulate(ms1ScanIntensities.begin(), ms1ScanIntensities.end(), 0.0f) / ms1ScanIntensities.size();
-//        } else if (params->consensusIntensityAgglomerationType == Fragment::Median) {
-//            observedMs1ScanIntensity = median(ms1ScanIntensities);
-//        }
-//    }
-
     float observedMs1ScanIntensity = DirectInfusionUtils::getObservedMs1ScanIntensity(ms1Scans, precMz, params, debug);
 
     //an intensity of 0 always indicates absence, irrespective of the params->ms1MinIntensity value.
