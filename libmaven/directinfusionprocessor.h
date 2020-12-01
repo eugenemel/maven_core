@@ -1223,6 +1223,9 @@ struct DIPipelineSampleData {
     long isNumOutputRows = 0;
     map<int, DirectInfusionAnnotation*> isAnnotationsByPrecursorRangeId = {};
 
+    //Issue 319: store quant measurements for different adduct forms of identified compounds
+    map<Compound*, map<Adduct*, float>> ms1ScanIntensityMap{};
+
     //Internal Standards Normalization
 
     //precursor
