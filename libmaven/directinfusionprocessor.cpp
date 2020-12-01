@@ -879,9 +879,6 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
     float observedMs1Intensity = 0.0f;
     int ms1IntensityCoord = -1;
 
-    //Issue 309
-    float observedMs1ScanIntensity = 0.0f;
-
     float precMz = compound->precursorMz;
 
     if (!params->ms1IsRequireAdductPrecursorMatch) {
@@ -940,28 +937,30 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
         }
     }
 
-    //Issue 309: add scan-based intensity - seeks to avoid any issues associated with consensus formation
-    // check for intensity in scans, if sufficient observedMs1Intensity was not found in consensus MS1 spectrum
-    vector<float> ms1ScanIntensities{};
-    for (auto scan : ms1Scans) {
-        float queryMzIntensityCandidate = scan->findClosestMzIntensity(precMz, params->ms1PpmTolr);
-        if (queryMzIntensityCandidate >= params->ms1MinIntensity && queryMzIntensityCandidate > 0.0f) {
-            ms1ScanIntensities.push_back(queryMzIntensityCandidate);
-        }
-    }
+//    //Issue 309: add scan-based intensity - seeks to avoid any issues associated with consensus formation
+//    // check for intensity in scans, if sufficient observedMs1Intensity was not found in consensus MS1 spectrum
+//    vector<float> ms1ScanIntensities{};
+//    for (auto scan : ms1Scans) {
+//        float queryMzIntensityCandidate = scan->findClosestMzIntensity(precMz, params->ms1PpmTolr);
+//        if (queryMzIntensityCandidate >= params->ms1MinIntensity && queryMzIntensityCandidate > 0.0f) {
+//            ms1ScanIntensities.push_back(queryMzIntensityCandidate);
+//        }
+//    }
 
-    if (!ms1ScanIntensities.empty()) {
-        if (params->consensusIntensityAgglomerationType == Fragment::Mean) {
-            observedMs1ScanIntensity = accumulate(ms1ScanIntensities.begin(), ms1ScanIntensities.end(), 0.0f) / ms1ScanIntensities.size();
-        } else if (params->consensusIntensityAgglomerationType == Fragment::Median) {
-            observedMs1ScanIntensity = median(ms1ScanIntensities);
-        }
-    }
+//    if (!ms1ScanIntensities.empty()) {
+//        if (params->consensusIntensityAgglomerationType == Fragment::Mean) {
+//            observedMs1ScanIntensity = accumulate(ms1ScanIntensities.begin(), ms1ScanIntensities.end(), 0.0f) / ms1ScanIntensities.size();
+//        } else if (params->consensusIntensityAgglomerationType == Fragment::Median) {
+//            observedMs1ScanIntensity = median(ms1ScanIntensities);
+//        }
+//    }
+
+    float observedMs1ScanIntensity = DirectInfusionUtils::getObservedMs1ScanIntensity(ms1Scans, precMz, params, debug);
 
     //an intensity of 0 always indicates absence, irrespective of the params->ms1MinIntensity value.
     bool isMs1InConsensusSpectrum = (observedMs1Intensity >= params->ms1MinIntensity && observedMs1Intensity > 0.0f);
 
-    bool isFoundMs1PrecursorIonInScans = !ms1ScanIntensities.empty();
+    bool isFoundMs1PrecursorIonInScans = observedMs1ScanIntensity > 0.0f;
 
     if (params->ms1IsFindPrecursorIon && !(isMs1InConsensusSpectrum || isFoundMs1PrecursorIonInScans)){
         directInfusionMatchAssessment->isDisqualifyThisMatch = true;
@@ -2865,4 +2864,31 @@ string DirectInfusionMatchAssessment::getFragmentLabelWithoutTags(string fragmen
     }
 
     return cleanedFragmentLabel;
+}
+
+float DirectInfusionUtils::getObservedMs1ScanIntensity(
+        const vector<Scan*>& validMs1Scans,
+        float queryMz,
+        shared_ptr<DirectInfusionSearchParameters> params,
+        bool debug){
+
+    float observedMs1ScanIntensity = 0.0f;
+    vector<float> ms1ScanIntensities{};
+
+    for (auto scan : validMs1Scans) {
+        float queryMzIntensityCandidate = scan->findClosestMzIntensity(queryMz, params->ms1PpmTolr);
+        if (queryMzIntensityCandidate >= params->ms1MinIntensity && queryMzIntensityCandidate > 0.0f) {
+            ms1ScanIntensities.push_back(queryMzIntensityCandidate);
+        }
+    }
+
+    if (!ms1ScanIntensities.empty()) {
+        if (params->consensusIntensityAgglomerationType == Fragment::Mean) {
+            observedMs1ScanIntensity = accumulate(ms1ScanIntensities.begin(), ms1ScanIntensities.end(), 0.0f) / ms1ScanIntensities.size();
+        } else if (params->consensusIntensityAgglomerationType == Fragment::Median) {
+            observedMs1ScanIntensity = median(ms1ScanIntensities);
+        }
+    }
+
+    return observedMs1ScanIntensity;
 }

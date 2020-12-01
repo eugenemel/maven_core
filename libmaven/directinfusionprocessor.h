@@ -1097,6 +1097,12 @@ public:
                                                     int scanWidthInDa = -1, // -1 indicates all scan widths
                                                     bool debug = false);
 
+    //Issue 319: easier to factor this out
+    static float getObservedMs1ScanIntensity(const vector<Scan*>& validMs1Scans,
+                                             float queryMz,
+                                             shared_ptr<DirectInfusionSearchParameters> params,
+                                             bool debug = false);
+
     static constexpr double C_13_MASS = 1.00335483521;
 
 };
