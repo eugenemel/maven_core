@@ -1855,8 +1855,8 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
                             << endl;
         }
 
-        if (queryMzIntensity > 0.0f && queryMzIntensityCandidate >= params->ms1MinScanIntensity &&
-                standardMzIntensity > 0.0f && standardMzIntensityCandidate >= params->ms1MinScanIntensity) {
+        if (queryMzIntensity > 0.0f && queryMzIntensity >= params->ms1MinScanIntensity &&
+                standardMzIntensity > 0.0f && standardMzIntensity >= params->ms1MinScanIntensity) {
 
             float intensityRatio = queryMzIntensity/standardMzIntensity;
 
