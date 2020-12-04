@@ -5,6 +5,9 @@ TEMPLATE=lib
 CONFIG += staticlib
 TARGET = maven
 
+#Issue 321: for lipidsummarizationutils.h and lipidsummarizationutils.cpp
+QT += core
+
 LIBS += -L. -lcdfread -lnetcdf -lmstoolkitlite
 
 DEFINES += _LARGEFILE_SOURCE _FILE_OFFSET_BITS=64 GCC
