@@ -11,26 +11,55 @@ using namespace std;
  */
 pair<string, vector<string>> LipidSummarizationUtils::getNameComponents(string lipidName){
 
-    regex rx("(\\,|\\(|\\)|\\/)");
+//    regex rx("(\\,|\\(|\\)|\\/)");
 
-    sregex_token_iterator iter(lipidName.begin(), lipidName.end(), rx, -1);
+//    sregex_token_iterator iter(lipidName.begin(), lipidName.end(), rx, -1);
+
+//    vector<string> chains;
+//    string lipidClass("");
+
+//    sregex_token_iterator end;
+//    for(; iter != end; ++iter){
+//        string bit = *(iter);
+
+//        //first match is lipid class
+//        if (lipidClass == "") {
+//            lipidClass = bit;
+//        }
+
+//        //semicolon indicates acyl chain
+//        if (bit.find(":") != string::npos) {
+//            chains.push_back(bit);
+//        }
+//    }
+
+    string::size_type chainStart = lipidName.size();
+    for (string::size_type i = 0; i < lipidName.size(); i++){
+        if (lipidName[i] == '(') {
+            chainStart = i;
+            break;
+        }
+    }
+
+    string lipidClass = lipidName.substr(0, chainStart);
+
+    string::size_type lastPos = lipidName.size()-1;
+    if (lipidName[lastPos] == ')'){
+        lastPos--;
+    }
+
+    string chainsSubstring = lipidName.substr(chainStart+1, (lastPos-chainStart));
+
+    regex rx("/");
+
+    sregex_token_iterator iter(chainsSubstring.begin(), chainsSubstring.end(), rx, -1);
 
     vector<string> chains;
-    string lipidClass("");
 
     sregex_token_iterator end;
     for(; iter != end; ++iter){
         string bit = *(iter);
-
-        //first match is lipid class
-        if (lipidClass == "") {
-            lipidClass = bit;
-        }
-
-        //semicolon indicates acyl chain
-        if (bit.find(":") != string::npos) {
-            chains.push_back(bit);
-        }
+        chains.push_back(bit);
     }
 
     pair<string, vector<string>> components = make_pair(lipidClass, chains);
