@@ -13,26 +13,6 @@ using namespace std;
  */
 pair<string, vector<string>> LipidSummarizationUtils::getNameComponents(string lipidName){
 
-//    QString lipidNameAsQString = QString(lipidName.c_str());
-
-//    QRegExp rx("(\\,|\\(|\\)|\\/)");
-//    QStringList qStringComponents = lipidNameAsQString.split(rx);
-
-//    vector<string> chains;
-
-//    if (qStringComponents.size() < 2) {
-//        return make_pair("", chains); //no class information and no chains
-//    }
-
-//    for (unsigned int i = 1; i < qStringComponents.size(); i++) {
-//        if (qStringComponents.at(i).toStdString().find(":") != string::npos){
-//            chains.push_back(qStringComponents.at(i).toStdString());
-//        }
-//    }
-
-//    pair<string, vector<string>> components = make_pair(qStringComponents.at(0).toStdString(), chains);
-
-
     regex rx("(\\,|\\(|\\)|\\/)");
 
     sregex_token_iterator iter(lipidName.begin(), lipidName.end(), rx, -1);
@@ -133,17 +113,37 @@ string LipidSummarizationUtils::getSummary(pair<string, vector<string>> lipidNam
 
                 for (auto chain : lipidNameComponents.second){
 
-                    QRegExp rx("-");
-                    QString chainAsQString(chain.c_str());
+//                    QRegExp rx("-");
+//                    QString chainAsQString(chain.c_str());
 
-                    QStringList qStringComponents = chainAsQString.split(rx);
+//                    QStringList qStringComponents = chainAsQString.split(rx);
 
-                    if (qStringComponents.size() == 1) {
-                        chains.push_back(chain);
-                    } else if (qStringComponents.size() == 2){
-                        linkageType = qStringComponents.at(0).toStdString().append("-");
-                        chains.push_back(qStringComponents.at(1).toStdString());
+//                    if (qStringComponents.size() == 1) {
+//                        chains.push_back(chain);
+//                    } else if (qStringComponents.size() == 2){
+//                        linkageType = qStringComponents.at(0).toStdString().append("-");
+//                        chains.push_back(qStringComponents.at(1).toStdString());
+//                    }
+
+                    regex rx("-");
+                    sregex_token_iterator iter(chain.begin(), chain.end(), rx, -1);
+
+                    vector<string> chainComponents{};
+
+                    sregex_token_iterator end;
+
+                    for (; iter != end; ++iter){
+                        string component = *(iter);
+                        chainComponents.push_back(component);
                     }
+
+                    if (chainComponents.size() == 1) {
+                        chains.push_back(chain);
+                    } else if (chainComponents.size() == 2){
+                        linkageType = chainComponents[0].append("-");
+                        chains.push_back(chainComponents[1]);
+                    }
+
                 }
 
                 if (linkageType != "") {
