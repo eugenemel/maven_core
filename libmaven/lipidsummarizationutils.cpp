@@ -34,24 +34,28 @@ pair<string, vector<string>> LipidSummarizationUtils::getNameComponents(string l
 
 
     regex rx("(\\,|\\(|\\)|\\/)");
-    smatch sm;
 
-    regex_match(lipidName.cbegin(), lipidName.cend(), sm, rx);
+    sregex_token_iterator iter(lipidName.begin(), lipidName.end(), rx, -1);
 
     vector<string> chains;
+    string lipidClass("");
 
-    if (sm.size() < 2) {
-        return make_pair("", chains); // no class information and no chains
-    }
+    sregex_token_iterator end;
+    for(; iter != end; ++iter){
+        string bit = *(iter);
 
-    for (unsigned int i = 0 ; i < sm.size(); i++) {
-        string bit = sm[i];
+        //first match is lipid class
+        if (lipidClass == "") {
+            lipidClass = bit;
+        }
+
+        //semicolon indicates acyl chain
         if (bit.find(":") != string::npos) {
             chains.push_back(bit);
         }
     }
 
-    pair<string, vector<string>> components = make_pair(chains[0], chains);
+    pair<string, vector<string>> components = make_pair(lipidClass, chains);
     return components;
 }
 
