@@ -1,6 +1,4 @@
 #include "lipidsummarizationutils.h"
-//#include <QRegExp>
-//#include <QStringList>
 #include <regex>
 
 using namespace std;
@@ -113,18 +111,6 @@ string LipidSummarizationUtils::getSummary(pair<string, vector<string>> lipidNam
 
                 for (auto chain : lipidNameComponents.second){
 
-//                    QRegExp rx("-");
-//                    QString chainAsQString(chain.c_str());
-
-//                    QStringList qStringComponents = chainAsQString.split(rx);
-
-//                    if (qStringComponents.size() == 1) {
-//                        chains.push_back(chain);
-//                    } else if (qStringComponents.size() == 2){
-//                        linkageType = qStringComponents.at(0).toStdString().append("-");
-//                        chains.push_back(qStringComponents.at(1).toStdString());
-//                    }
-
                     regex rx("-");
                     sregex_token_iterator iter(chain.begin(), chain.end(), rx, -1);
 
@@ -206,11 +192,6 @@ string LipidSummarizationUtils::getSummary(pair<string, vector<string>> lipidNam
 
                     vector<string> chainBits;
 
-//                    QRegExp rx(":");
-//                    QString chainQString(chain.c_str());
-
-//                    QStringList chainBitsRaw = chainQString.split(rx);
-
                     regex rx(":");
                     sregex_token_iterator iter(chain.begin(), chain.end(), rx, -1);
                     vector<string> chainBitsRaw{};
@@ -227,45 +208,22 @@ string LipidSummarizationUtils::getSummary(pair<string, vector<string>> lipidNam
                         string chainBitOHCorrected = chainBit;
 
                         if (chainBit[0] == 'm'){
-                        //if (chainBit.startsWith("m", Qt::CaseSensitive)){
-                            numHydroxyl++;
-                            //string chainBitStd = chainBit.toStdString();
-                            //chainBitStd = chainBitStd.substr(1, chainBitStd.size()-1);
-                            //chainBit = QString(chainBitStd.c_str());
 
+                            numHydroxyl++;
                             chainBitOHCorrected = chainBit.substr(1);
 
                         } else if (chainBit[0] == 'd') {
-                        //} else if (chainBit.startsWith("d", Qt::CaseSensitive)) {
-                            numHydroxyl = numHydroxyl + 2;
-//                            string chainBitStd = chainBit.toStdString();
-//                            chainBitStd = chainBitStd.substr(1, chainBit.size()-1);
-//                            chainBit = QString(chainBitStd.c_str());
 
+                            numHydroxyl = numHydroxyl + 2;
                             chainBitOHCorrected = chainBit.substr(1);
 
                         } else if (chainBit[0] == 't') {
-                        //} else if (chainBit.startsWith("t", Qt::CaseSensitive)) {
-                            numHydroxyl = numHydroxyl + 3;
-//                            string chainBitStd = chainBit.toStdString();
-//                            chainBitStd = chainBitStd.substr(1, chainBit.size()-1);
-//                            chainBit = QString(chainBitStd.c_str());
 
+                            numHydroxyl = numHydroxyl + 3;
                             chainBitOHCorrected = chainBit.substr(1);
                         }
 
-                        //Issue 124: for p- and o- linked lipids
-
-//                        QRegExp rx("-");
-//                        QStringList chainBitPieces = chainBit.split(rx);
-
-//                        if (chainBitPieces.size() == 1) {
-//                            chainBits.push_back(chainBit.toStdString());
-//                        } else if (chainBitPieces.size() == 2){
-//                            linkageType = chainBitPieces.at(0).toStdString().append("-");
-//                            chainBits.push_back(chainBitPieces.at(1).toStdString());
-//                        }
-
+                        //Issue 124: for plasmalogens (e.g.PE(p-16:0/18:2) or PE(o-16:0/18:2))
                         regex rx("-");
                         sregex_token_iterator iter(chainBitOHCorrected.begin(), chainBitOHCorrected.end(), rx, -1);
 
