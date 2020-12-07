@@ -33,12 +33,18 @@ pair<string, vector<string>> LipidSummarizationUtils::getNameComponents(string l
 //        }
 //    }
 
+    bool isFoundChains = false;
     string::size_type chainStart = lipidName.size();
     for (string::size_type i = 0; i < lipidName.size(); i++){
         if (lipidName[i] == '(') {
             chainStart = i;
+            isFoundChains = true;
             break;
         }
+    }
+
+    if (!isFoundChains) {
+        return make_pair("", vector<string>{});
     }
 
     string lipidClass = lipidName.substr(0, chainStart);
