@@ -1,6 +1,6 @@
 #include "lipidsummarizationutils.h"
-#include <QRegExp>
-#include <QStringList>
+//#include <QRegExp>
+//#include <QStringList>
 #include <regex>
 
 using namespace std;
@@ -206,42 +206,83 @@ string LipidSummarizationUtils::getSummary(pair<string, vector<string>> lipidNam
 
                     vector<string> chainBits;
 
-                    QRegExp rx(":");
-                    QString chainQString(chain.c_str());
+//                    QRegExp rx(":");
+//                    QString chainQString(chain.c_str());
 
-                    QStringList chainBitsRaw = chainQString.split(rx);
+//                    QStringList chainBitsRaw = chainQString.split(rx);
+
+                    regex rx(":");
+                    sregex_token_iterator iter(chain.begin(), chain.end(), rx, -1);
+                    vector<string> chainBitsRaw{};
+
+                    sregex_token_iterator end;
+
+                    for (; iter != end; ++iter){
+                        string component = *(iter);
+                        chainBitsRaw.push_back(component);
+                    }
 
                     for (auto chainBit : chainBitsRaw) {
 
-                        if (chainBit.startsWith("m", Qt::CaseSensitive)){
+                        string chainBitOHCorrected = chainBit;
+
+                        if (chainBit[0] == 'm'){
+                        //if (chainBit.startsWith("m", Qt::CaseSensitive)){
                             numHydroxyl++;
-                            string chainBitStd = chainBit.toStdString();
-                            chainBitStd = chainBitStd.substr(1, chainBitStd.size()-1);
-                            chainBit = QString(chainBitStd.c_str());
+                            //string chainBitStd = chainBit.toStdString();
+                            //chainBitStd = chainBitStd.substr(1, chainBitStd.size()-1);
+                            //chainBit = QString(chainBitStd.c_str());
 
-                        } else if (chainBit.startsWith("d", Qt::CaseSensitive)) {
+                            chainBitOHCorrected = chainBit.substr(1);
+
+                        } else if (chainBit[0] == 'd') {
+                        //} else if (chainBit.startsWith("d", Qt::CaseSensitive)) {
                             numHydroxyl = numHydroxyl + 2;
-                            string chainBitStd = chainBit.toStdString();
-                            chainBitStd = chainBitStd.substr(1, chainBit.size()-1);
-                            chainBit = QString(chainBitStd.c_str());
+//                            string chainBitStd = chainBit.toStdString();
+//                            chainBitStd = chainBitStd.substr(1, chainBit.size()-1);
+//                            chainBit = QString(chainBitStd.c_str());
 
-                        } else if (chainBit.startsWith("t", Qt::CaseSensitive)) {
+                            chainBitOHCorrected = chainBit.substr(1);
+
+                        } else if (chainBit[0] == 't') {
+                        //} else if (chainBit.startsWith("t", Qt::CaseSensitive)) {
                             numHydroxyl = numHydroxyl + 3;
-                            string chainBitStd = chainBit.toStdString();
-                            chainBitStd = chainBitStd.substr(1, chainBit.size()-1);
-                            chainBit = QString(chainBitStd.c_str());
+//                            string chainBitStd = chainBit.toStdString();
+//                            chainBitStd = chainBitStd.substr(1, chainBit.size()-1);
+//                            chainBit = QString(chainBitStd.c_str());
 
+                            chainBitOHCorrected = chainBit.substr(1);
                         }
 
                         //Issue 124: for p- and o- linked lipids
-                        QRegExp rx("-");
-                        QStringList chainBitPieces = chainBit.split(rx);
+
+//                        QRegExp rx("-");
+//                        QStringList chainBitPieces = chainBit.split(rx);
+
+//                        if (chainBitPieces.size() == 1) {
+//                            chainBits.push_back(chainBit.toStdString());
+//                        } else if (chainBitPieces.size() == 2){
+//                            linkageType = chainBitPieces.at(0).toStdString().append("-");
+//                            chainBits.push_back(chainBitPieces.at(1).toStdString());
+//                        }
+
+                        regex rx("-");
+                        sregex_token_iterator iter(chainBitOHCorrected.begin(), chainBitOHCorrected.end(), rx, -1);
+
+                        vector<string> chainBitPieces{};
+
+                        sregex_token_iterator end;
+
+                        for (; iter != end; ++iter){
+                            string component = *(iter);
+                            chainBitPieces.push_back(component);
+                        }
 
                         if (chainBitPieces.size() == 1) {
-                            chainBits.push_back(chainBit.toStdString());
-                        } else if (chainBitPieces.size() == 2){
-                            linkageType = chainBitPieces.at(0).toStdString().append("-");
-                            chainBits.push_back(chainBitPieces.at(1).toStdString());
+                            chainBits.push_back(chainBitOHCorrected);
+                        } else if (chainBitPieces.size() == 2) {
+                            linkageType = chainBitPieces[0].append("-");
+                            chainBits.push_back(chainBitPieces[1]);
                         }
                     }
 
