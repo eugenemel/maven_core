@@ -1,6 +1,7 @@
 #include "lipidsummarizationutils.h"
 #include <QRegExp>
 #include <QStringList>
+#include <regex>
 
 using namespace std;
 
@@ -12,24 +13,45 @@ using namespace std;
  */
 pair<string, vector<string>> LipidSummarizationUtils::getNameComponents(string lipidName){
 
-    QString lipidNameAsQString = QString(lipidName.c_str());
+//    QString lipidNameAsQString = QString(lipidName.c_str());
 
-    QRegExp rx("(\\,|\\(|\\)|\\/)");
-    QStringList qStringComponents = lipidNameAsQString.split(rx);
+//    QRegExp rx("(\\,|\\(|\\)|\\/)");
+//    QStringList qStringComponents = lipidNameAsQString.split(rx);
+
+//    vector<string> chains;
+
+//    if (qStringComponents.size() < 2) {
+//        return make_pair("", chains); //no class information and no chains
+//    }
+
+//    for (unsigned int i = 1; i < qStringComponents.size(); i++) {
+//        if (qStringComponents.at(i).toStdString().find(":") != string::npos){
+//            chains.push_back(qStringComponents.at(i).toStdString());
+//        }
+//    }
+
+//    pair<string, vector<string>> components = make_pair(qStringComponents.at(0).toStdString(), chains);
+
+
+    regex rx("(\\,|\\(|\\)|\\/)");
+    smatch sm;
+
+    regex_match(lipidName.cbegin(), lipidName.cend(), sm, rx);
 
     vector<string> chains;
 
-    if (qStringComponents.size() < 2) {
-        return make_pair("", chains); //no class information and no chains
+    if (sm.size() < 2) {
+        return make_pair("", chains); // no class information and no chains
     }
 
-    for (unsigned int i = 1; i < qStringComponents.size(); i++) {
-        if (qStringComponents.at(i).toStdString().find(":") != string::npos){
-            chains.push_back(qStringComponents.at(i).toStdString());
+    for (unsigned int i = 0 ; i < sm.size(); i++) {
+        string bit = sm[i];
+        if (bit.find(":") != string::npos) {
+            chains.push_back(bit);
         }
     }
 
-    pair<string, vector<string>> components = make_pair(qStringComponents.at(0).toStdString(), chains);
+    pair<string, vector<string>> components = make_pair(chains[0], chains);
     return components;
 }
 
