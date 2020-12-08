@@ -134,6 +134,11 @@ string LipidSummarizationUtils::getSummary(pair<string, vector<string>> lipidNam
     return "";
 }
 
+string LipidSummarizationUtils::getSummaryLevel5ToLevel4(pair<string, vector<string>> lipidNameConponents){
+    //TODO
+    return "TODO";
+}
+
 string LipidSummarizationUtils::getSummaryLevel4ToLevel3(pair<string, vector<string>> lipidNameComponents) {
 
     string lipidNameSummarized("");
