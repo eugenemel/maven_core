@@ -75,11 +75,11 @@ LipidNameComponents LipidSummarizationUtils::getNameComponents(string lipidName)
 }
 
 /**
- * @brief LipidSummarizationUtils::getSnPositionLevel
+ * @brief LipidSummarizationUtils::getSnPositionSummary
  * @param lipidName
  * @return Level 4 summary (sn position, with oxygenation information summarized)
  */
-string LipidSummarizationUtils::getSnPositionLevel(std::string lipidName){
+string LipidSummarizationUtils::getSnPositionSummary(std::string lipidName){
 
     LipidNameComponents lipidNameComponents = LipidSummarizationUtils::getNameComponents(lipidName);
 

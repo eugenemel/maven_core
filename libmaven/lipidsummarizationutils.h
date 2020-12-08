@@ -20,7 +20,7 @@ public:
     static LipidNameComponents getNameComponents(std::string lipidName);
 
     //Level 4 (Sn Position Level)
-    static std::string getSnPositionLevel(std::string lipidName);
+    static std::string getSnPositionSummary(std::string lipidName);
 
     //Level 3 (Molecular Species Level)
     static std::string getAcylChainLengthSummary(std::string lipidName);
