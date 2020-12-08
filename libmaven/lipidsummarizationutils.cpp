@@ -17,6 +17,8 @@ using namespace std;
  */
 LipidNameComponents LipidSummarizationUtils::getNameComponents(string lipidName){
 
+    int initialLevel = 4;
+
     LipidNameComponents lipidNameComponents;
 
     bool isFoundChains = false;
@@ -50,8 +52,20 @@ LipidNameComponents LipidSummarizationUtils::getNameComponents(string lipidName)
 
     sregex_token_iterator end;
     for(; iter != end; ++iter){
-        string bit = *(iter);
-        chains.push_back(bit);
+        string chain = *(iter);
+        chains.push_back(chain);
+
+        //Issue 321: additional oxygenation information
+        if (
+                chain.find(";OH") != string::npos ||
+                chain.find(";(OH") != string::npos || //handles any number of (OH)
+                chain.find(";Ep") != string::npos ||
+                chain.find(";OO") != string::npos || //handles ;OO and ;OOH
+                chain.find(";oxo") != string::npos ||
+                chain.find(";COOH") != string::npos
+             ) {
+            initialLevel = 5;
+        }
     }
 
     lipidNameComponents.lipidClass = lipidClass;
@@ -66,8 +80,17 @@ LipidNameComponents LipidSummarizationUtils::getNameComponents(string lipidName)
  * @return Level 3 summary (acyl chain lengths, but not information about attachment to head group)
  */
 string LipidSummarizationUtils::getAcylChainLengthSummary(string lipidName){
-    string lipidNameNoPositionLevel = LipidSummarizationUtils::getSummary(LipidSummarizationUtils::getNameComponents(lipidName), 3);
-    return lipidNameNoPositionLevel == "" ? lipidName : lipidNameNoPositionLevel;
+
+    LipidNameComponents lipidNameComponents = LipidSummarizationUtils::getNameComponents(lipidName);
+
+    //Issue 321: If the initial lipid is at level 5, first downgrade to level 4.
+    if (lipidNameComponents.initialLevel == 5) {
+        lipidName = LipidSummarizationUtils::getSummaryLevel5ToLevel4(lipidNameComponents);
+        lipidNameComponents = LipidSummarizationUtils::getNameComponents(lipidName);
+    }
+
+    string summarizedLipidName = LipidSummarizationUtils::getSummary(LipidSummarizationUtils::getNameComponents(lipidName), 3);
+    return summarizedLipidName == "" ? lipidName : summarizedLipidName;
 }
 
 /**
@@ -76,8 +99,17 @@ string LipidSummarizationUtils::getAcylChainLengthSummary(string lipidName){
  * @return  Level 2 summary (# of C-C and C=C bonds)
  */
 string LipidSummarizationUtils::getAcylChainCompositionSummary(string lipidName){
-    string lipidNameChainSumLevel = LipidSummarizationUtils::getSummary(LipidSummarizationUtils::getNameComponents(lipidName), 2);
-    return lipidNameChainSumLevel == "" ? lipidName : lipidNameChainSumLevel;
+
+    LipidNameComponents lipidNameComponents = LipidSummarizationUtils::getNameComponents(lipidName);
+
+    //Issue 321: If the initial lipid is at level 5, first downgrade to level 4.
+    if (lipidNameComponents.initialLevel == 5) {
+        lipidName = LipidSummarizationUtils::getSummaryLevel5ToLevel4(lipidNameComponents);
+        lipidNameComponents = LipidSummarizationUtils::getNameComponents(lipidName);
+    }
+
+    string summarizedLipidName = LipidSummarizationUtils::getSummary(LipidSummarizationUtils::getNameComponents(lipidName), 2);
+    return summarizedLipidName == "" ? lipidName : summarizedLipidName;
 }
 
 /**
@@ -86,8 +118,10 @@ string LipidSummarizationUtils::getAcylChainCompositionSummary(string lipidName)
  * @return Level 1 summary (lipid class name)
  */
 string LipidSummarizationUtils::getLipidClassSummary(string lipidName){
-    string lipidClass = LipidSummarizationUtils::getSummary(LipidSummarizationUtils::getNameComponents(lipidName), 1);
-    return lipidClass == "" ? lipidName : lipidClass;
+
+    LipidNameComponents lipidNameComponents = LipidSummarizationUtils::getNameComponents(lipidName);
+
+    return lipidNameComponents.lipidClass == "" ? lipidName : lipidNameComponents.lipidClass;
 }
 
 /**
@@ -138,9 +172,47 @@ string LipidSummarizationUtils::getSummary(LipidNameComponents lipidNameComponen
     return "";
 }
 
-string LipidSummarizationUtils::getSummaryLevel5ToLevel4(LipidNameComponents lipidNameConponents){
-    //TODO
-    return "TODO";
+string LipidSummarizationUtils::getSummaryLevel5ToLevel4(LipidNameComponents lipidNameComponents){
+
+   string lipidNameSummarized("");
+   lipidNameSummarized.append(lipidNameComponents.lipidClass);
+   lipidNameSummarized.append("(");
+
+   vector<string> updatedChains = vector<string>(lipidNameComponents.chains.size());
+
+   regex rx(";");
+   for (unsigned int i = 0; i < updatedChains.size(); i++) {
+
+       string chain = lipidNameComponents.chains[i];
+
+       sregex_token_iterator iter(chain.begin(), chain.end(), rx, -1);
+       vector<string> oxBits{};
+
+       sregex_token_iterator end;
+       for (; iter != end; ++iter){
+           string component = *(iter);
+           oxBits.push_back(component);
+       }
+
+       if (oxBits.size() == 1) {
+           //no oxidation of any kind
+
+            updatedChains[i] = oxBits[0];
+       } else {
+            //TODO
+       }
+
+   }
+
+   for (unsigned int i = 0; i < updatedChains.size(); i++) {
+       if (i > 0) {
+           lipidNameSummarized.append("/");
+       }
+       lipidNameSummarized.append(updatedChains[i]);
+   }
+   lipidNameSummarized.append(")");
+
+   return lipidNameSummarized;
 }
 
 string LipidSummarizationUtils::getSummaryLevel4ToLevel3(LipidNameComponents lipidNameComponents) {
