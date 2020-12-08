@@ -102,26 +102,21 @@ string LipidSummarizationUtils::getLipidClassSummary(string lipidName){
  * @return
  */
 string LipidSummarizationUtils::getSummary(pair<string, vector<string>> lipidNameComponents, int summaryLevel) {
-    string lipidNameSummarized = string("");
 
     //Currently only summary levels 1-3 are supported
     if (summaryLevel < 1 || summaryLevel > 3) {
-        return lipidNameSummarized;
+        return "";
     }
 
     //lipid class information is necessary for summary levels 1-3
     if (lipidNameComponents.first != ""){
 
-        lipidNameSummarized.append(lipidNameComponents.first);
-
         if (summaryLevel == 1) { //lipid class only
-            return lipidNameSummarized;
+            return lipidNameComponents.first;
         }
 
         //chain information is necessary for summary levels 2 and 3
         if (lipidNameComponents.second.size() > 0) {
-
-            lipidNameSummarized.append("(");
 
             if (summaryLevel == 3) {
 
@@ -129,102 +124,19 @@ string LipidSummarizationUtils::getSummary(pair<string, vector<string>> lipidNam
 
             } else if (summaryLevel == 2) {
 
-                int alkaneSum = 0;
-                int alkeneSum = 0;
-                string linkageType = "";
-                int numHydroxyl = 0;
-
-                for (auto chain : lipidNameComponents.second){
-
-                    vector<string> chainBits;
-
-                    regex rx(":");
-                    sregex_token_iterator iter(chain.begin(), chain.end(), rx, -1);
-                    vector<string> chainBitsRaw{};
-
-                    sregex_token_iterator end;
-
-                    for (; iter != end; ++iter){
-                        string component = *(iter);
-                        chainBitsRaw.push_back(component);
-                    }
-
-                    for (auto chainBit : chainBitsRaw) {
-
-                        string chainBitOHCorrected = chainBit;
-
-                        if (chainBit[0] == 'm'){
-
-                            numHydroxyl++;
-                            chainBitOHCorrected = chainBit.substr(1);
-
-                        } else if (chainBit[0] == 'd') {
-
-                            numHydroxyl = numHydroxyl + 2;
-                            chainBitOHCorrected = chainBit.substr(1);
-
-                        } else if (chainBit[0] == 't') {
-
-                            numHydroxyl = numHydroxyl + 3;
-                            chainBitOHCorrected = chainBit.substr(1);
-                        }
-
-                        //Issue 124: for plasmalogens (e.g.PE(p-16:0/18:2) or PE(o-16:0/18:2))
-                        regex rx("-");
-                        sregex_token_iterator iter(chainBitOHCorrected.begin(), chainBitOHCorrected.end(), rx, -1);
-
-                        vector<string> chainBitPieces{};
-
-                        sregex_token_iterator end;
-
-                        for (; iter != end; ++iter){
-                            string component = *(iter);
-                            chainBitPieces.push_back(component);
-                        }
-
-                        if (chainBitPieces.size() == 1) {
-                            chainBits.push_back(chainBitOHCorrected);
-                        } else if (chainBitPieces.size() == 2) {
-                            linkageType = chainBitPieces[0].append("-");
-                            chainBits.push_back(chainBitPieces[1]);
-                        }
-                    }
-
-                    //all chains must be sensible, otherwise do not try to to infer anything
-                    if (chainBits.size() != 2) {
-                      return string("");
-                    }
-
-                    alkaneSum += stoi(chainBits.at(0));
-                    alkeneSum += stoi(chainBits.at(1));
-                }
-
-                if (linkageType != "") {
-                    lipidNameSummarized.append(linkageType);
-                }
-
-                lipidNameSummarized.append(to_string(alkaneSum));
-                lipidNameSummarized.append(":");
-                lipidNameSummarized.append(to_string(alkeneSum));
-
-                if (numHydroxyl > 0) {
-                    lipidNameSummarized.append(",");
-                    lipidNameSummarized.append(to_string(numHydroxyl));
-                    lipidNameSummarized.append("-OH");
-                }
-
-                lipidNameSummarized.append(")");
+                return (getSummaryLevel4ToLevel2(lipidNameComponents));
             }
 
         }
     }
 
-    return lipidNameSummarized;
+    //fallback to empty string, indicates that summarization was not possible
+    return "";
 }
 
 string LipidSummarizationUtils::getSummaryLevel4ToLevel3(pair<string, vector<string>> lipidNameComponents) {
-    string lipidNameSummarized("");
 
+    string lipidNameSummarized("");
     lipidNameSummarized.append(lipidNameComponents.first);
     lipidNameSummarized.append("(");
 
@@ -299,6 +211,121 @@ string LipidSummarizationUtils::getSummaryLevel4ToLevel3(pair<string, vector<str
             lipidNameSummarized.append("_");
         }
         lipidNameSummarized.append(chains.at(i));
+    }
+
+    lipidNameSummarized.append(")");
+
+    return lipidNameSummarized;
+}
+
+string LipidSummarizationUtils::getSummaryLevel4ToLevel2(pair<string, vector<string>> lipidNameComponents) {
+
+    string lipidNameSummarized("");
+    lipidNameSummarized.append(lipidNameComponents.first);
+    lipidNameSummarized.append("(");
+
+    int alkaneSum = 0;
+    int alkeneSum = 0;
+    string linkageType = "";
+    int numOxygenations = 0;
+
+    for (auto chain : lipidNameComponents.second){
+
+        vector<string> chainBits;
+
+        regex rx(":");
+        sregex_token_iterator iter(chain.begin(), chain.end(), rx, -1);
+        vector<string> chainBitsRaw{};
+
+        sregex_token_iterator end;
+
+        for (; iter != end; ++iter){
+            string component = *(iter);
+            chainBitsRaw.push_back(component);
+        }
+
+        for (auto chainBit : chainBitsRaw) {
+
+            string chainBitOHCorrected = chainBit;
+
+            //Issue 321: Support old approach
+
+            if (chainBit[0] == 'm'){
+
+                numOxygenations++;
+                chainBitOHCorrected = chainBit.substr(1);
+
+            } else if (chainBit[0] == 'd') {
+
+                numOxygenations = numOxygenations + 2;
+                chainBitOHCorrected = chainBit.substr(1);
+
+            } else if (chainBit[0] == 't') {
+
+                numOxygenations = numOxygenations + 3;
+                chainBitOHCorrected = chainBit.substr(1);
+            }
+
+            //Issue 321: oxygenations in format of x:y;On e.g. 16:1;O2 (16 carbons, 1 C=C, 2 oxygenations)
+
+            int numOxSemicolonFormat = 0;
+            for (string::size_type i = 0; i < chainBitOHCorrected.size(); i++) {
+                if (chainBitOHCorrected[i] == ';') {
+                    if (i < chainBitOHCorrected.size()-2) {
+                        string::size_type end = chainBitOHCorrected.size()-i-1;
+                        numOxSemicolonFormat = stoi(chainBitOHCorrected.substr(i+2, end));
+                    } else {
+                        numOxSemicolonFormat = 1;
+                    }
+                    break;
+                }
+            }
+
+            numOxygenations += numOxSemicolonFormat;
+
+
+            //Issue 124: for plasmalogens (e.g.PE(p-16:0/18:2) or PE(o-16:0/18:2))
+            regex rx("-");
+            sregex_token_iterator iter(chainBitOHCorrected.begin(), chainBitOHCorrected.end(), rx, -1);
+
+            vector<string> chainBitPieces{};
+
+            sregex_token_iterator end;
+
+            for (; iter != end; ++iter){
+                string component = *(iter);
+                chainBitPieces.push_back(component);
+            }
+
+            if (chainBitPieces.size() == 1) {
+                chainBits.push_back(chainBitOHCorrected);
+            } else if (chainBitPieces.size() == 2) {
+                linkageType = chainBitPieces[0].append("-");
+                chainBits.push_back(chainBitPieces[1]);
+            }
+        }
+
+        //all chains must be sensible, otherwise do not try to to infer anything
+        if (chainBits.size() != 2) {
+          return string("");
+        }
+
+        alkaneSum += stoi(chainBits.at(0));
+        alkeneSum += stoi(chainBits.at(1));
+    }
+
+    if (linkageType != "") {
+        lipidNameSummarized.append(linkageType);
+    }
+
+    lipidNameSummarized.append(to_string(alkaneSum));
+    lipidNameSummarized.append(":");
+    lipidNameSummarized.append(to_string(alkeneSum));
+
+    //Issue 321: Switch to lipidmaps 2020 syntax
+    if (numOxygenations > 0) {
+        lipidNameSummarized.append(";O");
+        lipidNameSummarized.append(to_string(numOxygenations));
     }
 
     lipidNameSummarized.append(")");

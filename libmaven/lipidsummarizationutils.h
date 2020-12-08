@@ -44,7 +44,7 @@ private:
     static std::string getSummary(std::pair<std::string, std::vector<std::string>> lipidNameComponents, int summaryLevel);
 
     static std::string getSummaryLevel4ToLevel3(std::pair<std::string, std::vector<std::string>> lipidNameComponents);
-    static std::string getSummaryLevel4ToLevel2(std::string lipidLevel4);
+    static std::string getSummaryLevel4ToLevel2(std::pair<std::string, std::vector<std::string>> lipidNameComponents);
 
 };
 
