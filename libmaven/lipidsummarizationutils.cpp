@@ -15,7 +15,9 @@ using namespace std;
  *
  * The chains are split based on the forward slash / character.
  */
-pair<string, vector<string>> LipidSummarizationUtils::getNameComponents(string lipidName){
+LipidNameComponents LipidSummarizationUtils::getNameComponents(string lipidName){
+
+    LipidNameComponents lipidNameComponents;
 
     bool isFoundChains = false;
     string::size_type chainStart = lipidName.size();
@@ -28,7 +30,7 @@ pair<string, vector<string>> LipidSummarizationUtils::getNameComponents(string l
     }
 
     if (!isFoundChains) {
-        return make_pair("", vector<string>{});
+        return lipidNameComponents;
     }
 
     string lipidClass = lipidName.substr(0, chainStart);
@@ -52,8 +54,10 @@ pair<string, vector<string>> LipidSummarizationUtils::getNameComponents(string l
         chains.push_back(bit);
     }
 
-    pair<string, vector<string>> components = make_pair(lipidClass, chains);
-    return components;
+    lipidNameComponents.lipidClass = lipidClass;
+    lipidNameComponents.chains = chains;
+
+    return lipidNameComponents;
 }
 
 /**
@@ -101,7 +105,7 @@ string LipidSummarizationUtils::getLipidClassSummary(string lipidName){
  *  Summary level 1: lipid class only (all chain information unknown)
  * @return
  */
-string LipidSummarizationUtils::getSummary(pair<string, vector<string>> lipidNameComponents, int summaryLevel) {
+string LipidSummarizationUtils::getSummary(LipidNameComponents lipidNameComponents, int summaryLevel) {
 
     //Currently only summary levels 1-3 are supported
     if (summaryLevel < 1 || summaryLevel > 3) {
@@ -109,14 +113,14 @@ string LipidSummarizationUtils::getSummary(pair<string, vector<string>> lipidNam
     }
 
     //lipid class information is necessary for summary levels 1-3
-    if (lipidNameComponents.first != ""){
+    if (lipidNameComponents.lipidClass != ""){
 
         if (summaryLevel == 1) { //lipid class only
-            return lipidNameComponents.first;
+            return lipidNameComponents.lipidClass;
         }
 
         //chain information is necessary for summary levels 2 and 3
-        if (lipidNameComponents.second.size() > 0) {
+        if (lipidNameComponents.chains.size() > 0) {
 
             if (summaryLevel == 3) {
 
@@ -134,21 +138,21 @@ string LipidSummarizationUtils::getSummary(pair<string, vector<string>> lipidNam
     return "";
 }
 
-string LipidSummarizationUtils::getSummaryLevel5ToLevel4(pair<string, vector<string>> lipidNameConponents){
+string LipidSummarizationUtils::getSummaryLevel5ToLevel4(LipidNameComponents lipidNameConponents){
     //TODO
     return "TODO";
 }
 
-string LipidSummarizationUtils::getSummaryLevel4ToLevel3(pair<string, vector<string>> lipidNameComponents) {
+string LipidSummarizationUtils::getSummaryLevel4ToLevel3(LipidNameComponents lipidNameComponents) {
 
     string lipidNameSummarized("");
-    lipidNameSummarized.append(lipidNameComponents.first);
+    lipidNameSummarized.append(lipidNameComponents.lipidClass);
     lipidNameSummarized.append("(");
 
     string linkageType = "";
     vector<string> chains;
 
-    for (auto chain : lipidNameComponents.second){
+    for (auto chain : lipidNameComponents.chains){
 
         regex rx("-");
         sregex_token_iterator iter(chain.begin(), chain.end(), rx, -1);
@@ -223,10 +227,10 @@ string LipidSummarizationUtils::getSummaryLevel4ToLevel3(pair<string, vector<str
     return lipidNameSummarized;
 }
 
-string LipidSummarizationUtils::getSummaryLevel4ToLevel2(pair<string, vector<string>> lipidNameComponents) {
+string LipidSummarizationUtils::getSummaryLevel4ToLevel2(LipidNameComponents lipidNameComponents) {
 
     string lipidNameSummarized("");
-    lipidNameSummarized.append(lipidNameComponents.first);
+    lipidNameSummarized.append(lipidNameComponents.lipidClass);
     lipidNameSummarized.append("(");
 
     int alkaneSum = 0;
@@ -234,7 +238,7 @@ string LipidSummarizationUtils::getSummaryLevel4ToLevel2(pair<string, vector<str
     string linkageType = "";
     int numOxygenations = 0;
 
-    for (auto chain : lipidNameComponents.second){
+    for (auto chain : lipidNameComponents.chains){
 
         vector<string> chainBits;
 

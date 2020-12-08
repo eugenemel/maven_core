@@ -4,13 +4,20 @@
 #include <string>
 #include <vector>
 
+struct LipidNameComponents {
+    std::string lipidClass = "";
+    std::vector<std::string> chains{};
+
+    int initialLevel = 4; //sn-position level
+};
+
 class LipidSummarizationUtils {
 
 private:
     LipidSummarizationUtils() {} // prevent instantiation
 
 public:
-    static std::pair<std::string, std::vector<std::string>> getNameComponents(std::string lipidName);
+    static LipidNameComponents getNameComponents(std::string lipidName);
 
     //Level 3 (Molecular Species Level)
     static std::string getAcylChainLengthSummary(std::string lipidName);
@@ -41,11 +48,11 @@ public:
     static std::string getLipidClassSummaryKey() {return "LIPID_CLASS";}
 
 private:
-    static std::string getSummary(std::pair<std::string, std::vector<std::string>> lipidNameComponents, int summaryLevel);
+    static std::string getSummary(LipidNameComponents lipidNameComponents, int summaryLevel);
 
-    static std::string getSummaryLevel5ToLevel4(std::pair<std::string, std::vector<std::string>> lipidNameComponents);
-    static std::string getSummaryLevel4ToLevel3(std::pair<std::string, std::vector<std::string>> lipidNameComponents);
-    static std::string getSummaryLevel4ToLevel2(std::pair<std::string, std::vector<std::string>> lipidNameComponents);
+    static std::string getSummaryLevel5ToLevel4(LipidNameComponents lipidNameComponents);
+    static std::string getSummaryLevel4ToLevel3(LipidNameComponents lipidNameComponents);
+    static std::string getSummaryLevel4ToLevel2(LipidNameComponents lipidNameComponents);
 
 };
 
