@@ -325,7 +325,9 @@ string LipidSummarizationUtils::getSummaryLevel4ToLevel2(pair<string, vector<str
     //Issue 321: Switch to lipidmaps 2020 syntax
     if (numOxygenations > 0) {
         lipidNameSummarized.append(";O");
-        lipidNameSummarized.append(to_string(numOxygenations));
+        if (numOxygenations > 1) {
+            lipidNameSummarized.append(to_string(numOxygenations));
+        }
     }
 
     lipidNameSummarized.append(")");
