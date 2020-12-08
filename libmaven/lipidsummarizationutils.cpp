@@ -125,80 +125,82 @@ string LipidSummarizationUtils::getSummary(pair<string, vector<string>> lipidNam
 
             if (summaryLevel == 3) {
 
-                string linkageType = "";
-                vector<string> chains;
+                return (getSummaryLevel4ToLevel3(lipidNameComponents));
 
-                for (auto chain : lipidNameComponents.second){
+//                string linkageType = "";
+//                vector<string> chains;
 
-                    regex rx("-");
-                    sregex_token_iterator iter(chain.begin(), chain.end(), rx, -1);
+//                for (auto chain : lipidNameComponents.second){
 
-                    vector<string> chainComponents{};
+//                    regex rx("-");
+//                    sregex_token_iterator iter(chain.begin(), chain.end(), rx, -1);
 
-                    sregex_token_iterator end;
+//                    vector<string> chainComponents{};
 
-                    for (; iter != end; ++iter){
-                        string component = *(iter);
-                        chainComponents.push_back(component);
-                    }
+//                    sregex_token_iterator end;
 
-                    if (chainComponents.size() == 1) {
-                        chains.push_back(chain);
-                    } else if (chainComponents.size() == 2){
-                        linkageType = chainComponents[0].append("-");
-                        chains.push_back(chainComponents[1]);
-                    }
+//                    for (; iter != end; ++iter){
+//                        string component = *(iter);
+//                        chainComponents.push_back(component);
+//                    }
 
-                }
+//                    if (chainComponents.size() == 1) {
+//                        chains.push_back(chain);
+//                    } else if (chainComponents.size() == 2){
+//                        linkageType = chainComponents[0].append("-");
+//                        chains.push_back(chainComponents[1]);
+//                    }
 
-                if (linkageType != "") {
-                    lipidNameSummarized.append(linkageType);
-                }
+//                }
 
-                //WARNING: this sorting assumes that the vector contains no empty strings
-                sort(chains.begin(), chains.end(),
-                     [](const string& lhs, const string& rhs){
+//                if (linkageType != "") {
+//                    lipidNameSummarized.append(linkageType);
+//                }
 
-                    char lhsFirst = lhs.at(0);
-                    char rhsFirst = rhs.at(0);
+//                //WARNING: this sorting assumes that the vector contains no empty strings
+//                sort(chains.begin(), chains.end(),
+//                     [](const string& lhs, const string& rhs){
 
-                    if (isdigit(lhsFirst) && isdigit(rhsFirst)) {
-                        return lhs.compare(rhs) < 0; //TODO: look for digits up to colon, parse as number
-                    } else if (isdigit(lhsFirst) && !isdigit(rhsFirst)) {
-                        return lhs > rhs;
-                    } else if (!isdigit(lhsFirst) && isdigit(rhsFirst)) {
-                        return lhs < rhs;
-                    } else {
-                        if (lhsFirst == 't' && rhsFirst != 't') {
-                            return lhs < rhs;
-                        } else if (lhsFirst != 't' && rhsFirst == 't') {
-                            return lhs > rhs;
-                        } else {
-                            if (lhsFirst == 'd' && rhsFirst != 'd') {
-                                return lhs < rhs;
-                            } else if (lhsFirst != 'd' && rhsFirst == 'd') {
-                                return lhs > rhs;
-                            } else {
-                                if (lhsFirst == 'm' && rhsFirst != 'm') {
-                                    return lhs < rhs;
-                                } else if (lhsFirst != 'm' && rhsFirst == 'm') {
-                                    return lhs > rhs;
-                                } else {
-                                    return lhs.compare(rhs) < 0; //TODO: look for digits up to colon, parse as number
-                                }
-                            }
-                        }
-                    }
-                });
+//                    char lhsFirst = lhs.at(0);
+//                    char rhsFirst = rhs.at(0);
 
-                for (unsigned int i = 0; i < chains.size(); i++){
-                    if (i > 0) {
-                        lipidNameSummarized.append("_");
-                    }
-                    lipidNameSummarized.append(chains.at(i));
-                }
+//                    if (isdigit(lhsFirst) && isdigit(rhsFirst)) {
+//                        return lhs.compare(rhs) < 0; //TODO: look for digits up to colon, parse as number
+//                    } else if (isdigit(lhsFirst) && !isdigit(rhsFirst)) {
+//                        return lhs > rhs;
+//                    } else if (!isdigit(lhsFirst) && isdigit(rhsFirst)) {
+//                        return lhs < rhs;
+//                    } else {
+//                        if (lhsFirst == 't' && rhsFirst != 't') {
+//                            return lhs < rhs;
+//                        } else if (lhsFirst != 't' && rhsFirst == 't') {
+//                            return lhs > rhs;
+//                        } else {
+//                            if (lhsFirst == 'd' && rhsFirst != 'd') {
+//                                return lhs < rhs;
+//                            } else if (lhsFirst != 'd' && rhsFirst == 'd') {
+//                                return lhs > rhs;
+//                            } else {
+//                                if (lhsFirst == 'm' && rhsFirst != 'm') {
+//                                    return lhs < rhs;
+//                                } else if (lhsFirst != 'm' && rhsFirst == 'm') {
+//                                    return lhs > rhs;
+//                                } else {
+//                                    return lhs.compare(rhs) < 0; //TODO: look for digits up to colon, parse as number
+//                                }
+//                            }
+//                        }
+//                    }
+//                });
 
-                lipidNameSummarized.append(")");
+//                for (unsigned int i = 0; i < chains.size(); i++){
+//                    if (i > 0) {
+//                        lipidNameSummarized.append("_");
+//                    }
+//                    lipidNameSummarized.append(chains.at(i));
+//                }
+
+//                lipidNameSummarized.append(")");
 
             } else if (summaryLevel == 2) {
 
@@ -291,6 +293,90 @@ string LipidSummarizationUtils::getSummary(pair<string, vector<string>> lipidNam
 
         }
     }
+
+    return lipidNameSummarized;
+}
+
+string LipidSummarizationUtils::getSummaryLevel4ToLevel3(pair<string, vector<string>> lipidNameComponents) {
+    string lipidNameSummarized("");
+
+    lipidNameSummarized.append(lipidNameComponents.first);
+    lipidNameSummarized.append("(");
+
+    string linkageType = "";
+    vector<string> chains;
+
+    for (auto chain : lipidNameComponents.second){
+
+        regex rx("-");
+        sregex_token_iterator iter(chain.begin(), chain.end(), rx, -1);
+
+        vector<string> chainComponents{};
+
+        sregex_token_iterator end;
+
+        for (; iter != end; ++iter){
+            string component = *(iter);
+            chainComponents.push_back(component);
+        }
+
+        if (chainComponents.size() == 1) {
+            chains.push_back(chain);
+        } else if (chainComponents.size() == 2){
+            linkageType = chainComponents[0].append("-");
+            chains.push_back(chainComponents[1]);
+        }
+
+    }
+
+    if (linkageType != "") {
+        lipidNameSummarized.append(linkageType);
+    }
+
+    //WARNING: this sorting assumes that the vector contains no empty strings
+    sort(chains.begin(), chains.end(),
+         [](const string& lhs, const string& rhs){
+
+        char lhsFirst = lhs.at(0);
+        char rhsFirst = rhs.at(0);
+
+        if (isdigit(lhsFirst) && isdigit(rhsFirst)) {
+            return lhs.compare(rhs) < 0; //TODO: look for digits up to colon, parse as number
+        } else if (isdigit(lhsFirst) && !isdigit(rhsFirst)) {
+            return lhs > rhs;
+        } else if (!isdigit(lhsFirst) && isdigit(rhsFirst)) {
+            return lhs < rhs;
+        } else {
+            if (lhsFirst == 't' && rhsFirst != 't') {
+                return lhs < rhs;
+            } else if (lhsFirst != 't' && rhsFirst == 't') {
+                return lhs > rhs;
+            } else {
+                if (lhsFirst == 'd' && rhsFirst != 'd') {
+                    return lhs < rhs;
+                } else if (lhsFirst != 'd' && rhsFirst == 'd') {
+                    return lhs > rhs;
+                } else {
+                    if (lhsFirst == 'm' && rhsFirst != 'm') {
+                        return lhs < rhs;
+                    } else if (lhsFirst != 'm' && rhsFirst == 'm') {
+                        return lhs > rhs;
+                    } else {
+                        return lhs.compare(rhs) < 0; //TODO: look for digits up to colon, parse as number
+                    }
+                }
+            }
+        }
+    });
+
+    for (unsigned int i = 0; i < chains.size(); i++){
+        if (i > 0) {
+            lipidNameSummarized.append("_");
+        }
+        lipidNameSummarized.append(chains.at(i));
+    }
+
+    lipidNameSummarized.append(")");
 
     return lipidNameSummarized;
 }
