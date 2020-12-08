@@ -75,6 +75,22 @@ LipidNameComponents LipidSummarizationUtils::getNameComponents(string lipidName)
 }
 
 /**
+ * @brief LipidSummarizationUtils::getSnPositionLevel
+ * @param lipidName
+ * @return Level 4 summary (sn position, with oxygenation information summarized)
+ */
+string LipidSummarizationUtils::getSnPositionLevel(std::string lipidName){
+
+    LipidNameComponents lipidNameComponents = LipidSummarizationUtils::getNameComponents(lipidName);
+
+    if (lipidNameComponents.initialLevel == 4) {
+        return lipidName;
+    }
+
+    return getSummaryLevel5ToLevel4(lipidNameComponents);
+}
+
+/**
  * @brief LipidSummarizationUtils::getAcylChainLengthSummary
  * @param lipidName
  * @return Level 3 summary (acyl chain lengths, but not information about attachment to head group)
