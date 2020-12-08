@@ -8,30 +8,14 @@ using namespace std;
  * @param lipidName
  * --> must be a Level 4 (or above) lipid name (will not work on Level 3)
  * @return pair<string, vector<string>> where pair.first = class and pair.second = chains (in order)
+ *
+ * the lipid class is assumed to be everything from the start of the string until the first open paranthesis (
+ * the rest of the string are the chains.
+ * If the last character is a ")", it is removed.
+ *
+ * The chains are split based on the forward slash / character.
  */
 pair<string, vector<string>> LipidSummarizationUtils::getNameComponents(string lipidName){
-
-//    regex rx("(\\,|\\(|\\)|\\/)");
-
-//    sregex_token_iterator iter(lipidName.begin(), lipidName.end(), rx, -1);
-
-//    vector<string> chains;
-//    string lipidClass("");
-
-//    sregex_token_iterator end;
-//    for(; iter != end; ++iter){
-//        string bit = *(iter);
-
-//        //first match is lipid class
-//        if (lipidClass == "") {
-//            lipidClass = bit;
-//        }
-
-//        //semicolon indicates acyl chain
-//        if (bit.find(":") != string::npos) {
-//            chains.push_back(bit);
-//        }
-//    }
 
     bool isFoundChains = false;
     string::size_type chainStart = lipidName.size();
