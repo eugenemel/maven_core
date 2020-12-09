@@ -70,6 +70,7 @@ LipidNameComponents LipidSummarizationUtils::getNameComponents(string lipidName)
 
     lipidNameComponents.lipidClass = lipidClass;
     lipidNameComponents.chains = chains;
+    lipidNameComponents.initialLevel = initialLevel;
 
     return lipidNameComponents;
 }
