@@ -215,9 +215,77 @@ string LipidSummarizationUtils::getSummaryLevel5ToLevel4(LipidNameComponents lip
 
             updatedChains[i] = oxBits[0];
        } else {
-            //TODO
-       }
 
+           int numAddOx = 0;
+
+           int numSingle = 0;
+           int numDouble = 0;
+
+           for (string::size_type pos = 0; pos < oxBits[0].size(); pos++) {
+               char c = oxBits[0][pos];
+               if (c == ':') {
+                   numSingle = stoi(oxBits[0].substr(0, pos));
+                   numDouble = stoi(oxBits[0].substr(pos+1, (oxBits[0].size()-pos)));
+                   break;
+               }
+           }
+
+           for (unsigned int j = 1; j < oxBits.size(); j++) {
+
+               string oxBit = oxBits[j];
+
+               //single hydroxyl
+               if (oxBit == "OH") {
+                   numAddOx++;
+               }
+
+               //multiple hydroxyl
+               auto multipleHydroxylPos = oxBit.find("(OH)");
+               if (multipleHydroxylPos != string::npos) {
+                   int numHydroxyl = stoi(oxBit.substr(multipleHydroxylPos+4, oxBit.size()-multipleHydroxylPos));
+                   numAddOx += numHydroxyl;
+               }
+
+               //epoxide
+               if (oxBit == "Ep") {
+                   numAddOx++;
+                   numDouble++;
+               }
+
+               //hydroperoxide
+               if (oxBit == "OOH") {
+                   numAddOx = numAddOx + 2;
+               }
+
+               //peroxide
+               if (oxBit == "OO") {
+                   numAddOx = numAddOx + 2;
+                   numDouble++;
+               }
+
+               //aldehyde
+               if (oxBit == "oxo") {
+                   numAddOx++;
+                   numDouble++;
+               }
+
+               //carboxylic acid
+               if (oxBit == "COOH") {
+                   numAddOx = numAddOx + 2;
+               }
+
+           }
+
+           string updatedChain = to_string(numSingle).append(":").append(to_string(numDouble));
+           if (numAddOx > 0) {
+               updatedChain = updatedChain.append(";O");
+               if (numAddOx > 1) {
+                   updatedChain = updatedChain.append(to_string(numAddOx));
+               }
+           }
+
+           updatedChains[i] = updatedChain;
+       }
    }
 
    for (unsigned int i = 0; i < updatedChains.size(); i++) {
