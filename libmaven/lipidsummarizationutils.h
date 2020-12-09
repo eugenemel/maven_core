@@ -19,6 +19,8 @@ private:
 public:
     static LipidNameComponents getNameComponents(std::string lipidName);
 
+    static std::string getStrucDefFromRikenLibrary(std::string rikenLipidName);
+
     //Level 4 (Sn Position Level)
     static std::string getSnPositionSummary(std::string lipidName);
 

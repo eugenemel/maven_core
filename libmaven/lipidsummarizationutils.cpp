@@ -141,6 +141,12 @@ string LipidSummarizationUtils::getLipidClassSummary(string lipidName){
     return lipidNameComponents.lipidClass == "" ? lipidName : lipidNameComponents.lipidClass;
 }
 
+//TODO: implement
+string LipidSummarizationUtils::getStrucDefFromRikenLibrary(string rikenLipidName){
+    //TODO: implement
+    return rikenLipidName;
+}
+
 /**
  * @brief LipidSummarizationUtils::getSummarized
  * summarize the lipid name based on the information that is available in the name,
