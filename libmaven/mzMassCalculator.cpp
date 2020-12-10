@@ -251,6 +251,8 @@ map<string, int> MassCalculator::getAdductComponentComposition(string formula){
         return map<string, int>{{"C", 1}, {"H", 2}, {"Na", 1}, {"O", 2}};
     } else if (formula == "NaO2CH") {
         return map<string, int>{{"C", 1}, {"H", 1}, {"Na", 1}, {"O", 2}};
+    } else if (formula == "Hac") { //protonated acetate
+        return map<string, int>{{"C", 2}, {"H", 4}, {"O", 2}};
     } else {
         return getComposition(formula);
     }
