@@ -79,6 +79,23 @@ LipidNameComponents LipidSummarizationUtils::getNameComponents(string lipidName)
 }
 
 /**
+ * @brief LipidSummarizationUtils::getSnPositionOxPosSummary
+ * @param lipidName
+ * @return level 5 summary (structure defined with oxidation positions)
+ */
+string LipidSummarizationUtils::getStrucDefSummary(string lipidName){
+
+    LipidNameComponents lipidNameComponents = LipidSummarizationUtils::getNameComponents(lipidName);
+
+    if (lipidNameComponents.initialLevel < 6) {
+        return lipidName;
+    }
+
+    return getSummaryLevel6ToLevel5(lipidNameComponents);
+
+}
+
+/**
  * @brief LipidSummarizationUtils::getSnPositionSummary
  * @param lipidName
  * @return Level 4 summary (sn position, with oxygenation information summarized)
@@ -87,7 +104,7 @@ string LipidSummarizationUtils::getSnPositionSummary(std::string lipidName){
 
     LipidNameComponents lipidNameComponents = LipidSummarizationUtils::getNameComponents(lipidName);
 
-    if (lipidNameComponents.initialLevel == 4) {
+    if (lipidNameComponents.initialLevel < 5) {
         return lipidName;
     }
 

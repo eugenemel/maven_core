@@ -21,6 +21,9 @@ public:
 
     static std::string getStrucDefFromRikenLibrary(std::string rikenLipidName);
 
+    //Level 5 (Expects struc def + oxidation positions --> struc def)
+    static std::string getStrucDefSummary(std::string lipidName);
+
     //Level 4 (Sn Position Level)
     static std::string getSnPositionSummary(std::string lipidName);
 
