@@ -45,6 +45,7 @@ LipidNameComponents LipidSummarizationUtils::getNameComponents(string lipidName)
     string chainsSubstring = lipidName.substr(chainStart+1, (lastPos-chainStart));
 
     regex rx("/");
+    regex rxSemiColonNum(";[0-9]+");
 
     sregex_token_iterator iter(chainsSubstring.begin(), chainsSubstring.end(), rx, -1);
 
@@ -65,6 +66,8 @@ LipidNameComponents LipidSummarizationUtils::getNameComponents(string lipidName)
                 chain.find(";COOH") != string::npos
              ) {
             initialLevel = 5;
+        } else if (std::regex_match(chain, rxSemiColonNum)) {
+            initialLevel = 6;
         }
     }
 
@@ -88,6 +91,12 @@ string LipidSummarizationUtils::getSnPositionSummary(std::string lipidName){
         return lipidName;
     }
 
+    //Issue 321: If the initial lipid is at level 5 or 6, downgrade until level 4.
+    if (lipidNameComponents.initialLevel == 6) {
+        lipidName = LipidSummarizationUtils::getSummaryLevel6ToLevel5(lipidNameComponents);
+        lipidNameComponents = LipidSummarizationUtils::getNameComponents(lipidName);
+    }
+
     return getSummaryLevel5ToLevel4(lipidNameComponents);
 }
 
@@ -99,6 +108,12 @@ string LipidSummarizationUtils::getSnPositionSummary(std::string lipidName){
 string LipidSummarizationUtils::getAcylChainLengthSummary(string lipidName){
 
     LipidNameComponents lipidNameComponents = LipidSummarizationUtils::getNameComponents(lipidName);
+
+    //Issue 321: If the initial lipid is at level 5 or 6, downgrade until level 4.
+    if (lipidNameComponents.initialLevel == 6) {
+        lipidName = LipidSummarizationUtils::getSummaryLevel6ToLevel5(lipidNameComponents);
+        lipidNameComponents = LipidSummarizationUtils::getNameComponents(lipidName);
+    }
 
     //Issue 321: If the initial lipid is at level 5, first downgrade to level 4.
     if (lipidNameComponents.initialLevel == 5) {
@@ -119,7 +134,12 @@ string LipidSummarizationUtils::getAcylChainCompositionSummary(string lipidName)
 
     LipidNameComponents lipidNameComponents = LipidSummarizationUtils::getNameComponents(lipidName);
 
-    //Issue 321: If the initial lipid is at level 5, first downgrade to level 4.
+    //Issue 321: If the initial lipid is at level 5 or 6, downgrade until level 4.
+    if (lipidNameComponents.initialLevel == 6) {
+        lipidName = LipidSummarizationUtils::getSummaryLevel6ToLevel5(lipidNameComponents);
+        lipidNameComponents = LipidSummarizationUtils::getNameComponents(lipidName);
+    }
+
     if (lipidNameComponents.initialLevel == 5) {
         lipidName = LipidSummarizationUtils::getSummaryLevel5ToLevel4(lipidNameComponents);
         lipidNameComponents = LipidSummarizationUtils::getNameComponents(lipidName);
@@ -241,6 +261,11 @@ string LipidSummarizationUtils::getSummary(LipidNameComponents lipidNameComponen
     }
 
     //fallback to empty string, indicates that summarization was not possible
+    return "";
+}
+
+string LipidSummarizationUtils::getSummaryLevel6ToLevel5(LipidNameComponents lipidNameComponents){
+    //TODO
     return "";
 }
 

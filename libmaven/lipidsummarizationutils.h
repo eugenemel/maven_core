@@ -58,6 +58,7 @@ public:
 private:
     static std::string getSummary(LipidNameComponents lipidNameComponents, int summaryLevel);
 
+    static std::string getSummaryLevel6ToLevel5(LipidNameComponents lipidNameComponents);
     static std::string getSummaryLevel5ToLevel4(LipidNameComponents lipidNameComponents);
     static std::string getSummaryLevel4ToLevel3(LipidNameComponents lipidNameComponents);
     static std::string getSummaryLevel4ToLevel2(LipidNameComponents lipidNameComponents);
