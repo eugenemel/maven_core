@@ -38,7 +38,7 @@ public:
     static std::string getFullStructureLevelSummaryAttributeKey(){return "FULL_STRUCTURE_SUMMARY";}
 
     //More oxidation information, no stereochemistry info --> level 6
-    static std::string getStructureDefinedAndOxPositionLevelSummaryAttributeKey(){return "STRUCTURE_DEFINED_SUMMARY_OX_POS";}
+    static std::string getStructureDefinedAndOxPositionLevelSummaryAttributeKey(){return "STRUCTURE_DEFINED_OX_POS_SUMMARY";}
 
     //LipidMaps 2020: "Structure defined level" --> level 5
     static std::string getStructureDefinedLevelSummaryAttributeKey(){return "STRUCTURE_DEFINED_SUMMARY";}
