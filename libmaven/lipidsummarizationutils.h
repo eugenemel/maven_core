@@ -19,7 +19,7 @@ private:
 public:
     static LipidNameComponents getNameComponents(std::string lipidName);
 
-    static std::string getStrucDefFromRikenLibrary(std::string rikenLipidName);
+    static std::string getStrucDefOxPosFromRikenLibrary(std::string rikenLipidName);
 
     //Level 5 (Expects struc def + oxidation positions --> struc def)
     static std::string getStrucDefSummary(std::string lipidName);

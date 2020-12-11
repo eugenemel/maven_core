@@ -178,7 +178,7 @@ string LipidSummarizationUtils::getLipidClassSummary(string lipidName){
     return lipidNameComponents.lipidClass == "" ? lipidName : lipidNameComponents.lipidClass;
 }
 
-string LipidSummarizationUtils::getStrucDefFromRikenLibrary(string rikenLipidName){
+string LipidSummarizationUtils::getStrucDefOxPosFromRikenLibrary(string rikenLipidName){
 
     string strucDef("");
 
@@ -205,26 +205,33 @@ string LipidSummarizationUtils::getStrucDefFromRikenLibrary(string rikenLipidNam
     //sn2
     string sn2 = lipidNameComponents.chains[1];
     string sn2Chain = sn2;
+    string posString = "";
     for (unsigned long i = 0; i < sn2.size()-1; i++) {
+        if (sn2[i] == ',') {
+            posString = sn2.substr(0, i);
+        }
         if (sn2[i] == '-') {
             sn2Chain = sn2.substr(i+1, sn2.size()-i);
+            if (posString == ""){
+                posString = sn2.substr(0, i);
+            }
         }
     }
 
     if (sn2Chain == "HETE") {
-        strucDef.append("20:4;OH");
+        strucDef.append("20:4;").append(posString).append("OH");
     } else if (sn2Chain == "HDoHE") {
-        strucDef.append("22:6;OH");
+        strucDef.append("22:6;").append(posString).append("OH");
     } else if (sn2Chain == "EET"){
-        strucDef.append("20:3;Ep");
+        strucDef.append("20:3;").append(posString).append("Ep");
     } else if (sn2Chain == "EpETE") {
-        strucDef.append("20:4;Ep");
+        strucDef.append("20:4;").append(posString).append("Ep");
     } else if (sn2Chain == "HEPE") {
-        strucDef.append("20:5;OH");
+        strucDef.append("20:5;").append(posString).append("OH");
     } else if (sn2Chain == "HODE") {
-        strucDef.append("18:2;OH");
+        strucDef.append("18:2;").append(posString).append("OH");
     } else if (sn2Chain == "EpDPE") {
-        strucDef.append("22:5;Ep");
+        strucDef.append("22:5;").append(posString).append("Ep");
     } else {
         strucDef.append(sn2);
     }
