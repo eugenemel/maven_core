@@ -282,8 +282,116 @@ string LipidSummarizationUtils::getSummary(LipidNameComponents lipidNameComponen
 }
 
 string LipidSummarizationUtils::getSummaryLevel6ToLevel5(LipidNameComponents lipidNameComponents){
-    //TODO
-    return "";
+
+    string lipidNameSummarized("");
+    lipidNameSummarized.append(lipidNameComponents.lipidClass);
+    lipidNameSummarized.append("(");
+
+    vector<string> updatedChains = vector<string>(lipidNameComponents.chains.size());
+
+    regex rx(";");
+    regex rxComma(",");
+
+    for (unsigned int i = 0; i < updatedChains.size(); i++) {
+
+        string chain = lipidNameComponents.chains[i];
+
+        sregex_token_iterator iter(chain.begin(), chain.end(), rx, -1);
+        vector<string> oxBits{};
+
+        sregex_token_iterator end;
+        for (; iter != end; ++iter){
+            string component = *(iter);
+            oxBits.push_back(component);
+        }
+
+        if (oxBits.size() == 1) {
+            //no oxidation of any kind
+
+             updatedChains[i] = oxBits[0];
+
+        } else {
+
+            string updatedChain(oxBits[0]);
+
+            for (unsigned int j = 1; j < oxBits.size(); j++) {
+
+                updatedChain.append(";");
+
+                string oxBit = oxBits[j];
+
+                int numOH = 0;
+                int numEp = 0;
+                int numOOH = 0;
+                int numOO = 0;
+                int numOxo = 0;
+                int numCOOH = 0;
+
+                sregex_token_iterator iter(oxBit.begin(), oxBit.end(), rxComma, -1);
+                for (; iter != end; ++iter) {
+                    string oxidationEvent = *(iter);
+
+                    for (unsigned int k = 0; k < oxidationEvent.size(); k++) {
+                        if (!isdigit(oxidationEvent[k])) {
+                            string oxidationEventNoPos = oxidationEvent.substr(k, oxidationEvent.size()-k);
+                            if (oxidationEventNoPos == "OH") {
+                                numOH++;
+                            } else if (oxidationEventNoPos == "Ep") {
+                                numEp++;
+                            } else if (oxidationEventNoPos == "OOH") {
+                                numOOH++;
+                            } else if (oxidationEventNoPos == "OO") {
+                                numOO++;
+                            } else if (oxidationEventNoPos == "oxo") {
+                                numOxo++;
+                            } else if (oxidationEventNoPos == "COOH") {
+                                numCOOH++;
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                if (numOH > 1){
+                    updatedChain.append("(OH)").append(to_string(numOH));
+                } else if (numOH == 1) {
+                    updatedChain.append("OH");
+                } else if (numEp > 1) {
+                    updatedChain.append("Ep").append(to_string(numEp));
+                } else if (numEp == 1) {
+                    updatedChain.append("Ep");
+                } else if (numOOH > 1) {
+                    updatedChain.append("(OOH)").append(to_string(numOOH));
+                } else if (numOOH == 1) {
+                    updatedChain.append("OOH");
+                } else if (numOO > 1) {
+                    updatedChain.append("(OO)").append(to_string(numOO));
+                } else if (numOO == 1) {
+                    updatedChain.append("OO");
+                } else if (numOxo > 1) {
+                    updatedChain.append("oxo").append(to_string(numOxo));
+                } else if (numOxo == 1) {
+                    updatedChain.append("oxo");
+                } else if (numCOOH > 1) {
+                    updatedChain.append("(COOH)").append(to_string(numCOOH));
+                } else if (numCOOH == 1) {
+                    updatedChain.append("COOH");
+                }
+            }
+
+           updatedChains[i] = updatedChain;
+        }
+    }
+
+    for (unsigned int i = 0; i < updatedChains.size(); i++) {
+        if (i > 0) {
+            lipidNameSummarized.append("/");
+        }
+        lipidNameSummarized.append(updatedChains[i]);
+    }
+    lipidNameSummarized.append(")");
+
+    return lipidNameSummarized;
 }
 
 string LipidSummarizationUtils::getSummaryLevel5ToLevel4(LipidNameComponents lipidNameComponents){
