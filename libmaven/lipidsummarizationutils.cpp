@@ -45,7 +45,7 @@ LipidNameComponents LipidSummarizationUtils::getNameComponents(string lipidName)
     string chainsSubstring = lipidName.substr(chainStart+1, (lastPos-chainStart));
 
     regex rx("/");
-    regex rxSemiColonNum(";[0-9]+");
+    regex rxSemiColonNum(".*;[0-9]+.*");
 
     sregex_token_iterator iter(chainsSubstring.begin(), chainsSubstring.end(), rx, -1);
 
