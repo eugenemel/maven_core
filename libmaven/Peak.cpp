@@ -144,7 +144,7 @@ vector<Scan*> Peak::getFragmentationEvents(float ppmWindow) {
 
     for( unsigned int j=0; j < sample->scans.size(); j++ ) {
          	Scan* scan = sample->scans[j];
-            if (scan->mslevel <= 1) continue; //ms2 + scans only
+            if (scan->mslevel != 2) continue; //ms2 scans only
        		if (scan->rt < rtmin) continue;
             if (scan->rt > rtmax) break;
             if( scan->precursorMz >= minMz and scan->precursorMz <= maxMz) {
