@@ -1869,7 +1869,7 @@ ScanQuantOutput DirectInfusionUtils::findNearestScanNormalizedIntensity(const ve
             cout << "Query Scan #" << pairs[i].queryScan.scan->scannum
                  << " <--> "
                  <<  "Standard Scan #" << pairs[i].standardScan.scan->scannum
-                  << "intensity: " << pairs[i].queryScan.intensity << "/" << pairs[i].standardScan.intensity << "="
+                  << " intensity: " << pairs[i].queryScan.intensity << "/" << pairs[i].standardScan.intensity << " "
                   << pairs[i].getIntensity() << endl;
         }
     }
