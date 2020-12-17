@@ -1249,9 +1249,15 @@ struct NearestScanIntensityPair;
 
 struct ScanIntensity {
 
-    Scan* scan;
-    float intensity;
-    ScanIntensityType scanIntensityType;
+    Scan* scan = nullptr;
+    float intensity = 0;
+    ScanIntensityType scanIntensityType = ScanIntensityType::QUERY;
+
+    ScanIntensity(Scan* scanVal, float intensityVal, ScanIntensityType scanIntensityTypeVal){
+        scan = scanVal;
+        intensity = intensityVal;
+        scanIntensityType = scanIntensityTypeVal;
+    }
 
     //assumes that queryScans and standardScans are sorted in increasing order by scannum
     static vector<NearestScanIntensityPair> matchStandardScanIntensitiesToQueryScanIntensities(
