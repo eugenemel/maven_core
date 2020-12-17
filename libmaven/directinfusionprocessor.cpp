@@ -1799,9 +1799,6 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
 
     if (debug) cout << "DirectInfusionUtils::findNearestScanNormalizedIntensity()" << endl;
 
-//    float queryMzIntensity = -1.0f;
-//    float standardMzIntensity = -1.0f;
-
     vector<ScanIntensity> queryScans{};
     vector<ScanIntensity> standardScans{};
 
@@ -1825,7 +1822,6 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
         float queryMzIntensityCandidate = scan->findClosestMzIntensity(queryMz, params->ms1PpmTolr);
 
         if (queryMzIntensityCandidate > 0.0f && queryMzIntensityCandidate >= params->ms1MinScanIntensity) {
-//            queryMzIntensity = queryMzIntensityCandidate;
 
             queryScans.push_back(ScanIntensity(scan, queryMzIntensityCandidate, ScanIntensityType::QUERY));
 
@@ -1844,7 +1840,6 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
         float standardMzIntensityCandidate = scan->findClosestMzIntensity(standardMz, params->ms1PpmTolr);
 
         if (standardMzIntensityCandidate > 0.0f && standardMzIntensityCandidate >= params->ms1MinScanIntensity) {
-//            standardMzIntensity = standardMzIntensityCandidate;
 
             standardScans.push_back(ScanIntensity(scan, standardMzIntensityCandidate, ScanIntensityType::STANDARD));
 
@@ -1859,23 +1854,6 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
                             << to_string(standardMzIntensityCandidate)
                             << endl;
         }
-
-//        if (queryMzIntensity > 0.0f && queryMzIntensity >= params->ms1MinScanIntensity &&
-//                standardMzIntensity > 0.0f && standardMzIntensity >= params->ms1MinScanIntensity) {
-
-//            float intensityRatio = queryMzIntensity/standardMzIntensity;
-
-//            if (debug) cout << "Added intensity ratio "
-//                            << to_string(queryMzIntensity) << "/" << to_string(standardMzIntensity)
-//                            << ": " << intensityRatio
-//                            << endl;
-
-//            normalizedIntensities.push_back(queryMzIntensity/standardMzIntensity);
-
-//            //Once an intensity is involved in a ratio measurement, it cannot be involved in any other ratio measurement.
-//            queryMzIntensity = -1.0f;
-//            standardMzIntensity = -1.0f;
-//        }
 
     }
 
