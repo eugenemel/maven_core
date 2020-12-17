@@ -1896,6 +1896,69 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
     }
 }
 
+vector<NearestScanIntensityPair> ScanIntensity::matchStandardScanIntensitiesToQueryScanIntensities(vector<ScanIntensity> queryScans,
+                                                                                                   vector<ScanIntensity> standardScans,
+                                                                                                   bool debug) {
+    vector<NearestScanIntensityPair> pairs{};
+
+    vector<ScanIntensity> allScans(queryScans.size()+standardScans.size());
+
+    unsigned int counter = 0;
+    for (auto queryScanIntensity : queryScans) {
+        allScans[counter] = queryScanIntensity;
+        counter++;
+    }
+    for (auto standardScanIntensity : standardScans) {
+        allScans[counter] = standardScanIntensity;
+        counter++;
+    }
+
+    sort(allScans.begin(), allScans.end(), [](const ScanIntensity& lhs, const ScanIntensity& rhs){
+        return lhs.scan->scannum < rhs.scan->scannum;
+    });
+
+    for (unsigned int i = 0; i < allScans.size(); i++) {
+        ScanIntensity scanIntensity = allScans[i];
+
+        if (scanIntensity.scanIntensityType == ScanIntensityType::QUERY) {
+
+            int leftDiff = -1;
+            int rightDiff = -1;
+
+            //check left
+            if (i >= 1 && allScans[i-1].scanIntensityType == ScanIntensityType::STANDARD) {
+                leftDiff = scanIntensity.scan->scannum - allScans[i-1].scan->scannum;
+            }
+
+            //check right
+            if (i < allScans.size()-1 && allScans[i+1].scanIntensityType == ScanIntensityType::STANDARD) {
+                rightDiff = allScans[i+1].scan->scannum - scanIntensity.scan->scannum;
+            }
+
+            //case: only left diff valid
+            if (leftDiff >= 0 && rightDiff < 0) {
+                pairs.push_back(NearestScanIntensityPair(allScans[i-1], scanIntensity));
+
+            //case: only right diff valid
+            } else if (leftDiff < 0 && rightDiff >= 0) {
+                pairs.push_back(NearestScanIntensityPair(allScans[i+1], scanIntensity));
+
+
+            //case: both sides valid
+            }  else if (leftDiff >= 0 && rightDiff >= 0) {
+                if (leftDiff <= rightDiff) {
+                    pairs.push_back(NearestScanIntensityPair(allScans[i-1], scanIntensity));
+                } else {
+                    pairs.push_back(NearestScanIntensityPair(allScans[i+1], scanIntensity));
+                }
+            }
+        }
+    }
+
+    return pairs;
+}
+
+
 /**
  * @brief getCompounds
  *

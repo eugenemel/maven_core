@@ -1241,3 +1241,34 @@ struct DIPipelineSampleData {
     //fragments
     map<tuple<string, string, string>, float> fragmentQuantNormalizationMap = {};
 };
+
+enum ScanIntensityType{STANDARD=0, QUERY=1};
+
+struct ScanIntensity;
+struct NearestScanIntensityPair;
+
+struct ScanIntensity {
+
+    Scan* scan;
+    float intensity;
+    ScanIntensityType scanIntensityType;
+
+    //assumes that queryScans and standardScans are sorted in increasing order by scannum
+    static vector<NearestScanIntensityPair> matchStandardScanIntensitiesToQueryScanIntensities(
+            vector<ScanIntensity> queryScans,
+            vector<ScanIntensity> standardScans,
+            bool debug=false);
+};
+
+struct NearestScanIntensityPair {
+
+    ScanIntensity standardScan;
+    ScanIntensity queryScan;
+
+    NearestScanIntensityPair(ScanIntensity standardScanVal, ScanIntensity queryScanVal) {
+        standardScan = standardScanVal;
+        queryScan = queryScanVal;
+    }
+
+    float getIntensity(){return queryScan.intensity/standardScan.intensity;}
+};
