@@ -1082,6 +1082,16 @@ public:
     vector<shared_ptr<DirectInfusionMatchData>> compounds;
 };
 
+struct ScanQuantOutput {
+
+    bool isValid = false;
+
+    float intensity = 0.0f;
+    int numMeasurements = 0.0f;
+    float medianAbsoluteDeviation = 0.0f;
+
+};
+
 class DirectInfusionUtils {
 public:
     static float findNormalizedIntensity(const vector<Scan*>& scans,
@@ -1090,7 +1100,7 @@ public:
                                          shared_ptr<DirectInfusionSearchParameters> params,
                                          bool debug = false);
 
-    static float findNearestScanNormalizedIntensity(const vector<Scan*>& scans,
+    static ScanQuantOutput findNearestScanNormalizedIntensity(const vector<Scan*>& scans,
                                                     float queryMz,
                                                     float standardMz,
                                                     shared_ptr<DirectInfusionSearchParameters> params,

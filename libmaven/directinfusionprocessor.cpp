@@ -1790,12 +1790,14 @@ float DirectInfusionUtils::findNormalizedIntensity(const vector<Scan*>& scans,
 
 //returns -1.0f if not able to find scans
 //expects MS1 scans to be sorted in increasing order by scan number
-float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*>& scans,
+ScanQuantOutput DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*>& scans,
                                                               float queryMz,
                                                               float standardMz,
                                                               shared_ptr<DirectInfusionSearchParameters> params,
                                                               int scanWidthInDa,
                                                               bool debug){
+
+    ScanQuantOutput scanQuantOutput;
 
     if (debug) cout << "DirectInfusionUtils::findNearestScanNormalizedIntensity()" << endl;
 
@@ -1867,7 +1869,7 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
 
     if (debug) cout << "Found " << normalizedIntensities.size() << " scans." << endl;
 
-    if (normalizedIntensities.empty()) return -1.0f;
+    if (normalizedIntensities.empty()) return scanQuantOutput;
 
     if (debug) {
         cout << " Intensities: ";
@@ -1877,14 +1879,31 @@ float DirectInfusionUtils::findNearestScanNormalizedIntensity(const vector<Scan*
         cout << endl;
     }
 
+    float outputIntensity = -1.0f;
+
+    float medianIntensity = median(normalizedIntensities);
+
     if (params->consensusIntensityAgglomerationType == Fragment::Mean) {
-        return accumulate(normalizedIntensities.begin(), normalizedIntensities.end(), 0.0f) / normalizedIntensities.size();
+        outputIntensity = accumulate(normalizedIntensities.begin(), normalizedIntensities.end(), 0.0f) / normalizedIntensities.size();
     } else if (params->consensusIntensityAgglomerationType == Fragment::Median) {
-        return median(normalizedIntensities);
+        outputIntensity = medianIntensity;
     } else { //unsupported type
         if (debug) cout << "Unsupported quant agglomeration type, DirectInfusionUtils::findNormalizedIntensity() returning -1.0f" << endl;
-        return -1.0f;
+        return scanQuantOutput;
     }
+
+    scanQuantOutput.isValid = true;
+    scanQuantOutput.intensity = outputIntensity;
+    scanQuantOutput.numMeasurements = normalizedIntensities.size();
+
+    vector<float> deviations(normalizedIntensities.size());
+    for (unsigned int i = 0; i < normalizedIntensities.size(); i++) {
+        deviations[i] = abs(normalizedIntensities[i]-medianIntensity);
+    }
+
+    scanQuantOutput.medianAbsoluteDeviation = median(deviations);
+
+    return scanQuantOutput;
 }
 
 vector<NearestScanIntensityPair> ScanIntensity::matchStandardScanIntensitiesToQueryScanIntensities(vector<ScanIntensity> queryScans,
