@@ -1259,6 +1259,8 @@ struct ScanIntensity {
         scanIntensityType = scanIntensityTypeVal;
     }
 
+    ScanIntensity(){}
+
     //assumes that queryScans and standardScans are sorted in increasing order by scannum
     static vector<NearestScanIntensityPair> matchStandardScanIntensitiesToQueryScanIntensities(
             vector<ScanIntensity> queryScans,
