@@ -1278,6 +1278,12 @@ struct ScanIntensity {
             bool debug=false);
 };
 
+struct ScanIntensityMatch {
+    ScanIntensity standardScan;
+    ScanIntensity queryScan;
+    int dist;
+};
+
 struct NearestScanIntensityPair {
 
     ScanIntensity standardScan;

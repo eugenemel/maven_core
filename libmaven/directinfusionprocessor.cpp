@@ -1934,10 +1934,17 @@ vector<NearestScanIntensityPair> ScanIntensity::matchStandardScanIntensitiesToQu
         return lhs.scan->scannum < rhs.scan->scannum;
     });
 
+    vector<ScanIntensityMatch> allMatches{};
+
     for (unsigned int i = 0; i < allScans.size(); i++) {
+
         ScanIntensity scanIntensity = allScans[i];
 
         if (scanIntensity.scanIntensityType == ScanIntensityType::QUERY) {
+
+            ScanIntensityMatch scanIntensityMatch;
+
+            scanIntensityMatch.queryScan = scanIntensity;
 
             int leftDiff = -1;
             int rightDiff = -1;
@@ -1954,21 +1961,55 @@ vector<NearestScanIntensityPair> ScanIntensity::matchStandardScanIntensitiesToQu
 
             //case: only left diff valid
             if (leftDiff >= 0 && rightDiff < 0) {
-                pairs.push_back(NearestScanIntensityPair(allScans[i-1], scanIntensity));
+                //pairs.push_back(NearestScanIntensityPair(allScans[i-1], scanIntensity));
+                scanIntensityMatch.queryScan = allScans[i-1];
+                scanIntensityMatch.dist = leftDiff;
 
             //case: only right diff valid
             } else if (leftDiff < 0 && rightDiff >= 0) {
-                pairs.push_back(NearestScanIntensityPair(allScans[i+1], scanIntensity));
-
+                // pairs.push_back(NearestScanIntensityPair(allScans[i+1], scanIntensity));
+                scanIntensityMatch.queryScan = allScans[i+1];
+                scanIntensityMatch.dist = rightDiff;
 
             //case: both sides valid
             }  else if (leftDiff >= 0 && rightDiff >= 0) {
                 if (leftDiff <= rightDiff) {
-                    pairs.push_back(NearestScanIntensityPair(allScans[i-1], scanIntensity));
+                    // pairs.push_back(NearestScanIntensityPair(allScans[i-1], scanIntensity));
+                    scanIntensityMatch.queryScan = allScans[i-1];
+                    scanIntensityMatch.dist = leftDiff;
                 } else {
-                    pairs.push_back(NearestScanIntensityPair(allScans[i+1], scanIntensity));
+                    // pairs.push_back(NearestScanIntensityPair(allScans[i+1], scanIntensity));
+                    scanIntensityMatch.queryScan = allScans[i+1];
+                    scanIntensityMatch.dist = rightDiff;
                 }
             }
+
+            if (scanIntensityMatch.queryScan.scan) {
+                allMatches.push_back(scanIntensityMatch);
+            }
+        }
+    }
+
+    sort(allMatches.begin(), allMatches.end(), [](const ScanIntensityMatch& lhs, const ScanIntensityMatch& rhs){
+        return lhs.dist < rhs.dist;
+    });
+
+    vector<int> queryScanNumsUsed{};
+    vector<int> standardScanNumsUsed{};
+
+    for (auto& scanIntensityMatch : allMatches) {
+
+        int queryScanNum = scanIntensityMatch.queryScan.scan->scannum;
+        int standardScanNum = scanIntensityMatch.standardScan.scan->scannum;
+
+        bool isHasQueryScanNum = find(queryScanNumsUsed.begin(), queryScanNumsUsed.end(), queryScanNum) != queryScanNumsUsed.end();
+        bool isHasStandardScanNum = find(standardScanNumsUsed.begin(), standardScanNumsUsed.end(), standardScanNum) != standardScanNumsUsed.end();
+
+        if (!isHasQueryScanNum && !isHasStandardScanNum) {
+            queryScanNumsUsed.push_back(queryScanNum);
+            standardScanNumsUsed.push_back(standardScanNum);
+
+            pairs.push_back(NearestScanIntensityPair(scanIntensityMatch.standardScan, scanIntensityMatch.queryScan));
         }
     }
 
