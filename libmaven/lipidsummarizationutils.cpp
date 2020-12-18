@@ -712,3 +712,15 @@ string LipidSummarizationUtils::getSummaryLevel4ToLevel2(LipidNameComponents lip
 
     return lipidNameSummarized;
 }
+
+string LipidSummarizationUtils::getSummarizationLevelAttributeKey(int summarizationLevel){
+    switch(summarizationLevel){
+    case 1: return LipidSummarizationUtils::getLipidClassSummaryKey();
+    case 2: return LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey();
+    case 3: return LipidSummarizationUtils::getAcylChainLengthSummaryAttributeKey();
+    case 4: return LipidSummarizationUtils::getSnPositionLevelSummaryAttributeKey();
+    case 5: return LipidSummarizationUtils::getStructureDefinedLevelSummaryAttributeKey();
+    case 6: return LipidSummarizationUtils::getStructureDefinedAndOxPositionLevelSummaryAttributeKey();
+    default: return "UNKNOWN";
+    }
+}

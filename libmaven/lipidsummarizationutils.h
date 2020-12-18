@@ -58,6 +58,8 @@ public:
     //Lipid Class ---> level 1
     static std::string getLipidClassSummaryKey() {return "LIPID_CLASS";}
 
+    static std::string getSummarizationLevelAttributeKey(int summarizationLevel);
+
 private:
     static std::string getSummary(LipidNameComponents lipidNameComponents, int summaryLevel);
 
