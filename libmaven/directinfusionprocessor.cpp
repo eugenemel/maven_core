@@ -1962,33 +1962,35 @@ vector<NearestScanIntensityPair> ScanIntensity::matchStandardScanIntensitiesToQu
             //case: only left diff valid
             if (leftDiff >= 0 && rightDiff < 0) {
                 //pairs.push_back(NearestScanIntensityPair(allScans[i-1], scanIntensity));
-                scanIntensityMatch.queryScan = allScans[i-1];
+                scanIntensityMatch.standardScan = allScans[i-1];
                 scanIntensityMatch.dist = leftDiff;
 
             //case: only right diff valid
             } else if (leftDiff < 0 && rightDiff >= 0) {
                 // pairs.push_back(NearestScanIntensityPair(allScans[i+1], scanIntensity));
-                scanIntensityMatch.queryScan = allScans[i+1];
+                scanIntensityMatch.standardScan = allScans[i+1];
                 scanIntensityMatch.dist = rightDiff;
 
             //case: both sides valid
             }  else if (leftDiff >= 0 && rightDiff >= 0) {
                 if (leftDiff <= rightDiff) {
                     // pairs.push_back(NearestScanIntensityPair(allScans[i-1], scanIntensity));
-                    scanIntensityMatch.queryScan = allScans[i-1];
+                    scanIntensityMatch.standardScan = allScans[i-1];
                     scanIntensityMatch.dist = leftDiff;
                 } else {
                     // pairs.push_back(NearestScanIntensityPair(allScans[i+1], scanIntensity));
-                    scanIntensityMatch.queryScan = allScans[i+1];
+                    scanIntensityMatch.standardScan = allScans[i+1];
                     scanIntensityMatch.dist = rightDiff;
                 }
             }
 
-            if (scanIntensityMatch.queryScan.scan) {
+            if (scanIntensityMatch.standardScan.scan) {
                 allMatches.push_back(scanIntensityMatch);
             }
         }
     }
+
+    if (debug) cout << "Identified " << allMatches.size() << " candidate matches." << endl;
 
     sort(allMatches.begin(), allMatches.end(), [](const ScanIntensityMatch& lhs, const ScanIntensityMatch& rhs){
         return lhs.dist < rhs.dist;
@@ -2006,6 +2008,7 @@ vector<NearestScanIntensityPair> ScanIntensity::matchStandardScanIntensitiesToQu
         bool isHasStandardScanNum = find(standardScanNumsUsed.begin(), standardScanNumsUsed.end(), standardScanNum) != standardScanNumsUsed.end();
 
         if (!isHasQueryScanNum && !isHasStandardScanNum) {
+
             queryScanNumsUsed.push_back(queryScanNum);
             standardScanNumsUsed.push_back(standardScanNum);
 
