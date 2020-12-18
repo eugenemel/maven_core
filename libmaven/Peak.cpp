@@ -134,8 +134,8 @@ vector<Scan*> Peak::getFragmentationEvents(float ppmWindow) {
 
 	float amuTol = peakMz/1e6*ppmWindow;
 
-    double minMz = peakMz-amuTol;
-    double maxMz = peakMz-amuTol;
+    double minMz = peakMz - amuTol;
+    double maxMz = peakMz + amuTol;
 
     if (mzmax - mzmin > 0.5f) { //direct infusion peak
         minMz = mzmin;
