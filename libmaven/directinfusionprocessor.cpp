@@ -2080,6 +2080,7 @@ vector<NearestScanIntensityPair> ScanIntensity::matchStandardScanIntensitiesToQu
     } // end for (allWidths)
 
     if (validCandidateKeys.empty()){
+        if (debug) cout << "Found no valid candidate keys." << endl;
         return vector<NearestScanIntensityPair>{}; //invalid
     }
 
@@ -2090,6 +2091,12 @@ vector<NearestScanIntensityPair> ScanIntensity::matchStandardScanIntensitiesToQu
             return lhs.first < rhs.first;
         }
     });
+
+    if (debug) {
+        for (auto key : validCandidateKeys) {
+            cout << "valid key: " << key.first << " scan diff, " << key.second << " m/z window" << endl;
+        }
+    }
 
     return validCandidatesMap[validCandidateKeys[0]];
 }
