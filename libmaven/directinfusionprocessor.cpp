@@ -2039,13 +2039,26 @@ vector<NearestScanIntensityPair> ScanIntensity::matchStandardScanIntensitiesToQu
                 //a dist change - either exit here, or reset and continue
                 if (previousDist != currentDist && previousDist != -1) {
                     if (numAtCurrentDist > 0 && numAtCurrentDist >= params->minNumScansNearestScanNormalizedIntensity) {
+
                         pair<int, int> key = make_pair(previousDist, width);
                         validCandidatesMap.insert(make_pair(key, pairs));
                         validCandidateKeys.push_back(key);
                         isWroteBestWidth = true;
                         break;
+
                     } else {
+
+                        if (debug) {
+                            cout << "numAtCurrentDist="
+                                 << numAtCurrentDist
+                                 << ", threshold="
+                                 << params->minNumScansNearestScanNormalizedIntensity
+                                 << endl;
+                        }
+
+                        //reset to prepare for new count
                         pairs.clear();
+                        numAtCurrentDist = 0;
                     }
 
                 }
