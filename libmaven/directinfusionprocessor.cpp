@@ -1859,7 +1859,7 @@ ScanQuantOutput DirectInfusionUtils::findNearestScanNormalizedIntensity(const ve
 
     }
 
-    vector<NearestScanIntensityPair> pairs = ScanIntensity::matchStandardScanIntensitiesToQueryScanIntensities(standardScans, queryScans, params);
+    vector<NearestScanIntensityPair> pairs = ScanIntensity::matchStandardScanIntensitiesToQueryScanIntensities(standardScans, queryScans, params, debug);
 
     vector<float> normalizedIntensities(pairs.size());
 
