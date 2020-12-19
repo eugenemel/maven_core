@@ -1865,13 +1865,6 @@ ScanQuantOutput DirectInfusionUtils::findNearestScanNormalizedIntensity(const ve
 
     for (unsigned int i = 0; i < pairs.size(); i++){
         normalizedIntensities[i] = pairs[i].getIntensity();
-        if (debug) {
-            cout << "Query Scan #" << pairs[i].queryScan.scan->scannum
-                 << " <--> "
-                 <<  "Standard Scan #" << pairs[i].standardScan.scan->scannum
-                  << " intensity: " << pairs[i].queryScan.intensity << "/" << pairs[i].standardScan.intensity << " "
-                  << pairs[i].getIntensity() << endl;
-        }
     }
 
     if (debug) cout << "Found " << normalizedIntensities.size() << " scans." << endl;
@@ -2060,7 +2053,17 @@ vector<NearestScanIntensityPair> ScanIntensity::matchStandardScanIntensitiesToQu
                 queryScanNumsUsed.push_back(queryScanNum);
                 standardScanNumsUsed.push_back(standardScanNum);
 
-                pairs.push_back(NearestScanIntensityPair(scanIntensityMatch.standardScan, scanIntensityMatch.queryScan));
+                NearestScanIntensityPair nearestScanintensityPair(scanIntensityMatch.standardScan, scanIntensityMatch.queryScan);
+                pairs.push_back(nearestScanintensityPair);
+
+                if (debug) {
+                    cout << "width=" << width << ", dist=" << currentDist << " "
+                         << "Query Scan #" << nearestScanintensityPair.queryScan.scan->scannum
+                         << " <--> "
+                         <<  "Standard Scan #" << nearestScanintensityPair.standardScan.scan->scannum
+                          << " intensity: " << nearestScanintensityPair.queryScan.intensity << "/" << nearestScanintensityPair.standardScan.intensity << " "
+                          << nearestScanintensityPair.getIntensity() << endl;
+                }
 
                 previousDist = currentDist;
             }
