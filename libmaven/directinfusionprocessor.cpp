@@ -2032,7 +2032,7 @@ vector<NearestScanIntensityPair> ScanIntensity::matchStandardScanIntensitiesToQu
 
             if (!isHasQueryScanNum && !isHasStandardScanNum) {
 
-                if (previousDist == currentDist && previousDist != -1) {
+                if ((previousDist == currentDist && previousDist != -1) || previousDist == -1) {
                     numAtCurrentDist++;
                 }
 
@@ -2058,7 +2058,7 @@ vector<NearestScanIntensityPair> ScanIntensity::matchStandardScanIntensitiesToQu
 
                         //reset to prepare for new count
                         pairs.clear();
-                        numAtCurrentDist = 0;
+                        numAtCurrentDist = 1; // this entry starts a new count.
                     }
 
                 }
