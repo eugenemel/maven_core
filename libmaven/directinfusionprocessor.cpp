@@ -1859,7 +1859,7 @@ ScanQuantOutput DirectInfusionUtils::findNearestScanNormalizedIntensity(const ve
 
     }
 
-    vector<NearestScanIntensityPair> pairs = ScanIntensity::matchStandardScanIntensitiesToQueryScanIntensities(standardScans, queryScans);
+    vector<NearestScanIntensityPair> pairs = ScanIntensity::matchStandardScanIntensitiesToQueryScanIntensities(standardScans, queryScans, params);
 
     vector<float> normalizedIntensities(pairs.size());
 
@@ -1909,114 +1909,186 @@ ScanQuantOutput DirectInfusionUtils::findNearestScanNormalizedIntensity(const ve
     }
 
     scanQuantOutput.medianAbsoluteDeviation = median(deviations);
+    scanQuantOutput.scanDiff = pairs[0].dist;
+    scanQuantOutput.scanWidth = pairs[0].queryScan.scanWidth;
 
     return scanQuantOutput;
 }
 
 vector<NearestScanIntensityPair> ScanIntensity::matchStandardScanIntensitiesToQueryScanIntensities(vector<ScanIntensity> queryScans,
                                                                                                    vector<ScanIntensity> standardScans,
+                                                                                                   shared_ptr<DirectInfusionSearchParameters> params,
                                                                                                    bool debug) {
-    vector<NearestScanIntensityPair> pairs{};
+    map<int, vector<ScanIntensity>> scansByWidth{};
 
-    vector<ScanIntensity> allScans(queryScans.size()+standardScans.size());
+    vector<int> allWidths{};
 
-    unsigned int counter = 0;
     for (auto queryScanIntensity : queryScans) {
-        allScans[counter] = queryScanIntensity;
-        counter++;
+        int width = queryScanIntensity.scanWidth;
+        if (scansByWidth.find(width) == scansByWidth.end()) {
+            scansByWidth.insert(make_pair(width, vector<ScanIntensity>{}));
+            allWidths.push_back(width);
+        }
+        scansByWidth[width].push_back(queryScanIntensity);
     }
+
     for (auto standardScanIntensity : standardScans) {
-        allScans[counter] = standardScanIntensity;
-        counter++;
+        int width = standardScanIntensity.scanWidth;
+        if (scansByWidth.find(width) == scansByWidth.end()) {
+            scansByWidth.insert(make_pair(width, vector<ScanIntensity>{}));
+            allWidths.push_back(width);
+        }
+        scansByWidth[width].push_back(standardScanIntensity);
     }
 
-    sort(allScans.begin(), allScans.end(), [](const ScanIntensity& lhs, const ScanIntensity& rhs){
-        return lhs.scan->scannum < rhs.scan->scannum;
-    });
+    sort(allWidths.begin(), allWidths.end());
 
-    vector<ScanIntensityMatch> allMatches{};
+    //pair<scan dist, scan width>
+    map<pair<int, int>, vector<NearestScanIntensityPair>> validCandidatesMap{};
+    vector<pair<int, int>> validCandidateKeys{};
 
-    for (unsigned int i = 0; i < allScans.size(); i++) {
+    for (auto width : allWidths) {
 
-        ScanIntensity scanIntensity = allScans[i];
+        vector<NearestScanIntensityPair> pairs{};
+        vector<ScanIntensity> allScans = scansByWidth[width];
 
-        if (scanIntensity.scanIntensityType == ScanIntensityType::QUERY) {
+        sort(allScans.begin(), allScans.end(), [](const ScanIntensity& lhs, const ScanIntensity& rhs){
+            return lhs.scan->scannum < rhs.scan->scannum;
+        });
 
-            ScanIntensityMatch scanIntensityMatch;
+        vector<ScanIntensityMatch> allMatches{};
 
-            scanIntensityMatch.queryScan = scanIntensity;
+        for (unsigned int i = 0; i < allScans.size(); i++) {
 
-            int leftDiff = -1;
-            int rightDiff = -1;
+            ScanIntensity scanIntensity = allScans[i];
 
-            //check left
-            if (i >= 1 && allScans[i-1].scanIntensityType == ScanIntensityType::STANDARD) {
-                leftDiff = scanIntensity.scan->scannum - allScans[i-1].scan->scannum;
-            }
+            if (scanIntensity.scanIntensityType == ScanIntensityType::QUERY) {
 
-            //check right
-            if (i < allScans.size()-1 && allScans[i+1].scanIntensityType == ScanIntensityType::STANDARD) {
-                rightDiff = allScans[i+1].scan->scannum - scanIntensity.scan->scannum;
-            }
+                ScanIntensityMatch scanIntensityMatch;
 
-            //case: only left diff valid
-            if (leftDiff >= 0 && rightDiff < 0) {
-                //pairs.push_back(NearestScanIntensityPair(allScans[i-1], scanIntensity));
-                scanIntensityMatch.standardScan = allScans[i-1];
-                scanIntensityMatch.dist = leftDiff;
+                scanIntensityMatch.queryScan = scanIntensity;
 
-            //case: only right diff valid
-            } else if (leftDiff < 0 && rightDiff >= 0) {
-                // pairs.push_back(NearestScanIntensityPair(allScans[i+1], scanIntensity));
-                scanIntensityMatch.standardScan = allScans[i+1];
-                scanIntensityMatch.dist = rightDiff;
+                int leftDiff = -1;
+                int rightDiff = -1;
 
-            //case: both sides valid
-            }  else if (leftDiff >= 0 && rightDiff >= 0) {
-                if (leftDiff <= rightDiff) {
-                    // pairs.push_back(NearestScanIntensityPair(allScans[i-1], scanIntensity));
+                //check left
+                if (i >= 1 && allScans[i-1].scanIntensityType == ScanIntensityType::STANDARD) {
+                    leftDiff = scanIntensity.scan->scannum - allScans[i-1].scan->scannum;
+                }
+
+                //check right
+                if (i < allScans.size()-1 && allScans[i+1].scanIntensityType == ScanIntensityType::STANDARD) {
+                    rightDiff = allScans[i+1].scan->scannum - scanIntensity.scan->scannum;
+                }
+
+                //case: only left diff valid
+                if (leftDiff >= 0 && rightDiff < 0) {
                     scanIntensityMatch.standardScan = allScans[i-1];
                     scanIntensityMatch.dist = leftDiff;
-                } else {
-                    // pairs.push_back(NearestScanIntensityPair(allScans[i+1], scanIntensity));
+
+                //case: only right diff valid
+                } else if (leftDiff < 0 && rightDiff >= 0) {
                     scanIntensityMatch.standardScan = allScans[i+1];
                     scanIntensityMatch.dist = rightDiff;
+
+                //case: both sides valid
+                }  else if (leftDiff >= 0 && rightDiff >= 0) {
+                    if (leftDiff <= rightDiff) {
+                        scanIntensityMatch.standardScan = allScans[i-1];
+                        scanIntensityMatch.dist = leftDiff;
+                    } else {
+                        scanIntensityMatch.standardScan = allScans[i+1];
+                        scanIntensityMatch.dist = rightDiff;
+                    }
+                }
+
+                if (scanIntensityMatch.standardScan.scan) {
+                    allMatches.push_back(scanIntensityMatch);
                 }
             }
 
-            if (scanIntensityMatch.standardScan.scan) {
-                allMatches.push_back(scanIntensityMatch);
-            }
+
         }
+
+        if (debug) cout << "Identified " << allMatches.size() << " candidate matches for scans with width " << width << " Da." << endl;
+
+        sort(allMatches.begin(), allMatches.end(), [](const ScanIntensityMatch& lhs, const ScanIntensityMatch& rhs){
+            return lhs.dist < rhs.dist;
+        });
+
+        vector<int> queryScanNumsUsed{};
+        vector<int> standardScanNumsUsed{};
+
+        int previousDist = -1;
+        int currentDist = -1;
+
+        int numAtCurrentDist = 0;
+
+        bool isWroteBestWidth = false;
+
+        for (unsigned int i = 0; i < allMatches.size(); i++) {
+
+            ScanIntensityMatch scanIntensityMatch = allMatches[i];
+            currentDist = scanIntensityMatch.dist;
+
+            int queryScanNum = scanIntensityMatch.queryScan.scan->scannum;
+            int standardScanNum = scanIntensityMatch.standardScan.scan->scannum;
+
+            bool isHasQueryScanNum = find(queryScanNumsUsed.begin(), queryScanNumsUsed.end(), queryScanNum) != queryScanNumsUsed.end();
+            bool isHasStandardScanNum = find(standardScanNumsUsed.begin(), standardScanNumsUsed.end(), standardScanNum) != standardScanNumsUsed.end();
+
+            if (!isHasQueryScanNum && !isHasStandardScanNum) {
+
+                if (previousDist == currentDist && previousDist != -1) {
+                    numAtCurrentDist++;
+                }
+
+                //a dist change - either exit here, or reset and continue
+                if (previousDist != currentDist && previousDist != -1) {
+                    if (numAtCurrentDist > 0 && numAtCurrentDist >= params->minNumScansNearestScanNormalizedIntensity) {
+                        pair<int, int> key = make_pair(previousDist, width);
+                        validCandidatesMap.insert(make_pair(key, pairs));
+                        validCandidateKeys.push_back(key);
+                        isWroteBestWidth = true;
+                        break;
+                    } else {
+                        pairs.clear();
+                    }
+
+                }
+
+                queryScanNumsUsed.push_back(queryScanNum);
+                standardScanNumsUsed.push_back(standardScanNum);
+
+                pairs.push_back(NearestScanIntensityPair(scanIntensityMatch.standardScan, scanIntensityMatch.queryScan));
+            }
+
+            previousDist = currentDist;
+
+        } // end for (allMatches)
+
+        // handle case where all scans have the same diff (so not yet written to the map)
+        if (!isWroteBestWidth && numAtCurrentDist > 0 && numAtCurrentDist >= params->minNumScansNearestScanNormalizedIntensity) {
+            pair<int, int> key = make_pair(previousDist, width);
+            validCandidatesMap.insert(make_pair(key, pairs));
+            validCandidateKeys.push_back(key);
+        }
+
+    } // end for (allWidths)
+
+    if (validCandidateKeys.empty()){
+        return vector<NearestScanIntensityPair>{}; //invalid
     }
 
-    if (debug) cout << "Identified " << allMatches.size() << " candidate matches." << endl;
-
-    sort(allMatches.begin(), allMatches.end(), [](const ScanIntensityMatch& lhs, const ScanIntensityMatch& rhs){
-        return lhs.dist < rhs.dist;
+    sort(validCandidateKeys.begin(), validCandidateKeys.end(), [](const pair<int, int>& lhs, const pair<int, int>& rhs){
+        if (lhs.first == rhs.first) {
+            return lhs.second < rhs.second;
+        } else {
+            return lhs.first < rhs.first;
+        }
     });
 
-    vector<int> queryScanNumsUsed{};
-    vector<int> standardScanNumsUsed{};
-
-    for (auto& scanIntensityMatch : allMatches) {
-
-        int queryScanNum = scanIntensityMatch.queryScan.scan->scannum;
-        int standardScanNum = scanIntensityMatch.standardScan.scan->scannum;
-
-        bool isHasQueryScanNum = find(queryScanNumsUsed.begin(), queryScanNumsUsed.end(), queryScanNum) != queryScanNumsUsed.end();
-        bool isHasStandardScanNum = find(standardScanNumsUsed.begin(), standardScanNumsUsed.end(), standardScanNum) != standardScanNumsUsed.end();
-
-        if (!isHasQueryScanNum && !isHasStandardScanNum) {
-
-            queryScanNumsUsed.push_back(queryScanNum);
-            standardScanNumsUsed.push_back(standardScanNum);
-
-            pairs.push_back(NearestScanIntensityPair(scanIntensityMatch.standardScan, scanIntensityMatch.queryScan));
-        }
-    }
-
-    return pairs;
+    return validCandidatesMap[validCandidateKeys[0]];
 }
 
 

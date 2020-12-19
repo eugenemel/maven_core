@@ -167,9 +167,13 @@ public:
      *      for splitting ms1 intensity, when multiple compounds map to the same ms1 intensity value.
      * @param isPreferSmallestMassWindow: used in DirectInfusionUtils::findNormalizedIntensity().
      *       Agglomerate results from all individual scans based on mass window lengths.
+     * @param minNumScansNearestScanNormalizedIntensity: Minimum number of scans required to use this
+     *       class of scans for nearest scan normalized intensity quant. Classes of scans are defined by
+     *       the combination of the m/z width of the window, and the distance in scan num between scans.
      * ==================== */
     vector<string> ms1PartitionIntensityByFragments{"sn1","sn2"};
     bool isPreferSmallestScanMassWindow = true;
+    int minNumScansNearestScanNormalizedIntensity = 3;
 
     //Issue 270
     bool isReduceBySimpleParsimony = false;
@@ -332,6 +336,7 @@ public:
         }
         encodedParams = encodedParams + "};";
         encodedParams = encodedParams + "isPreferSmallestScanMassWindow" + "=" + to_string(isPreferSmallestScanMassWindow) + ";";
+        encodedParams = encodedParams + "minNumScansNearestScanNormalizedIntensity" + "=" + to_string(minNumScansNearestScanNormalizedIntensity);
 
         //agglomeration params
         encodedParams = encodedParams + "isAgglomerateAcrossSamples" + "=" + to_string(isAgglomerateAcrossSamples) + ";";
@@ -599,6 +604,9 @@ public:
         }
         if (decodedMap.find("isPreferSmallestScanMassWindow") != decodedMap.end()) {
             directInfusionSearchParameters->isPreferSmallestScanMassWindow = decodedMap["isPreferSmallestScanMassWindow"] == "1";
+        }
+        if (decodedMap.find("minNumScansNearestScanNormalizedIntensity") != decodedMap.end()) {
+            directInfusionSearchParameters->minNumScansNearestScanNormalizedIntensity = stoi(decodedMap["minNumScansNearestScanNormalizedIntensity"]);
         }
 
         //agglomeration params
@@ -1089,6 +1097,8 @@ struct ScanQuantOutput {
     float intensity = 0.0f;
     int numMeasurements = 0.0f;
     float medianAbsoluteDeviation = 0.0f;
+    int scanDiff = 0;
+    int scanWidth = 0;
 
 };
 
@@ -1262,11 +1272,15 @@ struct ScanIntensity {
     Scan* scan = nullptr;
     float intensity = 0;
     ScanIntensityType scanIntensityType = ScanIntensityType::QUERY;
+    int scanWidth = 0;
 
     ScanIntensity(Scan* scanVal, float intensityVal, ScanIntensityType scanIntensityTypeVal){
         scan = scanVal;
         intensity = intensityVal;
         scanIntensityType = scanIntensityTypeVal;
+        if (scanVal) {
+            scanWidth = static_cast<int>(round(scan->upperLimitMz - scan->lowerLimitMz));
+        }
     }
 
     ScanIntensity(){}
@@ -1275,6 +1289,7 @@ struct ScanIntensity {
     static vector<NearestScanIntensityPair> matchStandardScanIntensitiesToQueryScanIntensities(
             vector<ScanIntensity> queryScans,
             vector<ScanIntensity> standardScans,
+            shared_ptr<DirectInfusionSearchParameters> params,
             bool debug=false);
 };
 
@@ -1288,10 +1303,14 @@ struct NearestScanIntensityPair {
 
     ScanIntensity standardScan;
     ScanIntensity queryScan;
+    int dist = -1;
 
     NearestScanIntensityPair(ScanIntensity standardScanVal, ScanIntensity queryScanVal) {
         standardScan = standardScanVal;
         queryScan = queryScanVal;
+        if (standardScanVal.scan && queryScanVal.scan) {
+            dist = abs(standardScanVal.scan->scannum - queryScanVal.scan->scannum);
+        }
     }
 
     float getIntensity(){return queryScan.intensity/standardScan.intensity;}
