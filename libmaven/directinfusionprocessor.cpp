@@ -2070,7 +2070,11 @@ vector<NearestScanIntensityPair> ScanIntensity::matchStandardScanIntensitiesToQu
                 pairs.push_back(nearestScanintensityPair);
 
                 if (debug) {
-                    cout << "width=" << width << ", dist=" << currentDist << " "
+                    cout << "width=" << width
+                         << ", dist=" << currentDist
+                         << ", numAtCurrentDist= " << numAtCurrentDist
+                         << ", threshold= " << params->minNumScansNearestScanNormalizedIntensity
+                         << " "
                          << "Query Scan #" << nearestScanintensityPair.queryScan.scan->scannum
                          << " <--> "
                          <<  "Standard Scan #" << nearestScanintensityPair.standardScan.scan->scannum
