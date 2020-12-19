@@ -2061,9 +2061,9 @@ vector<NearestScanIntensityPair> ScanIntensity::matchStandardScanIntensitiesToQu
                 standardScanNumsUsed.push_back(standardScanNum);
 
                 pairs.push_back(NearestScanIntensityPair(scanIntensityMatch.standardScan, scanIntensityMatch.queryScan));
-            }
 
-            previousDist = currentDist;
+                previousDist = currentDist;
+            }
 
         } // end for (allMatches)
 
