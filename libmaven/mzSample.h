@@ -1207,11 +1207,8 @@ class SearchParameters {
 
     virtual string encodeParams() = 0;
 
-    virtual ~SearchParameters();
-
+    virtual ~SearchParameters() = default; //c++11 way
 };
-
-SearchParameters::~SearchParameters() = default; //c++11 way
 
 /**
  * @brief The PeaksSearchParameters class
