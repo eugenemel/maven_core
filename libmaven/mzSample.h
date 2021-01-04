@@ -1234,6 +1234,27 @@ class PeaksSearchParameters : public SearchParameters {
     bool matchingIsRetainUnknowns = false;
     bool matchingIsClusterPeakGroups = false;
 
+    //default constructor
+    PeaksSearchParameters() {
+
+        //scan filter parameters
+        scanFilterMinFracIntensity = 0.01;
+        scanFilterMinSNRatio = 1;
+        scanFilterMaxNumberOfFragments = 1024;
+        scanFilterBaseLinePercentile = 5;
+        scanFilterIsRetainFragmentsAbovePrecursorMz = false;
+        scanFilterPrecursorPurityPpm = 10;
+        scanFilterMinIntensity = 0;
+
+        //consensus spectrum formation parameters
+        consensusPpmTolr = 10;
+        consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
+        consensusIsIntensityAvgByObserved = false;
+        consensusIsNormalizeTo10K = true;
+        consensusMinNumMs2Scans = 0;
+        consensusMinFractionMs2Scans = 0.0f;
+    }
+
 public:
     string encodeParams();
     static shared_ptr<PeaksSearchParameters> decode(string encodedParams);
