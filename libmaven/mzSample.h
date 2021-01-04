@@ -1200,7 +1200,7 @@ class PeaksSearchParameters : public SearchParameters {
     float eicSmoothingWindow = 0;
     string eicEicSmoothingAlgorithm = "GAUSSIAN";
     float eicMaxPeakGroupRtDiff = 0.5;
-    int eic_noNoiseObs = 0;
+    int eicNoNoiseObs = 0;
 
     //quality
     float qualitySignalBaselineRatio = 1.00;

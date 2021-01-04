@@ -1736,13 +1736,76 @@ vector<Adduct*> Adduct::loadAdducts(string filename){
 }
 
 string PeaksSearchParameters::encodeParams(){
-    return "TODO";
+
+    string encodedParams;
+
+    //baseline
+    encodedParams = encodedParams + "baselineSmoothingWindow" + "=" + to_string(baselineSmoothingWindow) + ";";
+    encodedParams = encodedParams + "baselineDropTopX" + "=" + to_string(baselineDropTopX) + ";";
+
+    //eic
+    encodedParams = encodedParams + "eicSmoothingWindow" + "=" + to_string(eicSmoothingWindow) + ";";
+    encodedParams = encodedParams + "eicEicSmoothingAlgorithm" + "=" + eicEicSmoothingAlgorithm + ";";
+    encodedParams = encodedParams + "eicMaxPeakGroupRtDiff" + "=" + to_string(eicMaxPeakGroupRtDiff) + ";";
+    encodedParams = encodedParams + "eicNoNoiseObs" + "=" + to_string(eicNoNoiseObs) + ";";
+
+    //TODO
+
+    //quality
+
+    //isotopes
+
+    //ms1 matching
+
+    //ms1 matching
+
+    //matching options
+
+    return encodedParams;
 }
 
 shared_ptr<PeaksSearchParameters> PeaksSearchParameters::decode(string encodedParams){
     shared_ptr<PeaksSearchParameters> peaksSearchParameters = shared_ptr<PeaksSearchParameters>(new PeaksSearchParameters());
 
+    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams); //use semicolon (default)
+
+    //baseline
+    if (decodedMap.find("baselineSmoothingWindow") != decodedMap.end()) {
+        peaksSearchParameters->baselineSmoothingWindow = stof(decodedMap["baselineSmoothingWindow"]);
+    }
+    if (decodedMap.find("baselineDropTopX") != decodedMap.end()) {
+        peaksSearchParameters->baselineDropTopX = stoi(decodedMap["baselineDropTopX"]);
+    }
+
+    //eic
+    if (decodedMap.find("eicSmoothingWindow") != decodedMap.end()){
+        peaksSearchParameters->eicSmoothingWindow = stof(decodedMap["eicSmoothingWindow"]);
+    }
+    if (decodedMap.find("eicEicSmoothingAlgorithm") != decodedMap.end()){
+        peaksSearchParameters->eicEicSmoothingAlgorithm = decodedMap["eicEicSmoothingAlgorithm"];
+    }
+    if (decodedMap.find("eicMaxPeakGroupRtDiff") != decodedMap.end()){
+        peaksSearchParameters->eicMaxPeakGroupRtDiff = stof(decodedMap["eicMaxPeakGroupRtDiff"]);
+    }
+    if (decodedMap.find("eicNoNoiseObs") != decodedMap.end()){
+        peaksSearchParameters->eicNoNoiseObs = stoi(decodedMap["eicNoNoiseObs"]);
+    }
+
+    if (decodedMap.find("") != decodedMap.end()){
+
+    }
+
     //TODO
+
+    //quality
+
+    //isotopes
+
+    //ms1 matching
+
+    //ms1 matching
+
+    //matching options
 
     return peaksSearchParameters;
 }
