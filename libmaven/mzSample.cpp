@@ -1792,17 +1792,31 @@ string PeaksSearchParameters::encodeParams(){
     encodedParams = encodedParams + "eicMaxPeakGroupRtDiff" + "=" + to_string(eicMaxPeakGroupRtDiff) + ";";
     encodedParams = encodedParams + "eicNoNoiseObs" + "=" + to_string(eicNoNoiseObs) + ";";
 
-    //TODO
-
     //quality
+    encodedParams = encodedParams + "qualitySignalBaselineRatio" + "=" + to_string(qualitySignalBaselineRatio) + ";";
+    encodedParams = encodedParams + "qualitySignalBlankRatio" + "=" + to_string(qualitySignalBlankRatio) + ";";
+    encodedParams = encodedParams + "qualityMinPeakGroupIntensity" + "=" + to_string(qualityMinPeakGroupIntensity) + ";";
+    encodedParams = encodedParams + "qualityMinPeakWidth" + "=" + to_string(qualityMinPeakWidth) + ";";
+    encodedParams = encodedParams + "qualityMinGoodPeakPerGroup" + "=" + to_string(qualityMinGoodPeakPerGroup) + ";";
+    encodedParams = encodedParams + "qualityMinPeakQuality" + "=" + to_string(qualityMinPeakQuality) + ";";
+    encodedParams = encodedParams + "qualityClassifierModelName" + "=" + qualityClassifierModelName + ";";
 
     //isotopes
+    encodedParams = encodedParams + "isotopesIsExcludeIsotopicPeaks" + "=" + to_string(isotopesIsExcludeIsotopicPeaks) + ";";
 
     //ms1 matching
+    encodedParams = encodedParams + "ms1IsMatchRtFlag" + "=" + to_string(ms1IsMatchRtFlag) + ";";
+    encodedParams = encodedParams + "ms1PpmTolr" + "=" + to_string(ms1PpmTolr) + ";";
 
-    //ms1 matching
+    //ms2 matching
+    encodedParams = encodedParams + "ms2IsMatchMs2" + "=" + to_string(ms2IsMatchMs2) + ";";
+    encodedParams = encodedParams + "ms2ScoringAlgorithm" + "=" + ms2ScoringAlgorithm + ";";
+    encodedParams = encodedParams + "ms2MinScore" + "=" + to_string(ms2MinScore) + ";";
 
     //matching options
+    encodedParams = encodedParams + "matchingIsRequireAdductPrecursorMatch" + "=" + to_string(matchingIsRequireAdductPrecursorMatch) + ";";
+    encodedParams = encodedParams + "matchingIsRetainUnknowns" + "=" + to_string(matchingIsRetainUnknowns) + ";";
+    encodedParams = encodedParams + "matchingIsClusterPeakGroups" + "=" + to_string(matchingIsClusterPeakGroups) + ";";
 
     // END PeaksSearchParameters
 
@@ -1839,7 +1853,7 @@ shared_ptr<PeaksSearchParameters> PeaksSearchParameters::decode(string encodedPa
         peaksSearchParameters->scanFilterMinIntensity = stof(decodedMap["scanFilterMinIntensity"]);
     }
 
-            //scan filter for MS1 scans
+    //scan filter for MS1 scans
     if (decodedMap.find("scanFilterMs1MinRt") != decodedMap.end()) {
         peaksSearchParameters->scanFilterMs1MinRt = stof(decodedMap["scanFilterMs1MinRt"]);
     }
@@ -1855,7 +1869,7 @@ shared_ptr<PeaksSearchParameters> PeaksSearchParameters::decode(string encodedPa
         peaksSearchParameters->scanFilterMs2MaxRt = stof(decodedMap["scanFilterMs2MaxRt"]);
     }
 
-            //consensus spectrum params (all ms levels)
+    //consensus spectrum params (all ms levels)
 
     if (decodedMap.find("consensusIsIntensityAvgByObserved") != decodedMap.end()){
         peaksSearchParameters->consensusIsIntensityAvgByObserved = decodedMap["consensusIsIntensityAvgByObserved"] == "1";
@@ -1919,21 +1933,60 @@ shared_ptr<PeaksSearchParameters> PeaksSearchParameters::decode(string encodedPa
         peaksSearchParameters->eicNoNoiseObs = stoi(decodedMap["eicNoNoiseObs"]);
     }
 
-    if (decodedMap.find("") != decodedMap.end()){
-
+    //quality
+    if (decodedMap.find("qualitySignalBaselineRatio") != decodedMap.end()){
+        peaksSearchParameters->qualitySignalBaselineRatio = stof(decodedMap["qualitySignalBaselineRatio"]);
+    }
+    if (decodedMap.find("qualitySignalBlankRatio") != decodedMap.end()){
+        peaksSearchParameters->qualitySignalBlankRatio = stof(decodedMap["qualitySignalBlankRatio"]);
+    }
+    if (decodedMap.find("qualityMinPeakGroupIntensity") != decodedMap.end()){
+        peaksSearchParameters->qualityMinPeakGroupIntensity = stof(decodedMap["qualityMinPeakGroupIntensity"]);
+    }
+    if (decodedMap.find("qualityMinPeakWidth") != decodedMap.end()){
+        peaksSearchParameters->qualityMinPeakWidth = stoi(decodedMap["qualityMinPeakWidth"]);
+    }
+    if (decodedMap.find("qualityMinGoodPeakPerGroup") != decodedMap.end()){
+        peaksSearchParameters->qualityMinGoodPeakPerGroup = stof(decodedMap["qualityMinGoodPeakPerGroup"]);
+    }
+    if (decodedMap.find("qualityMinPeakQuality") != decodedMap.end()){
+        peaksSearchParameters->qualityMinPeakQuality = stof(decodedMap["qualityMinPeakQuality"]);
+    }
+    if (decodedMap.find("qualityClassifierModelName") != decodedMap.end()){
+        peaksSearchParameters->qualityClassifierModelName = decodedMap["qualityClassifierModelName"];
     }
 
-    //TODO
-
-    //quality
-
     //isotopes
+    if (decodedMap.find("isotopesIsExcludeIsotopicPeaks") != decodedMap.end()){
+        peaksSearchParameters->isotopesIsExcludeIsotopicPeaks = decodedMap["isotopesIsExcludeIsotopicPeaks"] == "1";
+    }
 
     //ms1 matching
+    if (decodedMap.find("ms1IsMatchRtFlag") != decodedMap.end()){
+        peaksSearchParameters->ms1IsMatchRtFlag = decodedMap["ms1IsMatchRtFlag"] == "1";
+    }
 
-    //ms1 matching
+    //ms2 matching
+    if (decodedMap.find("ms2IsMatchMs2") != decodedMap.end()){
+        peaksSearchParameters->ms2IsMatchMs2 = decodedMap["ms2IsMatchMs2"] == "1";
+    }
+    if (decodedMap.find("ms2ScoringAlgorithm") != decodedMap.end()){
+        peaksSearchParameters->ms2ScoringAlgorithm = decodedMap["ms2ScoringAlgorithm"];
+    }
+    if (decodedMap.find("ms2MinScore") != decodedMap.end()){
+        peaksSearchParameters->ms2MinScore = stof(decodedMap["ms2MinScore"]);
+    }
 
     //matching options
+    if (decodedMap.find("matchingIsRequireAdductPrecursorMatch") != decodedMap.end()){
+        peaksSearchParameters->matchingIsRequireAdductPrecursorMatch = decodedMap["matchingIsRequireAdductPrecursorMatch"] == "1";
+    }
+    if (decodedMap.find("matchingIsRetainUnknowns") != decodedMap.end()){
+        peaksSearchParameters->matchingIsRetainUnknowns = decodedMap["matchingIsRetainUnknowns"] == "1";
+    }
+    if (decodedMap.find("matchingIsClusterPeakGroups") != decodedMap.end()){
+        peaksSearchParameters->matchingIsClusterPeakGroups = decodedMap["matchingIsClusterPeakGroups"] == "1";
+    }
 
     // END PeaksSearchParameters
 

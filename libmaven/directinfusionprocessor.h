@@ -78,7 +78,6 @@ public:
      * MS1 SEARCH RELATED
      * @param ms1IsRequireAdductPrecursorMatch:reference compound associated adduct must == query adduct
      * @param ms1IsFindPrecursorIon: only retain matches where precursor peak is found in MS1 scan(s).
-     * @param ms1PpmTolr: tolerance value used for matching theoretical ion m/z to an m/z peak in an MS1 scan
      * @param ms1MinIntensity: min intensity value for an MS1 spectral peak in a consensus MS1 spectrum to be considered real.
      * @param ms1ScanFilter: consider only MS1 scans that substring match in their filterString field to this
      * @param isRequireMonoisotopic: disqualify candidate MS1 peak if there is a peak exactly one 13C-12C width behind
@@ -91,7 +90,6 @@ public:
 
     bool ms1IsRequireAdductPrecursorMatch = true;
     bool ms1IsFindPrecursorIon = false;
-    float ms1PpmTolr = 5;
     float ms1MinIntensity = 0;
     string ms1ScanFilter = "";
     bool ms1IsRequireMonoisotopic = true;

@@ -1166,11 +1166,33 @@ class SearchParameters {
     float consensusMinFractionMs2Scans = 0;
 
     /** ===================
+     * MS1 SEARCH RELATED
+     * @param ms1PpmTolr: tolerance value used for matching theoretical ion m/z to an m/z peak in an MS1 scan
+     * ==================== */
+    float ms1PpmTolr = 5;
+
+    /** ===================
      * MS2 SEARCH RELATED
      * @param ms2MinNumMatches: min number of reference peaks found in observed spectrum
      * @param ms2MinNumDiagnosticMatches: min number of reference peaks labeled as diagnostic found in observed spectrum
-     * @param ms2MinNumUniqueMatches: CURRENTLY UNUSED PARAMETER
-     * @param ms2PpmTolr: m/z tolerance value used for matching reference <--> observed spectra
+     * @param ms2MinNumUniqueMatches: min num of reference peaks that only match to a single compound.
+     *          in a DIMS context, the library compounds may be pre-summarized.
+     * @param ms2PpmTolr: m/z tolerance value used for matching reference <--> observed spectra in an MS2 scan
+     *
+     * Should only be used for comparing MS2 m/zs
+     *
+     * Contexts:
+     *
+     * [1] DirectInfusionMatchAssessment::computeMs2MatchAssessment():
+     * > float maxDeltaMz = (params->ms2PpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
+     * > fragmentationMatchScore.ranks = Fragment::findFragPairsGreedyMz(&t, observedSpectrum, maxDeltaMz);
+     *
+     * [2] DirectInfusionMatchInformation::computeMs1PartitionFractions():
+     * > float queryIntensity = scan->findClosestMzIntensity(queryMz, params->ms2PpmTolr); # scan is an MS2 scan, queryMz is an MS2 m/z
+     *
+     * [3] Fragment::scoreMatch():
+     * >float maxDeltaMz = (productPpmTolr * static_cast<float>(precursorMz))/ 1000000; #variable is renamed to productPpmTolr
+     *
      * @param ms2MinIntensity: minimum intensity value for an MS2 spectral peak to be considered real
      * ==================== */
 
@@ -1185,15 +1207,16 @@ class SearchParameters {
 
     virtual string encodeParams() = 0;
 
-    virtual ~SearchParameters() = default; //c++11 way
+    virtual ~SearchParameters();
 
 };
+
+SearchParameters::~SearchParameters() = default; //c++11 way
 
 /**
  * @brief The PeaksSearchParameters class
  *
  * Used by Peaks Dialog in maven GUI
- * TODO: finish (Issue #197)
  */
 class PeaksSearchParameters : public SearchParameters {
 
@@ -1222,8 +1245,8 @@ public:
     bool isotopesIsExcludeIsotopicPeaks = true;
 
     //ms1 matching
-    bool  ms1IsMatchRtFlag = false;
-    bool  ms1PpmTolr = 20;
+    bool ms1IsMatchRtFlag = false;
+    // ms1PpmTolr (SearchParameters)
 
     //ms2 matching
     bool ms2IsMatchMs2 = false;
@@ -1240,6 +1263,9 @@ public:
 
     //default constructor
     PeaksSearchParameters() {
+
+        //ms1 matching
+        ms1PpmTolr = 20;
 
         //scan filter parameters
         scanFilterMinFracIntensity = 0.01;
