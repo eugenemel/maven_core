@@ -1735,3 +1735,14 @@ vector<Adduct*> Adduct::loadAdducts(string filename){
     return adducts;
 }
 
+string PeaksSearchParameters::encodeParams(){
+    return "TODO";
+}
+
+shared_ptr<PeaksSearchParameters> PeaksSearchParameters::decode(string encodedParams){
+    shared_ptr<PeaksSearchParameters> peaksSearchParameters = shared_ptr<PeaksSearchParameters>(new PeaksSearchParameters());
+
+    //TODO
+
+    return peaksSearchParameters;
+}

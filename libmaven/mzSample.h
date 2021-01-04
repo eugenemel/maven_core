@@ -1231,6 +1231,9 @@ class PeaksSearchParameters : public SearchParameters {
     bool matchingIsRetainUnknowns = false;
     bool matchingIsClusterPeakGroups = false;
 
+    string encodeParams();
+
+    static shared_ptr<PeaksSearchParameters> decode(string encodedParams);
 };
 
 
