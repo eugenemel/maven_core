@@ -651,7 +651,68 @@ void PeakGroup::computeFragPattern(float productPpmTolr)  {
     f.buildConsensus(productPpmTolr);
     f.consensus->sortByMz();
     fragmentationPattern = f.consensus;
-    ms2EventCount = ms2events.size();
+    ms2EventCount = static_cast<int>(ms2events.size());
+}
+
+void PeakGroup::computePeaksSearchFragPattern(shared_ptr<PeaksSearchParameters> params) {
+
+    //build consensus ms2 specta
+//    vector<Scan*>ms2events = getFragmentationEvents();
+//    if (ms2events.size() == 0 ) return;
+//    sort(ms2events.begin(),ms2events.end(),Scan::compIntensity);
+
+    //TODO: modify all of this
+    //Fragment f(ms2events[0],0.01,1,1024);
+//    for(Scan* s : ms2events) {  f.addFragment(new Fragment(s,0,0.01,1024)); }
+//    f.buildConsensus(params->ms2PpmTolr);
+
+//    f.consensus->sortByMz();
+//    fragmentationPattern = f.consensus;
+
+    vector<Scan*> ms2Scans = getFragmentationEvents();
+    ms2EventCount = static_cast<int>(ms2Scans.size());
+
+    if (ms2Scans.empty()) return;   //this can happen when a peakgroup is associated with the wrong meanMz.
+
+    Fragment *f = nullptr;
+    for (auto& scan : ms2Scans) {
+        if (!f){
+            f = new Fragment(scan,
+                             params->scanFilterMinFracIntensity,
+                             params->scanFilterMinSNRatio,
+                             params->scanFilterMaxNumberOfFragments,
+                             params->scanFilterBaseLinePercentile,
+                             params->scanFilterIsRetainFragmentsAbovePrecursorMz,
+                             params->scanFilterPrecursorPurityPpm,
+                             params->scanFilterMinIntensity);
+        } else {
+            Fragment *brother = new Fragment(scan,
+                                             params->scanFilterMinFracIntensity,
+                                             params->scanFilterMinSNRatio,
+                                             params->scanFilterMaxNumberOfFragments,
+                                             params->scanFilterBaseLinePercentile,
+                                             params->scanFilterIsRetainFragmentsAbovePrecursorMz,
+                                             params->scanFilterPrecursorPurityPpm,
+                                             params->scanFilterMinIntensity);
+
+            f->addFragment(brother);
+        }
+    }
+
+    f->buildConsensus(params->consensusPpmTolr,
+                      params->consensusIntensityAgglomerationType,
+                      params->consensusIsIntensityAvgByObserved,
+                      params->consensusIsNormalizeTo10K,
+                      params->consensusMinNumMs2Scans,
+                      params->consensusMinFractionMs2Scans
+                      );
+
+    f->consensus->sortByMz();
+
+    this->fragmentationPattern = f->consensus;
+
+    //cleanup
+    if (f) delete(f);
 }
 
 void PeakGroup::computeDIFragPattern(shared_ptr<DirectInfusionSearchParameters> params){
@@ -698,7 +759,7 @@ void PeakGroup::computeDIFragPattern(shared_ptr<DirectInfusionSearchParameters> 
     }
 
     f->buildConsensus(params->consensusPpmTolr,
-                      Fragment::ConsensusIntensityAgglomerationType::Mean, //TODO: Issue 217
+                      params->consensusIntensityAgglomerationType,
                       params->consensusIsIntensityAvgByObserved,
                       params->consensusIsNormalizeTo10K,
                       params->consensusMinNumMs2Scans,

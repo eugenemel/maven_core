@@ -57,6 +57,8 @@ class Fragment;
 class Isotope;
 struct FragmentationMatchScore;
 
+class PeaksSearchParameters;
+
 using namespace pugi;
 using namespace mzUtils;
 using namespace std;
@@ -667,11 +669,12 @@ class PeakGroup {
 
         vector<Scan*> getRepresentativeFullScans();
         vector<Scan*> getFragmentationEvents();
-        void computeFragPattern(float productPpmTolr);
         void findHighestPurityMS2Pattern(float precPpmTolr);
         Scan* getAverageFragmentationScan(float productPpmTolr);
 
+        void computeFragPattern(float productPpmTolr);
         void computeDIFragPattern(shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters);
+        void computePeaksSearchFragPattern(shared_ptr<PeaksSearchParameters> params);
 
         Peak* getHighestIntensityPeak();
         int getChargeStateFromMS1(float ppm);
