@@ -1195,6 +1195,8 @@ class SearchParameters {
  */
 class PeaksSearchParameters : public SearchParameters {
 
+public:
+
     //baseline
     float baselineSmoothingWindow = 0;
     int baselineDropTopX = 80;
