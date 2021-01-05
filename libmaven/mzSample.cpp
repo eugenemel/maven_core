@@ -1779,6 +1779,16 @@ string PeaksSearchParameters::encodeParams(){
     encodedParams = encodedParams + "consensusMinNumMs2Scans" + "=" + to_string(consensusMinNumMs2Scans) + ";";
     encodedParams = encodedParams + "consensusMinFractionMs2Scans" + "=" + to_string(consensusMinFractionMs2Scans) + ";";
 
+    // ms1 matching
+    encodedParams = encodedParams + "ms1PpmTolr" + "=" + to_string(ms1PpmTolr) + ";";
+
+    // ms2 search
+    encodedParams = encodedParams + "ms2MinNumMatches" + "=" + to_string(ms2MinNumMatches) + ";";
+    encodedParams = encodedParams + "ms2MinNumDiagnosticMatches" + "=" + to_string(ms2MinNumDiagnosticMatches) + ";";
+    encodedParams = encodedParams + "ms2MinNumUniqueMatches" + "=" + to_string(ms2MinNumUniqueMatches) + ";";
+    encodedParams = encodedParams + "ms2PpmTolr" + "=" + to_string(ms2PpmTolr) + ";";
+    encodedParams = encodedParams + "ms2MinIntensity" + "=" + to_string(ms2MinIntensity) + ";";
+
     // END SearchParameters
     // START PeaksSearchParameters
 
@@ -1806,7 +1816,6 @@ string PeaksSearchParameters::encodeParams(){
 
     //ms1 matching
     encodedParams = encodedParams + "ms1IsMatchRtFlag" + "=" + to_string(ms1IsMatchRtFlag) + ";";
-    encodedParams = encodedParams + "ms1PpmTolr" + "=" + to_string(ms1PpmTolr) + ";";
 
     //ms2 matching
     encodedParams = encodedParams + "ms2IsMatchMs2" + "=" + to_string(ms2IsMatchMs2) + ";";
@@ -1906,6 +1915,28 @@ shared_ptr<PeaksSearchParameters> PeaksSearchParameters::decode(string encodedPa
     }
     if (decodedMap.find("consensusMinFractionMs2Scans") != decodedMap.end()){
         peaksSearchParameters->consensusMinFractionMs2Scans = stof(decodedMap["consensusMinFractionMs2Scans"]);
+    }
+
+    // ms1 matching
+    if (decodedMap.find("ms1PpmTolr") != decodedMap.end()) {
+        peaksSearchParameters->ms1PpmTolr = stof(decodedMap["ms1PpmTolr"]);
+    }
+
+    // ms2 search
+    if (decodedMap.find("ms2MinNumMatches") != decodedMap.end()) {
+        peaksSearchParameters->ms2MinNumMatches = stoi(decodedMap["ms2MinNumMatches"]);
+    }
+    if (decodedMap.find("ms2MinNumDiagnosticMatches") != decodedMap.end()) {
+        peaksSearchParameters->ms2MinNumDiagnosticMatches = stoi(decodedMap["ms2MinNumDiagnosticMatches"]);
+    }
+    if (decodedMap.find("ms2MinNumUniqueMatches") != decodedMap.end()) {
+        peaksSearchParameters->ms2MinNumUniqueMatches = stoi(decodedMap["ms2MinNumUniqueMatches"]);
+    }
+    if (decodedMap.find("ms2PpmTolr") != decodedMap.end()) {
+        peaksSearchParameters->ms2PpmTolr = stof(decodedMap["ms2PpmTolr"]);
+    }
+    if (decodedMap.find("ms2MinIntensity") != decodedMap.end()) {
+        peaksSearchParameters->ms2MinIntensity = stof(decodedMap["ms2MinIntensity"]);
     }
 
     // END SearchParameters
