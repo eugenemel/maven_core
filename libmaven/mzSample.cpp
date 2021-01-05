@@ -1812,7 +1812,7 @@ string PeaksSearchParameters::encodeParams(){
     encodedParams = encodedParams + "qualityClassifierModelName" + "=" + qualityClassifierModelName + ";";
 
     //isotopes
-    encodedParams = encodedParams + "isotopesIsExcludeIsotopicPeaks" + "=" + to_string(isotopesIsExcludeIsotopicPeaks) + ";";
+    encodedParams = encodedParams + "isotopesIsRequireMonoisotopicPeaks" + "=" + to_string(isotopesIsRequireMonoisotopicPeaks) + ";";
 
     //ms1 matching
     encodedParams = encodedParams + "ms1IsMatchRtFlag" + "=" + to_string(ms1IsMatchRtFlag) + ";";
@@ -1988,8 +1988,8 @@ shared_ptr<PeaksSearchParameters> PeaksSearchParameters::decode(string encodedPa
     }
 
     //isotopes
-    if (decodedMap.find("isotopesIsExcludeIsotopicPeaks") != decodedMap.end()){
-        peaksSearchParameters->isotopesIsExcludeIsotopicPeaks = decodedMap["isotopesIsExcludeIsotopicPeaks"] == "1";
+    if (decodedMap.find("isotopesIsRequireMonoisotopicPeaks") != decodedMap.end()){
+        peaksSearchParameters->isotopesIsRequireMonoisotopicPeaks = decodedMap["isotopesIsRequireMonoisotopicPeaks"] == "1";
     }
 
     //ms1 matching

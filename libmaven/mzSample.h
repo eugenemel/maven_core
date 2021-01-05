@@ -1210,6 +1210,12 @@ class SearchParameters {
     virtual ~SearchParameters() = default; //c++11 way
 };
 
+enum PeakGroupCompoundMatchingPolicy {
+    ALL_MATCHES,
+    SINGLE_TOP_HIT,
+    TOP_SCORE_HITS
+};
+
 /**
  * @brief The PeaksSearchParameters class
  *
@@ -1239,11 +1245,14 @@ public:
     string qualityClassifierModelName = "default.model";
 
     //isotopes
-    bool isotopesIsExcludeIsotopicPeaks = true;
+    bool isotopesIsRequireMonoisotopicPeaks = true; //renamed
+    bool isotopesExtractIsotopicPeaks = false; // NEW
 
     //ms1 matching
     bool ms1IsMatchRtFlag = false;
     // ms1PpmTolr (SearchParameters)
+    float ms1MassSliceMergePpm = 20.0f; //NEW
+    float ms1IsotopePatternExtraction = 20.0f; // NEW
 
     //ms2 matching
     bool ms2IsMatchMs2 = false;
@@ -1257,6 +1266,8 @@ public:
     bool matchingIsRequireAdductPrecursorMatch = true;
     bool matchingIsRetainUnknowns = false;
     bool matchingIsClusterPeakGroups = false;
+    string matchingLibraries = ""; // NEW
+    PeakGroupCompoundMatchingPolicy matchingPolicy = PeakGroupCompoundMatchingPolicy::SINGLE_TOP_HIT; //NEW
 
     //default constructor
     PeaksSearchParameters() {
