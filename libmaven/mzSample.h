@@ -1247,12 +1247,12 @@ public:
     //isotopes
     bool isotopesIsRequireMonoisotopicPeaks = true; //renamed
     bool isotopesExtractIsotopicPeaks = false; // NEW
+    float isotopesMzTolerance = 20.0f; // NEW
 
     //ms1 matching
     bool ms1IsMatchRtFlag = false;
     // ms1PpmTolr (SearchParameters)
     float ms1MassSliceMergePpm = 20.0f; //NEW
-    float ms1IsotopePatternExtraction = 20.0f; // NEW
 
     //ms2 matching
     bool ms2IsMatchMs2 = false;
