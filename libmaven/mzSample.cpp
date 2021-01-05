@@ -1813,9 +1813,14 @@ string PeaksSearchParameters::encodeParams(){
 
     //isotopes
     encodedParams = encodedParams + "isotopesIsRequireMonoisotopicPeaks" + "=" + to_string(isotopesIsRequireMonoisotopicPeaks) + ";";
+    encodedParams = encodedParams + "isotopesExtractIsotopicPeaks" + "=" + to_string(isotopesExtractIsotopicPeaks) + ";";
+    encodedParams = encodedParams + "isotopesMzTolerance" + "=" + to_string(isotopesMzTolerance) + ";";
 
-    //ms1 matching
+    //ms1
     encodedParams = encodedParams + "ms1IsMatchRtFlag" + "=" + to_string(ms1IsMatchRtFlag) + ";";
+    encodedParams = encodedParams + "ms1RtTolr" + "=" + to_string(ms1RtTolr) + ";";
+    encodedParams = encodedParams + "ms1MassSliceMergeNumScans" + "=" + to_string(ms1MassSliceMergeNumScans) + ";";
+    encodedParams = encodedParams + "ms1MassSliceMergePpm" + "=" + to_string(ms1MassSliceMergePpm) + ";";
 
     //ms2 matching
     encodedParams = encodedParams + "ms2IsMatchMs2" + "=" + to_string(ms2IsMatchMs2) + ";";
@@ -1826,6 +1831,17 @@ string PeaksSearchParameters::encodeParams(){
     encodedParams = encodedParams + "matchingIsRequireAdductPrecursorMatch" + "=" + to_string(matchingIsRequireAdductPrecursorMatch) + ";";
     encodedParams = encodedParams + "matchingIsRetainUnknowns" + "=" + to_string(matchingIsRetainUnknowns) + ";";
     encodedParams = encodedParams + "matchingIsClusterPeakGroups" + "=" + to_string(matchingIsClusterPeakGroups) + ";";
+    encodedParams = encodedParams + "matchingLibraries" + "=" + matchingLibraries + ";";
+
+    string matchingPolicyStr;
+    if (matchingPolicy == PeakGroupCompoundMatchingPolicy::SINGLE_TOP_HIT) {
+        matchingPolicyStr = "SINGLE_TOP_HIT";
+    } else if (matchingPolicy == PeakGroupCompoundMatchingPolicy::ALL_MATCHES) {
+        matchingPolicyStr = "ALL_MATCHES";
+    } else if (matchingPolicy == PeakGroupCompoundMatchingPolicy::TOP_SCORE_HITS) {
+        matchingPolicyStr = "TOP_SCORE_HITS";
+    }
+    encodedParams = encodedParams + "matchingPolicy" + "=" + matchingPolicyStr + ";";
 
     // END PeaksSearchParameters
 
@@ -1991,10 +2007,25 @@ shared_ptr<PeaksSearchParameters> PeaksSearchParameters::decode(string encodedPa
     if (decodedMap.find("isotopesIsRequireMonoisotopicPeaks") != decodedMap.end()){
         peaksSearchParameters->isotopesIsRequireMonoisotopicPeaks = decodedMap["isotopesIsRequireMonoisotopicPeaks"] == "1";
     }
+    if (decodedMap.find("isotopesExtractIsotopicPeaks") != decodedMap.end()) {
+        peaksSearchParameters->isotopesExtractIsotopicPeaks = decodedMap["isotopesExtractIsotopicPeaks"] == "1";
+    }
+    if (decodedMap.find("isotopesMzTolerance") != decodedMap.end()){
+        peaksSearchParameters->isotopesMzTolerance = stof(decodedMap["isotopesMzTolerance"]);
+    }
 
-    //ms1 matching
+    //ms1
     if (decodedMap.find("ms1IsMatchRtFlag") != decodedMap.end()){
         peaksSearchParameters->ms1IsMatchRtFlag = decodedMap["ms1IsMatchRtFlag"] == "1";
+    }
+    if (decodedMap.find("ms1RtTolr") != decodedMap.end()) {
+        peaksSearchParameters->ms1RtTolr = stof(decodedMap["ms1RtTolr"]);
+    }
+    if (decodedMap.find("ms1MassSliceMergeNumScans") != decodedMap.end()) {
+        peaksSearchParameters->ms1MassSliceMergeNumScans = stof(decodedMap["ms1MassSliceMergeNumScans"]);
+    }
+    if (decodedMap.find("ms1MassSliceMergePpm") != decodedMap.end()) {
+        peaksSearchParameters->ms1MassSliceMergePpm = stof(decodedMap["ms1MassSliceMergePpm"]);
     }
 
     //ms2 matching
@@ -2017,6 +2048,19 @@ shared_ptr<PeaksSearchParameters> PeaksSearchParameters::decode(string encodedPa
     }
     if (decodedMap.find("matchingIsClusterPeakGroups") != decodedMap.end()){
         peaksSearchParameters->matchingIsClusterPeakGroups = decodedMap["matchingIsClusterPeakGroups"] == "1";
+    }
+    if (decodedMap.find("matchingLibraries") != decodedMap.end()) {
+        peaksSearchParameters->matchingLibraries = decodedMap["matchingLibraries"];
+    }
+    if (decodedMap.find("matchingPolicy") != decodedMap.end()) {
+        string matchingPolicyStr = decodedMap["matchingPolicy"];
+        if (matchingPolicyStr == "ALL_MATCHES") {
+            peaksSearchParameters->matchingPolicy = PeakGroupCompoundMatchingPolicy::ALL_MATCHES;
+        } else if (matchingPolicyStr == "SINGLE_TOP_HIT") {
+            peaksSearchParameters->matchingPolicy = PeakGroupCompoundMatchingPolicy::SINGLE_TOP_HIT;
+        } else if (matchingPolicyStr == "TOP_SCORE_HITS") {
+            peaksSearchParameters->matchingPolicy = PeakGroupCompoundMatchingPolicy::TOP_SCORE_HITS;
+        }
     }
 
     // END PeaksSearchParameters

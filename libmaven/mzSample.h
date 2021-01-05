@@ -1245,14 +1245,16 @@ public:
     string qualityClassifierModelName = "default.model";
 
     //isotopes
-    bool isotopesIsRequireMonoisotopicPeaks = true; //renamed
-    bool isotopesExtractIsotopicPeaks = false; // NEW
-    float isotopesMzTolerance = 20.0f; // NEW
+    bool isotopesIsRequireMonoisotopicPeaks = true;
+    bool isotopesExtractIsotopicPeaks = false;
+    float isotopesMzTolerance = 20.0f;
 
     //ms1 matching
-    bool ms1IsMatchRtFlag = false;
     // ms1PpmTolr (SearchParameters)
-    float ms1MassSliceMergePpm = 20.0f; //NEW
+    bool ms1IsMatchRtFlag = false;
+    float ms1RtTolr = 2.0f;
+    float ms1MassSliceMergePpm = 20.0f;
+    float ms1MassSliceMergeNumScans = 10.0f;
 
     //ms2 matching
     bool ms2IsMatchMs2 = false;
@@ -1266,8 +1268,8 @@ public:
     bool matchingIsRequireAdductPrecursorMatch = true;
     bool matchingIsRetainUnknowns = false;
     bool matchingIsClusterPeakGroups = false;
-    string matchingLibraries = ""; // NEW
-    PeakGroupCompoundMatchingPolicy matchingPolicy = PeakGroupCompoundMatchingPolicy::SINGLE_TOP_HIT; //NEW
+    string matchingLibraries = "";
+    PeakGroupCompoundMatchingPolicy matchingPolicy = PeakGroupCompoundMatchingPolicy::SINGLE_TOP_HIT;
 
     //default constructor
     PeaksSearchParameters() {
