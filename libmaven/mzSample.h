@@ -1267,7 +1267,6 @@ public:
     //matching options
     bool matchingIsRequireAdductPrecursorMatch = true;
     bool matchingIsRetainUnknowns = false;
-    bool matchingIsClusterPeakGroups = false;
     string matchingLibraries = "";
     PeakGroupCompoundMatchingPolicy matchingPolicy = PeakGroupCompoundMatchingPolicy::SINGLE_TOP_HIT;
 

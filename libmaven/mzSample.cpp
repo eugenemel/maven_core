@@ -1830,7 +1830,6 @@ string PeaksSearchParameters::encodeParams(){
     //matching options
     encodedParams = encodedParams + "matchingIsRequireAdductPrecursorMatch" + "=" + to_string(matchingIsRequireAdductPrecursorMatch) + ";";
     encodedParams = encodedParams + "matchingIsRetainUnknowns" + "=" + to_string(matchingIsRetainUnknowns) + ";";
-    encodedParams = encodedParams + "matchingIsClusterPeakGroups" + "=" + to_string(matchingIsClusterPeakGroups) + ";";
     encodedParams = encodedParams + "matchingLibraries" + "=" + matchingLibraries + ";";
 
     string matchingPolicyStr;
@@ -2045,9 +2044,6 @@ shared_ptr<PeaksSearchParameters> PeaksSearchParameters::decode(string encodedPa
     }
     if (decodedMap.find("matchingIsRetainUnknowns") != decodedMap.end()){
         peaksSearchParameters->matchingIsRetainUnknowns = decodedMap["matchingIsRetainUnknowns"] == "1";
-    }
-    if (decodedMap.find("matchingIsClusterPeakGroups") != decodedMap.end()){
-        peaksSearchParameters->matchingIsClusterPeakGroups = decodedMap["matchingIsClusterPeakGroups"] == "1";
     }
     if (decodedMap.find("matchingLibraries") != decodedMap.end()) {
         peaksSearchParameters->matchingLibraries = decodedMap["matchingLibraries"];
