@@ -457,9 +457,14 @@ string LipidSummarizationUtils::getSummaryLevel5ToLevel4(LipidNameComponents lip
            for (string::size_type pos = 0; pos < oxBits[0].size(); pos++) {
                char c = oxBits[0][pos];
                if (c == ':') {
-                   numSingle = stoi(oxBits[0].substr(0, pos));
-                   numDouble = stoi(oxBits[0].substr(pos+1, (oxBits[0].size()-pos)));
-                   break;
+                   try {
+                       numSingle = stoi(oxBits[0].substr(0, pos));
+                       numDouble = stoi(oxBits[0].substr(pos+1, (oxBits[0].size()-pos)));
+                       break;
+                   } catch (const::std::invalid_argument& ia) {
+                       return "";
+                   }
+
                }
            }
 
@@ -475,8 +480,12 @@ string LipidSummarizationUtils::getSummaryLevel5ToLevel4(LipidNameComponents lip
                //multiple hydroxyl
                auto multipleHydroxylPos = oxBit.find("(OH)");
                if (multipleHydroxylPos != string::npos) {
-                   int numHydroxyl = stoi(oxBit.substr(multipleHydroxylPos+4, oxBit.size()-multipleHydroxylPos));
-                   numAddOx += numHydroxyl;
+                   try {
+                       int numHydroxyl = stoi(oxBit.substr(multipleHydroxylPos+4, oxBit.size()-multipleHydroxylPos));
+                       numAddOx += numHydroxyl;
+                   } catch (const::std::invalid_argument& ia) {
+                       return ""; //could not determine number of hydroxyls, return
+                   }
                }
 
                //epoxide
@@ -671,7 +680,12 @@ string LipidSummarizationUtils::getSummaryLevel4ToLevel2(LipidNameComponents lip
                 if (chainBitOHCorrected[i] == ';') {
                     if (i < chainBitOHCorrected.size()-2) {
                         string::size_type end = chainBitOHCorrected.size()-i-1;
-                        numOxSemicolonFormat = stoi(chainBitOHCorrected.substr(i+2, end));
+                        try {
+                            numOxSemicolonFormat = stoi(chainBitOHCorrected.substr(i+2, end));
+                        } catch (const std::invalid_argument& ia) {
+                            //assume no oxygen
+                        }
+
                     } else {
                         numOxSemicolonFormat = 1;
                     }
@@ -708,8 +722,13 @@ string LipidSummarizationUtils::getSummaryLevel4ToLevel2(LipidNameComponents lip
           return string("");
         }
 
-        alkaneSum += stoi(chainBits.at(0));
-        alkeneSum += stoi(chainBits.at(1));
+        try {
+            alkaneSum += stoi(chainBits.at(0));
+            alkeneSum += stoi(chainBits.at(1));
+        } catch (const std::invalid_argument& ia) {
+            return "";
+        }
+
     }
 
     if (linkageType != "") {
