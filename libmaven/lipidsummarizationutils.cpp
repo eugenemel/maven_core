@@ -56,8 +56,8 @@ LipidNameComponents LipidSummarizationUtils::getNameComponents(string lipidName)
     unsigned long startChains = chainStart+1;
     unsigned long endChains = lastCloseParanthesis-chainStart-1;
 
-    //could not parse chains
-    if (endChains < startChains) {
+    //could not parse chains, some problem with computations
+    if ((startChains+endChains) > lipidName.size()) {
         return lipidNameComponents;
     }
 
