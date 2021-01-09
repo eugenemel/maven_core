@@ -37,12 +37,31 @@ LipidNameComponents LipidSummarizationUtils::getNameComponents(string lipidName)
 
     string lipidClass = lipidName.substr(0, chainStart);
 
-    string::size_type lastPos = lipidName.size()-1;
-    if (lipidName[lastPos] == ')'){
-        lastPos--;
+    //Issue 332: handle less well-formatted names
+    string::size_type lastCloseParanthesis = string::npos;
+    for (string::size_type i = 0; i <lipidName.size(); i++) {
+        if (lipidName[i] == ')') {
+            if (lastCloseParanthesis == string::npos){
+                lastCloseParanthesis = i;
+            } else if (i > lastCloseParanthesis) {
+                lastCloseParanthesis = i;
+            }
+        }
     }
 
-    string chainsSubstring = lipidName.substr(chainStart+1, (lastPos-chainStart));
+    if (lastCloseParanthesis == string::npos) {
+        lastCloseParanthesis = lipidName.size()-1;
+    }
+
+    unsigned long startChains = chainStart+1;
+    unsigned long endChains = lastCloseParanthesis-chainStart-1;
+
+    //could not parse chains
+    if (endChains < startChains) {
+        return lipidNameComponents;
+    }
+
+    string chainsSubstring = lipidName.substr(startChains, endChains);
 
     regex rx("/");
     regex rxSemiColonNum(".*;[0-9]+.*");
