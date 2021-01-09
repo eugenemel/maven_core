@@ -37,7 +37,7 @@ LipidNameComponents LipidSummarizationUtils::getNameComponents(string lipidName)
 
     string lipidClass = lipidName.substr(0, chainStart);
 
-    //Issue 332: handle less well-formatted names
+    //Issue 332: handle less well-formatted names - find the close paranthesis
     string::size_type lastCloseParanthesis = string::npos;
     for (string::size_type i = 0; i <lipidName.size(); i++) {
         if (lipidName[i] == ')') {
@@ -49,8 +49,9 @@ LipidNameComponents LipidSummarizationUtils::getNameComponents(string lipidName)
         }
     }
 
+    //Need to find both first and last paranthesis to define chains
     if (lastCloseParanthesis == string::npos) {
-        lastCloseParanthesis = lipidName.size()-1;
+        return lipidNameComponents;
     }
 
     unsigned long startChains = chainStart+1;
