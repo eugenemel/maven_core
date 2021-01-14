@@ -1220,6 +1220,20 @@ public:
 
 };
 
+//Issue 319: functors to compare objects instead of memory addresses in maps
+//See https://stackoverflow.com/questions/25122932/pointers-as-keys-in-map-c-stl
+struct adduct_less {
+    bool operator()(Adduct* lhs, Adduct *rhs) {
+        return lhs->name < rhs->name;
+    }
+};
+
+struct compound_less {
+    bool operator()(Compound* lhs, Compound* rhs) {
+        return lhs->name < rhs->name;
+    }
+};
+
 /**
  * @brief The DIPipelineSampleData struct
  * container for a single DI sample,
@@ -1248,7 +1262,7 @@ struct DIPipelineSampleData {
     map<int, DirectInfusionAnnotation*> isAnnotationsByPrecursorRangeId = {};
 
     //Issue 319: store quant measurements for different adduct forms of identified compounds
-    map<Compound*, map<Adduct*, float>> compoundQuantByAdduct{};
+    map<Compound*, map<Adduct*, float, adduct_less>, compound_less> compoundQuantByAdduct{};
 
     //Internal Standards Normalization
 
