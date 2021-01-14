@@ -1247,31 +1247,35 @@ struct DIPipelineSampleData {
     //Data
 
     mzSample* sample = nullptr;
-    vector<Scan*> validMs1Scans = {};
+    vector<Scan*> validMs1Scans{};
     Fragment* ms1Fragment = nullptr;
-    map<int, vector<Scan*>> ms2ScansByPrecursorRangeId = {};
+    map<int, vector<Scan*>> ms2ScansByPrecursorRangeId{};
 
     //Pipeline Search Results
 
     //is results
     long searchNumOutputRows = 0;
-    map<int, DirectInfusionAnnotation*> searchAnnotationsByPrecursorRangeId = {};
+    map<int, DirectInfusionAnnotation*> searchAnnotationsByPrecursorRangeId{};
 
     //search results
     long isNumOutputRows = 0;
-    map<int, DirectInfusionAnnotation*> isAnnotationsByPrecursorRangeId = {};
+    map<int, DirectInfusionAnnotation*> isAnnotationsByPrecursorRangeId{};
 
     //Issue 319: store quant measurements for different adduct forms of identified compounds
     map<Compound*, map<Adduct*, float, adduct_less>, compound_less> compoundQuantByAdduct{};
 
     //Internal Standards Normalization
+    //key = <lipidClass, adductName>
 
     //precursor
-    map<pair<string, string>, float> precursorQuantNormalizationIntensityMap = {};
-    map<pair<string, string>, float> precursorQuantNormalizationMzMap = {};
+    map<pair<string, string>, float> precursorQuantNormalizationIntensityMap{};
+    map<pair<string, string>, float> precursorQuantNormalizationMzMap{};
+
+    //IS quant for adduct table
+    map<pair<string, string>, float> precursorQuantByAdductNormalizationIntensityMap{};
 
     //fragments
-    map<tuple<string, string, string>, float> fragmentQuantNormalizationMap = {};
+    map<tuple<string, string, string>, float> fragmentQuantNormalizationMap{};
 };
 
 enum ScanIntensityType{STANDARD=0, QUERY=1};
