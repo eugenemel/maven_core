@@ -1223,13 +1223,13 @@ public:
 //Issue 319: functors to compare objects instead of memory addresses in maps
 //See https://stackoverflow.com/questions/25122932/pointers-as-keys-in-map-c-stl
 struct adduct_less {
-    bool operator()(Adduct* lhs, Adduct *rhs) {
+    bool operator()(Adduct* lhs, Adduct *rhs) const {
         return lhs->name < rhs->name;
     }
 };
 
 struct compound_less {
-    bool operator()(Compound* lhs, Compound* rhs) {
+    bool operator()(Compound* lhs, Compound* rhs) const {
         return lhs->name < rhs->name;
     }
 };
