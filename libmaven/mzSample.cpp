@@ -1741,6 +1741,9 @@ string PeaksSearchParameters::encodeParams(){
 
     //START SearchParameters
 
+    //program level
+    encodedParams = encodedParams + "searchVersion" + "=" + searchVersion + ";";
+
     //scan filter params
     encodedParams = encodedParams + "scanFilterMinFracIntensity" + "=" + to_string(scanFilterMinFracIntensity) + ";";
     encodedParams = encodedParams + "scanFilterMinSNRatio" + "=" + to_string(scanFilterMinSNRatio) + ";";
@@ -1853,6 +1856,11 @@ shared_ptr<PeaksSearchParameters> PeaksSearchParameters::decode(string encodedPa
     unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams); //use semicolon (default)
 
     //START SearchParameters
+
+    //program level
+    if (decodedMap.find("searchVersion") != decodedMap.end()) {
+        peaksSearchParameters->searchVersion = decodedMap["searchVersion"];
+    }
 
     //scan filter params
     if (decodedMap.find("scanFilterMinFracIntensity") != decodedMap.end()){

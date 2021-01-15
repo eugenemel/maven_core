@@ -1127,6 +1127,12 @@ class SearchParameters {
     public:
 
     /** =======================
+     * PROGRAM LEVEL
+     * searchVersion: version of search protocol used to generate results.
+     * ========================*/
+     string searchVersion = "UNKNOWN";  //Issue 335
+
+    /** =======================
      * SCAN FILTER ASSOCIATED
      * All parameters are arguments of Fragment::Fragment() constructor.
      * ========================*/
