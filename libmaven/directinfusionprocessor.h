@@ -213,6 +213,9 @@ public:
 
         string encodedParams;
 
+        //program level
+        encodedParams = encodedParams + "searchVersion" + "=" + searchVersion + ";";
+
         //scan filter params (all ms levels)
         encodedParams = encodedParams + "scanFilterMinFracIntensity" + "=" + to_string(scanFilterMinFracIntensity) + ";";
         encodedParams = encodedParams + "scanFilterMinSNRatio" + "=" + to_string(scanFilterMinSNRatio) + ";";
@@ -397,6 +400,11 @@ public:
         shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters = shared_ptr<DirectInfusionSearchParameters>(new DirectInfusionSearchParameters());
 
         unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams); //use semicolon (default)
+
+        //program level
+        if (decodedMap.find("searchVersion") != decodedMap.end()) {
+            directInfusionSearchParameters->searchVersion = decodedMap["searchVersion"];
+        }
 
         //scan filter params
         if (decodedMap.find("scanFilterMinFracIntensity") != decodedMap.end()){
