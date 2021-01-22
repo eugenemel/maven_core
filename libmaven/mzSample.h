@@ -246,6 +246,13 @@ class mzLink {
             void* data1;   
             void* data2;
 			//
+
+            //Issue 337
+            //for use with Isotope widget
+            float isotopeFrac = 0.0f;
+            float percentExpected = 0.0f;
+            float percentRelative = 0.0f;
+
            float correlation;
            static bool compMz(const mzLink& a, const mzLink& b ) { return a.mz1 < b.mz1; }
            static bool compCorrelation(const mzLink& a, const mzLink& b) { return a.correlation > b.correlation; }
