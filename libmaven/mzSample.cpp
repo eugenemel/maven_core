@@ -333,9 +333,28 @@ void mzSample::parseMzMLChromatogromList(xml_node chromatogramList) {
                         xml_node binaryDataArrayList = chromatogram.child("binaryDataArrayList");
                         string precursorMzStr = chromatogram.first_element_by_path("precursor/isolationWindow/cvParam").attribute("value").value();
                         string productMzStr = chromatogram.first_element_by_path("product/isolationWindow/cvParam").attribute("value").value();
-                        float precursorMz = string2float(precursorMzStr);
-            float productMz = string2float(productMzStr);
-            int mslevel=2;
+
+                        float precursorMz = -1.0f;
+                        float productMz = -1.0f;
+
+                        try {
+                            precursorMz = string2float(precursorMzStr);
+                            productMz = string2float(productMzStr);
+                        } catch (...) {
+                            //swallow, skip these scans
+                        }
+
+                        //Issue 347: retrieve scans
+                        int scanpolarity = 0;
+                        map<string,string>cvParams = mzML_cvParams(chromatogram);
+
+                        if (cvParams.count("positive scan")) {
+                            scanpolarity=1;
+                        } else if(cvParams.count("negative scan")) {
+                            scanpolarity=-1;
+                        }
+
+                        int mslevel=2;
 
         for( xml_node binaryDataArray= binaryDataArrayList.child("binaryDataArray");
                                 binaryDataArray; binaryDataArray=binaryDataArray.next_sibling("binaryDataArray")) {
@@ -360,9 +379,9 @@ void mzSample::parseMzMLChromatogromList(xml_node chromatogramList) {
 //                cerr << timeVector.size()  << " ints=" << intsVector.size() << endl;
 //                cerr << "pre: " << precursorMz  << " prod=" << productMz << endl;
 
-                if (precursorMz and precursorMz ) {
+                if (precursorMz > 0 and productMz > 0) {
                                 for(unsigned int i=0; i < timeVector.size(); i++ ) {
-                                                Scan* scan = new Scan(this,scannum++,mslevel,timeVector[i],precursorMz,-1);
+                                                Scan* scan = new Scan(this,scannum++,mslevel,timeVector[i],precursorMz,scanpolarity);
                                                 scan->productMz=productMz;
                                                 scan->mz.push_back(productMz);
                                                 scan->filterLine= chromatogramId;
