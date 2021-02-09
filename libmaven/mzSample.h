@@ -200,7 +200,7 @@ class SRMTransition{
 public:
 
     float precursorMz = 0.0f;
-    float transitionMz = 0.0f;
+    float productMz = 0.0f;
     Compound *compound = nullptr;
     Adduct *adduct = nullptr;
 
