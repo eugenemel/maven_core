@@ -1031,7 +1031,7 @@ void mzSample::enumerateSRMScans() {
             srmScans[scans[i]->filterLine].push_back(i);
         }
     }
-    cerr << "enumerateSRMScans: " << srmScans.size() << endl;
+    cerr << "mzSample::enumerateSRMScans(): Found " << srmScans.size() << " SRM scans" << endl;
 }
 
 Scan* mzSample::getScan(unsigned int scanNum) {
