@@ -1025,10 +1025,26 @@ float mzSample::getAverageFullScanTime() {
 
 
 void mzSample::enumerateSRMScans() {
+
     srmScans.clear();
+    srmScansByMzs.clear();
+
     for(unsigned int i=0; i < scans.size(); i++ ) {
+
         if (scans[i]->filterLine.length()>0) {
-            srmScans[scans[i]->filterLine].push_back(i);
+
+            string stringKey = scans[i]->filterLine;
+            if(srmScans.find(stringKey) == srmScans.end()) {
+                srmScans.insert(make_pair(stringKey, vector<int>()));
+            }
+            srmScans[stringKey].push_back(static_cast<int>(i));
+
+            pair<float, float> mzKey = make_pair(scans[i]->precursorMz, scans[i]->productMz);
+            if (srmScansByMzs.find(mzKey) == srmScansByMzs.end()) {
+                srmScansByMzs.insert(make_pair(mzKey, vector<int>()));
+            }
+            srmScansByMzs[mzKey].push_back(static_cast<int>(i));
+
         }
     }
     cerr << "mzSample::enumerateSRMScans(): Found " << srmScans.size() << " SRM scans" << endl;

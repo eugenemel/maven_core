@@ -334,7 +334,7 @@ public:
     string  _setName;
     map<string,vector<int> >srmScans;		//srm to scan mapping
     map<string,string> instrumentInfo;		//tags associated with this sample
-
+    map<pair<float, float>,vector<int>> srmScansByMzs{};    //srm to scan mapping, key = <precursorMz, productMz>
 
     //saving and restoring retention times
     vector<float>originalRetentionTimes;       			//saved retention times prior to alignment
