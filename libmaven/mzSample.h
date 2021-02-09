@@ -195,6 +195,17 @@ private:
 
 };
 
+//Issue 347
+class SRMTransition{
+public:
+
+    float precursorMz = 0.0f;
+    float transitionMz = 0.0f;
+    Compound *compound = nullptr;
+    Adduct *adduct = nullptr;
+
+    vector<mzSlice> mzSlices{};
+};
 
 class mzSlice { 
     public:
