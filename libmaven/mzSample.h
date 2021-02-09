@@ -204,7 +204,7 @@ public:
     Compound *compound = nullptr;
     Adduct *adduct = nullptr;
 
-    vector<mzSlice> mzSlices{};
+    map<mzSample*, mzSlice> mzSlices{};
 };
 
 class mzSlice { 
