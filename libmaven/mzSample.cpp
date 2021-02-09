@@ -1110,7 +1110,6 @@ EIC* mzSample::getEIC(float precursorMz, float collisionEnergy, float productMz,
 
 EIC* mzSample::getEIC(string srm) {
 
-
         EIC* e = new EIC();
 	e->sampleName = sampleName;
 	e->sample = this;
@@ -1154,6 +1153,56 @@ EIC* mzSample::getEIC(string srm) {
     //std::cerr << "getEIC: srm"  << srm << " " << e->intensity.size() << endl;
 
 	return e;
+}
+
+//Issue 347
+//<precursor ion m/z, product ion m/z> for SRM scans
+EIC* mzSample::getEIC(pair<float, float> mzKey) {
+
+    EIC* e = new EIC();
+    e->sampleName = sampleName;
+    e->sample = this;
+    e->totalIntensity=0;
+    e->maxIntensity = 0;
+    e->mzmin = 0;
+    e->mzmax = 0;
+
+    if (srmScansByMzs.size() == 0 ) enumerateSRMScans();
+
+    if (srmScansByMzs.count(mzKey) > 0 ) {
+            vector<int> srmscans = srmScansByMzs[mzKey];
+            for (unsigned int i=0; i < srmscans.size(); i++ ) {
+                Scan* scan = scans[srmscans[i]];
+                float maxMz=0;
+                float maxIntensity=0;
+                for(unsigned int k=0; k < scan->nobs(); k++ ) {
+                    if (scan->intensity[k] > maxIntensity ) {
+                        maxIntensity=scan->intensity[k];
+                        maxMz = scan->mz[k];
+                    }
+                }
+                e->scannum.push_back(scan->scannum);
+                e->rt.push_back( scan->rt );
+                e->intensity.push_back(maxIntensity);
+                e->mz.push_back(maxMz);
+                e->totalIntensity += maxIntensity;
+
+                if (maxIntensity>e->maxIntensity) e->maxIntensity = maxIntensity;
+            }
+    }
+
+    if ( e->rt.size() > 0 ) {
+                e->rtmin = e->rt[0];
+                e->rtmax = e->rt[ e->size()-1];
+    }
+
+    float scale = getNormalizationConstant();
+    if(scale != 1.0) for (unsigned int j=0; j < e->size(); j++) { e->intensity[j] *= scale; }
+    if(e->size() == 0) cerr << "getEIC(pair<float, float> mzKey): is empty key=(" << mzKey.first << ", " << mzKey.second << ")" << endl;
+    //std::cerr << "getEIC: srm"  << srm << " " << e->intensity.size() << endl;
+
+return e;
+
 }
 
 
