@@ -201,6 +201,7 @@ public:
 
     float precursorMz = 0.0f;
     float productMz = 0.0f;
+    float rt = 0.0f;
     Compound *compound = nullptr;
     Adduct *adduct = nullptr;
 
