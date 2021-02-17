@@ -328,6 +328,30 @@ public:
 
         encodedParams = encodedParams + "};";
 
+        //Issue 359
+        encodedParams = encodedParams + "ms2sn1MinNumMatches" + "=" + to_string(ms2sn1MinNumMatches) + ";";
+        encodedParams = encodedParams + "ms2sn2MinNumMatches" + "=" + to_string(ms2sn2MinNumMatches) + ";";
+
+        encodedParams = encodedParams + "ms2sn1MinNumMatchesByLipidClassAndAdduct" +"=" + "{";
+
+        for (auto it = ms2sn1MinNumMatchesByLipidClassAndAdduct.begin(); it != ms2sn1MinNumMatchesByLipidClassAndAdduct.end(); ++it) {
+            string key = it->first.first + TUPLE_MAP_KEY_DELIMITER + it->first.second;
+            string value = to_string(it->second);
+            encodedParams = encodedParams + key + "=" + value + INTERNAL_MAP_DELIMITER;
+        }
+
+        encodedParams = encodedParams + "};";
+
+        encodedParams = encodedParams + "ms2sn2MinNumMatchesByLipidClassAndAdduct" +"=" + "{";
+
+        for (auto it = ms2sn2MinNumMatchesByLipidClassAndAdduct.begin(); it != ms2sn2MinNumMatchesByLipidClassAndAdduct.end(); ++it) {
+            string key = it->first.first + TUPLE_MAP_KEY_DELIMITER + it->first.second;
+            string value = to_string(it->second);
+            encodedParams = encodedParams + key + "=" + value + INTERNAL_MAP_DELIMITER;
+        }
+
+        encodedParams = encodedParams + "};";
+
         //ms1 search params
         encodedParams = encodedParams + "ms1IsRequireAdductPrecursorMatch" + "=" + to_string(ms1IsRequireAdductPrecursorMatch) + ";";
         encodedParams = encodedParams + "ms1IsFindPrecursorIon" + "=" + to_string(ms1IsFindPrecursorIon) + ";";
