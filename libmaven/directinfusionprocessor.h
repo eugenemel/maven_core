@@ -107,12 +107,20 @@ public:
      * @param ms2sn2FragmentLabelTag: label indicates this ms2 fragment is associated with an sn2 acyl chain.
      * @param ms2MinNumMatchesByLipidClassAndAdduct: override default ms2MinNumMatches with a new value specific to <lipidClass, adductName>.
      * @param ms2MinNumDiagnosticMatchesByClassAndAdduct: override default ms2MinNumMatches with a new value specific to <lipidClass, adductName>.
+     * @param ms2sn1MinNumMatches: min num sn1-associated reference peaks found in observed spectrum.
+     * @param ms2sn2MinNumMatches: min num sn2-associated reference peaks found in observed spectrum.
+     * @param ms2sn1MinNumMatchesByLipidClassAndAdduct: override default ms2sn1MinNumMatches with a new value specific to <lipidClass, adductName>.
+     * @param ms2sn2MinNumMatchesByLipidClassAndAdduct: override default ms2sn2MinNumMatches with a new value specific to <lipidClass, adductName>.
      * ==================== */
     string ms2DiagnosticFragmentLabelTag = "*";
     string ms2sn1FragmentLabelTag = "@";
     string ms2sn2FragmentLabelTag = "$";
     map<pair<string, string>, int> ms2MinNumMatchesByLipidClassAndAdduct{};
     map<pair<string, string>, int> ms2MinNumDiagnosticMatchesByLipidClassAndAdduct{};
+    int ms2sn1MinNumMatches = 0;
+    int ms2sn2MinNumMatches = 0;
+    map<pair<string, string>, int> ms2sn1MinNumMatchesByLipidClassAndAdduct{};
+    map<pair<string, string>, int> ms2sn2MinNumMatchesByLipidClassAndAdduct{};
 
     /** ===================
      * MS3 SEARCH RELATED
