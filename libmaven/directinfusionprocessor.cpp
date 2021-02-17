@@ -757,6 +757,8 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 
         int minNumMatches = params->ms2MinNumMatches;
         int minNumDiagnosticMatches = params->ms2MinNumDiagnosticMatches;
+        int minNumSn1Matches = params->ms2sn1MinNumMatches;
+        int minNumSn2Matches = params->ms2sn2MinNumMatches;
 
         string lipidClass;
 
@@ -792,6 +794,23 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
             }
 
             if (debug) cout << "ms2MinNumDiagnosticMatches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": " << minNumDiagnosticMatches << endl;
+
+            //Issue 359
+            if (params->ms2sn1MinNumMatchesByLipidClassAndAdduct.find(lipidClassAndAdductKey) != params->ms2sn1MinNumMatchesByLipidClassAndAdduct.end()) {
+                minNumSn1Matches = params->ms2sn1MinNumMatchesByLipidClassAndAdduct[lipidClassAndAdductKey];
+            } else if (params->ms2sn1MinNumMatchesByLipidClassAndAdduct.find(lipidClassKey) != params->ms2sn1MinNumMatchesByLipidClassAndAdduct.end()) {
+                minNumSn1Matches = params->ms2sn1MinNumMatchesByLipidClassAndAdduct[lipidClassKey];
+            }
+
+            if (debug) cout << "ms2MinNumSn1Matches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": " << minNumSn1Matches << endl;
+
+            if (params->ms2sn2MinNumMatchesByLipidClassAndAdduct.find(lipidClassAndAdductKey) != params->ms2sn2MinNumMatchesByLipidClassAndAdduct.end()) {
+                minNumSn2Matches = params->ms2sn2MinNumMatchesByLipidClassAndAdduct[lipidClassAndAdductKey];
+            } else if (params->ms2sn2MinNumMatchesByLipidClassAndAdduct.find(lipidClassKey) != params->ms2sn2MinNumMatchesByLipidClassAndAdduct.end()) {
+                minNumSn2Matches = params->ms2sn2MinNumMatchesByLipidClassAndAdduct[lipidClassKey];
+            }
+
+            if (debug) cout << "ms2MinNumSn2Matches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": " << minNumSn2Matches << endl;
         }
 
         unique_ptr<DirectInfusionMatchAssessment> matchAssessment = assessMatch(ms1Scans, ms1Fragment, ms2Fragment, libraryEntry, params, debug);
@@ -806,6 +825,8 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         if (!matchAssessment->isDisqualifyThisMatch &&
                 s.numMatches >= minNumMatches &&
                 s.numDiagnosticMatches >= minNumDiagnosticMatches &&
+                s.numSn1Matches >= minNumSn1Matches &&
+                s.numSn2Matches >= minNumSn2Matches &&
                 params->isDiagnosticFragmentMapAgreement(matchAssessment->diagnosticFragmentMatchMap)) {
 
             shared_ptr<DirectInfusionMatchData> directInfusionMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
