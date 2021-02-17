@@ -211,7 +211,7 @@ public:
         cout << encodedParams << endl;
     }
 
-    enum ByLipidClassAndAdduct{MIN_NUM_MATCHES=0, MIN_NUM_DIAGNOSTIC_MATCHES=1};
+    enum ByLipidClassAndAdduct{MIN_NUM_MATCHES=0, MIN_NUM_DIAGNOSTIC_MATCHES=1, MIN_SN1_MATCHES=2, MIN_SN2_MATCHES=3};
 
     //RESERVED DELIMITERS - DO NOT CHANGE!
     static constexpr const char* const INTERNAL_MAP_DELIMITER = "|,|";
@@ -424,6 +424,10 @@ public:
                 directInfusionSearchParameters->ms2MinNumMatchesByLipidClassAndAdduct.insert(make_pair(key, value));
             } else if (byLipidClassAndAdduct == ByLipidClassAndAdduct::MIN_NUM_DIAGNOSTIC_MATCHES) {
                 directInfusionSearchParameters->ms2MinNumDiagnosticMatchesByLipidClassAndAdduct.insert(make_pair(key, value));
+            } else if (byLipidClassAndAdduct == ByLipidClassAndAdduct::MIN_SN1_MATCHES) {
+                directInfusionSearchParameters->ms2sn1MinNumMatchesByLipidClassAndAdduct.insert(make_pair(key, value));
+            } else if (byLipidClassAndAdduct == ByLipidClassAndAdduct::MIN_SN2_MATCHES) {
+                directInfusionSearchParameters->ms2sn2MinNumMatchesByLipidClassAndAdduct.insert(make_pair(key, value));
             }
         }
     }
@@ -589,6 +593,12 @@ public:
         if (decodedMap.find("ms2sn2FragmentLabelTag") != decodedMap.end()){
             directInfusionSearchParameters->ms2sn2FragmentLabelTag = decodedMap["ms2sn2FragmentLabelTag"];
         }
+        if (decodedMap.find("ms2sn1MinNumMatches") != decodedMap.end()) {
+            directInfusionSearchParameters->ms2sn1MinNumMatches = stoi(decodedMap["ms2sn1MinNumMatches"]);
+        }
+        if (decodedMap.find("ms2sn2MinNumMatches") != decodedMap.end()) {
+            directInfusionSearchParameters->ms2sn2MinNumMatches = stoi(decodedMap["ms2sn2MinNumMatches"]);
+        }
 
         if (decodedMap.find("ms2MinNumDiagnosticMatchesMap") != decodedMap.end()) {
             string encodedDiagnosticFragmentsMap = decodedMap["ms2MinNumDiagnosticMatchesMap"];
@@ -607,6 +617,20 @@ public:
             addByLipidClassAndAdductMap(directInfusionSearchParameters,
                                         encodedMs2MinNumDiagnosticMatchesByLipidClassAndAdduct,
                                         ByLipidClassAndAdduct::MIN_NUM_DIAGNOSTIC_MATCHES);
+        }
+
+        if (decodedMap.find("ms2sn1MinNumMatchesByLipidClassAndAdduct") != decodedMap.end()) {
+            string encodedms2sn1MinNumMatchesByLipidClassAndAdduct = decodedMap["ms2sn1MinNumMatchesByLipidClassAndAdduct"];
+            addByLipidClassAndAdductMap(directInfusionSearchParameters,
+                                        encodedms2sn1MinNumMatchesByLipidClassAndAdduct,
+                                        ByLipidClassAndAdduct::MIN_SN1_MATCHES);
+        }
+
+        if (decodedMap.find("ms2sn2MinNumMatchesByLipidClassAndAdduct") != decodedMap.end()) {
+            string encodedms2sn2MinNumMatchesByLipidClassAndAdduct = decodedMap["ms2sn2MinNumMatchesByLipidClassAndAdduct"];
+            addByLipidClassAndAdductMap(directInfusionSearchParameters,
+                                        encodedms2sn2MinNumMatchesByLipidClassAndAdduct,
+                                        ByLipidClassAndAdduct::MIN_SN2_MATCHES);
         }
 
         //ms1 search params
