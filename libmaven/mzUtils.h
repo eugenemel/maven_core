@@ -124,6 +124,9 @@ bool replace(std::string& str, const std::string& from, const std::string& to);
 void replaceAll(std::string& str, const std::string& from, const std::string& to);
 
 
+/* file parsing functions */
+static tuple<double, double, string> parseMspFragLine(string line);
+
 /* rounding and ppm functions */
 float ppmDist(const float mz1, const float mz2);
 double ppmDist(const double mz1, const double mz2);

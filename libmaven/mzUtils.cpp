@@ -526,6 +526,51 @@ float correlation(const vector<float>&x, const vector<float>&y) {
     return (sumxy -( sumx*sumy)/n) / sqrt((x2-(sumx*sumx)/n)*(y2-(sumy*sumy)/n));
 }
 
+tuple<double, double, string> parseMspFragLine(string line){
+    int space1 = -1;
+    int space2 = -1;
+
+    for (unsigned int i = 0; i < line.size(); i++) {
+        char c = line[i];
+
+        bool isNextWhiteSpace = false;
+        if (i < line.size()-1) {
+            char c2 = line[i+1];
+            isNextWhiteSpace = std::isspace(c2);
+        }
+
+        if (std::isspace(c) && !isNextWhiteSpace) {
+            if (space1 == -1){
+                space1 = static_cast<int>(i);
+            } else if (space2 == -1) {
+                space2 = static_cast<int>(i);
+                break;
+            }
+        }
+    }
+
+    string fragLabel("");
+    double fragMz;
+    double fragIntensity;
+
+    if (space1 != -1) { //avoid exception on bad formatting
+        fragMz = stod(line.substr(0, static_cast<unsigned long>(space1)));
+
+        if (space2 == -1) {
+            //no label
+            fragIntensity = stod(line.substr(static_cast<unsigned long>(space1+1), (line.size()-static_cast<unsigned long>(space1))));
+        } else {
+            fragIntensity = stod(line.substr(static_cast<unsigned long>(space1+1), static_cast<unsigned long>(space2-space1)));
+            fragLabel = line.substr(static_cast<unsigned long>(space2+1), (line.size()-static_cast<unsigned long>(space2)));
+        }
+    } else {
+        cerr << "Fragment label \"" << line << "\"" << " could not be parsed! Returning (0, 0, \"\")" << endl;
+        //bad formatting
+    }
+
+    tuple<double, double, string> fragInfo = tuple<double, double, string>(fragMz, fragIntensity, fragLabel);
+    return fragInfo;
+}
 
 /**
  * peak fitting function
