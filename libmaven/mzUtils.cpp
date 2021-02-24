@@ -527,8 +527,10 @@ float correlation(const vector<float>&x, const vector<float>&y) {
 }
 
 tuple<double, double, string> parseMspFragLine(string line){
+
     int space1 = -1;
     int space2 = -1;
+    bool isHasNonWhiteSpace = false;
 
     for (unsigned int i = 0; i < line.size(); i++) {
         char c = line[i];
@@ -539,7 +541,9 @@ tuple<double, double, string> parseMspFragLine(string line){
             isNextWhiteSpace = std::isspace(c2);
         }
 
-        if (std::isspace(c) && !isNextWhiteSpace) {
+        if (!std::isspace(c)) {
+            isHasNonWhiteSpace = true;
+        } else if (std::isspace(c) && !isNextWhiteSpace) {
             if (space1 == -1){
                 space1 = static_cast<int>(i);
             } else if (space2 == -1) {
@@ -550,10 +554,10 @@ tuple<double, double, string> parseMspFragLine(string line){
     }
 
     string fragLabel("");
-    double fragMz;
-    double fragIntensity;
+    double fragMz(-1);
+    double fragIntensity(-1);
 
-    if (space1 != -1) { //avoid exception on bad formatting
+    if (isHasNonWhiteSpace && space1 != -1) { //avoid exception on bad formatting
         fragMz = stod(line.substr(0, static_cast<unsigned long>(space1)));
 
         if (space2 == -1) {
@@ -564,7 +568,7 @@ tuple<double, double, string> parseMspFragLine(string line){
             fragLabel = line.substr(static_cast<unsigned long>(space2+1), (line.size()-static_cast<unsigned long>(space2)));
         }
     } else {
-        cerr << "Fragment label \"" << line << "\"" << " could not be parsed! Returning (0, 0, \"\")" << endl;
+        //cerr << "Fragment label \"" << line << "\"" << " could not be parsed! Returning (0, 0, \"\")" << endl;
         //bad formatting
     }
 
