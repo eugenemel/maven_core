@@ -942,9 +942,10 @@ class Adduct {
 		float mass;
 		float charge;
 		
-        //given adduct mass compute parent ion mass
+        //given adduct mass, compute monoisotopic parent mass
 		inline float computeParentMass(float mz)  { return  (mz*abs(charge)-mass)/nmol; }
-        //given perent compute adduct mass
+
+        //given parent monoisotopic mass, compute adduct mass
 		inline float computeAdductMass(float pmz) { return (pmz*nmol+mass)/abs(charge); }
 
         static vector<Adduct*> loadAdducts(string filename);
