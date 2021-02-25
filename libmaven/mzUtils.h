@@ -47,6 +47,7 @@
 #define HMASS  		 1.007825032
 #define EMASS 		 0.00054857971 //(6.022141×10^23 ⋅ 9.10938×10^-28 )
 #define PROTON 		 1.00727645229
+#define WATER_MONO   18.0105646841 //(15.99491461960 + 2*1.00782503224)
 
 #if defined _WIN32 && !defined __CYGWIN__
    /* Use Windows separators on all _WIN32 defining
