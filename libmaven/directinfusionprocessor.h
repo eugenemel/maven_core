@@ -1328,6 +1328,9 @@ struct DIPipelineSampleData {
     //Issue 319: store quant measurements for different adduct forms of identified compounds
     map<Compound*, map<Adduct*, float, adduct_less>, compound_less> compoundQuantByAdduct{};
 
+    //Issue 364: Add SAF fraction information
+    map<Compound*, map<Adduct*, float, adduct_less>, compound_less> compoundSAFByAdduct{};
+
     //Internal Standards Normalization
     //key = <lipidClass, adductName>
 
