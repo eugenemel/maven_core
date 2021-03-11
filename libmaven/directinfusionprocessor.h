@@ -1344,8 +1344,12 @@ struct DIPipelineSampleData {
     long isNumOutputRows = 0;
     map<int, DirectInfusionAnnotation*> isAnnotationsByPrecursorRangeId{};
 
-    //Issue 319: store quant measurements for different adduct forms of identified compounds
+    //Issue 319, 363: store quant measurements for different adduct forms of identified compounds
     map<Compound*, map<Adduct*, DISampleCompoundAdductQuant, adduct_less>, compound_less> compoundQuantByAdduct{};
+
+    //Issue 363: m/z of identified compounds.
+    //used when considering adduct table.
+    set<float> identifiedMzs{};
 
     //Internal Standards Normalization
     //key = <lipidClass, adductName>
