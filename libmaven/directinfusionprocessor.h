@@ -1298,6 +1298,25 @@ struct compound_less {
     }
 };
 
+enum DISampleCompoundAdductQuantType{None=0, IdentifiedCompound=1, Reextraction=2};
+
+//Issue 363
+struct DISampleCompoundAdductQuant {
+
+    float quantVal = 0.0f;
+    float ms1PartitionFractionSAF = 0.0f;
+    DISampleCompoundAdductQuantType diSampleCompoundAdductQuantType = DISampleCompoundAdductQuantType::None;
+
+    DISampleCompoundAdductQuant(){}
+
+    DISampleCompoundAdductQuant(float quantVal, float ms1PartitionFractionSAF, DISampleCompoundAdductQuantType diSampleCompoundAdductQuantType) {
+        this->quantVal = quantVal;
+        this->ms1PartitionFractionSAF = ms1PartitionFractionSAF;
+        this->diSampleCompoundAdductQuantType = diSampleCompoundAdductQuantType;
+    }
+
+};
+
 /**
  * @brief The DIPipelineSampleData struct
  * container for a single DI sample,
@@ -1326,10 +1345,7 @@ struct DIPipelineSampleData {
     map<int, DirectInfusionAnnotation*> isAnnotationsByPrecursorRangeId{};
 
     //Issue 319: store quant measurements for different adduct forms of identified compounds
-    map<Compound*, map<Adduct*, float, adduct_less>, compound_less> compoundQuantByAdduct{};
-
-    //Issue 364: Add SAF fraction information
-    map<Compound*, map<Adduct*, float, adduct_less>, compound_less> compoundSAFByAdduct{};
+    map<Compound*, map<Adduct*, DISampleCompoundAdductQuant, adduct_less>, compound_less> compoundQuantByAdduct{};
 
     //Internal Standards Normalization
     //key = <lipidClass, adductName>
