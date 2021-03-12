@@ -24,7 +24,7 @@ before_install:
 
 script:
   # Add installed Qt path to $PATH
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source /opt/qt*/bin/qt*-env.sh; fi
+  # - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source /opt/qt*/bin/qt*-env.sh; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then source qt-5.env; fi
   # Build and install
   - qmake -r
