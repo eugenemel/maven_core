@@ -15,7 +15,7 @@ addons:
       #- qt59base
       - libsqlite3-dev
       - libmysqlclient-dev
-      - libssl1.0.0
+      #- libssl1.0.0
       - libssl-dev
       - qt5-default
 
