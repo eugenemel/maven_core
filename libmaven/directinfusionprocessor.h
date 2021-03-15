@@ -1355,6 +1355,9 @@ struct DIPipelineSampleData {
     //used when considering adduct table.
     set<float> identifiedMzs{};
 
+    //Issue 365: partition fractions, for use with re-extracted adduct forms in adduct table
+    map<Compound*, vector<float>, compound_less> compoundPartitionFractions{};
+
     //Internal Standards Normalization
     //key = <lipidClass, adductName>
 
