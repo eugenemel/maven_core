@@ -44,6 +44,10 @@ public:
      //Every adduct will become a column in a matrix of observed intensities.
      set<Adduct*> allAdducts{};
 
+     //Issue 365:
+     //use class-specific adducts for adducts table
+     map<string, set<Adduct*>> adductsByClass{};
+
 };
 
 /**
