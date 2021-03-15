@@ -1361,6 +1361,9 @@ struct DIPipelineSampleData {
     //Issue 365: key = m/z to reextract, value = all identified compounds
     map<float, set<Compound*>> reextractedMzSourceCompounds{};
 
+    //Issue 365: key = m/z to reextract, value = observed ms1 scan intensity
+    map<float, float> reextractedMzIntensities{};
+
     //Internal Standards Normalization
     //key = <lipidClass, adductName>
 
