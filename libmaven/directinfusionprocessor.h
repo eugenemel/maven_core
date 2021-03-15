@@ -1358,14 +1358,14 @@ struct DIPipelineSampleData {
     //Issue 365: intensity value = sum of all (SAF_partition * ms1_scan_intensity) for all IDed adducts
     map<Compound*, float, compound_less> identifiedAdductsCompoundQuant{};
 
-    //Issue 365: key = m/z to reextract, value = all identified compounds
-    map<float, set<Compound*>> reextractedMzSourceCompounds{};
+    //Issue 365: key = m/z to reextract, value = all identified compounds suggesting this m/z as a reextraction
+    map<float, set<Compound*>> reextractedMzToIdentifiedCompounds{};
 
     //Issue 365: key = m/z to reextract, value = observed ms1 scan intensity
     map<float, float> reextractedMzIntensities{};
 
-    //Internal Standards Normalization
-    //key = <lipidClass, adductName>
+    //Issue 365: key = m/z to reextract, value = unidentified <Compound*, Adduct*> pair
+    map<float, vector<pair<Compound*, Adduct*>>> reextractedMzToUnidentifiedCompoundAdduct{};
 
     //precursor
     map<pair<string, string>, float> precursorQuantNormalizationIntensityMap{};
