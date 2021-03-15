@@ -1355,8 +1355,11 @@ struct DIPipelineSampleData {
     //used when considering adduct table.
     set<float> identifiedMzs{};
 
-    //Issue 365: partition fractions, for use with re-extracted adduct forms in adduct table
-    map<Compound*, vector<float>, compound_less> compoundPartitionFractions{};
+    //Issue 365: intensity value = sum of all (SAF_partition * ms1_scan_intensity) for all IDed adducts
+    map<Compound*, float, compound_less> identifiedAdductsCompoundQuant{};
+
+    //Issue 365: key = m/z to reextract, value = all identified compounds
+    map<float, vector<Compound*>> reextractedMzSourceCompounds{};
 
     //Internal Standards Normalization
     //key = <lipidClass, adductName>
