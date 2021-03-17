@@ -1351,21 +1351,21 @@ struct DIPipelineSampleData {
     //Issue 319, 363: store quant measurements for different adduct forms of identified compounds
     map<Compound*, map<Adduct*, DISampleCompoundAdductQuant, adduct_less>, compound_less> compoundQuantByAdduct{};
 
-    //Issue 363: m/z of identified compounds.
+    //Issue 363: m/z of identified compounds. (mzUtils::intKeyToMz())
     //used when considering adduct table.
-    set<float> identifiedMzs{};
+    set<int> identifiedMzs{};
 
     //Issue 365: intensity value = sum of all (SAF_partition * ms1_scan_intensity) for all IDed adducts
     map<Compound*, float, compound_less> identifiedAdductsCompoundQuant{};
 
     //Issue 365: key = m/z to reextract, value = all identified compounds suggesting this m/z as a reextraction
-    map<float, set<Compound*>> reextractedMzToIdentifiedCompounds{};
+    map<int, set<Compound*>> reextractedMzToIdentifiedCompounds{};
 
     //Issue 365: key = m/z to reextract, value = observed ms1 scan intensity
-    map<float, float> reextractedMzIntensities{};
+    map<int, float> reextractedMzIntensities{};
 
     //Issue 365: key = m/z to reextract, value = unidentified <Compound*, Adduct*> pair
-    map<float, vector<pair<Compound*, Adduct*>>> reextractedMzToUnidentifiedCompoundAdduct{};
+    map<int, vector<pair<Compound*, Adduct*>>> reextractedMzToUnidentifiedCompoundAdduct{};
 
     //precursor
     map<pair<string, string>, float> precursorQuantNormalizationIntensityMap{};
