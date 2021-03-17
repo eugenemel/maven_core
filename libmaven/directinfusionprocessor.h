@@ -1358,7 +1358,7 @@ struct DIPipelineSampleData {
     // <int, int>
     // <mzUtils::intKeyToMz(mz, 4), mzUtils::intKeyToMz(intensity, 10)>
     static const long MZ_REEX_MZ_MULT_FACTOR = 10L;
-    static const long MZ_REEX_INTENSITY_MULT_FACTOR = 10000000000L;
+    static const long MZ_REEX_INTENSITY_MULT_FACTOR = 1L;
 
     //Issue 365: mz reex key convenient functions
     static pair<long, long> getMzReexKey(float mz, float intensity) {
