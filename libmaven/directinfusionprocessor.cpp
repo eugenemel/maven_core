@@ -353,8 +353,6 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
         double ms1PrecMz = ms3Compound->baseCompound->precursorMz;
 
-        int ms1MzKey = mzUtils::mzToIntKey(ms1PrecMz);
-
         double ms1MinMz = ms1PrecMz - ms1PrecMz * params->ms3AnalysisMs1PrecursorPpmTolr/1000000.0;
         double ms1MaxMz = ms1PrecMz + ms1PrecMz * params->ms3AnalysisMs1PrecursorPpmTolr/1000000.0;
 
@@ -371,7 +369,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                 double ms3_mz_min = ms3_mz - params->ms3MatchTolrInDa;
                 double ms3_mz_max = ms3_mz + params->ms3MatchTolrInDa;
 
-                int ms3MzKey = mzUtils::mzToIntKey(ms3_mz);
+                long ms3MzKey = mzUtils::mzToIntKey(ms3_mz);
 
                 for (auto it2 = ms3ScanGroupMap.begin(); it2 != ms3ScanGroupMap.end(); ++it2) {
 
@@ -1026,9 +1024,9 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getFragmentM
 
                if (debug) cout << "allCandidates[" << i << "]: " << compound->name << "|" << compound->adductString << " observedIndex=" << observedIndex << endl;
 
-               int fragInt = mzToIntKey(compound->fragment_mzs[i]);
+               long fragInt = mzToIntKey(compound->fragment_mzs[i]);
 
-               compoundFrags[matchCounter] = fragInt;
+               compoundFrags[matchCounter] = static_cast<int>(fragInt);
                matchCounter++;
 
                pair<int, shared_ptr<DirectInfusionMatchData>> key = make_pair(fragInt, directInfusionMatchData);
@@ -1135,7 +1133,8 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
         for (auto matchData : compoundList) {
 
             compounds.push_back(matchData->compound);
-            constituentMzs.insert(mzUtils::mzToIntKey(static_cast<double>(matchData->compound->precursorMz)));
+            long mzIntKey = mzUtils::mzToIntKey(static_cast<double>(matchData->compound->precursorMz));
+            constituentMzs.insert(static_cast<int>(mzIntKey));
 
             adduct = matchData->adduct;
             observedMs1Intensity += matchData->observedMs1Intensity;
@@ -2270,7 +2269,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                         compoundFragIntensity += fragObservedIntensity;
 
                         //Issue 318: split ambiguous fragments to avoid multiple-counting errors
-                        int fragKey = mzUtils::mzToIntKey(static_cast<double>(matchData->compound->fragment_mzs[i]));
+                        int fragKey = static_cast<int>(mzUtils::mzToIntKey(static_cast<double>(matchData->compound->fragment_mzs[i])));
                         float sumObservedMs1ScanIntensity = fragMzToSumObservedMs1ScanIntensity[fragKey];
 
                         compoundFragIntensitySAF += (fragObservedIntensity * (matchData->observedMs1ScanIntensity/sumObservedMs1ScanIntensity));
@@ -2279,7 +2278,8 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                             partitionMapMzs.insert(make_pair(it->first, set<int>()));
                         }
 
-                        partitionMapMzs[it->first].insert(mzUtils::mzToIntKey(static_cast<double>(matchData->compound->fragment_mzs[i])));
+                        long key = mzUtils::mzToIntKey(static_cast<double>(matchData->compound->fragment_mzs[i]));
+                        partitionMapMzs[it->first].insert(static_cast<int>(key));
 
                         if (debug) {
                             cout << "fragment label: " << fragmentLabel
@@ -2344,8 +2344,8 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                     float queryIntensity = scan->findClosestMzIntensity(queryMz, params->ms2PpmTolr);
                     if (queryIntensity > 0) {
 
-                        int fragKey = mzUtils::mzToIntKey(static_cast<double>(queryMz));
-                        float sumObservedMs1ScanIntensity = fragMzToSumObservedMs1ScanIntensity[fragKey];
+                        long fragKey = mzUtils::mzToIntKey(static_cast<double>(queryMz));
+                        float sumObservedMs1ScanIntensity = fragMzToSumObservedMs1ScanIntensity[static_cast<int>(fragKey)];
 
                         float queryIntensitySAF = queryIntensity * (matchData->observedMs1ScanIntensity/sumObservedMs1ScanIntensity);
 
@@ -2602,7 +2602,7 @@ map<int, float> DirectInfusionMatchInformation::getFragToSumObservedMs1ScanInten
 
             for (auto fragMzVal : matchData->compound->fragment_mzs) {
 
-                int fragMz = mzUtils::mzToIntKey(static_cast<double>(fragMzVal));
+                int fragMz = static_cast<int>(mzUtils::mzToIntKey(static_cast<double>(fragMzVal)));
 
                 for (int precMz : realPrecMzs) {
 
@@ -2761,7 +2761,7 @@ map<int, vector<shared_ptr<DirectInfusionMatchData>>> DirectInfusionMatchInforma
         //but not in the consensus ms1 spectrum.
         int key = -1;
         if (it->first->compound->precursorMz > 0){
-            key = mzUtils::mzToIntKey(static_cast<double>(it->first->compound->precursorMz));
+            key = static_cast<int>(mzUtils::mzToIntKey(static_cast<double>(it->first->compound->precursorMz)));
         } else {
             key = it->first->ms1IntensityCoord;
         }
@@ -2787,7 +2787,7 @@ map<int, vector<shared_ptr<DirectInfusionMatchData>>> DirectInfusionMatchInforma
         //but not in the consensus ms1 spectrum.
         int key = -1;
         if (compound->compound->precursorMz > 0){
-            key = mzUtils::mzToIntKey(static_cast<double>(compound->compound->precursorMz));
+            key = static_cast<int>(mzUtils::mzToIntKey(static_cast<double>(compound->compound->precursorMz)));
         } else {
             key = compound->ms1IntensityCoord;
         }

@@ -1357,13 +1357,13 @@ struct DIPipelineSampleData {
     // m/z reex key
     // <int, int>
     // <mzUtils::intKeyToMz(mz, 4), mzUtils::intKeyToMz(intensity, 10)>
-    static const int MZ_REEX_MZ_MULT_FACTOR = 4;
-    static const int MZ_REEX_INTENSITY_MULT_FACTOR = 10;
+    static const long MZ_REEX_MZ_MULT_FACTOR = 10L;
+    static const long MZ_REEX_INTENSITY_MULT_FACTOR = 10000000000L;
 
     //Issue 365: mz reex key convenient functions
-    static pair<int, int> getMzReexKey(float mz, float intensity) {
-        int mzKey = mzUtils::mzToIntKey(static_cast<double>(mz), MZ_REEX_MZ_MULT_FACTOR);
-        int intensityKey = mzUtils::mzToIntKey(static_cast<double>(intensity), MZ_REEX_INTENSITY_MULT_FACTOR);
+    static pair<long, long> getMzReexKey(float mz, float intensity) {
+        long mzKey = mzUtils::mzToIntKey(static_cast<double>(mz), MZ_REEX_MZ_MULT_FACTOR);
+        long intensityKey = mzUtils::mzToIntKey(static_cast<double>(intensity), MZ_REEX_INTENSITY_MULT_FACTOR);
         return make_pair(mzKey, intensityKey);
     }
 
@@ -1375,13 +1375,13 @@ struct DIPipelineSampleData {
 
     //Issue 363: key = m/z reex key of identified compounds.
     //used when considering adduct table.
-    set<pair<int, int>> identifiedMzs{};
+    set<pair<long, long>> identifiedMzs{};
 
     //Issue 365: key = m/z reex key, value = all identified compounds suggesting this m/z as a reextraction
-    map<pair<int, int>, set<Compound*>> reextractedMzToIdentifiedCompounds{};
+    map<pair<long, long>, set<Compound*>> reextractedMzToIdentifiedCompounds{};
 
     //Issue 365: key = m/z reex key, value = unidentified <Compound*, Adduct*> pair
-    map<pair<int, int>, vector<pair<Compound*, Adduct*>>> reextractedMzToUnidentifiedCompoundAdduct{};
+    map<pair<long, long>, vector<pair<Compound*, Adduct*>>> reextractedMzToUnidentifiedCompoundAdduct{};
 
     //precursor
     map<pair<string, string>, float> precursorQuantNormalizationIntensityMap{};

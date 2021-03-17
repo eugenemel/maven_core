@@ -1047,11 +1047,11 @@ float  crossCorrelationZ(vector<float>&xvector, vector<float>& yvector, float of
 	}
 }
 
-int mzToIntKey(const double mz, const int multFactor){
-    return static_cast<int>(round(mz*multFactor));
+long mzToIntKey(const double mz, const long multFactor){
+    return static_cast<long>(round(mz*multFactor));
 }
 
-double intKeyToMz(const int intKey, const int multFactor){
+double intKeyToMz(const long intKey, const long multFactor){
     return static_cast<double>(intKey) / static_cast<double>(multFactor);
 }
 

@@ -107,7 +107,7 @@ FragmentationMatchScore Compound::scoreCompoundHit(Fragment* f, float productPpm
 
 vector<Compound*> Compound::getChildren() {return vector<Compound*>(0);}
 
-vector<int> Compound::getConstituentMzs(){return vector<int>{mzUtils::mzToIntKey(precursorMz)};}
+vector<int> Compound::getConstituentMzs(){return vector<int>{static_cast<int>(mzUtils::mzToIntKey(precursorMz))};}
 
 //breadth-first search
 vector<Compound*> SummarizedCompound::getChildren() {
@@ -164,7 +164,7 @@ void SummarizedCompound::computeSummarizedData() {
     for (auto compound : getChildren()) {
         for (unsigned int i = 0; i < compound->fragment_mzs.size(); i++) {
 
-            int mzKey = mzUtils::mzToIntKey(compound->fragment_mzs[i], 1000000);
+            int mzKey = static_cast<int>(mzUtils::mzToIntKey(compound->fragment_mzs[i], 1000000L));
             float intensity = compound->fragment_intensity[i];
             string label = compound->fragment_labels[i];
 
@@ -286,7 +286,7 @@ void Ms3Compound::computeMs3Spectra() {
 
                 if (ms3precMz > -1.0){
 
-                    int mzKey = mzToIntKey(ms3precMz);
+                    int mzKey = static_cast<int>(mzToIntKey(ms3precMz));
 
                     if (ms3_fragment_mzs.find(mzKey) == ms3_fragment_mzs.end()) {
                         ms3_fragment_mzs.insert(make_pair(mzKey, vector<float>()));
