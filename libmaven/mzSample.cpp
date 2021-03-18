@@ -2155,3 +2155,12 @@ shared_ptr<PeaksSearchParameters> PeaksSearchParameters::decode(string encodedPa
 
     return peaksSearchParameters;
 }
+
+
+set<mzSample*> SRMTransition::getSamples(){
+       set<mzSample*> samples{};
+       for (auto p : mzSlices) {
+           samples.insert(p.first);
+       }
+       return samples;
+   }

@@ -207,12 +207,7 @@ public:
 
     vector<pair<mzSample*, mzSlice*>> mzSlices{};
 
-    set<mzSample*> getSamples() {
-        set<mzSample*> samples{};
-        for (auto p : mzSlices) {
-            samples.insert(p.first);
-        }
-    }
+    set<mzSample*> getSampleNames();
 };
 
 //Issue 368
