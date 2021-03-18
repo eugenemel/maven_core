@@ -206,7 +206,54 @@ public:
     Adduct *adduct = nullptr;
 
     vector<pair<mzSample*, mzSlice*>> mzSlices{};
+
+    set<mzSample*> getSamples() {
+        set<mzSample*> samples{};
+        for (auto p : mzSlices) {
+            samples.insert(p.first);
+        }
+    }
 };
+
+//Issue 368
+//TODO: this is currently unused, but leaving here in the event may be used in the future.
+//Currenly, pair<float, float> of precursorMz, productMz are used instead of a dedicated key class.
+//class SRMKey {
+//public:
+//    int precursorMz = 0;
+//    int productMz = 0;
+//    int rtStart = -1;
+//    int rtEnd = -1;
+
+//    static const int MZ_MULT_FACTOR = 4;
+//    static const int RT_MULT_FACTOR = 2;
+
+//    static SRMKey mzKey(float precursorMz, float productMz) {
+
+//        SRMKey key;
+
+//        int precMzInt = mzUtils::mzToIntKey(precursorMz, MZ_MULT_FACTOR);
+//        int prodMzInt = mzUtils::mzToIntKey(productMz, MZ_MULT_FACTOR);
+
+//        key.precursorMz = precMzInt;
+//        key.productMz = prodMzInt;
+
+//        return key;
+//    }
+
+//    static SRMKey mzRtKey(float precursorMz, float productMz, float rtStart, float rtEnd) {
+
+//        SRMKey key = SRMKey::mzKey(precursorMz, productMz);
+
+//        int rtStartKey = mzUtils::mzToIntKey(rtStart, RT_MULT_FACTOR);
+//        int rtEndKey = mzUtils::mzToIntKey(rtEnd, RT_MULT_FACTOR);
+
+//        key.rtStart = rtStartKey;
+//        key.rtEnd = rtEndKey;
+
+//        return key;
+//    }
+//};
 
 class mzSlice { 
     public:
