@@ -807,9 +807,12 @@ class PeakGroup {
 
         /**
          * Issue 368: SRM support
-         * Just create new columns to deal with this, deal with encoding later
          */
         float srmPrecursorMz;
+
+        /**
+         * Issue 368: SRM support
+         */
         float srmProductMz;
 
         bool isPrimaryGroup();
