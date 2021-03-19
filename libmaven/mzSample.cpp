@@ -1191,7 +1191,7 @@ EIC* mzSample::getEIC(pair<float, float> mzKey) {
     if (srmScansByMzs.count(mzKey) > 0 ) {
             vector<int> srmscans = srmScansByMzs[mzKey];
             for (unsigned int i=0; i < srmscans.size(); i++ ) {
-                Scan* scan = scans[srmscans[i]];
+                Scan* scan = scans[static_cast<unsigned long>(srmscans[i])];
                 float maxMz=0;
                 float maxIntensity=0;
                 for(unsigned int k=0; k < scan->nobs(); k++ ) {
