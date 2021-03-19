@@ -807,14 +807,10 @@ class PeakGroup {
 
         /**
          * Issue 368: SRM support
-         * New SRMTransitionType allows for precursor/product mz values
-         * precursor mz --> meanMz (database: from peaks table)
-         * product mz --> fragMatchScore.mergedScore (database: ms2score)
+         * Just create new columns to deal with this, deal with encoding later
          */
-        inline float getSrmPrecursorMz(){return (_type == GroupType::SRMTransitionType) ? meanMz : 0.0f;}
-        inline float getSrmProductMz() {return (_type == GroupType::SRMTransitionType) ? static_cast<float>(fragMatchScore.mergedScore) : 0.0f;}
-        inline float setSrmPrecursorMz(float srmPrecursorMz) {meanMz = srmPrecursorMz;}
-        inline float setSrmProductMz(float srmProductMz){fragMatchScore.mergedScore = static_cast<double>(srmProductMz);}
+        float srmPrecursorMz;
+        float srmProductMz;
 
         bool isPrimaryGroup();
         inline bool hasCompoundLink()  { if(compound != NULL) return true ; return false; }

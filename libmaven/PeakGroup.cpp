@@ -58,6 +58,9 @@ PeakGroup::PeakGroup()  {
     //children.reserve(0);
     peaks.reserve(0);
 
+    srmPrecursorMz = 0.0f;
+    srmProductMz = 0.0f;
+
 }      
 
 void PeakGroup::copyObj(const PeakGroup& o)  { 
@@ -124,6 +127,9 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
 
     chargeState=o.chargeState;
     isotopicIndex=o.isotopicIndex;
+
+    srmPrecursorMz = o.srmPrecursorMz;
+    srmProductMz = o.srmProductMz;
 
     copyChildren(o);
 }
