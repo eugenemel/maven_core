@@ -250,15 +250,97 @@ public:
 //    }
 //};
 
+class SRMTransition;
+
 class mzSlice { 
     public:
 
-    mzSlice(float mzmin, float mzmax, float rtmin, float rtmax) { this->mzmin=mzmin; this->mzmax=mzmax; this->rtmin=rtmin; this->rtmax=rtmax; this->mz=mzmin+(mzmax-mzmin)/2; this->rt=rtmin+(rtmax-rtmin)/2; compound=NULL; adduct=NULL, ionCount=0; compoundVector=vector<Compound*>();}
-    mzSlice(float mz, float rt, float ions) {  this->mz=this->mzmin=this->mzmax=mz; this->rt=this->rtmin=this->rtmax=rt; this->ionCount=ions;  compound=NULL; adduct=NULL, ionCount=0; compoundVector=vector<Compound*>();}
-    mzSlice(string filterLine) { mzmin=mzmax=rtmin=rtmax=mz=rt=ionCount=0; compound=NULL; adduct=NULL,srmId=filterLine; compoundVector=vector<Compound*>();}
-    mzSlice() { mzmin=mzmax=rtmin=rtmax=mz=rt=ionCount=0; compound=NULL; adduct=NULL; compoundVector=vector<Compound*>();}
-    mzSlice(const mzSlice& b) { mzmin=b.mzmin; mzmax=b.mzmax; rtmin=b.rtmin; rtmax=b.rtmax; ionCount=b.ionCount; mz=b.mz; rt=b.rt; compound=b.compound; adduct=b.adduct; srmId=b.srmId; compoundVector=b.compoundVector;}
-    mzSlice& operator= (const mzSlice& b) { mzmin=b.mzmin; mzmax=b.mzmax; rtmin=b.rtmin; rtmax=b.rtmax; ionCount=b.ionCount; compound=b.compound; adduct=b.adduct; srmId=b.srmId; mz=b.mz; rt=b.rt; compoundVector=b.compoundVector; return *this; }
+    mzSlice(float mzmin, float mzmax, float rtmin, float rtmax) {
+        this->mzmin=mzmin;
+        this->mzmax=mzmax;
+        this->rtmin=rtmin;
+        this->rtmax=rtmax;
+        this->mz=mzmin+(mzmax-mzmin)/2;
+        this->rt=rtmin+(rtmax-rtmin)/2;
+        compound=nullptr;
+        adduct=nullptr;
+        ionCount=0;
+        compoundVector=vector<Compound*>();
+    }
+
+    mzSlice(float mz, float rt, float ions) {
+        this->mz=this->mzmin=this->mzmax=mz;
+        this->rt=this->rtmin=this->rtmax=rt;
+        this->ionCount=ions;
+        compound=nullptr;
+        adduct=nullptr;
+        ionCount=0;
+        compoundVector=vector<Compound*>();
+    }
+
+    mzSlice(string filterLine) {
+        mzmin=mzmax=rtmin=rtmax=mz=rt=ionCount=0;
+        compound=nullptr;
+        adduct=nullptr;
+        srmId=filterLine;
+        compoundVector=vector<Compound*>();
+    }
+
+    mzSlice() {
+        mzmin=mzmax=rtmin=rtmax=mz=rt=ionCount=0;
+        compound=nullptr;
+        adduct=nullptr;
+        compoundVector=vector<Compound*>();
+    }
+
+    mzSlice(SRMTransition srmTransition) {
+
+        mzmin=mzmax=rtmin=rtmax=mz=rt=ionCount=0;
+
+        compound=srmTransition.compound;
+        adduct=srmTransition.adduct;
+
+        compoundVector=vector<Compound*>();
+        if (srmTransition.compound){
+            compoundVector.push_back(srmTransition.compound);
+        }
+
+        srmPrecursorMz = srmTransition.precursorMz;
+        srmProductMz = srmTransition.productMz;
+    }
+
+    mzSlice(const mzSlice& b) {
+        mzmin=b.mzmin;
+        mzmax=b.mzmax;
+        rtmin=b.rtmin;
+        rtmax=b.rtmax;
+        ionCount=b.ionCount;
+        mz=b.mz;
+        rt=b.rt;
+        compound=b.compound;
+        adduct=b.adduct;
+        srmId=b.srmId;
+        compoundVector=b.compoundVector;
+        srmPrecursorMz=b.srmPrecursorMz;
+        srmProductMz=b.srmProductMz;
+    }
+
+    mzSlice& operator= (const mzSlice& b) {
+        mzmin=b.mzmin;
+        mzmax=b.mzmax;
+        rtmin=b.rtmin;
+        rtmax=b.rtmax;
+        ionCount=b.ionCount;
+        compound=b.compound;
+        adduct=b.adduct;
+        srmId=b.srmId;
+        mz=b.mz;
+        rt=b.rt;
+        compoundVector=b.compoundVector;
+        srmPrecursorMz=b.srmPrecursorMz;
+        srmProductMz=b.srmProductMz;
+        return *this;
+    }
 
         float mzmin;
         float mzmax;
@@ -272,7 +354,13 @@ class mzSlice {
         vector<Compound*> compoundVector;
 		bool deleteFlag=0;
 
+    //SRM-associated
 	string srmId;
+    float srmPrecursorMz = 0.0f;
+    float srmProductMz = 0.0f;
+
+    inline bool isSrmTransitionSlice(){return (srmPrecursorMz > 0.0f && srmProductMz > 0.0f);}
+    inline pair<float, float> getSrmMzKey(){return make_pair(srmPrecursorMz, srmProductMz);}
 
 	static bool compIntensity(const mzSlice* a, const mzSlice* b ) { return b->ionCount < a->ionCount; }
 	static bool compMz(const mzSlice* a, const mzSlice* b ) { return a->mz < b->mz; }
@@ -616,7 +704,7 @@ class Peak {
 class PeakGroup {
 
 	public:
-        enum GroupType {None=0, C13Type=1, AdductType=2, CovariantType=3, IsotopeType=4 };     //group types
+        enum GroupType {None=0, C13Type=1, AdductType=2, CovariantType=3, IsotopeType=4, SRMTransitionType=5 };     //group types
         enum QType	   {AreaTop=0, Area=1, Height=2, AreaNotCorrected=3, RetentionTime=4, Quality=5, SNRatio=6, MS2Count=7 };
 		PeakGroup();
 		PeakGroup(const PeakGroup& o);
@@ -717,6 +805,17 @@ class PeakGroup {
         void  	setSrmId(string id)	  { srmId=id; }
         inline  string getSrmId() { return srmId; }
 
+        /**
+         * Issue 368: SRM support
+         * New SRMTransitionType allows for precursor/product mz values
+         * precursor mz --> meanMz (database: from peaks table)
+         * product mz --> fragMatchScore.mergedScore (database: ms2score)
+         */
+        inline float getSrmPrecursorMz(){return (_type == GroupType::SRMTransitionType) ? meanMz : 0.0f;}
+        inline float getSrmProductMz() {return (_type == GroupType::SRMTransitionType) ? static_cast<float>(fragMatchScore.mergedScore) : 0.0f;}
+        inline float setSrmPrecursorMz(float srmPrecursorMz) {meanMz = srmPrecursorMz;}
+        inline float setSrmProductMz(float srmProductMz){fragMatchScore.mergedScore = static_cast<double>(srmProductMz);}
+
         bool isPrimaryGroup();
         inline bool hasCompoundLink()  { if(compound != NULL) return true ; return false; }
         inline bool isEmpty()   { if(peaks.size() == 0) return true; return false; }
@@ -755,7 +854,6 @@ class PeakGroup {
 		inline void setType(GroupType t)  { _type = t; }
         inline bool isIsotope() { return _type == IsotopeType; }
         inline bool isAdduct() {  return _type == AdductType; }
-
 
 		void summary();
 		void groupStatistics();
