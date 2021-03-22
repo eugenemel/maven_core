@@ -44,6 +44,9 @@ std::string b64decode(const void* data, const size_t len)
 
 vector<float> decode_base64(const string& src, int float_size, bool neworkorder, bool decompress) {
 
+    //Issue 370
+    if (src.empty()) return vector<float>();
+
     string destStr=b64decode(src.c_str(), src.size());
 
 
