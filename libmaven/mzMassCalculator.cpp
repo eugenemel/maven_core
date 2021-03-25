@@ -253,6 +253,8 @@ map<string, int> MassCalculator::getAdductComponentComposition(string formula){
         return map<string, int>{{"C", 1}, {"H", 1}, {"Na", 1}, {"O", 2}};
     } else if (formula == "Hac") { //protonated acetate
         return map<string, int>{{"C", 2}, {"H", 4}, {"O", 2}};
+    } else if (formula == "37Cl") {
+        return map<string, int>{{"Cl", 1}}; //Issue 378: Note that non-monoisotopic aspect is lost here
     } else {
         return getComposition(formula);
     }
