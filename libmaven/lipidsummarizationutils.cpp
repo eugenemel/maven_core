@@ -763,3 +763,59 @@ string LipidSummarizationUtils::getSummarizationLevelAttributeKey(int summarizat
     default: return "UNKNOWN";
     }
 }
+
+//Issue 379
+string LipidSummarizationUtils::getLipidMapsSnPositionSummary(string lipidName){
+
+    LipidNameComponents lipidNameComponents = LipidSummarizationUtils::getNameComponents(lipidName);
+
+    string correctedName;
+
+    if (lipidNameComponents.chains.size() > 0) {
+        correctedName = lipidNameComponents.lipidClass + "(";
+    } else {
+        return lipidName;
+    }
+
+    for (unsigned int i = 0; i < lipidNameComponents.chains.size(); i++) {
+
+        string chain = lipidNameComponents.chains[i];
+        string chainBitOHCorrected;
+        int numOxygenations = 0;
+
+        if (i > 0) {
+            correctedName.append("/");
+        }
+
+        if (chain[0] == 'm'){
+
+            numOxygenations++;
+            chainBitOHCorrected = chain.substr(1);
+
+        } else if (chain[0] == 'd') {
+
+            numOxygenations = numOxygenations + 2;
+            chainBitOHCorrected = chain.substr(1);
+
+        } else if (chain[0] == 't') {
+
+            numOxygenations = numOxygenations + 3;
+            chainBitOHCorrected = chain.substr(1);
+        }
+
+        if (numOxygenations > 0) {
+            correctedName.append(chainBitOHCorrected);
+            correctedName.append(";O");
+            if (numOxygenations > 1) {
+                correctedName.append(to_string(numOxygenations));
+            }
+        } else {
+            correctedName.append(chain);
+        }
+
+    }
+
+    correctedName.append(")");
+
+    return correctedName;
+}

@@ -60,6 +60,9 @@ public:
 
     static std::string getSummarizationLevelAttributeKey(int summarizationLevel);
 
+    //Issue 379
+    static std::string getLipidMapsSnPositionSummary(std::string lipidName);
+
 private:
     static std::string getSummary(LipidNameComponents lipidNameComponents, int summaryLevel);
 
