@@ -1516,10 +1516,17 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::getMatchInfo
             cout << endl;
         }
 
-        cout << "Compounds with no fragment matches:" << endl;
+        cout << "Compounds with no fragment matches:";
+        if (matchInfo->compoundsNoFragMatches.empty()) {
+            cout << " (none) ";
+        }
+        cout << endl;
+
         for (auto directInfusionMatchData : matchInfo->compoundsNoFragMatches) {
             cout << "Compound= " << directInfusionMatchData->compound->name << "|" << directInfusionMatchData->compound->adductString << endl;
         }
+
+
     }
 
     return matchInfo;
