@@ -2295,7 +2295,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
 
                     //Issue 388: print info about each fragment
                     if (debug) {
-                        cout << (isAcylFragment ? "ACYL FRAGMENT " : " NON-ACYL FRAGMENT")
+                        cout << (isAcylFragment ? "ACYL FRAGMENT " : " NON-ACYL FRAGMENT ")
                              << "fragment label: " << fragmentLabel
                              << ", fragment intensity=" << fragObservedIntensity
                              << ", compoundFragIntensity=" << compoundFragIntensity
