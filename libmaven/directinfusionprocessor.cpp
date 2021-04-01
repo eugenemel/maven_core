@@ -2267,12 +2267,16 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
 
                     string fragmentLabel = matchData->compound->fragment_labels[i];
 
-                    vector<string> fragmentLabelTags = DirectInfusionMatchAssessment::getFragmentLabelTags(fragmentLabel, params, debug);
+                    //Issue 388: Disable debugging for easier readout
+                    vector<string> fragmentLabelTags = DirectInfusionMatchAssessment::getFragmentLabelTags(fragmentLabel, params, false);
+
+                    bool isAcylFragment = false;
 
                     //Issue 313: use marked sn1/sn2 fragment label tags instead of explicit list of fragment labels
                     if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn1FragmentLabelTag") != fragmentLabelTags.end() ||
                         find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn2FragmentLabelTag") != fragmentLabelTags.end()) {
 
+                        isAcylFragment = true;
                         compoundFragIntensity += fragObservedIntensity;
 
                         //Issue 318: split ambiguous fragments to avoid multiple-counting errors
@@ -2287,14 +2291,18 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
 
                         long key = mzUtils::mzToIntKey(static_cast<double>(matchData->compound->fragment_mzs[i]));
                         partitionMapMzs[it->first].insert(static_cast<int>(key));
-
-                        if (debug) {
-                            cout << "fragment label: " << fragmentLabel
-                                 << ", intensity=" << fragObservedIntensity
-                                 << ", compoundFragIntensity=" << compoundFragIntensity
-                                 << endl;
-                        }
                     }
+
+                    //Issue 388: print info about each fragment
+                    if (debug) {
+                        cout << (isAcylFragment ? "ACYL FRAGMENT " : " NON-ACYL FRAGMENT")
+                             << "fragment label: " << fragmentLabel
+                             << ", fragment intensity=" << fragObservedIntensity
+                             << ", compoundFragIntensity=" << compoundFragIntensity
+                             << ", compoundFragIntensitySAF=" << compoundFragIntensitySAF
+                             << endl;
+                    }
+
                 }
             }
 
