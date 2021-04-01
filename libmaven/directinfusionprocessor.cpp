@@ -2300,6 +2300,8 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                              << ", fragment intensity=" << fragObservedIntensity
                              << ", compoundFragIntensity=" << compoundFragIntensity
                              << ", compoundFragIntensitySAF=" << compoundFragIntensitySAF
+                             << ", allFragIntensity=" << allFragIntensity
+                             << ", allFragIntensitySAF=" << allFragIntensitySAF
                              << endl;
                     }
 
@@ -2323,7 +2325,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                 float fragmentMz = matchData->compound->fragment_mzs[i];
 
                 //Issue 313: use marked sn1/sn2 fragment label tags instead of explicit list of fragment labels
-                vector<string> fragmentLabelTags = DirectInfusionMatchAssessment::getFragmentLabelTags(fragmentLabel, params, debug);
+                vector<string> fragmentLabelTags = DirectInfusionMatchAssessment::getFragmentLabelTags(fragmentLabel, params, false);
 
                 if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn1FragmentLabelTag") != fragmentLabelTags.end() ||
 
