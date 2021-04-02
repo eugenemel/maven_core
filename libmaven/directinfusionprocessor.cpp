@@ -865,7 +865,10 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 
         //Issue 288
         if (!ms2Scans.empty()) {
-            matchInfo->computeMs1PartitionFractions(ms2Scans, ms2Fragment, params, debug);
+//            matchInfo->computeMs1PartitionFractions(ms2Scans, ms2Fragment, params, debug);
+
+            //Issue 388: alternative computation approach
+            matchInfo->computeMs1PartitionFractions2(ms2Fragment, params, debug);
         }
 
         directInfusionAnnotation->compounds = matchInfo->getCompounds();
