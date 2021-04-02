@@ -2233,6 +2233,10 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
 
     for (auto compound : getCompounds()) {
         long coord = mzUtils::mzToIntKey(static_cast<double>(compound->observedMs1ScanIntensity), 1L);
+
+        //If the observed intensity is 0, there is nothing to partition
+        if (coord == 0L) continue;
+
         if (ms1MzToCompoundNames.find(coord) == ms1MzToCompoundNames.end()) {
             ms1MzToCompoundNames.insert(make_pair(coord, vector<shared_ptr<DirectInfusionMatchData>>{}));
         }
@@ -2254,6 +2258,8 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
                 for (auto it2 = ms1MzToCompoundNames.begin(); it2 != ms1MzToCompoundNames.end(); ++it2) {
                     long ms1Id = it2->first;
                     vector<shared_ptr<DirectInfusionMatchData>> ms1Compounds = it2->second;
+
+                    if (ms1Id == 0L) continue;
 
                     if (std::find(ms1Compounds.begin(), ms1Compounds.end(), compound) != ms1Compounds.end()){
                         ms1Ids.insert(ms1Id);
@@ -2333,36 +2339,42 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
                      << endl;
             }
 
-            vector<int> fragMzs = matchDataToFrags.at(matchData);
-
+            //not all IDs have MS2 fragment matches
+            vector<int> fragMzs{};
             map<int, float> fragMzToIntensity{};
-            vector<int> ranks = matchData->fragmentationMatchScore.ranks;
 
-            for (unsigned int i = 0; i < ranks.size(); i++) {
+            if (matchDataToFrags.find(matchData) != matchDataToFrags.end()) {
 
-                int y = ranks[i];
-                if (y == -1) continue;
+                fragMzs = matchDataToFrags.at(matchData);
 
-                float fragObservedIntensity = ms2Fragment->consensus->intensity_array[static_cast<unsigned int>(y)];
+                vector<int> ranks = matchData->fragmentationMatchScore.ranks;
 
-                if (fragObservedIntensity >= params->ms2MinIntensity) {
+                for (unsigned int i = 0; i < ranks.size(); i++) {
 
-                    string fragmentLabel = matchData->compound->fragment_labels[i];
+                    int y = ranks[i];
+                    if (y == -1) continue;
 
-                    vector<string> fragmentLabelTags = DirectInfusionMatchAssessment::getFragmentLabelTags(fragmentLabel, params, false);
+                    float fragObservedIntensity = ms2Fragment->consensus->intensity_array[static_cast<unsigned int>(y)];
 
-                    if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn1FragmentLabelTag") != fragmentLabelTags.end() ||
-                        find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn2FragmentLabelTag") != fragmentLabelTags.end()) {
+                    if (fragObservedIntensity >= params->ms2MinIntensity) {
 
-                        int mzKey = static_cast<int>(mzUtils::mzToIntKey(static_cast<double>(matchData->compound->fragment_mzs[i])));
+                        string fragmentLabel = matchData->compound->fragment_labels[i];
 
-                        if (debug) cout << "Acyl chain fragment: " << fragmentLabel
-                                        <<   ", m/z=" << matchData->compound->fragment_mzs[i]
-                                        << ", intensity=" << fragObservedIntensity
-                                        << endl;
+                        vector<string> fragmentLabelTags = DirectInfusionMatchAssessment::getFragmentLabelTags(fragmentLabel, params, false);
 
-                        fragMzToIntensity.insert(make_pair(mzKey, fragObservedIntensity));
+                        if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn1FragmentLabelTag") != fragmentLabelTags.end() ||
+                            find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn2FragmentLabelTag") != fragmentLabelTags.end()) {
 
+                            int mzKey = static_cast<int>(mzUtils::mzToIntKey(static_cast<double>(matchData->compound->fragment_mzs[i])));
+
+                            if (debug) cout << "Acyl chain fragment: " << fragmentLabel
+                                            <<   ", m/z=" << matchData->compound->fragment_mzs[i]
+                                            << ", intensity=" << fragObservedIntensity
+                                            << endl;
+
+                            fragMzToIntensity.insert(make_pair(mzKey, fragObservedIntensity));
+
+                        }
                     }
                 }
             }
@@ -2373,7 +2385,9 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
 
                 if (fragMzToIntensity.find(fragId) == fragMzToIntensity.end()) continue;
 
-                pair<shared_ptr<DirectInfusionMatchData>, long> safKey = make_pair(matchData, fragId);
+                pair<shared_ptr<DirectInfusionMatchData>, int> safKey = make_pair(matchData, fragId);
+
+                if (fragToSAFMultiplier.find(safKey) == fragToSAFMultiplier.end()) continue;
 
                 float effectiveFragIntensity = (fragMzToIntensity.at(fragId) * fragToSAFMultiplier.at(safKey));
 
