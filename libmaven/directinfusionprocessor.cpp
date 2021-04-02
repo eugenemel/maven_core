@@ -2211,6 +2211,218 @@ string DirectInfusionMatchInformation::getFragmentGroupId(shared_ptr<DirectInfus
     }
 }
 
+void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
+        const Fragment *ms2Fragment,
+        const shared_ptr<DirectInfusionSearchParameters> params,
+        const bool debug){
+
+    if (debug) cout << "DirectInfusionMatchInformation::computeMs1PartitionFractions2()" << endl;
+
+    if (!ms2Fragment || !ms2Fragment->consensus) return;
+
+    map<shared_ptr<DirectInfusionMatchData>, float> partitionFractions{};
+
+    // <compoundName, fragId> = division of this fragment between multiple compounds in same window
+    map<pair<shared_ptr<DirectInfusionMatchData>, int>, float> fragToSAFMultiplier;
+    set<shared_ptr<DirectInfusionMatchData>> compoundsWithAdjustedSAFs{};
+
+    map<long, vector<shared_ptr<DirectInfusionMatchData>>> ms1MzToCompoundNames{};
+
+    for (auto compound : getCompounds()) {
+        long coord = mzUtils::mzToIntKey(static_cast<double>(compound->observedMs1ScanIntensity), 1L);
+        if (ms1MzToCompoundNames.find(coord) == ms1MzToCompoundNames.end()) {
+            ms1MzToCompoundNames.insert(make_pair(coord, vector<shared_ptr<DirectInfusionMatchData>>{}));
+        }
+        ms1MzToCompoundNames[coord].push_back(compound);
+    }
+
+    //STEP 1: determine SAF adjustments
+
+    for (auto it = fragToMatchData.begin(); it != fragToMatchData.end(); ++it) {
+
+        int fragId = it->first;
+        unordered_set<shared_ptr<DirectInfusionMatchData>> compounds = it->second;
+
+        set<long> ms1Ids{};
+
+        if (compounds.size() > 1) {
+
+            for (auto compound : compounds) {
+                for (auto it2 = ms1MzToCompoundNames.begin(); it2 != ms1MzToCompoundNames.end(); ++it2) {
+                    long ms1Id = it2->first;
+                    vector<shared_ptr<DirectInfusionMatchData>> ms1Compounds = it2->second;
+
+                    if (std::find(ms1Compounds.begin(), ms1Compounds.end(), compound) != ms1Compounds.end()){
+                        ms1Ids.insert(ms1Id);
+                    }
+                }
+            }
+
+            //SAF is only a concern when a fragment is involved in multiple compounds and multiple ms1 m/zs
+            if (ms1Ids.size() > 1) {
+
+                float totalIntensity = 0.0f;
+                for (auto ms1Id : ms1Ids) {
+                    totalIntensity += static_cast<float>(mzUtils::intKeyToMz(ms1Id, 1L));
+                }
+
+                for (auto ms1Id : ms1Ids) {
+
+                    float ms1IdIntensity = static_cast<float>(mzUtils::intKeyToMz(ms1Id, 1L));
+                    vector<shared_ptr<DirectInfusionMatchData>> compoundsWithMatchingId = ms1MzToCompoundNames.at(ms1Id);
+
+                    for (auto matchData : compoundsWithMatchingId) {
+
+                        //even if a compound doesn't directly have an ambigous fragment,
+                        //if it shares an MS1 intensity peak with a compound that
+                        //does have an ambiguous fragment, it is also affected by the SAF
+                        compoundsWithAdjustedSAFs.insert(matchData);
+
+                        if (debug) cout << matchData->compound->name << " "
+                                        << matchData->compound->adductString << " "
+                                        << "has ambiguous fragment m/z="
+                                        << mzUtils::intKeyToMz(fragId);
+
+                        pair<shared_ptr<DirectInfusionMatchData>, long> key = make_pair(matchData, fragId);
+
+                        if (fragToSAFMultiplier.find(key) == fragToSAFMultiplier.end()) {
+                            float SAFpartition = ms1IdIntensity/totalIntensity;
+                            fragToSAFMultiplier.insert(make_pair(key, SAFpartition));
+                        }
+
+                    }
+                }
+
+            //multiple compounds, but single ms1 m/z case: no need for SAF
+            } else {
+                for (auto compound : compounds) {
+                    pair<shared_ptr<DirectInfusionMatchData>, long> key = make_pair(compound, fragId);
+                    if (fragToSAFMultiplier.find(key) == fragToSAFMultiplier.end()) {
+                        fragToSAFMultiplier.insert(make_pair(key, 1.0f));
+                    }
+                }
+            }
+
+        } else {
+            pair<shared_ptr<DirectInfusionMatchData>, long> key = make_pair(*(compounds.begin()), fragId);
+            if (fragToSAFMultiplier.find(key) == fragToSAFMultiplier.end()) {
+                fragToSAFMultiplier.insert(make_pair(key, 1.0f));
+            }
+        }
+    }
+
+    //STEP 2: divide ms1 intensities between all compounds, based on fragments
+
+    for (auto it = ms1MzToCompoundNames.begin(); it != ms1MzToCompoundNames.end(); ++it) {
+
+        vector<shared_ptr<DirectInfusionMatchData>> compoundNames = it->second;
+
+        float totalEfectiveFragIntensityAllCompounds = 0.0f;
+
+        map<shared_ptr<DirectInfusionMatchData>, float> compoundToTotalEffectiveFragIntensity{};
+
+        for (auto matchData : compoundNames) {
+
+            if (debug) {
+                cout << "ms1 intensity: " << it->first
+                     << ", compound: " << matchData->compound->name
+                     << ", adduct: " << matchData->compound->adductString
+                     << endl;
+            }
+
+            vector<int> fragMzs = matchDataToFrags.at(matchData);
+
+            map<int, float> fragMzToIntensity{};
+            vector<int> ranks = matchData->fragmentationMatchScore.ranks;
+
+            for (unsigned int i = 0; i < ranks.size(); i++) {
+
+                int y = ranks[i];
+                if (y == -1) continue;
+
+                float fragObservedIntensity = ms2Fragment->consensus->intensity_array[static_cast<unsigned int>(y)];
+
+                if (fragObservedIntensity >= params->ms2MinIntensity) {
+
+                    string fragmentLabel = matchData->compound->fragment_labels[i];
+
+                    vector<string> fragmentLabelTags = DirectInfusionMatchAssessment::getFragmentLabelTags(fragmentLabel, params, false);
+
+                    if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn1FragmentLabelTag") != fragmentLabelTags.end() ||
+                        find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn2FragmentLabelTag") != fragmentLabelTags.end()) {
+
+                        int mzKey = static_cast<int>(mzUtils::mzToIntKey(static_cast<double>(matchData->compound->fragment_mzs[i])));
+
+                        if (debug) cout << "Acyl chain fragment: " << fragmentLabel
+                                        <<   ", m/z=" << matchData->compound->fragment_mzs[i]
+                                        << ", intensity=" << fragObservedIntensity
+                                        << endl;
+
+                        fragMzToIntensity.insert(make_pair(mzKey, fragObservedIntensity));
+
+                    }
+                }
+            }
+
+            float effectiveFragIntensityCompound = 0.0f;
+
+            for (auto fragId : fragMzs) {
+
+                if (fragMzToIntensity.find(fragId) == fragMzToIntensity.end()) continue;
+
+                pair<shared_ptr<DirectInfusionMatchData>, long> safKey = make_pair(matchData, fragId);
+
+                float effectiveFragIntensity = (fragMzToIntensity.at(fragId) * fragToSAFMultiplier.at(safKey));
+
+                effectiveFragIntensityCompound += effectiveFragIntensity;
+                totalEfectiveFragIntensityAllCompounds += effectiveFragIntensity;
+
+            }
+
+            compoundToTotalEffectiveFragIntensity.insert(make_pair(matchData, effectiveFragIntensityCompound));
+
+        }
+
+        for (auto it2 = compoundToTotalEffectiveFragIntensity.begin(); it2 != compoundToTotalEffectiveFragIntensity.end(); ++it2) {
+
+            auto matchData = it2->first;
+            float effectiveFragIntensityCompound = it2->second;
+
+            float partitionFraction = 1.0f/compoundNames.size();
+            if (totalEfectiveFragIntensityAllCompounds > 0.0f) {
+                partitionFraction = effectiveFragIntensityCompound/totalEfectiveFragIntensityAllCompounds;
+            }
+
+            partitionFractions.insert(make_pair(matchData, partitionFraction));
+        }
+
+    }
+
+    //STEP 3: disqualify SAFs, if appropriate
+
+    for (auto it = partitionFractions.begin(); it != partitionFractions.end(); ++it) {
+
+        auto matchData = it->first;
+        matchData->ms1PartitionFractionSplitAmbiguousFragments = it->second;
+
+        if (std::find(compoundsWithAdjustedSAFs.begin(), compoundsWithAdjustedSAFs.end(), matchData) != compoundsWithAdjustedSAFs.end()) {
+            matchData->ms1PartitionFraction = -1.0f;
+        } else {
+            matchData->ms1PartitionFraction = it->second;
+        }
+
+        //TODO: handle scans, or delete these fields
+        matchData->ms1PartitionFractionByScan = -1.0f;
+        matchData->ms1PartitionFractionByScanSplitAmbiguousFragments = -1.0f;
+
+        if (debug) cout << matchData->compound->name << " "
+                        << matchData->adduct->name << ":"
+                        << " partitionFraction= " << matchData->ms1PartitionFraction
+                        << ", partitionFractionSAF= " << matchData->ms1PartitionFractionSplitAmbiguousFragments
+                        << endl;
+    }
+}
+
 //Issue 288, 292
 void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<Scan*>& ms2Scans,
                                                                   const Fragment *ms2Fragment,

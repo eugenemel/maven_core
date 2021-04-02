@@ -868,6 +868,11 @@ public:
     // <precursor m/z, fragment m/z> = sum of all observed ms1 scan intensity
     map<int, float> getFragToSumObservedMs1ScanIntensity(const bool debug);
 
+    //Issue 388: redo this calculation to fix bugs
+    void computeMs1PartitionFractions2(const Fragment *ms2Fragment,
+                                       const shared_ptr<DirectInfusionSearchParameters> params,
+                                       const bool debug);
+
 private:
 
     // <precursor m/z, compound match data> = for use with partitioning intensity
