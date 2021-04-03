@@ -2290,7 +2290,8 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
                         if (debug) cout << matchData->compound->name << " "
                                         << matchData->compound->adductString << " "
                                         << "has ambiguous fragment m/z="
-                                        << mzUtils::intKeyToMz(fragId);
+                                        << mzUtils::intKeyToMz(fragId)
+                                        << endl;
 
                         pair<shared_ptr<DirectInfusionMatchData>, long> key = make_pair(matchData, fragId);
 
