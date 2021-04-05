@@ -338,10 +338,21 @@ vector<pair<string, string>> SummarizedCompound::parseCompoundId(string compound
 
         unsigned long posPrevious = 0;
         unsigned long posCurrent = 0;
+        unsigned long posSubstringStart = 0;
 
-        while ((posCurrent = generalSummaryCompoundList.find(");", posPrevious)) != string::npos) {
-            string encodedCompoundAdductPair = generalSummaryCompoundList.substr(posPrevious, posCurrent-posPrevious);
-            posPrevious = posCurrent + 2;
+        while ((posCurrent = generalSummaryCompoundList.find(";", posPrevious)) != string::npos) {
+
+            //LipidMaps 2020 update: skip semicolons associated with oxygens
+            if (posCurrent+1 < generalSummaryCompoundList.size() && generalSummaryCompoundList[posCurrent+1] == 'O'){
+                posPrevious = posCurrent + 1;
+                continue;
+            }
+
+            string encodedCompoundAdductPair = generalSummaryCompoundList.substr(posSubstringStart, posCurrent-posSubstringStart);
+
+            posPrevious = posCurrent + 1;
+
+            posSubstringStart = posPrevious;
 
             encodedCompoundAdductPairs.push_back(encodedCompoundAdductPair);
 
@@ -370,10 +381,21 @@ vector<pair<string, string>> SummarizedCompound::parseCompoundId(string compound
 
         unsigned long posPrevious = 0;
         unsigned long posCurrent = 0;
+        unsigned long posSubstringStart = 0;
 
-        while ((posCurrent = compositionSummaryCompoundList.find(");", posPrevious)) != string::npos) {
-            string compoundName = compositionSummaryCompoundList.substr(posPrevious, posCurrent-posPrevious);
-            posPrevious = posCurrent + 2;
+        while ((posCurrent = compositionSummaryCompoundList.find(";", posPrevious)) != string::npos) {
+
+            //LipidMaps 2020 update: skip semicolons associated with oxygens
+            if (posCurrent+1 < compositionSummaryCompoundList.size() && compositionSummaryCompoundList[posCurrent+1] == 'O'){
+                posPrevious = posCurrent + 1;
+                continue;
+            }
+
+            string compoundName = compositionSummaryCompoundList.substr(posSubstringStart, posCurrent-posSubstringStart);
+
+            posPrevious = posCurrent + 1;
+
+            posSubstringStart = posPrevious;
 
             compoundAdductPairs.push_back(make_pair(compoundName, compositionSummaryAdduct));
         }
