@@ -339,9 +339,9 @@ vector<pair<string, string>> SummarizedCompound::parseCompoundId(string compound
         unsigned long posPrevious = 0;
         unsigned long posCurrent = 0;
 
-        while ((posCurrent = generalSummaryCompoundList.find(";", posPrevious)) != string::npos) {
+        while ((posCurrent = generalSummaryCompoundList.find(");", posPrevious)) != string::npos) {
             string encodedCompoundAdductPair = generalSummaryCompoundList.substr(posPrevious, posCurrent-posPrevious);
-            posPrevious = posCurrent + 1;
+            posPrevious = posCurrent + 2;
 
             encodedCompoundAdductPairs.push_back(encodedCompoundAdductPair);
 
@@ -371,9 +371,9 @@ vector<pair<string, string>> SummarizedCompound::parseCompoundId(string compound
         unsigned long posPrevious = 0;
         unsigned long posCurrent = 0;
 
-        while ((posCurrent = compositionSummaryCompoundList.find(";", posPrevious)) != string::npos) {
+        while ((posCurrent = compositionSummaryCompoundList.find(");", posPrevious)) != string::npos) {
             string compoundName = compositionSummaryCompoundList.substr(posPrevious, posCurrent-posPrevious);
-            posPrevious = posCurrent + 1;
+            posPrevious = posCurrent + 2;
 
             compoundAdductPairs.push_back(make_pair(compoundName, compositionSummaryAdduct));
         }
