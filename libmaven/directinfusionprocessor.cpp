@@ -3088,6 +3088,11 @@ void DirectInfusionMatchAssessment::computeMs2MatchAssessment(
 
             fragmentationMatchScore.numMatches++;
 
+            //Issue 390
+            if (abs(compound->fragment_mzs[i] - compound->precursorMz) < maxDeltaMz) {
+                fragmentationMatchScore.isHasPrecursorMatch = true;
+            }
+
             if (!isHasLabels) continue;
 
             vector<string> fragmentLabelTags = DirectInfusionMatchAssessment::getFragmentLabelTags(compound->fragment_labels[i], params, debug);
@@ -3102,10 +3107,6 @@ void DirectInfusionMatchAssessment::computeMs2MatchAssessment(
 
             if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), "ms2sn2FragmentLabelTag") != fragmentLabelTags.end()) {
                 fragmentationMatchScore.numSn2Matches++;
-            }
-
-            if (abs(compound->fragment_mzs[i] - compound->precursorMz) < maxDeltaMz) {
-                fragmentationMatchScore.isHasPrecursorMatch = true;
             }
         }
     }
