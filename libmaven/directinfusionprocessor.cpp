@@ -757,6 +757,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         int minNumDiagnosticMatches = params->ms2MinNumDiagnosticMatches;
         int minNumSn1Matches = params->ms2sn1MinNumMatches;
         int minNumSn2Matches = params->ms2sn2MinNumMatches;
+        bool isRequirePrecursorMatchInMs2 = params->ms2IsRequirePrecursorMatch;
 
         string lipidClass;
 
@@ -819,13 +820,17 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         int ms1IntensityCoord = matchAssessment->ms1IntensityCoord;
         float observedMs1ScanIntensity = matchAssessment->observedMs1ScanIntensity;
 
+        //Issue 390
+        bool isSatisfiesMs2PrecursorMatchRequirements = !isRequirePrecursorMatchInMs2 || (isRequirePrecursorMatchInMs2 && matchAssessment->fragmentationMatchScore.isHasPrecursorMatch);
+
         //individual compound matches
         if (!matchAssessment->isDisqualifyThisMatch &&
                 s.numMatches >= minNumMatches &&
                 s.numDiagnosticMatches >= minNumDiagnosticMatches &&
                 s.numSn1Matches >= minNumSn1Matches &&
                 s.numSn2Matches >= minNumSn2Matches &&
-                params->isDiagnosticFragmentMapAgreement(matchAssessment->diagnosticFragmentMatchMap)) {
+                params->isDiagnosticFragmentMapAgreement(matchAssessment->diagnosticFragmentMatchMap) &&
+                isSatisfiesMs2PrecursorMatchRequirements) {
 
             shared_ptr<DirectInfusionMatchData> directInfusionMatchData = shared_ptr<DirectInfusionMatchData>(new DirectInfusionMatchData());
 
