@@ -810,6 +810,15 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
             }
 
             if (debug) cout << "ms2MinNumSn2Matches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": " << minNumSn2Matches << endl;
+
+            //Issue 390
+            if (params->ms2IsRequirePrecursorMatchByLipidClassAndAdduct.find(lipidClassAndAdductKey) != params->ms2IsRequirePrecursorMatchByLipidClassAndAdduct.end()) {
+                isRequirePrecursorMatchInMs2 = params->ms2IsRequirePrecursorMatchByLipidClassAndAdduct[lipidClassAndAdductKey];
+            } else if (params->ms2IsRequirePrecursorMatchByLipidClassAndAdduct.find(lipidClassKey) != params->ms2IsRequirePrecursorMatchByLipidClassAndAdduct.end()) {
+                isRequirePrecursorMatchInMs2 = params->ms2IsRequirePrecursorMatchByLipidClassAndAdduct[lipidClassKey];
+            }
+
+            if (debug) cout << "ms2IsRequirePrecursorMatch for lipidClass=" << lipidClass << ", adduct=" << adductName << ": " << (isRequirePrecursorMatchInMs2 ? "true" : "false") << endl;
         }
 
         unique_ptr<DirectInfusionMatchAssessment> matchAssessment = assessMatch(ms1Scans, ms1Fragment, ms2Fragment, libraryEntry, params, debug);
