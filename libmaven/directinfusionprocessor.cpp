@@ -3063,8 +3063,9 @@ void DirectInfusionMatchAssessment::computeMs2MatchAssessment(
     t.intensity_array = compound->fragment_intensity;
     t.fragment_labels = compound->fragment_labels;
 
+    float maxDeltaMz = (params->ms2PpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
+
     if (observedSpectrum) {
-        float maxDeltaMz = (params->ms2PpmTolr * static_cast<float>(t.precursorMz))/ 1000000;
         fragmentationMatchScore.ranks = Fragment::findFragPairsGreedyMz(&t, observedSpectrum, maxDeltaMz);
     } else {
         //Issue 303: downstream analysis expects the ranks vector to exist and be the same size as the compound fragment vectors
@@ -3103,6 +3104,9 @@ void DirectInfusionMatchAssessment::computeMs2MatchAssessment(
                 fragmentationMatchScore.numSn2Matches++;
             }
 
+            if (abs(compound->fragment_mzs[i] - compound->precursorMz) < maxDeltaMz) {
+                fragmentationMatchScore.isHasPrecursorMatch = true;
+            }
         }
     }
 

@@ -50,6 +50,7 @@ struct FragmentationMatchScore {
     double numDiagnosticMatches;
     double numSn1Matches; //Issue 312
     double numSn2Matches; //Issue 312
+    bool isHasPrecursorMatch;
 
     double ppmError;
     double mzFragError;
@@ -99,6 +100,7 @@ struct FragmentationMatchScore {
         numDiagnosticMatches=0;
         numSn1Matches=0;
         numSn2Matches=0;
+        isHasPrecursorMatch = false;
 
         ppmError=DBL_MAX;
         mzFragError=DBL_MAX;
