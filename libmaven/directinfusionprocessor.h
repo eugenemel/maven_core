@@ -116,6 +116,7 @@ public:
      * @param ms2sn1MinNumMatchesByLipidClassAndAdduct: override default ms2sn1MinNumMatches with a new value specific to <lipidClass, adductName>.
      * @param ms2sn2MinNumMatchesByLipidClassAndAdduct: override default ms2sn2MinNumMatches with a new value specific to <lipidClass, adductName>.
      * @param ms2IsRequirePrecursorMatch: Require that a fragment m/z matched in the MS2 spectrum matches within MS2 tolerance to the compound MS1 precursor m/z.
+     * @param ms2IsRequirePrecursorMatchByLipidClassAndAdduct: override default ms2IsRequirePrecursorMatch with a new value specific to <lipidClass, adductName>.
      * ==================== */
     string ms2DiagnosticFragmentLabelTag = "*";
     string ms2sn1FragmentLabelTag = "@";
@@ -127,6 +128,7 @@ public:
     map<pair<string, string>, int> ms2sn1MinNumMatchesByLipidClassAndAdduct{};
     map<pair<string, string>, int> ms2sn2MinNumMatchesByLipidClassAndAdduct{};
     bool ms2IsRequirePrecursorMatch = false; //Issue 390
+    map<pair<string, string>, bool> ms2IsRequirePrecursorMatchByLipidClassAndAdduct{};
 
     /** ===================
      * MS3 SEARCH RELATED
@@ -217,7 +219,7 @@ public:
         cout << encodedParams << endl;
     }
 
-    enum ByLipidClassAndAdduct{MIN_NUM_MATCHES=0, MIN_NUM_DIAGNOSTIC_MATCHES=1, MIN_SN1_MATCHES=2, MIN_SN2_MATCHES=3};
+    enum ByLipidClassAndAdduct{MIN_NUM_MATCHES=0, MIN_NUM_DIAGNOSTIC_MATCHES=1, MIN_SN1_MATCHES=2, MIN_SN2_MATCHES=3, REQUIRE_PRECURSOR_IN_MS2=4};
 
     //RESERVED DELIMITERS - DO NOT CHANGE!
     static constexpr const char* const INTERNAL_MAP_DELIMITER = "|,|";
@@ -335,6 +337,17 @@ public:
 
         encodedParams = encodedParams + "};";
 
+        //Issue 390
+        encodedParams = encodedParams + "ms2IsRequirePrecursorMatchByLipidClassAndAdduct" + "=" + "{";
+
+        for (auto it = ms2IsRequirePrecursorMatchByLipidClassAndAdduct.begin(); it != ms2IsRequirePrecursorMatchByLipidClassAndAdduct.end(); ++it) {
+            string key = it->first.first + TUPLE_MAP_KEY_DELIMITER + it->first.second;
+            string value = to_string(it->second);
+            encodedParams = encodedParams + key + "=" + value + INTERNAL_MAP_DELIMITER;
+        }
+
+        encodedParams = encodedParams + "};";
+
         //Issue 359
         encodedParams = encodedParams + "ms2sn1MinNumMatches" + "=" + to_string(ms2sn1MinNumMatches) + ";";
         encodedParams = encodedParams + "ms2sn2MinNumMatches" + "=" + to_string(ms2sn2MinNumMatches) + ";";
@@ -435,6 +448,9 @@ public:
                 directInfusionSearchParameters->ms2sn1MinNumMatchesByLipidClassAndAdduct.insert(make_pair(key, value));
             } else if (byLipidClassAndAdduct == ByLipidClassAndAdduct::MIN_SN2_MATCHES) {
                 directInfusionSearchParameters->ms2sn2MinNumMatchesByLipidClassAndAdduct.insert(make_pair(key, value));
+            } else if (byLipidClassAndAdduct == ByLipidClassAndAdduct::REQUIRE_PRECURSOR_IN_MS2) {
+              bool ms2IsRequirePrecursorMatch = it->second == "1";
+              directInfusionSearchParameters->ms2IsRequirePrecursorMatchByLipidClassAndAdduct.insert(make_pair(key, ms2IsRequirePrecursorMatch));
             }
         }
     }
@@ -641,6 +657,13 @@ public:
             addByLipidClassAndAdductMap(directInfusionSearchParameters,
                                         encodedms2sn2MinNumMatchesByLipidClassAndAdduct,
                                         ByLipidClassAndAdduct::MIN_SN2_MATCHES);
+        }
+
+        if (decodedMap.find("ms2IsRequirePrecursorMatchByLipidClassAndAdduct") != decodedMap.end()) {
+            string encodedms2IsRequirePrecursorMatchByLipidClassAndAdduct = decodedMap["ms2IsRequirePrecursorMatchByLipidClassAndAdduct"];
+            addByLipidClassAndAdductMap(directInfusionSearchParameters,
+                                        encodedms2IsRequirePrecursorMatchByLipidClassAndAdduct,
+                                        ByLipidClassAndAdduct::REQUIRE_PRECURSOR_IN_MS2);
         }
 
         //ms1 search params
