@@ -115,6 +115,7 @@ public:
      * @param ms2sn2MinNumMatches: min num sn2-associated reference peaks found in observed spectrum.
      * @param ms2sn1MinNumMatchesByLipidClassAndAdduct: override default ms2sn1MinNumMatches with a new value specific to <lipidClass, adductName>.
      * @param ms2sn2MinNumMatchesByLipidClassAndAdduct: override default ms2sn2MinNumMatches with a new value specific to <lipidClass, adductName>.
+     * @param ms2IsRequirePrecursorMatch: Require that a fragment m/z matched in the MS2 spectrum matches within MS2 tolerance to the compound MS1 precursor m/z.
      * ==================== */
     string ms2DiagnosticFragmentLabelTag = "*";
     string ms2sn1FragmentLabelTag = "@";
@@ -125,6 +126,7 @@ public:
     int ms2sn2MinNumMatches = 0;
     map<pair<string, string>, int> ms2sn1MinNumMatchesByLipidClassAndAdduct{};
     map<pair<string, string>, int> ms2sn2MinNumMatchesByLipidClassAndAdduct{};
+    bool ms2IsRequirePrecursorMatch = false; //Issue 390
 
     /** ===================
      * MS3 SEARCH RELATED
@@ -300,6 +302,7 @@ public:
         encodedParams = encodedParams + "ms2DiagnosticFragmentLabelTag" + "=" + ms2DiagnosticFragmentLabelTag + ";";
         encodedParams = encodedParams + "ms2sn1FragmentLabelTag" + "=" + ms2sn1FragmentLabelTag + ";";
         encodedParams = encodedParams + "ms2sn2FragmentLabelTag" + "=" + ms2sn2FragmentLabelTag + ";";
+        encodedParams = encodedParams + "ms2IsRequirePrecursorMatch" + "=" + to_string(ms2IsRequirePrecursorMatch) + ";"; //Issue 390
 
         encodedParams = encodedParams + "ms2MinNumDiagnosticMatchesMap" + "=" + "{";
 
@@ -602,6 +605,9 @@ public:
         }
         if (decodedMap.find("ms2sn2MinNumMatches") != decodedMap.end()) {
             directInfusionSearchParameters->ms2sn2MinNumMatches = stoi(decodedMap["ms2sn2MinNumMatches"]);
+        }
+        if (decodedMap.find("ms2IsRequirePrecursorMatch") != decodedMap.end()) { //Issue 390
+            directInfusionSearchParameters->ms2IsRequirePrecursorMatch = decodedMap["ms2IsRequirePrecursorMatch"] == "1";
         }
 
         if (decodedMap.find("ms2MinNumDiagnosticMatchesMap") != decodedMap.end()) {
