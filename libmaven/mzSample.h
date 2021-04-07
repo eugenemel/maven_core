@@ -773,6 +773,8 @@ struct IsotopeParameters {
 
     Classifier *clsf = nullptr;
 
+    inline bool isIsotopes() {return (isC13Labeled || isN15Labeled || isS34Labeled || isD2Labeled);}
+
 };
 
 class PeakGroup {

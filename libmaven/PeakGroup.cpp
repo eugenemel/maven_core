@@ -995,6 +995,7 @@ string PeakGroup::getPeakGroupLabel() {
  */
 void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters) {
 
+    if (!isotopeParameters.isIsotopes()) return;
     if (!compound) return;
     if (compound->formula.empty()) return;
     if (peakCount() == 0) return;
