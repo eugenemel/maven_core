@@ -995,6 +995,7 @@ string PeakGroup::getPeakGroupLabel() {
  */
 void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters) {
 
+    if (_type == PeakGroup::SRMTransitionType) return; //isotopes are not available for SRM types
     if (!isotopeParameters.isIsotopes()) return;
     if (!compound) return;
     if (compound->formula.empty()) return;
@@ -1030,13 +1031,21 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters) {
                 isotopeParameters.isS34Labeled,
                 isotopeParameters.isD2Labeled);
 
+    //sort by increasing m/z to number appropriately
+    sort(massList.begin(), massList.end(), [](Isotope& lhs, Isotope& rhs){
+            return lhs.mz < rhs.mz;
+         });
+
     map<string,PeakGroup>isotopes;
     map<string,PeakGroup>::iterator itr2;
 
     for (auto parentPeak : peaks ) {
         mzSample* sample = parentPeak.sample;
 
+        int isotopeNumber = -1;
+
         for (auto& isotope : massList) {
+            isotopeNumber++;
 
             string isotopeName = isotope.name;
             float isotopeMass = static_cast<float>(isotope.mz);
@@ -1145,6 +1154,7 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters) {
                         g.tagString=isotopeName;
                         g.expectedAbundance=expectedAbundance;
                         g.isotopeC13count= isotope.C13;
+                        g.isotopicIndex = isotopeNumber;
                         isotopes[isotopeName] = g;
                     }
                     isotopes[isotopeName].addPeak(*nearestPeak);
@@ -1161,7 +1171,10 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters) {
         PeakGroup& child = (*itr2).second;
         child.tagString = isotopeName;
         child.metaGroupId = metaGroupId;
-        child.groupId = groupId;                //TODO: child groups can have the same ID as parent groups?
+
+        child.groupId = groupId;
+         //TODO: child groups can have the same ID as parent groups? Note that when saving this in the mzrollDB, this will be overwritten
+
         child.compound = compound;
         child.adduct = adduct;
         child.parent = this;
