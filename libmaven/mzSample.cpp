@@ -26,6 +26,7 @@ mzSample::mzSample() {
     sampleId = -1;
     color[0]=color[1]=color[2]=0;
     color[3]=1.0;
+    _averageFullScanTime = -1.0f; //initial value of -1 indicates that computation not yet performed from mzSample::getAverageFullScanTime()
 }
 
 mzSample::~mzSample() { 
@@ -1024,7 +1025,11 @@ float mzSample::getMaxRt(const vector<mzSample*>&samples) {
 }
 
 float mzSample::getAverageFullScanTime() {
-	float s=0;
+
+    //Issue 371: Lazy implementation, if already computed, return
+    if (_averageFullScanTime >= 0) return _averageFullScanTime;
+
+    float s=0;
 	int n=0;
     Scan* lscan = nullptr;
     Scan* tscan = nullptr;
@@ -1037,8 +1042,13 @@ float mzSample::getAverageFullScanTime() {
 				lscan = tscan;
 		}
 	}
-	if ( n > 0 ) return s/n;
-	return 0;
+    if ( n > 0 ){
+        _averageFullScanTime = s/n;
+    } else {
+        _averageFullScanTime = 0.0f;
+    }
+
+    return _averageFullScanTime;
 }
 
 

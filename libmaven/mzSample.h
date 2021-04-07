@@ -468,6 +468,8 @@ public:
     map<string,string> instrumentInfo;		//tags associated with this sample
     map<pair<float, float>,vector<int>> srmScansByMzs{};    //srm to scan mapping, key = <precursorMz, productMz>
 
+    float _averageFullScanTime;
+
     //saving and restoring retention times
     vector<float>originalRetentionTimes;       			//saved retention times prior to alignment
     vector<double>polynomialAlignmentTransformation;		//parameters for polynomial transform
