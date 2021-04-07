@@ -1075,7 +1075,7 @@ Scan* mzSample::getScan(unsigned int scanNum) {
 		return(scans[scanNum]);
 	} else {
 		cerr << "Warning bad scan number " << scanNum << endl;
-		return NULL;
+        return nullptr;
 	}
 }
 
