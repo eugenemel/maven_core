@@ -985,3 +985,192 @@ void PeakGroup::processLabel(char label, bool isToggle) {
 string PeakGroup::getPeakGroupLabel() {
     return string(labels.begin(), labels.end());
 }
+
+/**
+ * @brief PeakGroup::pullIsotopes
+ * @param isotopeParameters
+ *
+ * Issue 371: To avoid confusion surrounding multiple implementations of
+ * pullIsotopes(), refactoring to PeakGroup-specific method
+ */
+void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters) {
+
+    if (!compound) return;
+    if (compound->formula.empty()) return;
+    if (peakCount() == 0) return;
+
+    Adduct *groupAdduct = nullptr;
+
+    if (adduct) {
+        groupAdduct = adduct;
+    } else if (isotopeParameters.adduct) {
+        groupAdduct = adduct;
+    }
+
+    if (!groupAdduct) return;
+
+    map<mzSample*, double, mzSample_name_less> sampleToPeakMz{};
+    for (Peak& p : peaks) {
+        sampleToPeakMz.insert(make_pair(p.sample, p.peakMz));
+    }
+
+    string formula = compound->formula;
+
+    int maxNumProtons = INT_MAX;
+    if (isotopeParameters.isExtractNIsotopes) {
+        maxNumProtons = isotopeParameters.maxIsotopesToExtract;
+    }
+    vector<Isotope> massList = MassCalculator::computeIsotopes(
+                formula,
+                groupAdduct,
+                maxNumProtons,
+                isotopeParameters.isC13Labeled,
+                isotopeParameters.isN15Labeled,
+                isotopeParameters.isS34Labeled,
+                isotopeParameters.isD2Labeled);
+
+    map<string,PeakGroup>isotopes;
+    map<string,PeakGroup>::iterator itr2;
+
+    for (auto parentPeak : peaks ) {
+        mzSample* sample = parentPeak.sample;
+
+        for (auto& isotope : massList) {
+
+            string isotopeName = isotope.name;
+            float isotopeMass = static_cast<float>(isotope.mz);
+            float expectedAbundance = static_cast<float>(isotope.abundance);
+
+            float mzmin = isotopeMass-isotopeMass/1e6f*isotopeParameters.ppm;
+            float mzmax = isotopeMass+isotopeMass/1e6f*isotopeParameters.ppm;
+
+
+            float rt  =   parentPeak.rt;
+            float rtmin = parentPeak.rtmin;
+            float rtmax = parentPeak.rtmax;
+
+            float isotopePeakIntensity=0;
+            float parentPeakIntensity=0;
+
+            parentPeakIntensity = parentPeak.peakIntensity;
+            int scannum = parentPeak.getScan()->scannum;
+
+            int minScan = max(0, scannum-3);
+            int maxScan = min(static_cast<int>(parentPeak.sample->scanCount()), scannum+3);
+
+            for (int i= minScan; i < maxScan; i++) {
+
+                Scan* s = sample->getScan(static_cast<unsigned int>(i));
+
+                //look for isotopic mass in the same spectrum
+                vector<int> matches = s->findMatchingMzs(mzmin, mzmax);
+
+                for(unsigned int j=0; j < matches.size(); j++ ) {
+                    int pos = matches[j];
+                    if (s->intensity[static_cast<unsigned int>(pos)] > isotopePeakIntensity ) {
+                        isotopePeakIntensity = s->intensity[static_cast<unsigned int>(pos)];
+                        rt = s->rt;
+                    }
+                }
+            }
+            //if(isotopePeakIntensity==0) continue;
+
+            //natural abundance check
+            if (isotopeParameters.isIgnoreNaturalAbundance) {
+                if (    (isotope.C13 > 0    && !isotopeParameters.isC13Labeled)
+                        || (isotope.N15 > 0 && !isotopeParameters.isN15Labeled)
+                        || (isotope.S34 > 0 && !isotopeParameters.isS34Labeled)
+                        || (isotope.H2 > 0  && !isotopeParameters.isD2Labeled)
+
+                        ) {
+                    if (expectedAbundance < 1e-8f) continue;
+                    if (expectedAbundance * parentPeakIntensity < 1) continue;
+                    float observedAbundance = isotopePeakIntensity/(parentPeakIntensity+isotopePeakIntensity);
+                    float naturalAbundanceError = abs(observedAbundance-expectedAbundance)/expectedAbundance*100.0f;
+
+                    //cerr << isotopeName << endl;
+                    //cerr << "Expected isotopeAbundance=" << expectedAbundance;
+                    //cerr << " Observed isotopeAbundance=" << observedAbundance;
+                    //cerr << " Error="     << naturalAbundanceError << endl;
+
+                    if (naturalAbundanceError > static_cast<float>(isotopeParameters.maxNaturalAbundanceErr) )  continue;
+                }
+            }
+
+            float w = static_cast<float>(isotopeParameters.maxIsotopeScanDiff)*isotopeParameters.avgScanTime;
+
+            //Issue 120: Use sample-specific mz value for peaks instead of average mz
+            double corrMz = sampleToPeakMz[sample];
+
+            double c = static_cast<double>(sample->correlation(isotopeMass, static_cast<float>(corrMz), isotopeParameters.ppm, rtmin-w,rtmax+w));
+
+            if (c < isotopeParameters.minIsotopicCorrelation)  continue;
+
+            //cerr << "pullIsotopes: " << isotopeMass << " " << rtmin-w << " " <<  rtmin+w << " c=" << c << endl;
+
+            EIC* eic=nullptr;
+            for( int i=0; i< isotopeParameters.maxIsotopeScanDiff; i++ ) {
+                float window=i*isotopeParameters.avgScanTime;
+
+                //TODO: Issue 371: Handle SRMTransitionType isotopes
+                eic = sample->getEIC(mzmin,mzmax,rtmin-window,rtmax+window,1);
+
+                if(!eic) continue;
+
+                eic->setSmootherType(isotopeParameters.eic_smoothingAlgorithm);
+                eic->getPeakPositions(static_cast<int>(isotopeParameters.eic_smoothingWindow));
+
+                //TODO: is this a good metric for stopping isotope extraction?
+                if (eic->peaks.size() >= 1 ) break;
+
+                //clean up
+                delete(eic);
+                eic=nullptr;
+            }
+
+            if (eic) {
+                Peak* nearestPeak=nullptr; float d=FLT_MAX;
+                for(unsigned int i=0; i < eic->peaks.size(); i++ ) {
+                    Peak& x = eic->peaks[i];
+                    float dist = abs(x.rt - rt);
+                    if ( dist > static_cast<float>(isotopeParameters.maxIsotopeScanDiff)*isotopeParameters.avgScanTime) continue;
+                    if ( dist < d ) { d=dist; nearestPeak = &x; }
+                }
+
+                if (nearestPeak) {
+                    if (isotopes.count(isotopeName)==0) {
+                        PeakGroup g;
+                        g.meanMz=isotopeMass;
+                        g.tagString=isotopeName;
+                        g.expectedAbundance=expectedAbundance;
+                        g.isotopeC13count= isotope.C13;
+                        isotopes[isotopeName] = g;
+                    }
+                    isotopes[isotopeName].addPeak(*nearestPeak);
+                }
+                delete(eic);
+                eic = nullptr;
+            }
+        }
+    }
+
+    children.clear();
+    for(itr2 = isotopes.begin(); itr2 != isotopes.end(); itr2++ ) {
+        string isotopeName = (*itr2).first;
+        PeakGroup& child = (*itr2).second;
+        child.tagString = isotopeName;
+        child.metaGroupId = metaGroupId;
+        child.groupId = groupId;                //TODO: child groups can have the same ID as parent groups?
+        child.compound = compound;
+        child.adduct = adduct;
+        child.parent = this;
+        child.setType(PeakGroup::IsotopeType);
+        child.groupStatistics();
+
+        if (isotopeParameters.clsf && isotopeParameters.clsf->hasModel()) {
+            isotopeParameters.clsf->classify(&child);
+            child.groupStatistics();
+        }
+        addChild(child);
+    }
+}

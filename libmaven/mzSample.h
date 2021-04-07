@@ -525,6 +525,12 @@ public:
 
 };
 
+struct mzSample_name_less {
+    bool operator()(mzSample* lhs, mzSample *rhs) const {
+        return lhs->sampleName < rhs->sampleName;
+    }
+};
+
 class EIC {
 	
 	public:
@@ -701,6 +707,72 @@ class Peak {
 		vector<mzLink> findCovariants();
 };
 
+//Issue 371: moved from maven/classifier.h
+class Classifier
+{
+
+public:
+    Classifier();
+    virtual ~Classifier();
+
+    //reimplemented in children
+    virtual void classify(PeakGroup* grp)=0;
+    virtual void train(vector<PeakGroup*>& groups)=0;
+    virtual void refineModel(PeakGroup* grp)=0;
+    virtual void saveModel(string filename)=0;
+    virtual void loadModel(string filename)=0;
+    virtual void loadDefaultModel()=0;
+    virtual bool hasModel()=0;
+
+    //common non virtal functions
+    void classify(vector<PeakGroup*>& groups);
+    void saveFeatures(vector<PeakGroup*>& groups, string filename);
+    vector<Peak*> removeRedundacy(vector<Peak*>&peaks);
+
+    inline string getModelFilename() { return _filename; }
+    int getLabelsCount () { return labels.size(); }
+    int getNumFeatures() { return num_features; }
+    string getClassifierType() { return clsf_type; }
+    void printLabelDistribution();
+
+    virtual vector<float> getFeatures(Peak& p) = 0;
+
+protected:
+    string _filename;
+
+    string clsf_type;
+    int num_features;
+    vector<string> features_names;
+    vector< vector<float> > FEATURES;
+    vector<char>labels;
+};
+
+struct IsotopeParameters {
+
+    Adduct *adduct = nullptr;
+
+    float ppm = 20;
+    double maxIsotopeScanDiff = 10;
+    double maxNaturalAbundanceErr = 100;
+    double minIsotopicCorrelation=0;
+    bool   isC13Labeled=false;
+    bool   isN15Labeled=false;
+    bool   isS34Labeled=false;
+    bool   isD2Labeled=false;
+
+    EIC::SmootherType eic_smoothingAlgorithm = EIC::SmootherType::GAUSSIAN;
+    float eic_smoothingWindow;
+
+    bool isIgnoreNaturalAbundance = true;
+    bool isExtractNIsotopes = false;
+    int maxIsotopesToExtract = 5;
+
+    float avgScanTime = 0.1f; //TODO: must set this based on sample info!
+
+    Classifier *clsf = nullptr;
+
+};
+
 class PeakGroup {
 
 	public:
@@ -859,6 +931,7 @@ class PeakGroup {
 		void updateQuality();
 		float medianRt();
 		float meanRtW();
+        void pullIsotopes(IsotopeParameters isotopeParameters); //Issue 371: refactor to dedicated method
 
         bool isGroupGood();
         bool isGroupBad();
