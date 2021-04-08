@@ -1371,6 +1371,9 @@ struct DIPipelineSampleData {
     vector<Scan*> validMs1Scans{};
     Fragment* ms1Fragment = nullptr;
     map<int, vector<Scan*>> ms2ScansByPrecursorRangeId{};
+    map<pair<int, int>, vector<Scan*>> validMs1ScansByMzRange{};
+
+    void computeValidMs1ScansByMzRange();
 
     //Pipeline Search Results
 

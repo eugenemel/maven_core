@@ -3384,3 +3384,17 @@ float DirectInfusionUtils::getObservedMs1ScanIntensity(
 
     return observedMs1ScanIntensity;
 }
+
+void DIPipelineSampleData::computeValidMs1ScansByMzRange() {
+
+    for (auto scan : validMs1Scans) {
+
+        pair<int, int> scanPair = make_pair(round(scan->lowerLimitMz), round(scan->upperLimitMz));
+
+        if (validMs1ScansByMzRange.find(scanPair) == validMs1ScansByMzRange.end()) {
+            validMs1ScansByMzRange.insert(make_pair(scanPair, vector<Scan*>()));
+        }
+
+        validMs1ScansByMzRange[scanPair].push_back(scan);
+    }
+}
