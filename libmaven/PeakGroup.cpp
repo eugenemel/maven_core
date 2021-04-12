@@ -1187,4 +1187,9 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters) {
         }
         addChild(child);
     }
+
+    //Issue 380: sort isotopes in order of increasing m/z
+    sort(children.begin(), children.end(), [](PeakGroup& lhs, PeakGroup& rhs){
+            return lhs.meanMz < rhs.meanMz;
+         });
 }
