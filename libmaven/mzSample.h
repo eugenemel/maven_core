@@ -872,6 +872,9 @@ class PeakGroup {
         float changeFoldRatio;
         float changePValue;
 
+        //internal flags
+        bool isComputedGroupStatistics;
+
 
         //LOSS
         int     chargeState;
@@ -931,7 +934,7 @@ class PeakGroup {
         inline bool isAdduct() {  return _type == AdductType; }
 
 		void summary();
-		void groupStatistics();
+        void groupStatistics(bool isForceRecomputation=true);
 		void updateQuality();
 		float medianRt();
 		float meanRtW();

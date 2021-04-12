@@ -61,6 +61,8 @@ PeakGroup::PeakGroup()  {
     srmPrecursorMz = 0.0f;
     srmProductMz = 0.0f;
 
+    isComputedGroupStatistics = false;
+
 }      
 
 void PeakGroup::copyObj(const PeakGroup& o)  { 
@@ -131,6 +133,7 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     srmPrecursorMz = o.srmPrecursorMz;
     srmProductMz = o.srmProductMz;
 
+    isComputedGroupStatistics = o.isComputedGroupStatistics;
     copyChildren(o);
 }
 
@@ -414,7 +417,11 @@ void PeakGroup::updateQuality() {
     }
 }
 
-void PeakGroup::groupStatistics() { 
+void PeakGroup::groupStatistics(bool isForceRecomputation) {
+
+    //Issue 380: Avoid unnecessary recomputations
+    if (!isForceRecomputation && isComputedGroupStatistics) return;
+
     float rtSum = 0;
     float mzSum = 0;
     maxIntensity = 0;
@@ -476,6 +483,8 @@ void PeakGroup::groupStatistics() {
     }
 
     groupOverlapMatrix();
+
+    isComputedGroupStatistics = true;
 }
 
 void PeakGroup::groupOverlapMatrix() {
