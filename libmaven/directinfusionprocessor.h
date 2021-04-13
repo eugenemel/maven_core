@@ -749,6 +749,7 @@ struct ScanQuantOutput {
 
     // <minMz, maxMz>
     pair<int, int> scanMzRange = make_pair(0,0);
+    inline string getScanMzRangeString() {return "(" + to_string(scanMzRange.first) + ", " + to_string(scanMzRange.second) + ")";}
 
 };
 
