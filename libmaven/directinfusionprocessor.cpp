@@ -617,6 +617,8 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
         }
     }
 
+    map<pair<int, int>, vector<Scan*>> validMs1ScansByMzRange = DirectInfusionUtils::computeValidMs1ScansByMzRange(validMs1Scans);
+
     //Issue 313
     if (directInfusionSearchSet->mapKeys.find(DirectInfusionSearchSet::getNoMs2ScansMapKey()) != directInfusionSearchSet->mapKeys.end()) {
         ms2ScansByBlockNumber.insert(make_pair(DirectInfusionSearchSet::getNoMs2ScansMapKey(), vector<Scan*>()));
@@ -671,7 +673,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
         DirectInfusionAnnotation* directInfusionAnnotation = processBlock(mapKey,
                                                                           directInfusionSearchSet->mzRangesByMapKey[mapKey],
                                                                           sample,
-                                                                          validMs1Scans,
+                                                                          validMs1ScansByMzRange,
                                                                           ms2ScansByBlockNumber[mapKey],
                                                                           ms1Fragment,
                                                                           directInfusionSearchSet->compoundsByMapKey[mapKey],
@@ -693,7 +695,7 @@ map<int, DirectInfusionAnnotation*> DirectInfusionProcessor::processSingleSample
 DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
                                        const pair<float, float>& mzRange,
                                        mzSample* sample,
-                                       const vector<Scan*>& ms1Scans,
+                                       const map<pair<int, int>, vector<Scan*>>& ms1Scans,
                                        const vector<Scan*>& ms2Scans,
                                        const Fragment *ms1Fragment,
                                        const vector<pair<Compound*, Adduct*>> library,
@@ -827,7 +829,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
         float fragmentMaxObservedIntensity = matchAssessment->fragmentMaxObservedIntensity;
         float observedMs1Intensity = matchAssessment->observedMs1Intensity;
         int ms1IntensityCoord = matchAssessment->ms1IntensityCoord;
-        float observedMs1ScanIntensity = matchAssessment->observedMs1ScanIntensity;
+        ScanQuantOutput observedMs1ScanIntensity = matchAssessment->observedMs1ScanIntensityQuant;
 
         //Issue 390
         bool isSatisfiesMs2PrecursorMatchRequirements = !isRequirePrecursorMatchInMs2 || (isRequirePrecursorMatchInMs2 && matchAssessment->fragmentationMatchScore.isHasPrecursorMatch);
@@ -849,7 +851,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
             directInfusionMatchData->fragmentMaxObservedIntensity = fragmentMaxObservedIntensity;
             directInfusionMatchData->observedMs1Intensity = observedMs1Intensity;
             directInfusionMatchData->ms1IntensityCoord = ms1IntensityCoord;
-            directInfusionMatchData->observedMs1ScanIntensity = observedMs1ScanIntensity;
+            directInfusionMatchData->observedMs1ScanIntensityQuant = observedMs1ScanIntensity;
 
             libraryMatches.push_back(directInfusionMatchData);
         }
@@ -895,7 +897,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
 }
 
 unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
-        const vector<Scan*>& ms1Scans,
+        const map<pair<int, int>, vector<Scan*>>& ms1Scans,
         const Fragment *ms1Fragment,
         const Fragment *ms2Fragment,
         const pair<Compound*, Adduct*>& libraryEntry,
@@ -973,19 +975,14 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
         }
     }
 
-    float observedMs1ScanIntensity = DirectInfusionUtils::getObservedMs1ScanIntensity(ms1Scans, precMz, params, debug);
+    ScanQuantOutput observedMs1ScanIntensityQuant = DirectInfusionUtils::getObservedMs1ScanIntensity(ms1Scans, precMz, params, debug);
 
-    //an intensity of 0 always indicates absence, irrespective of the params->ms1MinIntensity value.
-    bool isMs1InConsensusSpectrum = (observedMs1Intensity >= params->ms1MinIntensity && observedMs1Intensity > 0.0f);
-
-    bool isFoundMs1PrecursorIonInScans = observedMs1ScanIntensity > 0.0f;
-
-    if (params->ms1IsFindPrecursorIon && !(isMs1InConsensusSpectrum || isFoundMs1PrecursorIonInScans)){
+    if (params->ms1IsFindPrecursorIon && !observedMs1ScanIntensityQuant.isValid){
         directInfusionMatchAssessment->isDisqualifyThisMatch = true;
         return directInfusionMatchAssessment; // will return with no matching fragments, 0 for every score.
      }
 
-    directInfusionMatchAssessment->observedMs1ScanIntensity = observedMs1ScanIntensity;
+    directInfusionMatchAssessment->observedMs1ScanIntensityQuant = observedMs1ScanIntensityQuant;
     directInfusionMatchAssessment->observedMs1Intensity = observedMs1Intensity;
     directInfusionMatchAssessment->ms1IntensityCoord = ms1IntensityCoord;
 
@@ -1155,7 +1152,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
 
             adduct = matchData->adduct;
             observedMs1Intensity += matchData->observedMs1Intensity;
-            observedMs1ScanIntensity += matchData->observedMs1ScanIntensity;
+            observedMs1ScanIntensity += matchData->observedMs1ScanIntensityQuant.intensity;
 
             //Issue 288: intensity coordinate corresponds to the highest valid ms1 coord,
             //which will not always line up with the observed ms1 intensity.
@@ -1239,7 +1236,13 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
 
             summarizedMatchData->observedMs1Intensity = observedMs1Intensity;
             summarizedMatchData->ms1IntensityCoord = ms1IntensityCoord;
-            summarizedMatchData->observedMs1ScanIntensity = observedMs1ScanIntensity;
+
+            ScanQuantOutput scanQuantOutput;
+            scanQuantOutput.isValid = true;
+            scanQuantOutput.intensity = observedMs1ScanIntensity;
+            scanQuantOutput.isSummarized = true;
+
+            summarizedMatchData->observedMs1ScanIntensityQuant = scanQuantOutput;
 
         } else { //fall back to general summarization based on identical fragments
 
@@ -1351,7 +1354,13 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
 
             summarizedMatchData->observedMs1Intensity = observedMs1Intensity;
             summarizedMatchData->ms1IntensityCoord = ms1IntensityCoord;
-            summarizedMatchData->observedMs1ScanIntensity = observedMs1ScanIntensity;
+
+            ScanQuantOutput scanQuantOutput;
+            scanQuantOutput.isValid = true;
+            scanQuantOutput.intensity = observedMs1ScanIntensity;
+            scanQuantOutput.isSummarized = true;
+
+            summarizedMatchData->observedMs1ScanIntensityQuant = scanQuantOutput;
         }
 
         summarizedMatchDataToFrags.insert(make_pair(summarizedMatchData, it->first));
@@ -1741,7 +1750,7 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
        groupMatchData->fragmentMaxObservedIntensity = matchData->fragmentMaxObservedIntensity;
        groupMatchData->observedMs1Intensity = matchData->observedMs1Intensity;
        groupMatchData->ms1IntensityCoord = matchData->ms1IntensityCoord;
-       groupMatchData->observedMs1ScanIntensity = matchData->observedMs1ScanIntensity;
+       groupMatchData->observedMs1ScanIntensityQuant = matchData->observedMs1ScanIntensityQuant;
 
        directInfusionGroupAnnotation->compounds.at(annotationMatchIndex) = groupMatchData;
 
@@ -2246,7 +2255,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
     map<long, vector<shared_ptr<DirectInfusionMatchData>>> ms1MzToCompoundNames{};
 
     for (auto compound : getCompounds()) {
-        long coord = mzUtils::mzToIntKey(static_cast<double>(compound->observedMs1ScanIntensity), 1L);
+        long coord = mzUtils::mzToIntKey(static_cast<double>(compound->observedMs1ScanIntensityQuant.intensity), 1L);
 
         //If the observed intensity is 0, there is nothing to partition
         if (coord == 0L) continue;
@@ -2527,7 +2536,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                         int fragKey = static_cast<int>(mzUtils::mzToIntKey(static_cast<double>(matchData->compound->fragment_mzs[i])));
                         float sumObservedMs1ScanIntensity = fragMzToSumObservedMs1ScanIntensity[fragKey];
 
-                        compoundFragIntensitySAF += (fragObservedIntensity * (matchData->observedMs1ScanIntensity/sumObservedMs1ScanIntensity));
+                        compoundFragIntensitySAF += (fragObservedIntensity * (matchData->observedMs1ScanIntensityQuant.intensity/sumObservedMs1ScanIntensity));
 
                         if (partitionMapMzs.find(it->first) == partitionMapMzs.end()) {
                             partitionMapMzs.insert(make_pair(it->first, set<int>()));
@@ -2608,7 +2617,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<S
                         long fragKey = mzUtils::mzToIntKey(static_cast<double>(queryMz));
                         float sumObservedMs1ScanIntensity = fragMzToSumObservedMs1ScanIntensity[static_cast<int>(fragKey)];
 
-                        float queryIntensitySAF = queryIntensity * (matchData->observedMs1ScanIntensity/sumObservedMs1ScanIntensity);
+                        float queryIntensitySAF = queryIntensity * (matchData->observedMs1ScanIntensityQuant.intensity/sumObservedMs1ScanIntensity);
 
                         scanSumIntensity += queryIntensity;
                         scanSumSAFIntensity += queryIntensitySAF;
@@ -2884,7 +2893,7 @@ map<int, float> DirectInfusionMatchInformation::getFragToSumObservedMs1ScanInten
                         if (fragMzToSumObservedMs1ScanIntensity.find(fragMz) == fragMzToSumObservedMs1ScanIntensity.end()) {
                             fragMzToSumObservedMs1ScanIntensity.insert(make_pair(fragMz, 0.0f));
                         }
-                        fragMzToSumObservedMs1ScanIntensity[fragMz] += matchData->observedMs1ScanIntensity;
+                        fragMzToSumObservedMs1ScanIntensity[fragMz] += matchData->observedMs1ScanIntensityQuant.intensity;
                     }
             }
 
@@ -3358,34 +3367,121 @@ string DirectInfusionMatchAssessment::getFragmentLabelWithoutTags(string fragmen
     return cleanedFragmentLabel;
 }
 
-float DirectInfusionUtils::getObservedMs1ScanIntensity(
-        const vector<Scan*>& validMs1Scans,
+ScanQuantOutput DirectInfusionUtils::getObservedMs1ScanIntensity(
+        const map<pair<int, int>, vector<Scan*>>& validMs1Scans,
         float queryMz,
         shared_ptr<DirectInfusionSearchParameters> params,
         bool debug){
 
-    float observedMs1ScanIntensity = 0.0f;
-    vector<float> ms1ScanIntensities{};
+    ScanQuantOutput scanQuantOutput;
 
-    for (auto scan : validMs1Scans) {
-        float queryMzIntensityCandidate = scan->findClosestMzIntensity(queryMz, params->ms1PpmTolr);
-        if (queryMzIntensityCandidate >= params->ms1MinIntensity && queryMzIntensityCandidate > 0.0f) {
-            ms1ScanIntensities.push_back(queryMzIntensityCandidate);
+    vector<pair<pair<int, int>, vector<Scan*>>> matches{};
+
+    for (auto it = validMs1Scans.begin(); it != validMs1Scans.end(); ++it){
+        pair<int, int> range = it->first;
+
+        float rangeMin = range.first - params->ms1PpmTolr * range.first/1e6f;
+        float rangeMax = range.second + params->ms1PpmTolr * range.second/1e6f;
+
+        if (queryMz >= rangeMin && queryMz <= rangeMax) {
+            matches.push_back(make_pair(it->first, it->second));
         }
     }
 
-    if (!ms1ScanIntensities.empty()) {
+    if (debug) cout << "valid matches:" << endl;
+
+    sort(matches.begin(), matches.end(),
+         [queryMz, debug](pair<pair<int, int>, vector<Scan*>>& lhs, pair<pair<int, int>, vector<Scan*>&> rhs){
+
+        if (debug) cout << "lhs=(" << lhs.first.first << ", " << lhs.first.second << "), "
+                        << "rhs=(" << rhs.first.first << ", " << rhs.first.second << "): ";
+
+        int widthLeft = lhs.first.second - lhs.first.first;
+        int widthRight = rhs.first.second - rhs.first.first;
+
+        if (debug) cout << "widthLeft=" << widthLeft << ", widthRight=" << widthRight << " ";
+
+        if (widthLeft == widthRight) {
+
+            float centerLeft = widthLeft / 2.0f + lhs.first.first;
+            float centerRight = widthRight / 2.0f + rhs.first.first;
+
+            float deltaLeft = abs(centerLeft - queryMz);
+            float deltaRight = abs(centerRight - queryMz);
+
+            if (debug) cout << "centerLeft=" << centerLeft << ", centerRight=" << centerRight
+                            << ", deltaLeft=" << deltaLeft << ", deltaRight=" << deltaRight;
+
+            if (debug) cout << " RETURN: " << (deltaLeft < deltaRight) << endl;
+            return deltaLeft < deltaRight;
+        } else {
+            if (debug) cout << " RETURN: " << (widthLeft < widthRight) << endl;
+            return widthLeft < widthRight;
+        }
+    });
+
+    float observedMs1ScanIntensity = 0.0f;
+
+    scanQuantOutput.isValid = false;
+
+    for (auto& match : matches) {
+
+        if (debug) cout << "scan range: (" << match.first.first << ", " << match.first.second << "):";
+
+        vector<Scan*> scans = match.second;
+
+        observedMs1ScanIntensity = 0.0f;
+        vector<float> ms1ScanIntensities{};
+
+        for (auto scan : scans) {
+            float queryMzIntensityCandidate = scan->findClosestMzIntensity(queryMz, params->ms1PpmTolr);
+            if (queryMzIntensityCandidate >= params->ms1MinIntensity && queryMzIntensityCandidate > 0.0f) {
+                ms1ScanIntensities.push_back(queryMzIntensityCandidate);
+            }
+        }
+
+        //Must pass all filters, or continue iterating through matches
+        if (ms1ScanIntensities.size() < static_cast<unsigned int>(params->minNumScansMs1ScanIntensity)) continue;
+
+        float medianIntensity = median(ms1ScanIntensities);
+
         if (params->consensusIntensityAgglomerationType == Fragment::Mean) {
             observedMs1ScanIntensity = accumulate(ms1ScanIntensities.begin(), ms1ScanIntensities.end(), 0.0f) / ms1ScanIntensities.size();
         } else if (params->consensusIntensityAgglomerationType == Fragment::Median) {
-            observedMs1ScanIntensity = median(ms1ScanIntensities);
+            observedMs1ScanIntensity = medianIntensity;
         }
+
+        scanQuantOutput.isValid = true;
+        scanQuantOutput.intensity = observedMs1ScanIntensity;
+        scanQuantOutput.numMeasurements = static_cast<int>(ms1ScanIntensities.size());
+
+        vector<float> deviations(ms1ScanIntensities.size());
+        for (unsigned int i = 0; i < ms1ScanIntensities.size(); i++) {
+            deviations[i] = abs(ms1ScanIntensities[i]-medianIntensity);
+        }
+
+        scanQuantOutput.medianAbsoluteDeviation = median(deviations);
+        scanQuantOutput.scanWidth = abs(match.first.second - match.first.first);
+        scanQuantOutput.scanMzRange = match.first;
+
+        // Used for nearest scan normalized intensity, when comparing two mz measurements across different scans
+        // does not apply here
+        scanQuantOutput.scanDiff = 0;
+
+        if (debug) {
+            cout << " MATCH: intensity=" << observedMs1ScanIntensity << endl;
+        }
+
+        //found a set of scans that passes, use the data from this set and stop checking other sets.
+        break;
     }
 
-    return observedMs1ScanIntensity;
+    return scanQuantOutput;
 }
 
-void DIPipelineSampleData::computeValidMs1ScansByMzRange() {
+map<pair<int, int>, vector<Scan*>> DirectInfusionUtils::computeValidMs1ScansByMzRange(vector<Scan*>& validMs1Scans) {
+
+    map<pair<int, int>, vector<Scan*>> validMs1ScansByMzRange{};
 
     for (auto scan : validMs1Scans) {
 
@@ -3397,4 +3493,6 @@ void DIPipelineSampleData::computeValidMs1ScansByMzRange() {
 
         validMs1ScansByMzRange[scanPair].push_back(scan);
     }
+
+    return validMs1ScansByMzRange;
 }

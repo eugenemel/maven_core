@@ -736,6 +736,22 @@ public:
     }
 };
 
+struct ScanQuantOutput {
+
+    bool isValid = false;
+    bool isSummarized = false; // to handle combination of multiple ScanQuantOutputs during summarization
+
+    float intensity = 0.0f;
+    int numMeasurements = 0.0f;
+    float medianAbsoluteDeviation = 0.0f;
+    int scanDiff = 0;
+    int scanWidth = 0;
+
+    // <minMz, maxMz>
+    pair<int, int> scanMzRange = make_pair(0,0);
+
+};
+
 /**
  * @brief The DirectInfusionMatchData struct
  *
@@ -751,8 +767,8 @@ struct DirectInfusionMatchData {
     //Issue 232
     float observedMs1Intensity = 0.0f;
 
-    //Issue 309
-    float observedMs1ScanIntensity = 0.0f;
+    //Issue 309, 393
+    ScanQuantOutput observedMs1ScanIntensityQuant;
 
     //Issue 210
     int numUniqueFragments = 0;
@@ -783,7 +799,7 @@ struct DirectInfusionMatchAssessment {
     int ms1IntensityCoord = -1;
 
     //ms1 scans
-    float observedMs1ScanIntensity = 0.0f;
+    ScanQuantOutput observedMs1ScanIntensityQuant;
 
     //ms2-associated
     FragmentationMatchScore fragmentationMatchScore;
@@ -1117,7 +1133,7 @@ public:
      static DirectInfusionAnnotation* processBlock(int blockNum,
                               const pair<float,float>& mzRange,
                               mzSample* sample,
-                              const vector<Scan*>& ms1Scans,
+                              const map<pair<int, int>, vector<Scan*>>& ms1Scans,
                               const vector<Scan*>& ms2Scans,
                               const Fragment *ms1Fragment, //only one per sample, computed at the same time that ms1 scans are retrieved.
                               const vector<pair<Compound*, Adduct*>> library,
@@ -1135,7 +1151,7 @@ public:
       * Designed to be multithreaded, work of comparing / evaluating individual matches
       */
      static unique_ptr<DirectInfusionMatchAssessment> assessMatch(
-                             const vector<Scan*>& ms1Scans,
+                             const map<pair<int, int>, vector<Scan*>>& ms1Scans,
                              const Fragment *ms1Fragment,
                              const Fragment *ms2Fragment,
                              const pair<Compound*, Adduct*>& libraryMatch,
@@ -1198,21 +1214,6 @@ public:
     vector<shared_ptr<DirectInfusionMatchData>> compounds;
 };
 
-struct ScanQuantOutput {
-
-    bool isValid = false;
-
-    float intensity = 0.0f;
-    int numMeasurements = 0.0f;
-    float medianAbsoluteDeviation = 0.0f;
-    int scanDiff = 0;
-    int scanWidth = 0;
-
-    // <minMz, maxMz>
-    pair<int, int> scanMzRange = make_pair(0,0);
-
-};
-
 class DirectInfusionUtils {
 public:
     static float findNormalizedIntensity(const vector<Scan*>& scans,
@@ -1228,11 +1229,16 @@ public:
                                                     int scanWidthInDa = -1, // -1 indicates all scan widths
                                                     bool debug = false);
 
+
+    static map<pair<int, int>, vector<Scan*>> computeValidMs1ScansByMzRange(vector<Scan*>& validMs1Scans);
+
     //Issue 319: easier to factor this out
-    static float getObservedMs1ScanIntensity(const vector<Scan*>& validMs1Scans,
-                                             float queryMz,
-                                             shared_ptr<DirectInfusionSearchParameters> params,
-                                             bool debug = false);
+    //Issue 393: Update to respect scan types
+    static ScanQuantOutput getObservedMs1ScanIntensity(
+            const map<pair<int, int>, vector<Scan*>>& validMs1Scans,
+            float queryMz,
+            shared_ptr<DirectInfusionSearchParameters> params,
+            bool debug);
 
     static constexpr double C_13_MASS = 1.00335483521;
 
@@ -1383,8 +1389,6 @@ struct DIPipelineSampleData {
     Fragment* ms1Fragment = nullptr;
     map<int, vector<Scan*>> ms2ScansByPrecursorRangeId{};
     map<pair<int, int>, vector<Scan*>> validMs1ScansByMzRange{};
-
-    void computeValidMs1ScansByMzRange();
 
     //Pipeline Search Results
 
