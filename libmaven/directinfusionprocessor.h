@@ -1208,6 +1208,9 @@ struct ScanQuantOutput {
     int scanDiff = 0;
     int scanWidth = 0;
 
+    // <minMz, maxMz>
+    pair<int, int> scanMzRange = make_pair(0,0);
+
 };
 
 class DirectInfusionUtils {
