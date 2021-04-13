@@ -184,10 +184,14 @@ public:
      * @param minNumScansNearestScanNormalizedIntensity: Minimum number of scans required to use this
      *       class of scans for nearest scan normalized intensity quant. Classes of scans are defined by
      *       the combination of the m/z width of the window, and the distance in scan num between scans.
+     * @param minNumScansMs1ScanIntensity: Minimum number of scans require dto use this class of scans
+     *       for scans ms1 observed intensity.  Classes of scans are defined by the m/z width of the window
+     *       and the proximity of the query scan to the center of the window.
      * ==================== */
     vector<string> ms1PartitionIntensityByFragments{"sn1","sn2"};
     bool isPreferSmallestScanMassWindow = true;
     int minNumScansNearestScanNormalizedIntensity = 3;
+    int minNumScansMs1ScanIntensity = 3;
 
     //Issue 270
     bool isReduceBySimpleParsimony = false;
@@ -389,7 +393,8 @@ public:
         }
         encodedParams = encodedParams + "};";
         encodedParams = encodedParams + "isPreferSmallestScanMassWindow" + "=" + to_string(isPreferSmallestScanMassWindow) + ";";
-        encodedParams = encodedParams + "minNumScansNearestScanNormalizedIntensity" + "=" + to_string(minNumScansNearestScanNormalizedIntensity);
+        encodedParams = encodedParams + "minNumScansNearestScanNormalizedIntensity" + "=" + to_string(minNumScansNearestScanNormalizedIntensity) +";";
+        encodedParams = encodedParams + "minNumScansMs1ScanIntensity" + "=" + to_string(minNumScansMs1ScanIntensity) + ";";
 
         //agglomeration params
         encodedParams = encodedParams + "isAgglomerateAcrossSamples" + "=" + to_string(isAgglomerateAcrossSamples) + ";";
@@ -702,6 +707,9 @@ public:
         }
         if (decodedMap.find("minNumScansNearestScanNormalizedIntensity") != decodedMap.end()) {
             directInfusionSearchParameters->minNumScansNearestScanNormalizedIntensity = stoi(decodedMap["minNumScansNearestScanNormalizedIntensity"]);
+        }
+        if (decodedMap.find("minNumScansMs1ScanIntensity") != decodedMap.end()) {
+            directInfusionSearchParameters->minNumScansMs1ScanIntensity = stoi(decodedMap["minNumScansMs1ScanIntensity"]);
         }
 
         //agglomeration params
