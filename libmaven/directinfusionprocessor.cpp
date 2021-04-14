@@ -3391,7 +3391,7 @@ ScanQuantOutput DirectInfusionUtils::getObservedMs1ScanIntensity(
     if (debug) cout << "valid matches:" << endl;
 
     sort(matches.begin(), matches.end(),
-         [queryMz, debug](pair<pair<int, int>, vector<Scan*>>& lhs, pair<pair<int, int>, vector<Scan*>&> rhs){
+         [queryMz, debug](pair<pair<int, int>, vector<Scan*>>& lhs, pair<pair<int, int>, vector<Scan*>>& rhs){
 
         if (debug) cout << "lhs=(" << lhs.first.first << ", " << lhs.first.second << "), "
                         << "rhs=(" << rhs.first.first << ", " << rhs.first.second << "): ";
