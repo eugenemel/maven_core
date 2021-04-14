@@ -1142,7 +1142,12 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
         vector<Compound*> compounds;
         float observedMs1Intensity = 0.0f;
         int ms1IntensityCoord = -1;
+
         float observedMs1ScanIntensity = 0.0f;
+        int ms1ScanIntensityN = 0;
+        pair<int, int> ms1ScanIntensityRange = make_pair(0, 0);
+        int ms1ScanIntensityWidth = 0;
+        float ms1ScanIntensityMAD = 0.0f;
 
         for (auto matchData : compoundList) {
 
@@ -1153,6 +1158,9 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
             adduct = matchData->adduct;
             observedMs1Intensity += matchData->observedMs1Intensity;
             observedMs1ScanIntensity += matchData->observedMs1ScanIntensityQuant.intensity;
+            ms1ScanIntensityRange = matchData->observedMs1ScanIntensityQuant.scanMzRange;
+            ms1ScanIntensityWidth = matchData->observedMs1ScanIntensityQuant.scanWidth;
+            ms1ScanIntensityMAD += matchData->observedMs1ScanIntensityQuant.medianAbsoluteDeviation;
 
             //Issue 288: intensity coordinate corresponds to the highest valid ms1 coord,
             //which will not always line up with the observed ms1 intensity.
@@ -1173,7 +1181,10 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
             }
         }
         observedMs1Intensity /= compoundList.size();
+
         observedMs1ScanIntensity /= compoundList.size();
+        ms1ScanIntensityN /= compoundList.size();
+        ms1ScanIntensityMAD /= compoundList.size();
 
         bool isUseAcylChainOrCompositionSummarization = params->spectralCompositionAlgorithm == SpectralCompositionAlgorithm::AUTO_SUMMARIZED_ACYL_CHAINS_SUM_COMPOSITION &&
                 ((!isMissingAcylChainLevel && acylChainLevel.size() == 1) || (!isMissingCompositionLevel && compositionLevel.size() == 1));
@@ -1241,6 +1252,10 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
             scanQuantOutput.isValid = true;
             scanQuantOutput.intensity = observedMs1ScanIntensity;
             scanQuantOutput.isSummarized = true;
+            scanQuantOutput.numMeasurements = ms1ScanIntensityN;
+            scanQuantOutput.scanMzRange = ms1ScanIntensityRange;
+            scanQuantOutput.scanWidth = ms1ScanIntensityWidth;
+            scanQuantOutput.medianAbsoluteDeviation = ms1ScanIntensityMAD;
 
             summarizedMatchData->observedMs1ScanIntensityQuant = scanQuantOutput;
 
@@ -1359,6 +1374,10 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
             scanQuantOutput.isValid = true;
             scanQuantOutput.intensity = observedMs1ScanIntensity;
             scanQuantOutput.isSummarized = true;
+            scanQuantOutput.numMeasurements = ms1ScanIntensityN;
+            scanQuantOutput.scanMzRange = ms1ScanIntensityRange;
+            scanQuantOutput.scanWidth = ms1ScanIntensityWidth;
+            scanQuantOutput.medianAbsoluteDeviation = ms1ScanIntensityMAD;
 
             summarizedMatchData->observedMs1ScanIntensityQuant = scanQuantOutput;
         }
