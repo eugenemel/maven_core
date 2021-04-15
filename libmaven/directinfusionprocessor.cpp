@@ -1160,6 +1160,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
             observedMs1ScanIntensity += matchData->observedMs1ScanIntensityQuant.intensity;
             ms1ScanIntensityRange = matchData->observedMs1ScanIntensityQuant.scanMzRange;
             ms1ScanIntensityWidth = matchData->observedMs1ScanIntensityQuant.scanWidth;
+            ms1ScanIntensityN = matchData->observedMs1ScanIntensityQuant.numMeasurements;
             ms1ScanIntensityMAD += matchData->observedMs1ScanIntensityQuant.medianAbsoluteDeviation;
 
             //Issue 288: intensity coordinate corresponds to the highest valid ms1 coord,
