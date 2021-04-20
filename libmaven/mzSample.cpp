@@ -2174,3 +2174,93 @@ set<mzSample*> SRMTransition::getSamples(){
        }
        return samples;
    }
+
+string IsotopeParameters::encodeParams() {
+
+    string encodedParams;
+
+    encodedParams = encodedParams + "searchVersion" + "=" + searchVersion;
+
+    encodedParams = encodedParams + "ppm" + "=" + to_string(ppm);
+    encodedParams = encodedParams + "maxIsotopeScanDiff" + "=" + to_string(maxIsotopeScanDiff);
+    encodedParams = encodedParams + "maxNaturalAbundanceErr" + "=" + to_string(maxNaturalAbundanceErr);
+    encodedParams = encodedParams + "minIsotopicCorrelation" + "=" + to_string(minIsotopicCorrelation);
+    encodedParams = encodedParams + "isC13Labeled" + "=" + to_string(isC13Labeled);
+    encodedParams = encodedParams + "isN15Labeled" + "=" + to_string(isN15Labeled);
+    encodedParams = encodedParams + "isS34Labeled" + "=" + to_string(isS34Labeled);
+    encodedParams = encodedParams + "isD2Labeled" + "=" + to_string(isD2Labeled);
+
+    encodedParams = encodedParams + "eic_smoothingAlgorithm" + "=" + to_string(eic_smoothingAlgorithm);
+    encodedParams = encodedParams + "eic_smoothingWindow" + "=" + to_string(eic_smoothingWindow);
+
+    encodedParams = encodedParams + "isIgnoreNaturalAbundance" + "=" + to_string(isIgnoreNaturalAbundance);
+    encodedParams = encodedParams + "isExtractNIsotopes" + "=" + to_string(isExtractNIsotopes);
+    encodedParams = encodedParams + "maxIsotopesToExtract" + "=" + to_string(maxIsotopesToExtract);
+    encodedParams = encodedParams + "avgScanTime" + "=" + to_string(avgScanTime);
+
+    encodedParams = encodedParams + "adductName" + "=" + adductName; // use with Adduct* parameter
+    encodedParams = encodedParams + "clsfFile" + "=" + clsfFile;     // use with Classifier* parameter
+
+    return encodedParams;
+}
+
+IsotopeParameters IsotopeParameters::decode(string encodedParams) {
+
+    IsotopeParameters isotopeParameters;
+
+    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams);
+
+    if (decodedMap.find("searchVersion") != decodedMap.end()) {
+        isotopeParameters.searchVersion = decodedMap["searchVersion"];
+    }
+    if (decodedMap.find("ppm") != decodedMap.end()) {
+        isotopeParameters.ppm = stof(decodedMap["ppm"]);
+    }
+    if (decodedMap.find("maxIsotopeScanDiff") != decodedMap.end()) {
+        isotopeParameters.maxIsotopeScanDiff = stod(decodedMap["maxIsotopeScanDiff"]);
+    }
+    if (decodedMap.find("maxNaturalAbundanceErr") != decodedMap.end()) {
+        isotopeParameters.maxNaturalAbundanceErr = stod(decodedMap["maxNaturalAbundanceErr"]);
+    }
+    if (decodedMap.find("minIsotopicCorrelation") != decodedMap.end()) {
+        isotopeParameters.minIsotopicCorrelation = stod(decodedMap["minIsotopicCorrelation"]);
+    }
+    if (decodedMap.find("isC13Labeled") != decodedMap.end()) {
+        isotopeParameters.isC13Labeled = decodedMap["isC13Labeled"]=="1";
+    }
+    if (decodedMap.find("isN15Labeled") != decodedMap.end()) {
+        isotopeParameters.isN15Labeled = decodedMap["isN15Labeled"]=="1";
+    }
+    if (decodedMap.find("isS34Labeled") != decodedMap.end()) {
+        isotopeParameters.isS34Labeled = decodedMap["isS34Labeled"]=="1";
+    }
+    if (decodedMap.find("isD2Labeled") != decodedMap.end()) {
+        isotopeParameters.isD2Labeled = decodedMap["isD2Labeled"]=="1";
+    }
+    if (decodedMap.find("eic_smoothingAlgorithm") != decodedMap.end()) {
+        isotopeParameters.eic_smoothingAlgorithm = static_cast<EIC::SmootherType>(stoi(decodedMap["eic_smoothingAlgorithm"]));
+    }
+    if (decodedMap.find("eic_smoothingWindow") != decodedMap.end()) {
+        isotopeParameters.eic_smoothingWindow = stof(decodedMap["eic_smoothingWindow"]);
+    }
+    if (decodedMap.find("isIgnoreNaturalAbundance") != decodedMap.end()) {
+        isotopeParameters.isIgnoreNaturalAbundance = decodedMap["isIgnoreNaturalAbundance"]=="1";
+    }
+    if (decodedMap.find("isExtractNIsotopes") != decodedMap.end()) {
+        isotopeParameters.isExtractNIsotopes = decodedMap["isExtractNIsotopes"]=="1";
+    }
+    if (decodedMap.find("maxIsotopesToExtract") != decodedMap.end()) {
+        isotopeParameters.maxIsotopesToExtract = stoi(decodedMap["maxIsotopesToExtract"]);
+    }
+    if (decodedMap.find("avgScanTime") != decodedMap.end()) {
+        isotopeParameters.avgScanTime = stof(decodedMap["avgScanTime"]);
+    }
+    if (decodedMap.find("adductName") != decodedMap.end()) {
+        isotopeParameters.adductName = decodedMap["adductName"];
+    }
+    if (decodedMap.find("clsfFile") != decodedMap.end()) {
+        isotopeParameters.clsfFile = decodedMap["clsfFile"];
+    }
+
+    return isotopeParameters;
+}

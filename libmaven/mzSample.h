@@ -751,7 +751,7 @@ protected:
 
 struct IsotopeParameters {
 
-    Adduct *adduct = nullptr;
+    string searchVersion = "8.1.27.25";
 
     float ppm = 20;
     double maxIsotopeScanDiff = 10;
@@ -771,9 +771,16 @@ struct IsotopeParameters {
 
     float avgScanTime = 0.1f; //TODO: must set this based on sample info!
 
+    Adduct *adduct = nullptr;
     Classifier *clsf = nullptr;
 
+    string adductName = ""; // only exists to assist in encoding/decoding adduct
+    string clsfFile = ""; //only exists to assist in encoding/decoding classifier
+
     inline bool isIsotopes() {return (isC13Labeled || isN15Labeled || isS34Labeled || isD2Labeled);}
+
+    string encodeParams();
+    static IsotopeParameters decode(string encodedIsotopeParameters);
 
 };
 
