@@ -749,9 +749,12 @@ protected:
     vector<char>labels;
 };
 
+enum IsotopeParametersType{INVALID=0,SAVED=1,FROM_GUI=2};
+
 struct IsotopeParameters {
 
     string searchVersion = "8.1.27.25";
+    IsotopeParametersType isotopeParametersType = IsotopeParametersType::INVALID;
 
     float ppm = 20;
     double maxIsotopeScanDiff = 10;
@@ -814,6 +817,9 @@ class PeakGroup {
         string compoundDb;
 
         string displayName; //Issue 75: For use with tabledockwidget, other GUI displays
+
+        //Issue 402: Saved isotopeParameters should only apply to bookmarked peaks
+        IsotopeParameters isotopeParameters;
 
         /**
          * @brief importedCompoundName
