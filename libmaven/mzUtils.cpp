@@ -506,6 +506,10 @@ int isDir(const char* path) {
 
 float correlation(const vector<float>&x, const vector<float>&y) {
     int n = x.size();
+    if (n == 0) return 0;
+
+    if (x == y) return 1;
+
     float sumx = 0; 		//
     float sumy = 0;
     float sumxy =0;
@@ -519,7 +523,7 @@ float correlation(const vector<float>&x, const vector<float>&y) {
         x2 += x[i]*x[i];
         y2 += y[i]*y[i];
     }
-	if (n == 0) return 0;
+
 	float var1 = x2-(sumx*sumx)/n;
 	float var2 = y2-(sumy*sumy)/n;
 	if ( var1 == 0 || var2 == 0 ) return 0;

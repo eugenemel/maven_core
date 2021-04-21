@@ -1122,7 +1122,7 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters) {
             //Issue 120: Use sample-specific mz value for peaks instead of average mz
             double corrMz = sampleToPeakMz[sample];
 
-            double c = static_cast<double>(sample->correlation(isotopeMass, static_cast<float>(corrMz), isotopeParameters.ppm, rtmin-w,rtmax+w));
+            double c = static_cast<double>(sample->correlation(isotopeMass, static_cast<float>(corrMz), isotopeParameters.ppm, rtmin-w,rtmax+w, false));
 
             if (c < isotopeParameters.minIsotopicCorrelation)  continue;
 
