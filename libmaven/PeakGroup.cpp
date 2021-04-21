@@ -126,7 +126,6 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     changePValue    = o.changePValue;
     peaks = o.peaks;
 
-
     chargeState=o.chargeState;
     isotopicIndex=o.isotopicIndex;
 
@@ -134,6 +133,8 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     srmProductMz = o.srmProductMz;
 
     isComputedGroupStatistics = o.isComputedGroupStatistics;
+    isotopeParameters = o.isotopeParameters; //Issue 402
+
     copyChildren(o);
 }
 
