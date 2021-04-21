@@ -2262,5 +2262,7 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
         isotopeParameters.clsfFile = decodedMap["clsfFile"];
     }
 
+    isotopeParameters.isotopeParametersType = IsotopeParametersType::SAVED;
+
     return isotopeParameters;
 }
