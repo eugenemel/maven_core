@@ -2179,27 +2179,36 @@ string IsotopeParameters::encodeParams() {
 
     string encodedParams;
 
-    encodedParams = encodedParams + "searchVersion" + "=" + searchVersion;
+    encodedParams = encodedParams + "searchVersion" + "=" + searchVersion + ";";
 
-    encodedParams = encodedParams + "ppm" + "=" + to_string(ppm);
-    encodedParams = encodedParams + "maxIsotopeScanDiff" + "=" + to_string(maxIsotopeScanDiff);
-    encodedParams = encodedParams + "maxNaturalAbundanceErr" + "=" + to_string(maxNaturalAbundanceErr);
-    encodedParams = encodedParams + "minIsotopicCorrelation" + "=" + to_string(minIsotopicCorrelation);
-    encodedParams = encodedParams + "isC13Labeled" + "=" + to_string(isC13Labeled);
-    encodedParams = encodedParams + "isN15Labeled" + "=" + to_string(isN15Labeled);
-    encodedParams = encodedParams + "isS34Labeled" + "=" + to_string(isS34Labeled);
-    encodedParams = encodedParams + "isD2Labeled" + "=" + to_string(isD2Labeled);
+    encodedParams = encodedParams + "ppm" + "=" + to_string(ppm) + ";";
+    encodedParams = encodedParams + "maxIsotopeScanDiff" + "=" + to_string(maxIsotopeScanDiff) + ";";
+    encodedParams = encodedParams + "maxNaturalAbundanceErr" + "=" + to_string(maxNaturalAbundanceErr) + ";";
+    encodedParams = encodedParams + "minIsotopicCorrelation" + "=" + to_string(minIsotopicCorrelation) + ";";
+    encodedParams = encodedParams + "isC13Labeled" + "=" + to_string(isC13Labeled) + ";";
+    encodedParams = encodedParams + "isN15Labeled" + "=" + to_string(isN15Labeled) + ";";
+    encodedParams = encodedParams + "isS34Labeled" + "=" + to_string(isS34Labeled) + ";";
+    encodedParams = encodedParams + "isD2Labeled" + "=" + to_string(isD2Labeled) + ";";
 
-    encodedParams = encodedParams + "eic_smoothingAlgorithm" + "=" + to_string(eic_smoothingAlgorithm);
-    encodedParams = encodedParams + "eic_smoothingWindow" + "=" + to_string(eic_smoothingWindow);
+    encodedParams = encodedParams + "eic_smoothingAlgorithm" + "=" + to_string(eic_smoothingAlgorithm) + ";";
+    encodedParams = encodedParams + "eic_smoothingWindow" + "=" + to_string(eic_smoothingWindow) + ";";
 
-    encodedParams = encodedParams + "isIgnoreNaturalAbundance" + "=" + to_string(isIgnoreNaturalAbundance);
-    encodedParams = encodedParams + "isExtractNIsotopes" + "=" + to_string(isExtractNIsotopes);
-    encodedParams = encodedParams + "maxIsotopesToExtract" + "=" + to_string(maxIsotopesToExtract);
-    encodedParams = encodedParams + "avgScanTime" + "=" + to_string(avgScanTime);
+    encodedParams = encodedParams + "isIgnoreNaturalAbundance" + "=" + to_string(isIgnoreNaturalAbundance) + ";";
+    encodedParams = encodedParams + "isExtractNIsotopes" + "=" + to_string(isExtractNIsotopes) + ";";
+    encodedParams = encodedParams + "maxIsotopesToExtract" + "=" + to_string(maxIsotopesToExtract) + ";";
+    encodedParams = encodedParams + "avgScanTime" + "=" + to_string(avgScanTime) + ";";
 
-    encodedParams = encodedParams + "adductName" + "=" + adductName; // use with Adduct* parameter
-    encodedParams = encodedParams + "clsfFile" + "=" + clsfFile;     // use with Classifier* parameter
+    if (adduct) {
+        encodedParams = encodedParams + "adductName" + "=" + adduct->name + ";"; // use with Adduct* parameter
+    } else {
+        encodedParams = encodedParams + "adductName" + "=" + adductName + ";"; // use with Adduct* parameter
+    }
+
+    if (clsf) {
+        encodedParams = encodedParams + "clsfFile" + "=" + clsf->getModelFilename() + ";"; // use with Classifier* parameter
+    } else {
+        encodedParams = encodedParams + "clsfFile" + "=" + clsfFile + ";";     // use with Classifier* parameter
+    }
 
     return encodedParams;
 }
