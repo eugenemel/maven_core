@@ -1429,7 +1429,7 @@ EIC* mzSample::getBIC(float rtmin, float rtmax, int mslevel) {
 
 
 //compute correlation between two mzs within some retention time window
-float mzSample::correlation(float mz1,  float mz2, float ppm, float rt1, float rt2 ) { 
+float mzSample::correlation(float mz1,  float mz2, float ppm, float rt1, float rt2, bool debug) {
     
     float ppm1 = ppm*mz1/1e6;
     float ppm2 = ppm*mz2/1e6;
@@ -1437,20 +1437,44 @@ float mzSample::correlation(float mz1,  float mz2, float ppm, float rt1, float r
     EIC* e1 = mzSample::getEIC(mz1-ppm1, mz1+ppm1, rt1, rt2, mslevel);
     EIC* e2 = mzSample::getEIC(mz2-ppm2, mz2+ppm1, rt1, rt2, mslevel);
 
-    //debugging
-    //note that if the vector is all 0s, this will still compute the correlation!
-//    cout << "mzSample::correlation() mz1=" << to_string(mz1) << ", mz2=" <<to_string(mz2) << endl;
-//    cout << "first: " << e1->intensity.size() <<", second: " << e2->intensity.size() << endl;
+    double correlation = mzUtils::correlation(e1->intensity, e2->intensity);
 
-//    for (unsigned int i = 0; i < e1->intensity.size(); i++) {
-//        cout << e1->intensity.at(i) << "\t" << e2->intensity.at(i) << endl;
-//    }
-//    cout << "===========" << endl;
+    if (debug) {
 
-    double correlaton = mzUtils::correlation(e1->intensity, e2->intensity);
+        //note that if the vector is all 0s, this will still compute the correlation!
+        cout << "mzSample::correlation() mz1=" << to_string(mz1) << ", mz2=" <<to_string(mz2) << endl;
+        cout << "first: " << e1->intensity.size() <<", second: " << e2->intensity.size() << endl;
+
+        for (unsigned int i = 0; i < e1->intensity.size(); i++) {
+            cout << e1->intensity.at(i) << "\t" << e2->intensity.at(i) << endl;
+        }
+
+        cout << "mz_1 <- c(";
+        for (unsigned int i = 0; i < e1->intensity.size(); i++) {
+            if (i>0) {
+                cout << ", ";
+            }
+            cout << e1->intensity.at(i);
+        }
+        cout << ")" << endl;
+
+        cout << "mz_2 <- c(";
+        for (unsigned int i = 0; i < e2->intensity.size(); i++) {
+            if (i>0) {
+                cout << ", ";
+            }
+            cout << e2->intensity.at(i);
+        }
+        cout << ")" << endl;
+
+        cout << "correlation= " << correlation << endl;
+
+        cout << "===========" << endl;
+    }
+
     delete(e1);
     delete(e2);
-    return(correlaton);
+    return(correlation);
 }
 
 

@@ -427,7 +427,7 @@ public:
     void enumerateSRMScans();			//srm->scan mapping for QQQ
 
 
-    float correlation(float mz1,  float mz2, float ppm, float rt1, float rt2 ); //correlation in EIC space
+    float correlation(float mz1,  float mz2, float ppm, float rt1, float rt2, bool debug=false); //correlation in EIC space
     float getNormalizationConstant() { return _normalizationConstant; }
     void  setNormalizationConstant(float x) { _normalizationConstant = x; }
 
