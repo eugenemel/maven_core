@@ -1364,13 +1364,15 @@ struct DISampleCompoundAdductQuant {
 
     float quantVal = 0.0f;
     float ms1PartitionFractionSAF = 0.0f;
+    string partitionGroupId;
     DISampleCompoundAdductQuantType diSampleCompoundAdductQuantType = DISampleCompoundAdductQuantType::None;
 
     DISampleCompoundAdductQuant(){}
 
-    DISampleCompoundAdductQuant(float quantVal, float ms1PartitionFractionSAF, DISampleCompoundAdductQuantType diSampleCompoundAdductQuantType) {
+    DISampleCompoundAdductQuant(float quantVal, float ms1PartitionFractionSAF, string partitionGroupId, DISampleCompoundAdductQuantType diSampleCompoundAdductQuantType) {
         this->quantVal = quantVal;
         this->ms1PartitionFractionSAF = ms1PartitionFractionSAF;
+        this->partitionGroupId = partitionGroupId;
         this->diSampleCompoundAdductQuantType = diSampleCompoundAdductQuantType;
     }
 
