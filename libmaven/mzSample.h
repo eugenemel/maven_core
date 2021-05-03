@@ -1129,6 +1129,7 @@ public:
 
 //Issue 416
 class CompoundUtils {
+public:
     static string getSummarizedCompoundId(Compound *compound, Adduct *adduct);
 };
 
