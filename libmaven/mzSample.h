@@ -1068,11 +1068,15 @@ class Compound {
             virtual vector<int> getConstituentMzs();
 };
 
+//Issue 416
+enum SummarizedCompoundType{GENERAL=0, SUM_COMPOSITION=1};
+
 class SummarizedCompound : public Compound {
 
 public:
     vector<Compound*> children;
     string summarizedName;
+    SummarizedCompoundType type = SummarizedCompoundType::GENERAL;
 
     //Issue 314
     unordered_set<int> constituentMzsSet;
