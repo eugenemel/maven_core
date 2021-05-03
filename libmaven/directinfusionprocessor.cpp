@@ -1204,10 +1204,12 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
             if (!isMissingAcylChainLevel && acylChainLevel.size() == 1) {
 
                 summarizedCompound = new SummarizedCompound(*acylChainLevel.begin(), compounds);
+                summarizedCompound->type = SummarizedCompoundType::ACYL_CHAIN;
 
             } else if (!isMissingCompositionLevel && compositionLevel.size() == 1) {
 
                 summarizedCompound = new SummarizedCompound(*compositionLevel.begin(), compounds);
+                summarizedCompound->type = SummarizedCompoundType::SUM_COMPOSITION;
 
             } else {
                 cerr << "Problem in finding appropriate level of summarization for fragment matches!" << endl;
