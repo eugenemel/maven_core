@@ -1069,7 +1069,7 @@ class Compound {
 };
 
 //Issue 416
-enum SummarizedCompoundType{GENERAL=0, SUM_COMPOSITION=1};
+enum SummarizedCompoundType{GENERAL=0, SUM_COMPOSITION=1, ACYL_CHAIN=2};
 
 class SummarizedCompound : public Compound {
 
