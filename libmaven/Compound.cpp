@@ -1,5 +1,6 @@
 #include "Fragment.h"
 #include "mzSample.h"
+#include "lipidsummarizationutils.h"
 
 Compound::Compound(string id, string name, string formula, int charge) {
     this->id = id;
@@ -404,4 +405,22 @@ vector<pair<string, string>> SummarizedCompound::parseCompoundId(string compound
     }
 
     return compoundAdductPairs;
+}
+
+//Issue 416
+string CompoundUtils::getSummarizedCompoundId(Compound *compound, Adduct *adduct) {
+    if (!compound || !adduct) return "";
+
+    if (compound->metaDataMap.find(LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()) != compound->metaDataMap.end()){
+        return compound->metaDataMap[LipidSummarizationUtils::getAcylChainCompositionSummaryAttributeKey()] + " " + adduct->name;
+    }
+
+    if (SummarizedCompound *summarizedCompound = dynamic_cast<SummarizedCompound*>(compound)) {
+        if (summarizedCompound->type == SummarizedCompoundType::SUM_COMPOSITION) {
+            return summarizedCompound->name + " " + adduct->name;
+        }
+    }
+
+    //fall back to empty string - ID not possible
+    return "";
 }

@@ -1127,6 +1127,11 @@ public:
     vector<Compound*> getChildren();
 };
 
+//Issue 416
+class CompoundUtils {
+    static string getSummarizedCompoundId(Compound *compound, Adduct *adduct);
+};
+
 class Isotope {
 public:
     string name;
