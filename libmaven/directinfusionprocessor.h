@@ -788,6 +788,18 @@ struct DirectInfusionMatchData {
 
     //Issue 416
     string partitionGroupId;
+
+    //Issue 416
+    //lazily default to single compound ID, otherwise called by DirectInfusionMatchInformation::computeMs1PartitionFractions2()
+    string getPartitionGroupId() {
+        if (partitionGroupId.empty()) {
+            stringstream s;
+            s << std::fixed << setprecision(4);
+            s << adduct->computeAdductMass(compound->getExactMass()) << "_" << static_cast<long>(round(observedMs1ScanIntensityQuant.intensity));
+            partitionGroupId = s.str();
+        }
+        return partitionGroupId;
+    }
 };
 
 /**
