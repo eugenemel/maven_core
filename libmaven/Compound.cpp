@@ -17,6 +17,7 @@ Compound::Compound(string id, string name, string formula, int charge) {
     productMz=0;
     collisionEnergy=0;
     virtualFragmentation=false;
+    metaDataMap = {};
 }
 
 Compound::Compound(string id, string name, string formula, int charge, float exactMass) {
@@ -35,6 +36,7 @@ Compound::Compound(string id, string name, string formula, int charge, float exa
     productMz=0;
     collisionEnergy=0;
     virtualFragmentation=false;
+    metaDataMap = {};
 }
 
 MassCalculator* Compound::mcalc = new MassCalculator();
