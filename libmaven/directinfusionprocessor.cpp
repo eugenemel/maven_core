@@ -2290,6 +2290,26 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
         ms1MzToCompoundNames[coord].push_back(compound);
     }
 
+    //Issue 416: Determine partitionGroupIds, and retain
+    for (auto it = ms1MzToCompoundNames.begin(); it != ms1MzToCompoundNames.end(); ++it) {
+        long intensity = it->first;
+
+        float avgMz = 0.0f;
+        for (auto matchData : it->second) {
+            avgMz += matchData->compound->precursorMz;
+        }
+        avgMz /= it->second.size();
+
+        stringstream s;
+        s << std::fixed << setprecision(4);
+        s << avgMz << "_" << intensity;
+
+        string partitionGroupId = s.str();
+        for (auto matchData : it->second) {
+            matchData->partitionGroupId = partitionGroupId;
+        }
+    }
+
     //STEP 1: determine SAF adjustments
 
     for (auto it = fragToMatchData.begin(); it != fragToMatchData.end(); ++it) {

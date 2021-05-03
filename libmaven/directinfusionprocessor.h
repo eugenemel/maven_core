@@ -785,6 +785,9 @@ struct DirectInfusionMatchData {
     //Issue 318
     float ms1PartitionFractionSplitAmbiguousFragments = 1.0f;
     float ms1PartitionFractionByScanSplitAmbiguousFragments = 1.0f;
+
+    //Issue 416
+    string partitionGroupId;
 };
 
 /**
