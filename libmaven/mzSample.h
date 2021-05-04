@@ -995,6 +995,7 @@ class PeakGroup {
 		static bool compMetaGroup(const PeakGroup& a, const PeakGroup& b) { return(a.metaGroupId < b.metaGroupId); }
 		//static bool operator< (const PeakGroup* b) { return this->maxIntensity < b->maxIntensity; }
         static bool compMaxIntensity(const PeakGroup* a, const PeakGroup* b) { return(a->maxIntensity > b->maxIntensity); }
+        static void clusterGroups(vector<PeakGroup*> &allgroups, vector<mzSample*>samples, double maxRtDiff, double minSampleCorrelation, double minPeakShapeCorrelation, double ppm, vector<double> mzDeltas=vector<double>());
         static void clusterGroups(vector<PeakGroup> &allgroups, vector<mzSample*>samples, double maxRtDiff, double minSampleCorrelation, double minPeakShapeCorrelation, double ppm, vector<double> mzDeltas=vector<double>());
 
 private:

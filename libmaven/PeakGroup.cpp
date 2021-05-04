@@ -827,20 +827,24 @@ Scan* PeakGroup::getAverageFragmentationScan(float productPpmTolr)  {
  * @param ppm
  * @param mzDeltas
  */
-void PeakGroup::clusterGroups(vector<PeakGroup> &allgroups, vector<mzSample*>samples, double maxRtDiff, double minSampleCorrelation, double minPeakShapeCorrelation, double ppm, vector<double> mzDeltas) {
-    sort(allgroups.begin(),allgroups.end(), PeakGroup::compRt);
+void PeakGroup::clusterGroups(vector<PeakGroup*> &allgroups, vector<mzSample*>samples, double maxRtDiff, double minSampleCorrelation, double minPeakShapeCorrelation, double ppm, vector<double> mzDeltas) {
+
+    sort(allgroups.begin(), allgroups.end(), [](PeakGroup* lhs, PeakGroup* rhs){
+        return lhs->meanRt < rhs->meanRt;
+    });
+
     int metaGroupId = 0;
 
     //clear cluster information
-    for(unsigned int i=0; i<allgroups.size(); i++) allgroups[i].metaGroupId=0;
-    map<int,PeakGroup*>parentGroups;
+    for(unsigned int i=0; i<allgroups.size(); i++) allgroups[i]->metaGroupId=0;
+    map<int, PeakGroup*>parentGroups{};
 
     for(unsigned int i=0; i<allgroups.size(); i++) {
-        PeakGroup& grp1 = allgroups[i];
+        PeakGroup *grp1 = allgroups[i];
 
-        if (grp1.metaGroupId == 0) {  //create new cluster
-            grp1.metaGroupId=++metaGroupId;
-            parentGroups[metaGroupId]=&grp1;
+        if (grp1->metaGroupId == 0) {  //create new cluster
+            grp1->metaGroupId=++metaGroupId;
+            parentGroups[metaGroupId]=grp1;
         }
 
         //cluster parent
@@ -849,40 +853,48 @@ void PeakGroup::clusterGroups(vector<PeakGroup> &allgroups, vector<mzSample*>sam
         mzSample* largestSample=nullptr;
         double maxIntensity=0;
 
-        for(unsigned int i=0; i < grp1.peakCount(); i++ ) {
-            mzSample* sample = grp1.peaks[i].getSample();
-            if ( grp1.peaks[i].peakIntensity > maxIntensity ) largestSample=sample;
+        for(unsigned int i=0; i < grp1->peakCount(); i++ ) {
+            mzSample* sample = grp1->peaks[i].getSample();
+            if ( grp1->peaks[i].peakIntensity > maxIntensity ) largestSample=sample;
         }
 
         if (largestSample == nullptr ) continue;
-        vector<float>peakIntensityA = grp1.getOrderedIntensityVector(samples,PeakGroup::AreaTop);
+        vector<float>peakIntensityA = grp1->getOrderedIntensityVector(samples,PeakGroup::AreaTop);
 
         for(unsigned int j=i+1; j<allgroups.size(); j++) {
-            PeakGroup& grp2 = allgroups[j];
-            if (grp2.metaGroupId > 0 ) continue;
+            PeakGroup *grp2 = allgroups[j];
+            if (grp2->metaGroupId > 0 ) continue;
 
             //retention time distance
-            float rtdist  = abs(parent->meanRt-grp2.meanRt);
+            float rtdist  = abs(parent->meanRt-grp2->meanRt);
             if (rtdist > maxRtDiff*2 ) continue;
 
             //retention time overlap
-            float rtoverlap = mzUtils::checkOverlap(grp1.minRt, grp1.maxRt, grp2.minRt, grp2.maxRt );
+            float rtoverlap = mzUtils::checkOverlap(grp1->minRt, grp1->maxRt, grp2->minRt, grp2->maxRt );
             if (rtoverlap < 0.1) continue;
 
             //peak intensity correlation
-            vector<float>peakIntensityB = grp2.getOrderedIntensityVector(samples,PeakGroup::AreaTop);
+            vector<float>peakIntensityB = grp2->getOrderedIntensityVector(samples,PeakGroup::AreaTop);
             float cor = correlation(peakIntensityA,peakIntensityB);
             if (cor < minSampleCorrelation) continue;
 
             //peak shape correlation
-            float cor2 = largestSample->correlation(grp1.meanMz,grp2.meanMz,ppm,grp1.minRt,grp1.maxRt);
+            float cor2 = largestSample->correlation(grp1->meanMz,grp2->meanMz,ppm,grp1->minRt,grp1->maxRt);
             if (cor2 < minPeakShapeCorrelation) continue;
 
             //passed all the filters.. group grp1 and grp2 into a single metagroup
             //cerr << rtdist << " " << cor << " " << cor2 << endl;
-            grp2.metaGroupId = grp1.metaGroupId;
+            grp2->metaGroupId = grp1->metaGroupId;
         }
     }
+}
+
+void PeakGroup::clusterGroups(vector<PeakGroup> &allgroups, vector<mzSample*>samples, double maxRtDiff, double minSampleCorrelation, double minPeakShapeCorrelation, double ppm, vector<double> mzDeltas) {
+    vector<PeakGroup*> groupAddresses(allgroups.size());
+    for (unsigned int i = 0; i < allgroups.size(); i++) {
+        groupAddresses[i] = &(allgroups[i]);
+    }
+    clusterGroups(groupAddresses, samples, maxRtDiff, minSampleCorrelation, minPeakShapeCorrelation, ppm, mzDeltas);
 }
 
 Peak* PeakGroup::getHighestIntensityPeak() {
