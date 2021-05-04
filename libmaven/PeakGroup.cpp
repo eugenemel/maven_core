@@ -1138,7 +1138,7 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters) {
             //cerr << "pullIsotopes: " << isotopeMass << " " << rtmin-w << " " <<  rtmin+w << " c=" << c << endl;
 
             EIC* eic=nullptr;
-            for( int i=0; i< isotopeParameters.maxIsotopeScanDiff; i++ ) {
+            for( int i=0; i <= isotopeParameters.maxIsotopeScanDiff; i++ ) {
                 float window=i*isotopeParameters.avgScanTime;
 
                 //TODO: Issue 371: Handle SRMTransitionType isotopes
