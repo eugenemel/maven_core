@@ -1109,24 +1109,21 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters) {
 
             //natural abundance check
             if (isotopeParameters.isIgnoreNaturalAbundance) {
-                if (    (isotope.C13 > 0    && !isotopeParameters.isC13Labeled)
-                        || (isotope.N15 > 0 && !isotopeParameters.isN15Labeled)
-                        || (isotope.S34 > 0 && !isotopeParameters.isS34Labeled)
-                        || (isotope.H2 > 0  && !isotopeParameters.isD2Labeled)
 
-                        ) {
-                    if (expectedAbundance < 1e-8f) continue;
-                    if (expectedAbundance * parentPeakIntensity < 1) continue;
-                    float observedAbundance = isotopePeakIntensity/(parentPeakIntensity+isotopePeakIntensity);
-                    float naturalAbundanceError = abs(observedAbundance-expectedAbundance)/expectedAbundance*100.0f;
+                //peaks are too low intensity to observe? TODO: consider removing / restructuring
+                if (expectedAbundance < 1e-8f) continue;
+                if (expectedAbundance * parentPeakIntensity < 1) continue;
 
-                    //cerr << isotopeName << endl;
-                    //cerr << "Expected isotopeAbundance=" << expectedAbundance;
-                    //cerr << " Observed isotopeAbundance=" << observedAbundance;
-                    //cerr << " Error="     << naturalAbundanceError << endl;
+                float observedAbundance = isotopePeakIntensity/(parentPeakIntensity+isotopePeakIntensity);
+                float naturalAbundanceError = abs(observedAbundance-expectedAbundance)/expectedAbundance*100.0f;
 
-                    if (naturalAbundanceError > static_cast<float>(isotopeParameters.maxNaturalAbundanceErr) )  continue;
-                }
+                cerr << isotopeName << ": "
+                     << "Expected abundance= " << expectedAbundance << " "
+                     << "Observed abundance= " << observedAbundance << " "
+                     << "Error= "     << naturalAbundanceError << endl;
+
+                //C12 parent peak is always OK, cannot be disqualified on account of observed/expected abundance issues
+                if (naturalAbundanceError > static_cast<float>(isotopeParameters.maxNaturalAbundanceErr) && !isotope.isParent())  continue;
             }
 
             float w = static_cast<float>(isotopeParameters.maxIsotopeScanDiff)*isotopeParameters.avgScanTime;

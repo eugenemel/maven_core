@@ -1169,6 +1169,9 @@ public:
         return *this;
     }
 
+    //Issue 412
+    bool isParent() {return C13 == 0 && N15 == 0 && S34 == 0 && H2 == 0;}
+
 };
 
 class Adduct { 
