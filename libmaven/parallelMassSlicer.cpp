@@ -16,7 +16,7 @@ void ParallelMassSlicer::algorithmA() {
             seen[ scan->filterLine ]=1;
         }
     }
-    cerr << "#algorithmA" << slices.size() << endl;
+    cout << "#algorithmA" << slices.size() << endl;
 }
 
 void ParallelMassSlicer::algorithmB(float userPPM, float minIntensity, int rtStep) { 
@@ -30,18 +30,18 @@ void ParallelMassSlicer::algorithmB(float userPPM, float minIntensity, int rtSte
 
 	if (samples.size() > 0 and rtStep > 0 ) rtWindow = (samples[0]->getAverageFullScanTime()*rtStep);
 
-    cerr << "#Parallel algorithmB:" << endl;
-    cerr << " PPM=" << userPPM << endl;
-    cerr << " rtWindow=" << rtWindow << endl;
-    cerr << " rtStep=" << rtStep << endl;
-    cerr << " minCharge="     << _minCharge << endl;
-    cerr << " maxCharge="     << _maxCharge << endl;
-    cerr << " minIntensity="  << _minIntensity << endl;
-    cerr << " maxIntensity="  << _maxIntensity << endl;
-    cerr << " minMz="  << _minMz << endl;
-    cerr << " maxMz="  << _maxMz << endl;
-    cerr << " minRt="  << _minRt << endl;
-    cerr << " maxRt="  << _maxRt << endl;
+    cout << "#Parallel algorithmB:" << endl;
+    cout << " PPM=" << userPPM << endl;
+    cout << " rtWindow=" << rtWindow << endl;
+    cout << " rtStep=" << rtStep << endl;
+    cout << " minCharge="     << _minCharge << endl;
+    cout << " maxCharge="     << _maxCharge << endl;
+    cout << " minIntensity="  << _minIntensity << endl;
+    cout << " maxIntensity="  << _maxIntensity << endl;
+    cout << " minMz="  << _minMz << endl;
+    cout << " maxMz="  << _maxMz << endl;
+    cout << " minRt="  << _minRt << endl;
+    cout << " maxRt="  << _maxRt << endl;
 
 #ifdef OMP_PARALLEL
      #pragma omp parallel for ordered num_threads(4) schedule(static)  
@@ -50,7 +50,7 @@ void ParallelMassSlicer::algorithmB(float userPPM, float minIntensity, int rtSte
 		//if (slices.size() > _maxSlices) break;
 		//
         //Scan* lastScan = NULL;
-		cerr << "#algorithmB:" << samples[i]->sampleName << endl;
+        cout << "#algorithmB:" << samples[i]->sampleName << endl;
 
 		for(unsigned int j=0; j < samples[i]->scans.size(); j++ ) {
 			Scan* scan = samples[i]->scans[j];
@@ -71,7 +71,7 @@ void ParallelMassSlicer::algorithmB(float userPPM, float minIntensity, int rtSte
 				float mzmin = mz - mz/1e6*_precursorPPM;
 
                // if(charges.size()) {
-                    //cerr << "Scan=" << scan->scannum << " mz=" << mz << " charge=" << charges[k] << endl;
+                    //cout << "Scan=" << scan->scannum << " mz=" << mz << " charge=" << charges[k] << endl;
                // }
 				mzSlice* Z;
 #ifdef OMP_PARALLEL
@@ -83,7 +83,7 @@ void ParallelMassSlicer::algorithmB(float userPPM, float minIntensity, int rtSte
 #endif
 		
 				if (Z) {  //MERGE
-					//cerr << "Merged Slice " <<  Z->mzmin << " " << Z->mzmax 
+                    //cout << "Merged Slice " <<  Z->mzmin << " " << Z->mzmax
 					//<< " " << scan->intensity[k] << "  " << Z->ionCount << endl;
 
 					Z->ionCount = std::max((float) Z->ionCount, (float ) scan->intensity[k]);
@@ -95,11 +95,11 @@ void ParallelMassSlicer::algorithmB(float userPPM, float minIntensity, int rtSte
 					if (Z->mzmin < mz-(mz/1e6*userPPM)) Z->mzmin =  mz-(mz/1e6*userPPM);
 					if (Z->mzmax > mz+(mz/1e6*userPPM)) Z->mzmax =  mz+(mz/1e6*userPPM);
 					Z->mz =(Z->mzmin+Z->mzmax)/2; Z->rt=(Z->rtmin+Z->rtmax)/2;
-					//cerr << Z->mz << " " << Z->mzmin << " " << Z->mzmax << " " 
+                    //cout << Z->mz << " " << Z->mzmin << " " << Z->mzmax << " "
 					//<< ppmDist((float)Z->mzmin,mz) << endl;
 				} else { //NEW SLICE
 					//				if ( lastScan->hasMz(mz, userPPM) ) {
-                    //cerr << "\t" << rt << "  " << mzmin << "  "  << mzmax << endl;
+                    //cout << "\t" << rt << "  " << mzmin << "  "  << mzmax << endl;
 					mzSlice* s = new mzSlice(mzmin,mzmax, rt-2*rtWindow, rt+2*rtWindow);
 					s->ionCount = scan->intensity[k];
 					s->rt=scan->rt; 
@@ -113,13 +113,13 @@ void ParallelMassSlicer::algorithmB(float userPPM, float minIntensity, int rtSte
 #endif
 				}
 
-                //if ( slices.size() % 10000 == 0) cerr << "ParallelMassSlicer count=" << slices.size() << endl;
+                //if ( slices.size() % 10000 == 0) cout << "ParallelMassSlicer count=" << slices.size() << endl;
 			} //every scan m/z
 			//lastScan = scan;
 		} //every scan
 	} //every samples
 
-	cerr << "#algorithmB:  Found=" << slices.size() << " slices" << endl;
+    cout << "#algorithmB:  Found=" << slices.size() << " slices" << endl;
 	sort(slices.begin(),slices.end(), mzSlice::compIntensity);
 }
 
@@ -172,7 +172,7 @@ void ParallelMassSlicer::algorithmC(float ppm, float minIntensity, float rtWindo
                 }
             }
         }
-        cerr << "#algorithmC" << slices.size() << endl;
+        cout << "#algorithmC" << slices.size() << endl;
     }
 
 void ParallelMassSlicer::algorithmD(float ppm, float rtWindow) {        //features that have ms2 events
@@ -201,7 +201,7 @@ void ParallelMassSlicer::algorithmD(float ppm, float rtWindow) {        //featur
                 }
             }
         }
-        cerr << "#algorithmD" << slices.size() << endl;
+        cout << "#algorithmD" << slices.size() << endl;
 }
 
 void ParallelMassSlicer::algorithmE(float ppm, float rtHalfWindowInMin) {        //features that have ms2 events
@@ -235,7 +235,7 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtHalfWindowInMin) {       
             return lhs->mz < rhs->mz;
         });
 
-        cerr << "#algorithmE number of mz slices before merge: " << sample_slices.size() << endl;
+        cout << "#algorithmE number of mz slices before merge: " << sample_slices.size() << endl;
 
         unsigned int deleteCounter = 0;
 
@@ -245,7 +245,7 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtHalfWindowInMin) {       
 
             if (a->deleteFlag) continue; //skip over if already marked
 
-            // cerr << a->mz << "\t" << a->rt << endl;
+            // cout << a->mz << "\t" << a->rt << endl;
 
             for(unsigned int j=i+1; j < sample_slices.size(); j++ ) {
 
@@ -291,13 +291,13 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtHalfWindowInMin) {       
 			}
 		}
 
-        cerr << deleteCounter << " mz slices flagged for exclusion." << endl;
+        cout << deleteCounter << " mz slices flagged for exclusion." << endl;
 
 		for (mzSlice* x: sample_slices) { 
 			if (!x->deleteFlag) slices.push_back(x); 
 		}
 
-        cerr << "#algorithmE number of mz slices after merge: " << slices.size() << endl;
+        cout << "#algorithmE number of mz slices after merge: " << slices.size() << endl;
 }
 
 bool ParallelMassSlicer::isOverlapping(mzSlice *a, mzSlice *b){
