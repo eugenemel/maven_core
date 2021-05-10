@@ -51,7 +51,7 @@ EIC* EIC::eicMerge(const vector<EIC*>& eics) {
 	if (maxlen == 0 ) return meic;
 
 	//create new EIC
-	meic->sample = NULL;
+    meic->sample = nullptr;
 	vector<float>intensity(maxlen,0);
 	vector<float>rt(maxlen,0);
 	vector<int>scans(maxlen,0);
