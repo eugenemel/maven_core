@@ -422,7 +422,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
                 cerr << "ILLEGAL TYPE." << endl;
                 abort();
             }
-            cerr << "i=" <<  i << " " << intensity[i] << " (spline=" << spline[i] << ") " << type << endl;
+            cerr << "i=" <<  i << " rt=" << rt[i] << " " << intensity[i] << " (spline=" << spline[i] << ") " << type << endl;
         }
         cerr << "===================================" << endl;
     }
@@ -450,7 +450,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
                 splineAnnotation[minIntensity] = SplineAnnotation::MIN;
 
                 if (debug) {
-                    cerr << "i=" << minIntensity << " " << spline[minIntensity] << " MIN" << endl;
+                    cerr << "i=" << minIntensity << " rt=" << rt[i] << " " << spline[minIntensity] << " MIN" << endl;
                 }
 
             }
@@ -470,7 +470,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
 
                 if (debug) {
                     cerr << "i=" << i << " " << spline[i] << " MAX" << endl;
-                    cerr << "i=" << minIntensity << " " << spline[minIntensity] << " MIN" << endl;
+                    cerr << "i=" << minIntensity << " rt=" << rt[i] << " " << spline[minIntensity] << " MIN" << endl;
                 }
 
             } else {
@@ -498,8 +498,8 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
                     splineAnnotation[minIntensity] = SplineAnnotation::MIN;
 
                     if (debug) {
-                        cerr << "i=" << i << " " << spline[i] << " MAX" << endl;
-                        cerr << "i=" << minIntensity << " " << spline[minIntensity] << " MIN" << endl;
+                        cerr << "i=" << i << " rt=" << rt[i] << " " << spline[i] << " MAX" << endl;
+                        cerr << "i=" << minIntensity << " rt=" << rt[i] << " " << spline[minIntensity] << " MIN" << endl;
                     }
 
                 }
@@ -534,9 +534,9 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
         }
 
         if (debug) {
-            cerr << "i=" << peak.minpos << " LEFT MIN=" << spline[peak.minpos] << endl;
-            cerr << "i=" << peak.pos << " MAX=" << spline[peak.pos] << endl;
-            cerr << "i=" << peak.maxpos << " RIGHT MIN=" << spline[peak.maxpos] << endl;
+            cerr << "i=" << peak.minpos << " rt=" << peak.rtmin << " LEFT MIN=" << spline[peak.minpos] << endl;
+            cerr << "i=" << peak.pos << " rt=" << peak.rt << " MAX=" << spline[peak.pos] << endl;
+            cerr << "i=" << peak.maxpos << " rt=" << peak.rtmax << " RIGHT MIN=" << spline[peak.maxpos] << endl;
 
             assert(spline[peak.pos] > spline[peak.minpos]);
             assert(spline[peak.pos] > spline[peak.maxpos]);
