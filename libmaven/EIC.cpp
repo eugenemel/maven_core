@@ -356,7 +356,7 @@ void EIC::getPeakPositionsB(int smoothWindow, float minSmoothedPeakIntensity) {
  * @author phillipseitzer
  * @since 20191104
  */
-void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
+void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBounds) {
 
     peaks.clear();
 
@@ -391,14 +391,20 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug) {
             splineAnnotation[i] = SplineAnnotation::MAX;
 
             if (firstMax == -1){ //only assigned first time MAX appears
-                firstMax = i;
+                firstMax = static_cast<int>(i);
             }
-            lastMax = i; //reassigned every time MAX appears
+            lastMax = static_cast<int>(i); //reassigned every time MAX appears
 
         }
     }
 
     if (firstMax == -1) return; //no peaks determined based on 3-point max rule
+
+    if (debug && !isComputePeakBounds) {
+        cout << "WARNING: peak bounds were not determined.  Returning peaks with no peak boundaries defined." << endl;
+    }
+
+    if (!isComputePeakBounds) return;
 
     if (debug) {
         cerr << "===================================" << endl;

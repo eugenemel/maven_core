@@ -579,7 +579,7 @@ class EIC {
 		void deletePeak(unsigned int i);
         void getPeakPositions(int smoothWindow);
         void getPeakPositionsB(int smoothWindow, float minSmoothedPeakIntensity);
-        void getPeakPositionsC(int smoothWindow, bool debug);
+        void getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBounds=true);
         void getSingleGlobalMaxPeak(int smoothWindow);
 		void getPeakDetails(Peak& peak);
 		void getPeakWidth(Peak& peak);
