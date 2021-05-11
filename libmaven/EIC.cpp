@@ -387,6 +387,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
         if (spline[i] > spline[i-1] && spline[i] > spline[i+1] && intensity[i] > baselineQCutVal) {
 
             addPeak(static_cast<int>(i));
+            if (!isComputePeakBounds) peaks[peaks.size()-1].rt = rt[i];
 
             splineAnnotation[i] = SplineAnnotation::MAX;
 
