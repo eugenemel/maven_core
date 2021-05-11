@@ -544,6 +544,8 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
 
         getPeakDetails(peak);
 
+        cerr << endl;
+
         if (debug) {
              cerr << "Details: ("
                   << peak.peakMz
@@ -1403,12 +1405,12 @@ vector<PeakGroup> EIC::groupPeaksC(vector<EIC*>& eics, int smoothingWindow, floa
 
     sort(m->peaks.begin(), m->peaks.end(), Peak::compRt);
 
-    //debugging
-    cout << "group peak RTs:" << endl;
-    for (auto peak : m->peaks) {
-        cout << to_string(peak.rt) << endl;
-    }
-    cout << endl;
+//    //debugging
+//    cout << "group peak RTs:" << endl;
+//    for (auto peak : m->peaks) {
+//        cout << to_string(peak.rt) << endl;
+//    }
+//    cout << endl;
 
     //m->peaks.pos, sample peaks
     map<int, vector<Peak>> peakGroupData{};
