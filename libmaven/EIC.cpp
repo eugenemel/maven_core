@@ -853,6 +853,8 @@ void EIC::removeLowRankGroups( vector<PeakGroup>& groups, unsigned int rankLimit
  *
  * peaks are not retained if they are below the noiseThreshold.
  * Note that the smoothed value is compared to the noiseThreshold, not the raw intensity.
+ *
+ * @deprecated in favor of EIC::groupPeaksC()
  */
 vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, float minSmoothedPeakIntensity) {
 
@@ -1236,7 +1238,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
  * @return
  *
  *
- * @deprecated in favor of EIC::groupPeaksB()
+ * @deprecated in favor of EIC::groupPeaksC()
  */
 vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff) { 
 
@@ -1354,6 +1356,152 @@ vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float
 
 	if(m) delete(m);
 	return(pgroups);
+}
+
+/**
+ * Group peaks using merged EIC, intensity, RT proximity
+ *
+ * From MAVEN Issue 381
+ *
+ * Try to avoid stochasticity/OS-specific issues
+ *
+ * @brief groupPeaksC
+ * @param eics
+ * @param smoothingWindow
+ * @param maxRtDiff
+ * @param baselineSmoothingWindow
+ * @param baselineDropTopX
+ * @return
+ */
+vector<PeakGroup> EIC::groupPeaksC(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, int baselineSmoothingWindow, int baselineDropTopX) {
+
+    //list filled and return by this function
+    vector<PeakGroup> pgroups{};
+
+    //case there is only a single EIC, there is nothing to group
+    if ( eics.size() == 1 && eics[0]) {
+        EIC* m=eics[0];
+        for(unsigned int i=0; i< m->peaks.size(); i++ ) {
+            PeakGroup grp;
+            grp.groupId = static_cast<int>(i);
+            grp.addPeak(m->peaks[i]);
+            grp.groupStatistics();
+            pgroups.push_back(grp);
+        }
+        return pgroups;
+    }
+
+    //create EIC composed from all sample eics
+    EIC* m = EIC::eicMerge(eics);
+    if (!m) return pgroups;
+
+    m->setBaselineSmoothingWindow(baselineSmoothingWindow);
+    m->setBaselineDropTopX(baselineDropTopX);
+
+    //find peaks in merged eic
+    m->getPeakPositionsC(smoothingWindow, true, false);
+
+    sort(m->peaks.begin(), m->peaks.end(), Peak::compRt);
+
+    //debugging
+    cout << "group peak RTs:" << endl;
+    for (auto peak : m->peaks) {
+        cout << to_string(peak.rt) << endl;
+    }
+    cout << endl;
+
+    //m->peaks.pos, sample peaks
+    map<int, vector<Peak>> peakGroupData{};
+
+    map<int, set<mzSample*>> peakGroupSamples{};
+    for (unsigned int i = 0; i < m->peaks.size(); i++) {
+        peakGroupData.insert(make_pair(i, vector<Peak>{}));
+        peakGroupSamples.insert(make_pair(i, set<mzSample*>{}));
+    }
+
+    vector<Peak> allPeaks{};
+    for (auto& eic : eics) {
+        for (auto peak : eic->peaks) {
+            allPeaks.push_back(peak);
+        }
+    }
+
+    //try to annotate most intense peaks first
+    sort(allPeaks.begin(), allPeaks.end(), [](Peak& lhs, Peak& rhs){
+        if (lhs.peakIntensity == rhs.peakIntensity) { //corner case
+            return lhs.sample->sampleName < rhs.sample->sampleName; //sample names must differ
+        } else {
+            return lhs.peakIntensity > rhs.peakIntensity;
+        }
+    });
+
+    for (auto peak : allPeaks) {
+
+        float peakRt = peak.rt;
+        float minPeakRt = max(0.0f, peakRt-maxRtDiff);
+
+        auto lb = lower_bound(m->peaks.begin(), m->peaks.end(), minPeakRt, [](const Peak& p, float rt){
+            return p.rt < rt;
+        });
+
+        float deltaRt = 999999.0f;
+        float bestDeltaRt = deltaRt;
+        int bestGroupIndex = -1;
+
+        for (long k = lb - m->peaks.begin(); k < static_cast<long>(m->peaks.size()); k++){
+
+            //corresponds to a merged EIC peak group.
+            int groupIndex = static_cast<int>(k);
+
+            //Check if RT for sample query peak is within range of merged eic peak.
+            deltaRt = abs(m->peaks[static_cast<unsigned long>(groupIndex)].rt-peakRt);
+
+            //once out of range, always out of range for rest of the loop.
+            if (deltaRt > maxRtDiff) break;
+
+            //if a merged eic peak group already contains a peak from the sample query peak's sample,
+            //unable to add sample query peak to this merged eic peak group.
+            //use mzSample* name to determine uniqueness.
+            set<mzSample*> samples = peakGroupSamples[groupIndex];
+
+            if (std::find_if(samples.begin(), samples.end(),[peak](mzSample* sample) {
+                         return sample->sampleName == peak.sample->sampleName;}) != samples.end()) continue;
+
+            //only update groupIndex when a closer RT comes along.
+            if (deltaRt < bestDeltaRt || bestGroupIndex == -1) {
+                bestDeltaRt = deltaRt;
+                bestGroupIndex = static_cast<int>(groupIndex);
+            }
+
+        }
+
+        if (bestGroupIndex != -1) {
+            peakGroupSamples[bestGroupIndex].insert(peak.sample);
+            peakGroupData[bestGroupIndex].push_back(peak);
+        }
+
+    }
+
+    for (auto it = peakGroupData.begin(); it != peakGroupData.end(); ++it) {
+        int groupIndex = it->first;
+        vector<Peak> peaks = it->second;
+
+        if (peaks.empty()) continue;
+
+        PeakGroup grp;
+        grp.groupId = groupIndex;
+        for (auto peak : peaks) {
+            grp.addPeak(peak);
+        }
+        sort(grp.peaks.begin(), grp.peaks.end(), Peak::compSampleName);
+
+        grp.groupStatistics();
+
+        pgroups.push_back(grp);
+    }
+
+    if (m) delete(m);
+    return pgroups;
 }
 
 void EIC::interpolate() {
