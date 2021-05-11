@@ -544,10 +544,9 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
 
         getPeakDetails(peak);
 
-        cerr << endl;
-
         if (debug) {
-             cerr << "Details: ("
+             cerr << "\n"
+                  << "Details: ("
                   << peak.peakMz
                   << " [" << peak.mzmin << "-" << peak.mzmax << "], "
                   << peak.rt
