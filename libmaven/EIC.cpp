@@ -526,6 +526,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
             if (splineAnnotation[i] == SplineAnnotation::MIN) {
                 peak.minpos = i;
                 peak.rtmin = rt[i];
+                peak.mzmin = mz[i];
                 peak.minscan = static_cast<unsigned int>(scannum[i]);
                 break;
             }
@@ -536,6 +537,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
             if (splineAnnotation[i] == SplineAnnotation::MIN) {
                 peak.maxpos = i;
                 peak.rtmax = rt[i];
+                peak.mzmax = mz[i];
                 peak.maxscan = static_cast<unsigned int>(scannum[i]);
                 break;
             }
