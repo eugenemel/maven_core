@@ -120,7 +120,7 @@ void  EIC::computeBaseLine(int smoothing_window, int dropTopX) {
 	try { 
 		baseline = vector<float>(n,0);
 	}  catch(...) { 
-		cerr << "Exception caught while allocating memory " << n << "floats " << endl;
+        cout << "Exception caught while allocating memory " << n << "floats " << endl;
 	}
 
         //sort intensity vector
@@ -159,7 +159,7 @@ void  EIC::computeBaseLine(int smoothing_window, int dropTopX) {
 void  EIC::subtractBaseLine() {
 
 	if (baseline.size() == 0 ) {
-		cerr << "subtractBaseLine() failed. empty baseline vector\n";
+        cout << "subtractBaseLine() failed. empty baseline vector\n";
 		return;
 	}
 
@@ -180,7 +180,7 @@ void EIC::computeSpline(int smoothWindow) {
         try {
                 this->spline = vector<float>(n,0);
         }  catch(...) {
-                cerr << "Exception caught while allocating memory " << n << "floats " << endl;
+                cout << "Exception caught while allocating memory " << n << "floats " << endl;
         }
 
         //initalize spline, set to intensity vector
@@ -221,7 +221,7 @@ void  EIC::getPeakPositions(int smoothWindow) {
     //Need to explicitly clear out peaks, else an extra peak will be added with each getPeaks() call.
     peaks.clear();
 
-    //cerr << "getPeakPositions() " << " sWindow=" << smoothWindow << " sType=" << smootherType << endl;
+    //cout << "getPeakPositions() " << " sWindow=" << smoothWindow << " sType=" << smootherType << endl;
 
     unsigned int N = intensity.size();
     if ( N == 0 ) return;
@@ -263,7 +263,7 @@ void EIC::getSingleGlobalMaxPeak(int smoothWindow) {
     //Need to explicitly clear out peaks, else an extra peak will be added with each getPeaks() call.
     peaks.clear();
 
-    //cerr << "getPeakPositions() " << " sWindow=" << smoothWindow << " sType=" << smootherType << endl;
+    //cout << "getPeakPositions() " << " sWindow=" << smoothWindow << " sType=" << smootherType << endl;
 
     unsigned int N = intensity.size();
     if ( N == 0 ) return;
@@ -408,8 +408,8 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
     if (!isComputePeakBounds) return;
 
     if (debug) {
-        cerr << "===================================" << endl;
-        cerr << "BEFORE ASSIGNING MINIMA:" << endl;
+        cout << "===================================" << endl;
+        cout << "BEFORE ASSIGNING MINIMA:" << endl;
         for (unsigned int i = 0; i < N; i++) {
             string type = "";
             if (splineAnnotation[i] == SplineAnnotation::MAX) {
@@ -419,17 +419,17 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
             } else if (splineAnnotation[i] == SplineAnnotation::NONE) {
                 type = "NONE";
             } else {
-                cerr << "ILLEGAL TYPE." << endl;
+                cout << "ILLEGAL TYPE." << endl;
                 abort();
             }
-            cerr << "i=" <<  i << " rt=" << rt[i] << " " << intensity[i] << " (spline=" << spline[i] << ") " << type << endl;
+            cout << "i=" <<  i << " rt=" << rt[i] << " " << intensity[i] << " (spline=" << spline[i] << ") " << type << endl;
         }
-        cerr << "===================================" << endl;
+        cout << "===================================" << endl;
     }
 
     if (debug) {
-        cerr << "===================================" << endl;
-        cerr << "STARTING ASSIGNING MINIMA:" << endl;
+        cout << "===================================" << endl;
+        cout << "STARTING ASSIGNING MINIMA:" << endl;
     }
 
     for (unsigned int i = 0; i < N; i++){
@@ -450,7 +450,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
                 splineAnnotation[minIntensity] = SplineAnnotation::MIN;
 
                 if (debug) {
-                    cerr << "i=" << minIntensity << " rt=" << rt[minIntensity] << " " << spline[minIntensity] << " MIN" << endl;
+                    cout << "i=" << minIntensity << " rt=" << rt[minIntensity] << " " << spline[minIntensity] << " MIN" << endl;
                 }
 
             }
@@ -469,8 +469,8 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
                 splineAnnotation[minIntensity] = SplineAnnotation::MIN;
 
                 if (debug) {
-                    cerr << "i=" << i << " " << spline[i] << " MAX" << endl;
-                    cerr << "i=" << minIntensity << " rt=" << rt[minIntensity] << " " << spline[minIntensity] << " MIN" << endl;
+                    cout << "i=" << i << " " << spline[i] << " MAX" << endl;
+                    cout << "i=" << minIntensity << " rt=" << rt[minIntensity] << " " << spline[minIntensity] << " MIN" << endl;
                 }
 
             } else {
@@ -498,8 +498,8 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
                     splineAnnotation[minIntensity] = SplineAnnotation::MIN;
 
                     if (debug) {
-                        cerr << "i=" << i << " rt=" << rt[i] << " " << spline[i] << " MAX" << endl;
-                        cerr << "i=" << minIntensity << " rt=" << rt[minIntensity] << " " << spline[minIntensity] << " MIN" << endl;
+                        cout << "i=" << i << " rt=" << rt[i] << " " << spline[i] << " MAX" << endl;
+                        cout << "i=" << minIntensity << " rt=" << rt[minIntensity] << " " << spline[minIntensity] << " MIN" << endl;
                     }
 
                 }
@@ -509,10 +509,10 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
 
 
     if (debug) {
-        cerr << "FINISHED ASSIGNING MINIMA" << endl;
-        cerr << "===================================" << endl;
-        cerr << "===================================" << endl;
-        cerr << "FINAL PEAKS:" << endl;
+        cout << "FINISHED ASSIGNING MINIMA" << endl;
+        cout << "===================================" << endl;
+        cout << "===================================" << endl;
+        cout << "FINAL PEAKS:" << endl;
     }
 
     for (auto &peak : peaks) {
@@ -534,9 +534,9 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
         }
 
         if (debug) {
-            cerr << "i=" << peak.minpos << " rt=" << rt[peak.minpos] << " LEFT MIN=" << spline[peak.minpos] << endl;
-            cerr << "i=" << peak.pos << " rt=" << rt[peak.pos] << " MAX=" << spline[peak.pos] << endl;
-            cerr << "i=" << peak.maxpos << " rt=" << rt[peak.maxpos] << " RIGHT MIN=" << spline[peak.maxpos] << endl;
+            cout << "i=" << peak.minpos << " rt=" << rt[peak.minpos] << " LEFT MIN=" << spline[peak.minpos] << endl;
+            cout << "i=" << peak.pos << " rt=" << rt[peak.pos] << " MAX=" << spline[peak.pos] << endl;
+            cout << "i=" << peak.maxpos << " rt=" << rt[peak.maxpos] << " RIGHT MIN=" << spline[peak.maxpos] << endl;
 
             assert(spline[peak.pos] > spline[peak.minpos]);
             assert(spline[peak.pos] > spline[peak.maxpos]);
@@ -545,7 +545,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
         getPeakDetails(peak);
 
         if (debug) {
-             cerr << "\n"
+             cout << "\n"
                   << "Details: ("
                   << peak.peakMz
                   << " [" << peak.mzmin << "-" << peak.mzmax << "], "
@@ -556,7 +556,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
     }
 
     if (debug) {
-        cerr << "===================================" << endl;
+        cout << "===================================" << endl;
     }
 
     //assign peak ranks based on total area of the peak
@@ -578,7 +578,7 @@ void EIC::findPeakBounds(Peak& peak) {
     if (spline.empty())   return;
     if (baseline.empty()) return;
 
-	//cerr << "findPeakBounds:" << apex << " " << rt[apex] << endl;
+    //cout << "findPeakBounds:" << apex << " " << rt[apex] << endl;
 
 	int directionality = 0;
 	float lastValue = spline[apex];
@@ -636,7 +636,7 @@ void EIC::findPeakBounds(Peak& peak) {
 
 	peak.minpos = lb;
 	peak.maxpos = rb;
-	//cerr << "\tfindPeakBounds:" << lb << " " << rb << " " << rb-lb+1 << endl;
+    //cout << "\tfindPeakBounds:" << lb << " " << rb << " " << rb-lb+1 << endl;
 }
 
 void  EIC::getPeakDetails(Peak& peak) { 
@@ -725,7 +725,7 @@ void  EIC::getPeakDetails(Peak& peak) {
     }
 
     if ( peak.medianMz == 0) { peak.medianMz = peak.peakMz; }
-	//cerr << peak.peakMz << " " << peak.medianMz << " " << bitstring << endl;
+    //cout << peak.peakMz << " " << peak.medianMz << " " << bitstring << endl;
 
 	mzPattern p(bitstring);
     if (peak.width >= 5) peak.symmetry =  p.longestSymmetry('+','-');
@@ -800,7 +800,7 @@ void EIC::checkGaussianFit(Peak& peak) {
         peak.gaussFitSigma = gaussFitParams.first;
         peak.gaussFitR2 = gaussFitParams.second;
 
-        //cerr << "\tcheckGaussianFit(): Best Sigma=" << peak.gaussFitSigma <<  " minRsqr=" << peak.gaussFitR2 << endl;
+        //cout << "\tcheckGaussianFit(): Best Sigma=" << peak.gaussFitSigma <<  " minRsqr=" << peak.gaussFitR2 << endl;
 }
 
 
@@ -826,9 +826,9 @@ void  EIC::deletePeak(unsigned int i) {
 }
 
 void EIC::summary() { 
-		cerr << "EIC: mz=" << mzmin <<  "-" << mzmax << " rt=" << rtmin << "-" << rtmax << endl;
-		cerr << "   : maxIntensity=" << maxIntensity << endl;
-		cerr << "   : peaks=" << peaks.size() << endl;
+        cout << "EIC: mz=" << mzmin <<  "-" << mzmax << " rt=" << rtmin << "-" << rtmax << endl;
+        cout << "   : maxIntensity=" << maxIntensity << endl;
+        cout << "   : peaks=" << peaks.size() << endl;
 }		
 
 void EIC::removeLowRankGroups( vector<PeakGroup>& groups, unsigned int rankLimit ) {
@@ -1225,7 +1225,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
         }
 
         if (debug) {
-            cerr << "Returning " << pgroups.size() << " peak groups." << endl;
+            cout << "Returning " << pgroups.size() << " peak groups." << endl;
         }
 
         return(pgroups);
@@ -1275,8 +1275,8 @@ vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float
 		pgroups.push_back(grp);
   	}
 
-//    cerr << "EIC::groupPeaks() eics=" << eics.size() << endl;
-//    cerr << "EIC::groupPeaks() peakgroups pre-processing=" << pgroups.size() << endl;
+//    cout << "EIC::groupPeaks() eics=" << eics.size() << endl;
+//    cout << "EIC::groupPeaks() peakgroups pre-processing=" << pgroups.size() << endl;
 
 	for(unsigned int i=0; i < eics.size(); i++ ) {	//for every sample
 		for(unsigned int j=0; j < eics[i]->peaks.size(); j++ ) { //for every peak in the sample
@@ -1286,13 +1286,13 @@ vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float
 
             vector<Peak>::iterator itr = lower_bound(m->peaks.begin(), m->peaks.end(), b, Peak::compRtMin);
             int lb = (itr-(m->peaks.begin()))-1; if (lb < 0) lb=0;
-            //cerr << "\tb=" << b.rtmin << "<=>" << b.rtmax << " lb=" << lb << endl;
+            //cout << "\tb=" << b.rtmin << "<=>" << b.rtmax << " lb=" << lb << endl;
 
             //Find best matching group
             for(unsigned int k=lb; k< m->peaks.size(); k++ ) {
                 Peak& a = m->peaks[k];
                 float overlap = checkOverlap(a.rtmin,a.rtmax,b.rtmin,b.rtmax); //check for overlap
-                //cerr << "\t\ta=" << a.rtmin << "<=>" << a.rtmax  << " overlap=" << overlap << endl;
+                //cout << "\t\ta=" << a.rtmin << "<=>" << a.rtmax  << " overlap=" << overlap << endl;
 
                 if(overlap == 0 and a.rtmax < b.rtmin) continue;
                 if(overlap == 0 and a.rtmin > b.rtmax) break;
@@ -1305,11 +1305,11 @@ vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float
 				float score = 1.0/(distx+0.01)/(disty+0.01)*overlap;
 				//Feng note: the new score function above makes sure that the three terms are weighted equally.
 			    if ( score > b.groupOverlap) { b.groupNum=k; b.groupOverlap=score; }
-                //cerr << "x" << b.rt << " " << b.peakIntensity;
+                //cout << "x" << b.rt << " " << b.peakIntensity;
             }
 
             /*
-            cerr << b->peakMz <<  " " << b->rtmin << " " << b->rtmax << "->"  << b->groupNum <<
+            cout << b->peakMz <<  " " << b->rtmin << " " << b->rtmax << "->"  << b->groupNum <<
                     " " << b->groupOverlap << endl;
             */
 
@@ -1327,7 +1327,7 @@ vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float
         }
     }
 
-//    cerr << "EIC::groupPeaks() peakgroups pre sample cleaning=" << pgroups.size() << endl;
+//    cout << "EIC::groupPeaks() peakgroups pre sample cleaning=" << pgroups.size() << endl;
 
 	//clean up peakgroup such that there is only one peak for each sample
     for(unsigned int i=0; i< pgroups.size(); i++) {
@@ -1349,11 +1349,11 @@ vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float
             }
     }
 
- //   cerr << "EIC::groupPeaks() peakgroups post-processing=" << pgroups.size() << endl;
+ //   cout << "EIC::groupPeaks() peakgroups post-processing=" << pgroups.size() << endl;
 
 	//now merge overlapping groups
 	//EIC::mergeOverlapingGroups(pgroups);
- 	//cerr << "Found " << pgroups.size() << "groups" << endl;
+    //cout << "Found " << pgroups.size() << "groups" << endl;
 
 	if(m) delete(m);
 	return(pgroups);
