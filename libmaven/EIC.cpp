@@ -551,6 +551,16 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
             assert(spline[peak.pos] > spline[peak.maxpos]);
         }
 
+        if (debug) {
+            cout <<"Before getPeakDetails(peak) call:" << endl;
+            cout << "Details: ("
+                 << peak.peakMz
+                 << " [" << peak.mzmin << "-" << peak.mzmax << "], "
+                 << peak.rt
+                 << " [" << peak.rtmin << "-" << peak.rtmax
+                 << "])" << endl;
+        }
+
         getPeakDetails(peak);
 
         if (debug) {
