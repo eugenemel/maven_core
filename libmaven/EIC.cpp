@@ -534,6 +534,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
         }
 
         if (debug) {
+            cout << "\n";
             cout << "i=" << peak.minpos << " rt=" << rt[peak.minpos] << " LEFT MIN=" << spline[peak.minpos] << endl;
             cout << "i=" << peak.pos << " rt=" << rt[peak.pos] << " MAX=" << spline[peak.pos] << endl;
             cout << "i=" << peak.maxpos << " rt=" << rt[peak.maxpos] << " RIGHT MIN=" << spline[peak.maxpos] << endl;
@@ -545,8 +546,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
         getPeakDetails(peak);
 
         if (debug) {
-             cout << "\n"
-                  << "Details: ("
+             cout << "Details: ("
                   << peak.peakMz
                   << " [" << peak.mzmin << "-" << peak.mzmax << "], "
                   << peak.rt
