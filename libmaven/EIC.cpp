@@ -517,10 +517,16 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
 
     for (auto &peak : peaks) {
 
+        //set RT, scan info
+        peak.rt = rt[peak.pos];
+        peak.scan = static_cast<unsigned int>(scannum[peak.pos]);
+
         //find left boundary
         for (unsigned int i = peak.pos-1; i >= 0; i--) {
             if (splineAnnotation[i] == SplineAnnotation::MIN) {
                 peak.minpos = i;
+                peak.rtmin = rt[i];
+                peak.minscan = static_cast<unsigned int>(scannum[i]);
                 break;
             }
         }
@@ -529,6 +535,8 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
         for (unsigned int i = peak.pos+1; i < N; i++) {
             if (splineAnnotation[i] == SplineAnnotation::MIN) {
                 peak.maxpos = i;
+                peak.rtmax = rt[i];
+                peak.maxscan = static_cast<unsigned int>(scannum[i]);
                 break;
             }
         }
@@ -640,32 +648,35 @@ void EIC::findPeakBounds(Peak& peak) {
 }
 
 void  EIC::getPeakDetails(Peak& peak) { 
-    unsigned int N = intensity.size();
+
+    unsigned long N = intensity.size();
 
     if (N == 0) return;
     if (peak.pos >= N) return;
 
     //intensity and mz at the apex of the peaks
-    peak.peakIntensity = intensity[ peak.pos ];
+    peak.peakIntensity = intensity[peak.pos];
     peak.noNoiseObs = 0;
     peak.peakAreaCorrected  = 0;
     peak.peakArea=0;
     float baselineArea=0;
-    int jj=0;
 
-    if ( sample != NULL && sample->isBlank ) {
+    if (sample && sample->isBlank) {
         peak.fromBlankSample = true;
     }
 
     StatisticsVector<float>allmzs;
     string bitstring;
-    if(peak.maxpos >= N) peak.maxpos=N-1;
-    if(peak.minpos >= N) peak.minpos=peak.pos; //unsigned number weirdness.
+    if(peak.maxpos >= N) peak.maxpos= static_cast<unsigned int>(N)-1;
+    if(peak.minpos >= N) peak.minpos = peak.pos; //unsigned number weirdness.
 
     float lastValue = intensity[peak.minpos];
+
     for(unsigned int j=peak.minpos; j<= peak.maxpos;j++ ){
+
         peak.peakArea += intensity[j];
         baselineArea +=   baseline[j];
+
         if (intensity[j] > baseline[j]) peak.noNoiseObs++;
 
         if(peak.peakIntensity < intensity[j]) {
@@ -686,7 +697,6 @@ void  EIC::getPeakDetails(Peak& peak) {
         }
 
         lastValue = intensity[j];
-        jj++;
     }
 
     getPeakWidth(peak);
