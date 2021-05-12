@@ -563,7 +563,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
                  << "])" << endl;
         }
 
-        getPeakDetails(peak);
+        getPeakDetails(peak, false);
 
         if (debug) {
              cout << "Details: ("
@@ -659,7 +659,19 @@ void EIC::findPeakBounds(Peak& peak) {
     //cout << "\tfindPeakBounds:" << lb << " " << rb << " " << rb-lb+1 << endl;
 }
 
-void  EIC::getPeakDetails(Peak& peak) { 
+/**
+ * @brief EIC::getPeakDetails
+ * @param peak
+ * @param isCorrectPeakByMaxIntensity
+ *
+ * Issue 381: "isCorrectPeakByMaxIntensity" should be false when using spline-based maxima finding,
+ * as in EIC::getPeakPositionsC().
+ *
+ * Sometimes the intensity maxima will disagree with the spline maxima, which can lead to peak boundaries
+ * being reassigned, and can cause pathological behavior.
+ *
+ */
+void  EIC::getPeakDetails(Peak& peak, bool isCorrectPeakByMaxIntensity) {
 
     unsigned long N = intensity.size();
 
@@ -691,9 +703,11 @@ void  EIC::getPeakDetails(Peak& peak) {
 
         if (intensity[j] > baseline[j]) peak.noNoiseObs++;
 
-        if(peak.peakIntensity < intensity[j]) {
-            peak.peakIntensity = intensity[j];
-            peak.pos = j;
+        if (isCorrectPeakByMaxIntensity) {
+            if(peak.peakIntensity < intensity[j]) {
+                peak.peakIntensity = intensity[j];
+                peak.pos = j;
+            }
         }
 
         if (mz.size() > 0 && mz[j] > 0) allmzs.push_back(mz[j]);
