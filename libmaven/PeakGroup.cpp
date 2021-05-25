@@ -1,8 +1,12 @@
 #include "mzSample.h"
 #include "directinfusionprocessor.h"
 
-PeakGroup::PeakGroup()  { 
-    groupId=0;
+//init groupCounter
+long PeakGroup::groupCounter=0;
+
+PeakGroup::PeakGroup()  {
+    //groupId=0;
+    groupId = incrementGroupCounter();
     metaGroupId=0;
     groupRank=1000;
 
@@ -67,6 +71,7 @@ PeakGroup::PeakGroup()  {
 
 void PeakGroup::copyObj(const PeakGroup& o)  { 
     groupId= o.groupId;
+    //groupId = incrementGroupCounter();
     metaGroupId= o.metaGroupId;
     groupRank= o.groupRank;
 

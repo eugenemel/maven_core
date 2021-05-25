@@ -913,7 +913,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
             EIC* m=eics[0];
             for(unsigned int i=0; i< m->peaks.size(); i++ ) {
                 PeakGroup grp;
-                grp.groupId = static_cast<int>(i);
+                //grp.groupId = static_cast<int>(i);
                 grp.addPeak(m->peaks[i]);
                 grp.groupStatistics();
                 pgroups.push_back(grp);
@@ -1250,7 +1250,7 @@ vector<PeakGroup> EIC::groupPeaksB(vector<EIC*>& eics, int smoothingWindow, floa
             if (peakGroups.at(i).empty()) continue;
 
             PeakGroup grp;
-            grp.groupId = static_cast<int>(i);
+            //grp.groupId = static_cast<int>(i);
 
             for (auto peakPairIndex : peakGroups.at(i)) {
                 grp.addPeak(peakSamplePairs.at(peakPairIndex).second);
@@ -1287,7 +1287,7 @@ vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float
 		EIC* m=eics[0];
 		for(unsigned int i=0; i< m->peaks.size(); i++ ) {
 			PeakGroup grp;
-			grp.groupId = i;
+        //	grp.groupId = i;
 			grp.addPeak(m->peaks[i]);
 			grp.groupStatistics();
 			pgroups.push_back(grp);
@@ -1307,7 +1307,7 @@ vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float
 
 	for(unsigned int i=0; i< m->peaks.size(); i++ ) {
 		PeakGroup grp;
-		grp.groupId = i;
+    //	grp.groupId = i;
 		pgroups.push_back(grp);
   	}
 
@@ -1356,7 +1356,7 @@ vector<PeakGroup> EIC::groupPeaks(vector<EIC*>& eics, int smoothingWindow, float
             } else {
 				PeakGroup grp;
 				pgroups.push_back(grp);
-				grp.groupId = pgroups.size()+1;
+            //	grp.groupId = pgroups.size()+1;
 				grp.addPeak(b);
 				b.groupOverlap=0;
 			}
@@ -1420,7 +1420,7 @@ vector<PeakGroup> EIC::groupPeaksC(vector<EIC*>& eics, int smoothingWindow, floa
         EIC* m=eics[0];
         for(unsigned int i=0; i< m->peaks.size(); i++ ) {
             PeakGroup grp;
-            grp.groupId = static_cast<int>(i);
+          //  grp.groupId = static_cast<int>(i);
             grp.addPeak(m->peaks[i]);
             grp.groupStatistics();
             pgroups.push_back(grp);
@@ -1526,7 +1526,7 @@ vector<PeakGroup> EIC::groupPeaksC(vector<EIC*>& eics, int smoothingWindow, floa
         if (peaks.empty()) continue;
 
         PeakGroup grp;
-        grp.groupId = groupIndex;
+       // grp.groupId = groupIndex;
         for (auto peak : peaks) {
             grp.addPeak(peak);
         }

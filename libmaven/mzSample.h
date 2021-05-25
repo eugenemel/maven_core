@@ -30,6 +30,8 @@
 #endif
 
 
+
+
 #ifdef CDFPARSER
 #include "../libcdfread/ms10.h"
 #endif
@@ -844,7 +846,7 @@ class PeakGroup {
 
         bool isFocused;
 
-        int groupId;
+        //int groupId;
         int metaGroupId;
 
         float maxIntensity;
@@ -889,6 +891,12 @@ class PeakGroup {
         //internal flags
         bool isComputedGroupStatistics;
 
+        //privitize groupId
+        inline const int getGroupId() { return groupId; }
+        inline int incrementGroupCounter() { return groupCounter++; }
+        inline void setGroupId(int id) { groupId = id; }
+        inline void initGroupCount(int id) { groupCounter=id; }
+        inline int getGroupCounter() { return groupCounter; }
 
         //LOSS
         int     chargeState;
@@ -1001,7 +1009,12 @@ class PeakGroup {
 
 private:
         void processLabel(char label, bool isToggle);
+        long groupId;
+        static long groupCounter;
+
 };
+
+
 
 class Compound { 
         static MassCalculator* mcalc;
