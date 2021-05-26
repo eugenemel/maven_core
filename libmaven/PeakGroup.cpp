@@ -3,6 +3,7 @@
 
 PeakGroup::PeakGroup()  { 
     groupId=0;
+    savedGroupId=-1;
     metaGroupId=0;
     groupRank=1000;
 
@@ -69,6 +70,7 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     groupId= o.groupId;
     metaGroupId= o.metaGroupId;
     groupRank= o.groupRank;
+    //savedGroupId is intentionally not copied
 
     maxIntensity= o.maxIntensity;
     meanRt=o.meanRt;
