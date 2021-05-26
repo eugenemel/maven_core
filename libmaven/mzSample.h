@@ -908,6 +908,14 @@ class PeakGroup {
          */
         float srmProductMz;
 
+        /**
+         *  Issue 424: Stable Database Ids
+         *
+         */
+        inline int setDatabaseID(int id) { databaseStableId=id; }
+        inline int getDatabaseID() { return databaseStableId; }
+        inline bool hasDatabaseID() { return databaseStableId!=0; }
+
         bool isPrimaryGroup();
         inline bool hasCompoundLink()  { if(compound != NULL) return true ; return false; }
         inline bool isEmpty()   { if(peaks.size() == 0) return true; return false; }
@@ -1001,6 +1009,7 @@ class PeakGroup {
 
 private:
         void processLabel(char label, bool isToggle);
+        int databaseStableId;
 };
 
 class Compound { 

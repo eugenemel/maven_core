@@ -4,6 +4,7 @@
 PeakGroup::PeakGroup()  { 
     groupId=0;
     metaGroupId=0;
+    databaseStableId=0;
     groupRank=1000;
 
     maxIntensity=0;
@@ -68,6 +69,7 @@ PeakGroup::PeakGroup()  {
 void PeakGroup::copyObj(const PeakGroup& o)  { 
     groupId= o.groupId;
     metaGroupId= o.metaGroupId;
+    databaseStableId=o.databaseStableId;
     groupRank= o.groupRank;
 
     maxIntensity= o.maxIntensity;
