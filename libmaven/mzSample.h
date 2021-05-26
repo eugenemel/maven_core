@@ -846,7 +846,7 @@ class PeakGroup {
 
         int groupId;
         int metaGroupId;
-        int savedGroupId; //Issue 424: previous value in mzrollDB file.  Do not set for transient PeakGroups
+        int savedGroupId = -1; //Issue 424: previous value in mzrollDB file.  Do not set for transient PeakGroups
 
         float maxIntensity;
         float meanRt;
