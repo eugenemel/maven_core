@@ -3495,6 +3495,9 @@ ScanQuantOutput DirectInfusionUtils::getObservedMs1ScanIntensity(
             observedMs1ScanIntensity = medianIntensity;
         }
 
+        //Must pass all filters, or continue iterating through matches
+        if (observedMs1ScanIntensity < params->ms1MinScanIntensity) continue;
+
         scanQuantOutput.isValid = true;
         scanQuantOutput.intensity = observedMs1ScanIntensity;
         scanQuantOutput.numMeasurements = static_cast<int>(ms1ScanIntensities.size());
