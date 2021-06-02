@@ -496,7 +496,7 @@ void PeakGroup::groupOverlapMatrix() {
 
     for(unsigned int i=0; i< peaks.size(); i++) {
         Peak& a = peaks[i];
-        for(unsigned int j=i; j< peaks.size(); j++) {
+        for(unsigned int j=i+1; j< peaks.size(); j++) {
             Peak& b = peaks[j];
             float overlap = checkOverlap(a.rtmin,a.rtmax,b.rtmin,b.rtmax); //check for overlap
             if (overlap > 0 ) { b.groupOverlapFrac += log(overlap); a.groupOverlapFrac += log(overlap); }
