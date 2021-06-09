@@ -936,11 +936,11 @@ bool PeakGroup::isMonoisotopic( float ppm) {
 }
 
 bool PeakGroup::isGroupGood() {
-    return isGroupLabeled('g');
+    return isGroupLabeled(ReservedLabel::GOOD);
 }
 
 bool PeakGroup::isGroupBad() {
-    return isGroupLabeled('b');
+    return isGroupLabeled(ReservedLabel::BAD);
 }
 
 bool PeakGroup::isGroupLabeled(char label) {
@@ -949,14 +949,14 @@ bool PeakGroup::isGroupLabeled(char label) {
 
 void PeakGroup::markGroupGood() {
     if (isGroupGood()) return;
-    labels.erase(remove(labels.begin(), labels.end(), 'b'), labels.end());
-    labels.push_back('g');
+    labels.erase(remove(labels.begin(), labels.end(), ReservedLabel::BAD), labels.end());
+    labels.push_back(ReservedLabel::GOOD);
 }
 
 void PeakGroup::markGroupBad() {
     if (isGroupBad()) return;
-    labels.erase(remove(labels.begin(), labels.end(), 'g'), labels.end());
-    labels.push_back('b');
+    labels.erase(remove(labels.begin(), labels.end(), ReservedLabel::GOOD), labels.end());
+    labels.push_back(ReservedLabel::BAD);
 
 }
 
@@ -970,9 +970,14 @@ void PeakGroup::addLabel(char label) {
 
 void PeakGroup::processLabel(char label, bool isToggle) {
     if (label == '\0') {
+
         //reserved character: clear all labels
+        bool isHasManualChanged = find(labels.begin(), labels.end(), ReservedLabel::COMPOUND_MANUALLY_CHANGED) != labels.end();
 
         labels.clear();
+        if (isHasManualChanged) {
+            labels.push_back(ReservedLabel::COMPOUND_MANUALLY_CHANGED);
+        }
 
     } else if (find(labels.begin(), labels.end(), label) != labels.end()) {
 
@@ -986,16 +991,16 @@ void PeakGroup::processLabel(char label, bool isToggle) {
 
            return;
         }
-    } else if (label == 'g') {
+    } else if (label == ReservedLabel::GOOD) {
         //reserved character: 'good', add mark and remove 'bad' label
 
-        labels.erase(remove(labels.begin(), labels.end(), 'b'), labels.end());
+        labels.erase(remove(labels.begin(), labels.end(), ReservedLabel::BAD), labels.end());
         labels.push_back('g');
 
-    } else if (label == 'b') {
+    } else if (label == ReservedLabel::BAD) {
         //reserved character: 'bad', add mark and remove 'good' label
 
-        labels.erase(remove(labels.begin(), labels.end(), 'g'), labels.end());
+        labels.erase(remove(labels.begin(), labels.end(), ReservedLabel::GOOD), labels.end());
         labels.push_back('b');
 
 
