@@ -793,6 +793,8 @@ class PeakGroup {
 	public:
         enum GroupType {None=0, C13Type=1, AdductType=2, CovariantType=3, IsotopeType=4, SRMTransitionType=5 };     //group types
         enum QType	   {AreaTop=0, Area=1, Height=2, AreaNotCorrected=3, RetentionTime=4, Quality=5, SNRatio=6, MS2Count=7 };
+        enum ReservedLabel {GOOD='g', BAD='b', DELETED='x', COMPOUND_MANUALLY_CHANGED='@'}; //Issue 429
+
 		PeakGroup();
 		PeakGroup(const PeakGroup& o);
 		PeakGroup& operator=(const PeakGroup& o);
