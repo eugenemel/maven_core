@@ -372,8 +372,8 @@ class mzSlice {
 
         //SRM transition slices should not be assessed for (m/z, RT) boundaries,
         //always return false when comparing an SRM transition slice
-        if (!(one.srmPrecursorMz > 0.0f && one.srmProductMz > 0.0f)) return false;
-        if (!(two.srmPrecursorMz > 0.0f && two.srmProductMz > 0.0f)) return false;
+        if (one.srmPrecursorMz > 0.0f && one.srmProductMz > 0.0f) return false;
+        if (two.srmPrecursorMz > 0.0f && two.srmProductMz > 0.0f) return false;
 
         if (abs(one.mzmin - two.mzmin) > err) return false;
         if (abs(one.mzmax - two.mzmax) > err) return false;
