@@ -367,6 +367,21 @@ class mzSlice {
 	static bool compRt(const mzSlice* a, const mzSlice* b ) { return a->rt < b->rt; }
 	bool operator< (const mzSlice* b) { return mz < b->mz; }
 	bool operator< (const mzSlice& b) { return mz < b.mz; }
+
+    static bool isEqualMzRtBoundaries(const mzSlice& one, const mzSlice& two, float err=1e-6f) {
+
+        //SRM transition slices should not be assessed for (m/z, RT) boundaries,
+        //always return false when comparing an SRM transition slice
+        if (!(one.srmPrecursorMz > 0.0f && one.srmProductMz > 0.0f)) return false;
+        if (!(two.srmPrecursorMz > 0.0f && two.srmProductMz > 0.0f)) return false;
+
+        if (abs(one.mzmin - two.mzmin) > err) return false;
+        if (abs(one.mzmax - two.mzmax) > err) return false;
+        if (abs(one.rtmin - two.rtmin) > err) return false;
+        if (abs(one.rtmax - two.rtmax) > err) return false;
+
+        return true;
+    }
 };
 
 class mzLink { 
