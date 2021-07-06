@@ -58,6 +58,7 @@ class Isotope;
 struct FragmentationMatchScore;
 
 class PeaksSearchParameters;
+class LCLipidProcessor;
 
 using namespace pugi;
 using namespace mzUtils;
@@ -1591,5 +1592,18 @@ public:
     static shared_ptr<PeaksSearchParameters> decode(string encodedParams);
 };
 
+//Issue 455
+
+class LCLipidSearchParameters : SearchParameters {
+    //TODO
+};
+
+class LCLipidProcessor{
+    static void matchLipids(vector<PeakGroup*>& groups,
+                            vector<Compound*>& compounds,
+                            shared_ptr<LCLipidSearchParameters> params,
+                            bool debug=false
+                            );
+};
 
 #endif
