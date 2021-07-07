@@ -1593,9 +1593,16 @@ public:
 };
 
 //Issue 455
+class LCLipidSearchParameters : public SearchParameters {
 
-class LCLipidSearchParameters : SearchParameters {
-    //TODO
+    //fields
+    string mspFilePath = "";
+
+    //default constructor
+    LCLipidSearchParameters() {
+
+    }
+
 };
 
 class LCLipidProcessor{
