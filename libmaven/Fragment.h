@@ -50,6 +50,9 @@ struct FragmentationMatchScore {
     double numDiagnosticMatches;
     double numSn1Matches; //Issue 312
     double numSn2Matches; //Issue 312
+    double numSn3Matches; //Issue 455
+    double numSn4Matches; //Issue 455
+    double numOxidations; //Issue 455
     bool isHasPrecursorMatch;
 
     double ppmError;
@@ -250,7 +253,7 @@ class Fragment {
     static int getNumDiagnosticFragmentsMatched(string fragLblStartsWith, vector<string> labels, vector<int> ranks);
 
         double logNchooseK(int N,int k);
-        double SHP(int matched, int len1, int len2, int N);
+        static double SHP(int matched, int len1, int len2, int N);
         double MVH(const vector<int>& X, Fragment* other);
 	vector<double> matchedRankVector(const vector<int>& X, Fragment* other);
         static bool compPrecursorMz(const Fragment* a, const Fragment* b) { return a->precursorMz<b->precursorMz; }
