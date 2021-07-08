@@ -70,6 +70,7 @@ string LCLipidSearchParameters::encodeParams() {
 
     // END LCLipidSearchParameters
 
+    return encodedParams;
 }
 
 shared_ptr<LCLipidSearchParameters> LCLipidSearchParameters::decode(string encodedParams){
@@ -192,4 +193,6 @@ shared_ptr<LCLipidSearchParameters> LCLipidSearchParameters::decode(string encod
     }
 
     // END LCLipidSearchParameters
+
+    return lipidSearchParameters;
 }
