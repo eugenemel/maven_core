@@ -7,6 +7,8 @@
  * @param params
  * @param debug
  *
+ * This function assumes that all peak groups contain MS2s.
+ *
  * This function assumes that the compounds are lipids, they have precursorMz values,
  * they have labeled fragments, and the labels follow these reserved character rules:
  *
@@ -128,6 +130,7 @@ void LCLipidProcessor::matchLipids(vector<PeakGroup>& groups,
         if (maxScore > -1.0f) {
             group.compound = bestPair.first;
             group.fragMatchScore = bestPair.second;
+            group.fragMatchScore.mergedScore = bestPair.second.hypergeomScore;
         }
     }
 }
