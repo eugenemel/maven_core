@@ -1,10 +1,135 @@
 #include "mzSample.h"
 
+/**
+ * @brief LCLipidProcessor::matchLipids
+ * @param groups
+ * @param compounds
+ * @param params
+ * @param debug
+ *
+ * This function assumes that the compounds are lipids, they have precursorMz values,
+ * they have labeled fragments, and the labels follow these reserved character rules:
+ *
+ * Lipid Fragment Labels:
+ * sn1: @
+ * sn2: $
+ * sn3: !
+ * sn4: ^
+ * diagnostic: *
+ * oxidation: &
+ */
 void LCLipidProcessor::matchLipids(vector<PeakGroup>& groups,
                             vector<Compound*>& compounds,
                             shared_ptr<LCLipidSearchParameters> params,
                             bool debug){
-    cout << "TODO" << endl;
+
+    for (auto& group : groups) {
+
+        float minMz = group.meanMz - (group.meanMz*params->ms1PpmTolr/1000000);
+        float maxMz = group.meanMz + (group.meanMz*params->ms1PpmTolr/1000000);
+
+        auto lb = lower_bound(compounds.begin(), compounds.end(), minMz, [](const Compound* lhs, const float& rhs){
+            return lhs->precursorMz < rhs;
+        });
+
+        if (group.fragmentationPattern.mzs.empty()) {
+
+            //TODO: more flexibility around consensus spectrum formation
+            group.computeFragPattern(params->ms2PpmTolr);
+        }
+
+        vector<pair<Compound*, FragmentationMatchScore>> scores{};
+
+        for (unsigned int pos = lb - compounds.begin(); pos < compounds.size(); pos++){
+
+            Compound *compound = compounds[pos];
+            float precMz = compound->precursorMz;
+
+            //stop searching when the maxMz has been exceeded.
+            if (precMz > maxMz) {
+                break;
+            }
+
+            Fragment library;
+            library.precursorMz = static_cast<double>(precMz);
+            library.mzs = compound->fragment_mzs;
+            library.intensity_array = compound->fragment_intensity;
+            library.fragment_labels = compound->fragment_labels;
+
+            Fragment observed = group.fragmentationPattern;
+            float maxDeltaMz = (params->ms2PpmTolr * precMz)/ 1000000;
+
+            FragmentationMatchScore s;
+
+            vector<int> ranks = Fragment::findFragPairsGreedyMz(&library, &observed, maxDeltaMz);
+
+            for (unsigned int i = 0; i < ranks.size(); i++) {
+
+                int observedIndex = ranks[i];
+
+                if (observedIndex != -1) {
+
+                    s.numMatches++;
+
+                    string compoundLabel = compound->fragment_labels[i];
+
+                    //check labels
+                    for (char c : compoundLabel){
+
+                        if (c == '*'){
+                            s.numDiagnosticMatches++;
+                        } else if (c == '@') {
+                            s.numSn1Matches++;
+                        } else if (c == '$'){
+                            s.numSn2Matches++;
+                        } else if (c == '!') {
+                            s.numSn3Matches++;
+                        } else if (c == '^') {
+                            s.numSn4Matches++;
+                        } else if (c == '&') {
+                            s.numOxidations++;
+                        } else {
+                            //finished with special labels for this fragment
+                            break;
+                        }
+
+                    }
+                }
+            }
+
+            if (s.numMatches < params->ms2MinNumMatches) continue;
+            if (s.numDiagnosticMatches < params->ms2MinNumDiagnosticMatches) continue;
+
+            s.hypergeomScore = Fragment::SHP(static_cast<int>(s.numMatches),
+                                             static_cast<int>(library.mzs.size()),
+                                             static_cast<int>(observed.nobs()),
+                                             100000);
+
+            s.dotProduct = library.dotProduct(&observed);
+
+            s.fractionMatched = s.numMatches/library.mzs.size();
+
+            scores.push_back(make_pair(compound, s));
+        }
+
+        //based on scores, determine a result
+        //TODO: compare scores, summarization, etc
+
+        //this is a dummy for testing
+        float maxScore = -1.0f;
+        pair<Compound*, FragmentationMatchScore> bestPair;
+        for (auto score : scores) {
+            if (score.second.hypergeomScore > maxScore) {
+                bestPair = score;
+                maxScore = score.second.hypergeomScore;
+            }
+        }
+
+        if (maxScore > -1.0f) {
+            group.compound = bestPair.first;
+            group.fragMatchScore = bestPair.second;
+        }
+    }
 }
 
 string LCLipidSearchParameters::encodeParams() {
