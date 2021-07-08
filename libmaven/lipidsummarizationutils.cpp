@@ -786,7 +786,13 @@ string LipidSummarizationUtils::getLipidMapsSnPositionSummary(string lipidName){
     string correctedName;
 
     if (lipidNameComponents.chains.size() > 0) {
-        correctedName = lipidNameComponents.lipidClass + "(";
+        if (lipidNameComponents.lipidClass == "Alkyl_PC") {
+            correctedName = "PC(";
+        } else if (lipidNameComponents.lipidClass == "Alkyl_PE") {
+            correctedName = "PE(";
+        } else {
+            correctedName = lipidNameComponents.lipidClass + "(";
+        }
     } else {
         return lipidName;
     }
