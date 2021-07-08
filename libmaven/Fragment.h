@@ -252,7 +252,7 @@ class Fragment {
 	void normalizeIntensity(vector<float>&x, int binSize);
     static int getNumDiagnosticFragmentsMatched(string fragLblStartsWith, vector<string> labels, vector<int> ranks);
 
-        double logNchooseK(int N,int k);
+        static double logNchooseK(int N,int k);
         static double SHP(int matched, int len1, int len2, int N);
         double MVH(const vector<int>& X, Fragment* other);
 	vector<double> matchedRankVector(const vector<int>& X, Fragment* other);
