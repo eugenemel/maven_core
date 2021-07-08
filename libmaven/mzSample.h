@@ -1595,6 +1595,8 @@ public:
 //Issue 455
 class LCLipidSearchParameters : public SearchParameters {
 
+public:
+
     //fields
     string mspFilePath = "";
 
@@ -1603,7 +1605,6 @@ class LCLipidSearchParameters : public SearchParameters {
 
     }
 
-public:
     string encodeParams();
     static shared_ptr<LCLipidSearchParameters> decode(string encodedParams);
 
