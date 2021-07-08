@@ -1611,6 +1611,7 @@ public:
 };
 
 class LCLipidProcessor{
+public:
     static void matchLipids(vector<PeakGroup*>& groups,
                             vector<Compound*>& compounds,
                             shared_ptr<LCLipidSearchParameters> params,
