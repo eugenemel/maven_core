@@ -37,6 +37,10 @@ LipidNameComponents LipidSummarizationUtils::getNameComponents(string lipidName)
 
     string lipidClass = lipidName.substr(0, chainStart);
 
+    if (lipidName.substr(3, 2) == "o-" || lipidName.substr(3,2) == "p-"){
+        lipidClass = "Alkyl_" + lipidClass;
+    }
+
     //Issue 332: handle less well-formatted names - find the close paranthesis
     string::size_type lastCloseParanthesis = string::npos;
     for (string::size_type i = 0; i <lipidName.size(); i++) {
@@ -543,6 +547,10 @@ string LipidSummarizationUtils::getSummaryLevel5ToLevel4(LipidNameComponents lip
 
 string LipidSummarizationUtils::getSummaryLevel4ToLevel3(LipidNameComponents lipidNameComponents) {
 
+    if (lipidNameComponents.lipidClass == "Alkyl_PC" || lipidNameComponents.lipidClass == "ALkyl_PE") {
+        return getSummaryLevel4ToLevel2(lipidNameComponents);
+    }
+
     string lipidNameSummarized("");
     lipidNameSummarized.append(lipidNameComponents.lipidClass);
     lipidNameSummarized.append("(");
@@ -628,8 +636,14 @@ string LipidSummarizationUtils::getSummaryLevel4ToLevel3(LipidNameComponents lip
 string LipidSummarizationUtils::getSummaryLevel4ToLevel2(LipidNameComponents lipidNameComponents) {
 
     string lipidNameSummarized("");
-    lipidNameSummarized.append(lipidNameComponents.lipidClass);
-    lipidNameSummarized.append("(");
+    if (lipidNameComponents.lipidClass == "Alkyl_PC") {
+        lipidNameSummarized.append("PC(e-");
+    } else if (lipidNameComponents.lipidClass == "Alkyl_PE") {
+        lipidNameSummarized.append("PE(e-");
+    } else {
+        lipidNameSummarized.append(lipidNameComponents.lipidClass);
+        lipidNameSummarized.append("(");
+    }
 
     int alkaneSum = 0;
     int alkeneSum = 0;
