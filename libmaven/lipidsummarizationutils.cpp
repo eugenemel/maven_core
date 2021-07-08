@@ -547,7 +547,7 @@ string LipidSummarizationUtils::getSummaryLevel5ToLevel4(LipidNameComponents lip
 
 string LipidSummarizationUtils::getSummaryLevel4ToLevel3(LipidNameComponents lipidNameComponents) {
 
-    if (lipidNameComponents.lipidClass == "Alkyl_PC" || lipidNameComponents.lipidClass == "ALkyl_PE") {
+    if (lipidNameComponents.lipidClass == "Alkyl_PC" || lipidNameComponents.lipidClass == "Alkyl_PE") {
         return getSummaryLevel4ToLevel2(lipidNameComponents);
     }
 
