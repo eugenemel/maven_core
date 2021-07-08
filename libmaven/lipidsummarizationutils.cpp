@@ -745,8 +745,8 @@ string LipidSummarizationUtils::getSummaryLevel4ToLevel2(LipidNameComponents lip
 
     }
 
-    if (linkageType != "") {
-        lipidNameSummarized.append(linkageType);
+    if (linkageType == "p-") {
+        alkeneSum++;
     }
 
     lipidNameSummarized.append(to_string(alkaneSum));
