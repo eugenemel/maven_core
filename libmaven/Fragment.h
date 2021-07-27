@@ -168,6 +168,9 @@ class Fragment {
         float mergedScore;
         map<mzSample*, unordered_set<int>> scanNumMap;
 
+        //this is only populated if isRetainOriginalScanIntensities == true in buildConsensus()
+        map<int, vector<float>> consensusPositionToScanIntensities{};
+
 	TMT tmtQuant;
         PeakGroup* group;
 
@@ -227,7 +230,8 @@ class Fragment {
                             bool isIntensityAvgByObserved=false,
                             bool isNormalizeIntensityArray=true,
                             int minNumMs2ScansForConsensus=0,
-                            float minFractionMs2ScansForConsensus=0.0f);
+                            float minFractionMs2ScansForConsensus=0.0f,
+                            bool isRetainOriginalScanIntensities=false);
 
         vector<unsigned int> intensityOrderDesc();
         vector<int> mzOrderInc();

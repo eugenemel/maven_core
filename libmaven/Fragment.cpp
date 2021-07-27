@@ -674,13 +674,15 @@ void Fragment::truncateTopN(int n) {
  * @param isNormalizeIntensityArray: scale all intensities so that max intensity = 10000
  * @param minNumMs2ScansForConsensus: retain peaks found in at least this many scans
  * @param minFractionMs2ScansForConsensus: retain peaks found in at least this proportion of scans
+ * @param  bool isRetainOriginalScanIntensities: retain map of <consensus position, vector of scan intensities>
  */
 void Fragment::buildConsensus(float productPpmTolr,
                               ConsensusIntensityAgglomerationType consensusIntensityAgglomerationType,
                               bool isIntensityAvgByObserved,
                               bool isNormalizeIntensityArray,
                               int minNumMs2ScansForConsensus,
-                              float minFractionMs2ScansForConsensus) {
+                              float minFractionMs2ScansForConsensus,
+                              bool isRetainOriginalScanIntensities) {
 
     if(this->consensus) {
         delete(this->consensus);
@@ -707,7 +709,7 @@ void Fragment::buildConsensus(float productPpmTolr,
 
     //Issue 217
     map<int, vector<float>> posToIntensityMap{};
-    if (consensusIntensityAgglomerationType != ConsensusIntensityAgglomerationType::Mean){
+    if (isRetainOriginalScanIntensities || consensusIntensityAgglomerationType != ConsensusIntensityAgglomerationType::Mean){
         for (unsigned int i = 0; i < Cons->intensity_array.size(); i++){
             posToIntensityMap.insert(make_pair(i, vector<float>{Cons->intensity_array[i]}));
         }
@@ -748,7 +750,9 @@ void Fragment::buildConsensus(float productPpmTolr,
                 Cons->fragment_labels[posA] = brother->fragment_labels[j];
 
                 //Issue 217
-                if (consensusIntensityAgglomerationType != ConsensusIntensityAgglomerationType::Mean) posToIntensityMap[posA].push_back(intB);
+                if (isRetainOriginalScanIntensities || consensusIntensityAgglomerationType != ConsensusIntensityAgglomerationType::Mean) {
+                    posToIntensityMap[posA].push_back(intB);
+                }
 
             } else if ( posA == -1 ) {
                 Cons->mzs.push_back(mzB);
@@ -757,12 +761,14 @@ void Fragment::buildConsensus(float productPpmTolr,
                 Cons->fragment_labels.push_back(brother->fragment_labels[j]);
 
                 //Issue 217
-                if (consensusIntensityAgglomerationType != ConsensusIntensityAgglomerationType::Mean) posToIntensityMap.insert(make_pair(Cons->mzs.size()-1,vector<float>{intB}));
+                if (isRetainOriginalScanIntensities || consensusIntensityAgglomerationType != ConsensusIntensityAgglomerationType::Mean){
+                    posToIntensityMap.insert(make_pair(Cons->mzs.size()-1,vector<float>{intB}));
+                }
             }
         }
 
         //Issue 217: restructure map based on sorting
-        if (consensusIntensityAgglomerationType != ConsensusIntensityAgglomerationType::Mean){
+        if (isRetainOriginalScanIntensities || consensusIntensityAgglomerationType != ConsensusIntensityAgglomerationType::Mean){
 
             vector<int> mzOrderInc = Cons->mzOrderInc();
 
@@ -859,7 +865,13 @@ void Fragment::buildConsensus(float productPpmTolr,
         Cons->obscount = filtered_obscount;
 
         //Issue 227
-        if (consensusIntensityAgglomerationType != ConsensusIntensityAgglomerationType::Mean){
+        if (isRetainOriginalScanIntensities || consensusIntensityAgglomerationType != ConsensusIntensityAgglomerationType::Mean){
+
+            //Issue 468
+            if (isRetainOriginalScanIntensities) {
+                this->consensusPositionToScanIntensities = posToIntensityMap;
+            }
+
             posToIntensityMap.clear();
             for (unsigned int i = 0; i < medianIntensities.size(); i++){
                 posToIntensityMap.insert(make_pair(i, medianIntensities[i]));
