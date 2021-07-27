@@ -1457,6 +1457,7 @@ class SearchParameters {
     float consensusPpmTolr = 10;
     int consensusMinNumMs2Scans = 0;
     float consensusMinFractionMs2Scans = 0;
+    bool consensusIsRetainOriginalScanIntensities = false;
 
     /** ===================
      * MS1 SEARCH RELATED

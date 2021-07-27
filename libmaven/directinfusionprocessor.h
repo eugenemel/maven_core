@@ -277,6 +277,7 @@ public:
         encodedParams = encodedParams + "consensusPpmTolr" + "=" + to_string(consensusPpmTolr) + ";";
         encodedParams = encodedParams + "consensusMinNumMs2Scans" + "=" + to_string(consensusMinNumMs2Scans) + ";";
         encodedParams = encodedParams + "consensusMinFractionMs2Scans" + "=" + to_string(consensusMinFractionMs2Scans) + ";";
+        encodedParams = encodedParams + "consensusIsRetainOriginalScanIntensities" + "=" + to_string(consensusIsRetainOriginalScanIntensities) + ";";
 
         //ms3 search params
         encodedParams = encodedParams + "ms3IsMs3Search" + "=" + to_string(ms3IsMs3Search) + ";";
@@ -554,6 +555,9 @@ public:
         }
         if (decodedMap.find("consensusMinFractionMs2Scans") != decodedMap.end()){
             directInfusionSearchParameters->consensusMinFractionMs2Scans = stof(decodedMap["consensusMinFractionMs2Scans"]);
+        }
+        if (decodedMap.find("consensusIsRetainOriginalScanIntensities") != decodedMap.end()) {
+            directInfusionSearchParameters->consensusIsRetainOriginalScanIntensities = decodedMap["consensusIsRetainOriginalScanIntensities"] == "1";
         }
 
         //ms3 search params
