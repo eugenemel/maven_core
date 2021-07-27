@@ -741,7 +741,8 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
                           params->consensusIsIntensityAvgByObserved,
                           params->consensusIsNormalizeTo10K,
                           params->consensusMinNumMs2Scans,
-                          params->consensusMinFractionMs2Scans
+                          params->consensusMinFractionMs2Scans,
+                          params->consensusIsRetainOriginalScanIntensities
                           );
 
         ms2Fragment->consensus->sortByMz();
