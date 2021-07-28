@@ -159,6 +159,7 @@ Fragment::Fragment( Fragment* other) {
     this->clusterId= other->clusterId;
 	this->mergedScore = other->mergedScore;
     this->scanNumMap = other->scanNumMap;
+    this->consensusPositionToScanIntensities = other->consensusPositionToScanIntensities;
 }
 
 void Fragment::appendBrothers(Fragment* other) {
