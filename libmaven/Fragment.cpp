@@ -868,16 +868,17 @@ void Fragment::buildConsensus(float productPpmTolr,
         //Issue 227
         if (isRetainOriginalScanIntensities || consensusIntensityAgglomerationType != ConsensusIntensityAgglomerationType::Mean){
 
-            //Issue 468
-            if (isRetainOriginalScanIntensities) {
-                Cons->consensusPositionToScanIntensities = posToIntensityMap;
-            }
-
             posToIntensityMap.clear();
             for (unsigned int i = 0; i < medianIntensities.size(); i++){
                 posToIntensityMap.insert(make_pair(i, medianIntensities[i]));
             }
+
         }
+    }
+
+    //Issue 468
+    if (isRetainOriginalScanIntensities) {
+        Cons->consensusPositionToScanIntensities = posToIntensityMap;
     }
 
     //agglomerate intensity values
