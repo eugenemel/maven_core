@@ -2425,7 +2425,31 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
 
                     float fragObservedIntensity = ms2Fragment->consensus->intensity_array[static_cast<unsigned int>(y)];
 
-                    if (fragObservedIntensity >= params->ms2MinIntensity) {
+
+                    /**
+                      * Issue 470:
+                      * Unreliable fragments are excluded from partitioning.
+                      * This amounts to assigning an intensity value of "0" to the intensity of this fragment m/z.
+                      * This assumption is probably OK if fragments are conservatively excluded, and bad measurements
+                      * are low intensity anyway (which is probably the case).
+                      */
+                    bool isFragmentReliableForPartitioning = fragObservedIntensity >= params->partFragMinIntensity;
+
+                    if (params->partFragMinCV > 0.0f || params->partFragMinNumScans > 0) {
+                        vector<float> fragIntensities = ms2Fragment->consensus->consensusPositionToScanIntensities[y];
+
+                        isFragmentReliableForPartitioning = fragIntensities.size() >= static_cast<unsigned int>(params->partFragMinNumScans);
+
+                        if (params->partFragMinCV > 0.0f && isFragmentReliableForPartitioning && fragIntensities.size() > 1) {
+
+                            StatisticsVector<float> statVector(fragIntensities);
+                            float cv = static_cast<float>(statVector.stddev())/static_cast<float>(statVector.mean());
+
+                            isFragmentReliableForPartitioning = cv >= params->partFragMinCV;
+                        }
+                    }
+
+                    if (fragObservedIntensity >= params->ms2MinIntensity && isFragmentReliableForPartitioning) {
 
                         string fragmentLabel = matchData->compound->fragment_labels[i];
 
@@ -2474,7 +2498,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
             auto matchData = it2->first;
             float effectiveFragIntensityCompound = it2->second;
 
-            float partitionFraction = 1.0f/compoundNames.size();
+            float partitionFraction = -1.0f; // Issue 470: If no partitionable fragment intensity is found for any compounds, do not try to partition anything
             if (totalEfectiveFragIntensityAllCompounds > 0.0f) {
                 partitionFraction = effectiveFragIntensityCompound/totalEfectiveFragIntensityAllCompounds;
             }
