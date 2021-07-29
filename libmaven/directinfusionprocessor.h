@@ -193,6 +193,17 @@ public:
     int minNumScansNearestScanNormalizedIntensity = 3;
     int minNumScansMs1ScanIntensity = 3;
 
+    /** ===================
+      * PARTITION INTENSITY COMPUTATION
+      * @param partFragMinNumScans: minimum number of scans to trust fragment measurement.
+      * @param partFragMinCV: minimum CV (from scan measurements) to trust fragment measurement.
+      * @param partFragMinIntensity: minimum absolute intensity value of consensus fragment intensity measurement
+      *       to trust for use in partitioning.
+      * =================== */
+    int partFragMinNumScans = 0;
+    float partFragMinCV = 0;
+    float partFragMinIntensity = 0;
+
     //Issue 270
     bool isReduceBySimpleParsimony = false;
 
@@ -396,6 +407,11 @@ public:
         encodedParams = encodedParams + "isPreferSmallestScanMassWindow" + "=" + to_string(isPreferSmallestScanMassWindow) + ";";
         encodedParams = encodedParams + "minNumScansNearestScanNormalizedIntensity" + "=" + to_string(minNumScansNearestScanNormalizedIntensity) +";";
         encodedParams = encodedParams + "minNumScansMs1ScanIntensity" + "=" + to_string(minNumScansMs1ScanIntensity) + ";";
+
+        //DIMS intensity partitioning options
+        encodedParams = encodedParams + "partFragMinNumScans" + "=" + to_string(partFragMinNumScans) + ";";
+        encodedParams = encodedParams + "partFragMinCV" + "=" + to_string(partFragMinCV) + ";";
+        encodedParams = encodedParams + "partFragMinIntensity" + "=" + to_string(partFragMinIntensity) + ";";
 
         //agglomeration params
         encodedParams = encodedParams + "isAgglomerateAcrossSamples" + "=" + to_string(isAgglomerateAcrossSamples) + ";";
@@ -714,6 +730,17 @@ public:
         }
         if (decodedMap.find("minNumScansMs1ScanIntensity") != decodedMap.end()) {
             directInfusionSearchParameters->minNumScansMs1ScanIntensity = stoi(decodedMap["minNumScansMs1ScanIntensity"]);
+        }
+
+        //DIMS intensity partitioning options
+        if (decodedMap.find("partFragMinNumScans") != decodedMap.end()) {
+            directInfusionSearchParameters->partFragMinNumScans = stoi(decodedMap["partFragMinNumScans"]);
+        }
+        if (decodedMap.find("partFragMinCV") != decodedMap.end()) {
+            directInfusionSearchParameters->partFragMinCV = stof(decodedMap["partFragMinCV"]);
+        }
+        if (decodedMap.find("partFragMinIntensity") != decodedMap.end()) {
+            directInfusionSearchParameters->partFragMinIntensity = stof(decodedMap["partFragMinIntensity"]);
         }
 
         //agglomeration params
