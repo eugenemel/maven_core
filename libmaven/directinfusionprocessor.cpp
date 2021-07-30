@@ -2502,7 +2502,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
             auto matchData = it2->first;
             float effectiveFragIntensityCompound = it2->second;
 
-            float partitionFraction = -1.0f; // Issue 470: If no partitionable fragment intensity is found for any compounds, do not try to partition anything
+            float partitionFraction = 1.0f/compoundNames.size();
             if (totalEfectiveFragIntensityAllCompounds > 0.0f) {
                 partitionFraction = effectiveFragIntensityCompound/totalEfectiveFragIntensityAllCompounds;
             }
