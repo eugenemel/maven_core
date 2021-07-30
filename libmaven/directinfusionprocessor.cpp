@@ -2228,8 +2228,46 @@ vector<shared_ptr<DirectInfusionMatchData>> DirectInfusionMatchInformation::getC
     return compounds;
 }
 
-//WARNING: not rounded to nearest precision, just output that many digits
 string DirectInfusionMatchInformation::getFragmentGroupId(shared_ptr<DirectInfusionMatchData> compound, int precision){
+
+//    //guard to avoid nonsensical output
+//    if (precision < 0) {
+//        precision = 0;
+//    } else if (precision > 6) {
+//        precision = 6;
+//    }
+
+//    if (matchDataToFrags.find(compound) != matchDataToFrags.end()) {
+//        vector<int> frags = matchDataToFrags[compound];
+
+//        stringstream s;
+//        s << std::fixed << setprecision(precision);
+//        s << "(";
+
+//        for (unsigned int i = 0; i < frags.size(); i++) {
+
+//            if (i > 0) {
+//                s << ", ";
+//            }
+
+//            s << mzUtils::intKeyToMz(frags[i]);
+//        }
+
+//        s << ")";
+
+//        return s.str();
+//    } else {
+//        return "";
+//    }
+    return getGroupId(matchDataToFrags, compound, precision);
+}
+
+string DirectInfusionMatchInformation::getPartitionGroupId(shared_ptr<DirectInfusionMatchData> compound, int precision) {
+    return getGroupId(matchDataToPartitionFrags, compound, precision);
+}
+
+//WARNING: not rounded to nearest precision, just output that many digits
+string DirectInfusionMatchInformation::getGroupId(map<shared_ptr<DirectInfusionMatchData>, vector<int>>& map, shared_ptr<DirectInfusionMatchData> compound, int precision){
 
     //guard to avoid nonsensical output
     if (precision < 0) {
@@ -2238,8 +2276,8 @@ string DirectInfusionMatchInformation::getFragmentGroupId(shared_ptr<DirectInfus
         precision = 6;
     }
 
-    if (matchDataToFrags.find(compound) != matchDataToFrags.end()) {
-        vector<int> frags = matchDataToFrags[compound];
+    if (map.find(compound) != map.end()) {
+        vector<int> frags = map.at(compound);
 
         stringstream s;
         s << std::fixed << setprecision(precision);

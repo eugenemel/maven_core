@@ -932,16 +932,19 @@ struct DirectInfusionMatchInformation {
 public:
 
     //group of identified fragment m/zs ==> all identified compounds
-    map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> fragListToCompounds = {};
+    map<vector<int>, vector<shared_ptr<DirectInfusionMatchData>>> fragListToCompounds{};
 
     //single compound ==> all identified fragment mz/s
-    map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToFrags = {};
+    map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToFrags{};
 
     //single fragment m/z ==> all identified compounds containing fragment
-    map<int, unordered_set<shared_ptr<DirectInfusionMatchData>>> fragToMatchData = {};
+    map<int, unordered_set<shared_ptr<DirectInfusionMatchData>>> fragToMatchData{};
 
     //Issue 311: get all fragments that had no fragment matches
     vector<shared_ptr<DirectInfusionMatchData>> compoundsNoFragMatches{};
+
+    //Issue 470: keep track of compound m/zs used for partitioning
+    map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToPartitionFrags{};
 
     /**
      * @brief getCompounds
@@ -964,6 +967,9 @@ public:
                                       const Fragment *ms2Fragment,
                                       const shared_ptr<DirectInfusionSearchParameters> params,
                                       const bool debug);
+
+    //Issue 470
+    string getPartitionGroupId(shared_ptr<DirectInfusionMatchData> compound, int precision=2);
 
     // <precursor m/z, fragment m/z> = sum of all observed ms1 scan intensity
     map<int, float> getFragToSumObservedMs1ScanIntensity(const bool debug);
@@ -990,6 +996,8 @@ private:
             bool isSAF,
             const shared_ptr<DirectInfusionSearchParameters> params,
             const bool debug);
+
+    string getGroupId(map<shared_ptr<DirectInfusionMatchData>, vector<int>>& map, shared_ptr<DirectInfusionMatchData> compound, int precision);
 };
 
 /**
