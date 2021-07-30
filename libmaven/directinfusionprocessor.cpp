@@ -2455,6 +2455,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
                 fragMzs = matchDataToFrags.at(matchData);
 
                 vector<int> ranks = matchData->fragmentationMatchScore.ranks;
+                vector<int> partitionFrags{};
 
                 for (unsigned int i = 0; i < ranks.size(); i++) {
 
@@ -2508,9 +2509,17 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
                                             << endl;
 
                             fragMzToIntensity.insert(make_pair(mzKey, fragObservedIntensity));
+                            partitionFrags.push_back(mzKey);
 
                         }
                     }
+                }
+
+                //insert partition frags if old mapping not present, otherwise, update mapping with new value
+                if (this->matchDataToPartitionFrags.find(matchData) == matchDataToPartitionFrags.end()) {
+                    matchDataToPartitionFrags.insert(make_pair(matchData, partitionFrags));
+                } else {
+                    matchDataToPartitionFrags[matchData] = partitionFrags;
                 }
             }
 
