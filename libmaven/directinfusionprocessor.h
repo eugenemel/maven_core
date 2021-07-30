@@ -969,7 +969,7 @@ public:
                                       const bool debug);
 
     //Issue 470
-    string getPartitionGroupId(shared_ptr<DirectInfusionMatchData> compound, int precision=2);
+    string getPartitionFragmentGroupId(shared_ptr<DirectInfusionMatchData> compound, int precision=2);
 
     // <precursor m/z, fragment m/z> = sum of all observed ms1 scan intensity
     map<int, float> getFragToSumObservedMs1ScanIntensity(const bool debug);

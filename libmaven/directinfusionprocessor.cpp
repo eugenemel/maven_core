@@ -2262,7 +2262,7 @@ string DirectInfusionMatchInformation::getFragmentGroupId(shared_ptr<DirectInfus
     return getGroupId(matchDataToFrags, compound, precision);
 }
 
-string DirectInfusionMatchInformation::getPartitionGroupId(shared_ptr<DirectInfusionMatchData> compound, int precision) {
+string DirectInfusionMatchInformation::getPartitionFragmentGroupId(shared_ptr<DirectInfusionMatchData> compound, int precision) {
     return getGroupId(matchDataToPartitionFrags, compound, precision);
 }
 
