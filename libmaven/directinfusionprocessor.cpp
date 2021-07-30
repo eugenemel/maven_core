@@ -2435,7 +2435,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
                       */
                     bool isFragmentReliableForPartitioning = fragObservedIntensity >= params->partFragMinIntensity;
 
-                    if (params->partFragMinCV > 0.0f || params->partFragMinNumScans > 0) {
+                    if (params->partFragMaxCV > 0.0f || params->partFragMinNumScans > 0) {
 
                         vector<float> fragIntensities;
                         if (ms2Fragment->consensus->consensusPositionToScanIntensities.find(y) != ms2Fragment->consensus->consensusPositionToScanIntensities.end()) {
@@ -2444,12 +2444,12 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
 
                         isFragmentReliableForPartitioning = fragIntensities.size() >= static_cast<unsigned int>(params->partFragMinNumScans);
 
-                        if (params->partFragMinCV > 0.0f && isFragmentReliableForPartitioning && fragIntensities.size() > 1) {
+                        if (params->partFragMaxCV > 0.0f && isFragmentReliableForPartitioning && fragIntensities.size() > 1) {
 
                             StatisticsVector<float> statVector(fragIntensities);
                             float cv = static_cast<float>(statVector.stddev())/static_cast<float>(statVector.mean());
 
-                            isFragmentReliableForPartitioning = cv >= params->partFragMinCV;
+                            isFragmentReliableForPartitioning = cv <= params->partFragMaxCV;
                         }
                     }
 

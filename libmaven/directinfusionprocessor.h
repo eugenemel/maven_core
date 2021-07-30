@@ -196,12 +196,12 @@ public:
     /** ===================
       * PARTITION INTENSITY COMPUTATION
       * @param partFragMinNumScans: minimum number of scans to trust fragment measurement.
-      * @param partFragMinCV: minimum CV (from scan measurements) to trust fragment measurement.
+      * @param partFragMaxCV: maximum CV (from scan measurements) to trust fragment measurement.
       * @param partFragMinIntensity: minimum absolute intensity value of consensus fragment intensity measurement
       *       to trust for use in partitioning.
       * =================== */
     int partFragMinNumScans = 0;
-    float partFragMinCV = 0;
+    float partFragMaxCV = 0;
     float partFragMinIntensity = 0;
 
     //Issue 270
@@ -410,7 +410,7 @@ public:
 
         //DIMS intensity partitioning options
         encodedParams = encodedParams + "partFragMinNumScans" + "=" + to_string(partFragMinNumScans) + ";";
-        encodedParams = encodedParams + "partFragMinCV" + "=" + to_string(partFragMinCV) + ";";
+        encodedParams = encodedParams + "partFragMaxCV" + "=" + to_string(partFragMaxCV) + ";";
         encodedParams = encodedParams + "partFragMinIntensity" + "=" + to_string(partFragMinIntensity) + ";";
 
         //agglomeration params
@@ -736,8 +736,8 @@ public:
         if (decodedMap.find("partFragMinNumScans") != decodedMap.end()) {
             directInfusionSearchParameters->partFragMinNumScans = stoi(decodedMap["partFragMinNumScans"]);
         }
-        if (decodedMap.find("partFragMinCV") != decodedMap.end()) {
-            directInfusionSearchParameters->partFragMinCV = stof(decodedMap["partFragMinCV"]);
+        if (decodedMap.find("partFragMaxCV") != decodedMap.end()) {
+            directInfusionSearchParameters->partFragMaxCV = stof(decodedMap["partFragMaxCV"]);
         }
         if (decodedMap.find("partFragMinIntensity") != decodedMap.end()) {
             directInfusionSearchParameters->partFragMinIntensity = stof(decodedMap["partFragMinIntensity"]);
