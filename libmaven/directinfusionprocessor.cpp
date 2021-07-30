@@ -2436,7 +2436,11 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
                     bool isFragmentReliableForPartitioning = fragObservedIntensity >= params->partFragMinIntensity;
 
                     if (params->partFragMinCV > 0.0f || params->partFragMinNumScans > 0) {
-                        vector<float> fragIntensities = ms2Fragment->consensus->consensusPositionToScanIntensities[y];
+
+                        vector<float> fragIntensities;
+                        if (ms2Fragment->consensus->consensusPositionToScanIntensities.find(y) != ms2Fragment->consensus->consensusPositionToScanIntensities.end()) {
+                            fragIntensities = ms2Fragment->consensus->consensusPositionToScanIntensities[y];
+                        }
 
                         isFragmentReliableForPartitioning = fragIntensities.size() >= static_cast<unsigned int>(params->partFragMinNumScans);
 
