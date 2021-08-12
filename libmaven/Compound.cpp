@@ -407,6 +407,15 @@ vector<pair<string, string>> SummarizedCompound::parseCompoundId(string compound
     return compoundAdductPairs;
 }
 
+//Issue 472
+string SummarizedCompound::encodeSummarizedCompoundId(vector<pair<string, string>> compounds, bool debug){
+    string encodedSummarizedCompoundId;
+
+    //TODO
+
+    return encodedSummarizedCompoundId;
+}
+
 //Issue 416
 string CompoundUtils::getSummarizedCompoundId(Compound *compound, Adduct *adduct) {
     if (!compound || !adduct) return "";
