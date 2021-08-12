@@ -1218,7 +1218,7 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
             }
 
             //This is necessary, as the summarized form may actually map to multiple fragments (e.g., multiple TG(60:7)).
-            string summarizedId("{" + summarizedCompound->name + summarizedCompound->adductString + "}={");
+            string summarizedId("{" + summarizedCompound->name + "}={");
             for (unsigned int i = 0; i < compoundList.size(); i++) {
                 if (i > 0) {
                     summarizedId += ";";
