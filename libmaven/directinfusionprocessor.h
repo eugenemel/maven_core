@@ -1413,18 +1413,41 @@ enum DISampleCompoundAdductQuantType{None=0, IdentifiedCompound=1, Reextraction=
 //Issue 363
 struct DISampleCompoundAdductQuant {
 
-    float quantVal = 0.0f;
+    map<string,float> quantValues{};
+    float ms1PartitionFraction = 0.0f;
     float ms1PartitionFractionSAF = 0.0f;
     string partitionGroupId;
     DISampleCompoundAdductQuantType diSampleCompoundAdductQuantType = DISampleCompoundAdductQuantType::None;
 
     DISampleCompoundAdductQuant(){}
 
-    DISampleCompoundAdductQuant(float quantVal, float ms1PartitionFractionSAF, string partitionGroupId, DISampleCompoundAdductQuantType diSampleCompoundAdductQuantType) {
-        this->quantVal = quantVal;
+    DISampleCompoundAdductQuant(float ms1PartitionFraction, float ms1PartitionFractionSAF, string partitionGroupId, DISampleCompoundAdductQuantType diSampleCompoundAdductQuantType) {
+        this->ms1PartitionFraction = ms1PartitionFraction;
         this->ms1PartitionFractionSAF = ms1PartitionFractionSAF;
         this->partitionGroupId = partitionGroupId;
         this->diSampleCompoundAdductQuantType = diSampleCompoundAdductQuantType;
+    }
+
+    void addQuantValue(string quantName, float quantVal) {
+        if (quantValues.find(quantName) == quantValues.end()) {
+            quantValues.insert(make_pair(quantName, -1.0f));
+        }
+        quantValues[quantName] = quantVal;
+    }
+
+    void addMs1ScanIntensity(float intensity) {
+        addQuantValue("ms1_scan_intensity", intensity);
+    }
+
+    void addNearestScanNormalizedIntensity(float intensity) {
+        addQuantValue("ms1_intensity_is_nearest_scan_normalized", intensity);
+    }
+
+    float getQuantValue(string quantName) {
+        if (quantValues.find(quantName) == quantValues.end()) {
+            return -1.0f;
+        }
+        return quantValues[quantName];
     }
 
 };
