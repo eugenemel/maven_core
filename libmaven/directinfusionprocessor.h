@@ -1414,16 +1414,14 @@ enum DISampleCompoundAdductQuantType{None=0, IdentifiedCompound=1, Reextraction=
 struct DISampleCompoundAdductQuant {
 
     map<string,float> quantValues{};
-    float ms1PartitionFraction = 0.0f;
-    float ms1PartitionFractionSAF = 0.0f;
+    map<string, float> fractionValues{};
+
     string partitionGroupId;
     DISampleCompoundAdductQuantType diSampleCompoundAdductQuantType = DISampleCompoundAdductQuantType::None;
 
     DISampleCompoundAdductQuant(){}
 
-    DISampleCompoundAdductQuant(float ms1PartitionFraction, float ms1PartitionFractionSAF, string partitionGroupId, DISampleCompoundAdductQuantType diSampleCompoundAdductQuantType) {
-        this->ms1PartitionFraction = ms1PartitionFraction;
-        this->ms1PartitionFractionSAF = ms1PartitionFractionSAF;
+    DISampleCompoundAdductQuant(string partitionGroupId, DISampleCompoundAdductQuantType diSampleCompoundAdductQuantType) {
         this->partitionGroupId = partitionGroupId;
         this->diSampleCompoundAdductQuantType = diSampleCompoundAdductQuantType;
     }
@@ -1435,20 +1433,32 @@ struct DISampleCompoundAdductQuant {
         quantValues[quantName] = quantVal;
     }
 
-    void addMs1ScanIntensity(float intensity) {
-        addQuantValue("ms1_scan_intensity", intensity);
-    }
-
-    void addNearestScanNormalizedIntensity(float intensity) {
-        addQuantValue("ms1_intensity_is_nearest_scan_normalized", intensity);
-    }
-
     float getQuantValue(string quantName) {
         if (quantValues.find(quantName) == quantValues.end()) {
             return -1.0f;
         }
         return quantValues[quantName];
     }
+
+    void addFractionValue(string fractionName, float fractionVal) {
+        if (fractionValues.find(fractionName) == fractionValues.end()) {
+            fractionValues.insert(make_pair(fractionName, -1.0f));
+        }
+        fractionValues[fractionName] = fractionVal;
+    }
+
+    float getFractionValue(string fractionName) {
+        if (fractionValues.find(fractionName) == fractionValues.end()) {
+            return -1.0f;
+        }
+        return fractionValues[fractionName];
+    }
+
+    void addMs1ScanIntensity(float intensity) {addQuantValue("ms1_scan_intensity", intensity);}
+    void addNearestScanNormalizedIntensity(float intensity) {addQuantValue("ms1_intensity_is_nearest_scan_normalized", intensity);}
+    void addMs1PartitionFraction(float fraction){addFractionValue("ms1_partition_fraction", fraction);}
+    void addMs1PartitionFractionSAF(float fraction){addFractionValue("ms1_partition_fraction_SAF", fraction);}
+    void addMs1AdductFraction(float fraction){addFractionValue("ms1_adduct_fraction", fraction);}
 
 };
 
