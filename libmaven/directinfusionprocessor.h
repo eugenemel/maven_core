@@ -1408,6 +1408,18 @@ struct compound_less {
     }
 };
 
+//Issue 480:
+//Use names of compounds and adducts for comparison
+struct compound_adduct_less {
+    bool operator()(pair<Compound*, Adduct*>& lhs, pair<Compound*, Adduct*>& rhs) const {
+        if (lhs.first->name == rhs.first->name) {
+            return lhs.second->name < rhs.second->name;
+        } else {
+            return lhs.first->name < rhs.first->name;
+        }
+    }
+};
+
 enum DISampleCompoundAdductQuantType{None=0, IdentifiedCompound=1, Reextraction=2};
 
 //Issue 363
@@ -1540,6 +1552,9 @@ struct DIPipelineSampleData {
 
     //fragments
     map<tuple<string, string, string>, float> fragmentQuantNormalizationMap{};
+
+    //Issue 480
+    map<pair<Compound*, Adduct*>, float, compound_adduct_less> nearestScanNormalizedIntensityMap{};
 
 };
 
