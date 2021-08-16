@@ -1460,11 +1460,11 @@ struct DISampleCompoundAdductQuant {
     void addMs1PartitionFractionSAF(float fraction){addFractionValue("ms1_partition_fraction_SAF", fraction);}
     void addMs1AdductFraction(float fraction){addFractionValue("ms1_adduct_fraction", fraction);}
 
-    void getMs1ScanIntensity() {getQuantValue("ms1_scan_intensity");}
-    void getNearestScanNormalizedIntensity() {getQuantValue("ms1_intensity_is_nearest_scan_normalized");}
-    void getMs1PartitionFraction(){getFractionValue("ms1_partition_fraction");}
-    void getMs1PartitionFractionSAF(){getFractionValue("ms1_partition_fraction_SAF");}
-    void getMs1AdductFraction(){getFractionValue("ms1_adduct_fraction");}
+    float getMs1ScanIntensity() {return getQuantValue("ms1_scan_intensity");}
+    float getNearestScanNormalizedIntensity() {return getQuantValue("ms1_intensity_is_nearest_scan_normalized");}
+    float getMs1PartitionFraction(){return getFractionValue("ms1_partition_fraction");}
+    float getMs1PartitionFractionSAF(){return getFractionValue("ms1_partition_fraction_SAF");}
+    float getMs1AdductFraction(){return getFractionValue("ms1_adduct_fraction");}
 
 };
 
