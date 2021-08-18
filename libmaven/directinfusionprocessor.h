@@ -1536,6 +1536,7 @@ struct DIPipelineSampleData {
     map<pair<string, string>, float> precursorQuantNormalizationIntensityMap{};
     map<pair<string, string>, float> precursorQuantNormalizationMzMap{};
     map<pair<string, string>, float> precursorQuantRelativeFractions{};
+    map<pair<string, string>, int> precursorQuantAdductIntensityRank{};
 
     // <lipidClass,  adducts>
     map<string, vector<string>> internalStandardAdducts{};
