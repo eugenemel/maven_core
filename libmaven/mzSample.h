@@ -1630,6 +1630,7 @@ struct PeakContainer {
 
     float minPeakRt = 9999999.0f;
     float maxPeakRt = -1.0f;
+    float meanMz = 0.0f;
 
     //replace less intense peaks with more intense peaks,
     //update min and max rt computations
@@ -1646,20 +1647,30 @@ struct PeakContainer {
             }
         }
 
-        recomputeRtBounds();
+        recomputeProperties();
     }
 
-private:
-    void recomputeRtBounds() {
+    void recomputeProperties() {
+
+        //reinitialize
         minPeakRt = 9999999.0f;
         maxPeakRt = -1.0f;
+        meanMz = 0.0f;
 
+        if (peaks.empty()) return;
+
+        //recompute
+        float meanPeakMz = 0.0f;
         for (auto it = peaks.begin(); it != peaks.end(); ++it) {
             Peak p = it->second;
 
             if (p.rtmin < minPeakRt) minPeakRt = p.rtmin;
             if (p.rtmax > maxPeakRt) maxPeakRt = p.rtmax;
+
+            meanPeakMz += p.peakMz;
         }
+
+        meanMz = meanPeakMz / peaks.size();
 
     }
 
