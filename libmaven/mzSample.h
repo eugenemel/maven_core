@@ -1623,4 +1623,46 @@ public:
                             );
 };
 
+//Issue 482
+struct PeakContainer {
+
+    map<mzSample*, Peak> peaks{};
+
+    float minPeakRt = 9999999.0f;
+    float maxPeakRt = -1.0f;
+
+    //replace less intense peaks with more intense peaks,
+    //update min and max rt computations
+    void addPeaks(vector<Peak> peaksToAdd) {
+
+        for (Peak p : peaksToAdd) {
+            if (peaks.find(p.getSample()) != peaks.end()) {
+                Peak oldPeak = peaks[p.getSample()];
+                if (p.peakIntensity > oldPeak.peakIntensity) {
+                    peaks[p.getSample()] = p;
+                }
+            } else {
+                peaks.insert(make_pair(p.getSample(), p));
+            }
+        }
+
+        recomputeRtBounds();
+    }
+
+private:
+    void recomputeRtBounds() {
+        minPeakRt = 9999999.0f;
+        maxPeakRt = -1.0f;
+
+        for (auto it = peaks.begin(); it != peaks.end(); ++it) {
+            Peak p = it->second;
+
+            if (p.rtmin < minPeakRt) minPeakRt = p.rtmin;
+            if (p.rtmax > maxPeakRt) maxPeakRt = p.rtmax;
+        }
+
+    }
+
+};
+
 #endif
