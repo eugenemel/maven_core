@@ -407,6 +407,8 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
 
     if (!isComputePeakBounds) return;
 
+    if (debug) cout << "baselineQCutVal=" << baselineQCutVal << endl;
+
     if (debug) {
         cout << "===================================" << endl;
         cout << "BEFORE ASSIGNING MINIMA:" << endl;
@@ -425,11 +427,6 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
             cout << "i=" <<  i << " rt=" << rt[i] << " " << intensity[i] << " (spline=" << spline[i] << ") " << type << endl;
         }
         cout << "===================================" << endl;
-    }
-
-    if (debug) {
-        cout << "===================================" << endl;
-        cout << "STARTING ASSIGNING MINIMA:" << endl;
     }
 
    //Issue 482: re-work peak boundary assignments (maxima and minima)
@@ -529,6 +526,11 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
     }
 
     //Issue 482: this block starts the old method
+
+//    if (debug) {
+//        cout << "===================================" << endl;
+//        cout << "STARTING ASSIGNING MINIMA:" << endl;
+//    }
 //    for (unsigned int i = 0; i < N; i++){
 
 //        if (splineAnnotation[i] == SplineAnnotation::MAX) {
