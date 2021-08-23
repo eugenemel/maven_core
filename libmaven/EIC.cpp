@@ -432,156 +432,254 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
         cout << "STARTING ASSIGNING MINIMA:" << endl;
     }
 
-    for (unsigned int i = 0; i < N; i++){
+   //Issue 482: re-work peak boundary assignments (maxima and minima)
+    peaks.clear();
 
+    for (unsigned int i = 1; i < N-1; i++) {
+
+        //indicates a new peak
         if (splineAnnotation[i] == SplineAnnotation::MAX) {
 
-            if (i == firstMax) {
+            Peak* peak = addPeak(static_cast<int>(i));
 
-                int minIntensity = i-1;
+            //descend to the left
+            unsigned int leftMinimumIntensityIndex = i-1;
+            unsigned int leftIndex = i-1;
 
-                //first point less than the baseline is the first peak min.
-                for (unsigned int j = i-1; j > 0; j--) {
-                    if (spline[j] < spline[minIntensity]) {
-                        minIntensity = j;
-                    }
+            while(true) {
+
+                //if this point is below the baseline, it is invalid, stop immediately
+                if (intensity[leftIndex] < baselineQCutVal) {
+                    break;
                 }
 
-                splineAnnotation[minIntensity] = SplineAnnotation::MIN;
-
-                if (debug) {
-                    cout << "i=" << minIntensity << " rt=" << rt[minIntensity] << " " << spline[minIntensity] << " MIN" << endl;
+                //if this point is another maximum, it is invalid, stop immediately
+                if (splineAnnotation[leftIndex] == SplineAnnotation::MAX) {
+                    break;
                 }
 
+                //this point is valid, compare for minimum intensity
+                if (spline[leftIndex] < spline[leftMinimumIntensityIndex]) {
+                    leftMinimumIntensityIndex = leftIndex;
+                }
+
+                //stop at the end of the EIC - this is the last valid point to the left
+                if (leftIndex == 0) {
+                    break;
+                }
+
+                //continue moving to the left, check for more valid points
+                leftIndex--;
             }
 
-            if (i == lastMax) {
+            //descend to the right
+            unsigned int rightMinimumIntensityIndex = i+1;
+            unsigned int rightIndex = i+1;
 
-                int minIntensity = i+1;
+            while(true) {
 
-                //first point less than the baseline following the last max is the last peak min.
-                for (unsigned int j = i+1; j < N-1; j++) {
-                    if (spline[j] < spline[minIntensity]) {
-                        minIntensity = j;
-                    }
+                //if this point is below the baseline, it is invalid, stop immediately
+                if (intensity[rightIndex] < baselineQCutVal) {
+                    break;
                 }
 
-                splineAnnotation[minIntensity] = SplineAnnotation::MIN;
-
-                if (debug) {
-                    cout << "i=" << i << " " << spline[i] << " MAX" << endl;
-                    cout << "i=" << minIntensity << " rt=" << rt[minIntensity] << " " << spline[minIntensity] << " MIN" << endl;
+                //if this point is another maximum, it is invalid, stop immediately
+                if (splineAnnotation[rightIndex] == SplineAnnotation::MAX) {
+                    break;
                 }
 
-            } else {
-
-                //find next max, if it exists
-                int nextMax = -1;
-
-                for (unsigned int j = i+1; j < N-1; j++){
-                    if (splineAnnotation[j] == SplineAnnotation::MAX) {
-                        nextMax = j;
-                        break;
-                    }
+                //this point is valid, compare for minimum intensity
+                if (spline[rightIndex] < spline[rightMinimumIntensityIndex]) {
+                    rightMinimumIntensityIndex = rightIndex;
                 }
 
-                if (nextMax != -1) {
-                    //found another max
-
-                    int minIntensity = i+1;
-                    for (int j = i+1; j < nextMax; j++) {
-                        if (spline[j] < spline[minIntensity]) {
-                            minIntensity = j;
-                        }
-                    }
-
-                    splineAnnotation[minIntensity] = SplineAnnotation::MIN;
-
-                    if (debug) {
-                        cout << "i=" << i << " rt=" << rt[i] << " " << spline[i] << " MAX" << endl;
-                        cout << "i=" << minIntensity << " rt=" << rt[minIntensity] << " " << spline[minIntensity] << " MIN" << endl;
-                    }
-
+                //stop at the end of the EIC - this is the last valid point to the right
+                if (rightIndex == N-1) {
+                    break;
                 }
+
+                //continue moving to the right, check for more valid points
+                rightIndex--;
             }
+
+            peak->minpos = leftMinimumIntensityIndex;
+            peak->rtmin = rt[leftMinimumIntensityIndex];
+            peak->mzmin = mz[leftMinimumIntensityIndex];
+            peak->minscan = static_cast<unsigned int>(scannum[leftMinimumIntensityIndex]);
+
+            peak->maxpos = rightMinimumIntensityIndex;
+            peak->rtmax = rt[rightMinimumIntensityIndex];
+            peak->mzmax = mz[rightMinimumIntensityIndex];
+            peak->maxscan = static_cast<unsigned int>(scannum[rightMinimumIntensityIndex]);
+
+            getPeakDetails(*peak, false);
         }
-    }
-
-
-    if (debug) {
-        cout << "FINISHED ASSIGNING MINIMA" << endl;
-        cout << "===================================" << endl;
-        cout << "===================================" << endl;
-        cout << "FINAL PEAKS:" << endl;
-    }
-
-    for (auto &peak : peaks) {
-
-        //set RT, scan info
-        peak.rt = rt[peak.pos];
-        peak.scan = static_cast<unsigned int>(scannum[peak.pos]);
-
-        //find left boundary
-        for (unsigned int i = peak.pos-1; i >= 0; i--) {
-            if (splineAnnotation[i] == SplineAnnotation::MIN) {
-                peak.minpos = i;
-                peak.rtmin = rt[i];
-                peak.mzmin = mz[i];
-                peak.minscan = static_cast<unsigned int>(scannum[i]);
-                break;
-            }
-        }
-
-        //find right boundary
-        for (unsigned int i = peak.pos+1; i < N; i++) {
-            if (splineAnnotation[i] == SplineAnnotation::MIN) {
-                peak.maxpos = i;
-                peak.rtmax = rt[i];
-                peak.mzmax = mz[i];
-                peak.maxscan = static_cast<unsigned int>(scannum[i]);
-                break;
-            }
-        }
-
-        if (debug) {
-            cout << "\n";
-            cout << "i=" << peak.minpos << " rt=" << rt[peak.minpos] << " LEFT MIN=" << spline[peak.minpos] << endl;
-            cout << "i=" << peak.pos << " rt=" << rt[peak.pos] << " MAX=" << spline[peak.pos] << endl;
-            cout << "i=" << peak.maxpos << " rt=" << rt[peak.maxpos] << " RIGHT MIN=" << spline[peak.maxpos] << endl;
-
-            assert(spline[peak.pos] > spline[peak.minpos]);
-            assert(spline[peak.pos] > spline[peak.maxpos]);
-        }
-
-        if (debug) {
-            cout <<"Before getPeakDetails(peak) call:" << endl;
-            cout << "Details: ("
-                 << peak.peakMz
-                 << " [" << peak.mzmin << "-" << peak.mzmax << "], "
-                 << peak.rt
-                 << " [" << peak.rtmin << "-" << peak.rtmax
-                 << "])" << endl;
-        }
-
-        getPeakDetails(peak, false);
-
-        if (debug) {
-             cout << "Details: ("
-                  << peak.peakMz
-                  << " [" << peak.mzmin << "-" << peak.mzmax << "], "
-                  << peak.rt
-                  << " [" << peak.rtmin << "-" << peak.rtmax
-                  << "])" << endl;
-        }
-    }
-
-    if (debug) {
-        cout << "===================================" << endl;
     }
 
     //assign peak ranks based on total area of the peak
     sort(peaks.begin(),peaks.end(),Peak::compArea);
     for(unsigned int i=0; i<peaks.size(); i++) peaks[i].peakRank = i;
+
+    if (debug) {
+        for (auto peak : peaks) {
+            cout << "PEAK: pos=" << peak.pos << ", mz=" << peak.peakMz << ", rt=" << peak.rt << endl;
+            cout << "\t min=" << peak.minpos << ", minmz=" << peak.mzmin << ", rtmin=" << peak.rtmin << endl;
+            cout << "\t max=" << peak.maxpos << ", maxmz=" << peak.mzmax << ", rtmax=" << peak.rtmax << endl;
+        }
+    }
+
+    //Issue 482: this block starts the old method
+//    for (unsigned int i = 0; i < N; i++){
+
+//        if (splineAnnotation[i] == SplineAnnotation::MAX) {
+
+//            if (static_cast<int>(i) == firstMax) {
+
+//                int minIntensity = static_cast<int>(i-1);
+
+//                //first point less than the baseline is the first peak min.
+//                for (int j = i-1; j >= 0; j--) {
+//                    if (spline[j] < spline[minIntensity]) {
+//                        minIntensity = j;
+//                    }
+//                }
+
+//                splineAnnotation[minIntensity] = SplineAnnotation::MIN;
+
+//                if (debug) {
+//                    cout << "i=" << minIntensity << " rt=" << rt[minIntensity] << " " << spline[minIntensity] << " MIN" << endl;
+//                }
+
+//            }
+
+//            if (i == lastMax) {
+
+//                int minIntensity = i+1;
+
+//                //first point less than the baseline following the last max is the last peak min.
+//                for (unsigned int j = i+1; j < N; j++) {
+//                    if (spline[j] < spline[minIntensity]) {
+//                        minIntensity = j;
+//                    }
+//                }
+
+//                splineAnnotation[minIntensity] = SplineAnnotation::MIN;
+
+//                if (debug) {
+//                    cout << "i=" << i << " " << spline[i] << " MAX" << endl;
+//                    cout << "i=" << minIntensity << " rt=" << rt[minIntensity] << " " << spline[minIntensity] << " MIN" << endl;
+//                }
+
+//            } else {
+
+//                //find next max, if it exists
+//                int nextMax = -1;
+
+//                for (unsigned int j = i+1; j < N-1; j++){
+//                    if (splineAnnotation[j] == SplineAnnotation::MAX) {
+//                        nextMax = j;
+//                        break;
+//                    }
+//                }
+
+//                if (nextMax != -1) {
+//                    //found another max
+
+//                    //minimum intensity point between the two maxes is the boundary
+//                    unsigned int minIntensity = i+1;
+//                    for (int j = static_cast<int>(i+1); j < nextMax; j++) {
+//                        if (spline[j] < spline[minIntensity]) {
+//                            minIntensity = j;
+//                        }
+//                    }
+
+//                    splineAnnotation[minIntensity] = SplineAnnotation::MIN;
+
+//                    if (debug) {
+//                        cout << "i=" << i << " rt=" << rt[i] << " " << spline[i] << " MAX" << endl;
+//                        cout << "i=" << minIntensity << " rt=" << rt[minIntensity] << " " << spline[minIntensity] << " MIN" << endl;
+//                    }
+
+//                }
+//            }
+//        }
+//    }
+
+
+//    if (debug) {
+//        cout << "FINISHED ASSIGNING MINIMA" << endl;
+//        cout << "===================================" << endl;
+//        cout << "===================================" << endl;
+//        cout << "FINAL PEAKS:" << endl;
+//    }
+
+//    for (auto &peak : peaks) {
+
+//        //set RT, scan info
+//        peak.rt = rt[peak.pos];
+//        peak.scan = static_cast<unsigned int>(scannum[peak.pos]);
+
+//        //find left boundary
+//        for (unsigned int i = peak.pos-1; i >= 0; i--) {
+//            if (splineAnnotation[i] == SplineAnnotation::MIN) {
+//                peak.minpos = i;
+//                peak.rtmin = rt[i];
+//                peak.mzmin = mz[i];
+//                peak.minscan = static_cast<unsigned int>(scannum[i]);
+//                break;
+//            }
+//        }
+
+//        //find right boundary
+//        for (unsigned int i = peak.pos+1; i < N; i++) {
+//            if (splineAnnotation[i] == SplineAnnotation::MIN) {
+//                peak.maxpos = i;
+//                peak.rtmax = rt[i];
+//                peak.mzmax = mz[i];
+//                peak.maxscan = static_cast<unsigned int>(scannum[i]);
+//                break;
+//            }
+//        }
+
+//        if (debug) {
+//            cout << "\n";
+//            cout << "i=" << peak.minpos << " rt=" << rt[peak.minpos] << " LEFT MIN=" << spline[peak.minpos] << endl;
+//            cout << "i=" << peak.pos << " rt=" << rt[peak.pos] << " MAX=" << spline[peak.pos] << endl;
+//            cout << "i=" << peak.maxpos << " rt=" << rt[peak.maxpos] << " RIGHT MIN=" << spline[peak.maxpos] << endl;
+
+//            assert(spline[peak.pos] > spline[peak.minpos]);
+//            assert(spline[peak.pos] > spline[peak.maxpos]);
+//        }
+
+//        if (debug) {
+//            cout <<"Before getPeakDetails(peak) call:" << endl;
+//            cout << "Details: ("
+//                 << peak.peakMz
+//                 << " [" << peak.mzmin << "-" << peak.mzmax << "], "
+//                 << peak.rt
+//                 << " [" << peak.rtmin << "-" << peak.rtmax
+//                 << "])" << endl;
+//        }
+
+//        getPeakDetails(peak, false);
+
+//        if (debug) {
+//             cout << "Details: ("
+//                  << peak.peakMz
+//                  << " [" << peak.mzmin << "-" << peak.mzmax << "], "
+//                  << peak.rt
+//                  << " [" << peak.rtmin << "-" << peak.rtmax
+//                  << "])" << endl;
+//        }
+//    }
+
+//    if (debug) {
+//        cout << "===================================" << endl;
+//    }
+
+//    //assign peak ranks based on total area of the peak
+//    sort(peaks.begin(),peaks.end(),Peak::compArea);
+//    for(unsigned int i=0; i<peaks.size(); i++) peaks[i].peakRank = i;
 
 }
 
