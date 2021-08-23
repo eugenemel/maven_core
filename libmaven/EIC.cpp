@@ -1558,7 +1558,7 @@ vector<PeakGroup> EIC::groupPeaksC(vector<EIC*>& eics, int smoothingWindow, floa
  * @param mergeOverlap
  * @return
  */
-vector<PeakGroup> groupPeaksD(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, int baselineSmoothingWindow, int baselineDropTopX, float mergeOverlap) {
+vector<PeakGroup> EIC::groupPeaksD(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, int baselineSmoothingWindow, int baselineDropTopX, float mergeOverlap) {
 
     //list filled and return by this function
     vector<PeakGroup> pgroups{};
