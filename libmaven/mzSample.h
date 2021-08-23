@@ -1676,4 +1676,72 @@ struct PeakContainer {
 
 };
 
+/**
+ * @brief The IntegerSetContainer struct
+ *
+ * When merging together objects referenced by an int, this structure manages
+ * the associations between merged objects.
+ */
+struct IntegerSetContainer {
+
+
+    //given an element, return the container containing the element, if it is present.
+    map<int, set<int>> containerBySet{};
+
+    void addMerge(pair<int, int> pair) {
+
+        int first = pair.first;
+        int second = pair.second;
+
+        set<int> firstContainer{};
+        set<int> secondContainer{};
+
+        if (containerBySet.find(first) != containerBySet.end()) {
+            firstContainer = containerBySet[first];
+        }
+
+        if (containerBySet.find(second) != containerBySet.end()) {
+            secondContainer = containerBySet[second];
+        }
+
+        //Case 1: both elements are new
+        if (firstContainer.empty() && secondContainer.empty()) {
+            set<int> newContainer{first, second};
+            containerBySet.insert(make_pair(first, newContainer));
+            containerBySet.insert(make_pair(second, newContainer));
+
+        //Case 2: the first element is new, the second element is old
+        } else if (firstContainer.empty() && !secondContainer.empty()) {
+            containerBySet[second].insert(first);
+
+        //Case 3: the first element is old, the second element is new
+        } else if (!firstContainer.empty() && secondContainer.empty()) {
+            containerBySet[first].insert(second);
+
+        //Case 4: both elements are already in the same container
+        } else if (firstContainer == secondContainer){
+            //no action needs to be taken
+
+        //Case 5: both elements exist, but are in different containers
+        //create a new combined set joining the two containers
+        } else {
+            set<int> mergedSet;
+            std::merge(firstContainer.begin(), firstContainer.end(),
+                        secondContainer.begin(), secondContainer.end(),
+                        std::inserter(mergedSet, mergedSet.begin()));
+
+            containerBySet.insert(make_pair(first, mergedSet));
+            containerBySet.insert(make_pair(second, mergedSet));
+        }
+    }
+
+    set<set<int>> getContainers(){
+        set<set<int>> allContainers{};
+        for (auto container : containerBySet) {
+            allContainers.insert(container.second);
+        }
+        return allContainers;
+    }
+};
+
 #endif
