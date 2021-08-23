@@ -1584,7 +1584,7 @@ vector<PeakGroup> EIC::groupPeaksD(vector<EIC*>& eics, int smoothingWindow, floa
     m->setBaselineDropTopX(baselineDropTopX);
 
     //find peaks in merged eic
-    m->getPeakPositionsC(smoothingWindow, true, false);
+    m->getPeakPositionsC(smoothingWindow, false, false);
 
     sort(m->peaks.begin(), m->peaks.end(), Peak::compRt);
 
