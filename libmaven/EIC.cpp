@@ -496,7 +496,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
                 }
 
                 //continue moving to the right, check for more valid points
-                rightIndex--;
+                rightIndex++;
             }
 
             peak->minpos = leftMinimumIntensityIndex;
