@@ -1634,9 +1634,10 @@ struct PeakContainer {
 
     //replace less intense peaks with more intense peaks,
     //update min and max rt computations
-    void addPeaks(vector<Peak> peaksToAdd) {
+    void mergePeakContainer(PeakContainer container) {
 
-        for (Peak p : peaksToAdd) {
+        for (auto it = container.peaks.begin(); it != container.peaks.end(); ++it) {
+            Peak p = it->second;
             if (peaks.find(p.getSample()) != peaks.end()) {
                 Peak oldPeak = peaks[p.getSample()];
                 if (p.peakIntensity > oldPeak.peakIntensity) {
@@ -1646,8 +1647,6 @@ struct PeakContainer {
                 peaks.insert(make_pair(p.getSample(), p));
             }
         }
-
-        recomputeProperties();
     }
 
     void recomputeProperties() {
