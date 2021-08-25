@@ -925,6 +925,7 @@ struct DirectInfusionMatchDataCompareByNames {
 struct PartitionInformation {
     map<shared_ptr<DirectInfusionMatchData>, float> partitionFractions{};
     set<shared_ptr<DirectInfusionMatchData>> compoundsWithAdjustedSAFs{};
+    map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToPartitionFrags{};
 };
 
 /**

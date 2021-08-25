@@ -2603,6 +2603,7 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
     // <compoundName, fragId> = division of this fragment between multiple compounds in same window
     map<pair<shared_ptr<DirectInfusionMatchData>, int>, float> fragToSAFMultiplier;
     set<shared_ptr<DirectInfusionMatchData>> compoundsWithAdjustedSAFs{};
+    map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToPartitionFrags;
 
     map<long, vector<shared_ptr<DirectInfusionMatchData>>> ms1MzToCompoundNames{};
 
@@ -2811,7 +2812,7 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
                 }
 
                 //insert partition frags if old mapping not present, otherwise, update mapping with new value
-                if (this->matchDataToPartitionFrags.find(matchData) == matchDataToPartitionFrags.end()) {
+                if (matchDataToPartitionFrags.find(matchData) == matchDataToPartitionFrags.end()) {
                     matchDataToPartitionFrags.insert(make_pair(matchData, partitionFrags));
                 } else {
                     matchDataToPartitionFrags[matchData] = partitionFrags;
@@ -2856,6 +2857,7 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
 
     partitionInformation.partitionFractions = partitionFractions;
     partitionInformation.compoundsWithAdjustedSAFs = compoundsWithAdjustedSAFs;
+    partitionInformation.matchDataToPartitionFrags = matchDataToPartitionFrags;
 
     return partitionInformation;
 }
@@ -2892,6 +2894,9 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions3(
                         << ", acylChainPartitionFractionSAF= " << matchData->acylChainPartitionFractionSAF
                         << endl;
     }
+
+    //TODO:rename variable
+    this->matchDataToPartitionFrags = acylChainPartitionFractions.matchDataToPartitionFrags;
 
     for (auto it = diagnosticPartitionFractions.partitionFractions.begin(); it != diagnosticPartitionFractions.partitionFractions.end(); ++it) {
 
