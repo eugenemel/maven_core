@@ -2584,6 +2584,73 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
     }
 }
 
+//Issue 486
+PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const Fragment *ms2Fragment,
+                                         const shared_ptr<DirectInfusionSearchParameters> params,
+                                         vector<string> fragmentLabelTags,
+                                         const bool debug){
+
+    //TODO
+
+    return PartitionInformation();
+}
+
+//Issue 486
+void DirectInfusionMatchInformation::computeMs1PartitionFractions3(
+        const Fragment *ms2Fragment,
+        const shared_ptr<DirectInfusionSearchParameters> params,
+        const bool debug){
+
+    vector<string> acylChainFragments{"ms2sn1FragmentLabelTag", "ms2sn2FragmentLabelTag"};
+    vector<string> diagnosticFragments{"ms2DiagnosticFragmentLabelTag"};
+
+    PartitionInformation acylChainPartitionFractions = getPartitionFractions(ms2Fragment, params, acylChainFragments, debug);
+    PartitionInformation diagnosticPartitionFractions = getPartitionFractions(ms2Fragment, params, diagnosticFragments, debug);
+
+    for (auto it = acylChainPartitionFractions.partitionFractions.begin(); it != acylChainPartitionFractions.partitionFractions.end(); ++it) {
+
+        auto matchData = it->first;
+
+        float partitionFractionSAF = it->second;
+        float partitionFraction = it->second;
+
+        if (std::find(acylChainPartitionFractions.compoundsWithAdjustedSAFs.begin(), acylChainPartitionFractions.compoundsWithAdjustedSAFs.end(), matchData) != acylChainPartitionFractions.compoundsWithAdjustedSAFs.end()) {
+            partitionFraction = -1.0f;
+        }
+
+        matchData->acylChainPartitionFraction = partitionFraction;
+        matchData->acylChainPartitionFractionSAF = partitionFractionSAF;
+
+        if (debug) cout << matchData->compound->name << " "
+                        << matchData->adduct->name << ":"
+                        << " acylChainPartitionFraction= " << matchData->acylChainPartitionFraction
+                        << ", acylChainPartitionFractionSAF= " << matchData->acylChainPartitionFractionSAF
+                        << endl;
+    }
+
+    for (auto it = diagnosticPartitionFractions.partitionFractions.begin(); it != diagnosticPartitionFractions.partitionFractions.end(); ++it) {
+
+        auto matchData = it->first;
+
+        float partitionFractionSAF = it->second;
+        float partitionFraction = it->second;
+
+        if (std::find(diagnosticPartitionFractions.compoundsWithAdjustedSAFs.begin(), diagnosticPartitionFractions.compoundsWithAdjustedSAFs.end(), matchData) != diagnosticPartitionFractions.compoundsWithAdjustedSAFs.end()) {
+            partitionFraction = -1.0f;
+        }
+
+        matchData->diagnosticPartitionFraction = partitionFraction;
+        matchData->diagnosticPartitionFractionSAF = partitionFractionSAF;
+
+        if (debug) cout << matchData->compound->name << " "
+                        << matchData->adduct->name << ":"
+                        << " diagnosticPartitionFraction= " << matchData->diagnosticPartitionFraction
+                        << ", diagnosticPartitionFractionsAF= " << matchData->diagnosticPartitionFractionSAF
+                        << endl;
+    }
+
+}
+
 //Issue 288, 292
 void DirectInfusionMatchInformation::computeMs1PartitionFractions(const vector<Scan*>& ms2Scans,
                                                                   const Fragment *ms2Fragment,

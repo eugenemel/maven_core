@@ -808,12 +808,10 @@ struct DirectInfusionMatchData {
 
     //Issue 288
     int ms1IntensityCoord = -1;
+
+    //Issue 486: TODO: delete these fields
     float ms1PartitionFraction = 1.0f;
-
-    //Issue 292
     float ms1PartitionFractionByScan = 1.0f;
-
-    //Issue 318
     float ms1PartitionFractionSplitAmbiguousFragments = 1.0f;
     float ms1PartitionFractionByScanSplitAmbiguousFragments = 1.0f;
 
@@ -831,6 +829,12 @@ struct DirectInfusionMatchData {
         }
         return partitionGroupId;
     }
+
+    //Issue 486
+    float acylChainPartitionFraction = 1.0f;
+    float acylChainPartitionFractionSAF = 1.0f;
+    float diagnosticPartitionFraction = 1.0f;
+    float diagnosticPartitionFractionSAF = 1.0f;
 };
 
 /**
@@ -918,6 +922,11 @@ struct DirectInfusionMatchDataCompareByNames {
     }
 };
 
+struct PartitionInformation {
+    map<shared_ptr<DirectInfusionMatchData>, float> partitionFractions{};
+    set<shared_ptr<DirectInfusionMatchData>> compoundsWithAdjustedSAFs{};
+};
+
 /**
  * @brief The DirectInfusionMatchInformation structure
  *
@@ -979,6 +988,14 @@ public:
                                        const shared_ptr<DirectInfusionSearchParameters> params,
                                        const bool debug);
 
+    PartitionInformation getPartitionFractions(const Fragment *ms2Fragment,
+                                             const shared_ptr<DirectInfusionSearchParameters> params,
+                                             vector<string> fragmentLabelTags,
+                                             const bool debug);
+    //Issue
+    void computeMs1PartitionFractions3(const Fragment *ms2Fragment,
+                                       const shared_ptr<DirectInfusionSearchParameters> params,
+                                       const bool debug);
 private:
 
     // <precursor m/z, compound match data> = for use with partitioning intensity
