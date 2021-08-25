@@ -809,12 +809,6 @@ struct DirectInfusionMatchData {
     //Issue 288
     int ms1IntensityCoord = -1;
 
-    //Issue 486: TODO: delete these fields
-    float ms1PartitionFraction = 1.0f;
-    float ms1PartitionFractionByScan = 1.0f;
-    float ms1PartitionFractionSplitAmbiguousFragments = 1.0f;
-    float ms1PartitionFractionByScanSplitAmbiguousFragments = 1.0f;
-
     //Issue 416
     string partitionGroupId;
 
@@ -971,12 +965,6 @@ public:
 
     //Issue 275
     string getFragmentGroupId(shared_ptr<DirectInfusionMatchData> compound, int precision=2);
-
-    //Issue 288, 292
-    void computeMs1PartitionFractions(const vector<Scan*>& ms2Scans,
-                                      const Fragment *ms2Fragment,
-                                      const shared_ptr<DirectInfusionSearchParameters> params,
-                                      const bool debug);
 
     //Issue 470
     string getPartitionFragmentGroupId(shared_ptr<DirectInfusionMatchData> compound, int precision=2);
