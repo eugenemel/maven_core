@@ -2587,7 +2587,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
 //Issue 486
 PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const Fragment *ms2Fragment,
                                          const shared_ptr<DirectInfusionSearchParameters> params,
-                                         vector<string> fragmentLabelTags,
+                                         vector<string> partitionFragmentLabels,
                                          const bool debug){
 
     if (debug) cout << "DirectInfusionMatchInformation::getPartitionFractions()" << endl;
@@ -2750,7 +2750,6 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
 
                     float fragObservedIntensity = ms2Fragment->consensus->intensity_array[static_cast<unsigned int>(y)];
 
-
                     /**
                       * Issue 470:
                       * Unreliable fragments are excluded from partitioning.
@@ -2785,7 +2784,7 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
                         vector<string> fragmentLabelTags = DirectInfusionMatchAssessment::getFragmentLabelTags(fragmentLabel, params, false);
 
                         bool isPartitionFragment = false;
-                        for (auto tag : fragmentLabelTags) {
+                        for (auto tag : partitionFragmentLabels) {
                             if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), tag) != fragmentLabelTags.end()) {
                                 isPartitionFragment = true;
                                 break;
