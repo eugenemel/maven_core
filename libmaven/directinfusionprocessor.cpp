@@ -2266,7 +2266,7 @@ string DirectInfusionMatchInformation::getFragmentGroupId(shared_ptr<DirectInfus
 }
 
 string DirectInfusionMatchInformation::getPartitionFragmentGroupId(shared_ptr<DirectInfusionMatchData> compound, int precision) {
-    return getGroupId(matchDataToPartitionFrags, compound, precision);
+    return getGroupId(matchDataToAcylPartitionFrags, compound, precision);
 }
 
 //WARNING: not rounded to nearest precision, just output that many digits
@@ -2519,10 +2519,10 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
                 }
 
                 //insert partition frags if old mapping not present, otherwise, update mapping with new value
-                if (this->matchDataToPartitionFrags.find(matchData) == matchDataToPartitionFrags.end()) {
-                    matchDataToPartitionFrags.insert(make_pair(matchData, partitionFrags));
+                if (this->matchDataToAcylPartitionFrags.find(matchData) == matchDataToAcylPartitionFrags.end()) {
+                    matchDataToAcylPartitionFrags.insert(make_pair(matchData, partitionFrags));
                 } else {
-                    matchDataToPartitionFrags[matchData] = partitionFrags;
+                    matchDataToAcylPartitionFrags[matchData] = partitionFrags;
                 }
             }
 
@@ -2896,7 +2896,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions3(
     }
 
     //TODO:rename variable
-    this->matchDataToPartitionFrags = acylChainPartitionFractions.matchDataToPartitionFrags;
+    this->matchDataToAcylPartitionFrags = acylChainPartitionFractions.matchDataToPartitionFrags;
 
     for (auto it = diagnosticPartitionFractions.partitionFractions.begin(); it != diagnosticPartitionFractions.partitionFractions.end(); ++it) {
 

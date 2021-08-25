@@ -953,8 +953,8 @@ public:
     //Issue 311: get all fragments that had no fragment matches
     vector<shared_ptr<DirectInfusionMatchData>> compoundsNoFragMatches{};
 
-    //Issue 470: keep track of compound m/zs used for partitioning
-    map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToPartitionFrags{};
+    //Issue 470: keep track of compound m/zs used for acyl chain partitioning
+    map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToAcylPartitionFrags{};
 
     /**
      * @brief getCompounds
