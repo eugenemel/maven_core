@@ -1554,15 +1554,14 @@ struct DIPipelineSampleData {
     //fragments
     map<tuple<string, string, string>, float> fragmentQuantNormalizationMap{};
 
-    //Issue
-    //    <lipidClass, adductName>, observed IS intensity
-    map<pair<string, string>, float> fragmentQuantMaxDiagnosticIntensityMap{};
-
     //Issue 487:  add some fragment information
+    // Stores the IS quant information for the chosen diagnostic fragment
+    //  <compoundName, adductName, fragmentLabel>, IS observed intensity
+    map<tuple<string, string, string>, float> fragmentQuantMaxDiagnosticObservedISIntensityMap{};
 
-    //Stores the highest intensity diagnostic fragment, based on observed IS
-    //  <compoundName, adductName, fragmentName>, normalized fragment intensity
-    map<tuple<string, string, string>, float> fragmentQuantNormalizedIntensityMap{};
+    //Stores the normalized diagnostic intensity information
+    //    <lipidClass, adductName>, normalized fragment intensity
+    map<pair<string, string>, float> fragmentQuantMaxDiagnosticNormalizedIntensityMap{};
 
     //      <compound name, adduct name>
     map<pair<string, string>, float> nearestScanNormalizedIntensityMap{};
