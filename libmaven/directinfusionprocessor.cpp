@@ -2635,7 +2635,17 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
         }
     }
 
+
     //STEP 1: determine SAF adjustments
+    //
+    //Issue 488: Extend to diagnostic fragments ambiguity SAF adjustment
+    //    acyl chains:
+    //    SAF is only a concern when a fragment is involved in multiple compounds that have different ms1 m/zs.
+    //
+    //    diagnostic fragments:
+    //    SAF is a concern when a fragment is involved in multiple compounds, whether or not the compounds have
+    //    the same ms1 m/z.  In this case, SAF affects all compounds that have the fragment, and does not affect compounds
+    //    that do not have the fragment.
 
     for (auto it = fragToMatchData.begin(); it != fragToMatchData.end(); ++it) {
 
@@ -2659,7 +2669,6 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
                 }
             }
 
-            //SAF is only a concern when a fragment is involved in multiple compounds and multiple ms1 m/zs
             if (ms1Ids.size() > 1) {
 
                 float totalIntensity = 0.0f;
