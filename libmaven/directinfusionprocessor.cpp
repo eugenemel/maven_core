@@ -2872,6 +2872,9 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
     //Issue 488: SAF partitions for diagnostic fragments are disqualified
     if (isPossibleAmbiguousFragmentsFromSameMz) {
 
+        //start from empty set
+        compoundsWithAdjustedSAFs.clear();
+
         for (auto it = partitionMzToMatchData.begin(); it != partitionMzToMatchData.end(); ++it) {
 
             //all compounds that contain the partition fragment
