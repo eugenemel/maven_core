@@ -2587,6 +2587,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
 PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const Fragment *ms2Fragment,
                                          const shared_ptr<DirectInfusionSearchParameters> params,
                                          vector<string> partitionFragmentLabels,
+                                         const bool isPossibleAmbiguousFragmentsFromSameMz,
                                          const bool debug){
 
     if (debug) cout << "DirectInfusionMatchInformation::getPartitionFractions()" << endl;
@@ -2602,6 +2603,9 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
     map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToPartitionFrags;
 
     map<long, vector<shared_ptr<DirectInfusionMatchData>>> ms1MzToCompoundNames{};
+
+    //Issue 488
+    map<int, vector<shared_ptr<DirectInfusionMatchData>>> partitionMzToMatchData{};
 
     for (auto compound : getCompounds()) {
         long coord = mzUtils::mzToIntKey(static_cast<double>(compound->observedMs1ScanIntensityQuant.intensity), 1L);
@@ -2812,6 +2816,11 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
                             fragMzToIntensity.insert(make_pair(mzKey, fragObservedIntensity));
                             partitionFrags.push_back(mzKey);
 
+                            if (partitionMzToMatchData.find(mzKey) == partitionMzToMatchData.end()) {
+                                partitionMzToMatchData.insert(make_pair(mzKey, vector<shared_ptr<DirectInfusionMatchData>>()));
+                            }
+
+                            partitionMzToMatchData[mzKey].push_back(matchData);
                         }
                     }
                 }
@@ -2860,6 +2869,28 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
 
     }
 
+    //Issue 488: SAF partitions for diagnostic fragments are disqualified
+    if (isPossibleAmbiguousFragmentsFromSameMz) {
+
+        for (auto it = partitionMzToMatchData.begin(); it != partitionMzToMatchData.end(); ++it) {
+
+            vector<shared_ptr<DirectInfusionMatchData>> compounds = it->second;
+
+            //all compounds that contain the partition fragment
+            for (auto compound : compounds) {
+
+                long coord = mzUtils::mzToIntKey(static_cast<double>(compound->observedMs1ScanIntensityQuant.intensity), 1L);
+
+                //all compounds that share an ms1 m/z with a compound that contains the partition fragment
+                vector<shared_ptr<DirectInfusionMatchData>> ms1Compounds = ms1MzToCompoundNames.at(coord);
+
+                for (auto matchData : ms1Compounds) {
+                    compoundsWithAdjustedSAFs.insert(matchData);
+                }
+            }
+        }
+    }
+
     partitionInformation.partitionFractions = partitionFractions;
     partitionInformation.compoundsWithAdjustedSAFs = compoundsWithAdjustedSAFs;
     partitionInformation.matchDataToPartitionFrags = matchDataToPartitionFrags;
@@ -2876,8 +2907,8 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions3(
     vector<string> acylChainFragments{"ms2sn1FragmentLabelTag", "ms2sn2FragmentLabelTag"};
     vector<string> diagnosticFragments{"ms2DiagnosticFragmentLabelTag"};
 
-    PartitionInformation acylChainPartitionFractions = getPartitionFractions(ms2Fragment, params, acylChainFragments, debug);
-    PartitionInformation diagnosticPartitionFractions = getPartitionFractions(ms2Fragment, params, diagnosticFragments, debug);
+    PartitionInformation acylChainPartitionFractions = getPartitionFractions(ms2Fragment, params, acylChainFragments, false, debug);
+    PartitionInformation diagnosticPartitionFractions = getPartitionFractions(ms2Fragment, params, diagnosticFragments, true, debug);
 
     for (auto it = acylChainPartitionFractions.partitionFractions.begin(); it != acylChainPartitionFractions.partitionFractions.end(); ++it) {
 

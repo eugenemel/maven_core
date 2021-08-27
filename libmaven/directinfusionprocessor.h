@@ -980,6 +980,7 @@ public:
     PartitionInformation getPartitionFractions(const Fragment *ms2Fragment,
                                              const shared_ptr<DirectInfusionSearchParameters> params,
                                              vector<string> fragmentLabelTags,
+                                             const bool isPossibleAmbiguousFragmentsFromSameMz,
                                              const bool debug);
     //Issue
     void computeMs1PartitionFractions3(const Fragment *ms2Fragment,
