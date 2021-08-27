@@ -2687,7 +2687,7 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
 
                     for (auto matchData : compoundsWithMatchingId) {
 
-                        //even if a compound doesn't directly have an ambigous fragment,
+                        //even if a compound doesn't directly have an ambiguous fragment,
                         //if it shares an MS1 intensity peak with a compound that
                         //does have an ambiguous fragment, it is also affected by the SAF
                         compoundsWithAdjustedSAFs.insert(matchData);
@@ -2874,20 +2874,24 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
 
         for (auto it = partitionMzToMatchData.begin(); it != partitionMzToMatchData.end(); ++it) {
 
+            //all compounds that contain the partition fragment
             vector<shared_ptr<DirectInfusionMatchData>> compounds = it->second;
 
-            //all compounds that contain the partition fragment
-            for (auto compound : compounds) {
+            //when more than one compound could contain the partition fragment, need to adjust SAFs
+            if (compounds.size() > 1) {
+                for (auto compound : compounds) {
 
-                long coord = mzUtils::mzToIntKey(static_cast<double>(compound->observedMs1ScanIntensityQuant.intensity), 1L);
+                    long coord = mzUtils::mzToIntKey(static_cast<double>(compound->observedMs1ScanIntensityQuant.intensity), 1L);
 
-                //all compounds that share an ms1 m/z with a compound that contains the partition fragment
-                vector<shared_ptr<DirectInfusionMatchData>> ms1Compounds = ms1MzToCompoundNames.at(coord);
+                    //all compounds that share an ms1 m/z with a compound that contains the partition fragment
+                    vector<shared_ptr<DirectInfusionMatchData>> ms1Compounds = ms1MzToCompoundNames.at(coord);
 
-                for (auto matchData : ms1Compounds) {
-                    compoundsWithAdjustedSAFs.insert(matchData);
+                    for (auto matchData : ms1Compounds) {
+                        compoundsWithAdjustedSAFs.insert(matchData);
+                    }
                 }
             }
+
         }
     }
 
