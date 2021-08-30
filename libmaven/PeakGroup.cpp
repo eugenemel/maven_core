@@ -257,6 +257,7 @@ vector<float> PeakGroup::getOrderedIntensityVector(vector<mzSample*>& samples, Q
             case Area: y = peak.peakAreaCorrected; break;
             case Height: y = peak.peakIntensity; break;
             case AreaNotCorrected: y = peak.peakArea; break;
+            case AreaFractional: y = peak.peakAreaFractional; break;
             case RetentionTime: y = peak.rt; break;
             case Quality: y = peak.quality; break;
             case SNRatio: y = peak.signalBaselineRatio; break;
