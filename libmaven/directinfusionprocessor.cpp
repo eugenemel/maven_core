@@ -2638,6 +2638,32 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
         }
     }
 
+    map<pair<long, long>, vector<shared_ptr<DirectInfusionMatchData>>> ms1MzAndFragmentToCompounds{};
+    for (auto it = ms1MzToCompoundNames.begin(); it != ms1MzToCompoundNames.end(); ++it) {
+
+        long ms1Mz = it->first;
+        vector<shared_ptr<DirectInfusionMatchData>> compounds = it->second;
+
+        for (auto compound : compounds) {
+
+            if (matchDataToFrags.find(compound) != matchDataToFrags.end()) {
+                vector<int> fragments = matchDataToFrags[compound];
+
+                for (auto fragment : fragments) {
+                    pair<long, long> ms1MzAndFragment = make_pair(ms1Mz, fragment);
+                    if (ms1MzAndFragmentToCompounds.find(ms1MzAndFragment) == ms1MzAndFragmentToCompounds.end()) {
+                        ms1MzAndFragmentToCompounds.insert(make_pair(ms1MzAndFragment, vector<shared_ptr<DirectInfusionMatchData>>()));
+                    }
+                    ms1MzAndFragmentToCompounds[ms1MzAndFragment].push_back(compound);
+                }
+            }
+
+        }
+
+    }
+
+    //not the same as SAF - the fragments themselves can be used in this case
+    set<shared_ptr<DirectInfusionMatchData>> compoundsWithAmbiguousFragments{};
 
     //STEP 1: determine SAF adjustments
 
@@ -2651,6 +2677,10 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
         if (compounds.size() > 1) {
 
             for (auto compound : compounds) {
+
+                //compound ambiguity is not the same as SAF
+                compoundsWithAmbiguousFragments.insert(compound);
+
                 for (auto it2 = ms1MzToCompoundNames.begin(); it2 != ms1MzToCompoundNames.end(); ++it2) {
                     long ms1Id = it2->first;
                     vector<shared_ptr<DirectInfusionMatchData>> ms1Compounds = it2->second;
@@ -2663,48 +2693,39 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
                 }
             }
 
-            if (ms1Ids.size() > 1) {
+            float totalIntensity = 0.0f;
+            for (auto ms1Id : ms1Ids) {
+                totalIntensity += static_cast<float>(mzUtils::intKeyToMz(ms1Id, 1L));
+            }
 
-                float totalIntensity = 0.0f;
-                for (auto ms1Id : ms1Ids) {
-                    totalIntensity += static_cast<float>(mzUtils::intKeyToMz(ms1Id, 1L));
-                }
+            for (auto ms1Id : ms1Ids) {
 
-                for (auto ms1Id : ms1Ids) {
+                float ms1IdIntensity = static_cast<float>(mzUtils::intKeyToMz(ms1Id, 1L));
+                vector<shared_ptr<DirectInfusionMatchData>> compoundsWithMatchingId = ms1MzToCompoundNames.at(ms1Id);
 
-                    float ms1IdIntensity = static_cast<float>(mzUtils::intKeyToMz(ms1Id, 1L));
-                    vector<shared_ptr<DirectInfusionMatchData>> compoundsWithMatchingId = ms1MzToCompoundNames.at(ms1Id);
+                for (auto matchData : compoundsWithMatchingId) {
 
-                    for (auto matchData : compoundsWithMatchingId) {
+                    //even if a compound doesn't directly have an ambiguous fragment,
+                    //if it shares an MS1 intensity peak with a compound that
+                    //does have an ambiguous fragment, it is also affected by the SAF
+                    compoundsWithAdjustedSAFs.insert(matchData);
 
-                        //even if a compound doesn't directly have an ambiguous fragment,
-                        //if it shares an MS1 intensity peak with a compound that
-                        //does have an ambiguous fragment, it is also affected by the SAF
-                        compoundsWithAdjustedSAFs.insert(matchData);
+                    if (debug) cout << matchData->compound->name << " "
+                                    << matchData->compound->adductString << " "
+                                    << "has ambiguous fragment m/z="
+                                    << mzUtils::intKeyToMz(fragId)
+                                    << endl;
 
-                        if (debug) cout << matchData->compound->name << " "
-                                        << matchData->compound->adductString << " "
-                                        << "has ambiguous fragment m/z="
-                                        << mzUtils::intKeyToMz(fragId)
-                                        << endl;
+                    pair<shared_ptr<DirectInfusionMatchData>, long> key = make_pair(matchData, fragId);
 
-                        pair<shared_ptr<DirectInfusionMatchData>, long> key = make_pair(matchData, fragId);
+                    pair<long, long> ms1MzAndFragment = make_pair(ms1Id, fragId);
+                    float redundantIntensityScalingFactor = 1.0f/ms1MzAndFragmentToCompounds[ms1MzAndFragment].size();
 
-                        if (fragToSAFMultiplier.find(key) == fragToSAFMultiplier.end()) {
-                            float SAFpartition = ms1IdIntensity/totalIntensity;
-                            fragToSAFMultiplier.insert(make_pair(key, SAFpartition));
-                        }
-
-                    }
-                }
-
-            //multiple compounds, but single ms1 m/z case: no need for SAF
-            } else {
-                for (auto compound : compounds) {
-                    pair<shared_ptr<DirectInfusionMatchData>, long> key = make_pair(compound, fragId);
                     if (fragToSAFMultiplier.find(key) == fragToSAFMultiplier.end()) {
-                        fragToSAFMultiplier.insert(make_pair(key, 1.0f));
+                        float SAFpartition = (ms1IdIntensity * redundantIntensityScalingFactor)/totalIntensity;
+                        fragToSAFMultiplier.insert(make_pair(key, SAFpartition));
                     }
+
                 }
             }
 
@@ -2716,7 +2737,12 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
         }
     }
 
-    //STEP 2: divide ms1 intensities between all compounds, based on fragments
+    //STEP 2: Keep track of absolute partition fragment intensity
+
+    //this map does not get cleared for each MS1 m/z
+    map<shared_ptr<DirectInfusionMatchData>, float> partitionFragmentIntensitySum{};
+
+    //STEP 3: divide ms1 intensities between all compounds, based on fragments
 
     for (auto it = ms1MzToCompoundNames.begin(); it != ms1MzToCompoundNames.end(); ++it) {
 
@@ -2841,6 +2867,7 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
             }
 
             compoundToTotalEffectiveFragIntensity.insert(make_pair(matchData, effectiveFragIntensityCompound));
+            partitionFragmentIntensitySum.insert(make_pair(matchData, effectiveFragIntensityCompound));
 
         }
 
@@ -2862,6 +2889,8 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
     partitionInformation.partitionFractions = partitionFractions;
     partitionInformation.compoundsWithAdjustedSAFs = compoundsWithAdjustedSAFs;
     partitionInformation.matchDataToPartitionFrags = matchDataToPartitionFrags;
+    partitionInformation.compoundsWithAmbiguousFragments = compoundsWithAmbiguousFragments;
+    partitionInformation.partitionFragmentIntensitySum = partitionFragmentIntensitySum;
 
     return partitionInformation;
 }
