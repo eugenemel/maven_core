@@ -1605,6 +1605,10 @@ struct DIPipelineSampleData {
     //      <compound name, adduct name>
     map<pair<string, string>, float> nearestScanNormalizedIntensityMap{};
 
+    //Issue 492: needed for normalization downstream
+    map<pair<string, string>, float> diagnosticFragmentSumISMap{};
+    map<pair<string, string>, float> acylChainFragmentSumISMap{};
+
 };
 
 enum ScanIntensityType{STANDARD=0, QUERY=1};
