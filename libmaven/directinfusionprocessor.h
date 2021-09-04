@@ -829,6 +829,12 @@ struct DirectInfusionMatchData {
     float acylChainPartitionFractionSAF = 1.0f;
     float diagnosticPartitionFraction = 1.0f;
     float diagnosticPartitionFractionSAF = 1.0f;
+
+    //Issue 492: new quant types
+    float acylFragmentSum = -1.0f;
+    float acylFragmentSumSAF = -1.0f;
+    float diagnosticFragmentSum = -1.0f;
+    float diagnosticFragmentSumSAF = -1.0f;
 };
 
 /**
@@ -918,8 +924,41 @@ struct DirectInfusionMatchDataCompareByNames {
 
 struct PartitionInformation {
     map<shared_ptr<DirectInfusionMatchData>, float> partitionFractions{};
+
+    //These are compounds that have an MS1 m/z shared by multiple compounds,
+    //and the partition fragments associated with those compounds are not all
+    //unambiguous. This means that a compound that itself does not have any
+    //ambiguous fragments may still have an adjusted SAF, if it shares an
+    //MS1 m/z with a compound that does have ambiguous fragments.
+    //If a compound has a unique MS1 m/z, it does not need SAF adjustment, and so
+    //would not be included in this set.
     set<shared_ptr<DirectInfusionMatchData>> compoundsWithAdjustedSAFs{};
+
     map<shared_ptr<DirectInfusionMatchData>, vector<int>> matchDataToPartitionFrags{};
+
+    //Issue 491: Add more ambiguity categories
+
+    //Compounds with an MS1 m/z where at least one identified compound has no
+    //known way to partition intensity.
+    //If a compound is ever in this set, partitioning cannot be performed.
+    //A compound should only ever end up in this set if it would need to be partitioned,
+    //and it was found that it could not be.
+    set<shared_ptr<DirectInfusionMatchData>> unpartitionableCompounds{};
+    //TODO: currently unused - need to think carefully about this one,
+    //If we move away from partitioning, may not be necessary
+    //TODO: Issue 493
+
+    //Compounds where at least one associated partition fragment is associated
+    //with some other compound.
+    //
+    //This is distinct from compoundsWithAdjustedSAFs, as that is tied to the MS1 m/z.
+    //In this case, the MS1 m/z is not considered at all.
+    set<shared_ptr<DirectInfusionMatchData>> compoundsWithAmbiguousFragments{};
+
+    //Map of the sum of all partition fraction-associated MS2 intensities,
+    //with intensities adjusted according to SAF (when appropriate).
+    //To check which compounds do not have ambiguous fragments, see compoundsWithAmbiguousFragments.
+    map<shared_ptr<DirectInfusionMatchData>, float> partitionFragmentIntensitySum{};
 };
 
 /**
@@ -980,7 +1019,6 @@ public:
     PartitionInformation getPartitionFractions(const Fragment *ms2Fragment,
                                              const shared_ptr<DirectInfusionSearchParameters> params,
                                              vector<string> fragmentLabelTags,
-                                             const bool isPossibleAmbiguousFragmentsFromSameMz,
                                              const bool debug);
     //Issue
     void computeMs1PartitionFractions3(const Fragment *ms2Fragment,

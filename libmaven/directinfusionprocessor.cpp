@@ -2587,7 +2587,6 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions2(
 PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const Fragment *ms2Fragment,
                                          const shared_ptr<DirectInfusionSearchParameters> params,
                                          vector<string> partitionFragmentLabels,
-                                         const bool isPossibleAmbiguousFragmentsFromSameMz,
                                          const bool debug){
 
     if (debug) cout << "DirectInfusionMatchInformation::getPartitionFractions()" << endl;
@@ -2641,15 +2640,6 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
 
 
     //STEP 1: determine SAF adjustments
-    //
-    //Issue 488: Extend to diagnostic fragments ambiguity SAF adjustment
-    //    acyl chains:
-    //    SAF is only a concern when a fragment is involved in multiple compounds that have different ms1 m/zs.
-    //
-    //    diagnostic fragments:
-    //    SAF is a concern when a fragment is involved in multiple compounds, whether or not the compounds have
-    //    the same ms1 m/z.  In this case, SAF affects all compounds that have the fragment, and does not affect compounds
-    //    that do not have the fragment.
 
     for (auto it = fragToMatchData.begin(); it != fragToMatchData.end(); ++it) {
 
@@ -2869,35 +2859,6 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
 
     }
 
-    //Issue 488: SAF partitions for diagnostic fragments are disqualified
-    if (isPossibleAmbiguousFragmentsFromSameMz) {
-
-        //start from empty set
-        compoundsWithAdjustedSAFs.clear();
-
-        for (auto it = partitionMzToMatchData.begin(); it != partitionMzToMatchData.end(); ++it) {
-
-            //all compounds that contain the partition fragment
-            vector<shared_ptr<DirectInfusionMatchData>> compounds = it->second;
-
-            //when more than one compound could contain the partition fragment, need to adjust SAFs
-            if (compounds.size() > 1) {
-                for (auto compound : compounds) {
-
-                    long coord = mzUtils::mzToIntKey(static_cast<double>(compound->observedMs1ScanIntensityQuant.intensity), 1L);
-
-                    //all compounds that share an ms1 m/z with a compound that contains the partition fragment
-                    vector<shared_ptr<DirectInfusionMatchData>> ms1Compounds = ms1MzToCompoundNames.at(coord);
-
-                    for (auto matchData : ms1Compounds) {
-                        compoundsWithAdjustedSAFs.insert(matchData);
-                    }
-                }
-            }
-
-        }
-    }
-
     partitionInformation.partitionFractions = partitionFractions;
     partitionInformation.compoundsWithAdjustedSAFs = compoundsWithAdjustedSAFs;
     partitionInformation.matchDataToPartitionFrags = matchDataToPartitionFrags;
@@ -2914,8 +2875,8 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions3(
     vector<string> acylChainFragments{"ms2sn1FragmentLabelTag", "ms2sn2FragmentLabelTag"};
     vector<string> diagnosticFragments{"ms2DiagnosticFragmentLabelTag"};
 
-    PartitionInformation acylChainPartitionFractions = getPartitionFractions(ms2Fragment, params, acylChainFragments, false, debug);
-    PartitionInformation diagnosticPartitionFractions = getPartitionFractions(ms2Fragment, params, diagnosticFragments, true, debug);
+    PartitionInformation acylChainPartitionFractions = getPartitionFractions(ms2Fragment, params, acylChainFragments, debug);
+    PartitionInformation diagnosticPartitionFractions = getPartitionFractions(ms2Fragment, params, diagnosticFragments, debug);
 
     for (auto it = acylChainPartitionFractions.partitionFractions.begin(); it != acylChainPartitionFractions.partitionFractions.end(); ++it) {
 
