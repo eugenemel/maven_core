@@ -2928,8 +2928,23 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions3(
                         << endl;
     }
 
-    //TODO:rename variable
+
     this->matchDataToAcylPartitionFrags = acylChainPartitionFractions.matchDataToPartitionFrags;
+
+    for (auto it = acylChainPartitionFractions.partitionFragmentIntensitySum.begin(); it != acylChainPartitionFractions.partitionFragmentIntensitySum.end(); ++it) {
+
+        auto matchData = it->first;
+
+        float acylFragmentSum = it->second;
+        float acylFragmentSumSAF = it->second;
+
+        if (std::find(acylChainPartitionFractions.compoundsWithAmbiguousFragments.begin(), acylChainPartitionFractions.compoundsWithAmbiguousFragments.end(), matchData) != acylChainPartitionFractions.compoundsWithAmbiguousFragments.end()) {
+            acylFragmentSum = -1.0f;
+        }
+
+        matchData->acylFragmentSum = acylFragmentSum;
+        matchData->acylFragmentSumSAF = acylFragmentSumSAF;
+    }
 
     for (auto it = diagnosticPartitionFractions.partitionFractions.begin(); it != diagnosticPartitionFractions.partitionFractions.end(); ++it) {
 
@@ -2950,6 +2965,21 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions3(
                         << " diagnosticPartitionFraction= " << matchData->diagnosticPartitionFraction
                         << ", diagnosticPartitionFractionsAF= " << matchData->diagnosticPartitionFractionSAF
                         << endl;
+    }
+
+    for (auto it = diagnosticPartitionFractions.partitionFragmentIntensitySum.begin(); it != diagnosticPartitionFractions.partitionFragmentIntensitySum.end(); ++it) {
+
+        auto matchData = it->first;
+
+        float diagnosticFragmentSum = it->second;
+        float diagnosticFragmentSumSAF = it->second;
+
+        if (std::find(diagnosticPartitionFractions.compoundsWithAmbiguousFragments.begin(), diagnosticPartitionFractions.compoundsWithAmbiguousFragments.end(), matchData) != diagnosticPartitionFractions.compoundsWithAmbiguousFragments.end()) {
+            diagnosticFragmentSum = -1.0f;
+        }
+
+        matchData->diagnosticFragmentSum = diagnosticFragmentSum;
+        matchData->diagnosticFragmentSumSAF = diagnosticFragmentSumSAF;
     }
 
 }
