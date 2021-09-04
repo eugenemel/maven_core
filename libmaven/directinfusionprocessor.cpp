@@ -2963,7 +2963,7 @@ void DirectInfusionMatchInformation::computeMs1PartitionFractions3(
         if (debug) cout << matchData->compound->name << " "
                         << matchData->adduct->name << ":"
                         << " diagnosticPartitionFraction= " << matchData->diagnosticPartitionFraction
-                        << ", diagnosticPartitionFractionsAF= " << matchData->diagnosticPartitionFractionSAF
+                        << ", diagnosticPartitionFractionSAF= " << matchData->diagnosticPartitionFractionSAF
                         << endl;
     }
 
