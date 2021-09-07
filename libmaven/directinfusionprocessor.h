@@ -1602,6 +1602,11 @@ struct DIPipelineSampleData {
     //    <lipidClass, adductName>, normalized fragment intensity
     map<pair<string, string>, float> fragmentQuantMaxDiagnosticNormalizedIntensityMap{};
 
+    map<pair<string, string>, float> fragmentQuantAcylSumNormalizedIntensityMap{};
+    map<pair<string, string>, float> fragmentQuantAcylSumSAFNormalizedIntensityMap{};
+    map<pair<string, string>, float> fragmentQuantDiagnosticSumNormalizedIntensityMap{};
+    map<pair<string, string>, float> fragmentQuantDiagnosticSumSAFNormalizedIntensityMap{};
+
     //      <compound name, adduct name>
     map<pair<string, string>, float> nearestScanNormalizedIntensityMap{};
 
