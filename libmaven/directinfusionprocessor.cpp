@@ -2603,9 +2603,6 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
 
     map<long, vector<shared_ptr<DirectInfusionMatchData>>> ms1MzToCompoundNames{};
 
-    //Issue 488
-    map<int, vector<shared_ptr<DirectInfusionMatchData>>> partitionMzToMatchData{};
-
     for (auto compound : getCompounds()) {
         long coord = mzUtils::mzToIntKey(static_cast<double>(compound->observedMs1ScanIntensityQuant.intensity), 1L);
 
@@ -2665,14 +2662,100 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
     //not the same as SAF - the fragments themselves can be used in this case
     set<shared_ptr<DirectInfusionMatchData>> compoundsWithAmbiguousFragments{};
 
-    //STEP 1: determine SAF adjustments
+    //STEP 1: Identify all partition fragments, and record intensities
+
+    map<int, float> partitionFragToIntensity{};
+
+    for (auto matchData : getCompounds()) {
+
+        if (debug) {
+            cout << "compound: " << matchData->compound->name
+                 << ", adduct: " << matchData->compound->adductString
+                 << endl;
+        }
+
+        if (matchDataToFrags.find(matchData) != matchDataToFrags.end()) {
+
+            vector<int> ranks = matchData->fragmentationMatchScore.ranks;
+
+            for (unsigned int i = 0; i < ranks.size(); i++) {
+
+                int y = ranks[i];
+                if (y == -1) continue;
+
+                float fragObservedIntensity = ms2Fragment->consensus->intensity_array[static_cast<unsigned int>(y)];
+
+                /**
+                  * Issue 470:
+                  * Unreliable fragments are excluded from partitioning.
+                  * This amounts to assigning an intensity value of "0" to the intensity of this fragment m/z.
+                  * This assumption is probably OK if fragments are conservatively excluded, and bad measurements
+                  * are low intensity anyway (which is probably the case).
+                  */
+
+                bool isFragmentReliableForPartitioning = fragObservedIntensity >= params->partFragMinIntensity;
+
+                if (params->partFragMaxCV > 0.0f || params->partFragMinNumScans > 0) {
+
+                    vector<float> fragIntensities;
+                    if (ms2Fragment->consensus->consensusPositionToScanIntensities.find(y) != ms2Fragment->consensus->consensusPositionToScanIntensities.end()) {
+                        fragIntensities = ms2Fragment->consensus->consensusPositionToScanIntensities[y];
+                    }
+
+                    isFragmentReliableForPartitioning = fragIntensities.size() >= static_cast<unsigned int>(params->partFragMinNumScans);
+
+                    if (params->partFragMaxCV > 0.0f && isFragmentReliableForPartitioning && fragIntensities.size() > 1) {
+
+                        StatisticsVector<float> statVector(fragIntensities);
+                        float cv = static_cast<float>(statVector.stddev())/static_cast<float>(statVector.mean());
+
+                        isFragmentReliableForPartitioning = cv <= params->partFragMaxCV;
+                    }
+                }
+
+                if (fragObservedIntensity >= params->ms2MinIntensity && isFragmentReliableForPartitioning) {
+
+                    string fragmentLabel = matchData->compound->fragment_labels[i];
+
+                    vector<string> fragmentLabelTags = DirectInfusionMatchAssessment::getFragmentLabelTags(fragmentLabel, params, false);
+
+                    bool isPartitionFragment = false;
+                    for (auto tag : partitionFragmentLabels) {
+                        if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), tag) != fragmentLabelTags.end()) {
+                            isPartitionFragment = true;
+                            break;
+                        }
+                    }
+
+                    if (isPartitionFragment) {
+
+                        int mzKey = static_cast<int>(mzUtils::mzToIntKey(static_cast<double>(matchData->compound->fragment_mzs[i])));
+
+                        if (debug) cout << "Partition fragment: " << fragmentLabel
+                                        <<   ", m/z=" << matchData->compound->fragment_mzs[i]
+                                        << ", intensity=" << fragObservedIntensity
+                                        << endl;
+
+                        if (partitionFragToIntensity.find(mzKey) == partitionFragToIntensity.end()) {
+                            partitionFragToIntensity.insert(make_pair(mzKey, fragObservedIntensity));
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
+    //STEP 2: determine SAF adjustments
 
     for (auto it = fragToMatchData.begin(); it != fragToMatchData.end(); ++it) {
 
         int fragId = it->first;
         unordered_set<shared_ptr<DirectInfusionMatchData>> compounds = it->second;
-
         set<long> ms1Ids{};
+
+        //skip over fragments that are not partition fragments
+        if (partitionFragToIntensity.find(fragId) == partitionFragToIntensity.end()) continue;
 
         if (compounds.size() > 1) {
 
@@ -2737,12 +2820,12 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
         }
     }
 
-    //STEP 2: Keep track of absolute partition fragment intensity
+    //STEP 3: Keep track of absolute partition fragment intensity
 
     //this map does not get cleared for each MS1 m/z
     map<shared_ptr<DirectInfusionMatchData>, float> partitionFragmentIntensitySum{};
 
-    //STEP 3: divide ms1 intensities between all compounds, based on fragments
+    //STEP 4: divide ms1 intensities between all compounds, based on fragments
 
     for (auto it = ms1MzToCompoundNames.begin(); it != ms1MzToCompoundNames.end(); ++it) {
 
@@ -2763,112 +2846,40 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
 
             //not all IDs have MS2 fragment matches
             vector<int> fragMzs{};
-            map<int, float> fragMzToIntensity{};
 
             if (matchDataToFrags.find(matchData) != matchDataToFrags.end()) {
 
                 fragMzs = matchDataToFrags.at(matchData);
-
-                vector<int> ranks = matchData->fragmentationMatchScore.ranks;
                 vector<int> partitionFrags{};
+                float effectiveFragIntensityCompound = 0.0f;
 
-                for (unsigned int i = 0; i < ranks.size(); i++) {
+                for (auto fragId : fragMzs) {
 
-                    int y = ranks[i];
-                    if (y == -1) continue;
+                    //If the intensity is missing, this fragment is not a partition fragment
+                    if (partitionFragToIntensity.find(fragId) == partitionFragToIntensity.end()) continue;
 
-                    float fragObservedIntensity = ms2Fragment->consensus->intensity_array[static_cast<unsigned int>(y)];
+                    partitionFrags.push_back(fragId);
 
-                    /**
-                      * Issue 470:
-                      * Unreliable fragments are excluded from partitioning.
-                      * This amounts to assigning an intensity value of "0" to the intensity of this fragment m/z.
-                      * This assumption is probably OK if fragments are conservatively excluded, and bad measurements
-                      * are low intensity anyway (which is probably the case).
-                      */
-                    bool isFragmentReliableForPartitioning = fragObservedIntensity >= params->partFragMinIntensity;
-
-                    if (params->partFragMaxCV > 0.0f || params->partFragMinNumScans > 0) {
-
-                        vector<float> fragIntensities;
-                        if (ms2Fragment->consensus->consensusPositionToScanIntensities.find(y) != ms2Fragment->consensus->consensusPositionToScanIntensities.end()) {
-                            fragIntensities = ms2Fragment->consensus->consensusPositionToScanIntensities[y];
-                        }
-
-                        isFragmentReliableForPartitioning = fragIntensities.size() >= static_cast<unsigned int>(params->partFragMinNumScans);
-
-                        if (params->partFragMaxCV > 0.0f && isFragmentReliableForPartitioning && fragIntensities.size() > 1) {
-
-                            StatisticsVector<float> statVector(fragIntensities);
-                            float cv = static_cast<float>(statVector.stddev())/static_cast<float>(statVector.mean());
-
-                            isFragmentReliableForPartitioning = cv <= params->partFragMaxCV;
-                        }
+                    //insert partition frags if old mapping not present, otherwise, update mapping with new value
+                    if (matchDataToPartitionFrags.find(matchData) == matchDataToPartitionFrags.end()) {
+                        matchDataToPartitionFrags.insert(make_pair(matchData, partitionFrags));
+                    } else {
+                        matchDataToPartitionFrags[matchData] = partitionFrags;
                     }
+                    pair<shared_ptr<DirectInfusionMatchData>, int> safKey = make_pair(matchData, fragId);
 
-                    if (fragObservedIntensity >= params->ms2MinIntensity && isFragmentReliableForPartitioning) {
+                    if (fragToSAFMultiplier.find(safKey) == fragToSAFMultiplier.end()) continue;
 
-                        string fragmentLabel = matchData->compound->fragment_labels[i];
+                    float effectiveFragIntensity = (partitionFragToIntensity.at(fragId) * fragToSAFMultiplier.at(safKey));
 
-                        vector<string> fragmentLabelTags = DirectInfusionMatchAssessment::getFragmentLabelTags(fragmentLabel, params, false);
+                    effectiveFragIntensityCompound += effectiveFragIntensity;
+                    totalEfectiveFragIntensityAllCompounds += effectiveFragIntensity;
 
-                        bool isPartitionFragment = false;
-                        for (auto tag : partitionFragmentLabels) {
-                            if (find(fragmentLabelTags.begin(), fragmentLabelTags.end(), tag) != fragmentLabelTags.end()) {
-                                isPartitionFragment = true;
-                                break;
-                            }
-                        }
-
-                        if (isPartitionFragment) {
-
-                            int mzKey = static_cast<int>(mzUtils::mzToIntKey(static_cast<double>(matchData->compound->fragment_mzs[i])));
-
-                            if (debug) cout << "Partition fragment: " << fragmentLabel
-                                            <<   ", m/z=" << matchData->compound->fragment_mzs[i]
-                                            << ", intensity=" << fragObservedIntensity
-                                            << endl;
-
-                            fragMzToIntensity.insert(make_pair(mzKey, fragObservedIntensity));
-                            partitionFrags.push_back(mzKey);
-
-                            if (partitionMzToMatchData.find(mzKey) == partitionMzToMatchData.end()) {
-                                partitionMzToMatchData.insert(make_pair(mzKey, vector<shared_ptr<DirectInfusionMatchData>>()));
-                            }
-
-                            partitionMzToMatchData[mzKey].push_back(matchData);
-                        }
-                    }
                 }
 
-                //insert partition frags if old mapping not present, otherwise, update mapping with new value
-                if (matchDataToPartitionFrags.find(matchData) == matchDataToPartitionFrags.end()) {
-                    matchDataToPartitionFrags.insert(make_pair(matchData, partitionFrags));
-                } else {
-                    matchDataToPartitionFrags[matchData] = partitionFrags;
-                }
+                compoundToTotalEffectiveFragIntensity.insert(make_pair(matchData, effectiveFragIntensityCompound));
+                partitionFragmentIntensitySum.insert(make_pair(matchData, effectiveFragIntensityCompound));
             }
-
-            float effectiveFragIntensityCompound = 0.0f;
-
-            for (auto fragId : fragMzs) {
-
-                if (fragMzToIntensity.find(fragId) == fragMzToIntensity.end()) continue;
-
-                pair<shared_ptr<DirectInfusionMatchData>, int> safKey = make_pair(matchData, fragId);
-
-                if (fragToSAFMultiplier.find(safKey) == fragToSAFMultiplier.end()) continue;
-
-                float effectiveFragIntensity = (fragMzToIntensity.at(fragId) * fragToSAFMultiplier.at(safKey));
-
-                effectiveFragIntensityCompound += effectiveFragIntensity;
-                totalEfectiveFragIntensityAllCompounds += effectiveFragIntensity;
-
-            }
-
-            compoundToTotalEffectiveFragIntensity.insert(make_pair(matchData, effectiveFragIntensityCompound));
-            partitionFragmentIntensitySum.insert(make_pair(matchData, effectiveFragIntensityCompound));
-
         }
 
         for (auto it2 = compoundToTotalEffectiveFragIntensity.begin(); it2 != compoundToTotalEffectiveFragIntensity.end(); ++it2) {
@@ -2891,6 +2902,7 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
     partitionInformation.matchDataToPartitionFrags = matchDataToPartitionFrags;
     partitionInformation.compoundsWithAmbiguousFragments = compoundsWithAmbiguousFragments;
     partitionInformation.partitionFragmentIntensitySum = partitionFragmentIntensitySum;
+    partitionInformation.partitionFragToIntensity = partitionFragToIntensity;
 
     return partitionInformation;
 }

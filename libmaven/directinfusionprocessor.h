@@ -959,6 +959,10 @@ struct PartitionInformation {
     //with intensities adjusted according to SAF (when appropriate).
     //To check which compounds do not have ambiguous fragments, see compoundsWithAmbiguousFragments.
     map<shared_ptr<DirectInfusionMatchData>, float> partitionFragmentIntensitySum{};
+
+    //m/z of fragments designated as partition fragments.  If a fragment is not a partition fragment,
+    //ambiguity rules do not apply to it.
+    map<int, float> partitionFragToIntensity{};
 };
 
 /**
