@@ -2877,6 +2877,13 @@ PartitionInformation DirectInfusionMatchInformation::getPartitionFractions(const
 
                 }
 
+                if (debug) {
+                    cout << "compound: " << matchData->compound->name
+                         << ", adduct: " << matchData->compound->adductString
+                         << ", effectiveFragIntensityCompound: " << effectiveFragIntensityCompound
+                         << endl;
+                }
+
                 compoundToTotalEffectiveFragIntensity.insert(make_pair(matchData, effectiveFragIntensityCompound));
                 partitionFragmentIntensitySum.insert(make_pair(matchData, effectiveFragIntensityCompound));
             }
