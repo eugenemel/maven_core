@@ -1213,10 +1213,16 @@ class Adduct {
 		float charge;
 		
         //given adduct mass, compute monoisotopic parent mass
-		inline float computeParentMass(float mz)  { return  (mz*abs(charge)-mass)/nmol; }
+        inline float computeParentMass(float mz)  {
+            float divisor = nmol != 0 ? nmol : 1; //Issue 495: Avoid divide-by-zero
+            return  (mz*abs(charge)-mass)/divisor;
+        }
 
         //given parent monoisotopic mass, compute adduct mass
-		inline float computeAdductMass(float pmz) { return (pmz*nmol+mass)/abs(charge); }
+        inline float computeAdductMass(float pmz) {
+            float divisor = charge != 0 ? abs(charge) : 1; //Issue 495: avoid divide-by-zero
+            return (pmz*nmol+mass)/divisor;
+        }
 
         static vector<Adduct*> loadAdducts(string filename);
 };
