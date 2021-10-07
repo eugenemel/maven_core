@@ -190,8 +190,8 @@ public:
      * ==================== */
     vector<string> ms1PartitionIntensityByFragments{"sn1","sn2"};
     bool isPreferSmallestScanMassWindow = true;
-    int minNumScansNearestScanNormalizedIntensity = 3;
-    int minNumScansMs1ScanIntensity = 3;
+    int minNumScansNearestScanNormalizedIntensity = 2;
+    int minNumScansMs1ScanIntensity = 2;
 
     /** ===================
       * PARTITION INTENSITY COMPUTATION
