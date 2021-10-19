@@ -702,7 +702,11 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
                                        const shared_ptr<DirectInfusionSearchParameters> params,
                                        const bool debug){
 
-    if (debug) cout << "DirectInfusionProcessor::processBlock(): block #" << blockNum << endl;
+    if (debug) cout << "DirectInfusionProcessor::processBlock(): block #"
+                    << blockNum << ", "
+                    << library.size()
+                    << "library entries."
+                    << endl;
 
     //need valid compounds to identify matches
     if (library.empty()) return nullptr;
