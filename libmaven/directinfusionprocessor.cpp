@@ -705,7 +705,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
     if (debug) cout << "DirectInfusionProcessor::processBlock(): block #"
                     << blockNum << ", "
                     << library.size()
-                    << "library entries."
+                    << " library entries."
                     << endl;
 
     //need valid compounds to identify matches
