@@ -42,20 +42,13 @@ shared_ptr<DirectInfusionSearchSet> DirectInfusionProcessor::getSearchSet(mzSamp
                 continue;
             }
 
-            float compoundMz = compound->precursorMz;
+            if (params->ms1IsRequireAdductPrecursorMatch && compound->adductString != adduct->name){
+                continue;
+            }
 
-            if (params->ms1IsRequireAdductPrecursorMatch){
-
-                if (compound->adductString != adduct->name){
-                    continue;
-                }
-
-                //TODO: this code works for compounds that do not have an 'adductString' set, but the adduct in the name.
-                //delete this eventually.
-//                if(compound->name.length() < adduct->name.length() ||
-//                   compound->name.compare (compound->name.length() - adduct->name.length(), adduct->name.length(), adduct->name) != 0){
-//                    continue;
-//                }
+            float compoundMz = 0;
+            if (compound->adductString == adduct->name && compound->precursorMz > 0) {
+                compoundMz = compound->precursorMz;
             } else {
                 compoundMz = adduct->computeAdductMass(massCalc.computeNeutralMass(compound->getFormula()));
             }
