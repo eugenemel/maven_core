@@ -918,11 +918,18 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
     float observedMs1Intensity = 0.0f;
     int ms1IntensityCoord = -1;
 
-    float precMz = compound->precursorMz;
 
-    if (!params->ms1IsRequireAdductPrecursorMatch) {
+    //Issue 504
+    if (params->ms1IsRequireAdductPrecursorMatch && compound->adductString != adduct->name){
+        directInfusionMatchAssessment->isDisqualifyThisMatch = true;
+        return directInfusionMatchAssessment;
+    }
 
-        //Compute this way instead of using compound->precursorMz to allow for possibility of matching compound to unexpected adduct
+    float precMz;
+
+    if (compound->precursorMz > 0 && compound->adductString == adduct->name) {
+        precMz = compound->precursorMz;
+    } else {
         MassCalculator massCalc;
         float compoundMz = adduct->computeAdductMass(static_cast<float>(massCalc.computeNeutralMass(compound->getFormula())));
         precMz = adduct->computeAdductMass(compoundMz);
