@@ -637,9 +637,9 @@ string LipidSummarizationUtils::getSummaryLevel4ToLevel2(LipidNameComponents lip
 
     string lipidNameSummarized("");
     if (lipidNameComponents.lipidClass == "Alkyl_PC") {
-        lipidNameSummarized.append("PC(e-");
+        lipidNameSummarized.append("PC(o-");
     } else if (lipidNameComponents.lipidClass == "Alkyl_PE") {
-        lipidNameSummarized.append("PE(e-");
+        lipidNameSummarized.append("PE(o-");
     } else {
         lipidNameSummarized.append(lipidNameComponents.lipidClass);
         lipidNameSummarized.append("(");
