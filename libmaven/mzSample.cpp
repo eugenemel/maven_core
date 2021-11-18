@@ -1186,7 +1186,7 @@ EIC* mzSample::getEIC(string srm) {
 
 //Issue 347
 //<precursor ion m/z, product ion m/z> for SRM scans
-EIC* mzSample::getEIC(pair<float, float> mzKey, mzSlice slice) {
+EIC* mzSample::getEIC(pair<float, float> mzKey, mzSlice* slice) {
 
     EIC* e = new EIC();
     e->sampleName = sampleName;
@@ -1204,7 +1204,7 @@ EIC* mzSample::getEIC(pair<float, float> mzKey, mzSlice slice) {
                 Scan* scan = scans[static_cast<unsigned long>(srmscans[i])];
 
                 //Issue 513: SRMs and zooming: only use when slice RTs make sense
-                if (slice.rtmin > 0 && slice.rtmax > 0 && (scan->rt < slice.rtmin || scan->rt > slice.rtmax)) continue;
+                if (slice && slice->rtmin > 0 && slice->rtmax > 0 && (scan->rt < slice->rtmin || scan->rt > slice->rtmax)) continue;
 
                 float maxMz=0;
                 float maxIntensity=0;
