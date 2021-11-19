@@ -1927,6 +1927,10 @@ string PeaksSearchParameters::encodeParams(){
     encodedParams = encodedParams + "eicMaxPeakGroupRtDiff" + "=" + to_string(eicMaxPeakGroupRtDiff) + ";";
     encodedParams = encodedParams + "eicNoNoiseObs" + "=" + to_string(eicNoNoiseObs) + ";";
 
+    //grouping
+    encodedParams = encodedParams + "grpVersion" + "=" + grpVersion + ";";
+    encodedParams = encodedParams + "grpMergeOverlap" + "=" + to_string(grpMergeOverlap) + ";";
+
     //quality
     encodedParams = encodedParams + "qualitySignalBaselineRatio" + "=" + to_string(qualitySignalBaselineRatio) + ";";
     encodedParams = encodedParams + "qualitySignalBlankRatio" + "=" + to_string(qualitySignalBlankRatio) + ";";
@@ -2107,6 +2111,14 @@ shared_ptr<PeaksSearchParameters> PeaksSearchParameters::decode(string encodedPa
     }
     if (decodedMap.find("eicNoNoiseObs") != decodedMap.end()){
         peaksSearchParameters->eicNoNoiseObs = stoi(decodedMap["eicNoNoiseObs"]);
+    }
+
+    //grouping
+    if (decodedMap.find("grpVersion") != decodedMap.end()) {
+        peaksSearchParameters->grpVersion = decodedMap["grpVersion"];
+    }
+    if (decodedMap.find("grpMergeOverlap") != decodedMap.end()) {
+        peaksSearchParameters->grpMergeOverlap = stof(decodedMap["grpMergeOverlap"]);
     }
 
     //quality

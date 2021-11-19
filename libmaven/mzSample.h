@@ -1539,6 +1539,10 @@ public:
     float eicMaxPeakGroupRtDiff = 0.5;
     int eicNoNoiseObs = 0;
 
+    //grouping
+    string grpVersion = "EIC::groupPeaksC()";
+    float grpMergeOverlap = 0.80f;
+
     //quality
     float qualitySignalBaselineRatio = 1.00;
     float qualitySignalBlankRatio = 1.00;
