@@ -808,7 +808,85 @@ Scan* PeakGroup::getAverageFragmentationScan(float productPpmTolr)  {
 
 //Issue 515
 Fragment* PeakGroup::getMs2LibrarySpectrum(shared_ptr<LibraryMs2SpectrumParameters> params, bool debug) {
-    // TODO
+
+    if (params->librarySpectrumType == LibraryMs2SpectrumFormationAlgorithm::CLOSEST_SCAN_ALL_SAMPLES) {
+
+        vector<Scan*> scans{};
+
+        for (Peak p : peaks) {
+
+            Scan *closestScan = nullptr;
+
+            for (Scan* scan : p.sample->scans) {
+                if (scan->rt > p.rtmax) break;
+                if (scan->rt < p.rtmin || scan->mslevel != 2) continue;
+
+                //precursor m/z in tolerance
+                if (mzUtils::ppmDist(scan->precursorMz, p.peakMz) <= params->ms2PpmTolr) {
+                    float rtDist = abs(scan->rt - p.rt);
+                    if (!closestScan || rtDist < abs(closestScan->rt - p.rt)) {
+                        closestScan = scan;
+                    }
+                }
+            }
+
+            if (closestScan) {
+                scans.push_back(closestScan);
+
+                if (debug) cout << p.sample->sampleName
+                                << ": #"
+                                << closestScan->scannum
+                                << "(MS2 rt ="
+                                << closestScan->rt
+                                << ", peak rt="
+                                << p.rt << ")"
+                                << endl;
+            }
+        }
+
+        if (debug) cout << "Found " << scans.size() << "MS2 scans." << endl;
+
+        if (scans.empty()) {
+            return nullptr;
+        } else {
+            Fragment *f = new Fragment(scans[0],
+                                      params->scanFilterMinFracIntensity,
+                                      params->scanFilterMinSNRatio,
+                                      params->scanFilterMaxNumberOfFragments,
+                                      params->scanFilterBaseLinePercentile,
+                                      params->scanFilterIsRetainFragmentsAbovePrecursorMz,
+                                      params->scanFilterPrecursorPurityPpm,
+                                      params->scanFilterMinIntensity);
+
+            if (scans.size() > 1) {
+                for (unsigned int i = 1; i < scans.size(); i++) {
+                    Fragment *brother = new Fragment(scans[i],
+                                                     params->scanFilterMinFracIntensity,
+                                                     params->scanFilterMinSNRatio,
+                                                     params->scanFilterMaxNumberOfFragments,
+                                                     params->scanFilterBaseLinePercentile,
+                                                     params->scanFilterIsRetainFragmentsAbovePrecursorMz,
+                                                     params->scanFilterPrecursorPurityPpm,
+                                                     params->scanFilterMinIntensity);
+
+                    f->addFragment(brother);
+                }
+
+                f->buildConsensus(params->consensusPpmTolr,
+                                  params->consensusIntensityAgglomerationType,
+                                  params->consensusIsIntensityAvgByObserved,
+                                  params->consensusIsNormalizeTo10K,
+                                  static_cast<int>(scans.size()), //override params->consensusMinNumMs2Scans
+                                  params->consensusMinFractionMs2Scans
+                                  );
+                f->consensus->sortByMz();
+
+                return f;
+            }
+        }
+
+    }
+
     return nullptr;
 }
 
