@@ -836,7 +836,7 @@ Fragment* PeakGroup::getMs2LibrarySpectrum(shared_ptr<LibraryMs2SpectrumParamete
                 if (debug) cout << p.sample->sampleName
                                 << ": #"
                                 << closestScan->scannum
-                                << "(MS2 rt ="
+                                << " (MS2 rt ="
                                 << closestScan->rt
                                 << ", peak rt="
                                 << p.rt << ")"
@@ -844,7 +844,7 @@ Fragment* PeakGroup::getMs2LibrarySpectrum(shared_ptr<LibraryMs2SpectrumParamete
             }
         }
 
-        if (debug) cout << "Found " << scans.size() << "MS2 scans." << endl;
+        if (debug) cout << "Found " << scans.size() << " MS2 scans." << endl;
 
         if (scans.empty()) {
             return nullptr;
