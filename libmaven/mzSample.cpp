@@ -2206,6 +2206,198 @@ shared_ptr<PeaksSearchParameters> PeaksSearchParameters::decode(string encodedPa
     return peaksSearchParameters;
 }
 
+string LibraryMs2SpectrumParameters::encodeParams(){
+
+    string encodedParams;
+
+    //START SearchParameters
+
+    //program level
+    encodedParams = encodedParams + "searchVersion" + "=" + searchVersion + ";";
+
+    //scan filter params
+    encodedParams = encodedParams + "scanFilterMinFracIntensity" + "=" + to_string(scanFilterMinFracIntensity) + ";";
+    encodedParams = encodedParams + "scanFilterMinSNRatio" + "=" + to_string(scanFilterMinSNRatio) + ";";
+    encodedParams = encodedParams + "scanFilterMaxNumberOfFragments" + "=" + to_string(scanFilterMaxNumberOfFragments) + ";";
+    encodedParams = encodedParams + "scanFilterBaseLinePercentile" + "=" + to_string(scanFilterBaseLinePercentile) + ";";
+    encodedParams = encodedParams + "scanFilterIsRetainFragmentsAbovePrecursorMz" + "=" + to_string(scanFilterIsRetainFragmentsAbovePrecursorMz) + ";";
+    encodedParams = encodedParams + "scanFilterPrecursorPurityPpm" + "=" + to_string(scanFilterPrecursorPurityPpm) + ";";
+    encodedParams = encodedParams + "scanFilterMinIntensity" + "=" + to_string(scanFilterMinIntensity) + ";";
+
+    //scan filter for MS1 scans
+    encodedParams = encodedParams + "scanFilterMs1MinRt" + "=" + to_string(scanFilterMs1MinRt) + ";";
+    encodedParams = encodedParams + "scanFilterMs1MaxRt" + "=" + to_string(scanFilterMs1MaxRt) + ";";
+
+    //scan filter for MS2 scans
+    encodedParams = encodedParams + "scanFilterMs2MinRt" + "=" + to_string(scanFilterMs2MinRt) + ";";
+    encodedParams = encodedParams + "scanFilterMs2MaxRt" + "=" + to_string(scanFilterMs2MaxRt) + ";";
+
+    //consensus spectrum params
+    encodedParams = encodedParams + "consensusIsIntensityAvgByObserved" + "=" + to_string(consensusIsIntensityAvgByObserved) + ";";
+    encodedParams = encodedParams + "consensusIsNormalizeTo10K" + "=" + to_string(consensusIsNormalizeTo10K) + ";";
+    string consensusIntensityAgglomerationTypeStr = "UNSPECIFIED";
+    if (consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
+        consensusIntensityAgglomerationTypeStr = "MEAN";
+    } else if (consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
+        consensusIntensityAgglomerationTypeStr = "MEDIAN";
+    }
+    encodedParams = encodedParams + "consensusIntensityAgglomerationType" + "=" + consensusIntensityAgglomerationTypeStr + ";";
+
+    //ms1 consensus spectrum params
+    encodedParams = encodedParams + "consensusMs1PpmTolr" + "=" + to_string(consensusMs1PpmTolr) + ";";
+    encodedParams = encodedParams + "consensusMinNumMs1Scans" + "=" + to_string(consensusMinNumMs1Scans) + ";";
+    encodedParams = encodedParams + "consensusMinFractionMs1Scans" + "=" + to_string(consensusMinFractionMs1Scans) + ";";
+
+    //ms2 consensus spectrum params
+    encodedParams = encodedParams + "consensusPpmTolr" + "=" + to_string(consensusPpmTolr) + ";";
+    encodedParams = encodedParams + "consensusMinNumMs2Scans" + "=" + to_string(consensusMinNumMs2Scans) + ";";
+    encodedParams = encodedParams + "consensusMinFractionMs2Scans" + "=" + to_string(consensusMinFractionMs2Scans) + ";";
+
+    // ms1 matching
+    encodedParams = encodedParams + "ms1PpmTolr" + "=" + to_string(ms1PpmTolr) + ";";
+
+    // ms2 search
+    encodedParams = encodedParams + "ms2MinNumMatches" + "=" + to_string(ms2MinNumMatches) + ";";
+    encodedParams = encodedParams + "ms2MinNumDiagnosticMatches" + "=" + to_string(ms2MinNumDiagnosticMatches) + ";";
+    encodedParams = encodedParams + "ms2MinNumUniqueMatches" + "=" + to_string(ms2MinNumUniqueMatches) + ";";
+    encodedParams = encodedParams + "ms2PpmTolr" + "=" + to_string(ms2PpmTolr) + ";";
+    encodedParams = encodedParams + "ms2MinIntensity" + "=" + to_string(ms2MinIntensity) + ";";
+
+    // END SearchParameters
+
+    // START LibraryMs2SpectrumParameters
+
+    //TODO
+
+    // END LibraryMs2SpectrumParameters
+
+    return encodedParams;
+}
+
+shared_ptr<LibraryMs2SpectrumParameters> LibraryMs2SpectrumParameters::decode(string encodedParams){
+
+    shared_ptr<LibraryMs2SpectrumParameters> libraryMs2SearchParameters = shared_ptr<LibraryMs2SpectrumParameters>(new LibraryMs2SpectrumParameters());
+
+    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams); //use semicolon (default)
+
+    //START SearchParameters
+
+    //program level
+    if (decodedMap.find("searchVersion") != decodedMap.end()) {
+        libraryMs2SearchParameters->searchVersion = decodedMap["searchVersion"];
+    }
+
+    //scan filter params
+    if (decodedMap.find("scanFilterMinFracIntensity") != decodedMap.end()){
+        libraryMs2SearchParameters->scanFilterMinFracIntensity = stof(decodedMap["scanFilterMinFracIntensity"]);
+    }
+    if (decodedMap.find("scanFilterMinSNRatio") != decodedMap.end()){
+        libraryMs2SearchParameters->scanFilterMinSNRatio = stof(decodedMap["scanFilterMinSNRatio"]);
+    }
+    if (decodedMap.find("scanFilterMaxNumberOfFragments") != decodedMap.end()) {
+        libraryMs2SearchParameters->scanFilterMaxNumberOfFragments = stoi(decodedMap["scanFilterMaxNumberOfFragments"]);
+    }
+    if (decodedMap.find("scanFilterBaseLinePercentile") != decodedMap.end()) {
+        libraryMs2SearchParameters->scanFilterBaseLinePercentile = stoi(decodedMap["scanFilterBaseLinePercentile"]);
+    }
+    if (decodedMap.find("scanFilterIsRetainFragmentsAbovePrecursorMz") != decodedMap.end()) {
+        libraryMs2SearchParameters->scanFilterIsRetainFragmentsAbovePrecursorMz = decodedMap["scanFilterIsRetainFragmentsAbovePrecursorMz"] == "1";
+    }
+    if (decodedMap.find("scanFilterPrecursorPurityPpm") != decodedMap.end()){
+        libraryMs2SearchParameters->scanFilterPrecursorPurityPpm = stof(decodedMap["scanFilterPrecursorPurityPpm"]);
+    }
+    if (decodedMap.find("scanFilterMinIntensity") != decodedMap.end()){
+        libraryMs2SearchParameters->scanFilterMinIntensity = stof(decodedMap["scanFilterMinIntensity"]);
+    }
+
+    //scan filter for MS1 scans
+    if (decodedMap.find("scanFilterMs1MinRt") != decodedMap.end()) {
+        libraryMs2SearchParameters->scanFilterMs1MinRt = stof(decodedMap["scanFilterMs1MinRt"]);
+    }
+    if (decodedMap.find("scanFilterMs1MaxRt") != decodedMap.end()) {
+        libraryMs2SearchParameters->scanFilterMs1MaxRt = stof(decodedMap["scanFilterMs1MaxRt"]);
+    }
+
+    //scan filter for MS2 scans
+    if (decodedMap.find("scanFilterMs2MinRt") != decodedMap.end()) {
+        libraryMs2SearchParameters->scanFilterMs2MinRt = stof(decodedMap["scanFilterMs2MinRt"]);
+    }
+    if (decodedMap.find("scanFilterMs2MaxRt") != decodedMap.end()) {
+        libraryMs2SearchParameters->scanFilterMs2MaxRt = stof(decodedMap["scanFilterMs2MaxRt"]);
+    }
+
+    //consensus spectrum params (all ms levels)
+
+    if (decodedMap.find("consensusIsIntensityAvgByObserved") != decodedMap.end()){
+        libraryMs2SearchParameters->consensusIsIntensityAvgByObserved = decodedMap["consensusIsIntensityAvgByObserved"] == "1";
+    }
+    if (decodedMap.find("consensusIsNormalizeTo10K") != decodedMap.end()){
+        libraryMs2SearchParameters->consensusIsNormalizeTo10K = decodedMap["consensusIsNormalizeTo10K"] == "1";
+    }
+    if (decodedMap.find("consensusIntensityAgglomerationType") != decodedMap.end()) {
+        string consensusIntensityAgglomerationTypeStr = decodedMap["consensusIntensityAgglomerationType"];
+        if (consensusIntensityAgglomerationTypeStr == "MEAN") {
+            libraryMs2SearchParameters->consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
+        } else if (consensusIntensityAgglomerationTypeStr == "MEDIAN") {
+            libraryMs2SearchParameters->consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
+        }
+    }
+
+    //ms1 consensus spectrum params
+    if (decodedMap.find("consensusMs1PpmTolr") != decodedMap.end()){
+        libraryMs2SearchParameters->consensusMs1PpmTolr = stof(decodedMap["consensusMs1PpmTolr"]);
+    }
+    if (decodedMap.find("consensusMinNumMs1Scans") != decodedMap.end()){
+        libraryMs2SearchParameters->consensusMinNumMs1Scans = stoi(decodedMap["consensusMinNumMs1Scans"]);
+    }
+    if (decodedMap.find("consensusMinFractionMs1Scans") != decodedMap.end()){
+        libraryMs2SearchParameters->consensusMinFractionMs1Scans = stof(decodedMap["consensusMinFractionMs1Scans"]);
+    }
+
+    //ms2 consensus spectrum params
+    if (decodedMap.find("consensusPpmTolr") != decodedMap.end()){
+        libraryMs2SearchParameters->consensusPpmTolr = stof(decodedMap["consensusPpmTolr"]);
+    }
+    if (decodedMap.find("consensusMinNumMs2Scans") != decodedMap.end()){
+        libraryMs2SearchParameters->consensusMinNumMs2Scans = stoi(decodedMap["consensusMinNumMs2Scans"]);
+    }
+    if (decodedMap.find("consensusMinFractionMs2Scans") != decodedMap.end()){
+        libraryMs2SearchParameters->consensusMinFractionMs2Scans = stof(decodedMap["consensusMinFractionMs2Scans"]);
+    }
+
+    // ms1 matching
+    if (decodedMap.find("ms1PpmTolr") != decodedMap.end()) {
+        libraryMs2SearchParameters->ms1PpmTolr = stof(decodedMap["ms1PpmTolr"]);
+    }
+
+    // ms2 search
+    if (decodedMap.find("ms2MinNumMatches") != decodedMap.end()) {
+        libraryMs2SearchParameters->ms2MinNumMatches = stoi(decodedMap["ms2MinNumMatches"]);
+    }
+    if (decodedMap.find("ms2MinNumDiagnosticMatches") != decodedMap.end()) {
+        libraryMs2SearchParameters->ms2MinNumDiagnosticMatches = stoi(decodedMap["ms2MinNumDiagnosticMatches"]);
+    }
+    if (decodedMap.find("ms2MinNumUniqueMatches") != decodedMap.end()) {
+        libraryMs2SearchParameters->ms2MinNumUniqueMatches = stoi(decodedMap["ms2MinNumUniqueMatches"]);
+    }
+    if (decodedMap.find("ms2PpmTolr") != decodedMap.end()) {
+        libraryMs2SearchParameters->ms2PpmTolr = stof(decodedMap["ms2PpmTolr"]);
+    }
+    if (decodedMap.find("ms2MinIntensity") != decodedMap.end()) {
+        libraryMs2SearchParameters->ms2MinIntensity = stof(decodedMap["ms2MinIntensity"]);
+    }
+
+    // END SearchParameters
+
+    // START LibraryMs2SpectrumParameters
+
+    // TODO
+
+    // END LibraryMs2SpectrumParameters
+
+    return libraryMs2SearchParameters;
+}
+
 
 set<mzSample*> SRMTransition::getSamples(){
        set<mzSample*> samples{};
