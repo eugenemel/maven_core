@@ -1614,8 +1614,25 @@ public:
     static shared_ptr<PeaksSearchParameters> decode(string encodedParams);
 };
 
+enum class LibraryMs2SpectrumFormationAlgorithm {
+    /**
+     * In each sample, select the MS2 scan closest to the RT of the peak, if
+     * there is an MS2 scan within the RT bounds of the sample's peak.
+     * Retain spectral peaks that are found in all samples.
+     */
+    CLOSEST_SCAN_ALL_SAMPLES,
+
+    /**
+     * Use all MS2 scans in RT ranges of all peaks for consensus spectrum.
+     * Rely on consensus formation parameters for further modifications.
+     */
+    ALL_SCANS
+};
+
 //Issue 515
 class LibraryMs2SpectrumParameters : public SearchParameters {
+
+    LibraryMs2SpectrumFormationAlgorithm librarySpectrumType = LibraryMs2SpectrumFormationAlgorithm::CLOSEST_SCAN_ALL_SAMPLES;
 
 public:
     string encodeParams();

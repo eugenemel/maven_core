@@ -2267,7 +2267,11 @@ string LibraryMs2SpectrumParameters::encodeParams(){
 
     // START LibraryMs2SpectrumParameters
 
-    //TODO
+    if (librarySpectrumType == LibraryMs2SpectrumFormationAlgorithm::CLOSEST_SCAN_ALL_SAMPLES) {
+        encodedParams = encodedParams + "librarySpectrumType" + "=" + "CLOSEST_SCAN_ALL_SAMPLES" + ";";
+    } else if (librarySpectrumType == LibraryMs2SpectrumFormationAlgorithm::ALL_SCANS) {
+        encodedParams = encodedParams + "librarySpectrumType" + "=" + "ALL_SCANS" + ";";
+    }
 
     // END LibraryMs2SpectrumParameters
 
@@ -2391,7 +2395,14 @@ shared_ptr<LibraryMs2SpectrumParameters> LibraryMs2SpectrumParameters::decode(st
 
     // START LibraryMs2SpectrumParameters
 
-    // TODO
+   if (decodedMap.find("librarySpectrumType") != decodedMap.end()) {
+       string librarySpectrumTypeStr = decodedMap["librarySpectrumType"];
+       if (librarySpectrumTypeStr == "CLOSEST_SCAN_ALL_SAMPLES") {
+           libraryMs2SearchParameters->librarySpectrumType = LibraryMs2SpectrumFormationAlgorithm::CLOSEST_SCAN_ALL_SAMPLES;
+       } else if (librarySpectrumTypeStr == "ALL_SCANS") {
+           libraryMs2SearchParameters->librarySpectrumType = LibraryMs2SpectrumFormationAlgorithm::ALL_SCANS;
+       }
+   }
 
     // END LibraryMs2SpectrumParameters
 
