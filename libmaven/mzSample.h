@@ -1632,9 +1632,10 @@ enum class LibraryMs2SpectrumFormationAlgorithm {
 //Issue 515
 class LibraryMs2SpectrumParameters : public SearchParameters {
 
+public:
+
     LibraryMs2SpectrumFormationAlgorithm librarySpectrumType = LibraryMs2SpectrumFormationAlgorithm::CLOSEST_SCAN_ALL_SAMPLES;
 
-public:
     string encodeParams();
     static shared_ptr<LibraryMs2SpectrumParameters> decode(string encodedParams);
 };
