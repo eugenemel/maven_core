@@ -817,6 +817,8 @@ Fragment* PeakGroup::getMs2LibrarySpectrum(shared_ptr<LibraryMs2SpectrumParamete
 
             Scan *closestScan = nullptr;
 
+            if (!p.sample) continue;
+
             for (Scan* scan : p.sample->scans) {
                 if (scan->rt > p.rtmax) break;
                 if (scan->rt < p.rtmin || scan->mslevel != 2) continue;
