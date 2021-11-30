@@ -806,6 +806,12 @@ Scan* PeakGroup::getAverageFragmentationScan(float productPpmTolr)  {
     return avgScan;
 }
 
+//Issue 515
+Fragment* PeakGroup::getMs2LibrarySpectrum(shared_ptr<LibraryMs2SpectrumParameters> params, bool debug) {
+    // TODO
+    return nullptr;
+}
+
 /**
  * Clustering function that organizes peak groups into clusters based on several independent metrics.
  *

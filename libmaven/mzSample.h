@@ -57,6 +57,8 @@ class Fragment;
 class Isotope;
 struct FragmentationMatchScore;
 
+class LibraryMs2SpectrumParameters;
+
 class PeaksSearchParameters;
 class LCLipidProcessor;
 
@@ -943,7 +945,12 @@ class PeakGroup {
         vector<Scan*> getRepresentativeFullScans();
         vector<Scan*> getFragmentationEvents();
         void findHighestPurityMS2Pattern(float precPpmTolr);
+
+        //Issue 515: This is an old method
         Scan* getAverageFragmentationScan(float productPpmTolr);
+
+        //Issue 515: Prefer this approach
+        Fragment* getMs2LibrarySpectrum(shared_ptr<LibraryMs2SpectrumParameters> params, bool debug=false);
 
         void computeFragPattern(float productPpmTolr);
         void computeDIFragPattern(shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters);
@@ -1605,6 +1612,14 @@ public:
 public:
     string encodeParams();
     static shared_ptr<PeaksSearchParameters> decode(string encodedParams);
+};
+
+//Issue 515
+class LibraryMs2SpectrumParameters : public SearchParameters {
+
+public:
+    string encodeParams();
+    static shared_ptr<LibraryMs2SpectrumParameters> decode(string encodedParams);
 };
 
 //Issue 455
