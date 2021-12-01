@@ -1159,10 +1159,22 @@ public:
     vector<Compound*> getChildren();
 };
 
+//Issue 515
+enum IdentifierType {
+    HMDB,
+    InChIKey,
+    CAS
+};
+
 //Issue 416
 class CompoundUtils {
+
+private:
+    CompoundUtils() {} // prevent instantiation
+
 public:
     static string getSummarizedCompoundId(Compound *compound, Adduct *adduct);
+    static string getIdentifierKey(IdentifierType identifierType);
 };
 
 class Isotope {

@@ -433,3 +433,16 @@ string CompoundUtils::getSummarizedCompoundId(Compound *compound, Adduct *adduct
     //fall back to empty string - ID not possible
     return "";
 }
+
+//Issue 515
+string CompoundUtils::getIdentifierKey(IdentifierType identifierType){
+    if (identifierType == IdentifierType::HMDB) {
+        return "HMDB";
+    } else if (identifierType == IdentifierType::CAS) {
+        return "CAS";
+    } else if (identifierType == IdentifierType::InChIKey) {
+        return "InChIKey";
+    }
+
+    return "Unknown_Identifier";
+}
