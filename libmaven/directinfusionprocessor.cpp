@@ -1924,6 +1924,20 @@ ScanQuantOutput DirectInfusionUtils::findNearestScanNormalizedIntensity(const ve
                             << endl;
         }
 
+        // scan has proper m/z range, but query m/z not found with enough intensity
+        if (debug && queryMz >= scan->getMinMz() && queryMz <= scan->getMaxMz() && queryMzIntensityCandidate <= params->ms1MinScanIntensity) {
+            cout << "Scan #"
+                 << scan->scannum << ", "
+                 << scan->filterString
+                 << ", minMz: " << scan->getMinMz()
+                 << ", maxMz: " << scan->getMaxMz()
+                 << ", mzWidth: " << (scan->getMaxMz()-scan->getMinMz())
+                 << ": query m/z=" << queryMz
+                 << ", query intensity="
+                 << to_string(queryMzIntensityCandidate)
+                 << endl;
+        }
+
         float standardMzIntensityCandidate = scan->findClosestMzIntensity(standardMz, params->ms1PpmTolr);
 
         if (standardMzIntensityCandidate > 0.0f && standardMzIntensityCandidate >= params->ms1MinScanIntensity) {
@@ -1940,6 +1954,20 @@ ScanQuantOutput DirectInfusionUtils::findNearestScanNormalizedIntensity(const ve
                             << ", standard intensity="
                             << to_string(standardMzIntensityCandidate)
                             << endl;
+        }
+
+        // scan has proper m/z range, but standard m/z not found with enough intensity
+        if (debug && standardMz >= scan->getMinMz() && standardMz <= scan->getMaxMz() && standardMzIntensityCandidate <= params->ms1MinScanIntensity) {
+            cout << "Scan #"
+                 << scan->scannum << ", "
+                 << scan->filterString
+                 << ", minMz: " << scan->getMinMz()
+                 << ", maxMz: " << scan->getMaxMz()
+                 << ", mzWidth: " << (scan->getMaxMz()-scan->getMinMz())
+                 << ": standard m/z=" << standardMz
+                 << ", standard intensity="
+                 << to_string(standardMzIntensityCandidate)
+                 << endl;
         }
 
     }
