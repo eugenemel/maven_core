@@ -850,6 +850,7 @@ DirectInfusionAnnotation* DirectInfusionProcessor::processBlock(int blockNum,
             directInfusionMatchData->observedMs1Intensity = observedMs1Intensity;
             directInfusionMatchData->ms1IntensityCoord = ms1IntensityCoord;
             directInfusionMatchData->observedMs1ScanIntensityQuant = observedMs1ScanIntensity;
+            directInfusionMatchData->observedMs1ScanIntensityQuantMPlusOne = matchAssessment->observedMs1ScanIntensityQuantMPlusOne;
 
             libraryMatches.push_back(directInfusionMatchData);
         }
@@ -986,8 +987,25 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
     ScanQuantOutput observedMs1ScanIntensityQuant = DirectInfusionUtils::getObservedMs1ScanIntensity(ms1Scans, precMz, params, debug);
 
     if (params->ms1IsFindPrecursorIon && !observedMs1ScanIntensityQuant.isValid){
-        directInfusionMatchAssessment->isDisqualifyThisMatch = true;
-        return directInfusionMatchAssessment; // will return with no matching fragments, 0 for every score.
+
+        //Issue 522: fall back to [M+1]
+        if (params->ms1IsMPlusOneValidPrecursor) {
+
+            ScanQuantOutput observedMs1ScanIntensityQuantMPlusOne = DirectInfusionUtils::getObservedMs1ScanIntensity(
+                        ms1Scans,
+                        (static_cast<float>(DirectInfusionUtils::C_13_MASS)+precMz),
+                        params,
+                        debug);
+
+            directInfusionMatchAssessment->observedMs1ScanIntensityQuantMPlusOne = observedMs1ScanIntensityQuantMPlusOne;
+            directInfusionMatchAssessment->isDisqualifyThisMatch = !observedMs1ScanIntensityQuantMPlusOne.isValid;
+        } else {
+            directInfusionMatchAssessment->isDisqualifyThisMatch = true;
+        }
+
+        if (directInfusionMatchAssessment->isDisqualifyThisMatch) {
+            return directInfusionMatchAssessment; // will return with no matching fragments, 0 for every score.
+        }
      }
 
     directInfusionMatchAssessment->observedMs1ScanIntensityQuant = observedMs1ScanIntensityQuant;
@@ -1165,13 +1183,25 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
 
             adduct = matchData->adduct;
             observedMs1Intensity += matchData->observedMs1Intensity;
-            observedMs1ScanIntensity += matchData->observedMs1ScanIntensityQuant.intensity;
 
-            ms1ScanIntensityRange = matchData->observedMs1ScanIntensityQuant.scanMzRange;
-            ms1ScanIntensityWidth = matchData->observedMs1ScanIntensityQuant.scanWidth;
+            //Issue 522: Use [M+1] quant, if appropriate
+            //Note that mixture of [M+0], [M+1] compounds to summarize
+            //promotes [M+1] quant measurements to [M+0], and mixes [M+0] measurements together
+            ScanQuantOutput compoundMs1ScanIntensityQuant = matchData->observedMs1ScanIntensityQuant;
+            if (!compoundMs1ScanIntensityQuant.isValid) {
+                compoundMs1ScanIntensityQuant = matchData->observedMs1ScanIntensityQuantMPlusOne;
+                if (!compoundMs1ScanIntensityQuant.isValid) {
+                    continue;
+                }
+            }
 
-            ms1ScanIntensityN += matchData->observedMs1ScanIntensityQuant.numMeasurements;
-            ms1ScanIntensityMAD += matchData->observedMs1ScanIntensityQuant.medianAbsoluteDeviation;
+            observedMs1ScanIntensity += compoundMs1ScanIntensityQuant.intensity;
+
+            ms1ScanIntensityRange = compoundMs1ScanIntensityQuant.scanMzRange;
+            ms1ScanIntensityWidth = compoundMs1ScanIntensityQuant.scanWidth;
+
+            ms1ScanIntensityN += compoundMs1ScanIntensityQuant.numMeasurements;
+            ms1ScanIntensityMAD += compoundMs1ScanIntensityQuant.medianAbsoluteDeviation;
 
             //Issue 288: intensity coordinate corresponds to the highest valid ms1 coord,
             //which will not always line up with the observed ms1 intensity.
@@ -1269,7 +1299,6 @@ unique_ptr<DirectInfusionMatchInformation> DirectInfusionProcessor::summarizeFra
             scanQuantOutput.scanMzRange = ms1ScanIntensityRange;
             scanQuantOutput.scanWidth = ms1ScanIntensityWidth;
             scanQuantOutput.medianAbsoluteDeviation = ms1ScanIntensityMAD;
-
             summarizedMatchData->observedMs1ScanIntensityQuant = scanQuantOutput;
 
         } else { //fall back to general summarization based on identical fragments
@@ -1783,6 +1812,7 @@ DirectInfusionGroupAnnotation* DirectInfusionGroupAnnotation::createByAveragePro
        groupMatchData->observedMs1Intensity = matchData->observedMs1Intensity;
        groupMatchData->ms1IntensityCoord = matchData->ms1IntensityCoord;
        groupMatchData->observedMs1ScanIntensityQuant = matchData->observedMs1ScanIntensityQuant;
+       groupMatchData->observedMs1ScanIntensityQuantMPlusOne = matchData->observedMs1ScanIntensityQuantMPlusOne;
 
        directInfusionGroupAnnotation->compounds.at(annotationMatchIndex) = groupMatchData;
 

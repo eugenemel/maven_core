@@ -82,6 +82,7 @@ public:
      * MS1 SEARCH RELATED
      * @param ms1IsRequireAdductPrecursorMatch:reference compound associated adduct must == query adduct
      * @param ms1IsFindPrecursorIon: only retain matches where precursor peak is found in MS1 scan(s).
+     * @param ms1IsMPlusOneValidPrecursor: if the [M+0] of a precursor peak cannot be found, fall back to look for the [M+1] (13C).
      * @param ms1MinIntensity: min intensity value for an MS1 spectral peak in a consensus MS1 spectrum to be considered real.
      * @param ms1ScanFilter: consider only MS1 scans that substring match in their filterString field to this
      * @param isRequireMonoisotopic: disqualify candidate MS1 peak if there is a peak exactly one 13C-12C width behind
@@ -94,6 +95,7 @@ public:
 
     bool ms1IsRequireAdductPrecursorMatch = true;
     bool ms1IsFindPrecursorIon = false;
+    bool ms1IsMPlusOneValidPrecursor = false;
     float ms1MinIntensity = 0;
     string ms1ScanFilter = "";
     bool ms1IsRequireMonoisotopic = true;
@@ -802,6 +804,10 @@ struct DirectInfusionMatchData {
     //Issue 309, 393
     ScanQuantOutput observedMs1ScanIntensityQuant;
 
+    //Issue 522
+    //Field is not filled out unless the [M+0] intensity is missing, e.g. ion coalescence
+    ScanQuantOutput observedMs1ScanIntensityQuantMPlusOne;
+
     //Issue 210
     int numUniqueFragments = 0;
     vector<bool> isFragmentUnique; //follows m/z-sorted Compound* fragment vectors
@@ -851,6 +857,10 @@ struct DirectInfusionMatchAssessment {
 
     //ms1 scans
     ScanQuantOutput observedMs1ScanIntensityQuant;
+
+    //Issue 522
+    //Field is not filled out unless the [M+0] intensity is missing, e.g. ion coalescence
+    ScanQuantOutput observedMs1ScanIntensityQuantMPlusOne;
 
     //ms2-associated
     FragmentationMatchScore fragmentationMatchScore;
