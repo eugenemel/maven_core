@@ -959,7 +959,7 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
         if (observedMs1Intensity > 0.0f && params->ms1IsRequireMonoisotopic) {
 
             float minMMinusOneMz = minMz - static_cast<float>(DirectInfusionUtils::C_13_MASS);
-            float maxMMinusOneMz = maxMz + static_cast<float>(DirectInfusionUtils::C_13_MASS);
+            float maxMMinusOneMz = maxMz - static_cast<float>(DirectInfusionUtils::C_13_MASS);
 
             auto lb = lower_bound(ms1Fragment->consensus->mzs.begin(), ms1Fragment->consensus->mzs.end(), minMMinusOneMz);
 
