@@ -393,6 +393,7 @@ public:
         //ms1 search params
         encodedParams = encodedParams + "ms1IsRequireAdductPrecursorMatch" + "=" + to_string(ms1IsRequireAdductPrecursorMatch) + ";";
         encodedParams = encodedParams + "ms1IsFindPrecursorIon" + "=" + to_string(ms1IsFindPrecursorIon) + ";";
+        encodedParams = encodedParams + "ms1IsMPlusOneValidPrecursor" + "=" + to_string(ms1IsMPlusOneValidPrecursor) + ";";
         encodedParams = encodedParams + "ms1PpmTolr" + "=" + to_string(ms1PpmTolr) + ";";
         encodedParams = encodedParams + "ms1MinIntensity" + "=" + to_string(ms1MinIntensity) + ";";
         encodedParams = encodedParams + "ms1ScanFilter" + "=" + ms1ScanFilter + ";";
@@ -699,6 +700,9 @@ public:
         }
         if (decodedMap.find("ms1IsFindPrecursorIon") != decodedMap.end()){
             directInfusionSearchParameters->ms1IsFindPrecursorIon = decodedMap["ms1IsFindPrecursorIon"] == "1";
+        }
+        if (decodedMap.find("ms1IsMPlusOneValidPrecursor") != decodedMap.end()) {
+            directInfusionSearchParameters->ms1IsMPlusOneValidPrecursor = decodedMap["ms1IsMPlusOneValidPrecursor"] == "1";
         }
         if (decodedMap.find("ms1PpmTolr") != decodedMap.end()){
             directInfusionSearchParameters->ms1PpmTolr = stof(decodedMap["ms1PpmTolr"]);
