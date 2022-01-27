@@ -752,7 +752,7 @@ public:
         }
         if (decodedMap.find("normClassMap") != decodedMap.end()) {
             string encodedNormClassMap = decodedMap["normClassMap"];
-            unordered_map<string, string> normClassMapValues = mzUtils::decodeParameterMap(encodedParams, INTERNAL_MAP_DELIMITER);
+            unordered_map<string, string> normClassMapValues = mzUtils::decodeParameterMap(encodedNormClassMap, INTERNAL_MAP_DELIMITER);
             directInfusionSearchParameters->normClassMap.clear();
             for (auto it = normClassMapValues.begin(); it != normClassMapValues.end(); ++it) {
                 directInfusionSearchParameters->normClassMap.insert(make_pair(it->first, it->second));
