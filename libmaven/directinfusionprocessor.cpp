@@ -999,6 +999,9 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
 
             directInfusionMatchAssessment->observedMs1ScanIntensityQuantMPlusOne = observedMs1ScanIntensityQuantMPlusOne;
             directInfusionMatchAssessment->isDisqualifyThisMatch = !observedMs1ScanIntensityQuantMPlusOne.isValid;
+
+            if (debug) cout << "Precursor ion is required, [M+0] not detected, falling back to [M+1]" << endl;
+
         } else {
             directInfusionMatchAssessment->isDisqualifyThisMatch = true;
         }
