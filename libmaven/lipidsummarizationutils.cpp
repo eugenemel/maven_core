@@ -37,8 +37,11 @@ LipidNameComponents LipidSummarizationUtils::getNameComponents(string lipidName)
 
     string lipidClass = lipidName.substr(0, chainStart);
 
-    if (lipidName.substr(3, 2) == "o-" || lipidName.substr(3,2) == "p-"){
+    //Issue 523: separate into Alkyl and Alkenyl subclasses
+    if (lipidName.substr(3, 2) == "o-") {
         lipidClass = "Alkyl_" + lipidClass;
+    } else if (lipidName.substr(3,2) == "p-") {
+        lipidClass = "Alkenyl_" + lipidClass;
     }
 
     //Issue 332: handle less well-formatted names - find the close paranthesis
@@ -636,9 +639,9 @@ string LipidSummarizationUtils::getSummaryLevel4ToLevel3(LipidNameComponents lip
 string LipidSummarizationUtils::getSummaryLevel4ToLevel2(LipidNameComponents lipidNameComponents) {
 
     string lipidNameSummarized("");
-    if (lipidNameComponents.lipidClass == "Alkyl_PC") {
+    if (lipidNameComponents.lipidClass == "Alkyl_PC" || lipidNameComponents.lipidClass == "Alkenyl_PC") {
         lipidNameSummarized.append("PC(o-");
-    } else if (lipidNameComponents.lipidClass == "Alkyl_PE") {
+    } else if (lipidNameComponents.lipidClass == "Alkyl_PE" || lipidNameComponents.lipidClass == "Alkenyl_PE") {
         lipidNameSummarized.append("PE(o-");
     } else {
         lipidNameSummarized.append(lipidNameComponents.lipidClass);
