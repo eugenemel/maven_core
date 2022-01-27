@@ -189,11 +189,15 @@ public:
      * @param minNumScansMs1ScanIntensity: Minimum number of scans require dto use this class of scans
      *       for scans ms1 observed intensity.  Classes of scans are defined by the m/z width of the window
      *       and the proximity of the query scan to the center of the window.
+     * @param normClassMap: lipid class to normalize analyte to when no IS of a lipid class is available.
+     *       <key, value>: <class_with_no_IS, class_with_IS>
+     *       Operates as a backup, so will default to looking for an IS of the correct lipid class first.
      * ==================== */
     vector<string> ms1PartitionIntensityByFragments{"sn1","sn2"};
     bool isPreferSmallestScanMassWindow = true;
     int minNumScansNearestScanNormalizedIntensity = 2;
     int minNumScansMs1ScanIntensity = 2;
+    map<string, string> normClassMap{{"Alkyl_PC","Alkenyl_PC"},{"Alkyl_PE","Alkenyl_PE"}};
 
     /** ===================
       * PARTITION INTENSITY COMPUTATION
@@ -410,6 +414,15 @@ public:
         encodedParams = encodedParams + "isPreferSmallestScanMassWindow" + "=" + to_string(isPreferSmallestScanMassWindow) + ";";
         encodedParams = encodedParams + "minNumScansNearestScanNormalizedIntensity" + "=" + to_string(minNumScansNearestScanNormalizedIntensity) +";";
         encodedParams = encodedParams + "minNumScansMs1ScanIntensity" + "=" + to_string(minNumScansMs1ScanIntensity) + ";";
+        encodedParams = encodedParams + "normClassMap" + "=" + "{";
+
+        for (auto it = normClassMap.begin(); it != normClassMap.end(); ++it) {
+            string key = it->first;
+            string value = it->second;
+            encodedParams = encodedParams + key + "=" + value + INTERNAL_MAP_DELIMITER;
+        }
+
+        encodedParams = encodedParams + "};";
 
         //DIMS intensity partitioning options
         encodedParams = encodedParams + "partFragMinNumScans" + "=" + to_string(partFragMinNumScans) + ";";
@@ -736,6 +749,14 @@ public:
         }
         if (decodedMap.find("minNumScansMs1ScanIntensity") != decodedMap.end()) {
             directInfusionSearchParameters->minNumScansMs1ScanIntensity = stoi(decodedMap["minNumScansMs1ScanIntensity"]);
+        }
+        if (decodedMap.find("normClassMap") != decodedMap.end()) {
+            string encodedNormClassMap = decodedMap["normClassMap"];
+            unordered_map<string, string> normClassMapValues = mzUtils::decodeParameterMap(encodedParams, INTERNAL_MAP_DELIMITER);
+            directInfusionSearchParameters->normClassMap.clear();
+            for (auto it = normClassMapValues.begin(); it != normClassMapValues.end(); ++it) {
+                directInfusionSearchParameters->normClassMap.insert(make_pair(it->first, it->second));
+            }
         }
 
         //DIMS intensity partitioning options
