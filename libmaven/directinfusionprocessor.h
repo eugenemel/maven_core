@@ -1650,7 +1650,7 @@ struct DIPipelineSampleData {
     constexpr static const float PREC_QUANT_MAP_NO_VALUE = -1.0f;
 
     //Issue 523: fall back to checking alternative key in some cases
-    float getPrecursorValue(pair<string, string>& class_adduct_key,
+    float getClassAdductMapValue(pair<string, string>& class_adduct_key,
                             map<pair<string, string>, float>& prec_quant_map,
                             shared_ptr<DirectInfusionSearchParameters> params) {
 
