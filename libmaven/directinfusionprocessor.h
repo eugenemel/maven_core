@@ -1635,27 +1635,29 @@ struct DIPipelineSampleData {
     //    <lipidClass, adductName>, normalized fragment intensity
     map<pair<string, string>, float> fragmentQuantMaxDiagnosticNormalizedIntensityMap{};
 
+    //    <compoundName, adductName>
     map<pair<string, string>, float> fragmentQuantAcylSumNormalizedIntensityMap{};
     map<pair<string, string>, float> fragmentQuantAcylSumSAFNormalizedIntensityMap{};
     map<pair<string, string>, float> fragmentQuantDiagnosticSumNormalizedIntensityMap{};
     map<pair<string, string>, float> fragmentQuantDiagnosticSumSAFNormalizedIntensityMap{};
 
-    //      <compound name, adduct name>
+    //    <compoundName, adductName>
     map<pair<string, string>, float> nearestScanNormalizedIntensityMap{};
 
     //Issue 492: needed for normalization downstream
+    //  <lipidClass, adductName>
     map<pair<string, string>, float> diagnosticFragmentSumISMap{};
     map<pair<string, string>, float> acylChainFragmentSumISMap{};
 
-    constexpr static const float PREC_QUANT_MAP_NO_VALUE = -1.0f;
+    constexpr static const float MAP_NO_VALUE = -1.0f;
 
     //Issue 523: fall back to checking alternative key in some cases
     float getClassAdductMapValue(pair<string, string>& class_adduct_key,
-                            map<pair<string, string>, float>& prec_quant_map,
+                            map<pair<string, string>, float>& class_adduct_map,
                             shared_ptr<DirectInfusionSearchParameters> params) {
 
-        if (prec_quant_map.find(class_adduct_key) != prec_quant_map.end()) {
-            return prec_quant_map.at(class_adduct_key);
+        if (class_adduct_map.find(class_adduct_key) != class_adduct_map.end()) {
+            return class_adduct_map.at(class_adduct_key);
         }
 
         string lipidClass = class_adduct_key.first;
@@ -1666,13 +1668,40 @@ struct DIPipelineSampleData {
             string substituteLipidClass = params->normClassMap.at(lipidClass);
             pair<string, string> alt_class_adduct_key = make_pair(substituteLipidClass, adductName);
 
-            if (prec_quant_map.find(alt_class_adduct_key) != prec_quant_map.end()) {
-                return prec_quant_map.at(alt_class_adduct_key);
+            if (class_adduct_map.find(alt_class_adduct_key) != class_adduct_map.end()) {
+                return class_adduct_map.at(alt_class_adduct_key);
             }
 
         }
 
-        return PREC_QUANT_MAP_NO_VALUE;
+        return MAP_NO_VALUE;
+    }
+
+    float getClassAdductFragmentMapValue(
+            tuple<string, string, string>& class_adduct_fragment_key,
+            map<tuple<string, string, string>, float>& class_adduct_fragment_map,
+            shared_ptr<DirectInfusionSearchParameters> params) {
+
+        if (class_adduct_fragment_map.find(class_adduct_fragment_key) != class_adduct_fragment_map.end()) {
+            return class_adduct_fragment_map.at(class_adduct_fragment_key);
+        }
+
+        string lipidClass = get<0>(class_adduct_fragment_key);
+        string adductName = get<1>(class_adduct_fragment_key);
+        string fragment = get<2>(class_adduct_fragment_key);
+
+        if (params->normClassMap.find(lipidClass) != params->normClassMap.end()) {
+
+            string substituteLipidClass = params->normClassMap.at(lipidClass);
+            tuple<string, string, string> alt_class_adduct_fragment_key = make_tuple(substituteLipidClass, adductName, fragment);
+
+            if (class_adduct_fragment_map.find(alt_class_adduct_fragment_key) != class_adduct_fragment_map.end()) {
+                return class_adduct_fragment_map.at(alt_class_adduct_fragment_key);
+            }
+
+        }
+
+        return MAP_NO_VALUE;
     }
 
 };
