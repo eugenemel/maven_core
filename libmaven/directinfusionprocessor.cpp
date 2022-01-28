@@ -1002,7 +1002,8 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
             directInfusionMatchAssessment->observedMs1ScanIntensityQuantMPlusOne = observedMs1ScanIntensityQuantMPlusOne;
             directInfusionMatchAssessment->isDisqualifyThisMatch = !observedMs1ScanIntensityQuantMPlusOne.isValid;
 
-            if (debug) cout << compound->name << " " << compound->adductString << ": Able to find [M+1]? " << (!observedMs1ScanIntensityQuantMPlusOne.isValid ? "TRUE" : "FALSE") << endl;
+            if (debug) cout << compound->name << " " << compound->adductString << ": Able to find [M+1]? " << (observedMs1ScanIntensityQuantMPlusOne.isValid ? "TRUE" : "FALSE") << endl;
+            if (debug) cout << compound->name << " " << compound->adductString << ": Match assessment retained? " << (directInfusionMatchAssessment->isDisqualifyThisMatch ? "FALSE" : "TRUE") << endl;
 
         } else {
             directInfusionMatchAssessment->isDisqualifyThisMatch = true;
