@@ -1617,7 +1617,6 @@ struct DIPipelineSampleData {
     map<pair<string, string>, float> precursorQuantRelativeFractions{};
     map<pair<string, string>, int> precursorQuantAdductIntensityRank{};
 
-
     // <lipidClass,  adducts>
     map<string, vector<string>> internalStandardAdducts{};
 
@@ -1647,6 +1646,34 @@ struct DIPipelineSampleData {
     //Issue 492: needed for normalization downstream
     map<pair<string, string>, float> diagnosticFragmentSumISMap{};
     map<pair<string, string>, float> acylChainFragmentSumISMap{};
+
+    constexpr static const float PREC_QUANT_MAP_NO_VALUE = -1.0f;
+
+    //Issue 523: fall back to checking alternative key in some cases
+    float getPrecursorValue(pair<string, string>& class_adduct_key,
+                            map<pair<string, string>, float>& prec_quant_map,
+                            shared_ptr<DirectInfusionSearchParameters> params) {
+
+        if (prec_quant_map.find(class_adduct_key) != prec_quant_map.end()) {
+            return prec_quant_map.at(class_adduct_key);
+        }
+
+        string lipidClass = class_adduct_key.first;
+        string adductName = class_adduct_key.second;
+
+        if (params->normClassMap.find(lipidClass) != params->normClassMap.end()) {
+
+            string substituteLipidClass = params->normClassMap.at(lipidClass);
+            pair<string, string> alt_class_adduct_key = make_pair(substituteLipidClass, adductName);
+
+            if (prec_quant_map.find(alt_class_adduct_key) != prec_quant_map.end()) {
+                return prec_quant_map.at(alt_class_adduct_key);
+            }
+
+        }
+
+        return PREC_QUANT_MAP_NO_VALUE;
+    }
 
 };
 
