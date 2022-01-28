@@ -991,6 +991,8 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
         //Issue 522: fall back to [M+1]
         if (params->ms1IsMPlusOneValidPrecursor) {
 
+            if (debug) cout << compound->name << " " << compound->adductString << ": Precursor ion is required, [M+0] not detected, falling back to [M+1]" << endl;
+
             ScanQuantOutput observedMs1ScanIntensityQuantMPlusOne = DirectInfusionUtils::getObservedMs1ScanIntensity(
                         ms1Scans,
                         (static_cast<float>(DirectInfusionUtils::C_13_MASS)+precMz),
@@ -1000,7 +1002,7 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
             directInfusionMatchAssessment->observedMs1ScanIntensityQuantMPlusOne = observedMs1ScanIntensityQuantMPlusOne;
             directInfusionMatchAssessment->isDisqualifyThisMatch = !observedMs1ScanIntensityQuantMPlusOne.isValid;
 
-            if (debug) cout << "Precursor ion is required, [M+0] not detected, falling back to [M+1]" << endl;
+            if (debug) cout << compound->name << " " << compound->adductString << ": Able to find [M+1]? " << (!observedMs1ScanIntensityQuantMPlusOne.isValid ? "TRUE" : "FALSE") << endl;
 
         } else {
             directInfusionMatchAssessment->isDisqualifyThisMatch = true;
@@ -3340,6 +3342,7 @@ ScanQuantOutput DirectInfusionUtils::getObservedMs1ScanIntensity(
         }
     }
 
+    if (debug) cout << "DirectInfusionUtils::getObservedMs1ScanIntensity() queryMz=" << queryMz << endl;
     if (debug) cout << "valid matches:" << endl;
 
     sort(matches.begin(), matches.end(),
