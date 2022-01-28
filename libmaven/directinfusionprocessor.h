@@ -1654,7 +1654,8 @@ struct DIPipelineSampleData {
     //Issue 523: fall back to checking alternative key in some cases
     float getClassAdductMapValue(pair<string, string>& class_adduct_key,
                             map<pair<string, string>, float>& class_adduct_map,
-                            shared_ptr<DirectInfusionSearchParameters> params) {
+                            shared_ptr<DirectInfusionSearchParameters> params,
+                            bool debug) {
 
         if (class_adduct_map.find(class_adduct_key) != class_adduct_map.end()) {
             return class_adduct_map.at(class_adduct_key);
@@ -1669,6 +1670,14 @@ struct DIPipelineSampleData {
             pair<string, string> alt_class_adduct_key = make_pair(substituteLipidClass, adductName);
 
             if (class_adduct_map.find(alt_class_adduct_key) != class_adduct_map.end()) {
+                if (debug){
+                    cout << "DIPipelineSampleData::getClassAdductMapValue(): "
+                         << "original key: (" << lipidClass << ", " << adductName << ") "
+                         << "subsitute key: (" << substituteLipidClass << ", " << adductName << ") "
+                         << "original key missing, subsitute key found with "
+                         << "intensity=" << class_adduct_map.at(alt_class_adduct_key)
+                         << endl;
+                }
                 return class_adduct_map.at(alt_class_adduct_key);
             }
 
@@ -1680,7 +1689,8 @@ struct DIPipelineSampleData {
     float getClassAdductFragmentMapValue(
             tuple<string, string, string>& class_adduct_fragment_key,
             map<tuple<string, string, string>, float>& class_adduct_fragment_map,
-            shared_ptr<DirectInfusionSearchParameters> params) {
+            shared_ptr<DirectInfusionSearchParameters> params,
+            bool debug) {
 
         if (class_adduct_fragment_map.find(class_adduct_fragment_key) != class_adduct_fragment_map.end()) {
             return class_adduct_fragment_map.at(class_adduct_fragment_key);
@@ -1696,6 +1706,14 @@ struct DIPipelineSampleData {
             tuple<string, string, string> alt_class_adduct_fragment_key = make_tuple(substituteLipidClass, adductName, fragment);
 
             if (class_adduct_fragment_map.find(alt_class_adduct_fragment_key) != class_adduct_fragment_map.end()) {
+                if (debug){
+                    cout << "DIPipelineSampleData::getClassAdductFragmentMapValue(): "
+                         << "original key: (" << lipidClass << ", " << adductName << ", " << fragment << ") "
+                         << "subsitute key: (" << substituteLipidClass << ", " << adductName << ", " << fragment << ") "
+                         << "original key missing, subsitute key found with "
+                         << "intensity=" << class_adduct_fragment_map.at(alt_class_adduct_fragment_key)
+                         << endl;
+                }
                 return class_adduct_fragment_map.at(alt_class_adduct_fragment_key);
             }
 
