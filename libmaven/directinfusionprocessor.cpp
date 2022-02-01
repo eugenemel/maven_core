@@ -926,14 +926,31 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
         return directInfusionMatchAssessment;
     }
 
-    float precMz;
+    float precMz = -1.0f;
 
-    if (compound->precursorMz > 0 && compound->adductString == adduct->name) {
-        precMz = compound->precursorMz;
-    } else {
-        MassCalculator massCalc;
-        float compoundMz = adduct->computeAdductMass(static_cast<float>(massCalc.computeNeutralMass(compound->getFormula())));
-        precMz = adduct->computeAdductMass(compoundMz);
+    //Issue 527: quantify based on a different m/z than the true precursor m/z
+    if (compound->metaDataMap.find("alternativeQuantPrecursorMz") != compound->metaDataMap.end()) {
+
+        string precMzString = compound->metaDataMap["alternativeQuantPrecursorMz"];
+
+        try {
+            precMz = stod(precMzString);
+        } catch (const::std::invalid_argument& ia) {
+            if (debug) cerr << "Could not parse alternativeQuantPrecursorMz ='" << precMzString << "'" << endl;
+            precMz = -1.0f;
+        }
+
+    }
+
+    //Issue 527: alternativeQuantPrecursorMz has highest priority
+    if (precMz <= 0.0f) {
+        if (compound->precursorMz > 0 && compound->adductString == adduct->name) {
+            precMz = compound->precursorMz;
+        } else {
+            MassCalculator massCalc;
+            float compoundMz = adduct->computeAdductMass(static_cast<float>(massCalc.computeNeutralMass(compound->getFormula())));
+            precMz = adduct->computeAdductMass(compoundMz);
+        }
     }
 
     if (ms1Fragment && ms1Fragment->consensus) {
@@ -3036,7 +3053,10 @@ void DirectInfusionMatchAssessment::computeMs2MatchAssessment(
                                const bool debug){
 
     Fragment t;
+
+    //Issue 527: precursorMz in this context is always the compound's true precursor m/z
     t.precursorMz = compound->precursorMz;
+
     t.mzs = compound->fragment_mzs;
     t.intensity_array = compound->fragment_intensity;
     t.fragment_labels = compound->fragment_labels;
