@@ -935,6 +935,12 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
 
         try {
             precMz = stod(precMzString);
+
+            if (debug) cerr << compound->name << " " << compound->adductString
+                            << " will use alternativeQuantPrecursorMz=" << precMz << " instead of original precMz=" << compound->precursorMz
+                            << " for MS1 quant."
+                            << endl;
+
         } catch (const::std::invalid_argument& ia) {
             if (debug) cerr << "Could not parse alternativeQuantPrecursorMz ='" << precMzString << "'" << endl;
             precMz = -1.0f;
