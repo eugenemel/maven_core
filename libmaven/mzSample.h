@@ -1173,6 +1173,13 @@ private:
     CompoundUtils() {} // prevent instantiation
 
 public:
+
+    //Isssue 527: convenience function
+    static bool isMPlusOnePrecursorHybrid(Compound *compound){
+        if (!compound) return false;
+        return (compound->name.find("_M1") != string::npos);
+    }
+
     static string getSummarizedCompoundId(Compound *compound, Adduct *adduct);
     static string getIdentifierKey(IdentifierType identifierType);
 };
