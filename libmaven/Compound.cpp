@@ -434,6 +434,44 @@ string CompoundUtils::getSummarizedCompoundId(Compound *compound, Adduct *adduct
     return "";
 }
 
+double CompoundUtils::getMS1QuantPrecursorMz(Compound *compound, Adduct *adduct, bool debug) {
+
+    //Do not try to compute precursor mz without both compound and adduct.
+    double precMz = -1.0;
+    if (!compound || !adduct) return precMz;
+
+    // [1] Highest priority: alternativeQuantPrecursorMz
+    if (compound->metaDataMap.find("alternativeQuantPrecursorMz") != compound->metaDataMap.end()){
+        string alternativeQuantPrecursorMz = compound->metaDataMap["alternativeQuantPrecursorMz"];
+
+        try {
+            precMz = stod(alternativeQuantPrecursorMz);
+
+            if (debug) cerr << compound->name << " " << compound->adductString
+                            << " will use alternativeQuantPrecursorMz=" << precMz << " instead of original precMz=" << compound->precursorMz
+                            << " for MS1 quant."
+                            << endl;
+
+            return precMz;
+
+        } catch (const::std::invalid_argument& ia) {
+            if (debug) cerr << "Could not parse alternativeQuantPrecursorMz ='" << alternativeQuantPrecursorMz << "'" << endl;
+        }
+    }
+
+    //[2] Second priority: manually predetermined precursorMz
+    if (compound->precursorMz > 0 && compound->adductString == adduct->name) {
+        return static_cast<double>(compound->precursorMz);
+    }
+
+    //[3] lowest priority: compute adduct mass from molecular formula and adduct information.
+    MassCalculator massCalc;
+    float compoundMz = adduct->computeAdductMass(static_cast<float>(massCalc.computeNeutralMass(compound->getFormula())));
+    precMz = static_cast<double>(adduct->computeAdductMass(compoundMz));
+
+    return precMz;
+}
+
 //Issue 515
 string CompoundUtils::getIdentifierKey(IdentifierType identifierType){
     if (identifierType == IdentifierType::HMDB) {

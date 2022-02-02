@@ -1180,6 +1180,7 @@ public:
         return (compound->name.find("_M1") != string::npos);
     }
 
+    static double getMS1QuantPrecursorMz(Compound *compound, Adduct* adduct, bool debug);
     static string getSummarizedCompoundId(Compound *compound, Adduct *adduct);
     static string getIdentifierKey(IdentifierType identifierType);
 };
