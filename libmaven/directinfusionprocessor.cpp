@@ -926,38 +926,8 @@ unique_ptr<DirectInfusionMatchAssessment> DirectInfusionProcessor::assessMatch(
         return directInfusionMatchAssessment;
     }
 
-    float precMz = -1.0f;
-
-    //Issue 527: quantify based on a different m/z than the true precursor m/z
-    if (compound->metaDataMap.find("alternativeQuantPrecursorMz") != compound->metaDataMap.end()) {
-
-        string precMzString = compound->metaDataMap["alternativeQuantPrecursorMz"];
-
-        try {
-            precMz = stod(precMzString);
-
-            if (debug) cerr << compound->name << " " << compound->adductString
-                            << " will use alternativeQuantPrecursorMz=" << precMz << " instead of original precMz=" << compound->precursorMz
-                            << " for MS1 quant."
-                            << endl;
-
-        } catch (const::std::invalid_argument& ia) {
-            if (debug) cerr << "Could not parse alternativeQuantPrecursorMz ='" << precMzString << "'" << endl;
-            precMz = -1.0f;
-        }
-
-    }
-
-    //Issue 527: alternativeQuantPrecursorMz has highest priority
-    if (precMz <= 0.0f) {
-        if (compound->precursorMz > 0 && compound->adductString == adduct->name) {
-            precMz = compound->precursorMz;
-        } else {
-            MassCalculator massCalc;
-            float compoundMz = adduct->computeAdductMass(static_cast<float>(massCalc.computeNeutralMass(compound->getFormula())));
-            precMz = adduct->computeAdductMass(compoundMz);
-        }
-    }
+    //Issue 527
+    float precMz = static_cast<float>(CompoundUtils::getMS1QuantPrecursorMz(compound, adduct, debug));
 
     if (ms1Fragment && ms1Fragment->consensus) {
 
