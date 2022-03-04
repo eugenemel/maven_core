@@ -2572,7 +2572,7 @@ string LoopInjectionMs2SpectrumParameters::encodeParams() {
         encodedParams = encodedParams + collisionEnergy + INTERNAL_MAP_DELIMITER;
     }
     encodedParams = encodedParams + "};";
-    encodedParams = encodedParams + "precPpmTolr" + "=" + to_string(precPpmTolr);
+    encodedParams = encodedParams + "precPpmTolr" + "=" + to_string(precPpmTolr) + ";";
 
     return encodedParams;
 }
