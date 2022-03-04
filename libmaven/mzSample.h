@@ -1446,7 +1446,48 @@ public:
 
 //Issue 530
 class LoopInjectionMs2SpectrumParameters {
-    //TODO
+
+public:
+
+    /** =======================
+     * SCAN FILTER ASSOCIATED
+     * All parameters are arguments of Fragment::Fragment() constructor.
+     * ========================*/
+    float scanFilterMinFracIntensity = 0;
+    float scanFilterMinSNRatio = 0;
+    int scanFilterMaxNumberOfFragments = -1;
+    int scanFilterBaseLinePercentile = 0;
+    bool scanFilterIsRetainFragmentsAbovePrecursorMz = true;
+    float scanFilterPrecursorPurityPpm = 0;
+    float scanFilterMinIntensity = 0;
+
+    /** =======================
+     * CONSENSUS SPECTRUM ASSOCIATED
+     * All parameters are arguments Fragment::buildConsensus() method.
+     * ========================*/
+    Fragment::ConsensusIntensityAgglomerationType consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
+    bool consensusIsIntensityAvgByObserved = true;
+    bool consensusIsNormalizeTo10K = false;
+
+    //consensus spectrum formation of MS2 scans
+    float consensusPpmTolr = 10;
+    int consensusMinNumMs2Scans = 0;
+    float consensusMinFractionMs2Scans = 0;
+    bool consensusIsRetainOriginalScanIntensities = false;
+
+    /**
+     * Other scan filters
+     * @brief scanMinTIC
+     */
+    float scanMinTIC = 0;
+    vector<string> scanCollisionEnergies{};
+
+    //RESERVED DELIMITERS - DO NOT CHANGE!
+    static constexpr const char* const INTERNAL_MAP_DELIMITER = "|,|";
+
+public:
+    string encodeParams();
+    static shared_ptr<LoopInjectionMs2SpectrumParameters> decode(string encodedParams);
 };
 
 /**
