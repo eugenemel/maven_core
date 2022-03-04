@@ -2560,6 +2560,7 @@ string LoopInjectionMs2SpectrumParameters::encodeParams() {
     for (auto collisionEnergy : scanCollisionEnergies) {
         encodedParams = encodedParams + collisionEnergy + INTERNAL_MAP_DELIMITER;
     }
+    encodedParams = encodedParams + "};";
     return encodedParams;
 }
 
