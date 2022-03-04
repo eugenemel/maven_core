@@ -2531,10 +2531,50 @@ Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<Lo
 
     for (auto scan : scans) {
         if (scan->mslevel != 2) continue;
-        //if (mzUtils::ppmDist(scan->precursorMz, precursorMz) >= params->scan)
+        if (mzUtils::ppmDist(scan->precursorMz, precursorMz) >= params->precPpmTolr) continue;
+        if (std::find(validCollisionEnergies.begin(), validCollisionEnergies.end(), scan->collisionEnergy) == validCollisionEnergies.end()) continue;
+
+        scansForConsensus.push_back(scan);
     }
-    //TODO
-    return nullptr;
+
+    Fragment *fragment = nullptr;
+    for (auto & scan: scansForConsensus) {
+        if (!fragment) {
+            fragment = new Fragment(scan,
+                                       params->scanFilterMinFracIntensity,
+                                       params->scanFilterMinSNRatio,
+                                       params->scanFilterMaxNumberOfFragments,
+                                       params->scanFilterBaseLinePercentile,
+                                       params->scanFilterIsRetainFragmentsAbovePrecursorMz,
+                                       params->scanFilterPrecursorPurityPpm,
+                                       params->scanFilterMinIntensity);
+        } else {
+            Fragment *ms1Brother = new Fragment(scan,
+                                             params->scanFilterMinFracIntensity,
+                                             params->scanFilterMinSNRatio,
+                                             params->scanFilterMaxNumberOfFragments,
+                                             params->scanFilterBaseLinePercentile,
+                                             params->scanFilterIsRetainFragmentsAbovePrecursorMz,
+                                             params->scanFilterPrecursorPurityPpm,
+                                             params->scanFilterMinIntensity);
+
+            fragment->addFragment(ms1Brother);
+        }
+    }
+
+    if (fragment){
+        fragment->buildConsensus(params->consensusPpmTolr,
+                                    params->consensusIntensityAgglomerationType,
+                                    params->consensusIsIntensityAvgByObserved,
+                                    params->consensusIsNormalizeTo10K,
+                                    params->consensusMinNumMs2Scans,
+                                    params->consensusMinFractionMs2Scans
+                                    );
+
+        fragment->consensus->sortByMz();
+    }
+
+    return fragment;
 }
 
 string LoopInjectionMs2SpectrumParameters::encodeParams() {
