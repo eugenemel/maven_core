@@ -2518,3 +2518,10 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
 
     return isotopeParameters;
 }
+
+//Issue 530
+Fragment* getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<LoopInjectionMs2SpectrumParameters> params){
+
+    //TODO
+    return nullptr;
+}

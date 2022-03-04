@@ -58,6 +58,7 @@ class Isotope;
 struct FragmentationMatchScore;
 
 class LibraryMs2SpectrumParameters;
+class LoopInjectionMs2SpectrumParameters;
 
 class PeaksSearchParameters;
 class LCLipidProcessor;
@@ -460,6 +461,8 @@ public:
     EIC* getBIC(float,float,int);		//get Base Peak Chromatogram
     double getMS1PrecursorMass(Scan* ms2scan,float ppm);
     vector<Scan*> getFragmentationEvents(mzSlice* slice);
+
+    Fragment* getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<LoopInjectionMs2SpectrumParameters> params);
 
     deque <Scan*> scans;
     int sampleId;
@@ -1439,6 +1442,11 @@ public:
             if (isotopes[i]->deconvolutedMass > maxIsotopeMass) maxIsotopeMass=isotopes[i]->deconvolutedMass;
         }
     }
+};
+
+//Issue 530
+class LoopInjectionMs2SpectrumParameters {
+    //TODO
 };
 
 /**
