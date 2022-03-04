@@ -2522,6 +2522,17 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
 //Issue 530
 Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<LoopInjectionMs2SpectrumParameters> params){
 
+    vector<float> validCollisionEnergies{};
+    for (auto collisionEnergy : params->scanCollisionEnergies) {
+        validCollisionEnergies.push_back(stof(collisionEnergy));
+    }
+
+    vector<Scan*> scansForConsensus{};
+
+    for (auto scan : scans) {
+        if (scan->mslevel != 2) continue;
+        //if (mzUtils::ppmDist(scan->precursorMz, precursorMz) >= params->scan)
+    }
     //TODO
     return nullptr;
 }
@@ -2554,13 +2565,15 @@ string LoopInjectionMs2SpectrumParameters::encodeParams() {
     encodedParams = encodedParams + "consensusMinFractionMs2Scans" + "=" + to_string(consensusMinFractionMs2Scans) + ";";
     encodedParams = encodedParams + "consensusIsRetainOriginalScanIntensities" + "=" + to_string(consensusIsRetainOriginalScanIntensities) + ";";
 
-    //Other scan filters
+    //Other parameters
     encodedParams = encodedParams + "scanMinTIC" + "=" + to_string(scanMinTIC) + ";";
     encodedParams = encodedParams + "scanCollisionEnergies" + "=" + "{";
     for (auto collisionEnergy : scanCollisionEnergies) {
         encodedParams = encodedParams + collisionEnergy + INTERNAL_MAP_DELIMITER;
     }
     encodedParams = encodedParams + "};";
+    encodedParams = encodedParams + "precPpmTolr" + "=" + to_string(precPpmTolr);
+
     return encodedParams;
 }
 
@@ -2618,13 +2631,16 @@ shared_ptr<LoopInjectionMs2SpectrumParameters> LoopInjectionMs2SpectrumParameter
         loopInjectionMs2SpectrumParameters->consensusMinFractionMs2Scans = stof(decodedMap["consensusMinFractionMs2Scans"]);
     }
 
-    //Other scan filters
+    //Other parameters
     if (decodedMap.find("scanMinTIC") != decodedMap.end()) {
         loopInjectionMs2SpectrumParameters->scanMinTIC = stof(decodedMap["scanMinTIC"]);
     }
     if (decodedMap.find("scanCollisionEnergies") != decodedMap.end()){
         string encodedScanCollisionEnergies = decodedMap["scanCollisionEnergies"];
         loopInjectionMs2SpectrumParameters->scanCollisionEnergies = mzUtils::decodeParameterVector(encodedScanCollisionEnergies, INTERNAL_MAP_DELIMITER);
+    }
+    if (decodedMap.find("precPpmTolr") != decodedMap.end()) {
+        loopInjectionMs2SpectrumParameters->precPpmTolr = stof(decodedMap["precPpmTolr"]);
     }
 
     return loopInjectionMs2SpectrumParameters;
