@@ -2574,6 +2574,23 @@ Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<Lo
         fragment->consensus->sortByMz();
     }
 
+    if (params->postConsensusMinIntensity > 0) {
+
+        vector<float> mzs_filtered;
+        vector<float> intensity_array_filtered;
+
+        for (unsigned int i = 0; i < fragment->consensus->nobs(); i++) {
+            if (fragment->consensus->intensity_array[i] >= params->postConsensusMinIntensity) {
+                mzs_filtered.push_back(fragment->consensus->mzs[i]);
+                intensity_array_filtered.push_back(fragment->consensus->intensity_array[i]);
+            }
+        }
+
+        fragment->consensus->mzs = mzs_filtered;
+        fragment->consensus->intensity_array = intensity_array_filtered;
+
+    }
+
     return fragment;
 }
 
