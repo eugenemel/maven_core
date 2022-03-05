@@ -2613,6 +2613,7 @@ string LoopInjectionMs2SpectrumParameters::encodeParams() {
     }
     encodedParams = encodedParams + "};";
     encodedParams = encodedParams + "precPpmTolr" + "=" + to_string(precPpmTolr) + ";";
+    encodedParams = encodedParams + "postConsensusMinIntensity" + "=" + to_string(postConsensusMinIntensity) + ";";
 
     return encodedParams;
 }
@@ -2681,6 +2682,9 @@ shared_ptr<LoopInjectionMs2SpectrumParameters> LoopInjectionMs2SpectrumParameter
     }
     if (decodedMap.find("precPpmTolr") != decodedMap.end()) {
         loopInjectionMs2SpectrumParameters->precPpmTolr = stof(decodedMap["precPpmTolr"]);
+    }
+    if (decodedMap.find("postConsensusMinIntensity") != decodedMap.end()) {
+        loopInjectionMs2SpectrumParameters->postConsensusMinIntensity = stof(decodedMap["postConsensusMinIntensity"]);
     }
 
     return loopInjectionMs2SpectrumParameters;
