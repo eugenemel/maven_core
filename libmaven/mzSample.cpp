@@ -550,7 +550,7 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
 
         //Issue 530
         float collisionEnergy = 0;
-        xml_node activation = spectrum.first_element_by_path("spectrumDesc/precursorList/precursor/activation");
+        xml_node activation = spectrum.first_element_by_path("precursorList/precursor/activation");
         for( xml_node cvParam= activation.child("cvParam"); cvParam; cvParam= cvParam.next_sibling("cvParam")) {
             if (strncasecmp(cvParam.attribute("name").value(),"CollisionEnergy",11) == 0  ||
                     strncasecmp(cvParam.attribute("name").value(),"collision energy",12) == 0) {
