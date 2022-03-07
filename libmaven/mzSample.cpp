@@ -548,6 +548,16 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
         xml_node binaryDataArrayList = spectrum.child("binaryDataArrayList");
         if( ! binaryDataArrayList or binaryDataArrayList.empty()) continue;
 
+        //Issue 530
+        float collisionEnergy = 0;
+        xml_node activation = spectrum.first_element_by_path("spectrumDesc/precursorList/precursor/activation");
+        for( xml_node cvParam= activation.child("cvParam"); cvParam; cvParam= cvParam.next_sibling("cvParam")) {
+            if (strncasecmp(cvParam.attribute("name").value(),"CollisionEnergy",11) == 0  ||
+                    strncasecmp(cvParam.attribute("name").value(),"collision energy",12) == 0) {
+                collisionEnergy=cvParam.attribute("value").as_float();
+            }
+        }
+
         for(xml_node binaryDataArray= binaryDataArrayList.child("binaryDataArray");
                 binaryDataArray; binaryDataArray=binaryDataArray.next_sibling("binaryDataArray")) {
                 if( ! binaryDataArray or binaryDataArray.empty()) continue;
@@ -580,6 +590,7 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
         scan->lowerLimitMz = lowerLimitMz;
         scan->upperLimitMz = upperLimitMz;
         scan->ms1PrecursorForMs3 = ms1PrecursorForMs3;
+        scan->collisionEnergy = collisionEnergy;
 
         if (isolationWindowLowerOffset>0) scan->isolationWindowLowerOffset = isolationWindowLowerOffset;
         if (isolationWindowUpperOffset>0) scan->isolationWindowUpperOffset = isolationWindowUpperOffset;
@@ -676,7 +687,8 @@ void mzSample::parseMzData(const char* filename) {
 
         xml_node activation = spectrum.first_element_by_path("spectrumDesc/precursorList/precursor/activation");
 		for( xml_node cvParam= activation.child("cvParam"); cvParam; cvParam= cvParam.next_sibling("cvParam")) {
-			if (strncasecmp(cvParam.attribute("name").value(),"CollisionEnergy",10) == 0 ) {
+            if (strncasecmp(cvParam.attribute("name").value(),"CollisionEnergy",11) == 0  ||
+                    strncasecmp(cvParam.attribute("name").value(),"collision energy",12) == 0) { // Issue 530
 				collisionEnergy=cvParam.attribute("value").as_float();
 			}
 		}
@@ -798,7 +810,12 @@ Scan* mzSample::parseMzXMLScan(const xml_node& mzxml_scan_node, int scannum) {
         if (strncasecmp(attr.name(),"filterLine",9) == 0) filterLine = attr.value();
         if (strncasecmp(attr.name(),"mslevel",5) == 0 ) msLevel = string2integer(attr.value());
         if (strncasecmp(attr.name(),"basePeakMz",9) == 0 ) productMz = string2float(attr.value());
-        if (strncasecmp(attr.name(),"collisionEnergy",12) == 0 ) collisionEnergy= string2float(attr.value());
+
+        //Issue 530: support "collision energy" as well as "collisionEnergy" named attributes
+        if (strncasecmp(attr.name(),"collisionEnergy",12) == 0 || strncasecmp(attr.name(),"collision energy",13) == 0){
+            collisionEnergy= string2float(attr.value());
+        }
+
         if (strncasecmp(attr.name(),"scanType",8) == 0 ) scanType = attr.value();
         if (strncasecmp(attr.name(),"centroided",10) == 0 ) centroided = string2integer(attr.value());
 
