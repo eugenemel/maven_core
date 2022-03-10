@@ -2536,81 +2536,130 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     return isotopeParameters;
 }
 
+/**
+  * Scans of the same collision energy look approximately the same,
+  * so first build consensus spectra for all of the same collision energy.
+  *
+  * Combine Fragment* with the same collision energy, using the preserved raw intensities
+  * The m/z from the different collision energy provide the bins.  When necessary, combine
+  * bins
+  *
+  * Consider a merge() function to make this easier?
+  *
+  * blocking by collision energy probably makes the most sense (either median or mean),
+  * then sum of all intensities for consensus
+  * --> a single measurement for each collision energy, followed by sum of each collision
+  * energy for overall.
+  * --> don't do any normalization until the end
+  */
 //Issue 530
 Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<LoopInjectionMs2SpectrumParameters> params){
 
-    vector<float> validCollisionEnergies{};
-    for (auto collisionEnergy : params->scanCollisionEnergies) {
-        validCollisionEnergies.push_back(stof(collisionEnergy));
-    }
-
-    vector<Scan*> scansForConsensus{};
+    map<string, vector<Scan*>> collisionEnergyToScans{};
+    vector<Fragment*> singleCollisionEnergySpectra{};
 
     for (auto scan : scans) {
         if (scan->mslevel != 2) continue;
         if (mzUtils::ppmDist(scan->precursorMz, precursorMz) >= params->precPpmTolr) continue;
-        if (std::find(validCollisionEnergies.begin(), validCollisionEnergies.end(), scan->collisionEnergy) == validCollisionEnergies.end()) continue;
 
-        scansForConsensus.push_back(scan);
+        string collisionEnergyString = to_string(scan->collisionEnergy);
+
+        if (std::find(params->scanCollisionEnergies.begin(), params->scanCollisionEnergies.end(), collisionEnergyString) == params->scanCollisionEnergies.end()) continue;
+
+        if (collisionEnergyToScans.find(collisionEnergyString) == collisionEnergyToScans.end()) {
+            collisionEnergyToScans.insert(make_pair(collisionEnergyString, vector<Scan*>{}));
+        }
+        collisionEnergyToScans[collisionEnergyString].push_back(scan);
     }
 
-    Fragment *fragment = nullptr;
-    for (auto & scan: scansForConsensus) {
-        if (!fragment) {
-            fragment = new Fragment(scan,
-                                       params->scanFilterMinFracIntensity,
-                                       params->scanFilterMinSNRatio,
-                                       params->scanFilterMaxNumberOfFragments,
-                                       params->scanFilterBaseLinePercentile,
-                                       params->scanFilterIsRetainFragmentsAbovePrecursorMz,
-                                       params->scanFilterPrecursorPurityPpm,
-                                       params->scanFilterMinIntensity);
-        } else {
-            Fragment *ms1Brother = new Fragment(scan,
-                                             params->scanFilterMinFracIntensity,
-                                             params->scanFilterMinSNRatio,
-                                             params->scanFilterMaxNumberOfFragments,
-                                             params->scanFilterBaseLinePercentile,
-                                             params->scanFilterIsRetainFragmentsAbovePrecursorMz,
-                                             params->scanFilterPrecursorPurityPpm,
-                                             params->scanFilterMinIntensity);
+    for (auto it = collisionEnergyToScans.begin(); it != collisionEnergyToScans.end(); ++it) {
 
-            fragment->addFragment(ms1Brother);
-        }
-    }
+        vector<Scan*> scansForConsensus = it->second;
 
-    if (fragment){
-        fragment->buildConsensus(params->consensusPpmTolr,
-                                    params->consensusIntensityAgglomerationType,
-                                    params->consensusIsIntensityAvgByObserved,
-                                    params->consensusIsNormalizeTo10K,
-                                    params->consensusMinNumMs2Scans,
-                                    params->consensusMinFractionMs2Scans,
-                                    true //isRetainOriginalScanIntensities
-                                    );
+        Fragment *fragment = nullptr;
+        for (auto & scan: scansForConsensus) {
+            if (!fragment) {
+                fragment = new Fragment(scan,
+                                           params->scanFilterMinFracIntensity,
+                                           params->scanFilterMinSNRatio,
+                                           params->scanFilterMaxNumberOfFragments,
+                                           params->scanFilterBaseLinePercentile,
+                                           params->scanFilterIsRetainFragmentsAbovePrecursorMz,
+                                           params->scanFilterPrecursorPurityPpm,
+                                           params->scanFilterMinIntensity);
+            } else {
+                Fragment *ms1Brother = new Fragment(scan,
+                                                 params->scanFilterMinFracIntensity,
+                                                 params->scanFilterMinSNRatio,
+                                                 params->scanFilterMaxNumberOfFragments,
+                                                 params->scanFilterBaseLinePercentile,
+                                                 params->scanFilterIsRetainFragmentsAbovePrecursorMz,
+                                                 params->scanFilterPrecursorPurityPpm,
+                                                 params->scanFilterMinIntensity);
 
-        fragment->consensus->sortByMz();
-
-        //post-consensus irreversible transformations
-
-        if (params->postConsensusMinIntensity > 0) {
-            fragment->consensus->filterByMinIntensity(params->postConsensusMinIntensity);
+                fragment->addFragment(ms1Brother);
+            }
         }
 
-        if (params->postConsensusMzDelta > 0) {
-            fragment->consensus->agglomerateMzs(params->postConsensusMzDelta);
-        }
+        if (fragment){
+            fragment->buildConsensus(params->consensusPpmTolr,
+                                        params->consensusIntensityAgglomerationType, //mean or median
+                                        params->consensusIsIntensityAvgByObserved,
+                                        params->consensusIsNormalizeTo10K,
+                                        params->consensusMinNumMs2Scans,
+                                        params->consensusMinFractionMs2Scans,
+                                        false //isRetainOriginalScanIntensities
+                                        );
 
-        if (params->postConsensusNormMaxValue > 0) {
-            fragment->consensus->normalizeIntensityArray(params->postConsensusNormMaxValue);
-        }
+            fragment->consensus->sortByMz();
 
-        if (params->postConsensusPostNormMinIntensity > 0) {
-            fragment->consensus->filterByMinIntensity(params->postConsensusPostNormMinIntensity);
+            singleCollisionEnergySpectra.push_back(fragment->consensus);
         }
     }
 
-    return fragment;
+    Fragment *combinedCollisionEnergyFragment = nullptr;
+
+    if (singleCollisionEnergySpectra.empty()) return combinedCollisionEnergyFragment;
+
+    combinedCollisionEnergyFragment = singleCollisionEnergySpectra[0];
+
+    if (singleCollisionEnergySpectra.size() > 1) {
+
+        for (unsigned int i = 1; i < singleCollisionEnergySpectra.size(); i++) {
+            combinedCollisionEnergyFragment->addFragment(singleCollisionEnergySpectra[i]);
+        }
+
+        combinedCollisionEnergyFragment->buildConsensus(
+                    params->consensusPpmTolr,
+                    Fragment::ConsensusIntensityAgglomerationType::Sum,
+                    false,
+                    false,
+                    0,
+                    0,
+                    true);
+
+        combinedCollisionEnergyFragment = combinedCollisionEnergyFragment->consensus;
+    }
+
+    //post-consensus irreversible transformations
+
+    if (params->postConsensusMinIntensity > 0) {
+        combinedCollisionEnergyFragment->filterByMinIntensity(params->postConsensusMinIntensity);
+    }
+
+    if (params->postConsensusMzDelta > 0) {
+        combinedCollisionEnergyFragment->agglomerateMzs(params->postConsensusMzDelta);
+    }
+
+    if (params->postConsensusNormMaxValue > 0) {
+        combinedCollisionEnergyFragment->normalizeIntensityArray(params->postConsensusNormMaxValue);
+    }
+
+    if (params->postConsensusPostNormMinIntensity > 0) {
+        combinedCollisionEnergyFragment->filterByMinIntensity(params->postConsensusPostNormMinIntensity);
+    }
+
+    return combinedCollisionEnergyFragment;
 }
 
 string LoopInjectionMs2SpectrumParameters::encodeParams() {
