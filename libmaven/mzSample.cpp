@@ -2590,21 +2590,22 @@ Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<Lo
 
         fragment->consensus->sortByMz();
 
+        //post-consensus irreversible transformations
+
         if (params->postConsensusMinIntensity > 0) {
+            fragment->consensus->filterByMinIntensity(params->postConsensusMinIntensity);
+        }
 
-            vector<float> mzs_filtered;
-            vector<float> intensity_array_filtered;
+        if (params->postConsensusMzDelta > 0) {
+            fragment->consensus->agglomerateMzs(params->postConsensusMzDelta);
+        }
 
-            for (unsigned int i = 0; i < fragment->consensus->nobs(); i++) {
-                if (fragment->consensus->intensity_array[i] >= params->postConsensusMinIntensity) {
-                    mzs_filtered.push_back(fragment->consensus->mzs[i]);
-                    intensity_array_filtered.push_back(fragment->consensus->intensity_array[i]);
-                }
-            }
+        if (params->postConsensusNormMaxValue > 0) {
+            fragment->consensus->normalizeIntensityArray(params->postConsensusNormMaxValue);
+        }
 
-            fragment->consensus->mzs = mzs_filtered;
-            fragment->consensus->intensity_array = intensity_array_filtered;
-
+        if (params->postConsensusPostNormMinIntensity > 0) {
+            fragment->consensus->filterByMinIntensity(params->postConsensusPostNormMinIntensity);
         }
     }
 
@@ -2648,6 +2649,9 @@ string LoopInjectionMs2SpectrumParameters::encodeParams() {
     encodedParams = encodedParams + "};";
     encodedParams = encodedParams + "precPpmTolr" + "=" + to_string(precPpmTolr) + ";";
     encodedParams = encodedParams + "postConsensusMinIntensity" + "=" + to_string(postConsensusMinIntensity) + ";";
+    encodedParams = encodedParams + "postConsensusMzDelta" + "=" + to_string(postConsensusMzDelta) + ";";
+    encodedParams = encodedParams + "postConsensusNormMaxValue" + "=" + to_string(postConsensusNormMaxValue) + ";";
+    encodedParams = encodedParams + "postConsensusPostNormMinIntensity" + "=" + to_string(postConsensusPostNormMinIntensity) + ";";
 
     return encodedParams;
 }
@@ -2719,6 +2723,15 @@ shared_ptr<LoopInjectionMs2SpectrumParameters> LoopInjectionMs2SpectrumParameter
     }
     if (decodedMap.find("postConsensusMinIntensity") != decodedMap.end()) {
         loopInjectionMs2SpectrumParameters->postConsensusMinIntensity = stof(decodedMap["postConsensusMinIntensity"]);
+    }
+    if (decodedMap.find("postConsensusMzDelta") != decodedMap.end()) {
+        loopInjectionMs2SpectrumParameters->postConsensusMzDelta = stof(decodedMap["postConsensusMzDelta"]);
+    }
+    if (decodedMap.find("postConsensusNormMaxValue") != decodedMap.end()) {
+        loopInjectionMs2SpectrumParameters->postConsensusNormMaxValue = stof(decodedMap["postConsensusNormMaxValue"]);
+    }
+    if (decodedMap.find("postConsensusPostNormMinIntensity") != decodedMap.end()) {
+        loopInjectionMs2SpectrumParameters->postConsensusPostNormMinIntensity = stof(decodedMap["postConsensusPostNormMinIntensity"]);
     }
 
     return loopInjectionMs2SpectrumParameters;

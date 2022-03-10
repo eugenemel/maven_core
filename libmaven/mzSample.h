@@ -1482,6 +1482,9 @@ public:
     vector<string> scanCollisionEnergies{};
     float precPpmTolr = 10;
     float postConsensusMinIntensity = 0; //after consensus spectrum completely created, additional round of filtering
+    float postConsensusMzDelta = 0;
+    float postConsensusNormMaxValue = 1.0;
+    float postConsensusPostNormMinIntensity = 0;
 
     //RESERVED DELIMITERS - DO NOT CHANGE!
     static constexpr const char* const INTERNAL_MAP_DELIMITER = "|,|";
