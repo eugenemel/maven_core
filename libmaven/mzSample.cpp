@@ -2639,6 +2639,8 @@ Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<Lo
                     true);
 
         combinedCollisionEnergyFragment = combinedCollisionEnergyFragment->consensus;
+
+        //TODO: memory leaks
     }
 
     //post-consensus irreversible transformations
