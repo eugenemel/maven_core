@@ -885,14 +885,14 @@ void Fragment::buildConsensus(float productPpmTolr,
     }
 
     //agglomerate intensity values
-	if( brothers.size() >= 1) {
-        if (consensusIntensityAgglomerationType == Mean) {
-            for( unsigned int i=0; i < Cons->intensity_array.size(); i++){
+    if( brothers.size() >= 1) {
+        for( unsigned int i=0; i < Cons->intensity_array.size(); i++){
+            if (consensusIntensityAgglomerationType == Mean) {
                 Cons->intensity_array[i] /= (isIntensityAvgByObserved ? Cons->obscount[i] : N);
-            }
-        } else if (consensusIntensityAgglomerationType == Median) {
-            for( unsigned int i=0; i < Cons->intensity_array.size(); i++){
+            } else if (consensusIntensityAgglomerationType == Median) {
                 Cons->intensity_array[i] = mzUtils::median(posToIntensityMap[static_cast<int>(i)]);
+            } else if (consensusIntensityAgglomerationType == Sum) {
+                Cons->intensity_array[i] = accumulate(posToIntensityMap[static_cast<int>(i)].begin(), posToIntensityMap[static_cast<int>(i)].end(), 0);
             }
         }
 	}
