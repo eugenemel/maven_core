@@ -834,7 +834,7 @@ void Fragment::buildConsensus(float productPpmTolr,
     //compute retention time window
     Cons->rt  = this->consensusRt();
 
-    //compute avererage purity
+    //compute average purity
     Cons->purity = this->consensusPurity();
 
     //optionally filter values from scans based on number of observations
