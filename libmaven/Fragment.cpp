@@ -954,6 +954,7 @@ void Fragment::sortByIntensity() {
     vector<float> b(intensity_array.size());
     vector<int> c(obscount.size());
     vector<string> fragLabels(fragment_labels.size());
+    vector<vector<float>> medianIntensities(order.size());
 
     map<int,string>d;
     for(unsigned int i=0; i<order.size(); i++) {
@@ -963,12 +964,25 @@ void Fragment::sortByIntensity() {
         if(order[i] < obscount.size()) c[i] = obscount[order[i]];
         if(annotations.count(order[i])>0) d[i] = annotations[order[i]];
 
-    };
+        if (!consensusPositionToScanIntensities.empty()){
+            medianIntensities.at(i) = consensusPositionToScanIntensities[order[i]];
+        }
+
+    }
+
     mzs = a;
     intensity_array = b;
     obscount = c;
     annotations=d;
     fragment_labels = fragLabels;
+
+    if (!medianIntensities.empty()) {
+        consensusPositionToScanIntensities.clear();
+        for (unsigned int i = 0; i < medianIntensities.size(); i++){
+            consensusPositionToScanIntensities.insert(make_pair(i, medianIntensities[i]));
+        }
+    }
+
     sortedBy = Fragment::SortType::Intensity;
 }	
 
@@ -981,6 +995,7 @@ void Fragment::sortByMz() {
     vector<float> b(intensity_array.size());
     vector<int> c(obscount.size());
     vector<string> fragLabels(fragment_labels.size());
+    vector<vector<float>> medianIntensities(order.size());
 
     map<int,string>d;
 
@@ -991,13 +1006,25 @@ void Fragment::sortByMz() {
         if(order[i] < obscount.size()) c[i] = obscount[order[i]];
         if (annotations.count(order[i])>0) d[i] = annotations[order[i]];
 
-    };
+        if (!consensusPositionToScanIntensities.empty()){
+            medianIntensities.at(i) = consensusPositionToScanIntensities[order[i]];
+        }
+
+    }
 
     mzs = a;
     intensity_array = b;
     obscount = c;
     annotations=d;
     fragment_labels = fragLabels;
+
+    if (!medianIntensities.empty()) {
+        consensusPositionToScanIntensities.clear();
+        for (unsigned int i = 0; i < medianIntensities.size(); i++){
+            consensusPositionToScanIntensities.insert(make_pair(i, medianIntensities[i]));
+        }
+    }
+
     sortedBy = Fragment::SortType::Mz;
 }
 
