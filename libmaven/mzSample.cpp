@@ -2562,7 +2562,7 @@ Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<Lo
         if (scan->mslevel != 2) continue;
         if (mzUtils::ppmDist(scan->precursorMz, precursorMz) >= params->precPpmTolr) continue;
 
-        string collisionEnergyString = to_string(scan->collisionEnergy);
+        string collisionEnergyString = to_string(static_cast<int>(scan->collisionEnergy));
 
         if (std::find(params->scanCollisionEnergies.begin(), params->scanCollisionEnergies.end(), collisionEnergyString) == params->scanCollisionEnergies.end()) continue;
 
