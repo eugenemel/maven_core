@@ -233,6 +233,11 @@ class Fragment {
                             float minFractionMs2ScansForConsensus=0.0f,
                             bool isRetainOriginalScanIntensities=false);
 
+        //Issue 530: irreversible transformations
+        void normalizeIntensityArray(float normValue = 10000);
+        void agglomerateMzs(float minMzDelta);
+        void filterByMinIntensity(float minIntensity);
+
         vector<unsigned int> intensityOrderDesc();
         vector<int> mzOrderInc();
 

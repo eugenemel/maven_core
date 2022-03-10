@@ -1061,6 +1061,9 @@ vector<float> Fragment::asDenseVector(float mzmin, float mzmax, int nbins=2000) 
 	return v;
 }
 
+/**
+ * @deprecated
+ **/
 void Fragment::normalizeIntensity(vector<float>&x, int binSize=100)  { 
     //condition
     for(int i=0; i<x.size(); i+=binSize) {
@@ -1267,3 +1270,177 @@ int Fragment::getNumDiagnosticFragmentsMatched(string fragLblStartsWith, vector<
     return numDiagnosticFragmentsMatched;
 }
 
+/**
+ * @brief Fragment::normalizeIntensityArray
+ * Irreversible transformation, intensity values are converted to normalized value
+ * Max intensity value takes on value of @param normValue. All others scaled commensurately.
+ *
+ * @param normValue
+ */
+void Fragment::normalizeIntensityArray(float normValue){
+
+    sortByIntensity();
+    if (intensity_array.size() > 1) {
+        float maxValue = intensity_array[0];
+        for(unsigned int i=0; i<intensity_array.size(); i++)  {
+            intensity_array[i] = intensity_array[i]/maxValue*normValue;
+        }
+    }
+
+}
+
+/**
+ * @brief Fragment::agglomerateMzs
+ * Irreversible transformation, where m/z values that are too close to each other
+ * (based on @param minMzDelta) are identified and combined together.
+ * The highest intensity associated with each respective (m/z, I) spectral peak is retained.
+ * Note that this is a transitive agglomeration process, so if minMzDelta is too high,
+ * many spectral peaks might get pulled in together.
+ *
+ * @param minMzDelta
+ */
+void Fragment::agglomerateMzs(float minMzDelta){
+
+    if (minMzDelta <= 0) return;
+
+    sortByMz();
+
+    vector<vector<unsigned int>> agglomeratedMzs{};
+    bool isHasMzAgglomeration = false;
+
+    if (mzs.size() > 1) {
+
+        //i == 0 case
+        vector<unsigned int> currentGroup{0};
+
+        for (unsigned int i = 1; i < mzs.size(); i++) {
+            float mzDelta = mzs.at(i) - mzs.at(i-1);
+            if (mzDelta >= minMzDelta) {
+                agglomeratedMzs.push_back(currentGroup);
+                currentGroup = vector<unsigned int>{};
+            } else {
+                isHasMzAgglomeration = true;
+            }
+            currentGroup.push_back(i);
+        }
+
+        agglomeratedMzs.push_back(currentGroup);
+    } else {
+        for (unsigned int i = 0; i < mzs.size(); i++) {
+            agglomeratedMzs.push_back(vector<unsigned int>{i});
+        }
+    }
+
+    if (!isHasMzAgglomeration) return; //no need to agglomerate if no m/zs are too close to each other
+
+    vector<float> updatedMzs{};
+    vector<float> updatedIntensities{};
+    vector<string> updatedFragmentLabels{};
+    vector<int> updatedObsCount{};
+    vector<vector<float>> updatedMedianIntensities{};
+
+    for (unsigned int i = 0; i < agglomeratedMzs.size(); i++) {
+        vector<unsigned int> aggMzs = agglomeratedMzs[i];
+
+        unsigned int preferredPos = 0;
+
+        float updatedMz = 0.0f;
+        //float updatedIntensity = 0.0f;
+
+        if (aggMzs.size() > 1) {
+            float maxIntensity = -1.0f;
+            for (unsigned int j = 0; j < aggMzs.size(); j++) {
+
+                unsigned int posKey = aggMzs[j];
+
+                updatedMz += mzs[posKey];
+
+                float positionRepresentativeIntensity = 0.0f;
+                if (consensusPositionToScanIntensities.find(static_cast<int>(posKey)) != consensusPositionToScanIntensities.end()) {
+                    positionRepresentativeIntensity = *max_element(consensusPositionToScanIntensities[static_cast<int>(posKey)].begin(), consensusPositionToScanIntensities[static_cast<int>(posKey)].end());
+                } else {
+                    positionRepresentativeIntensity = intensity_array[posKey];
+                }
+
+                if (positionRepresentativeIntensity > maxIntensity) {
+                    preferredPos = posKey;
+                    maxIntensity = positionRepresentativeIntensity;
+                }
+            }
+
+            updatedMz /= aggMzs.size();
+
+        } else {
+
+            updatedMz = mzs[aggMzs[0]];
+            preferredPos = aggMzs[0];
+        }
+
+        if (!consensusPositionToScanIntensities.empty()) {
+            updatedMedianIntensities.push_back(consensusPositionToScanIntensities[static_cast<int>(preferredPos)]);
+        }
+
+        updatedMzs.push_back(updatedMz);
+        updatedIntensities.push_back(intensity_array[preferredPos]);
+        updatedFragmentLabels.push_back(fragment_labels[preferredPos]);
+        updatedObsCount.push_back(obscount[preferredPos]);
+    }
+
+    if (!updatedMedianIntensities.empty()) {
+        consensusPositionToScanIntensities.clear();
+        for (unsigned int i = 0; i < updatedMedianIntensities.size(); i++){
+            consensusPositionToScanIntensities.insert(make_pair(i, updatedMedianIntensities[i]));
+        }
+    }
+
+    mzs = updatedMzs;
+    intensity_array = updatedIntensities;
+    fragment_labels = updatedFragmentLabels;
+    obscount = updatedObsCount;
+}
+
+
+/**
+ * @brief Fragment::filterByMinIntensity
+ * Irreversible transformation where all intensity values less than @param minIntensity
+ * are dropped, and all relevant data structures are adjusted accordingly.
+ *
+ * @param minIntensity
+ */
+void Fragment::filterByMinIntensity(float minIntensity) {
+
+    vector<float> filtered_mzs;
+    vector<float> filtered_intensities;
+    vector<string> filtered_fragment_labels;
+    vector<int> filtered_obscount;
+    vector<vector<float>> medianIntensities;
+
+    for (unsigned int i= 0; i < nobs(); i++) {
+
+        if (intensity_array[i] >= minIntensity) {
+
+            filtered_mzs.push_back(mzs[i]);
+            filtered_intensities.push_back(intensity_array[i]);
+            filtered_fragment_labels.push_back(fragment_labels[i]);
+            filtered_obscount.push_back(obscount[i]);
+
+            if (!consensusPositionToScanIntensities.empty()) {
+                medianIntensities.push_back(consensusPositionToScanIntensities[static_cast<int>(i)]);
+            }
+
+        }
+    }
+
+    if (!medianIntensities.empty()) {
+        consensusPositionToScanIntensities.clear();
+        for (unsigned int i = 0; i < medianIntensities.size(); i++){
+            consensusPositionToScanIntensities.insert(make_pair(i, medianIntensities[i]));
+        }
+    }
+
+    mzs = filtered_mzs;
+    intensity_array = filtered_intensities;
+    fragment_labels = filtered_fragment_labels;
+    obscount = filtered_obscount;
+
+}
