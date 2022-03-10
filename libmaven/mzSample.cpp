@@ -2585,7 +2585,8 @@ Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<Lo
                                     params->consensusIsIntensityAvgByObserved,
                                     params->consensusIsNormalizeTo10K,
                                     params->consensusMinNumMs2Scans,
-                                    params->consensusMinFractionMs2Scans
+                                    params->consensusMinFractionMs2Scans,
+                                    true //isRetainOriginalScanIntensities
                                     );
 
         fragment->consensus->sortByMz();
