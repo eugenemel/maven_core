@@ -1091,6 +1091,15 @@ class Compound {
 
             inline float getExactMass() { return exactMass; }
             void setExactMass(float value) { exactMass = value; }
+            void setChargeFromAdductName() {
+                if (!adductString.empty() && charge == 0){
+                    if (adductString.compare(adductString.length() - 1, 1, "+") == 0){
+                        charge = 1;
+                    } else if (adductString.compare(adductString.length() - 1, 1, "-") == 0) {
+                        charge = -1;
+                    }
+                }
+            }
 
             inline void setFormula(string formulastr) { formula = formulastr; }
             string getFormula() { return formula; }
