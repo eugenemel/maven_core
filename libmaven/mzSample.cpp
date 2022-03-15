@@ -2673,7 +2673,7 @@ Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<Lo
     }
 
     if (params->postConsensusMzDelta > 0) {
-        combinedCollisionEnergyFragment->agglomerateMzs(params->postConsensusMzDelta);
+        combinedCollisionEnergyFragment->agglomerateMzs(params->postConsensusMzDelta, params->postConsensusMzDeltaIsPpm);
     }
 
     if (params->postConsensusNormMaxValue > 0) {
