@@ -2694,16 +2694,19 @@ string LoopInjectionMs2SpectrumParameters::encodeParams() {
 
     //Other parameters
     encodedParams = encodedParams + "scanMinTIC" + "=" + to_string(scanMinTIC) + ";";
+    encodedParams = encodedParams + "scanMinTICFraction" + "=" + to_string(scanMinTICFraction) + ";";
     encodedParams = encodedParams + "scanCollisionEnergies" + "=" + "{";
     for (auto collisionEnergy : scanCollisionEnergies) {
         encodedParams = encodedParams + collisionEnergy + INTERNAL_MAP_DELIMITER;
     }
     encodedParams = encodedParams + "};";
     encodedParams = encodedParams + "precPpmTolr" + "=" + to_string(precPpmTolr) + ";";
+    encodedParams = encodedParams + "precIsRemoveCoIsolations" + "=" + to_string(precIsRemoveCoIsolations) + ";";
     encodedParams = encodedParams + "postConsensusMinIntensity" + "=" + to_string(postConsensusMinIntensity) + ";";
     encodedParams = encodedParams + "postConsensusMzDelta" + "=" + to_string(postConsensusMzDelta) + ";";
     encodedParams = encodedParams + "postConsensusNormMaxValue" + "=" + to_string(postConsensusNormMaxValue) + ";";
     encodedParams = encodedParams + "postConsensusPostNormMinIntensity" + "=" + to_string(postConsensusPostNormMinIntensity) + ";";
+
 
     return encodedParams;
 }
@@ -2766,12 +2769,18 @@ shared_ptr<LoopInjectionMs2SpectrumParameters> LoopInjectionMs2SpectrumParameter
     if (decodedMap.find("scanMinTIC") != decodedMap.end()) {
         loopInjectionMs2SpectrumParameters->scanMinTIC = stof(decodedMap["scanMinTIC"]);
     }
+    if (decodedMap.find("scanMinTICFraction") != decodedMap.end()) {
+        loopInjectionMs2SpectrumParameters->scanMinTICFraction = stof(decodedMap["scanMinTICFraction"]);
+    }
     if (decodedMap.find("scanCollisionEnergies") != decodedMap.end()){
         string encodedScanCollisionEnergies = decodedMap["scanCollisionEnergies"];
         loopInjectionMs2SpectrumParameters->scanCollisionEnergies = mzUtils::decodeParameterVector(encodedScanCollisionEnergies, INTERNAL_MAP_DELIMITER);
     }
     if (decodedMap.find("precPpmTolr") != decodedMap.end()) {
         loopInjectionMs2SpectrumParameters->precPpmTolr = stof(decodedMap["precPpmTolr"]);
+    }
+    if (decodedMap.find("precIsRemoveCoIsolations") != decodedMap.end()) {
+        loopInjectionMs2SpectrumParameters->precIsRemoveCoIsolations = decodedMap["precIsRemoveCoIsolations"] == "1" ? true : false;
     }
     if (decodedMap.find("postConsensusMinIntensity") != decodedMap.end()) {
         loopInjectionMs2SpectrumParameters->postConsensusMinIntensity = stof(decodedMap["postConsensusMinIntensity"]);

@@ -1486,11 +1486,17 @@ public:
 
     /** =======================
      * All others
+     * @param scanMinTICFraction: Only retain MS2 scans with TIC at or above max TIC
+     * @param precIsRemoveCoIsolations:remove all peaks from (precMz - 0.5 Da) to (precMz + 0.5 Da) not within precPpmTolr to precMz
+     * @param postConsensusPostNormMinIntensity: After consensus spectrum completely created, additional round of filtering
      * ========================*/
+
     float scanMinTIC = 0;
+    float scanMinTICFraction = 0;
     vector<string> scanCollisionEnergies{};
     float precPpmTolr = 10;
-    float postConsensusMinIntensity = 0; //after consensus spectrum completely created, additional round of filtering
+    bool precIsRemoveCoIsolations = false;
+    float postConsensusMinIntensity = 0;
     float postConsensusMzDelta = 0;
     float postConsensusNormMaxValue = 1.0;
     float postConsensusPostNormMinIntensity = 0;
