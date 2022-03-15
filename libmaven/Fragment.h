@@ -235,7 +235,7 @@ class Fragment {
 
         //Issue 530: irreversible transformations
         void normalizeIntensityArray(float normValue = 10000);
-        void agglomerateMzs(float minMzDelta);
+        void agglomerateMzs(float minMzDelta, bool isMinMzDeltaPpm=false);
         void filterByMinIntensity(float minIntensity);
         void removeCoIsolations(float precursorMz, float ppmTolr);
 

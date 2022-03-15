@@ -1324,9 +1324,12 @@ void Fragment::normalizeIntensityArray(float normValue){
  * Note that this is a transitive agglomeration process, so if minMzDelta is too high,
  * many spectral peaks might get pulled in together.
  *
+ * if @isMinMzDeltaPpm is true, @param minMzDelta is a ppm measurement.
+ * If false, it is a Dalton measurement.
+ *
  * @param minMzDelta
  */
-void Fragment::agglomerateMzs(float minMzDelta){
+void Fragment::agglomerateMzs(float minMzDelta, bool isMinMzDeltaPpm){
 
     if (minMzDelta <= 0) return;
 
@@ -1341,8 +1344,16 @@ void Fragment::agglomerateMzs(float minMzDelta){
         vector<unsigned int> currentGroup{0};
 
         for (unsigned int i = 1; i < mzs.size(); i++) {
-            float mzDelta = mzs.at(i) - mzs.at(i-1);
-            if (mzDelta >= minMzDelta) {
+
+            bool isAgglomerateMzs = false;
+            if (isMinMzDeltaPpm) {
+                isAgglomerateMzs = mzUtils::ppmDist(mzs.at(i), mzs.at(i-1)) >= minMzDelta;
+            } else {
+                float mzDelta = mzs.at(i) - mzs.at(i-1);
+                isAgglomerateMzs = mzDelta >= minMzDelta;
+            }
+
+            if (isAgglomerateMzs) {
                 agglomeratedMzs.push_back(currentGroup);
                 currentGroup = vector<unsigned int>{};
             } else {
