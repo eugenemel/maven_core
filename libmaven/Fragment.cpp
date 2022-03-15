@@ -1347,10 +1347,10 @@ void Fragment::agglomerateMzs(float minMzDelta, bool isMinMzDeltaPpm){
 
             bool isAgglomerateMzs = false;
             if (isMinMzDeltaPpm) {
-                isAgglomerateMzs = mzUtils::ppmDist(mzs.at(i), mzs.at(i-1)) >= minMzDelta;
+                isAgglomerateMzs = mzUtils::ppmDist(mzs.at(i), mzs.at(i-1)) < minMzDelta;
             } else {
                 float mzDelta = mzs.at(i) - mzs.at(i-1);
-                isAgglomerateMzs = mzDelta >= minMzDelta;
+                isAgglomerateMzs = mzDelta < minMzDelta;
             }
 
             if (isAgglomerateMzs) {
