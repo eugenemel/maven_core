@@ -1498,6 +1498,7 @@ public:
     bool precIsRemoveCoIsolations = false;
     float postConsensusMinIntensity = 0;
     float postConsensusMzDelta = 0;
+    float postConsensusMzDeltaIsPpm = false;
     float postConsensusNormMaxValue = 1.0;
     float postConsensusPostNormMinIntensity = 0;
 

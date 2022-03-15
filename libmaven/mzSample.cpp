@@ -2731,6 +2731,7 @@ string LoopInjectionMs2SpectrumParameters::encodeParams() {
     encodedParams = encodedParams + "precIsRemoveCoIsolations" + "=" + to_string(precIsRemoveCoIsolations) + ";";
     encodedParams = encodedParams + "postConsensusMinIntensity" + "=" + to_string(postConsensusMinIntensity) + ";";
     encodedParams = encodedParams + "postConsensusMzDelta" + "=" + to_string(postConsensusMzDelta) + ";";
+    encodedParams = encodedParams + "postConsensusMzDeltaIsPpm" + "=" + to_string(postConsensusMzDeltaIsPpm) + ";";
     encodedParams = encodedParams + "postConsensusNormMaxValue" + "=" + to_string(postConsensusNormMaxValue) + ";";
     encodedParams = encodedParams + "postConsensusPostNormMinIntensity" + "=" + to_string(postConsensusPostNormMinIntensity) + ";";
 
@@ -2814,6 +2815,9 @@ shared_ptr<LoopInjectionMs2SpectrumParameters> LoopInjectionMs2SpectrumParameter
     }
     if (decodedMap.find("postConsensusMzDelta") != decodedMap.end()) {
         loopInjectionMs2SpectrumParameters->postConsensusMzDelta = stof(decodedMap["postConsensusMzDelta"]);
+    }
+    if (decodedMap.find("postConsensusMzDeltaIsPpm") != decodedMap.end()) {
+        loopInjectionMs2SpectrumParameters->postConsensusMzDeltaIsPpm = decodedMap["postConsensusMzDeltaIsPpm"] == "1" ? true : false;
     }
     if (decodedMap.find("postConsensusNormMaxValue") != decodedMap.end()) {
         loopInjectionMs2SpectrumParameters->postConsensusNormMaxValue = stof(decodedMap["postConsensusNormMaxValue"]);
