@@ -2556,6 +2556,8 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
 Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<LoopInjectionMs2SpectrumParameters> params){
 
     map<string, vector<Scan*>> collisionEnergyToScans{};
+    map<int, float> scanNumToTIC{};
+
     vector<Fragment*> singleCollisionEnergySpectra{};
 
     for (auto scan : scans) {
@@ -2570,7 +2572,24 @@ Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<Lo
             collisionEnergyToScans.insert(make_pair(collisionEnergyString, vector<Scan*>{}));
         }
         collisionEnergyToScans[collisionEnergyString].push_back(scan);
+
+        scanNumToTIC.insert(make_pair(scan->scannum, static_cast<float>(scan->totalIntensity())));
     }
+
+    float scanMinTIC = params->scanMinTIC;
+
+    float maxTIC = -1.0f;
+    if (params->scanMinTICFraction > 0 && params->scanMinTICFraction <= 1) {
+        for (auto it = scanNumToTIC.begin(); it != scanNumToTIC.end(); ++it){
+            if (it->second > maxTIC) {
+                maxTIC = it->second;
+            }
+        }
+    }
+
+    float maxTICFraction = params->scanMinTICFraction*maxTIC;
+
+    if (maxTICFraction > scanMinTIC) scanMinTIC = maxTICFraction;
 
     for (auto it = collisionEnergyToScans.begin(); it != collisionEnergyToScans.end(); ++it) {
 
@@ -2578,6 +2597,10 @@ Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<Lo
 
         Fragment *fragment = nullptr;
         for (auto & scan: scansForConsensus) {
+
+            //Issue 532: check TIC
+            if (scanNumToTIC.at(scan->scannum) < scanMinTIC) continue;
+
             if (!fragment) {
                 fragment = new Fragment(scan,
                                            params->scanFilterMinFracIntensity,
