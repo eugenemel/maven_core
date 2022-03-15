@@ -2661,6 +2661,10 @@ Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<Lo
         combinedCollisionEnergyFragment->filterByMinIntensity(params->postConsensusPostNormMinIntensity);
     }
 
+    if (params->precIsRemoveCoIsolations) {
+        combinedCollisionEnergyFragment->removeCoIsolations(precursorMz, params->precPpmTolr);
+    }
+
     return combinedCollisionEnergyFragment;
 }
 

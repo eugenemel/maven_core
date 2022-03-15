@@ -1471,3 +1471,43 @@ void Fragment::filterByMinIntensity(float minIntensity) {
     obscount = filtered_obscount;
 
 }
+
+void Fragment::removeCoIsolations(float precursorMz, float ppmTolr){
+
+    vector<float> filtered_mzs;
+    vector<float> filtered_intensities;
+    vector<string> filtered_fragment_labels;
+    vector<int> filtered_obscount;
+    vector<vector<float>> medianIntensities;
+
+    float minPrecMz = precursorMz - 0.5f;
+    float maxPrecMz = precursorMz + 0.5f;
+
+    for (unsigned int i= 0; i < nobs(); i++) {
+
+        if (mzs[i] < minPrecMz || mzs[i] > maxPrecMz || mzUtils::ppmDist(precursorMz, mzs[i]) <= ppmTolr) {
+
+            filtered_mzs.push_back(mzs[i]);
+            filtered_intensities.push_back(intensity_array[i]);
+            filtered_fragment_labels.push_back(fragment_labels[i]);
+            filtered_obscount.push_back(obscount[i]);
+
+            if (!consensusPositionToScanIntensities.empty()) {
+                medianIntensities.push_back(consensusPositionToScanIntensities[static_cast<int>(i)]);
+            }
+
+        }
+    }
+
+    if (!medianIntensities.empty()) {
+        consensusPositionToScanIntensities.clear();
+        for (unsigned int i = 0; i < medianIntensities.size(); i++){
+            consensusPositionToScanIntensities.insert(make_pair(i, medianIntensities[i]));
+        }
+    }
+
+    mzs = filtered_mzs;
+    intensity_array = filtered_intensities;
+    fragment_labels = filtered_fragment_labels;
+    obscount = filtered_obscount;
+}

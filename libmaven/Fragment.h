@@ -237,6 +237,7 @@ class Fragment {
         void normalizeIntensityArray(float normValue = 10000);
         void agglomerateMzs(float minMzDelta);
         void filterByMinIntensity(float minIntensity);
+        void removeCoIsolations(float precursorMz, float ppmTolr);
 
         vector<unsigned int> intensityOrderDesc();
         vector<int> mzOrderInc();
