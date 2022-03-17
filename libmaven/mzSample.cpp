@@ -2668,25 +2668,26 @@ Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<Lo
 
     //post-consensus irreversible transformations
 
-    if (params->postConsensusMinIntensity > 0) {
-        combinedCollisionEnergyFragment->filterByMinIntensity(params->postConsensusMinIntensity);
-    }
+    //Issue 532: debugging
+//    if (params->postConsensusMinIntensity > 0) {
+//        combinedCollisionEnergyFragment->filterByMinIntensity(params->postConsensusMinIntensity);
+//    }
 
-    if (params->postConsensusMzDelta > 0) {
-        combinedCollisionEnergyFragment->agglomerateMzs(params->postConsensusMzDelta, params->postConsensusMzDeltaIsPpm);
-    }
+//    if (params->postConsensusMzDelta > 0) {
+//        combinedCollisionEnergyFragment->agglomerateMzs(params->postConsensusMzDelta, params->postConsensusMzDeltaIsPpm);
+//    }
 
-    if (params->postConsensusNormMaxValue > 0) {
-        combinedCollisionEnergyFragment->normalizeIntensityArray(params->postConsensusNormMaxValue);
-    }
+//    if (params->postConsensusNormMaxValue > 0) {
+//        combinedCollisionEnergyFragment->normalizeIntensityArray(params->postConsensusNormMaxValue);
+//    }
 
-    if (params->postConsensusPostNormMinIntensity > 0) {
-        combinedCollisionEnergyFragment->filterByMinIntensity(params->postConsensusPostNormMinIntensity);
-    }
+//    if (params->postConsensusPostNormMinIntensity > 0) {
+//        combinedCollisionEnergyFragment->filterByMinIntensity(params->postConsensusPostNormMinIntensity);
+//    }
 
-    if (params->precIsRemoveCoIsolations) {
-        combinedCollisionEnergyFragment->removeCoIsolations(precursorMz, params->precPpmTolr);
-    }
+//    if (params->precIsRemoveCoIsolations) {
+//        combinedCollisionEnergyFragment->removeCoIsolations(precursorMz, params->precPpmTolr);
+//    }
 
     return combinedCollisionEnergyFragment;
 }
