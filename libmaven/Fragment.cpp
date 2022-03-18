@@ -879,11 +879,6 @@ void Fragment::buildConsensus(float productPpmTolr,
         }
     }
 
-    //Issue 468
-    if (isRetainOriginalScanIntensities) {
-        Cons->consensusPositionToScanIntensities = posToIntensityMap;
-    }
-
     //agglomerate intensity values
     if( brothers.size() >= 1) {
         for( unsigned int i=0; i < Cons->intensity_array.size(); i++){
@@ -906,6 +901,13 @@ void Fragment::buildConsensus(float productPpmTolr,
                 Cons->intensity_array[i] = Cons->intensity_array[i]/maxValue*10000;
             }
         }
+    }
+
+    //Issue 468
+    if (isRetainOriginalScanIntensities) {
+        Cons->consensusPositionToScanIntensities = posToIntensityMap;
+    } else {
+        Cons->consensusPositionToScanIntensities.clear();
     }
 
     this->consensus = Cons; 
@@ -947,7 +949,7 @@ vector<int> Fragment::mzOrderInc() {
 
 
 void Fragment::sortByIntensity() { 
-    if(sortedBy == Fragment::SortType::Intensity) return; //sppedup already sorted
+    if(sortedBy == Fragment::SortType::Intensity) return; //speedup already sorted
 
     vector<unsigned int>order = intensityOrderDesc();
     vector<float> a(mzs.size());
