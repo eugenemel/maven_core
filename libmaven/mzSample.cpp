@@ -2670,34 +2670,25 @@ Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<Lo
 
     //post-consensus irreversible transformations
 
-    //Issue 532: debugging: passing up to here
-
-    //Issue 532: possibly the problem
     if (params->postConsensusMinIntensity > 0) {
         combinedCollisionEnergyFragment->filterByMinIntensity(params->postConsensusMinIntensity);
     }
 
-//    //Issue 532: possibly the problem
-//    if (params->postConsensusMzDelta > 0) {
-//        combinedCollisionEnergyFragment->agglomerateMzs(params->postConsensusMzDelta, params->postConsensusMzDeltaIsPpm);
-//    }
+    if (params->postConsensusMzDelta > 0) {
+        combinedCollisionEnergyFragment->agglomerateMzs(params->postConsensusMzDelta, params->postConsensusMzDeltaIsPpm);
+    }
 
-    //Issue 532: possibly the problem
     if (params->postConsensusNormMaxValue > 0) {
         combinedCollisionEnergyFragment->normalizeIntensityArray(params->postConsensusNormMaxValue);
     }
 
-//    //Issue 532: possibly the problem
-//    if (params->postConsensusPostNormMinIntensity > 0) {
-//        combinedCollisionEnergyFragment->filterByMinIntensity(params->postConsensusPostNormMinIntensity);
-//    }
+    if (params->postConsensusPostNormMinIntensity > 0) {
+        combinedCollisionEnergyFragment->filterByMinIntensity(params->postConsensusPostNormMinIntensity);
+    }
 
-    //Issue 532: debugging: testing point
-
-//    //Issue 532: possibly the problem
-//    if (params->precIsRemoveCoIsolations) {
-//        combinedCollisionEnergyFragment->removeCoIsolations(precursorMz, params->precPpmTolr);
-//    }
+    if (params->precIsRemoveCoIsolations) {
+        combinedCollisionEnergyFragment->removeCoIsolations(precursorMz, params->precPpmTolr);
+    }
 
     return combinedCollisionEnergyFragment;
 }
