@@ -892,7 +892,7 @@ void Fragment::buildConsensus(float productPpmTolr,
             } else if (consensusIntensityAgglomerationType == Median) {
                 Cons->intensity_array[i] = mzUtils::median(posToIntensityMap[static_cast<int>(i)]);
             } else if (consensusIntensityAgglomerationType == Sum) {
-                Cons->intensity_array[i] = accumulate(posToIntensityMap[static_cast<int>(i)].begin(), posToIntensityMap[static_cast<int>(i)].end(), 0);
+                Cons->intensity_array[i] = accumulate(posToIntensityMap[static_cast<int>(i)].begin(), posToIntensityMap[static_cast<int>(i)].end(), 0.0f);
             }
         }
 	}
