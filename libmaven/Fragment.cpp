@@ -903,7 +903,7 @@ void Fragment::buildConsensus(float productPpmTolr,
         }
     }
 
-    //Issue 468
+    //Issue 468, 532
     if (isRetainOriginalScanIntensities) {
         Cons->consensusPositionToScanIntensities = posToIntensityMap;
     } else {
