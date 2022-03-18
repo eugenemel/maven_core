@@ -2595,6 +2595,8 @@ Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<Lo
 
         vector<Scan*> scansForConsensus = it->second;
 
+        if (scansForConsensus.empty()) continue;
+
         Fragment *fragment = nullptr;
         for (auto & scan: scansForConsensus) {
 
@@ -2680,10 +2682,10 @@ Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<Lo
 //        combinedCollisionEnergyFragment->agglomerateMzs(params->postConsensusMzDelta, params->postConsensusMzDeltaIsPpm);
 //    }
 
-//    //Issue 532: possibly the problem
-//    if (params->postConsensusNormMaxValue > 0) {
-//        combinedCollisionEnergyFragment->normalizeIntensityArray(params->postConsensusNormMaxValue);
-//    }
+    //Issue 532: possibly the problem
+    if (params->postConsensusNormMaxValue > 0) {
+        combinedCollisionEnergyFragment->normalizeIntensityArray(params->postConsensusNormMaxValue);
+    }
 
 //    //Issue 532: possibly the problem
 //    if (params->postConsensusPostNormMinIntensity > 0) {
@@ -2692,10 +2694,10 @@ Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<Lo
 
     //Issue 532: debugging: testing point
 
-    //Issue 532: possibly the problem
-    if (params->precIsRemoveCoIsolations) {
-        combinedCollisionEnergyFragment->removeCoIsolations(precursorMz, params->precPpmTolr);
-    }
+//    //Issue 532: possibly the problem
+//    if (params->precIsRemoveCoIsolations) {
+//        combinedCollisionEnergyFragment->removeCoIsolations(precursorMz, params->precPpmTolr);
+//    }
 
     return combinedCollisionEnergyFragment;
 }
