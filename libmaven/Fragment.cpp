@@ -1355,9 +1355,10 @@ void Fragment::agglomerateMzs(float minMzDelta, bool isMinMzDeltaPpm){
                 isAgglomerateMzs = mzDelta < minMzDelta;
             }
 
-            if (isAgglomerateMzs) {
+            if (!isAgglomerateMzs) {
                 agglomeratedMzs.push_back(currentGroup);
                 currentGroup = vector<unsigned int>{};
+            } else {
                 isHasMzAgglomeration = true;
             }
             currentGroup.push_back(i);
