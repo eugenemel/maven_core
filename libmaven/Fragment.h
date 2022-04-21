@@ -224,6 +224,7 @@ class Fragment {
         static vector<int> compareRanks(Fragment* a, Fragment* b, float productPpmTolr);
         static vector<int> locatePositions( Fragment* a, Fragment* b, float productPpmToll);
         static vector<int> findFragPairsGreedyMz(Fragment* a, Fragment* b, float maxMzDiff);
+        static double normCosineScore(Fragment* a, Fragment* b, vector<int> ranks);
 
         void buildConsensus(float productPpmTolr,
                             ConsensusIntensityAgglomerationType consensusIntensityAgglomerationType=Mean,

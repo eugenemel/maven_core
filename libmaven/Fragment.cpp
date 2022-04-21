@@ -1524,3 +1524,20 @@ void Fragment::removeCoIsolations(float precursorMz, float ppmTolr){
     fragment_labels = filtered_fragment_labels;
     obscount = filtered_obscount;
 }
+
+double Fragment::normCosineScore(Fragment* a, Fragment* b, vector<int> ranks) {
+    if (!a || !b) return -1.0;
+
+    vector<float> aNorm = mzUtils::sumOfSquaresNorm(a->intensity_array);
+    vector<float> bNorm = mzUtils::sumOfSquaresNorm(b->intensity_array);
+
+    double normCosineScore = 0.0;
+    for (unsigned int i = 0; i < ranks.size(); i++) {
+        int observedIndex = ranks[i];
+        if (observedIndex != -1) {
+            normCosineScore += static_cast<double>(aNorm[i]) * static_cast<double>(bNorm[static_cast<unsigned int>(observedIndex)]);
+        }
+    }
+
+    return normCosineScore;
+}
