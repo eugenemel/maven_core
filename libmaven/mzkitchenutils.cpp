@@ -517,3 +517,5 @@ shared_ptr<MzkitchenMetaboliteSearchParameters> MzkitchenMetaboliteSearchParamet
     return metaboliteSearchParameters;
 
 }
+
+MzkitchenMspSearchParameters::~MzkitchenMspSearchParameters(){}
