@@ -1744,6 +1744,8 @@ public:
     virtual string getMzKitchenSearchType() = 0;
     virtual ~MzkitchenMspSearchParameters();
 
+    void setLegacyPeakGroupParameters();
+
 };
 
 //Issue 455
@@ -1752,7 +1754,9 @@ class LCLipidSearchParameters : public MzkitchenMspSearchParameters {
 public:
 
     //default constructor
-    LCLipidSearchParameters() {}
+    LCLipidSearchParameters() {
+        setLegacyPeakGroupParameters();
+    }
 
     string getMzKitchenSearchType(){return "lipidSearch";}
 
@@ -1776,7 +1780,9 @@ public:
     float rtMatchTolerance = 0.5f;
 
     //default constructor
-    MzkitchenMetaboliteSearchParameters() {}
+    MzkitchenMetaboliteSearchParameters() {
+        setLegacyPeakGroupParameters();
+    }
 
     string getMzKitchenSearchType(){return "metaboliteSearch";}
 

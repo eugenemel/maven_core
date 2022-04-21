@@ -36,9 +36,7 @@ void MzKitchenProcessor::matchLipids_LC(
         });
 
         if (group.fragmentationPattern.mzs.empty()) {
-
-            //TODO: more flexibility around consensus spectrum formation
-            group.computeFragPattern(params->ms2PpmTolr);
+            group.computeFragPattern(params.get());
         }
 
         vector<pair<Compound*, FragmentationMatchScore>> scores{};
@@ -533,6 +531,26 @@ shared_ptr<MzkitchenMetaboliteSearchParameters> MzkitchenMetaboliteSearchParamet
 
     return metaboliteSearchParameters;
 
+}
+
+void MzkitchenMspSearchParameters::setLegacyPeakGroupParameters(){
+
+    //Fragment() constructor
+    scanFilterMinFracIntensity = 0.01f;
+    scanFilterMinSNRatio = 1.0f;
+    scanFilterMaxNumberOfFragments = 1024;
+    scanFilterBaseLinePercentile = 5;
+    scanFilterIsRetainFragmentsAbovePrecursorMz = false;
+    scanFilterPrecursorPurityPpm=10;
+    scanFilterMinIntensity=0;
+
+    //Fragment::buildConsensus()
+    consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
+    consensusIsIntensityAvgByObserved = false;
+    consensusIsNormalizeTo10K = true;
+    consensusMinNumMs2Scans=0;
+    consensusMinFractionMs2Scans=0.0f;
+    consensusIsRetainOriginalScanIntensities=false;
 }
 
 MzkitchenMspSearchParameters::~MzkitchenMspSearchParameters() = default;
