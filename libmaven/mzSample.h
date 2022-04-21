@@ -1741,7 +1741,7 @@ public:
 
 };
 
-MzkitchenMspSearchParameters::~MzkitchenMspSearchParameters() = default;
+MzkitchenMspSearchParameters::~MzkitchenMspSearchParameters(){};
 
 //Issue 455
 class LCLipidSearchParameters : public MzkitchenMspSearchParameters {
