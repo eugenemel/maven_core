@@ -61,7 +61,7 @@ class LibraryMs2SpectrumParameters;
 class LoopInjectionMs2SpectrumParameters;
 
 class PeaksSearchParameters;
-class LCLipidProcessor;
+class MzKitchenProcessor;
 
 using namespace pugi;
 using namespace mzUtils;
@@ -1780,9 +1780,9 @@ public:
 
 };
 
-class LCLipidProcessor{
+class MzKitchenProcessor{
 public:
-    static void matchLipids(vector<PeakGroup>& groups,
+    static void matchLipids_LC(vector<PeakGroup>& groups,
                             vector<Compound*>& compounds,
                             shared_ptr<LCLipidSearchParameters> params,
                             bool debug=false

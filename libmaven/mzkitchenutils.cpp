@@ -20,7 +20,7 @@
  * diagnostic: *
  * oxidation: &
  */
-void LCLipidProcessor::matchLipids(vector<PeakGroup>& groups,
+void MzKitchenProcessor::matchLipids_LC(vector<PeakGroup>& groups,
                             vector<Compound*>& compounds,
                             shared_ptr<LCLipidSearchParameters> params,
                             bool debug){
