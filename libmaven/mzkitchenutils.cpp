@@ -518,4 +518,4 @@ shared_ptr<MzkitchenMetaboliteSearchParameters> MzkitchenMetaboliteSearchParamet
 
 }
 
-MzkitchenMspSearchParameters::~MzkitchenMspSearchParameters(){}
+MzkitchenMspSearchParameters::~MzkitchenMspSearchParameters() = default;

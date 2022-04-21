@@ -1874,6 +1874,8 @@ vector<Adduct*> Adduct::loadAdducts(string filename){
     return adducts;
 }
 
+SearchParameters::~SearchParameters() = default;
+
 string PeaksSearchParameters::encodeParams(){
 
     string encodedParams;

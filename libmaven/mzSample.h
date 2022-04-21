@@ -1607,7 +1607,7 @@ class SearchParameters {
 
     virtual string encodeParams() = 0;
 
-    virtual ~SearchParameters() = default; //c++11 way
+    virtual ~SearchParameters();
 };
 
 enum PeakGroupCompoundMatchingPolicy {
