@@ -1729,21 +1729,47 @@ public:
     static shared_ptr<LibraryMs2SpectrumParameters> decode(string encodedParams);
 };
 
-//Issue 455
-class LCLipidSearchParameters : public SearchParameters {
+class MzkitchenMspSearchParameters : public SearchParameters {
 
 public:
 
     //fields
     string mspFilePath = "";
 
-    //default constructor
-    LCLipidSearchParameters() {
+    virtual string getMzKitchenSearchType() = 0;
+    virtual ~MzkitchenMspSearchParameters();
 
-    }
+};
+
+MzkitchenMspSearchParameters::~MzkitchenMspSearchParameters() = default;
+
+//Issue 455
+class LCLipidSearchParameters : public MzkitchenMspSearchParameters {
+
+public:
+
+    //default constructor
+    LCLipidSearchParameters() {}
+
+    string getMzKitchenSearchType(){return "lipidSearch";}
 
     string encodeParams();
     static shared_ptr<LCLipidSearchParameters> decode(string encodedParams);
+
+};
+
+//Issue 538
+class MzkitchenMetaboliteSearchParameters : public MzkitchenMspSearchParameters {
+
+public:
+
+    //default constructor
+    MzkitchenMetaboliteSearchParameters() {}
+
+    string getMzKitchenSearchType(){return "metaboliteSearch";}
+
+    string encodeParams();
+    static shared_ptr<MzkitchenMetaboliteSearchParameters> decode(string encodedParams);
 
 };
 
