@@ -184,22 +184,18 @@ void MzKitchenProcessor::matchMetabolites(
 
             vector<int> ranks = Fragment::findFragPairsGreedyMz(&library, &observed, maxDeltaMz);
 
-            //TODO: scoring? dotProduct() function is implemented in a slightly strange way
-            //intensity sum-of-squares normalization: divide all intensities by the sum of the squares mzUtils::sumOfSquares
+            double normCosineScore = Fragment::normCosineScore(&library, &observed, ranks);
+            s.dotProduct = normCosineScore;
 
             scores.push_back(make_pair(compound, s));
         }
 
-        //based on scores, determine a result
-        //TODO: compare scores, summarization, etc
-
-        //this is a dummy for testing
         float maxScore = -1.0f;
         pair<Compound*, FragmentationMatchScore> bestPair;
         for (auto score : scores) {
-            if (score.second.hypergeomScore > maxScore) {
+            if (score.second.dotProduct > maxScore) {
                 bestPair = score;
-                maxScore = score.second.hypergeomScore;
+                maxScore = score.second.dotProduct;
             }
         }
 
