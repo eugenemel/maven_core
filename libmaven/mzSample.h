@@ -60,6 +60,7 @@ struct FragmentationMatchScore;
 class LibraryMs2SpectrumParameters;
 class LoopInjectionMs2SpectrumParameters;
 
+class SearchParameters;
 class PeaksSearchParameters;
 class MzKitchenProcessor;
 
@@ -956,6 +957,10 @@ class PeakGroup {
         Fragment* getMs2LibrarySpectrum(shared_ptr<LibraryMs2SpectrumParameters> params, bool debug=false);
 
         void computeFragPattern(float productPpmTolr);
+
+        //Issue 538: reimplementation of computeFragPattern(productPpmTolr) with more control
+        void computeFragPattern(SearchParameters *parameters);
+
         void computeDIFragPattern(shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters);
         void computePeaksSearchFragPattern(shared_ptr<PeaksSearchParameters> params);
 
@@ -1783,10 +1788,14 @@ public:
 class MzKitchenProcessor{
 public:
     static void matchLipids_LC(vector<PeakGroup>& groups,
-                            vector<Compound*>& compounds,
-                            shared_ptr<LCLipidSearchParameters> params,
-                            bool debug=false
-                            );
+                               vector<Compound*>& compounds,
+                               shared_ptr<LCLipidSearchParameters> params,
+                               bool debug=false);
+
+    static void matchMetabolites(vector<PeakGroup>& groups,
+                                 vector<Compound*>& compounds,
+                                 shared_ptr<MzkitchenMetaboliteSearchParameters> params,
+                                 bool debug=false);
 };
 
 //Issue 482

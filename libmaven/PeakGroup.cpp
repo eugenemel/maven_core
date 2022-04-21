@@ -673,6 +673,60 @@ void PeakGroup::computeFragPattern(float productPpmTolr)  {
     ms2EventCount = static_cast<int>(ms2events.size());
 }
 
+void PeakGroup::computeFragPattern(SearchParameters *parameters) {
+
+    //build consensus ms2 specta
+    vector<Scan*>ms2events = getFragmentationEvents();
+    if (ms2events.size() == 0 ) return;
+    sort(ms2events.begin(), ms2events.end(), Scan::compIntensity);
+
+    Fragment *f = nullptr;
+    for (unsigned int i = 0; i < ms2events.size(); i++) {
+        Scan *scan = ms2events[i];
+        if (i == 0) {
+            f = new Fragment(scan,
+                         parameters->scanFilterMinFracIntensity,
+                         parameters->scanFilterMinSNRatio,
+                         parameters->scanFilterMaxNumberOfFragments,
+                         parameters->scanFilterBaseLinePercentile,
+                         parameters->scanFilterIsRetainFragmentsAbovePrecursorMz,
+                         parameters->scanFilterMinIntensity);
+        } else {
+            f->addFragment(new Fragment(scan,
+                                       parameters->scanFilterMinFracIntensity,
+                                       parameters->scanFilterMinSNRatio,
+                                       parameters->scanFilterMaxNumberOfFragments,
+                                       parameters->scanFilterBaseLinePercentile,
+                                       parameters->scanFilterIsRetainFragmentsAbovePrecursorMz,
+                                       parameters->scanFilterMinIntensity));
+        }
+    }
+
+    if (!f) return;
+
+    f->buildConsensus(
+                parameters->consensusPpmTolr,
+                parameters->consensusIntensityAgglomerationType,
+                parameters->consensusIsIntensityAvgByObserved,
+                parameters->consensusIsNormalizeTo10K,
+                parameters->consensusMinNumMs2Scans,
+                parameters->consensusMinFractionMs2Scans,
+                parameters->consensusIsRetainOriginalScanIntensities);
+
+    f->consensus->sortByMz();
+
+    //make a copy of the consensus fragment, because the original f->consensus will be deleted
+    fragmentationPattern = Fragment(f->consensus);
+    ms2EventCount = static_cast<int>(ms2events.size());
+
+    //delete Fragment* and children to avoid memory leaks
+    delete(f);
+
+    //Fragment f(ms2events[0],0.01,1,1024);
+    //f.buildConsensus(productPpmTolr);
+
+}
+
 void PeakGroup::computePeaksSearchFragPattern(shared_ptr<PeaksSearchParameters> params) {
 
     //build consensus ms2 specta
