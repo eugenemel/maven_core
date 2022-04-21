@@ -1204,5 +1204,22 @@ vector<string> decodeParameterVector(string encodedParams, string delimiter) {
 
 } //decodeParameterVector()
 
+vector<float> sumOfSquaresNorm(vector<float> intensities) {
+
+    long double sum = 0.0L;
+
+    for (float intensity : intensities) {
+        sum += static_cast<long double>(intensity) * static_cast<long double>(intensity);
+    }
+
+    vector<float> normIntensities = vector<float>(intensities.size());
+
+    for (unsigned int i = 0; i < intensities.size(); i++) {
+        normIntensities[i] = static_cast<float>(static_cast<long double>(intensities[i])/sum);
+    }
+
+    return normIntensities;
+} // sumOfSquaresNorm()
+
 } //namespace end
 
