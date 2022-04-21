@@ -202,7 +202,7 @@ void MzKitchenProcessor::matchMetabolites(
         if (maxScore > -1.0f) {
             group.compound = bestPair.first;
             group.fragMatchScore = bestPair.second;
-            group.fragMatchScore.mergedScore = bestPair.second.hypergeomScore;
+            group.fragMatchScore.mergedScore = bestPair.second.dotProduct;
         }
     }
 
