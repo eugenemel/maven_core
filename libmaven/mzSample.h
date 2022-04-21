@@ -1741,7 +1741,10 @@ public:
 
 };
 
+# ifndef MZKITCHENMSPSEARCHPARAMETERS_DESTRUCTOR
+# define MZKITCHENMSPSEARCHPARAMETERS_DESTRUCTOR
 MzkitchenMspSearchParameters::~MzkitchenMspSearchParameters(){};
+# endif
 
 //Issue 455
 class LCLipidSearchParameters : public MzkitchenMspSearchParameters {
