@@ -1761,6 +1761,15 @@ class MzkitchenMetaboliteSearchParameters : public MzkitchenMspSearchParameters 
 
 public:
 
+    //fields
+
+    /** =======================
+     * RT Matching
+     * searchVersion: version of search protocol used to generate results.
+     * ========================*/
+    bool rtIsRequireRtMatch = true;
+    float rtMatchTolerance = 0.5f;
+
     //default constructor
     MzkitchenMetaboliteSearchParameters() {}
 

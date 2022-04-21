@@ -383,11 +383,13 @@ string MzkitchenMetaboliteSearchParameters::encodeParams() {
     encodedParams = encodedParams + "ms2MinIntensity" + "=" + to_string(ms2MinIntensity) + ";";
 
     // END SearchParameters
-    // START LCLipidSearchParameters
+    // START MzkitchenMetaboliteSearchParameters
 
     encodedParams = encodedParams + "mspFilePath" + "=" + mspFilePath + ";";
+    encodedParams = encodedParams + "rtIsRequireRtMatch" + "=" + to_string(rtIsRequireRtMatch) + ";";
+    encodedParams = encodedParams + "rtMatchTolerance" + "=" + to_string(rtMatchTolerance) + ";";
 
-    // END LCLipidSearchParameters
+    // END MzkitchenMetaboliteSearchParameters
 
     return encodedParams;
 }
@@ -506,13 +508,19 @@ shared_ptr<MzkitchenMetaboliteSearchParameters> MzkitchenMetaboliteSearchParamet
     }
 
     // END SearchParameters
-    // START metaboliteSearchParameters
+    // START MzkitchenMetaboliteSearchParameters
 
     if (decodedMap.find("mspFilePath") != decodedMap.end()) {
         metaboliteSearchParameters->mspFilePath = decodedMap["mspFilePath"];
     }
+    if (decodedMap.find("rtIsRequireRtMatch") != decodedMap.end()) {
+        metaboliteSearchParameters->rtIsRequireRtMatch = decodedMap["rtIsRequireRtMatch"]=="1";
+    }
+    if (decodedMap.find("rtMatchTolerance") != decodedMap.end()) {
+        metaboliteSearchParameters->rtMatchTolerance = stof(decodedMap["rtMatchTolerance"]);
+    }
 
-    // END metaboliteSearchParameters
+    // END MzkitchenMetaboliteSearchParameters
 
     return metaboliteSearchParameters;
 
