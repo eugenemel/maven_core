@@ -1212,10 +1212,12 @@ vector<float> sumOfSquaresNorm(vector<float> intensities) {
         sum += static_cast<long double>(intensity) * static_cast<long double>(intensity);
     }
 
+    long double sumSqrt = sqrt(sum);
+
     vector<float> normIntensities = vector<float>(intensities.size());
 
     for (unsigned int i = 0; i < intensities.size(); i++) {
-        normIntensities[i] = static_cast<float>(static_cast<long double>(intensities[i])/sum);
+        normIntensities[i] = static_cast<float>(static_cast<long double>(intensities[i])/sumSqrt);
     }
 
     return normIntensities;
