@@ -20,10 +20,11 @@
  * diagnostic: *
  * oxidation: &
  */
-void MzKitchenProcessor::matchLipids_LC(vector<PeakGroup>& groups,
-                            vector<Compound*>& compounds,
-                            shared_ptr<LCLipidSearchParameters> params,
-                            bool debug){
+void MzKitchenProcessor::matchLipids_LC(
+        vector<PeakGroup>& groups,
+        vector<Compound*>& compounds,
+        shared_ptr<LCLipidSearchParameters> params,
+        bool debug){
 
     for (auto& group : groups) {
 
@@ -133,6 +134,14 @@ void MzKitchenProcessor::matchLipids_LC(vector<PeakGroup>& groups,
             group.fragMatchScore.mergedScore = bestPair.second.hypergeomScore;
         }
     }
+}
+
+void MzKitchenProcessor::matchMetabolites(
+        vector<PeakGroup>& groups,
+        vector<Compound*>& compounds,
+        shared_ptr<MzkitchenMetaboliteSearchParameters> params,
+        bool debug){
+
 }
 
 string LCLipidSearchParameters::encodeParams() {
