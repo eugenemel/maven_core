@@ -140,6 +140,77 @@ void MzKitchenProcessor::matchMetabolites(
         shared_ptr<MzkitchenMetaboliteSearchParameters> params,
         bool debug){
 
+    for (auto& group : groups) {
+
+        float minMz = group.meanMz - (group.meanMz*params->ms1PpmTolr/1000000);
+        float maxMz = group.meanMz + (group.meanMz*params->ms1PpmTolr/1000000);
+
+        auto lb = lower_bound(compounds.begin(), compounds.end(), minMz, [](const Compound* lhs, const float& rhs){
+            return lhs->precursorMz < rhs;
+        });
+
+        if (group.fragmentationPattern.mzs.empty()) {
+            group.computeFragPattern(params.get());
+        }
+
+        vector<pair<Compound*, FragmentationMatchScore>> scores{};
+
+        for (unsigned int pos = lb - compounds.begin(); pos < compounds.size(); pos++){
+
+            Compound *compound = compounds[pos];
+            float precMz = compound->precursorMz;
+
+            //stop searching when the maxMz has been exceeded.
+            if (precMz > maxMz) {
+                break;
+            }
+
+            Fragment library;
+            library.precursorMz = static_cast<double>(precMz);
+            library.mzs = compound->fragment_mzs;
+            library.intensity_array = compound->fragment_intensity;
+            library.fragment_labels = compound->fragment_labels;
+
+            //skip entries when the RT is required, and out of range
+            float rtDiff = abs(group.medianRt() - compound->expectedRt);
+            if (params->rtIsRequireRtMatch & (rtDiff > params->rtMatchTolerance)) {
+                continue;
+            }
+
+            Fragment observed = group.fragmentationPattern;
+            float maxDeltaMz = (params->ms2PpmTolr * precMz)/ 1000000;
+
+            FragmentationMatchScore s;
+
+            vector<int> ranks = Fragment::findFragPairsGreedyMz(&library, &observed, maxDeltaMz);
+
+            //TODO: scoring? dotProduct() function is implemented in a slightly strange way
+            //intensity sum-of-squares normalization: divide all intensities by the sum of the squares mzUtils::sumOfSquares
+
+            scores.push_back(make_pair(compound, s));
+        }
+
+        //based on scores, determine a result
+        //TODO: compare scores, summarization, etc
+
+        //this is a dummy for testing
+        float maxScore = -1.0f;
+        pair<Compound*, FragmentationMatchScore> bestPair;
+        for (auto score : scores) {
+            if (score.second.hypergeomScore > maxScore) {
+                bestPair = score;
+                maxScore = score.second.hypergeomScore;
+            }
+        }
+
+        if (maxScore > -1.0f) {
+            group.compound = bestPair.first;
+            group.fragMatchScore = bestPair.second;
+            group.fragMatchScore.mergedScore = bestPair.second.hypergeomScore;
+        }
+    }
+
+
 }
 
 string LCLipidSearchParameters::encodeParams() {

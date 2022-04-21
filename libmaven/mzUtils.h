@@ -147,6 +147,7 @@ int isDir(const char* path);
 vector<string> getMzSampleFilesFromDirectory(const char* path);
 unordered_map<string, string> decodeParameterMap(string encodedParams, string delimiter=";");
 vector<string> decodeParameterVector(string encodedParams, string delimiter=";");
+vector<float> sumOfSquaresNorm(vector<float> intensities);
 
 //fractional overlap between two line segments
 inline float checkOverlap(float a, float b, float c, float d) { 
