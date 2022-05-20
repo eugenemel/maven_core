@@ -25,3 +25,4 @@ maven_core.pro
 peakdetector.pro.user
 libmaven/ThreadSafeSmoother
 *.o.tmp
+maven_core.pro.user**
