@@ -7,4 +7,4 @@ INCLUDEPATH += ../MSToolkit/include/ ../pugixml/src .. ../libmaven
 
 SOURCES = mzDeltas.cpp
 
-LIBS += -lmaven -lpugixml -lneural -lz -lmstoolkitlite
+LIBS += -lmaven -lpugixml -lneural -lmstoolkitlite -lz
