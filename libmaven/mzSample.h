@@ -834,6 +834,10 @@ class PeakGroup {
 		vector<Peak> peaks;
         vector<PeakGroup> children;
 
+        //Issue 539: introduced to avoid NPE - see Issue 544
+        //currently only used by tabledockwidget
+        vector<PeakGroup*> ptrChildren;
+
         string srmId;
         string tagString;
         string searchTableName;
