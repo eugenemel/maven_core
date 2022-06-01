@@ -832,11 +832,9 @@ class PeakGroup {
         Adduct*   adduct;
 
 		vector<Peak> peaks;
-        vector<PeakGroup> children;
 
-        //Issue 539: introduced to avoid NPE - see Issue 544
-        //currently only used by tabledockwidget
-        vector<PeakGroup*> ptrChildren;
+        //Issue 544: switch to vector<PeakGroup*>
+        vector<PeakGroup> children;
 
         string srmId;
         string tagString;
