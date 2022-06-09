@@ -1786,6 +1786,13 @@ public:
         setLegacyPeakGroupParameters();
     }
 
+    /** =======================
+     * @param matchingPolicy: Describes which peak group <--> compound identifications should be retained.
+     * @param isComputeAllFragScores: if true, scores are computed and saved in mzrollDB database (Issue 547)
+     * ========================*/
+    PeakGroupCompoundMatchingPolicy matchingPolicy = PeakGroupCompoundMatchingPolicy::SINGLE_TOP_HIT;
+    bool isComputeAllFragScores = true;
+
     string getMzKitchenSearchType(){return "metaboliteSearch";}
 
     string encodeParams();

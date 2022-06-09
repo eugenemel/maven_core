@@ -463,6 +463,16 @@ string MzkitchenMetaboliteSearchParameters::encodeParams() {
     encodedParams = encodedParams + "rtIsRequireRtMatch" + "=" + to_string(rtIsRequireRtMatch) + ";";
     encodedParams = encodedParams + "rtMatchTolerance" + "=" + to_string(rtMatchTolerance) + ";";
 
+    //Issue 547
+    string matchingPolicyStr = "SINGLE_TOP_HIT";
+    if (matchingPolicy == PeakGroupCompoundMatchingPolicy::ALL_MATCHES) {
+        matchingPolicyStr = "ALL_MATCHES";
+    } else if (matchingPolicy == PeakGroupCompoundMatchingPolicy::TOP_SCORE_HITS) {
+        matchingPolicyStr = "TOP_SCORE_HITS";
+    }
+    encodedParams = encodedParams + "matchingPolicy" + "=" + matchingPolicyStr + ";";
+    encodedParams = encodedParams + "isComputeAllFragScores" + "=" + to_string(isComputeAllFragScores) + ";";
+
     // END MzkitchenMetaboliteSearchParameters
 
     return encodedParams;
@@ -592,6 +602,20 @@ shared_ptr<MzkitchenMetaboliteSearchParameters> MzkitchenMetaboliteSearchParamet
     }
     if (decodedMap.find("rtMatchTolerance") != decodedMap.end()) {
         metaboliteSearchParameters->rtMatchTolerance = stof(decodedMap["rtMatchTolerance"]);
+    }
+
+    //Issue 547
+    if (decodedMap.find("matchingPolicy") != decodedMap.end()) {
+        if (decodedMap["matchingPolicy"] == "SINGLE_TOP_HIT") {
+            metaboliteSearchParameters->matchingPolicy = PeakGroupCompoundMatchingPolicy::SINGLE_TOP_HIT;
+        } else if (decodedMap["matchingPolicy"] == "ALL_MATCHES") {
+            metaboliteSearchParameters->matchingPolicy = PeakGroupCompoundMatchingPolicy::ALL_MATCHES;
+        } else if (decodedMap["matchingPolicy"] == "TOP_SCORE_HITS") {
+            metaboliteSearchParameters->matchingPolicy = PeakGroupCompoundMatchingPolicy::TOP_SCORE_HITS;
+        }
+    }
+    if (decodedMap.find("isComputeAllFragScores") != decodedMap.end()) {
+        metaboliteSearchParameters->isComputeAllFragScores = decodedMap["isComputeAllFragScores"] == "1";
     }
 
     // END MzkitchenMetaboliteSearchParameters
