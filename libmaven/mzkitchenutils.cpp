@@ -134,6 +134,13 @@ void MzKitchenProcessor::matchLipids_LC(
     }
 }
 
+/**
+ * @brief MzKitchenProcessor::matchMetabolites
+ * @param groups
+ * @param compounds
+ * @param params
+ * @param debug
+ */
 void MzKitchenProcessor::matchMetabolites(
         vector<PeakGroup>& groups,
         vector<Compound*>& compounds,
@@ -190,6 +197,10 @@ void MzKitchenProcessor::matchMetabolites(
             scores.push_back(make_pair(compound, s));
         }
 
+        if (scores.empty()) continue;
+
+        group.compounds = scores;
+
         float maxScore = -1.0f;
         pair<Compound*, FragmentationMatchScore> bestPair;
         for (auto score : scores) {
@@ -204,9 +215,16 @@ void MzKitchenProcessor::matchMetabolites(
             group.fragMatchScore = bestPair.second;
             group.fragMatchScore.mergedScore = bestPair.second.dotProduct;
         }
+
+        //Issue 546: debugging
+        if (debug) {
+            cout << group.meanMz << "@" << group.medianRt() << ":" << endl;
+
+            for (auto pair : group.compounds) {
+                cout << "\t" << pair.first->name << " " << pair.second.dotProduct << endl;
+            }
+        }
     }
-
-
 }
 
 string LCLipidSearchParameters::encodeParams() {

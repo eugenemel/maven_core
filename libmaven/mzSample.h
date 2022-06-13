@@ -1009,6 +1009,9 @@ class PeakGroup {
         FragmentationMatchScore fragMatchScore;
         Fragment fragmentationPattern;
 
+        //Issue 546: Attach hypotheses to group, same way as vector<Peak> works
+        vector<pair<Compound*, FragmentationMatchScore>> compounds{};
+
 		void deletePeaks();
         bool deletePeak(unsigned int index);
 

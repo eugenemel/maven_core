@@ -137,6 +137,8 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     isComputedGroupStatistics = o.isComputedGroupStatistics;
     isotopeParameters = o.isotopeParameters; //Issue 402
 
+    compounds = o.compounds;
+
     copyChildren(o);
 }
 
