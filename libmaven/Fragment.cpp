@@ -433,6 +433,12 @@ void Fragment::printInclusionList(bool printHeader, ostream& outstream, string C
 
 }
 
+/**
+ * @brief Fragment::scoreMatch
+ * @param other - observed MS/MS spectrum ('this' is the library MS/MS spectrum)
+ * @param productPpmTolr
+ * @return
+ */
 FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTolr) {
     FragmentationMatchScore s;
     if (mzs.size() < 2 or other->mzs.size() < 2) return s;

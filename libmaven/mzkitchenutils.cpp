@@ -185,13 +185,13 @@ void MzKitchenProcessor::matchMetabolites(
             }
 
             Fragment observed = group.fragmentationPattern;
-            float maxDeltaMz = (params->ms2PpmTolr * precMz)/ 1000000;
+            //float maxDeltaMz = (params->ms2PpmTolr * precMz)/ 1000000;
 
-            FragmentationMatchScore s;
+            FragmentationMatchScore s = library.scoreMatch(&observed, params->ms2PpmTolr);
 
-            vector<int> ranks = Fragment::findFragPairsGreedyMz(&library, &observed, maxDeltaMz);
+            //vector<int> ranks = Fragment::findFragPairsGreedyMz(&library, &observed, maxDeltaMz);
 
-            double normCosineScore = Fragment::normCosineScore(&library, &observed, ranks);
+            double normCosineScore = Fragment::normCosineScore(&library, &observed, s.ranks);
             s.dotProduct = normCosineScore;
 
             scores.push_back(make_pair(compound, s));
@@ -221,7 +221,12 @@ void MzKitchenProcessor::matchMetabolites(
             cout << group.meanMz << "@" << group.medianRt() << ":" << endl;
 
             for (auto pair : group.compounds) {
-                cout << "\t" << pair.first->name << " " << pair.second.dotProduct << endl;
+                cout << "\t" << pair.first->name << " "
+                     << pair.second.numMatches << " "
+                     << pair.second.fractionMatched << " "
+                     << pair.second.dotProduct  << " "
+                     << pair.second.hypergeomScore << " "
+                     << endl;
             }
         }
     }
