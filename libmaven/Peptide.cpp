@@ -2788,7 +2788,9 @@ Peptide* Peptide::shuffle(double minHomology, unsigned int numAAsToAdd) {
   do {
     string newSeq("");
 
-    random_shuffle(movableAA.begin(), movableAA.end());
+    //Issue 548: This does not exist in C++14 or later, commenting out for now
+    //TODO: re-implement in C++17
+    // random_shuffle(movableAA.begin(), movableAA.end());
 
     //    for (vector<char>::iterator c = movableAA.begin(); c != movableAA.end(); c++) cerr << *c << ' '; cerr << endl;
 
