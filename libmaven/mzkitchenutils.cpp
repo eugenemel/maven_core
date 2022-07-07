@@ -177,9 +177,9 @@ void MzKitchenProcessor::matchMetabolites(
 
         vector<pair<Compound*, FragmentationMatchScore>> scores{};
 
-        for (unsigned int pos = lb - compounds.begin(); pos < compounds.size(); pos++){
+        for (long pos = lb - compounds.begin(); pos < static_cast<long>(compounds.size()); pos++){
 
-            Compound *compound = compounds[pos];
+            Compound *compound = compounds[static_cast<unsigned long>(pos)];
             float precMz = compound->precursorMz;
 
             //stop searching when the maxMz has been exceeded.
