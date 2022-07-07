@@ -42,10 +42,19 @@ void MzKitchenProcessor::matchLipids_LC(
 
         vector<pair<Compound*, FragmentationMatchScore>> scores{};
 
+        if (debug) {
+            cout << group.meanMz << "@" << group.meanRt << ":\n";
+        }
+
         for (long pos = lb - compounds.begin(); pos < static_cast<long>(compounds.size()); pos++){
 
             Compound *compound = compounds[static_cast<unsigned long>(pos)];
             float precMz = compound->precursorMz;
+
+            //stop searching when the maxMz has been exceeded.
+            if (precMz > maxMz) {
+                break;
+            }
 
             if (debug) {
 
@@ -56,7 +65,7 @@ void MzKitchenProcessor::matchLipids_LC(
                     cout << "compounds[" << (pos-1) << "]: " << compounds[pos-1]->precursorMz << "\n";
                 }
 
-                cout << "compounds[" << (pos) << "]: " << precMz << "\n";
+                cout << "compounds[" << (pos) << "]: " << precMz << " <--> " << compound->id << "\n";
 
                 if (pos <= compounds.size()-2) {
                     cout << "compounds[" << (pos+1) << "]: " << compounds[pos+1]->precursorMz << "\n";
@@ -65,11 +74,6 @@ void MzKitchenProcessor::matchLipids_LC(
 
                 cout << "\n\n";
 
-            }
-
-            //stop searching when the maxMz has been exceeded.
-            if (precMz > maxMz) {
-                break;
             }
 
             Fragment library;
@@ -148,6 +152,10 @@ void MzKitchenProcessor::matchLipids_LC(
             scores.push_back(make_pair(compound, s));
         }
 
+        if (debug) {
+            cout << "\n";
+        }
+
         //based on scores, determine a result
         //TODO: compare scores, summarization, etc
 
@@ -155,6 +163,11 @@ void MzKitchenProcessor::matchLipids_LC(
         float maxScore = -1.0f;
         pair<Compound*, FragmentationMatchScore> bestPair;
         for (auto score : scores) {
+
+            if (debug) {
+                cout << score.first->id << ", score=" << score.second.hypergeomScore << "\n";
+            }
+
             if (score.second.hypergeomScore > maxScore) {
                 bestPair = score;
                 maxScore = score.second.hypergeomScore;
@@ -165,6 +178,10 @@ void MzKitchenProcessor::matchLipids_LC(
             group.compound = bestPair.first;
             group.fragMatchScore = bestPair.second;
             group.fragMatchScore.mergedScore = bestPair.second.hypergeomScore;
+
+            if (debug) {
+                cout << "MATCH: " << group.meanMz << "@" << group.meanRt  << " <--> " << group.compound->id << "\n" << endl;
+            }
         }
     }
 }
