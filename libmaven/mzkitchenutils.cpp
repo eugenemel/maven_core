@@ -1,4 +1,5 @@
 #include "mzSample.h"
+#include "lipidsummarizationutils.h"
 
 /**
  * @brief LCLipidProcessor::matchLipids
@@ -56,6 +57,20 @@ void MzKitchenProcessor::matchLipids_LC(
             library.mzs = compound->fragment_mzs;
             library.intensity_array = compound->fragment_intensity;
             library.fragment_labels = compound->fragment_labels;
+
+            //lazily enumerate summarization info, cache for future comparisons
+            if (compound->metaDataMap.find(LipidSummarizationUtils::getLipidClassSummaryKey()) == compound->metaDataMap.end()) {
+                LipidNameComponents lipidNameComponents = LipidSummarizationUtils::getNameComponents(compound->name);
+                compound->metaDataMap.insert(make_pair(LipidSummarizationUtils::getLipidClassSummaryKey(), lipidNameComponents.lipidClass));
+            }
+
+            //skip entries when the RT is out of range
+            string lipidClass = compound->metaDataMap[LipidSummarizationUtils::getLipidClassSummaryKey()];
+            if (params->lipidClassToRtRange.find(lipidClass) != params->lipidClassToRtRange.end()) {
+                pair<float, float> validRtRange = params->lipidClassToRtRange[lipidClass];
+
+                if (group.medianRt() < validRtRange.first || group.medianRt() > validRtRange.second) continue;
+            }
 
             Fragment observed = group.fragmentationPattern;
             float maxDeltaMz = (params->ms2PpmTolr * precMz)/ 1000000;
