@@ -42,10 +42,30 @@ void MzKitchenProcessor::matchLipids_LC(
 
         vector<pair<Compound*, FragmentationMatchScore>> scores{};
 
-        for (unsigned int pos = lb - compounds.begin(); pos < compounds.size(); pos++){
+        for (long pos = lb - compounds.begin(); pos < static_cast<long>(compounds.size()); pos++){
 
-            Compound *compound = compounds[pos];
+            Compound *compound = compounds[static_cast<unsigned long>(pos)];
             float precMz = compound->precursorMz;
+
+            if (debug) {
+
+                cout << "(" << minMz << ", " << maxMz << ")\n";
+
+                if (pos >= 2){
+                    cout << "compounds[" << (pos-2) << "]: " << compounds[pos-2]->precursorMz << "\n";
+                    cout << "compounds[" << (pos-1) << "]: " << compounds[pos-1]->precursorMz << "\n";
+                }
+
+                cout << "compounds[" << (pos) << "]: " << precMz << "\n";
+
+                if (pos <= compounds.size()-2) {
+                    cout << "compounds[" << (pos+1) << "]: " << compounds[pos+1]->precursorMz << "\n";
+                    cout << "compounds[" << (pos+2) << "]: " << compounds[pos+1]->precursorMz << "\n";
+                }
+
+                cout << "\n\n";
+
+            }
 
             //stop searching when the maxMz has been exceeded.
             if (precMz > maxMz) {
