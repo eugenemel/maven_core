@@ -293,6 +293,17 @@ string LCLipidSearchParameters::encodeParams() {
 
     encodedParams = encodedParams + "mspFilePath" + "=" + mspFilePath + ";";
 
+    //Issue 552
+    encodedParams = encodedParams + "lipidClassToRtRange" + "=" + "{";
+
+    for (auto it = lipidClassToRtRange.begin(); it != lipidClassToRtRange.end(); ++it) {
+        string key = it->first;
+        string value = to_string(it->second.first) + TUPLE_MAP_KEY_DELIMITER + to_string(it->second.second);
+        encodedParams = encodedParams + key + "=" + value + INTERNAL_MAP_DELIMITER;
+    }
+
+    encodedParams = encodedParams + "};";
+
     // END LCLipidSearchParameters
 
     return encodedParams;
@@ -415,6 +426,33 @@ shared_ptr<LCLipidSearchParameters> LCLipidSearchParameters::decode(string encod
 
     if (decodedMap.find("mspFilePath") != decodedMap.end()) {
         lipidSearchParameters->mspFilePath = decodedMap["mspFilePath"];
+    }
+    if (decodedMap.find("lipidClassToRtRange") != decodedMap.end()) {
+
+        string encodedLipidClassToRtRange = decodedMap["lipidClassToRtRange"];
+        unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedLipidClassToRtRange, INTERNAL_MAP_DELIMITER);
+
+        for (auto it = decodedMap.begin(); it != decodedMap.end(); ++it){
+            string key = it->first;
+            string valueEncoded = it->second;
+
+            auto pos = valueEncoded.find(TUPLE_MAP_KEY_DELIMITER);
+
+            string startRtEncoded = valueEncoded.substr(0, pos);
+            string endRtEncoded = valueEncoded.substr(pos+1, valueEncoded.size());
+
+            try {
+                float startRt = stof(startRtEncoded);
+                float endRt = stof(endRtEncoded);
+
+                if (startRt < endRt) {
+                    lipidSearchParameters->lipidClassToRtRange.insert(make_pair(key, make_pair(startRt, endRt)));
+                }
+
+            } catch (...) {
+                //skip this entry - something wrong with the encoding
+            }
+        }
     }
 
     // END LCLipidSearchParameters

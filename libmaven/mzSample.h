@@ -1751,6 +1751,10 @@ public:
 
     void setLegacyPeakGroupParameters();
 
+    //RESERVED DELIMITERS - DO NOT CHANGE!
+    static constexpr const char* const INTERNAL_MAP_DELIMITER = "|,|";
+    static constexpr const char* const TUPLE_MAP_KEY_DELIMITER = "&";
+
 };
 
 //Issue 455
@@ -1762,6 +1766,13 @@ public:
     LCLipidSearchParameters() {
         setLegacyPeakGroupParameters();
     }
+
+    /** =======================
+     * RT Matching
+     * lipidClassToRtRange: map describing valid RT range for lipid class, if available.
+     * If none available, retain all RTs
+     * ========================*/
+    map<string, pair<float, float>> lipidClassToRtRange{};
 
     string getMzKitchenSearchType(){return "lipidSearch";}
 
@@ -1780,6 +1791,7 @@ public:
     /** =======================
      * RT Matching
      * searchVersion: version of search protocol used to generate results.
+     * lipidClassToRtRange: map describing valid RT range for lipid class, if available.  If none available, retain all RTs
      * ========================*/
     bool rtIsRequireRtMatch = true;
     float rtMatchTolerance = 0.5f;
