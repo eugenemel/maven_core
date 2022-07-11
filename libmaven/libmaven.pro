@@ -18,6 +18,7 @@ SOURCES=base64.cpp mzMassCalculator.cpp mzSample.cpp  mzUtils.cpp statistics.cpp
        PeakGroup.cpp EIC.cpp Scan.cpp Peak.cpp  \
        Compound.cpp \
        mzkitchenutils.cpp \
+       qqqprocessor.cpp \
        savgol.cpp \
        SavGolSmoother.cpp \
        parallelmassSlicer.cpp \

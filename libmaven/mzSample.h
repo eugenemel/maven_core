@@ -1948,4 +1948,31 @@ struct IntegerSetContainer {
     }
 };
 
+class QQQSearchParameters : public SearchParameters {
+
+public:
+
+    string getMzKitchenSearchType();
+    virtual ~QQQSearchParameters();
+
+    //fields
+    float amuQ1 = 0.5f;
+    float amuQ3 = 0.5f;
+};
+
+class QQQProcessor{
+    public:
+
+    //TODO
+    static pair<vector<mzSlice*>, vector<SRMTransition*>> getSRMSlices(
+            vector<mzSample*> samples,
+            shared_ptr<QQQSearchParameters> params,
+            vector<Compound*> compounds,
+            vector<Adduct*> adducts,
+            bool debug = false);
+
+
+};
+
+
 #endif
