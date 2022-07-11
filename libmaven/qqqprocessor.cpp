@@ -2,6 +2,7 @@
 #include <regex>
 
 //TODO: test this
+//TODO: this should replace MainWindow::getSrmSlices()
 pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
         vector<mzSample*> samples,
         shared_ptr<QQQSearchParameters> params,
