@@ -158,6 +158,7 @@ string QQQSearchParameters::encodeParams(){
 
     encodedParams = encodedParams + "amuQ1" + "=" + to_string(amuQ1) + ";";
     encodedParams = encodedParams + "amuQ3" + "=" + to_string(amuQ3) + ";";
+    encodedParams = encodedParams + "transitionListFilePath" + "=" + transitionListFilePath + ";";
 
     return encodedParams;
 }
@@ -283,6 +284,9 @@ shared_ptr<QQQSearchParameters> QQQSearchParameters::decode(string encodedParams
     }
     if (decodedMap.find("amuQ3") != decodedMap.end()) {
         qqqSearchParameters->amuQ3 = stof(decodedMap["amuQ3"]);
+    }
+    if (decodedMap.find("transitionListFilePath") != decodedMap.end()) {
+        qqqSearchParameters->transitionListFilePath = decodedMap["transitionListFilePath"];
     }
 
     // END QQQSearchParameters
