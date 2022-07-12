@@ -2017,8 +2017,6 @@ public:
     string encodeParams();
     static shared_ptr<QQQSearchParameters> decode(string encodedParams);
 
-    virtual ~QQQSearchParameters();
-
     //fields
     string transitionListFilePath = "";
 
