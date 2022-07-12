@@ -1,7 +1,6 @@
 #include "mzSample.h"
 #include <regex>
 
-//TODO: test this
 //TODO: this should replace MainWindow::getSrmSlices()
 pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
         vector<mzSample*> samples,
@@ -151,4 +150,142 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
     }
 
     return make_pair(slices, srmTransitionsAsVector);
+}
+
+string QQQSearchParameters::encodeParams(){
+
+    string encodedParams = SearchParameters::encodeParams();
+
+    encodedParams = encodedParams + "amuQ1" + "=" + to_string(amuQ1) + ";";
+    encodedParams = encodedParams + "amuQ3" + "=" + to_string(amuQ3) + ";";
+
+    return encodedParams;
+}
+
+shared_ptr<QQQSearchParameters> QQQSearchParameters::decode(string encodedParams) {
+
+    shared_ptr<QQQSearchParameters> qqqSearchParameters = shared_ptr<QQQSearchParameters>(new QQQSearchParameters());
+
+    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams); //use semicolon (default)
+
+    //START SearchParameters
+
+    //program level
+    if (decodedMap.find("searchVersion") != decodedMap.end()) {
+        qqqSearchParameters->searchVersion = decodedMap["searchVersion"];
+    }
+
+    //scan filter params
+    if (decodedMap.find("scanFilterMinFracIntensity") != decodedMap.end()){
+        qqqSearchParameters->scanFilterMinFracIntensity = stof(decodedMap["scanFilterMinFracIntensity"]);
+    }
+    if (decodedMap.find("scanFilterMinSNRatio") != decodedMap.end()){
+        qqqSearchParameters->scanFilterMinSNRatio = stof(decodedMap["scanFilterMinSNRatio"]);
+    }
+    if (decodedMap.find("scanFilterMaxNumberOfFragments") != decodedMap.end()) {
+        qqqSearchParameters->scanFilterMaxNumberOfFragments = stoi(decodedMap["scanFilterMaxNumberOfFragments"]);
+    }
+    if (decodedMap.find("scanFilterBaseLinePercentile") != decodedMap.end()) {
+        qqqSearchParameters->scanFilterBaseLinePercentile = stoi(decodedMap["scanFilterBaseLinePercentile"]);
+    }
+    if (decodedMap.find("scanFilterIsRetainFragmentsAbovePrecursorMz") != decodedMap.end()) {
+        qqqSearchParameters->scanFilterIsRetainFragmentsAbovePrecursorMz = decodedMap["scanFilterIsRetainFragmentsAbovePrecursorMz"] == "1";
+    }
+    if (decodedMap.find("scanFilterPrecursorPurityPpm") != decodedMap.end()){
+        qqqSearchParameters->scanFilterPrecursorPurityPpm = stof(decodedMap["scanFilterPrecursorPurityPpm"]);
+    }
+    if (decodedMap.find("scanFilterMinIntensity") != decodedMap.end()){
+        qqqSearchParameters->scanFilterMinIntensity = stof(decodedMap["scanFilterMinIntensity"]);
+    }
+
+    //scan filter for MS1 scans
+    if (decodedMap.find("scanFilterMs1MinRt") != decodedMap.end()) {
+        qqqSearchParameters->scanFilterMs1MinRt = stof(decodedMap["scanFilterMs1MinRt"]);
+    }
+    if (decodedMap.find("scanFilterMs1MaxRt") != decodedMap.end()) {
+        qqqSearchParameters->scanFilterMs1MaxRt = stof(decodedMap["scanFilterMs1MaxRt"]);
+    }
+
+    //scan filter for MS2 scans
+    if (decodedMap.find("scanFilterMs2MinRt") != decodedMap.end()) {
+        qqqSearchParameters->scanFilterMs2MinRt = stof(decodedMap["scanFilterMs2MinRt"]);
+    }
+    if (decodedMap.find("scanFilterMs2MaxRt") != decodedMap.end()) {
+        qqqSearchParameters->scanFilterMs2MaxRt = stof(decodedMap["scanFilterMs2MaxRt"]);
+    }
+
+    //consensus spectrum params (all ms levels)
+
+    if (decodedMap.find("consensusIsIntensityAvgByObserved") != decodedMap.end()){
+        qqqSearchParameters->consensusIsIntensityAvgByObserved = decodedMap["consensusIsIntensityAvgByObserved"] == "1";
+    }
+    if (decodedMap.find("consensusIsNormalizeTo10K") != decodedMap.end()){
+        qqqSearchParameters->consensusIsNormalizeTo10K = decodedMap["consensusIsNormalizeTo10K"] == "1";
+    }
+    if (decodedMap.find("consensusIntensityAgglomerationType") != decodedMap.end()) {
+        string consensusIntensityAgglomerationTypeStr = decodedMap["consensusIntensityAgglomerationType"];
+        if (consensusIntensityAgglomerationTypeStr == "MEAN") {
+            qqqSearchParameters->consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
+        } else if (consensusIntensityAgglomerationTypeStr == "MEDIAN") {
+            qqqSearchParameters->consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
+        }
+    }
+
+    //ms1 consensus spectrum params
+    if (decodedMap.find("consensusMs1PpmTolr") != decodedMap.end()){
+        qqqSearchParameters->consensusMs1PpmTolr = stof(decodedMap["consensusMs1PpmTolr"]);
+    }
+    if (decodedMap.find("consensusMinNumMs1Scans") != decodedMap.end()){
+        qqqSearchParameters->consensusMinNumMs1Scans = stoi(decodedMap["consensusMinNumMs1Scans"]);
+    }
+    if (decodedMap.find("consensusMinFractionMs1Scans") != decodedMap.end()){
+        qqqSearchParameters->consensusMinFractionMs1Scans = stof(decodedMap["consensusMinFractionMs1Scans"]);
+    }
+
+    //ms2 consensus spectrum params
+    if (decodedMap.find("consensusPpmTolr") != decodedMap.end()){
+        qqqSearchParameters->consensusPpmTolr = stof(decodedMap["consensusPpmTolr"]);
+    }
+    if (decodedMap.find("consensusMinNumMs2Scans") != decodedMap.end()){
+        qqqSearchParameters->consensusMinNumMs2Scans = stoi(decodedMap["consensusMinNumMs2Scans"]);
+    }
+    if (decodedMap.find("consensusMinFractionMs2Scans") != decodedMap.end()){
+        qqqSearchParameters->consensusMinFractionMs2Scans = stof(decodedMap["consensusMinFractionMs2Scans"]);
+    }
+
+    // ms1 matching
+    if (decodedMap.find("ms1PpmTolr") != decodedMap.end()) {
+        qqqSearchParameters->ms1PpmTolr = stof(decodedMap["ms1PpmTolr"]);
+    }
+
+    // ms2 search
+    if (decodedMap.find("ms2MinNumMatches") != decodedMap.end()) {
+        qqqSearchParameters->ms2MinNumMatches = stoi(decodedMap["ms2MinNumMatches"]);
+    }
+    if (decodedMap.find("ms2MinNumDiagnosticMatches") != decodedMap.end()) {
+        qqqSearchParameters->ms2MinNumDiagnosticMatches = stoi(decodedMap["ms2MinNumDiagnosticMatches"]);
+    }
+    if (decodedMap.find("ms2MinNumUniqueMatches") != decodedMap.end()) {
+        qqqSearchParameters->ms2MinNumUniqueMatches = stoi(decodedMap["ms2MinNumUniqueMatches"]);
+    }
+    if (decodedMap.find("ms2PpmTolr") != decodedMap.end()) {
+        qqqSearchParameters->ms2PpmTolr = stof(decodedMap["ms2PpmTolr"]);
+    }
+    if (decodedMap.find("ms2MinIntensity") != decodedMap.end()) {
+        qqqSearchParameters->ms2MinIntensity = stof(decodedMap["ms2MinIntensity"]);
+    }
+
+    // END SearchParameters
+    // START QQQSearchParameters
+
+    if (decodedMap.find("amuQ1") != decodedMap.end()) {
+        qqqSearchParameters->amuQ1 = stof(decodedMap["amuQ1"]);
+    }
+    if (decodedMap.find("amuQ3") != decodedMap.end()) {
+        qqqSearchParameters->amuQ3 = stof(decodedMap["amuQ3"]);
+    }
+
+    // END QQQSearchParameters
+
+    return qqqSearchParameters;
 }

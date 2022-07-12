@@ -1953,6 +1953,10 @@ class QQQSearchParameters : public SearchParameters {
 public:
 
     string getMzKitchenSearchType();
+
+    string encodeParams();
+    shared_ptr<QQQSearchParameters> decode(string encodedParams);
+
     virtual ~QQQSearchParameters();
 
     //fields
