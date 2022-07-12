@@ -2027,14 +2027,18 @@ public:
 class QQQProcessor{
     public:
 
-    //TODO
     static pair<vector<mzSlice*>, vector<SRMTransition*>> getSRMSlices(
-            vector<mzSample*> samples,
+            vector<mzSample*>& samples,
             shared_ptr<QQQSearchParameters> params,
-            vector<Compound*> compounds,
-            vector<Adduct*> adducts,
+            vector<Compound*>& compounds,
+            vector<Adduct*>& adducts,
             bool debug = false);
 
+    static vector<PeakGroup> getGroups(
+            vector<SRMTransition*>& transitions,
+            vector<mzSample*>& samples,
+            shared_ptr<QQQSearchParameters> params,
+            bool debug = false);
 
 };
 

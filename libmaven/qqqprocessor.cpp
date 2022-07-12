@@ -1,12 +1,11 @@
 #include "mzSample.h"
 #include <regex>
 
-//TODO: this should replace MainWindow::getSrmSlices()
 pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
-        vector<mzSample*> samples,
+        vector<mzSample*>& samples,
         shared_ptr<QQQSearchParameters> params,
-        vector<Compound*> compounds,
-        vector<Adduct*> adducts,
+        vector<Compound*>& compounds,
+        vector<Adduct*>& adducts,
         bool debug){
 
     set<string> srms;
@@ -150,6 +149,17 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
     }
 
     return make_pair(slices, srmTransitionsAsVector);
+}
+
+vector<PeakGroup> QQQProcessor::getGroups(
+        vector<SRMTransition*>& transitions,
+        vector<mzSample*>& samples,
+        shared_ptr<QQQSearchParameters> params,
+        bool debug){
+
+    //TODO
+
+    return vector<PeakGroup>{};
 }
 
 string QQQSearchParameters::encodeParams(){
