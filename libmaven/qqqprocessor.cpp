@@ -27,9 +27,9 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
     vector<mzSlice*>slices;
     map<pair<float, float>, SRMTransition*> srmTransitions{};
 
-    for(int i=0; i < samples.size(); i++ ) {
+    for(unsigned int i=0; i < samples.size(); i++ ) {
         mzSample* sample = samples[i];
-        for( int j=0; j < sample->scans.size(); j++ ) {
+        for(unsigned int j=0; j < sample->scans.size(); j++ ) {
             Scan* scan = sample->getScan(j);
             if (!scan) continue;
 
@@ -64,29 +64,18 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
                 } else if (m2.size() > 0){
                     precursorMz = stof(m2[0]);
                 }
-
-//                if( rx1a.indexIn(filterLine) != -1 ) {
-//                    precursorMz = rx1a.capturedTexts()[1].toDouble();
-//                } else if ( rx1b.indexIn(filterLine) != -1 ) {
-//                    precursorMz = rx1b.capturedTexts()[1].toDouble();
-//                }
             }
 
             if ( productMz < 1e-6f ) {
 
-                smatch m1;
-                regex_search(filterLine, m1, rx2);
+                smatch m3;
+                regex_search(filterLine, m3, rx2);
 
-                if (m1.size() > 1) {
-                    float lb = stof(m1[0]);
-                    float ub = stof(m1[1]);
-                    productMz = 0.5f*(lb+(ub-lb));
+                if (m3.size() > 2) {
+                    float lb = stof(m3[1]);
+                    float ub = stof(m3[2]);
+                    productMz = lb+(0.5f*(ub-lb));
                 }
-//                if ( rx2.indexIn(filterLine) != -1 ) {
-//                    float lb = rx2.capturedTexts()[1].toDouble();
-//                    float ub = rx2.capturedTexts()[2].toDouble();
-//                    productMz = lb+(ub-lb)/2;
-//                }
             }
 
             //relies on compounds
