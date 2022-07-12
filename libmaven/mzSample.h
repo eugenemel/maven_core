@@ -1953,7 +1953,7 @@ class QQQSearchParameters : public SearchParameters {
 public:
 
     string encodeParams();
-    shared_ptr<QQQSearchParameters> decode(string encodedParams);
+    static shared_ptr<QQQSearchParameters> decode(string encodedParams);
 
     virtual ~QQQSearchParameters();
 
