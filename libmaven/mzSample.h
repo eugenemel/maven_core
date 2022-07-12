@@ -2034,12 +2034,6 @@ class QQQProcessor{
             vector<Adduct*>& adducts,
             bool debug = false);
 
-    static vector<PeakGroup> getGroups(
-            vector<SRMTransition*>& transitions,
-            vector<mzSample*>& samples,
-            shared_ptr<QQQSearchParameters> params,
-            bool debug = false);
-
 };
 
 

@@ -151,17 +151,6 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
     return make_pair(slices, srmTransitionsAsVector);
 }
 
-vector<PeakGroup> QQQProcessor::getGroups(
-        vector<SRMTransition*>& transitions,
-        vector<mzSample*>& samples,
-        shared_ptr<QQQSearchParameters> params,
-        bool debug){
-
-    //TODO
-
-    return vector<PeakGroup>{};
-}
-
 string QQQSearchParameters::encodeParams(){
 
     string encodedParams = baseParams();
