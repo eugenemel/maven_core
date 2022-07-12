@@ -154,7 +154,7 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
 
 string QQQSearchParameters::encodeParams(){
 
-    string encodedParams = SearchParameters::encodeParams();
+    string encodedParams = baseParams();
 
     encodedParams = encodedParams + "amuQ1" + "=" + to_string(amuQ1) + ";";
     encodedParams = encodedParams + "amuQ3" + "=" + to_string(amuQ3) + ";";
