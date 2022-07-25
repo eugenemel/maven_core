@@ -262,7 +262,7 @@ void MzKitchenProcessor::matchMetabolites(
 
         //Issue 559: print empty groups
         if (debug) {
-            cout << group.meanMz << "@" << group.medianRt() << ":" << endl;
+            cout << group.meanMz << "@" << group.medianRt() << " #ms2s=" << group.ms2EventCount << " :" << endl;
         }
 
         if (scores.empty()) continue;
