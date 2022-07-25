@@ -199,6 +199,17 @@ void MzKitchenProcessor::matchMetabolites(
         shared_ptr<MzkitchenMetaboliteSearchParameters> params,
         bool debug){
 
+    //Issue 559: Arrange groups in order for debugging
+    if (debug) {
+        sort(groups.begin(), groups.end(), [](const PeakGroup& lhs, const PeakGroup& rhs){
+            if (lhs.meanMz == rhs.meanMz){
+                return lhs.meanRt < rhs.meanRt;
+            } else {
+                return lhs.meanMz < rhs.meanMz;
+            }
+        });
+    }
+
     for (auto& group : groups) {
 
         float minMz = group.meanMz - (group.meanMz*params->ms1PpmTolr/1000000);
@@ -249,6 +260,11 @@ void MzKitchenProcessor::matchMetabolites(
             scores.push_back(make_pair(compound, s));
         }
 
+        //Issue 559: print empty groups
+        if (debug) {
+            cout << group.meanMz << "@" << group.medianRt() << ":" << endl;
+        }
+
         if (scores.empty()) continue;
 
         group.compounds = scores;
@@ -270,7 +286,7 @@ void MzKitchenProcessor::matchMetabolites(
 
         //Issue 546: debugging
         if (debug) {
-            cout << group.meanMz << "@" << group.medianRt() << ":" << endl;
+            //cout << group.meanMz << "@" << group.medianRt() << ":" << endl;
 
             for (auto pair : group.compounds) {
                 cout << "\t" << pair.first->name << " "
