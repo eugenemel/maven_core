@@ -247,14 +247,11 @@ void MzKitchenProcessor::matchMetabolites(
                 continue;
             }
 
-            Fragment observed = group.fragmentationPattern;
-            //float maxDeltaMz = (params->ms2PpmTolr * precMz)/ 1000000;
+            FragmentationMatchScore s = library.scoreMatch(&(group.fragmentationPattern), params->ms2PpmTolr);
 
-            FragmentationMatchScore s = library.scoreMatch(&observed, params->ms2PpmTolr);
+            if (s.numMatches < params->ms2MinNumMatches) continue;
 
-            //vector<int> ranks = Fragment::findFragPairsGreedyMz(&library, &observed, maxDeltaMz);
-
-            double normCosineScore = Fragment::normCosineScore(&library, &observed, s.ranks);
+            double normCosineScore = Fragment::normCosineScore(&library, &(group.fragmentationPattern), s.ranks);
             s.dotProduct = normCosineScore;
 
             scores.push_back(make_pair(compound, s));
