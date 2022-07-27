@@ -206,6 +206,20 @@ float PeakGroup::medianRt() {
     return mzUtils::median(rts);
 }
 
+//Issue 560
+float PeakGroup::maxPeakRt(){
+    float maxRt = 0.0f;
+    float maxIntensity = -1.0f;
+    for (auto p : peaks) {
+        if (p.peakIntensity > maxIntensity) {
+            maxRt = p.rt;
+            maxIntensity = p.peakIntensity;
+        }
+    }
+
+    return maxRt;
+}
+
 void PeakGroup::deleteChildren() { 
     children.clear();
 }

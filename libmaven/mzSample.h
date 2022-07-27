@@ -988,6 +988,7 @@ class PeakGroup {
         void groupStatistics(bool isForceRecomputation=true);
 		void updateQuality();
 		float medianRt();
+        float maxPeakRt();
 		float meanRtW();
         void pullIsotopes(IsotopeParameters isotopeParameters); //Issue 371: refactor to dedicated method
 
