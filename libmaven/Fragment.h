@@ -67,6 +67,11 @@ struct FragmentationMatchScore {
     vector<double> matchedQuantiles;
     vector<int> ranks;
 
+    //Issue 547: Additional scoring metrics
+    double dotProductNorm;
+    double neutralLossCosineScore;
+    double spectralEntropyScore;
+
     static vector<string> getScoringAlgorithmNames() {
         vector<string> names;
         names.push_back("HyperGeomScore");

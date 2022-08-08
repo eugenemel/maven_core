@@ -483,6 +483,8 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
     s.matchedQuantiles = matchedRankVector(s.ranks,b);
     //s.dotProductShuffle = this->dotProductShuffle(b,2000);
 
+    s.dotProductNorm = normCosineScore(this, b, s.ranks);
+
     //cerr << "scoreMatch:\n" << a->nobs() << "\t" << b->nobs() << "\t" << s.numMatches << " hyper=" << s.hypergeomScore << "\n";
 
     return s;
