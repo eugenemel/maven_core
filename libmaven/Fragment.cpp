@@ -1317,7 +1317,11 @@ void Fragment::convertToNLSpectrum() {
         //Add 1 Da for tolerance wiggle room
         if (originalMass > static_cast<float>(precursorMz+1.0)) break;
 
-        float nLmass = static_cast<float>(precursorMz)-originalMass;
+        //precursor mass is preserved.
+        float nLmass = originalMass;
+        if (abs(originalMass-static_cast<float>(precursorMz)) > 0.1f){
+            nLmass = static_cast<float>(precursorMz)-originalMass;
+        }
 
         updatedMzs.push_back(nLmass);
         updatedIntensities.push_back(intensity_array[i]);
