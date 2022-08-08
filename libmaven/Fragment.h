@@ -248,7 +248,7 @@ class Fragment {
         double compareToFragment(Fragment* other, float productPPMToll);
         static vector<int> compareRanks(Fragment* a, Fragment* b, float productPpmTolr);
         static vector<int> locatePositions( Fragment* a, Fragment* b, float productPpmToll);
-        static vector<int> findFragPairsGreedyMz(Fragment* a, Fragment* b, float maxMzDiff);
+        static vector<int> findFragPairsGreedyMz(Fragment* a, Fragment* b, float maxMzDiff, bool isMatchToNLMassShift=false);
         static double normCosineScore(Fragment* a, Fragment* b, vector<int> ranks);
         static double normNLCosineScore(Fragment* library, Fragment* observed, float productPpmTolr);
 

@@ -549,6 +549,10 @@ vector<int> Fragment::compareRanks(Fragment* a, Fragment* b, float productPpmTol
  * @param a (MS/MS spectrum 1) (typically from library)
  * @param b (MS/MS spectrum 2) (typically from experimental data)
  * @param maxMzDiff (tolerance, translated into a maximum m/z difference)
+ * @param isMatchToNLMassShift: Match to NL-adjusted m/zs (precursorMz).
+ * If both an NL-adjusted m/z and regular m/z match, the lowest m/z diff is retained.
+ * [default=false]
+ *
  * @return ranks vector<int>, of length of a.
  *
  * rank[a_position] = b_position
@@ -556,34 +560,48 @@ vector<int> Fragment::compareRanks(Fragment* a, Fragment* b, float productPpmTol
  *
  * Note that these pairs are only valid if the two MS/MS spectra remain sorted by Mz.
  */
-vector<int> Fragment::findFragPairsGreedyMz(Fragment* a, Fragment* b, float maxMzDiff) {
+vector<int> Fragment::findFragPairsGreedyMz(Fragment* library, Fragment* observed, float maxMzDiff, bool isMatchToNLMassShift) {
 
     //Sort spectra by m/z
-    a->sortByMz();
-    b->sortByMz();
+    library->sortByMz();
+    observed->sortByMz();
+
+    map<unsigned int, float> NLMzs{};
+    if (isMatchToNLMassShift) {
+        for (unsigned int i = 0; i < library->mzs.size(); i++) {
+            double libraryMz = static_cast<double>(library->mzs[i]);
+            if (libraryMz < library->precursorMz) {
+                float nLMz = static_cast<float>(library->precursorMz - libraryMz);
+                NLMzs.insert(make_pair(i, nLMz));
+            }
+        }
+    }
+
+    //TODO: need to intermix NLMzs with library mzs.
+    //TODO: use special class, mapping int to some special container class?
 
     //Identify all valid possible fragment pairs (based on tolerance),
     //record with mzDelta
 
     vector<pair<float,pair<unsigned int, unsigned int>>> fragPairsWithMzDeltas;
 
-    for (unsigned int i = 0; i < a->mzs.size(); i++){
+    for (unsigned int i = 0; i < library->mzs.size(); i++){
 
-        float mz_a = a->mzs.at(i);
+        float mzLibraryFrag = library->mzs.at(i);
 
-        for (unsigned int j = 0; j < b->mzs.size(); j++) {
+        for (unsigned int j = 0; j < observed->mzs.size(); j++) {
 
-            float mz_b = b->mzs.at(j);
+            float mzObservedFrag = observed->mzs.at(j);
 
-            if (mz_a - mz_b > maxMzDiff) {
+            if (mzLibraryFrag - mzObservedFrag > maxMzDiff) {
                 //Out of tolerance - could possibly come into tolerance as j increases.
-            } else if (mz_b - mz_a > maxMzDiff) {
+            } else if (mzObservedFrag - mzLibraryFrag > maxMzDiff) {
                 //Out of tolerance - cannot possibly come into tolerance as j increases.
                 break;
             } else {
                 //In tolerance - record dissimilarity as candidate match.
 
-                float mzDelta = abs(mz_a - mz_b);
+                float mzDelta = abs(mzLibraryFrag - mzObservedFrag);
 
                 pair<unsigned int, unsigned int> peakPair (i, j); //First position is reserved for a, second for b
 
@@ -612,26 +630,26 @@ vector<int> Fragment::findFragPairsGreedyMz(Fragment* a, Fragment* b, float maxM
     //Once a fragment has been claimed in a frag pair, it may not be involved in any other
     //frag pair.
     vector<pair<unsigned int, unsigned int>> matches;
-    vector<int> ranks (a->mzs.size(),-1);
-    set<unsigned int> claimedAFrags;
-    set<unsigned int> claimedBFrags;
+    vector<int> ranks (library->mzs.size(),-1);
+    set<unsigned int> claimedLibraryFrags;
+    set<unsigned int> claimedObservedFrags;
 
 //    cerr << "match: ref <--> obs" << endl;
 
     for (pair<float,pair<unsigned int, unsigned int>> fragPairWithMzDelta : fragPairsWithMzDeltas){
         pair<unsigned int, unsigned int> fragPair = fragPairWithMzDelta.second;
-        unsigned int a_frag = fragPair.first;
-        unsigned int b_frag = fragPair.second;
+        unsigned int libraryFrag = fragPair.first;
+        unsigned int observedFrag = fragPair.second;
 
-        if (claimedAFrags.count(a_frag) == 0 && claimedBFrags.count(b_frag) == 0){
+        if (claimedLibraryFrags.count(libraryFrag) == 0 && claimedObservedFrags.count(observedFrag) == 0){
 
             matches.push_back(fragPair);
-            ranks[a_frag] = static_cast<int>(b_frag);
+            ranks[libraryFrag] = static_cast<int>(observedFrag);
 
 //            cerr << "match: " << a->mzs.at(a_frag) << " <--> " << b->mzs.at(b_frag) << endl;
 
-            claimedAFrags.insert(a_frag);
-            claimedBFrags.insert(b_frag);
+            claimedLibraryFrags.insert(libraryFrag);
+            claimedObservedFrags.insert(observedFrag);
         }
     }
 
