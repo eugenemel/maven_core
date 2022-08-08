@@ -1346,11 +1346,16 @@ void Fragment::convertToNLSpectrum() {
 
 double Fragment::normNLCosineScore(Fragment *library, Fragment *observed, float productPpmTolr){
 
-    observed->convertToNLSpectrum();
+    Fragment *observedNL = new Fragment(observed);
+    observedNL->convertToNLSpectrum();
 
-    vector<int> ranks = Fragment::compareRanks(library, observed, productPpmTolr);
+    vector<int> ranks = Fragment::compareRanks(library, observedNL, productPpmTolr);
 
-    return Fragment::normCosineScore(library, observed, ranks);
+    double normCosineNLScore = Fragment::normCosineScore(library, observedNL, ranks);
+
+    delete(observedNL);
+
+    return normCosineNLScore;
 }
 
 //Warning: do not use this with direct infusion code. only LC-MS/MS analysis.
