@@ -20,6 +20,7 @@ Fragment::Fragment() {
     clusterId=0;
 	mergedScore=0;
     scanNumMap={};
+    isNLSpectrum=false;
 }
 
 
@@ -102,6 +103,7 @@ Fragment::Fragment(Scan* scan,
 
     this->rt = scan->rt;
     this->purity = precursorPurityPpm > 0 ? scan->getPrecursorPurity(precursorPurityPpm) : 0.0f;  //this might be slow
+    this->isNLSpectrum = false;
     this->sortByMz();
 }
 
@@ -133,6 +135,7 @@ Fragment::Fragment(Scan *scan){
     this->scanNumMap={};
     scanNumMap.insert(make_pair(scan->sample, unordered_set<int>()));
     scanNumMap[scan->sample].insert(scan->scannum);
+    this->isNLSpectrum = false;
 }
 
 //delete
@@ -163,6 +166,7 @@ Fragment::Fragment( Fragment* other) {
 	this->mergedScore = other->mergedScore;
     this->scanNumMap = other->scanNumMap;
     this->consensusPositionToScanIntensities = other->consensusPositionToScanIntensities;
+    this->isNLSpectrum = other->isNLSpectrum;
 }
 
 void Fragment::appendBrothers(Fragment* other) {
@@ -484,6 +488,7 @@ FragmentationMatchScore Fragment::scoreMatch(Fragment* other, float productPpmTo
     //s.dotProductShuffle = this->dotProductShuffle(b,2000);
 
     s.dotProductNorm = normCosineScore(this, b, s.ranks);
+    s.dotProductNormNL = normNLCosineScore(this, b, productPpmTolr);
 
     //cerr << "scoreMatch:\n" << a->nobs() << "\t" << b->nobs() << "\t" << s.numMatches << " hyper=" << s.hypergeomScore << "\n";
 
@@ -1274,6 +1279,11 @@ bool Fragment::hasNLS(float NLS, float ppmTolr) {
     return false;
 }
 
+/**
+  * @deprecated
+  * Never used, if this should be used, need to revisit the code, see
+  * Fragment::convertToNLFragment() for considerations that should be handled here
+**/
 void Fragment::addNeutralLosses() {
     int N = mzs.size();
     for(int i=0; i < N; i++) {
@@ -1287,6 +1297,56 @@ void Fragment::addNeutralLosses() {
         }
     }
     sortByIntensity();
+}
+
+//Issue 752: for NL scoring
+void Fragment::convertToNLSpectrum() {
+    //already an NL spectrum - nothing to do
+    if (this->isNLSpectrum) return;
+
+    vector<float> updatedMzs;
+    vector<float> updatedIntensities;
+    vector<string> updatedLabels;
+
+    this->sortByMz();
+
+    for(unsigned int i = 0; i < nobs(); i++) {
+        float originalMass = mzs[i];
+
+        //Do not retain any masses above the precursor m/z
+        //Add 1 Da for tolerance wiggle room
+        if (originalMass > static_cast<float>(precursorMz+1.0)) break;
+
+        float nLmass = static_cast<float>(precursorMz)-originalMass;
+
+        updatedMzs.push_back(nLmass);
+        updatedIntensities.push_back(intensity_array[i]);
+
+        string originalLabel = fragment_labels[i];
+        string updatedLabel = "";
+        if (!originalLabel.empty()) {
+            string updatedLabel = "NL " + originalLabel;
+        }
+        updatedLabels.push_back(updatedLabel);
+    }
+
+    this->mzs = updatedMzs;
+    this->intensity_array = updatedIntensities;
+    this->fragment_labels = updatedLabels;
+
+    this->sortedBy = SortType::None;
+    this->sortByMz();
+
+    this->isNLSpectrum = true;
+}
+
+double Fragment::normNLCosineScore(Fragment *library, Fragment *observed, float productPpmTolr){
+
+    observed->convertToNLSpectrum();
+
+    vector<int> ranks = Fragment::compareRanks(library, observed, productPpmTolr);
+
+    return Fragment::normCosineScore(library, observed, ranks);
 }
 
 //Warning: do not use this with direct infusion code. only LC-MS/MS analysis.

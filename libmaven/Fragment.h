@@ -69,7 +69,8 @@ struct FragmentationMatchScore {
 
     //Issue 547: Additional scoring metrics
     double dotProductNorm;
-    double neutralLossCosineScore;
+    double dotProductNormNL;
+    double modifiedDotProduct;
     double spectralEntropyScore;
 
     static vector<string> getScoringAlgorithmNames() {
@@ -82,6 +83,10 @@ struct FragmentationMatchScore {
         names.push_back("TICMatched");
         names.push_back("NumMatches");
         names.push_back("FractionRefMatched");
+        names.push_back("NormDotProduct");
+        names.push_back("NormNLDotProduct");
+        names.push_back("ModifiedDotProduct");
+        names.push_back("SpectralEntropy");
         return names;
     }
 
@@ -95,8 +100,11 @@ struct FragmentationMatchScore {
         else if (scoringAlgorithm == "WeightedDotProduct") return weightedDotProduct;
         else if (scoringAlgorithm == "NumMatches")        return  numMatches;
         else if (scoringAlgorithm == "FractionRefMatched")  return fractionMatched;
+        else if (scoringAlgorithm == "NormDotProduct") return dotProductNorm;
+        else if (scoringAlgorithm == "NormNLDotProduct") return dotProductNormNL;
+        else if (scoringAlgorithm == "ModifiedDotProduct") return modifiedDotProduct;
+        else if (scoringAlgorithm == "SpectralEntropy") return spectralEntropyScore;
         else return hypergeomScore;
-
     }
 
     FragmentationMatchScore() {
@@ -119,6 +127,10 @@ struct FragmentationMatchScore {
         mvhScore=0;
         ms2purity=0;
         dotProductShuffle=0;
+        dotProductNorm=0;
+        dotProductNormNL=0;
+        modifiedDotProduct=0;
+        spectralEntropyScore=0;
     }
 
     FragmentationMatchScore& operator=(const FragmentationMatchScore& b) {
@@ -143,6 +155,11 @@ struct FragmentationMatchScore {
 		dotProductShuffle = b.dotProductShuffle;
         fractionMatched = b.fractionMatched;
         ranks=b.ranks;
+
+        dotProductNorm = b.dotProductNorm;
+        dotProductNormNL = b.dotProductNormNL;
+        modifiedDotProduct = b.modifiedDotProduct;
+        spectralEntropyScore = b.spectralEntropyScore;
 
         return *this;
     }
@@ -175,6 +192,9 @@ class Fragment {
 
         //this is only populated if isRetainOriginalScanIntensities == true in buildConsensus()
         map<int, vector<float>> consensusPositionToScanIntensities{};
+
+        //Issue 752: NL spectra
+        bool isNLSpectrum;
 
 	TMT tmtQuant;
         PeakGroup* group;
@@ -230,6 +250,7 @@ class Fragment {
         static vector<int> locatePositions( Fragment* a, Fragment* b, float productPpmToll);
         static vector<int> findFragPairsGreedyMz(Fragment* a, Fragment* b, float maxMzDiff);
         static double normCosineScore(Fragment* a, Fragment* b, vector<int> ranks);
+        static double normNLCosineScore(Fragment* library, Fragment* observed, float productPpmTolr);
 
         void buildConsensus(float productPpmTolr,
                             ConsensusIntensityAgglomerationType consensusIntensityAgglomerationType=Mean,
@@ -264,7 +285,10 @@ class Fragment {
         double mzWeightedDotProduct(const vector<int>& X, Fragment* other);
         bool hasMz(float mzValue, float ppmTolr);
         bool hasNLS(float NLS, float ppmTolr);
+
         void addNeutralLosses();
+        void convertToNLSpectrum();
+
 	void normalizeIntensity(vector<float>&x, int binSize);
     static int getNumDiagnosticFragmentsMatched(string fragLblStartsWith, vector<string> labels, vector<int> ranks);
 
