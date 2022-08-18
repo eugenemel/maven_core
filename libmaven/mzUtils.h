@@ -141,7 +141,7 @@ long mzToIntKey(const double mz, const long multFactor=1000000L);
 double intKeyToMz(const long intKey, const long multFactor=1000000L);
 
 vector<vector<int>> simpleParsimonyReducer(vector<vector<int>> originalSet);
-vector<vector<double>> decodeMsMsSpectrum(string encodedString);
+vector<vector<float>> decodeMsMsSpectrum(string encodedString);
 
 /* file system functions */
 bool fileExists(string strFilename);
