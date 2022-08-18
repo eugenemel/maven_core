@@ -28,6 +28,31 @@ void split(const string& s, char c, vector<string>& v) {
     if ( v.size() == 0) v.push_back(s);
 }
 
+void split(const string& s, string delimiter, vector<string>& v){
+    unsigned long posPrevious = 0;
+    unsigned long posCurrent = s.find(delimiter, posPrevious);
+
+    while (posCurrent != string::npos) {
+
+        string val = s.substr(posPrevious, posCurrent-posPrevious);
+        posPrevious = posCurrent + delimiter.length();
+
+        if (!val.empty()) {
+            v.push_back(val);
+        }
+
+        posCurrent = s.find(delimiter, posPrevious);
+    }
+
+    //last entry
+    if (posCurrent == string::npos && posPrevious != s.length()) {
+        string val = s.substr(posPrevious, s.length()-posPrevious+1);
+        if (!val.empty()) {
+            v.push_back(val);
+        }
+    }
+}
+
 char *mystrcasestr(const char *s1, const char *s2) {
 	 const char *s = s1;
 	 const char *p = s2;
@@ -1222,6 +1247,44 @@ vector<float> sumOfSquaresNorm(vector<float> intensities) {
 
     return normIntensities;
 } // sumOfSquaresNorm()
+
+
+/**
+ * @brief decodeMsMsSpectrum
+ * Decode encoded spectrum of the form {{masses}{intensities}},
+ * e.g.{{mass1,mass2,mass3},{intensity1,intensity2,intensity3}}
+ * e.g.{{57.070015,58.0655441,60.0447273},{0.0146532,0.018739,0.0063873}}
+ *
+ * @param encodedMsMsSpectrum
+ * @return
+ */
+vector<vector<double>> decodeMsMsSpectrum(string encodedMsMsSpectrum){
+
+    //input should always start with {{ and end with }}
+    if (encodedMsMsSpectrum.size() < 4) return (vector<vector<double>>());
+
+    string encodedMsMsSpectrumNoEnds = encodedMsMsSpectrum.substr(2, encodedMsMsSpectrum.size()-4); // remove {{ and }} at beginning and end
+
+    vector<string> bits{};
+    split(encodedMsMsSpectrum, "},{", bits);
+
+    vector<vector<double>> msMsSpectrum = vector<vector<double>>(bits.size());
+
+    for (unsigned int i = 0; i < bits.size(); i++) {
+        vector<string> dist{};
+        split(bits[i], ",", dist);
+
+        vector<double> distAsDouble(dist.size());
+        for (unsigned int j = 0; j < dist.size(); j++) {
+            distAsDouble[j] = stod(dist[j]);
+        }
+
+        msMsSpectrum[i] = distAsDouble;
+    }
+
+    return msMsSpectrum;
+
+} //decodeMsMsSpectrum()
 
 } //namespace end
 

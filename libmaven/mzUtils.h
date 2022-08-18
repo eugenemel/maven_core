@@ -114,7 +114,10 @@ float string2float(const std::string& s);
 string integer2string(int x);
 string float2string(float f, int p);
 string makeLowerCase(string &s);
+
 void split(const string& s, char c, vector<string>& v);
+void split(const string& s, string delimiter, vector<string>& v);
+
 char *mystrcasestr(const char *s1, const char *s2);
 int strincmp(char *s1, char* s2,int n);
 string cleanFilename(const string& s);  
@@ -138,6 +141,7 @@ long mzToIntKey(const double mz, const long multFactor=1000000L);
 double intKeyToMz(const long intKey, const long multFactor=1000000L);
 
 vector<vector<int>> simpleParsimonyReducer(vector<vector<int>> originalSet);
+vector<vector<double>> decodeMsMsSpectrum(string encodedString);
 
 /* file system functions */
 bool fileExists(string strFilename);
