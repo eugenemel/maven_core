@@ -1266,7 +1266,7 @@ vector<vector<double>> decodeMsMsSpectrum(string encodedMsMsSpectrum){
     string encodedMsMsSpectrumNoEnds = encodedMsMsSpectrum.substr(2, encodedMsMsSpectrum.size()-4); // remove {{ and }} at beginning and end
 
     vector<string> bits{};
-    split(encodedMsMsSpectrum, "},{", bits);
+    split(encodedMsMsSpectrumNoEnds, "},{", bits);
 
     vector<vector<double>> msMsSpectrum = vector<vector<double>>(bits.size());
 
