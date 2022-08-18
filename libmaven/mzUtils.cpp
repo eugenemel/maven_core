@@ -14,6 +14,7 @@ std::string makeLowerCase(string &s) {
 }
 
 void split(const string& s, char c, vector<string>& v) {
+
     string::size_type i = 0;
     string::size_type j = s.find(c);
 
@@ -29,8 +30,9 @@ void split(const string& s, char c, vector<string>& v) {
 }
 
 void split(const string& s, string delimiter, vector<string>& v){
-    unsigned long posPrevious = 0;
-    unsigned long posCurrent = s.find(delimiter, posPrevious);
+
+    string::size_type posPrevious = 0;
+    string::size_type posCurrent = s.find(delimiter, posPrevious);
 
     while (posCurrent != string::npos) {
 
