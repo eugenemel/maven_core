@@ -1260,25 +1260,25 @@ vector<float> sumOfSquaresNorm(vector<float> intensities) {
  * @param encodedMsMsSpectrum
  * @return
  */
-vector<vector<double>> decodeMsMsSpectrum(string encodedMsMsSpectrum){
+vector<vector<float>> decodeMsMsSpectrum(string encodedMsMsSpectrum){
 
     //input should always start with {{ and end with }}
-    if (encodedMsMsSpectrum.size() < 4) return (vector<vector<double>>());
+    if (encodedMsMsSpectrum.size() < 4) return (vector<vector<float>>());
 
     string encodedMsMsSpectrumNoEnds = encodedMsMsSpectrum.substr(2, encodedMsMsSpectrum.size()-4); // remove {{ and }} at beginning and end
 
     vector<string> bits{};
     split(encodedMsMsSpectrumNoEnds, "},{", bits);
 
-    vector<vector<double>> msMsSpectrum = vector<vector<double>>(bits.size());
+    vector<vector<float>> msMsSpectrum = vector<vector<float>>(bits.size());
 
     for (unsigned int i = 0; i < bits.size(); i++) {
         vector<string> dist{};
         split(bits[i], ",", dist);
 
-        vector<double> distAsDouble(dist.size());
+        vector<float> distAsDouble(dist.size());
         for (unsigned int j = 0; j < dist.size(); j++) {
-            distAsDouble[j] = stod(dist[j]);
+            distAsDouble[j] = stof(dist[j]);
         }
 
         msMsSpectrum[i] = distAsDouble;
