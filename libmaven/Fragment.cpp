@@ -1650,34 +1650,39 @@ double Fragment::normCosineScore(Fragment* a, Fragment* b, vector<int> ranks) {
  *
  * @return encodedString
  */
-string Fragment::encodeSpectrum(int numDigits, string type) {
+string Fragment::encodeSpectrum(int numDigits, string type, bool isNormalizeToMaxIntensity) {
 
     sortedBy = Fragment::SortType::None;
     sortByMz();
 
-    vector<float> mzs = this->mzs;
-    auto c = intensity_array;
-    float m = *std::max_element(c.begin(), c.end());
+    vector<float> mzs = fragment->mzs;
+    auto c = fragment->intensity_array;
     vector<float> normalized_intensities(c.size());
-    std::transform(c.begin(), c.end(), normalized_intensities.begin(), [&m](float intensity){return intensity /= m;});
 
-    float minIntensity = static_cast<float>(pow(10, -numDigits));
+    if (isNormalizeToMaxIntensity) {
 
-    if (minIntensity > 0) {
+        float m = *std::max_element(c.begin(), c.end());
+        std::transform(c.begin(), c.end(), normalized_intensities.begin(), [&m](float intensity){return intensity /= m;});
+        float minIntensity = static_cast<float>(pow(10, -numDigits));
 
-        vector<float> mzCleaned;
-        vector<float> intensityCleaned;
+        if (minIntensity > 0) {
 
-        for (unsigned int i = 0; i < mzs.size(); i++) {
+            vector<float> mzCleaned;
+            vector<float> intensityCleaned;
 
-            if (normalized_intensities[i] >= minIntensity) {
-                mzCleaned.push_back(mzs[i]);
-                intensityCleaned.push_back(normalized_intensities[i]);
+            for (unsigned int i = 0; i < mzs.size(); i++) {
+
+                if (normalized_intensities[i] >= minIntensity) {
+                    mzCleaned.push_back(mzs[i]);
+                    intensityCleaned.push_back(normalized_intensities[i]);
+                }
             }
-        }
 
-        mzs = mzCleaned;
-        normalized_intensities = intensityCleaned;
+            mzs = mzCleaned;
+            normalized_intensities = intensityCleaned;
+        }
+    } else {
+        normalized_intensities = c;
     }
 
     stringstream encodedSpectrum;
@@ -1690,7 +1695,12 @@ string Fragment::encodeSpectrum(int numDigits, string type) {
         stringstream intensityEncoding;
 
         mzEncoding << std::fixed << setprecision(numDigits);
-        intensityEncoding << std::fixed << setprecision(numDigits);
+
+        if (isNormalizeToMaxIntensity) {
+            intensityEncoding << std::fixed << setprecision(numDigits);
+        } else {
+            intensityEncoding << std::fixed << setprecision(0);
+        }
 
         for (unsigned int i = 0; i < mzs.size(); i++) {
             if (i > 0) {
@@ -1706,7 +1716,14 @@ string Fragment::encodeSpectrum(int numDigits, string type) {
     } else {
         //fall back to tab-delimited list
         for (unsigned int i = 0; i < mzs.size(); i++) {
-            encodedSpectrum << mzs[i] << "\t" << normalized_intensities[i] << "\n";
+            if (isNormalizeToMaxIntensity) {
+                encodedSpectrum << mzs[i] << "\t" << normalized_intensities[i] << "\n";
+            } else {
+                encodedSpectrum << std::fixed << setprecision(numDigits)
+                                << mzs[i] << "\t"
+                                << std::fixed << setprecision(0)
+                                << normalized_intensities[i] << "\n";
+            }
         }
     }
 
