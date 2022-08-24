@@ -1655,8 +1655,8 @@ string Fragment::encodeSpectrum(int numDigits, string type, bool isNormalizeToMa
     sortedBy = Fragment::SortType::None;
     sortByMz();
 
-    vector<float> mzs = fragment->mzs;
-    auto c = fragment->intensity_array;
+    vector<float> mzs = this->mzs;
+    auto c = intensity_array;
     vector<float> normalized_intensities(c.size());
 
     if (isNormalizeToMaxIntensity) {
