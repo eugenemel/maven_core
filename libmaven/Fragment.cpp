@@ -1650,7 +1650,7 @@ double Fragment::normCosineScore(Fragment* a, Fragment* b, vector<int> ranks) {
  *
  * @return encodedString
  */
-string Fragment::encodeMsMsSpectrum(int numDigits) {
+string Fragment::encodeSpectrum(int numDigits, string type) {
 
     sortedBy = Fragment::SortType::None;
     sortByMz();
@@ -1681,23 +1681,37 @@ string Fragment::encodeMsMsSpectrum(int numDigits) {
     }
 
     stringstream encodedSpectrum;
-    stringstream mzEncoding;
-    stringstream intensityEncoding;
 
     encodedSpectrum << std::fixed << setprecision(numDigits);
-    mzEncoding << std::fixed << setprecision(numDigits);
-    intensityEncoding << std::fixed << setprecision(numDigits);
 
-    for (unsigned int i = 0; i < mzs.size(); i++) {
-        if (i > 0) {
-            mzEncoding <<  ",";
-            intensityEncoding << ",";
+    if (type == "encoded") {
+
+        stringstream mzEncoding;
+        stringstream intensityEncoding;
+
+        mzEncoding << std::fixed << setprecision(numDigits);
+        intensityEncoding << std::fixed << setprecision(numDigits);
+
+        for (unsigned int i = 0; i < mzs.size(); i++) {
+            if (i > 0) {
+                mzEncoding <<  ",";
+                intensityEncoding << ",";
+            }
+            mzEncoding << mzs[i];
+            intensityEncoding  << normalized_intensities[i];
         }
-        mzEncoding << mzs[i];
-        intensityEncoding  << normalized_intensities[i];
-    }
 
-    encodedSpectrum << "{{" << mzEncoding.str() << "},{" << intensityEncoding.str() << "}}";
+        encodedSpectrum << "{{" << mzEncoding.str() << "},{" << intensityEncoding.str() << "}}";
+
+    } else {
+        //fall back to tab-delimited list
+        for (unsigned int i = 0; i < mzs.size(); i++) {
+            if (i > 0) {
+                encodedSpectrum << "\n";
+            }
+            encodedSpectrum << mzs[i] << "\t" << normalized_intensities[i];
+        }
+    }
 
     return encodedSpectrum.str();
 }

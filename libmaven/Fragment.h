@@ -252,7 +252,7 @@ class Fragment {
         static double normCosineScore(Fragment* a, Fragment* b, vector<int> ranks);
         static double normNLCosineScore(Fragment* library, Fragment* observed, float productPpmTolr);
 
-        string encodeMsMsSpectrum(int numDigits=5);
+        string encodeSpectrum(int numDigits=5, string type="encoded");
 
         void buildConsensus(float productPpmTolr,
                             ConsensusIntensityAgglomerationType consensusIntensityAgglomerationType=Mean,
