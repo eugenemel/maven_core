@@ -1706,10 +1706,7 @@ string Fragment::encodeSpectrum(int numDigits, string type) {
     } else {
         //fall back to tab-delimited list
         for (unsigned int i = 0; i < mzs.size(); i++) {
-            if (i > 0) {
-                encodedSpectrum << "\n";
-            }
-            encodedSpectrum << mzs[i] << "\t" << normalized_intensities[i];
+            encodedSpectrum << mzs[i] << "\t" << normalized_intensities[i] << "\n";
         }
     }
 
