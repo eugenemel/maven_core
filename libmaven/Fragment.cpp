@@ -1636,3 +1636,68 @@ double Fragment::normCosineScore(Fragment* a, Fragment* b, vector<int> ranks) {
 
     return normCosineScore;
 }
+
+/**
+ * @brief encodeMsMsSpectrum
+ * Convert masses and intensities from *fragment into string of form {{masses}{intensities}}
+ * e.g.{{mass1,mass2,mass3},{intensity1,intensity2,intensity3}}
+ * e.g.{{57.070015,58.0655441,60.0447273},{0.0146532,0.018739,0.0063873}}
+ *
+ * @param fragment: should have mzs and intensities
+ * @param numDigits: number of digits after decimal point to include in string encoding.
+ * Any fragments where intensity would have string representation of 0 is automatically
+ * excluded from the encoded spectrum.
+ *
+ * @return encodedString
+ */
+string Fragment::encodeMsMsSpectrum(int numDigits) {
+
+    sortedBy = Fragment::SortType::None;
+    sortByMz();
+
+    vector<float> mzs = this->mzs;
+    auto c = intensity_array;
+    float m = *std::max_element(c.begin(), c.end());
+    vector<float> normalized_intensities(c.size());
+    std::transform(c.begin(), c.end(), normalized_intensities.begin(), [&m](float intensity){return intensity /= m;});
+
+    float minIntensity = static_cast<float>(pow(10, -numDigits));
+
+    if (minIntensity > 0) {
+
+        vector<float> mzCleaned;
+        vector<float> intensityCleaned;
+
+        for (unsigned int i = 0; i < mzs.size(); i++) {
+
+            if (normalized_intensities[i] >= minIntensity) {
+                mzCleaned.push_back(mzs[i]);
+                intensityCleaned.push_back(normalized_intensities[i]);
+            }
+        }
+
+        mzs = mzCleaned;
+        normalized_intensities = intensityCleaned;
+    }
+
+    stringstream encodedSpectrum;
+    stringstream mzEncoding;
+    stringstream intensityEncoding;
+
+    encodedSpectrum << std::fixed << setprecision(numDigits);
+    mzEncoding << std::fixed << setprecision(numDigits);
+    intensityEncoding << std::fixed << setprecision(numDigits);
+
+    for (unsigned int i = 0; i < mzs.size(); i++) {
+        if (i > 0) {
+            mzEncoding <<  ",";
+            intensityEncoding << ",";
+        }
+        mzEncoding << mzs[i];
+        intensityEncoding  << normalized_intensities[i];
+    }
+
+    encodedSpectrum << "{{" << mzEncoding.str() << "},{" << intensityEncoding.str() << "}}";
+
+    return encodedSpectrum.str();
+}
