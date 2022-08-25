@@ -168,14 +168,6 @@ shared_ptr<QQQSearchParameters> QQQSearchParameters::decode(string encodedParams
 
     unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams); //use semicolon (default)
 
-    //debugging
-    cout << "QQQSearchParameters::decode(): all received parameters:\n";
-
-    for (auto it = decodedMap.begin(); it != decodedMap.end(); ++it) {
-        cout << "(" << it->first << ", " << it->second << ")\n";
-    }
-    cout << endl;
-
     //START SearchParameters
 
     //program level
