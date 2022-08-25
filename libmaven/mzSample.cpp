@@ -1248,7 +1248,9 @@ EIC* mzSample::getEIC(pair<float, float> mzKey, mzSlice* slice) {
 
     float scale = getNormalizationConstant();
     if(scale != 1.0) for (unsigned int j=0; j < e->size(); j++) { e->intensity[j] *= scale; }
-    if(e->size() == 0) cerr << "getEIC(pair<float, float> mzKey): is empty key=(" << mzKey.first << ", " << mzKey.second << ")" << endl;
+
+    //Issue 563: avoid filling up log file with many repetitions of this message
+    //if(e->size() == 0) cerr << "getEIC(pair<float, float> mzKey): is empty key=(" << mzKey.first << ", " << mzKey.second << ")" << endl;
     //std::cerr << "getEIC: srm"  << srm << " " << e->intensity.size() << endl;
 
 return e;
