@@ -565,7 +565,7 @@ class EIC {
         maxIntensity=totalIntensity=0;
         eic_noNoiseObs=0;
         smootherType=GAUSSIAN;
-        baselineSmoothingWindow=5;  //baseline smoothin window
+        baselineSmoothingWindow=5;  //baseline smoothing window
         baselineDropTopX=60;    //fraction of point to remove when computing baseline
         for(unsigned int i=0; i<4;i++) color[i]=0;
     }
