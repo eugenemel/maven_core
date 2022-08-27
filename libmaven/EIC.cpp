@@ -1689,7 +1689,14 @@ vector<PeakGroup> EIC::groupPeaksD(vector<EIC*>& eics, int smoothingWindow, floa
     //find peaks in merged eic
     m->getPeakPositionsC(smoothingWindow, false, false);
 
-    sort(m->peaks.begin(), m->peaks.end(), Peak::compRt);
+    //When RT values are identical, fall back to sample names.
+    sort(m->peaks.begin(), m->peaks.end(), [](Peak& lhs, Peak& rhs){
+        if (lhs.rt == rhs.rt) { //edge case
+            return lhs.sample->sampleName < rhs.sample->sampleName; //sample names must differ
+        } else {
+            return lhs.rt < rhs.rt;
+        }
+    });
 
     //m->peaks.pos, sample peaks
     map<int, PeakContainer> peakGroupData{};
