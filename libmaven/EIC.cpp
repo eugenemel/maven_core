@@ -514,8 +514,11 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
     }
 
     //assign peak ranks based on total area of the peak
-    sort(peaks.begin(),peaks.end(),Peak::compArea);
+    sort(peaks.begin(), peaks.end(), Peak::compArea);
     for(unsigned int i=0; i<peaks.size(); i++) peaks[i].peakRank = i;
+
+    //sort peaks by RT
+    sort(peaks.begin(), peaks.end(), Peak::compRt);
 
     if (debug) {
         for (auto peak : peaks) {
