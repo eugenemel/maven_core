@@ -117,15 +117,23 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
 
             //Issue 347
             pair<float, float> srmKey = make_pair(precursorMz, productMz);
-            SRMTransition *srmTransition = new SRMTransition();
+            SRMTransition *srmTransition;
             if (srmTransitions.find(srmKey) != srmTransitions.end()) {
                 srmTransition = srmTransitions[srmKey];
             } else {
+                srmTransition = new SRMTransition();
                 srmTransition->precursorMz = precursorMz;
                 srmTransition->productMz = productMz;
             }
 
             srmTransition->mzSlices.push_back(make_pair(sample, s));
+
+            if (srmTransition->srmIdBySample.find(sample) == srmTransition->srmIdBySample.end()) {
+                srmTransition->srmIdBySample.insert(make_pair(sample, set<string>{}));
+            }
+            srmTransition->srmIdBySample.at(sample).insert(filterLine);
+
+            srmTransition->srmIds.insert(filterLine);
 
             if (compound){
                 srmTransition->compound = compound;

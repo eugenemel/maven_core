@@ -212,6 +212,11 @@ public:
 
     vector<pair<mzSample*, mzSlice*>> mzSlices{};
 
+    //Issue 563: Expand SRMTransition class with srmId information
+    //  sample         srmId
+    map<mzSample*, set<string>> srmIdBySample{};
+    set<string> srmIds;
+
     set<mzSample*> getSamples();
 };
 
