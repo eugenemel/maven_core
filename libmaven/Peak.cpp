@@ -2,8 +2,8 @@
 
 Peak::Peak() {
 	pos = 0;
-	eic = NULL;
-	sample = NULL;
+    eic = nullptr;
+    sample = nullptr;
 }
 
 Peak::Peak(EIC* e, int p) { 
@@ -36,6 +36,7 @@ Peak::Peak(EIC* e, int p) {
 		rt=0;
 		rtmax=0;
 		rtmin=0;
+        sample = nullptr; //possibly reassigned near end of constructor
 		scan=0;
 		signalBaselineRatio=0;
 		symmetry=0;
@@ -48,8 +49,8 @@ Peak::Peak(EIC* e, int p) {
 		isMonoIsotopic=false;
 		selectionScore=0;
         ms2EventCount=0;
-        if (eic and eic->sample != NULL) sample = eic->sample;
-        //if (sample == NULL && eic != NULL ) sample = eic->sample;
+
+        if (eic and eic->sample) sample = eic->sample;
 }
 
 
