@@ -463,6 +463,11 @@ public:
     EIC* getEIC(string srmId);	//get eic based on srmId
     EIC* getEIC(float precursorMz, float collisionEnergy, float productMz, float amuQ1, float amuQ2 );
     EIC* getEIC(pair<float, float> mzKey, mzSlice* slice); //get eic based on SRM precursor, product ion mzs
+
+    // get EIC based on SRM transition - combine multiple srmIds if necessary
+    EIC* getEIC(SRMTransition* srmTransition,
+                Fragment::ConsensusIntensityAgglomerationType agglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median);
+
     EIC* getTIC(float,float,int);		//get Total Ion Chromatogram
     EIC* getBIC(float,float,int);		//get Base Peak Chromatogram
     double getMS1PrecursorMass(Scan* ms2scan,float ppm);

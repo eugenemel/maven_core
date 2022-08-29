@@ -1,4 +1,5 @@
 #include "mzSample.h"
+#include <numeric>
 
 //global options
 int mzSample::filter_minIntensity = -1;
@@ -1195,10 +1196,114 @@ EIC* mzSample::getEIC(string srm) {
 
 	float scale = getNormalizationConstant();
 	if(scale != 1.0) for (unsigned int j=0; j < e->size(); j++) { e->intensity[j] *= scale; }
-	if(e->size() == 0) cerr << "getEIC(SRM STRING): is empty" << srm << endl;
+    //if(e->size() == 0) cerr << "getEIC(SRM STRING): is empty" << srm << endl;
     //std::cerr << "getEIC: srm"  << srm << " " << e->intensity.size() << endl;
 
 	return e;
+}
+
+EIC* mzSample::getEIC(SRMTransition* srmTransition, Fragment::ConsensusIntensityAgglomerationType agglomerationType) {
+
+    if (!srmTransition) return nullptr;
+
+    //   rt,            mzs,          intensities
+    map<float, pair<vector<float>, vector<float>>> rtToIntensities{};
+
+    //sets are always sorted, avoids non-determinism
+    set<string> srmIds = srmTransition->srmIdBySample.at(this);
+
+    //   rt   scannum
+    map<float, int> rtToScanNum{};
+
+    // organize across all IDs
+    for (string srmId : srmIds) {
+        if (srmScans.find(srmId) != srmScans.end()) {
+            vector<int> srmscans = srmScans[srmId];
+            for (unsigned int i = 0; i < srmscans.size(); i++) {
+                Scan* scan = scans[static_cast<unsigned long>(srmscans[i])];
+
+                float maxIntensityMz = 0.0f;
+                float maxIntensity = 0.0f;
+
+                for(unsigned int k=0; k < scan->nobs(); k++ ) {
+                    if (scan->intensity[k] > maxIntensity ) {
+                        maxIntensity=scan->intensity[k];
+                        maxIntensityMz = scan->mz[k];
+                    }
+                }
+
+                float rt = scan->rt;
+                if (rtToIntensities.find(rt) == rtToIntensities.end()) {
+                    rtToIntensities.insert(make_pair(rt, make_pair(vector<float>{}, vector<float>{})));
+                }
+                rtToIntensities.at(rt).first.push_back(maxIntensityMz);
+                rtToIntensities.at(rt).second.push_back(maxIntensity);
+
+                if (rtToScanNum. find(scan->scannum) == rtToScanNum.end()) {
+                    rtToScanNum.insert(make_pair(rt, scan->scannum));
+                }
+            }
+
+        }
+    }
+
+    EIC* e = new EIC();
+    e->sampleName = sampleName;
+    e->sample = this;
+    e->totalIntensity = 0;
+    e->maxIntensity = 0;
+    e->mzmin = 0;
+    e->mzmax = 0;
+
+    e->scannum = vector<int>(rtToIntensities.size());
+    e->rt = vector<float>(rtToIntensities.size());
+    e->intensity = vector<float>(rtToIntensities.size());
+    e->mz = vector<float>(rtToIntensities.size());
+
+    unsigned int i = 0;
+
+    for (auto it = rtToIntensities.begin(); it != rtToIntensities.end(); ++it) {
+        float rt = it->first;
+        int scannum = rtToScanNum.at(rt);
+        vector<float> intensities = it->second.first;
+        vector<float> mzs = it->second.second;
+
+        float consensusIntensity, consensusMz;
+
+        if (agglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
+            consensusMz = accumulate(mzs.begin(), mzs.end(), 0.0f) / mzs.size();
+            consensusIntensity = accumulate(intensities.begin(), intensities.end(), 0.0f) / intensities.size();
+        } else if (agglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
+            consensusMz = median(mzs);
+            consensusIntensity = median(intensities);
+        } else if (agglomerationType == Fragment::ConsensusIntensityAgglomerationType::Sum) {
+            consensusMz = accumulate(mzs.begin(), mzs.end(), 0.0f);
+            consensusIntensity = accumulate(intensities.begin(), intensities.end(), 0.0f);
+        } else {
+            cerr << "Unsupported agglomerationType in mzSample::getEIC(SRMTransition* srmTransition, Fragment::ConsensusIntensityAgglomerationType agglomerationType)! Exiting." << endl;
+            abort();
+        }
+
+        e->scannum[i] = scannum;
+        e->rt[i] = rt;
+        e->intensity[i] = consensusIntensity;
+        e->mz[i] = consensusMz;
+        e->totalIntensity += consensusIntensity;
+
+        if (consensusIntensity > e->maxIntensity) e->maxIntensity = consensusIntensity;
+
+        i++;
+    }
+
+    if ( e->rt.size() > 0 ) {
+        e->rtmin = e->rt[0];
+        e->rtmax = e->rt[ e->size()-1];
+    }
+
+    float scale = getNormalizationConstant();
+    if(scale != 1.0f) for (unsigned int j=0; j < e->size(); j++) { e->intensity[j] *= scale; }
+
+    return e;
 }
 
 //Issue 347
