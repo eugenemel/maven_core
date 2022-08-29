@@ -1203,11 +1203,10 @@ EIC* mzSample::getEIC(string srm) {
 }
 
 EIC* mzSample::getEIC(SRMTransition* srmTransition, Fragment::ConsensusIntensityAgglomerationType agglomerationType) {
-
     if (!srmTransition) return nullptr;
 
-    //   rt,            mzs,          intensities
-    map<float, pair<vector<float>, vector<float>>> rtToIntensities{};
+    //   rt,       intensities
+    map<float, vector<float>> rtToIntensities{};
 
     //Some samples might not contain a particular (precursorMz, productMz)
     if (srmTransition->srmIdBySample.find(this) == srmTransition->srmIdBySample.end()) {
@@ -1227,22 +1226,19 @@ EIC* mzSample::getEIC(SRMTransition* srmTransition, Fragment::ConsensusIntensity
             for (unsigned int i = 0; i < srmscans.size(); i++) {
                 Scan* scan = scans[static_cast<unsigned long>(srmscans[i])];
 
-                float maxIntensityMz = 0.0f;
                 float maxIntensity = 0.0f;
 
                 for(unsigned int k=0; k < scan->nobs(); k++ ) {
                     if (scan->intensity[k] > maxIntensity ) {
-                        maxIntensity=scan->intensity[k];
-                        maxIntensityMz = scan->mz[k];
+                        maxIntensity = scan->intensity[k];
                     }
                 }
 
                 float rt = scan->rt;
                 if (rtToIntensities.find(rt) == rtToIntensities.end()) {
-                    rtToIntensities.insert(make_pair(rt, make_pair(vector<float>{}, vector<float>{})));
+                    rtToIntensities.insert(make_pair(rt, vector<float>{}));
                 }
-                rtToIntensities.at(rt).first.push_back(maxIntensityMz);
-                rtToIntensities.at(rt).second.push_back(maxIntensity);
+                rtToIntensities.at(rt).push_back(maxIntensity);
 
                 if (rtToScanNum. find(scan->scannum) == rtToScanNum.end()) {
                     rtToScanNum.insert(make_pair(rt, scan->scannum));
@@ -1263,41 +1259,37 @@ EIC* mzSample::getEIC(SRMTransition* srmTransition, Fragment::ConsensusIntensity
     e->scannum = vector<int>(rtToIntensities.size());
     e->rt = vector<float>(rtToIntensities.size());
     e->intensity = vector<float>(rtToIntensities.size());
-    e->mz = vector<float>(rtToIntensities.size());
+    e->mz = vector<float>(rtToIntensities.size(), srmTransition->productMz);
 
     unsigned int i = 0;
 
     for (auto it = rtToIntensities.begin(); it != rtToIntensities.end(); ++it) {
         float rt = it->first;
         int scannum = rtToScanNum.at(rt);
-        vector<float> intensities = it->second.first;
-        vector<float> mzs = it->second.second;
+        vector<float> intensities = it->second;
 
-        float consensusIntensity, consensusMz;
+        float consensusIntensity = 0.0f;
 
-        if (agglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
-            consensusMz = accumulate(mzs.begin(), mzs.end(), 0.0f) / mzs.size();
-            consensusIntensity = accumulate(intensities.begin(), intensities.end(), 0.0f) / intensities.size();
-        } else if (agglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
-            consensusMz = median(mzs);
-            consensusIntensity = median(intensities);
-        } else if (agglomerationType == Fragment::ConsensusIntensityAgglomerationType::Sum) {
-            consensusMz = accumulate(mzs.begin(), mzs.end(), 0.0f);
-            consensusIntensity = accumulate(intensities.begin(), intensities.end(), 0.0f);
-        } else {
-            cerr << "Unsupported agglomerationType in mzSample::getEIC(SRMTransition* srmTransition, Fragment::ConsensusIntensityAgglomerationType agglomerationType)! Exiting." << endl;
-            abort();
+        if (!intensities.empty()) {
+            if (agglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
+                consensusIntensity = accumulate(intensities.begin(), intensities.end(), 0.0f) / intensities.size();
+            } else if (agglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
+                consensusIntensity = median(intensities);
+            } else if (agglomerationType == Fragment::ConsensusIntensityAgglomerationType::Sum) {
+                consensusIntensity = accumulate(intensities.begin(), intensities.end(), 0.0f);
+            } else {
+                cerr << "Unsupported agglomerationType in mzSample::getEIC(SRMTransition* srmTransition, Fragment::ConsensusIntensityAgglomerationType agglomerationType)! Exiting." << endl;
+                abort();
+            }
         }
 
         //TODO: swap with faster access
         e->scannum.at(i) = scannum;
         e->rt.at(i) = rt;
         e->intensity.at(i) = consensusIntensity;
-        e->mz.at(i) = consensusMz;
 //        e->scannum[i] = scannum;
 //        e->rt[i] = rt;
 //        e->intensity[i] = consensusIntensity;
-//        e->mz[i] = consensusMz;
 
         e->totalIntensity += consensusIntensity;
 
