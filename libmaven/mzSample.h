@@ -276,6 +276,7 @@ class mzSlice {
         adduct=nullptr;
         ionCount=0;
         compoundVector=vector<Compound*>();
+        srmTransition=nullptr;
     }
 
     mzSlice(float mz, float rt, float ions) {
@@ -286,6 +287,7 @@ class mzSlice {
         adduct=nullptr;
         ionCount=0;
         compoundVector=vector<Compound*>();
+        srmTransition=nullptr;
     }
 
     mzSlice(string filterLine) {
@@ -294,6 +296,7 @@ class mzSlice {
         adduct=nullptr;
         srmId=filterLine;
         compoundVector=vector<Compound*>();
+        srmTransition=nullptr;
     }
 
     mzSlice() {
@@ -301,6 +304,7 @@ class mzSlice {
         compound=nullptr;
         adduct=nullptr;
         compoundVector=vector<Compound*>();
+        srmTransition=nullptr;
     }
 
     mzSlice(SRMTransition srmTransition) {
@@ -317,6 +321,33 @@ class mzSlice {
 
         srmPrecursorMz = srmTransition.precursorMz;
         srmProductMz = srmTransition.productMz;
+    }
+
+    mzSlice(SRMTransition* srmTransition) {
+
+        mzmin=mzmax=rtmin=rtmax=mz=rt=ionCount=0;
+
+        if (!srmTransition) {
+            srmTransition = nullptr;
+            compound = nullptr;
+            adduct = nullptr;
+            compoundVector = {};
+            srmPrecursorMz = 0;
+            srmProductMz = 0;
+            return;
+        }
+
+        this->srmTransition = srmTransition;
+        compound=srmTransition->compound;
+        adduct=srmTransition->adduct;
+
+        compoundVector=vector<Compound*>();
+        if (srmTransition->compound){
+            compoundVector.push_back(srmTransition->compound);
+        }
+
+        srmPrecursorMz = srmTransition->precursorMz;
+        srmProductMz = srmTransition->productMz;
     }
 
     mzSlice(const mzSlice& b) {
@@ -361,6 +392,7 @@ class mzSlice {
         float ionCount;
         Compound* compound;
         Adduct*   adduct;
+        SRMTransition* srmTransition;
         vector<Compound*> compoundVector;
 		bool deleteFlag=0;
 
