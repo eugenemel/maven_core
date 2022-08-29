@@ -1289,10 +1289,16 @@ EIC* mzSample::getEIC(SRMTransition* srmTransition, Fragment::ConsensusIntensity
             abort();
         }
 
-        e->scannum[i] = scannum;
-        e->rt[i] = rt;
-        e->intensity[i] = consensusIntensity;
-        e->mz[i] = consensusMz;
+        //TODO: swap with faster access
+        e->scannum.at(i) = scannum;
+        e->rt.at(i) = rt;
+        e->intensity.at(i) = consensusIntensity;
+        e->mz.at(i) = consensusMz;
+//        e->scannum[i] = scannum;
+//        e->rt[i] = rt;
+//        e->intensity[i] = consensusIntensity;
+//        e->mz[i] = consensusMz;
+
         e->totalIntensity += consensusIntensity;
 
         if (consensusIntensity > e->maxIntensity) e->maxIntensity = consensusIntensity;
