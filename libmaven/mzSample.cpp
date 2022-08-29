@@ -1209,6 +1209,11 @@ EIC* mzSample::getEIC(SRMTransition* srmTransition, Fragment::ConsensusIntensity
     //   rt,            mzs,          intensities
     map<float, pair<vector<float>, vector<float>>> rtToIntensities{};
 
+    //Some samples might not contain a particular (precursorMz, productMz)
+    if (srmTransition->srmIdBySample.find(this) == srmTransition->srmIdBySample.end()) {
+        return nullptr;
+    }
+
     //sets are always sorted, avoids non-determinism
     set<string> srmIds = srmTransition->srmIdBySample.at(this);
 
