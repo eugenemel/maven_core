@@ -1645,6 +1645,7 @@ vector<PeakGroup> EIC::groupPeaksC(vector<EIC*>& eics, int smoothingWindow, floa
 }
 
 /**
+ * @brief groupPeaksD
  * Group peaks using merged EIC, intensity, RT proximity
  *
  * From mass_spec Issue #692 / MAVEN Issue #482
@@ -1652,7 +1653,17 @@ vector<PeakGroup> EIC::groupPeaksC(vector<EIC*>& eics, int smoothingWindow, floa
  * Combine similar peak groups together, when appropriate.
  * This replaces peakdetector method reduceGroups()
  *
- * @brief groupPeaksC
+ * Comment: This approach will select the most intense peak within RT tolerance for a given sample,
+ * and associate this peak with the peak group.
+ * This means that any less intense peaks from the same sample that have closer RT will be excluded.
+ * This tends to happen when the maxRtDiff is large enough to permit multiple peaks within tolerance
+ * to match to a given peakgroup RT, which, in practice, are usually noise peaks.
+ * A series of quant approaches are compared. If none of these are different, the sample name is considered,
+ * and finally, if multiple peaks from the same sample have identical quant, the RT value is used as an absolute tiebreaker.
+ *
+ * In some cases, it may be preferable to prefer RT over every measure of intensity.  In that case,
+ * a different algorithm should be used.
+ *
  * @param eics
  * @param smoothingWindow
  * @param maxRtDiff
@@ -1661,7 +1672,7 @@ vector<PeakGroup> EIC::groupPeaksC(vector<EIC*>& eics, int smoothingWindow, floa
  * @param mergeOverlap
  * @return
  */
-vector<PeakGroup> EIC::groupPeaksD(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, int baselineSmoothingWindow, int baselineDropTopX, float mergeOverlap) {
+vector<PeakGroup> EIC::groupPeaksD(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, int baselineSmoothingWindow, int baselineDropTopX, float mergeOverlap, bool debug) {
 
     //list filled and return by this function
     vector<PeakGroup> pgroups{};
@@ -1689,14 +1700,20 @@ vector<PeakGroup> EIC::groupPeaksD(vector<EIC*>& eics, int smoothingWindow, floa
     //find peaks in merged eic
     m->getPeakPositionsC(smoothingWindow, false, false);
 
-    //When RT values are identical, fall back to sample names.
+    //RT values should never be identical for merged EIC.
     sort(m->peaks.begin(), m->peaks.end(), [](Peak& lhs, Peak& rhs){
-        if (lhs.rt == rhs.rt) { //edge case
-            return lhs.sample->sampleName < rhs.sample->sampleName; //sample names must differ
-        } else {
-            return lhs.rt < rhs.rt;
-        }
+        return lhs.rt < rhs.rt;
     });
+
+    if (debug) {
+        for (unsigned int i = 1; i < m->peaks.size(); i++) {
+            if (m->peaks.at(i).rt == m->peaks.at(i-1).rt) {
+                cerr << "Merged EIC Peaks found with identical RT!";
+                cerr << "RT="<< m->peaks.at(i).rt << endl;
+                abort();
+            }
+        }
+    }
 
     //m->peaks.pos, sample peaks
     map<int, PeakContainer> peakGroupData{};
@@ -1715,12 +1732,33 @@ vector<PeakGroup> EIC::groupPeaksD(vector<EIC*>& eics, int smoothingWindow, floa
     }
 
     //try to annotate most intense peaks first
+    // fall back to other metrics of intensity
+    // use, samples, rt to break ties
     sort(allPeaks.begin(), allPeaks.end(), [](Peak& lhs, Peak& rhs){
-        if (lhs.peakIntensity == rhs.peakIntensity) { //corner case
-            return lhs.sample->sampleName < rhs.sample->sampleName; //sample names must differ
-        } else {
+
+        if (lhs.peakIntensity != rhs.peakIntensity) {
             return lhs.peakIntensity > rhs.peakIntensity;
         }
+
+        if (lhs.peakAreaTop != rhs.peakAreaTop) {
+            return lhs.peakAreaTop > rhs.peakAreaTop;
+        }
+
+        if (lhs.peakAreaCorrected != rhs.peakAreaCorrected) {
+            return lhs.peakAreaCorrected > rhs.peakAreaCorrected;
+        }
+
+        if (lhs.peakArea != rhs.peakArea) {
+            return lhs.peakArea > rhs.peakArea;
+        }
+
+        //sample name is arbitrary tiebreaker if every measure of quant is equal
+        if (lhs.sample != rhs.sample) {
+            return lhs.sample < rhs.sample;
+        }
+
+        //rt is last resort tiebreaker to produce deterministic ordering
+        return lhs.rt < rhs.rt;
     });
 
     for (auto peak : allPeaks) {
@@ -1735,6 +1773,12 @@ vector<PeakGroup> EIC::groupPeaksD(vector<EIC*>& eics, int smoothingWindow, floa
         float deltaRt = 999999.0f;
         float bestDeltaRt = deltaRt;
         int bestGroupIndex = -1;
+
+        //TODO: How to handle cases where there are multiple peaks from the same sample
+        //with identical intensities, one should be associated with a peak group, while another gets associated with no peak?
+        //Currently, this is peak-centric assignment.
+        //Probably, instead of skipping over cases where the peak is already associated,
+        //need to record multiple associations, and take only the one that is closest to the group Rt.
 
         for (long k = lb - m->peaks.begin(); k < static_cast<long>(m->peaks.size()); k++){
 

@@ -670,7 +670,7 @@ class EIC {
         static vector<PeakGroup> groupPeaks(vector<EIC*>&eics, int smoothingWindow, float maxRtDiff);
         static vector<PeakGroup> groupPeaksB(vector<EIC*>&eics, int smoothingWindow, float maxRtDiff, float minSmoothedPeakIntensity);
         static vector<PeakGroup> groupPeaksC(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, int baselineSmoothingWindow, int baselineDropTopX);
-        static vector<PeakGroup> groupPeaksD(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, int baselineSmoothingWindow, int baselineDropTopX, float mergeOverlap);
+        static vector<PeakGroup> groupPeaksD(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, int baselineSmoothingWindow, int baselineDropTopX, float mergeOverlap, bool debug=false);
 
 		static EIC* eicMerge(const vector<EIC*>& eics);
 		static void removeLowRankGroups(vector<PeakGroup>&groups, unsigned int rankLimit );
