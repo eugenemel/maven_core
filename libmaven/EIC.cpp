@@ -1731,6 +1731,16 @@ vector<PeakGroup> EIC::groupPeaksD(vector<EIC*>& eics, int smoothingWindow, floa
         }
     }
 
+    if (debug) {
+       cout << "EIC::groupPeaksD(): START allPeaks" << endl;
+       for (auto peak : allPeaks) {
+           cout << fixed << setprecision(5)
+                << "(" << peak.peakMz << ", " << peak.rt << ", " << peak.peakIntensity << ") " << peak.sample->sampleName
+                << endl;
+       }
+       cout << "EIC::groupPeaksD(): END allPeaks" << endl;
+    }
+
     //try to annotate most intense peaks first
     // fall back to other metrics of intensity
     // use, samples, rt to break ties
