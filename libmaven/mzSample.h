@@ -322,8 +322,13 @@ class mzSlice {
         adduct=srmTransition.adduct;
 
         compoundVector=vector<Compound*>();
-        if (srmTransition.compound){
+
+        if (srmTransition.compounds.empty() && srmTransition.compound) {
             compoundVector.push_back(srmTransition.compound);
+        } else {
+            for (auto p : srmTransition.compounds) {
+                compoundVector.push_back(p.first);
+            }
         }
 
         srmPrecursorMz = srmTransition.precursorMz;
