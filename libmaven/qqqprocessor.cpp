@@ -99,12 +99,17 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
                 srmTransition = new SRMTransition();
                 srmTransition->precursorMz = precursorMz;
                 srmTransition->productMz = productMz;
+                srmTransition->transitionId = transitionId;
             }
 
             //Associated compounds with SRMTransition, if applicable
             if (precursorMz > 0 && productMz > 0 ) {
                 for (auto db_compound : compounds) {
 
+                    if (debug) {
+                        srmTransition->printKey();
+                        cout << ": " << endl;
+                    }
                     //only consider SRM compounds
                     if (db_compound->precursorMz <= 0 || db_compound->productMz <= 0) continue;
 
@@ -134,6 +139,10 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
                                 break;
                             }
                         }
+                    }
+
+                    if (debug) {
+                        cout << "    " << db_compound->id << endl;
                     }
 
                     //In reality, compounds should have multiple srmIds across many samples,

@@ -224,6 +224,7 @@ public:
     set<mzSample*> getSamples();
 
     void addCompound(Compound* compound, Adduct* adduct);
+    void printKey();
 };
 
 //Issue 368

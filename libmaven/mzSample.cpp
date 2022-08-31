@@ -2549,6 +2549,14 @@ void SRMTransition::addCompound(Compound* compound, Adduct* adduct){
     this->compounds.insert(make_pair(compound, adduct));
 }
 
+void SRMTransition::printKey(){
+    cout << setprecision(2) << fixed << "(" << this->precursorMz << ", " << this->productMz;
+    if (!this->transitionId.empty()){
+        cout << ", " << this->transitionId;
+    }
+    cout << ")";
+}
+
 string IsotopeParameters::encodeParams() {
 
     string encodedParams;
