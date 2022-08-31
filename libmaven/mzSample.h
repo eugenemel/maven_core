@@ -224,6 +224,7 @@ public:
     set<mzSample*> getSamples();
 
     void addCompound(Compound* compound, Adduct* adduct);
+    string getKey();
     void printKey();
 };
 

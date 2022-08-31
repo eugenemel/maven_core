@@ -189,6 +189,10 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
         }
     }
 
+    sort(srmTransitionsAsVector.begin(), srmTransitionsAsVector.end(), [](SRMTransition* lhs, SRMTransition* rhs){
+       return lhs->getKey() < rhs->getKey();
+    });
+
     if (debug) {
         cout << "# SRMTransitions: " << srmTransitions.size()
              << ", # SRMs: " << srms.size()
