@@ -2538,8 +2538,10 @@ shared_ptr<LibraryMs2SpectrumParameters> LibraryMs2SpectrumParameters::decode(st
     return libraryMs2SearchParameters;
 }
 
+//adduct may be nullptr, but not compound
+//note that this will result in pairs of <Compound*, nullptr>
 void SRMTransition::addCompound(Compound* compound, Adduct* adduct){
-    if (!compound || !adduct) return;
+    if (!compound) return;
 
     if (!this->compound){
         this->compound = compound;
