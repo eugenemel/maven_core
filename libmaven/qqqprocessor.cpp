@@ -22,12 +22,8 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
     //regex for transitionId
     regex rx3("transition=\\d+");
 
-    int countMatches=0;
-
     float amuQ1 = params->amuQ1;
     float amuQ3 = params->amuQ3;
-
-    vector<mzSlice*>slices;
 
     //Issue 563: SRM transitions now include a transition ID string to distinguish data
     map<tuple<float, float, string>, SRMTransition*> srmTransitions{};
@@ -102,14 +98,15 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
                 srmTransition->transitionId = transitionId;
             }
 
+            if (debug) {
+                srmTransition->printKey();
+                cout << ": " << endl;
+            }
+
             //Associated compounds with SRMTransition, if applicable
             if (precursorMz > 0 && productMz > 0 ) {
                 for (auto db_compound : compounds) {
 
-                    if (debug) {
-                        srmTransition->printKey();
-                        cout << ": " << endl;
-                    }
                     //only consider SRM compounds
                     if (db_compound->precursorMz <= 0 || db_compound->productMz <= 0) continue;
 
@@ -162,34 +159,40 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
             srmTransition->srmIds.insert(filterLine);
 
             srmTransitions[srmKey] = srmTransition;
-
-            // ------- //
-            // mzSlice //
-            // ------- //
-
-            mzSlice* s = new mzSlice(0,0,0,0);
-            s->srmId = scan->filterLine.c_str();
-            slices.push_back(s);
-
-            if (srmTransition->compound) {
-
-                s->compound=srmTransition->compound;
-                s->adduct =srmTransition->adduct;
-                s->rt = srmTransition->compound->expectedRt;
-
-                countMatches++;
-            }
-
         }
-        //qDebug() << "SRM mapping: " << countMatches << " compounds mapped out of " << srms.size();
     }
 
+    vector<mzSlice*> slices{};  //Build slices from completed srmTransitions
     vector<SRMTransition*> srmTransitionsAsVector(srmTransitions.size());
 
-    unsigned int counter = 0;
+    unsigned long counter = 0;
     for (auto it = srmTransitions.begin(); it != srmTransitions.end(); ++it) {
         srmTransitionsAsVector[counter] = it->second;
         counter++;
+
+        for (string srmId : it->second->srmIds) {
+            for (auto p : it->second->compounds) {
+                mzSlice* s = new mzSlice(0,0,0,0);
+                s->srmId = srmId;
+                s->compound = p.first;
+                s->adduct = p.second;
+                if (s->compound) {
+                    s->rt = s->compound->expectedRt;
+                }
+                slices.push_back(s);
+            }
+            if (!it->second->compound) {
+                mzSlice* s = new mzSlice(0,0,0,0);
+                s->srmId = srmId;
+                slices.push_back(s);
+            }
+        }
+    }
+
+    if (debug) {
+        cout << "# SRMTransitions: " << srmTransitions.size()
+             << ", # SRMs: " << srms.size()
+             << ", # Slices: " << slices.size();
     }
 
     return make_pair(slices, srmTransitionsAsVector);
