@@ -200,17 +200,21 @@ private:
 
 };
 
+//Issue 563: SRM Transitions, in general, map to multiple
+//<Compound*, Adduct*> pairs.
 //Issue 347
 class SRMTransition{
 public:
 
     float precursorMz = 0.0f;
     float productMz = 0.0f;
-    float rt = 0.0f;
+    string transitionId = "";
+
+    set<pair<Compound*, Adduct*>> compounds{};
+
+    //top compound is used for GUI features.
     Compound *compound = nullptr;
     Adduct *adduct = nullptr;
-
-    vector<pair<mzSample*, mzSlice*>> mzSlices{};
 
     //Issue 563: Expand SRMTransition class with srmId information
     //  sample         srmId
@@ -218,6 +222,8 @@ public:
     set<string> srmIds;
 
     set<mzSample*> getSamples();
+
+    void addCompound(Compound* compound, Adduct* adduct);
 };
 
 //Issue 368
@@ -2076,6 +2082,10 @@ class QQQProcessor{
             vector<Compound*>& compounds,
             vector<Adduct*>& adducts,
             bool debug = false);
+
+    //reserved constants - do not change!
+    static string getTransitionIdFilterStringKey(){return "TRANSITION_ID_FILTER_STRING";}
+    static string getTransitionIonTypeFilterStringKey(){return "TRANSITION_ION_TYPE";}
 
 };
 

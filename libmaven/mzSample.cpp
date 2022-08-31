@@ -2538,14 +2538,16 @@ shared_ptr<LibraryMs2SpectrumParameters> LibraryMs2SpectrumParameters::decode(st
     return libraryMs2SearchParameters;
 }
 
+void SRMTransition::addCompound(Compound* compound, Adduct* adduct){
+    if (!compound || !adduct) return;
 
-set<mzSample*> SRMTransition::getSamples(){
-       set<mzSample*> samples{};
-       for (auto p : mzSlices) {
-           samples.insert(p.first);
-       }
-       return samples;
-   }
+    if (!this->compound){
+        this->compound = compound;
+        this->adduct = adduct;
+    }
+
+    this->compounds.insert(make_pair(compound, adduct));
+}
 
 string IsotopeParameters::encodeParams() {
 

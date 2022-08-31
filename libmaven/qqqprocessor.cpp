@@ -14,16 +14,23 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
     //-87.000 [42.500-43.500]
     //- c ESI SRM ms2 159.000 [113.500-114.500]
 
+    //regexes for precursorMz, productMz
     regex rx1a("[+/-](\\d+\\.\\d+)");
     regex rx1b("ms2\\s*(\\d+\\.\\d+)");
     regex rx2("(\\d+\\.\\d+)-(\\d+\\.\\d+)");
+
+    //regex for transitionId
+    regex rx3("transition=\\d+");
+
     int countMatches=0;
 
     float amuQ1 = params->amuQ1;
     float amuQ3 = params->amuQ3;
 
     vector<mzSlice*>slices;
-    map<pair<float, float>, SRMTransition*> srmTransitions{};
+
+    //Issue 563: SRM transitions now include a transition ID string to distinguish data
+    map<tuple<float, float, string>, SRMTransition*> srmTransitions{};
 
     for(unsigned int i=0; i < samples.size(); i++ ) {
         mzSample* sample = samples[i];
@@ -31,24 +38,21 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
             Scan* scan = sample->getScan(j);
             if (!scan) continue;
 
+            // -------------------------- //
+            // Extract SRM data from scan //
+            // -------------------------- //
+
             string filterLine(scan->filterLine.c_str());
             if (filterLine.empty()) continue;
 
             if (srms.find(filterLine) != srms.end()) continue;
-            //if (srms.contains(filterLine))  continue;
             srms.insert(filterLine);
-
-            mzSlice* s = new mzSlice(0,0,0,0);
-            s->srmId = scan->filterLine.c_str();
-            slices.push_back(s);
-
-            //match compounds
-            Compound* compound = nullptr;
-            Adduct* adduct = nullptr;
 
             float precursorMz = scan->precursorMz;
             float productMz   = scan->productMz;
-            int   polarity= scan->getPolarity();
+            string transitionId = "";
+
+            int  polarity= scan->getPolarity();
             if (polarity==0) filterLine[0] == '+' ? polarity=1 : polarity =-1;
 
             if ( precursorMz < 1e-6f ) {
@@ -76,9 +80,29 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
                 }
             }
 
-            //relies on compounds
+            smatch m4;
+            regex_search(filterLine, m4, rx3);
+            if (!m4.empty()) {
+                transitionId = m4[0];
+            }
+
+            // ------------- //
+            // SRMTransition //
+            // ------------- //
+
+            tuple<float, float, string> srmKey = make_tuple(precursorMz, productMz, transitionId);
+
+            SRMTransition *srmTransition;
+            if (srmTransitions.find(srmKey) != srmTransitions.end()) {
+                srmTransition = srmTransitions[srmKey];
+            } else {
+                srmTransition = new SRMTransition();
+                srmTransition->precursorMz = precursorMz;
+                srmTransition->productMz = productMz;
+            }
+
+            //Associated compounds with SRMTransition, if applicable
             if (precursorMz > 0 && productMz > 0 ) {
-                float dist = FLT_MAX;
                 for (auto db_compound : compounds) {
 
                     //only consider SRM compounds
@@ -91,59 +115,62 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
                     auto q3_dist = abs(db_compound->productMz-productMz);
                     if (q3_dist > amuQ3) continue;
 
-                    auto d = sqrt(q1_dist*q1_dist + q3_dist*q3_dist);
-                    if (d < dist) {
-                        compound = db_compound;
-                        dist = d;
+                    // Issue 563: match transition_id filter
+                    // If a transition ID is known, it must be present in the srmId, for this compound to be correct.
+                    // If no transitionId is provided, match only on precursorMz and productMz.
+                    if (db_compound->metaDataMap.find(QQQProcessor::getTransitionIdFilterStringKey()) != db_compound->metaDataMap.end()) {
+
+                        string compoundTransitionId = db_compound->metaDataMap.at(QQQProcessor::getTransitionIdFilterStringKey());
+
+                        //exact match required - avoid substring issues, e.g. "transition=4" matching to "transition=44"
+                        if (compoundTransitionId != transitionId) continue;
                     }
-                }
-            }
 
-            if (compound) {
-                compound->srmId=filterLine;
-                s->compound=compound;
-                s->rt = compound->expectedRt;
-                countMatches++;
-
-                if (!compound->adductString.empty()) {
-                    for (auto availableAdduct : adducts) {
-                        if (availableAdduct->name == compound->adductString) {
-                            adduct = availableAdduct;
-                            break;
+                    Adduct* db_adduct = nullptr;
+                    if (!db_compound->adductString.empty()) {
+                        for (auto availableAdduct : adducts) {
+                            if (availableAdduct->name == db_compound->adductString) {
+                                db_adduct = availableAdduct;
+                                break;
+                            }
                         }
                     }
+
+                    //In reality, compounds should have multiple srmIds across many samples,
+                    //this is set here for GUI compatibility
+                    if (db_compound->srmId.empty()) {
+                        db_compound->srmId = filterLine;
+                    }
+
+                    srmTransition->addCompound(db_compound, db_adduct);
                 }
             }
-
-            //Issue 347
-            pair<float, float> srmKey = make_pair(precursorMz, productMz);
-            SRMTransition *srmTransition;
-            if (srmTransitions.find(srmKey) != srmTransitions.end()) {
-                srmTransition = srmTransitions[srmKey];
-            } else {
-                srmTransition = new SRMTransition();
-                srmTransition->precursorMz = precursorMz;
-                srmTransition->productMz = productMz;
-            }
-
-            srmTransition->mzSlices.push_back(make_pair(sample, s));
 
             if (srmTransition->srmIdBySample.find(sample) == srmTransition->srmIdBySample.end()) {
                 srmTransition->srmIdBySample.insert(make_pair(sample, set<string>{}));
             }
             srmTransition->srmIdBySample.at(sample).insert(filterLine);
-
             srmTransition->srmIds.insert(filterLine);
 
-            if (compound){
-                srmTransition->compound = compound;
-                if (compound->expectedRt > 0) {
-                    srmTransition->rt = compound->expectedRt;
-                }
-            }
-            if (adduct) srmTransition->adduct = adduct;
-
             srmTransitions[srmKey] = srmTransition;
+
+            // ------- //
+            // mzSlice //
+            // ------- //
+
+            mzSlice* s = new mzSlice(0,0,0,0);
+            s->srmId = scan->filterLine.c_str();
+            slices.push_back(s);
+
+            if (srmTransition->compound) {
+
+                s->compound=srmTransition->compound;
+                s->adduct =srmTransition->adduct;
+                s->rt = srmTransition->compound->expectedRt;
+
+                countMatches++;
+            }
+
         }
         //qDebug() << "SRM mapping: " << countMatches << " compounds mapped out of " << srms.size();
     }
