@@ -2810,16 +2810,17 @@ Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<Lo
         combinedCollisionEnergyFragment->agglomerateMzs(params->postConsensusMzDelta, params->postConsensusMzDeltaIsPpm);
     }
 
+    // Issue 566: Remove co-isolations before normalizing, to assure that there is always a frag peak with intensity of max intensity
+    if (params->precIsRemoveCoIsolations) {
+        combinedCollisionEnergyFragment->removeCoIsolations(precursorMz, params->precPpmTolr);
+    }
+
     if (params->postConsensusNormMaxValue > 0) {
         combinedCollisionEnergyFragment->normalizeIntensityArray(params->postConsensusNormMaxValue);
     }
 
     if (params->postConsensusPostNormMinIntensity > 0) {
         combinedCollisionEnergyFragment->filterByMinIntensity(params->postConsensusPostNormMinIntensity);
-    }
-
-    if (params->precIsRemoveCoIsolations) {
-        combinedCollisionEnergyFragment->removeCoIsolations(precursorMz, params->precPpmTolr);
     }
 
     return combinedCollisionEnergyFragment;
