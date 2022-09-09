@@ -85,6 +85,9 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
             if (!m4.empty()) {
                 transitionName = string(m4[0]);
                 transitionName = transitionName.substr(5);
+
+                //remove certain tricky characters
+                mzUtils::replace(transitionName, "(±)", "");
             }
 
             smatch m5;
