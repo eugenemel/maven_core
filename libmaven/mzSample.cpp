@@ -2768,7 +2768,9 @@ Fragment* mzSample::getLoopInjectionMs2Spectrum(float precursorMz, shared_ptr<Lo
 
             fragment->consensus->sortByMz();
 
-            singleCollisionEnergySpectra.push_back(fragment->consensus);
+            if (!fragment->consensus->mzs.empty()) {
+                singleCollisionEnergySpectra.push_back(fragment->consensus);
+            }
         }
     }
 

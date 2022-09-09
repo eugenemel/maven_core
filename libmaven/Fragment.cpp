@@ -1404,13 +1404,11 @@ int Fragment::getNumDiagnosticFragmentsMatched(string fragLblStartsWith, vector<
 void Fragment::normalizeIntensityArray(float normValue){
 
     sortByIntensity();
-    if (intensity_array.size() > 1) {
+    if (!intensity_array.empty()) {
         float maxValue = intensity_array[0];
         for(unsigned int i=0; i<intensity_array.size(); i++)  {
             intensity_array[i] = intensity_array[i]/maxValue*normValue;
         }
-    } else if (intensity_array.size() == 1){
-        intensity_array[0] = normValue;
     }
 
 }
