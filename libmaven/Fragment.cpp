@@ -1580,6 +1580,14 @@ void Fragment::filterByMinIntensity(float minIntensity) {
 
 }
 
+/**
+ * @brief Fragment::removeCoIsolations
+ * Remove any m/z values that are within a 1 Da window centered around precursorMz.
+ * Technically, this removes the original precursor along with any co-isolating species within tolerance.
+ *
+ * @param precursorMz
+ * @param ppmTolr
+ */
 void Fragment::removeCoIsolations(float precursorMz, float ppmTolr){
 
     vector<float> filtered_mzs;
