@@ -1409,6 +1409,8 @@ void Fragment::normalizeIntensityArray(float normValue){
         for(unsigned int i=0; i<intensity_array.size(); i++)  {
             intensity_array[i] = intensity_array[i]/maxValue*normValue;
         }
+    } else if (intensity_array.size() == 1){
+        intensity_array[0] = normValue;
     }
 
 }
