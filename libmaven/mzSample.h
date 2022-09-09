@@ -208,7 +208,8 @@ public:
 
     float precursorMz = 0.0f;
     float productMz = 0.0f;
-    string transitionId = "";
+    string name = "";
+    float collisionEnergy = 0.0f;
 
     set<pair<Compound*, Adduct*>> compounds{};
 

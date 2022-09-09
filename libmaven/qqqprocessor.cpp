@@ -19,8 +19,11 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
     regex rx1b("ms2\\s*(\\d+\\.\\d+)");
     regex rx2("(\\d+\\.\\d+)-(\\d+\\.\\d+)");
 
-    //regex for transitionId
-    regex rx3("transition=\\d+");
+    //regex for transition name (Sciex 7500)
+    regex rx3("name=.*$");
+
+    //regex for collision energy (Sciex 7500)
+    regex rx4("ce=[^\\s|$]+");
 
     float amuQ1 = params->amuQ1;
     float amuQ3 = params->amuQ3;
@@ -46,7 +49,8 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
 
             float precursorMz = scan->precursorMz;
             float productMz   = scan->productMz;
-            string transitionId = "";
+            string transitionName = "";
+            float collisionEnergy = 0;
 
             int  polarity= scan->getPolarity();
             if (polarity==0) filterLine[0] == '+' ? polarity=1 : polarity =-1;
@@ -79,14 +83,23 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
             smatch m4;
             regex_search(filterLine, m4, rx3);
             if (!m4.empty()) {
-                transitionId = m4[0];
+                transitionName = string(m4[0]);
+                transitionName = transitionName.substr(5);
+            }
+
+            smatch m5;
+            regex_search(filterLine, m5, rx4);
+            if (!m5.empty()) {
+                string ce = string(m5[0]);
+                ce = ce.substr(3);
+                collisionEnergy = stof(ce);
             }
 
             // ------------- //
             // SRMTransition //
             // ------------- //
 
-            tuple<float, float, string> srmKey = make_tuple(precursorMz, productMz, transitionId);
+            tuple<float, float, string> srmKey = make_tuple(precursorMz, productMz, transitionName);
 
             SRMTransition *srmTransition;
             if (srmTransitions.find(srmKey) != srmTransitions.end()) {
@@ -95,7 +108,8 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
                 srmTransition = new SRMTransition();
                 srmTransition->precursorMz = precursorMz;
                 srmTransition->productMz = productMz;
-                srmTransition->transitionId = transitionId;
+                srmTransition->name = transitionName;
+                srmTransition->collisionEnergy = collisionEnergy;
             }
 
             if (debug) {
@@ -117,15 +131,16 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
                     auto q3_dist = abs(db_compound->productMz-productMz);
                     if (q3_dist > amuQ3) continue;
 
-                    // Issue 563: match transition_id filter
+                    // Issue 563/564: match transition_id filter
                     // If a transition ID is known, it must be present in the srmId, for this compound to be correct.
                     // If no transitionId is provided, match only on precursorMz and productMz.
+                    // This allows that the compound name and transition name be different strings, though by default
+                    // the transition_id will usually be the same as the compound name.
                     if (db_compound->metaDataMap.find(QQQProcessor::getTransitionIdFilterStringKey()) != db_compound->metaDataMap.end()) {
 
                         string compoundTransitionId = db_compound->metaDataMap.at(QQQProcessor::getTransitionIdFilterStringKey());
 
-                        //exact match required - avoid substring issues, e.g. "transition=4" matching to "transition=44"
-                        if (compoundTransitionId != transitionId) continue;
+                        if (compoundTransitionId != transitionName) continue;
                     }
 
                     Adduct* db_adduct = nullptr;

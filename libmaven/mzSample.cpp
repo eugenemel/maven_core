@@ -2554,8 +2554,8 @@ void SRMTransition::addCompound(Compound* compound, Adduct* adduct){
 string SRMTransition::getKey() {
     stringstream keystream;
     keystream << setprecision(2) << fixed << "(" << this->precursorMz << ", " << this->productMz;
-    if (!this->transitionId.empty()){
-        keystream << ", " << this->transitionId;
+    if (!this->name.empty()){
+        keystream << ", " << this->name;
     }
     keystream << ")";
     return keystream.str();
