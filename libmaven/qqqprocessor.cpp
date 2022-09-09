@@ -143,7 +143,14 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
 
                         string compoundTransitionId = db_compound->metaDataMap.at(QQQProcessor::getTransitionIdFilterStringKey());
 
-                        if (compoundTransitionId != transitionName) continue;
+                        //compounds should match, except for whitespace differences
+                        string compoundTransitionIdNoWhiteSpace = compoundTransitionId;
+                        string transitionNameNoWhiteSpace = transitionName;
+
+                        mzUtils::replaceAll(compoundTransitionIdNoWhiteSpace, " ","");
+                        mzUtils::replaceAll(transitionNameNoWhiteSpace, " ","");
+
+                        if (compoundTransitionIdNoWhiteSpace != transitionNameNoWhiteSpace) continue;
                     }
 
                     Adduct* db_adduct = nullptr;
