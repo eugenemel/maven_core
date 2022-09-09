@@ -85,9 +85,6 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
             if (!m4.empty()) {
                 transitionName = string(m4[0]);
                 transitionName = transitionName.substr(5);
-
-                //remove certain tricky characters
-                mzUtils::replace(transitionName, "(±)", "");
             }
 
             smatch m5;
@@ -143,14 +140,17 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
 
                         string compoundTransitionId = db_compound->metaDataMap.at(QQQProcessor::getTransitionIdFilterStringKey());
 
-                        //compounds should match, except for whitespace differences
-                        string compoundTransitionIdNoWhiteSpace = compoundTransitionId;
-                        string transitionNameNoWhiteSpace = transitionName;
+                        //compounds should match, except for whitespace differences, and removing special characters
+                        string compoundTransitionIdForComparison = compoundTransitionId;
+                        string transitionNameForComparison = transitionName;
 
-                        mzUtils::replaceAll(compoundTransitionIdNoWhiteSpace, " ","");
-                        mzUtils::replaceAll(transitionNameNoWhiteSpace, " ","");
+                        //remove certain tricky characters, white space
+                        mzUtils::replaceAll(transitionNameForComparison, "(±)", "");
+                        mzUtils::replaceAll(transitionNameForComparison, " ","");
 
-                        if (compoundTransitionIdNoWhiteSpace != transitionNameNoWhiteSpace) continue;
+                        mzUtils::replaceAll(compoundTransitionIdForComparison, " ","");
+
+                        if (compoundTransitionIdForComparison != transitionNameForComparison) continue;
                     }
 
                     Adduct* db_adduct = nullptr;
