@@ -383,6 +383,7 @@ class mzSlice {
         compoundVector=b.compoundVector;
         srmPrecursorMz=b.srmPrecursorMz;
         srmProductMz=b.srmProductMz;
+        srmTransition=b.srmTransition;
     }
 
     mzSlice& operator= (const mzSlice& b) {
@@ -399,6 +400,7 @@ class mzSlice {
         compoundVector=b.compoundVector;
         srmPrecursorMz=b.srmPrecursorMz;
         srmProductMz=b.srmProductMz;
+        srmTransition=b.srmTransition;
         return *this;
     }
 
