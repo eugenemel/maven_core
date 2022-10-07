@@ -136,9 +136,9 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
                     // If no transitionId is provided, match only on precursorMz and productMz.
                     // This allows that the compound name and transition name be different strings, though by default
                     // the transition_id will usually be the same as the compound name.
-                    if (db_compound->metaDataMap.find(QQQProcessor::getTransitionIdFilterStringKey()) != db_compound->metaDataMap.end()) {
+                    if (!db_compound->srmId.empty()) {
 
-                        string compoundTransitionId = db_compound->metaDataMap.at(QQQProcessor::getTransitionIdFilterStringKey());
+                        string compoundTransitionId = db_compound->srmId;
 
                         //compounds should match, except for whitespace differences, and removing special characters
                         string compoundTransitionIdForComparison = compoundTransitionId;
@@ -166,12 +166,6 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
 
                     if (debug) {
                         cout << "    " << db_compound->id << endl;
-                    }
-
-                    //In reality, compounds should have multiple srmIds across many samples,
-                    //this is set here for GUI compatibility
-                    if (db_compound->srmId.empty()) {
-                        db_compound->srmId = filterLine;
                     }
 
                     srmTransition->addCompound(db_compound, db_adduct);
