@@ -1141,6 +1141,7 @@ class Compound {
             int charge;
 
             //QQQ mapping
+            SRMTransition* srmTransition = nullptr;
             string method_id;
             float precursorMz;	//QQQ parent ion
             float productMz;	//QQQ child ion

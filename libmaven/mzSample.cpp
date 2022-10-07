@@ -2546,6 +2546,8 @@ void SRMTransition::addCompound(Compound* compound, Adduct* adduct){
     if (!this->compound){
         this->compound = compound;
         this->adduct = adduct;
+
+        this->compound->srmTransition = this;
     }
 
     this->compounds.insert(make_pair(compound, adduct));
