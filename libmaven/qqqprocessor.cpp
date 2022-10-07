@@ -146,9 +146,10 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
 
                         //remove certain tricky characters, white space
                         mzUtils::replaceAll(transitionNameForComparison, "(±)", "");
-                        mzUtils::replaceAll(transitionNameForComparison, " ","");
+                        mzUtils::replaceAll(transitionNameForComparison, " ", "");
 
-                        mzUtils::replaceAll(compoundTransitionIdForComparison, " ","");
+                        mzUtils::replaceAll(compoundTransitionIdForComparison, "(±)", "");
+                        mzUtils::replaceAll(compoundTransitionIdForComparison, " ", "");
 
                         if (compoundTransitionIdForComparison != transitionNameForComparison) continue;
                     }
