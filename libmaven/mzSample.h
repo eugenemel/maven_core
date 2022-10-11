@@ -2117,6 +2117,8 @@ class QQQProcessor{
 
     static void printSRMIds(vector<SRMTransition*>& transitions);
 
+    static set<string> getSRMIds(vector<SRMTransition*>& transitions);
+
     //reserved constants - do not change!
     static string getTransitionIdFilterStringKey(){return "TRANSITION_ID_FILTER_STRING";}
     static string getTransitionIonTypeFilterStringKey(){return "TRANSITION_ION_TYPE";}

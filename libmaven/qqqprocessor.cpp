@@ -272,6 +272,13 @@ pair<vector<mzSlice*>, vector<string>> QQQProcessor::getMzSlices(
     return make_pair(slices, missingTransitions);
 }
 
+/**
+ * @brief QQQProcessor::printSRMIds
+ * @param transitions
+ *
+ * Print all srmIds, limiting to one (Q1, Q3, transition_name)
+ * (print some random sample id number with the srmId information)
+ */
 void QQQProcessor::printSRMIds(vector<SRMTransition*>& transitions) {
     for (SRMTransition *transition : transitions) {
         if (transition && !transition->srmIds.empty()) {
@@ -279,6 +286,25 @@ void QQQProcessor::printSRMIds(vector<SRMTransition*>& transitions) {
             cout << srmIdString << endl;
         }
     }
+}
+
+/**
+ * @brief QQQProcessor::getSRMIds
+ * @param transitions
+ * @return
+ *
+ * Retrieve all srmId information, from every sample.
+ */
+set<string> QQQProcessor::getSRMIds(vector<SRMTransition*>& transitions) {
+    set<string> srmIds{};
+    for (SRMTransition *transition : transitions) {
+        if (transition && !transition->srmIds.empty()) {
+            for (auto srmId : transition->srmIds) {
+                srmIds.insert(srmId);
+            }
+        }
+    }
+    return srmIds;
 }
 
 shared_ptr<QQQSearchParameters> QQQSearchParameters::decode(string encodedParams) {
