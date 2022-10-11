@@ -199,11 +199,13 @@ pair<vector<mzSlice*>, vector<SRMTransition*>> QQQProcessor::getSRMSlices(
                 if (s->compound) {
                     s->rt = s->compound->expectedRt;
                 }
+                s->srmTransition = it->second;
                 slices.push_back(s);
             }
             if (!it->second->compound) {
                 mzSlice* s = new mzSlice(0,0,0,0);
                 s->srmId = srmId;
+                s->srmTransition = it->second;
                 slices.push_back(s);
             }
         }
