@@ -2113,7 +2113,7 @@ class QQQProcessor{
     static pair<vector<mzSlice*>, vector<string>> getMzSlices(
             vector<SRMTransition*>& transitions,
             bool isRequireCompound,
-            bool debug);
+            bool debug = false);
 
     static void printSRMIds(vector<SRMTransition*>& transitions);
 
