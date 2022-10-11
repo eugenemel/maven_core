@@ -235,6 +235,52 @@ string QQQSearchParameters::encodeParams(){
     return encodedParams;
 }
 
+//Issue 568: Create dedicated method to convert SRMTransitions to mzSlice
+pair<vector<mzSlice*>, vector<string>> QQQProcessor::getMzSlices(
+        vector<SRMTransition*>& transitions,
+        bool isRequireCompound,
+        bool debug) {
+
+    vector<mzSlice*> slices{};
+    vector<string> missingTransitions{};
+
+    for (SRMTransition *transition : transitions) {
+
+        if (isRequireCompound && !transition->compound) {
+            missingTransitions.push_back(transition->getKey());
+        } else {
+            mzSlice *slice = new mzSlice(transition);
+            slices.push_back(slice);
+
+            if (debug) {
+                transition->printKey();
+                cout << ":\n";
+            }
+
+            sort(slice->compoundVector.begin(), slice->compoundVector.end(), [](Compound* lhs, Compound* rhs){
+                return lhs->id < rhs->id;
+            });
+
+            if (debug) {
+                for (auto p : slice->compoundVector) {
+                    cout << "   " << p->id << endl;
+                }
+            }
+        }
+    }
+
+    return make_pair(slices, missingTransitions);
+}
+
+void QQQProcessor::printSRMIds(vector<SRMTransition*>& transitions) {
+    for (SRMTransition *transition : transitions) {
+        if (transition && !transition->srmIds.empty()) {
+            string srmIdString = *(transition->srmIds.begin());
+            cout << srmIdString << endl;
+        }
+    }
+}
+
 shared_ptr<QQQSearchParameters> QQQSearchParameters::decode(string encodedParams) {
 
     shared_ptr<QQQSearchParameters> qqqSearchParameters = shared_ptr<QQQSearchParameters>(new QQQSearchParameters());

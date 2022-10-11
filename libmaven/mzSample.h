@@ -2099,6 +2099,24 @@ class QQQProcessor{
             vector<Adduct*>& adducts,
             bool debug = false);
 
+    /**
+     * @brief getCompoundBasedMzSlices
+     * @param transitions
+     * @param debug
+     * @return
+     *
+     * Generate mzSlices* from SRMTransition*, for those SRMTransition* that have
+     * at least one compound associated with each slice.
+     *
+     * SRMTransition* that do not have any compounds are noted in the vector<string>
+     */
+    static pair<vector<mzSlice*>, vector<string>> getMzSlices(
+            vector<SRMTransition*>& transitions,
+            bool isRequireCompound,
+            bool debug);
+
+    static void printSRMIds(vector<SRMTransition*>& transitions);
+
     //reserved constants - do not change!
     static string getTransitionIdFilterStringKey(){return "TRANSITION_ID_FILTER_STRING";}
     static string getTransitionIonTypeFilterStringKey(){return "TRANSITION_ION_TYPE";}
