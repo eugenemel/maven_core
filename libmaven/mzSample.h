@@ -2092,13 +2092,6 @@ public:
 class QQQProcessor{
     public:
 
-    static pair<vector<mzSlice*>, vector<SRMTransition*>> getSRMSlices(
-            vector<mzSample*>& samples,
-            shared_ptr<QQQSearchParameters> params,
-            vector<Compound*>& compounds,
-            vector<Adduct*>& adducts,
-            bool debug = false);
-
     /**
      * @brief getSRMTransitions
      * @param samples
