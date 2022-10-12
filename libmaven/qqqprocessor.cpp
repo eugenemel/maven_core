@@ -2,7 +2,7 @@
 #include <regex>
 
 
-static vector<SRMTransition*> getSRMTransitions(
+vector<SRMTransition*> QQQProcessor::getSRMTransitions(
         vector<mzSample*>& samples,
         shared_ptr<QQQSearchParameters> params,
         vector<Compound*>& compounds,
