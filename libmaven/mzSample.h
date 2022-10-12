@@ -2100,6 +2100,24 @@ class QQQProcessor{
             bool debug = false);
 
     /**
+     * @brief getSRMTransitions
+     * @param samples
+     * @param params
+     * @param compounds
+     * @param adducts
+     * @param debug
+     * @return
+     *
+     * Based on samples, compounds, and adducts, build all SRMTransition* for a given dataset.
+     */
+    static vector<SRMTransition*> getSRMTransitions(
+            vector<mzSample*>& samples,
+            shared_ptr<QQQSearchParameters> params,
+            vector<Compound*>& compounds,
+            vector<Adduct*>& adducts,
+            bool debug = false);
+
+    /**
      * @brief getCompoundBasedMzSlices
      * @param transitions
      * @param debug
