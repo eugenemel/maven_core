@@ -7,7 +7,7 @@ vector<SRMTransition*> QQQProcessor::getSRMTransitions(
         shared_ptr<QQQSearchParameters> params,
         vector<Compound*>& compounds,
         vector<Adduct*>& adducts,
-        bool debug = false) {
+        bool debug) {
 
     set<string> srms;
     //+118.001@cid34.00 [57.500-58.500]
