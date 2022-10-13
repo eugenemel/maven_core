@@ -353,10 +353,14 @@ void EIC::getPeakPositionsB(int smoothWindow, float minSmoothedPeakIntensity) {
  * Peaks always range from one minima to another. If an EIC contains multiple maxima, adjacent maxima will share
  * a minimum between them.
  *
+ * Issue 569: Alternative approach to determine RT bounds of a peak
+ * @param rtBoundsMaxIntensityFraction
+ * When computing Rt bounds, stop when the intensity crosses this threshold
+ *
  * @author phillipseitzer
  * @since 20191104
  */
-void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBounds) {
+void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBounds, float rtBoundsMaxIntensityFraction) {
 
     peaks.clear();
 
@@ -437,6 +441,13 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
         //indicates a new peak
         if (splineAnnotation[i] == SplineAnnotation::MAX) {
 
+            float intensityThreshold = baselineQCutVal;
+
+            //Issue 569: Use rtBoundsMaxIntensityFraction instead of intensity value
+            if (rtBoundsMaxIntensityFraction > 0.0f && rtBoundsMaxIntensityFraction < 1.0f) {
+                intensityThreshold = max(intensityThreshold, rtBoundsMaxIntensityFraction * intensity[i]);
+            }
+
             Peak* peak = addPeak(static_cast<int>(i));
 
             //descend to the left
@@ -446,7 +457,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
             while(true) {
 
                 //if this point is below the baseline, it is invalid, stop immediately
-                if (intensity[leftIndex] < baselineQCutVal) {
+                if (intensity[leftIndex] < intensityThreshold) {
                     break;
                 }
 
@@ -476,7 +487,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
             while(true) {
 
                 //if this point is below the baseline, it is invalid, stop immediately
-                if (intensity[rightIndex] < baselineQCutVal) {
+                if (intensity[rightIndex] < intensityThreshold) {
                     break;
                 }
 
