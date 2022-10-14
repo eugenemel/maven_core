@@ -34,6 +34,7 @@ Fragment::Fragment() {
  * @param maxNumberOfFragments: maximum number of spectral peaks to include
  * @param baseLinePercentile: (expressed as a percentage) intensity percentile corresponding to S:N ratio of 1
  * @param isRetainFragmentsAbovePrecursorMz: if true, keep peaks above precursor m/z. If false, skip peaks
+ * Issue 570: Note that if the precursorMz value is set to 0, all peaks will be excluded.
  * @param precursorPurityPpm: ppm value used to determine precursor purity (search MS1 scans)
  * @param minIntensity: minimum intensity value for a peak to be retained
  */
