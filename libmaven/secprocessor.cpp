@@ -28,9 +28,9 @@ string SECSearchParameters::encodeParams() {
 
     encodedParams = encodedParams + "traceWindowSize" + "=" + to_string(traceWindowSize) + ";";
     encodedParams = encodedParams + "traceMinPeakIntensity" + "=" + to_string(traceMinPeakIntensity) + ";";
-    encodedParams = encodedParams + "traceMinPeakSN" + "=" + to_string(traceMinPeakSN);
-    encodedParams = encodedParams + "traceBaselineDropTopX" + "=" + to_string(traceBaselineDropTopX);
-    encodedParams = encodedParams + "tracePeakBoundsMaxIntensityFraction" + "=" + to_string(tracePeakBoundsMaxIntensityFraction);
+    encodedParams = encodedParams + "traceMinPeakSN" + "=" + to_string(traceMinPeakSN) + ";";
+    encodedParams = encodedParams + "traceBaselineDropTopX" + "=" + to_string(traceBaselineDropTopX) + ";";
+    encodedParams = encodedParams + "tracePeakBoundsMaxIntensityFraction" + "=" + to_string(tracePeakBoundsMaxIntensityFraction) + ";";
 
     return encodedParams;
 }
