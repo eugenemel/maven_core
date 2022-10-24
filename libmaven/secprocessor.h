@@ -53,6 +53,8 @@ enum SECTraceType {Unset=0, Peptide=1, Protein=2};
  */
 class SECTrace {
 
+public:
+
     SECTraceType type = SECTraceType::Unset;
 
     vector<int> fractionNums{}; //Includes missing fractions, e.g. from params
