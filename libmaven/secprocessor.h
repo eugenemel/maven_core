@@ -34,7 +34,7 @@ class SECSearchParameters {
      int traceWindowSize = 5;
      float traceMinPeakIntensity = 1e6f;
      float traceMinPeakSN = 0.0f;
-     float traceBaselineDropTopX = 80; //EIC is full width
+     int traceBaselineDropTopX = 80; //EIC is full width
      float tracePeakBoundsMaxIntensityFraction = 0.1f;
 
      string encodeParams();
