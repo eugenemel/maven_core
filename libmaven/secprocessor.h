@@ -38,7 +38,7 @@ class SECSearchParameters {
      float tracePeakBoundsMaxIntensityFraction = 0.1f;
 
      string encodeParams();
-     shared_ptr<SECSearchParameters> decode(string encodedParams);
+     shared_ptr<SECSearchParameters> static decode(string encodedParams);
 };
 
 enum SECTraceType {Unset=0, Peptide=1, Protein=2};
