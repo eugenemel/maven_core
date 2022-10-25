@@ -136,7 +136,9 @@ SECTrace::SECTrace(SECTraceType type,
 
     eic->intensity = this->rawIntensities;
     eic->rt = pseudoRt;
+    eic->mz = vector<float>(static_cast<unsigned long>(N));
     eic->scannum = this->fractionNums;
+
     eic->setSmootherType(params->traceSmoothingType);
     eic->setBaselineSmoothingWindow(params->traceWindowSize);
     eic->setBaselineDropTopX(params->traceBaselineDropTopX);

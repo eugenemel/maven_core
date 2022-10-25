@@ -441,11 +441,19 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
         //indicates a new peak
         if (splineAnnotation[i] == SplineAnnotation::MAX) {
 
+            if (debug) {
+                cout << "Peak @ i=" << i << ":" << endl;
+            }
+
             float intensityThreshold = baselineQCutVal;
 
             //Issue 569: Use rtBoundsMaxIntensityFraction instead of intensity value
             if (rtBoundsMaxIntensityFraction > 0.0f && rtBoundsMaxIntensityFraction < 1.0f) {
                 intensityThreshold = max(intensityThreshold, rtBoundsMaxIntensityFraction * intensity[i]);
+            }
+
+            if (debug) {
+                cout << "intensityThreshold: " << intensityThreshold << endl;
             }
 
             Peak* peak = addPeak(static_cast<int>(i));
@@ -480,6 +488,10 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
                 leftIndex--;
             }
 
+            if (debug) {
+                cout << "leftMinimumIntensityIndex: " << leftMinimumIntensityIndex << endl;
+            }
+
             //descend to the right
             unsigned int rightMinimumIntensityIndex = i+1;
             unsigned int rightIndex = i+1;
@@ -508,6 +520,10 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
 
                 //continue moving to the right, check for more valid points
                 rightIndex++;
+            }
+
+            if (debug) {
+                cout << "rightMinimumIntensityIndex: " << rightMinimumIntensityIndex << endl;
             }
 
             peak->minpos = leftMinimumIntensityIndex;
