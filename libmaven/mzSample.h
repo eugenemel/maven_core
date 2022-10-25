@@ -623,7 +623,7 @@ class EIC {
 	public:
 
     EIC() {
-        sample=NULL;
+        sample=nullptr;
         mzmin=mzmax=rtmin=rtmax=0;
         maxIntensity=totalIntensity=0;
         eic_noNoiseObs=0;
