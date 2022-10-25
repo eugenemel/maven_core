@@ -91,5 +91,42 @@ SECTrace::SECTrace(SECTraceType type,
                    vector<int> fractionNums,
                    vector<float> rawIntensities,
                    shared_ptr<SECSearchParameters> params) {
-    //TODO
+
+    if (fractionNums.size() != rawIntensities.size()) {
+        cerr << "SECTrace() requires same length for fractionNums, rawIntensities. Exiting." << endl;
+        abort();
+    }
+
+    this->type = type;
+
+    int N = params->traceMaxFractionNumber - params->traceMinFractionNumber + 1;
+
+    this->fractionNums = vector<int>(static_cast<unsigned long>(N));
+    this->rawIntensities = vector<float>(static_cast<unsigned long>(N));
+
+    map<int, float> rawDataMap{};
+    for (unsigned int i = 0; i < fractionNums.size(); i++) {
+        int fracNum = fractionNums[i];
+        float rawIntensity = rawIntensities[i];
+        rawDataMap.insert(make_pair(fracNum, rawIntensity));
+    }
+
+    unsigned int counter = 0;
+
+    int fracNum = params->traceMinFractionNumber;
+
+    while (fracNum <= params->traceMaxFractionNumber) {
+        this->fractionNums[counter] = fracNum;
+
+        float intensityVal = params->traceMissingIntensityFill;
+
+        if (rawDataMap.find(fracNum) != rawDataMap.end()) {
+            intensityVal = rawDataMap.at(fracNum);
+        }
+
+        this->rawIntensities[counter] = intensityVal;
+        counter++;
+        fracNum++;
+    }
+
 }
