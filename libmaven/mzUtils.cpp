@@ -1078,7 +1078,7 @@ float  crossCorrelationZ(vector<float>&xvector, vector<float>& yvector, float of
 	}
 }
 
-float intensityAtPercentile(vector<float>& intensities, float percentile){
+float intensityAtPercentile(vector<float> intensities, float percentile){
     if (intensities.empty()) return 0;
     if (percentile <= 0) return 0;
     sort(intensities.begin(), intensities.end());
