@@ -552,6 +552,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
             cout << "PEAK: pos=" << peak.pos << ", mz=" << peak.peakMz << ", rt=" << peak.rt << endl;
             cout << "\t min=" << peak.minpos << ", minmz=" << peak.mzmin << ", rtmin=" << peak.rtmin << endl;
             cout << "\t max=" << peak.maxpos << ", maxmz=" << peak.mzmax << ", rtmax=" << peak.rtmax << endl;
+            cout << "\t SN=" << peak.signalBaselineRatio << ", (" << peak.peakIntensity << "/" << peak.peakBaseLineLevel << ")" << endl;
         }
     }
 
