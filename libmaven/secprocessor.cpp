@@ -90,7 +90,8 @@ shared_ptr<SECSearchParameters> SECSearchParameters::decode(string encodedParams
 SECTrace::SECTrace(SECTraceType type,
                    vector<int> fractionNums,
                    vector<float> rawIntensities,
-                   shared_ptr<SECSearchParameters> params) {
+                   shared_ptr<SECSearchParameters> params,
+                   bool debug) {
 
     if (fractionNums.size() != rawIntensities.size()) {
         cerr << "SECTrace() requires same length for fractionNums, rawIntensities. Exiting." << endl;
@@ -143,7 +144,7 @@ SECTrace::SECTrace(SECTraceType type,
     eic->setBaselineSmoothingWindow(params->traceWindowSize);
     eic->setBaselineDropTopX(params->traceBaselineDropTopX);
 
-    eic->getPeakPositionsC(params->traceSmoothingType, false, true, params->tracePeakBoundsMaxIntensityFraction);
+    eic->getPeakPositionsC(params->traceSmoothingType, debug, true, params->tracePeakBoundsMaxIntensityFraction);
 
     this->smoothedIntensities = eic->spline;
 

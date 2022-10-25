@@ -77,7 +77,8 @@ public:
     SECTrace(SECTraceType type,
              vector<int> fractionNums,
              vector<float> rawIntensities,
-             shared_ptr<SECSearchParameters> params);
+             shared_ptr<SECSearchParameters> params,
+             bool debug = false);
 };
 
 #endif // SECPROCESSOR_H
