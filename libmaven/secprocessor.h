@@ -29,6 +29,7 @@ class SECSearchParameters {
       * PEAK PICKING
       * comments:
       * baseline smoothing is the same as peak smoothing.
+      * @param traceMinPeakIntensity and @param traceMinPeakSN are compared to the raw intensities, not smoothed values
       * ========================*/
      EIC::SmootherType traceSmoothingType = EIC::SmootherType::GAUSSIAN;
      int traceWindowSize = 5;

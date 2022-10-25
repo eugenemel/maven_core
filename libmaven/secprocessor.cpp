@@ -115,8 +115,11 @@ SECTrace::SECTrace(SECTraceType type,
 
     int fracNum = params->traceMinFractionNumber;
 
+    vector<float> pseudoRt(static_cast<unsigned long>(N));
+
     while (fracNum <= params->traceMaxFractionNumber) {
         this->fractionNums[counter] = fracNum;
+        pseudoRt[counter] = static_cast<float>(fracNum);
 
         float intensityVal = params->traceMissingIntensityFill;
 
@@ -129,4 +132,23 @@ SECTrace::SECTrace(SECTraceType type,
         fracNum++;
     }
 
+    EIC *eic = new EIC();
+
+    eic->intensity = this->rawIntensities;
+    eic->rt = pseudoRt;
+    eic->setSmootherType(params->traceSmoothingType);
+    eic->setBaselineSmoothingWindow(params->traceWindowSize);
+    eic->setBaselineDropTopX(params->traceBaselineDropTopX);
+
+    eic->getPeakPositionsC(params->traceSmoothingType, false, true, params->tracePeakBoundsMaxIntensityFraction);
+
+    this->smoothedIntensities = eic->spline;
+
+    for (auto p : eic->peaks) {
+        if (this->rawIntensities[p.pos] >= params->traceMinPeakIntensity && p.signalBaselineRatio >= params->traceMinPeakSN) {
+            this->peaks.push_back(p);
+        }
+    }
+
+    delete(eic);
 }
