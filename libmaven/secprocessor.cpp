@@ -143,7 +143,7 @@ SECTrace::SECTrace(SECTraceType type,
     eic->setBaselineSmoothingWindow(params->traceWindowSize);
     eic->setBaselineDropTopX(params->traceBaselineDropTopX);
 
-    eic->getPeakPositionsC(params->traceSmoothingType, true, true, params->tracePeakBoundsMaxIntensityFraction);
+    eic->getPeakPositionsC(params->traceSmoothingType, false, true, params->tracePeakBoundsMaxIntensityFraction);
 
     this->smoothedIntensities = eic->spline;
 
