@@ -1078,6 +1078,20 @@ float  crossCorrelationZ(vector<float>&xvector, vector<float>& yvector, float of
 	}
 }
 
+float intensityAtPercentile(vector<float>& intensities, float percentile){
+    if (intensities.empty()) return 0;
+    if (percentile <= 0) return 0;
+    sort(intensities.begin(), intensities.end());
+    if (percentile >= 1) return intensities[intensities.size()-1];
+
+    float thresh = percentile * intensities.size() + 0.5f;
+    unsigned int index = static_cast<unsigned int>(thresh);
+
+    if (index > intensities.size()) return intensities[intensities.size()-1];
+
+    return intensities[static_cast<unsigned int>(index)];
+}
+
 long mzToIntKey(const double mz, const long multFactor){
     return static_cast<long>(round(mz*multFactor));
 }

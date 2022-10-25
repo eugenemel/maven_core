@@ -103,7 +103,8 @@ double beta(double x, double y);
 double gamma(double z);
 double betaPDF(double x, double a, double b);
 double pertPDF(double x, double min, double mode, double max);
-float  crossCorrelationZ(vector<float>&xvector, vector<float>& yvector, float offset);
+float crossCorrelationZ(vector<float>&xvector, vector<float>& yvector, float offset);
+float intensityAtPercentile(vector<float>& intensities, float percentile);
 
 vector<double> naturalAbundanceCorrection(int nC, vector<double>& M);
 
