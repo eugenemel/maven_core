@@ -210,6 +210,22 @@ string QQQSearchParameters::encodeParams(){
     encodedParams = encodedParams + "amuQ3" + "=" + to_string(amuQ3) + ";";
     encodedParams = encodedParams + "transitionListFilePath" + "=" + transitionListFilePath + ";";
 
+    encodedParams = encodedParams + "transitionCompoundMappingPolicy" + "=";
+    if (transitionCompoundMappingPolicy == QQQTransitionCompoundMappingPolicy::REQUIRE_ALL_TRANSITIONS_EXACTLY_ONE_COMPOUND) {
+        encodedParams = encodedParams + "REQUIRE_ALL_TRANSITIONS_EXACTLY_ONE_COMPOUND";
+    } else if (transitionCompoundMappingPolicy == QQQTransitionCompoundMappingPolicy::REQUIRE_ALL_TRANSITIONS_TO_ONE_OR_MORE_COMPOUNDS) {
+        encodedParams = encodedParams + "REQUIRE_ALL_TRANSITIONS_TO_ONE_OR_MORE_COMPOUNDS";
+    } else if (transitionCompoundMappingPolicy == QQQTransitionCompoundMappingPolicy::RETAIN_TRANSITIONS_ONE_OR_MORE_COMPOUNDS) {
+        encodedParams = encodedParams + "RETAIN_TRANSITIONS_ONE_OR_MORE_COMPOUNDS";
+    } else if (transitionCompoundMappingPolicy == QQQTransitionCompoundMappingPolicy::RETAIN_TRANSITIONS_EXACTLY_ONE_COMPOUND) {
+        encodedParams = encodedParams + "RETAIN_TRANSITIONS_EXACTLY_ONE_COMPOUND";
+    } else if (transitionCompoundMappingPolicy == QQQTransitionCompoundMappingPolicy::RETAIN_ALL_TRANSITIONS) {
+        encodedParams = encodedParams + "RETAIN_ALL_TRANSITIONS";
+    } else {
+        encodedParams = encodedParams + "UNKNOWN";
+    }
+    encodedParams = encodedParams + ";";
+
     return encodedParams;
 }
 
@@ -410,7 +426,20 @@ shared_ptr<QQQSearchParameters> QQQSearchParameters::decode(string encodedParams
     if (decodedMap.find("transitionListFilePath") != decodedMap.end()) {
         qqqSearchParameters->transitionListFilePath = decodedMap["transitionListFilePath"];
     }
-
+    if (decodedMap.find("transitionCompoundMappingPolicy") != decodedMap.end()) {
+        string transitionCompoundMappingPolicyStr = decodedMap["transitionCompoundMappingPolicy"];
+        if (transitionCompoundMappingPolicyStr == "REQUIRE_ALL_TRANSITIONS_EXACTLY_ONE_COMPOUND") {
+            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::REQUIRE_ALL_TRANSITIONS_EXACTLY_ONE_COMPOUND;
+        } else if (transitionCompoundMappingPolicyStr == "REQUIRE_ALL_TRANSITIONS_TO_ONE_OR_MORE_COMPOUNDS") {
+            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::REQUIRE_ALL_TRANSITIONS_TO_ONE_OR_MORE_COMPOUNDS;
+        } else if (transitionCompoundMappingPolicyStr == "RETAIN_TRANSITIONS_ONE_OR_MORE_COMPOUNDS") {
+            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::RETAIN_TRANSITIONS_ONE_OR_MORE_COMPOUNDS;
+        } else if (transitionCompoundMappingPolicyStr == "RETAIN_TRANSITIONS_EXACTLY_ONE_COMPOUND") {
+            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::RETAIN_TRANSITIONS_EXACTLY_ONE_COMPOUND;
+        } else if (transitionCompoundMappingPolicyStr == "RETAIN_ALL_TRANSITIONS") {
+            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::RETAIN_ALL_TRANSITIONS;
+        }
+    }
     // END QQQSearchParameters
 
     return qqqSearchParameters;

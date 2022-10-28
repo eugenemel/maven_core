@@ -2075,6 +2075,30 @@ struct IntegerSetContainer {
     }
 };
 
+
+enum QQQTransitionCompoundMappingPolicy{
+
+    //Every transition in sample set must map to exactly one compound in supplied transition list.
+    //failure state: list missing transitions and exit program.
+    REQUIRE_ALL_TRANSITIONS_EXACTLY_ONE_COMPOUND,
+
+    //Every transition in sample set must map to one or more compounds in supplied transition list.
+    //failure state: list missing transitions and exit program.
+    REQUIRE_ALL_TRANSITIONS_TO_ONE_OR_MORE_COMPOUNDS,
+
+    //Transitions that are not mapped to one or more compounds are not converted into SRMTransitions.
+    //failure state: silently exclude transitions that do not meet criteria.
+    RETAIN_TRANSITIONS_ONE_OR_MORE_COMPOUNDS,
+
+    //Transitions that are not mapped to a single compound are not converted into SRMTransitions.
+    //failure state: silently exclude transitions that do not meet criteria
+    RETAIN_TRANSITIONS_EXACTLY_ONE_COMPOUND,
+
+    //All transitions are retained, whether or not they map to a compound.
+    //failure state: not possible
+    RETAIN_ALL_TRANSITIONS
+};
+
 class QQQSearchParameters : public SearchParameters {
 
 public:
@@ -2084,6 +2108,7 @@ public:
 
     //fields
     string transitionListFilePath = "";
+    QQQTransitionCompoundMappingPolicy transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::RETAIN_ALL_TRANSITIONS;
 
     float amuQ1 = 0.5f;
     float amuQ3 = 0.5f;
