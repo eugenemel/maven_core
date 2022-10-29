@@ -215,10 +215,6 @@ vector<SRMTransition*> QQQProcessor::getSRMTransitions(
 
             for (auto transition : transitionsMultipleCompounds) {
                 cout << transition->getKey() << endl;
-
-                sort(transition->compounds.begin(), transition->compounds.end(), [](pair<Compound*, Adduct*>& lhs, pair<Compound*, Adduct*>& rhs){
-                    return lhs.first->id < rhs.first->id;
-                });
                 for (auto p : transition->compounds) {
                     cout << "   " << p.first->id << endl;
                 }
