@@ -183,12 +183,77 @@ vector<SRMTransition*> QQQProcessor::getSRMTransitions(
         }
     }
 
-    vector<SRMTransition*> srmTransitionsAsVector(srmTransitions.size());
+    vector<SRMTransition*> transitionsZeroCompounds{};
+    vector<SRMTransition*> transitionsOneCompound{};
+    vector<SRMTransition*> transitionsMultipleCompounds{};
 
-    unsigned long counter = 0;
     for (auto it = srmTransitions.begin(); it != srmTransitions.end(); ++it) {
-        srmTransitionsAsVector[counter] = it->second;
-        counter++;
+        unsigned long numCompounds = it->second->compounds.size();
+        if (numCompounds == 0) {
+            transitionsZeroCompounds.push_back(it->second);
+        } else if (numCompounds == 1) {
+            transitionsOneCompound.push_back(it->second);
+        } else {
+            transitionsMultipleCompounds.push_back(it->second);
+        }
+    }
+
+    vector<SRMTransition*> srmTransitionsAsVector = transitionsOneCompound;
+
+    if (params->transitionCompoundMappingPolicy == REQUIRE_ALL_TRANSITIONS_EXACTLY_ONE_COMPOUND) {
+        if (!transitionsZeroCompounds.empty() || !transitionsMultipleCompounds.empty()) {
+            cout << "=====================================\n";
+            cout << "ERROR: The current transition to compound mapping policy is set to require that all transitions map to exactly one compound." << endl;
+
+            cout <<  transitionsZeroCompounds.size() << " transitions did not map to any compounds:" << endl;
+            for (auto transition : transitionsZeroCompounds) {
+                cout << transition->getKey() << endl;
+            }
+            cout << endl;
+
+            cout << transitionsMultipleCompounds.size() << " transitions mapped to more than one compound:" << endl;
+
+            for (auto transition : transitionsMultipleCompounds) {
+                cout << transition->getKey() << endl;
+
+                sort(transition->compounds.begin(), transition->compounds.end(), [](pair<Compound*, Adduct*>& lhs, pair<Compound*, Adduct*>& rhs){
+                    return lhs.first->id < rhs.first->id;
+                });
+                for (auto p : transition->compounds) {
+                    cout << "   " << p.first->id << endl;
+                }
+
+            }
+
+            cout << "=====================================\n";
+            cout << endl;
+            exit(-1);
+        }
+    } else if (params->transitionCompoundMappingPolicy == QQQTransitionCompoundMappingPolicy::REQUIRE_ALL_TRANSITIONS_TO_ONE_OR_MORE_COMPOUNDS) {
+        if (!transitionsZeroCompounds.empty()) {
+            cout << "=====================================\n";
+            cout << "ERROR: The current transition to compound mapping policy is set to require that all transitions map to at least one compound." << endl;
+
+            cout <<  transitionsZeroCompounds.size() << " transitions did not map to any compounds:" << endl;
+            for (auto transition : transitionsZeroCompounds) {
+                cout << transition->getKey() << endl;
+            }
+            cout << endl;
+
+            cout << "=====================================\n";
+            cout << endl;
+            exit(-1);
+        } else {
+            srmTransitionsAsVector.insert(srmTransitionsAsVector.end(), transitionsMultipleCompounds.begin(), transitionsMultipleCompounds.end());
+        }
+    } else if (params->transitionCompoundMappingPolicy == QQQTransitionCompoundMappingPolicy::RETAIN_TRANSITIONS_ONE_OR_MORE_COMPOUNDS) {
+        srmTransitionsAsVector.insert(srmTransitionsAsVector.end(), transitionsMultipleCompounds.begin(), transitionsMultipleCompounds.end());
+    } else if (params->transitionCompoundMappingPolicy == QQQTransitionCompoundMappingPolicy::RETAIN_TRANSITIONS_EXACTLY_ONE_COMPOUND) {
+        //done during initialization, leaving here for readability
+        //srmTransitionsAsVector = transitionsOneCompound;
+    } else { //if an unfamiliar policy is detected, same as RETAIN_ALL_TRANSITIONS
+        srmTransitionsAsVector.insert(srmTransitionsAsVector.end(), transitionsMultipleCompounds.begin(), transitionsMultipleCompounds.end());
+        srmTransitionsAsVector.insert(srmTransitionsAsVector.end(), transitionsZeroCompounds.begin(), transitionsZeroCompounds.end());
     }
 
     sort(srmTransitionsAsVector.begin(), srmTransitionsAsVector.end(), [](SRMTransition* lhs, SRMTransition* rhs){
@@ -196,7 +261,7 @@ vector<SRMTransition*> QQQProcessor::getSRMTransitions(
     });
 
     if (debug) {
-        cout << "# SRMTransitions: " << srmTransitions.size() << endl;
+        cout << "# SRMTransitions: " << srmTransitionsAsVector.size() << endl;
     }
 
     return srmTransitionsAsVector;
