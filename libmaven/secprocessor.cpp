@@ -146,6 +146,9 @@ SECTrace::SECTrace(SECTraceType type,
 
     eic->getPeakPositionsC(params->traceSmoothingType, debug, true, params->tracePeakBoundsMaxIntensityFraction);
 
+    //TODO: this shouldn't be necessary!
+    //eic->computeSpline(params->traceWindowSize);
+
     this->smoothedIntensities = eic->spline;
 
     for (auto p : eic->peaks) {
