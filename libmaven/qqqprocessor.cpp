@@ -290,18 +290,17 @@ string QQQSearchParameters::encodeParams(){
 }
 
 //Issue 568: Create dedicated method to convert SRMTransitions to mzSlice
-pair<vector<mzSlice*>, vector<string>> QQQProcessor::getMzSlices(
+vector<mzSlice*> QQQProcessor::getMzSlices(
         vector<SRMTransition*>& transitions,
         bool isRequireCompound,
         bool debug) {
 
     vector<mzSlice*> slices{};
-    vector<string> missingTransitions{};
 
     for (SRMTransition *transition : transitions) {
 
         if (isRequireCompound && !transition->compound) {
-            missingTransitions.push_back(transition->getKey());
+            // pass
         } else {
             mzSlice *slice = new mzSlice(transition);
             slices.push_back(slice);
@@ -323,7 +322,7 @@ pair<vector<mzSlice*>, vector<string>> QQQProcessor::getMzSlices(
         }
     }
 
-    return make_pair(slices, missingTransitions);
+    return slices;
 }
 
 /**

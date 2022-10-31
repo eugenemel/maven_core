@@ -2146,7 +2146,7 @@ class QQQProcessor{
      *
      * SRMTransition* that do not have any compounds are noted in the vector<string>
      */
-    static pair<vector<mzSlice*>, vector<string>> getMzSlices(
+    static vector<mzSlice*> getMzSlices(
             vector<SRMTransition*>& transitions,
             bool isRequireCompound,
             bool debug = false);
