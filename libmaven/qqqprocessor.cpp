@@ -234,7 +234,6 @@ vector<SRMTransition*> QQQProcessor::getSRMTransitions(
             for (auto transition : transitionsZeroCompounds) {
                 cout << transition->getKey() << endl;
             }
-            cout << endl;
 
             cout << "=====================================\n";
             cout << endl;
