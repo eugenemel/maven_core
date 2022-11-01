@@ -98,6 +98,7 @@ SECTrace::SECTrace(SECTraceType type,
         abort();
     }
 
+    this->params = params;
     this->type = type;
 
     int N = params->traceMaxFractionNumber - params->traceMinFractionNumber + 1;
@@ -155,4 +156,46 @@ SECTrace::SECTrace(SECTraceType type,
     }
 
     delete(eic);
+}
+
+vector<string> SECTrace::getPeakSummaryString(
+        string empty,
+        string leftPrefix,
+        string maxPrefix,
+        string rightPrefix){
+
+    vector<string> summaryString(this->fractionNums.size(), empty);
+
+    for (unsigned int i = 0; i < this->peaks.size(); i++){
+
+        Peak p = this->peaks[i];
+
+        string left = leftPrefix + to_string(i);
+        string max = maxPrefix + to_string(i);
+        string right = rightPrefix + to_string(i);
+
+        unsigned int left_coord = static_cast<unsigned int>(p.rtmin - params->traceMinFractionNumber + 0.00001f);
+        unsigned int max_coord = static_cast<unsigned int>(p.rt - params->traceMinFractionNumber + 0.00001f);
+        unsigned int right_coord = static_cast<unsigned int>(p.rtmax - params->traceMinFractionNumber + 0.00001f);
+
+        if (summaryString.at(left_coord) != "") {
+            summaryString[left_coord] = summaryString[left_coord] + ", " + left;
+        } else {
+            summaryString[left_coord] = left;
+        }
+
+        if (summaryString.at(max_coord) != "") {
+            summaryString[max_coord] = summaryString[max_coord] + ", " + max;
+        } else {
+            summaryString[max_coord] = max;
+        }
+
+        if (summaryString.at(right_coord) != "") {
+            summaryString[right_coord] = summaryString[right_coord] + ", " + right;
+        } else {
+            summaryString[right_coord] = right;
+        }
+    }
+
+    return summaryString;
 }

@@ -79,6 +79,12 @@ public:
              vector<float> rawIntensities,
              shared_ptr<SECSearchParameters> params,
              bool debug = false);
+
+    vector<string> getPeakSummaryString(
+            string empty = "",
+            string leftPrefix = "L",
+            string maxPrefix = "M",
+            string rightPrefix = "R");
 };
 
 #endif // SECPROCESSOR_H
