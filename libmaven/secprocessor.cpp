@@ -178,19 +178,19 @@ vector<string> SECTrace::getPeakSummaryString(
         unsigned int max_coord = static_cast<unsigned int>(p.rt - params->traceMinFractionNumber + 0.00001f);
         unsigned int right_coord = static_cast<unsigned int>(p.rtmax - params->traceMinFractionNumber + 0.00001f);
 
-        if (summaryString.at(left_coord) != "") {
+        if (summaryString.at(left_coord) != empty) {
             summaryString[left_coord] = summaryString[left_coord] + ", " + left;
         } else {
             summaryString[left_coord] = left;
         }
 
-        if (summaryString.at(max_coord) != "") {
+        if (summaryString.at(max_coord) != empty) {
             summaryString[max_coord] = summaryString[max_coord] + ", " + max;
         } else {
             summaryString[max_coord] = max;
         }
 
-        if (summaryString.at(right_coord) != "") {
+        if (summaryString.at(right_coord) != empty) {
             summaryString[right_coord] = summaryString[right_coord] + ", " + right;
         } else {
             summaryString[right_coord] = right;
