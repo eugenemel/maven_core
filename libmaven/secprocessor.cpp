@@ -1,4 +1,5 @@
 #include "secprocessor.h"
+#include <numeric>
 
 string SECSearchParameters::encodeParams() {
 
@@ -140,6 +141,19 @@ SECTrace::SECTrace(SECTraceType type,
         this->rawIntensities[counter] = intensityVal;
         counter++;
         fracNum++;
+    }
+
+    if (params->traceNormalizeToSumIntensity) {
+        float intensitySum = accumulate(this->rawIntensities.begin(), this->rawIntensities.end(), 0.0f);
+
+        //guard against divide by 0
+        if (intensitySum == 0.0f) {
+            intensitySum = 1.0f;
+        }
+
+        for (unsigned int i = 0; i < this->rawIntensities.size(); i++) {
+            this->rawIntensities[i] = this->rawIntensities[i]/intensitySum;
+        }
     }
 
     EIC *eic = new EIC();
