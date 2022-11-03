@@ -34,6 +34,7 @@ class SECSearchParameters {
      EIC::SmootherType traceSmoothingType = EIC::SmootherType::GAUSSIAN;
      int traceWindowSize = 5;
      float traceMinPeakIntensity = 1e6f;
+     float traceMinSmoothedIntensity = 1e6f;
      float traceMinPeakSN = 0.0f;
      int traceBaselineDropTopX = 80; //EIC is full width
      float tracePeakBoundsMaxIntensityFraction = 0.1f;

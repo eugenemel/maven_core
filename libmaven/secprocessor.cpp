@@ -28,6 +28,7 @@ string SECSearchParameters::encodeParams() {
 
     encodedParams = encodedParams + "traceWindowSize" + "=" + to_string(traceWindowSize) + ";";
     encodedParams = encodedParams + "traceMinPeakIntensity" + "=" + to_string(traceMinPeakIntensity) + ";";
+    encodedParams = encodedParams + "traceMinSmoothedIntensity" + "=" + to_string(traceMinSmoothedIntensity) + ";";
     encodedParams = encodedParams + "traceMinPeakSN" + "=" + to_string(traceMinPeakSN) + ";";
     encodedParams = encodedParams + "traceBaselineDropTopX" + "=" + to_string(traceBaselineDropTopX) + ";";
     encodedParams = encodedParams + "tracePeakBoundsMaxIntensityFraction" + "=" + to_string(tracePeakBoundsMaxIntensityFraction) + ";";
@@ -73,6 +74,9 @@ shared_ptr<SECSearchParameters> SECSearchParameters::decode(string encodedParams
     }
     if (decodedMap.find("traceMinPeakIntensity") != decodedMap.end()) {
         secSearchParameters->traceMinPeakIntensity = stof(decodedMap["traceMinPeakIntensity"]);
+    }
+    if (decodedMap.find("traceMinSmoothedIntensity") != decodedMap.end()) {
+        secSearchParameters->traceMinSmoothedIntensity = stof(decodedMap["traceMinSmoothedIntensity"]);
     }
     if (decodedMap.find("traceMinPeakSN") != decodedMap.end()) {
         secSearchParameters->traceMinPeakSN = stof(decodedMap["traceMinPeakSN"]);
