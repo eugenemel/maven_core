@@ -154,7 +154,9 @@ SECTrace::SECTrace(SECTraceType type,
     this->smoothedIntensities = eic->spline;
 
     for (auto p : eic->peaks) {
-        if (this->rawIntensities[p.pos] >= params->traceMinPeakIntensity && p.signalBaselineRatio >= params->traceMinPeakSN) {
+        if (this->rawIntensities[p.pos] >= params->traceMinPeakIntensity
+                && this->smoothedIntensities[p.pos] >= params->traceMinSmoothedIntensity
+                && p.signalBaselineRatio >= params->traceMinPeakSN) {
             this->peaks.push_back(p);
         }
     }
