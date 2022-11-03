@@ -20,10 +20,12 @@ class SECSearchParameters {
      * SEC TRACE filling
      * comments:
      * baseline smoothing is the same as peak smoothing.
+     * @param traceNormalizeToSumIntensity is carried out after filling.
      * ========================*/
      float traceMissingIntensityFill = 0.0f;
      int traceMinFractionNumber = 1;
      int traceMaxFractionNumber = 72;
+     bool traceNormalizeToSumIntensity = false;
 
      /** =======================
       * PEAK PICKING

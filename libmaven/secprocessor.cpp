@@ -11,6 +11,7 @@ string SECSearchParameters::encodeParams() {
     encodedParams = encodedParams + "traceMissingIntensityFill" + "=" + to_string(traceMissingIntensityFill) + ";";
     encodedParams = encodedParams + "traceMinFractionNumber" + "=" + to_string(traceMinFractionNumber) + ";";
     encodedParams = encodedParams + "traceMaxFractionNumber" + "=" + to_string(traceMaxFractionNumber) + ";";
+    encodedParams = encodedParams + "traceNormalizeToSumIntensity" + "=" + to_string(traceNormalizeToSumIntensity) + ";";
 
     //Peak Picking
 
@@ -56,6 +57,9 @@ shared_ptr<SECSearchParameters> SECSearchParameters::decode(string encodedParams
     }
     if (decodedMap.find("traceMaxFractionNumber") != decodedMap.end()) {
         secSearchParameters->traceMaxFractionNumber = stoi(decodedMap["traceMaxFractionNumber"]);
+    }
+    if (decodedMap.find("traceNormalizeToSumIntensity") != decodedMap.end()) {
+        secSearchParameters->traceNormalizeToSumIntensity = decodedMap["traceNormalizeToSumIntensity"] == "1";
     }
 
     //Peak Picking
