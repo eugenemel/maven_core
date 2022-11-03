@@ -114,7 +114,7 @@ void  EIC::computeBaseLine(int smoothing_window, int dropTopX) {
         baselineQCutVal=0.0f;
     }
 
-	int n = intensity.size();
+    unsigned int n = static_cast<unsigned int>(intensity.size());
 	if (n == 0)  return;
 
 	try { 
@@ -123,6 +123,12 @@ void  EIC::computeBaseLine(int smoothing_window, int dropTopX) {
         cout << "Exception caught while allocating memory " << n << "floats " << endl;
 	}
 
+    //Issue 572: Dropping no values amounts to assuming no measured intensities
+    //are below the baseline.
+    if (dropTopX < 0 || dropTopX > 100) {
+        baselineQCutVal = -1.0f; // all intensity values are greater, everything matches
+        baseline = intensity;
+    } else {
         //sort intensity vector
         vector<float> tmpv = intensity;
         std::sort(tmpv.begin(),tmpv.end());
@@ -136,24 +142,26 @@ void  EIC::computeBaseLine(int smoothing_window, int dropTopX) {
         pos < tmpv.size() ? qcut = tmpv[pos] : qcut = tmpv.back();
 
         baselineQCutVal = qcut;
+
         //drop all points above maximum baseline value
-	for(int i=0; i<n; i++ ) {
-		if ( intensity[i] > qcut) {
-			baseline[i]=qcut;
-		} else {
-			baseline[i] = intensity[i];
-		}
-	}
-
-        //smooth baseline
-        mzUtils::GaussianSmoother smoother(smoothing_window);
-        vector<float> smoothed = smoother.smooth(baseline);
-        for (int i = 0; i < smoothed.size(); i++) baseline[i] = smoothed.at(i);
-
-        //count number of observation in EIC above baseline
-        for(int i=0; i<n; i++) {
-            if(intensity[i]>baseline[i]) eic_noNoiseObs++;
+        for(unsigned int i=0; i<n; i++ ) {
+            if (intensity[i] > qcut) {
+                baseline[i]=qcut;
+            } else {
+                baseline[i] = intensity[i];
+            }
         }
+    }
+
+    //smooth baseline
+    mzUtils::GaussianSmoother smoother(static_cast<unsigned int>(smoothing_window));
+    vector<float> smoothed = smoother.smooth(baseline);
+    for (unsigned int i = 0; i < smoothed.size(); i++) baseline[i] = smoothed.at(i);
+
+    //count number of observation in EIC above baseline
+    for(unsigned int i=0; i < n; i++) {
+        if(intensity[i]>baseline[i]) eic_noNoiseObs++;
+    }
 }
 
 void  EIC::subtractBaseLine() {
