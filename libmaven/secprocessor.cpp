@@ -284,5 +284,7 @@ float SECTraceSimilarityCosine::getSimilarity(bool debug) {
     auto ranks = Fragment::compareRanks(f1, f2, productPpmTolr);
     similarity = static_cast<float>(Fragment::normCosineScore(f1, f2, ranks));
 
+    //TODO: switch to using FragmentationMatchScore?
+
     return similarity;
 }
