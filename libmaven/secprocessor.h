@@ -122,7 +122,7 @@ public:
 
     float similarity = -1.0f; //unset
 
-    virtual string getName();
+    virtual string getName() = 0;
     virtual float getSimilarity(bool debug = false) = 0;
 
     virtual ~SECTraceSimilarity(){}
