@@ -264,6 +264,11 @@ Fragment* SECTrace::getFragment(shared_ptr<SECSearchParameters> params, bool deb
     return fragment;
 }
 
+float SECTraceSimilarity::getSimilarity(bool debug){
+    if (debug) cout << "SECTraceSimilarity::getSimilarity()" << endl;
+    return similarity;
+}
+
 SECTraceSimilarityCosine::SECTraceSimilarityCosine(SECTrace* first, SECTrace* second, shared_ptr<SECSearchParameters> params) {
     this->first = first;
     this->second = second;
