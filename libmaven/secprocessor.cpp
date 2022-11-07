@@ -35,6 +35,13 @@ string SECSearchParameters::encodeParams() {
     encodedParams = encodedParams + "traceBaselineDropTopX" + "=" + to_string(traceBaselineDropTopX) + ";";
     encodedParams = encodedParams + "tracePeakBoundsMaxIntensityFraction" + "=" + to_string(tracePeakBoundsMaxIntensityFraction) + ";";
 
+    // Fragment
+    encodedParams = encodedParams + "fragmentIsSmoothedIntensity" + "=" + to_string(fragmentIsSmoothedIntensity) +";";
+
+    // Similarity Scoring
+    encodedParams = encodedParams + "similarityMinNumPeaks" + "=" + to_string(similarityMinNumPeaks) + ";";
+    encodedParams = encodedParams + "similarityFractionDiffTol" + "=" + to_string(similarityFractionDiffTol) + ";";
+
     return encodedParams;
 }
 
@@ -91,6 +98,19 @@ shared_ptr<SECSearchParameters> SECSearchParameters::decode(string encodedParams
     }
     if (decodedMap.find("tracePeakBoundsMaxIntensityFraction") != decodedMap.end()) {
         secSearchParameters->tracePeakBoundsMaxIntensityFraction = stof(decodedMap["tracePeakBoundsMaxIntensityFraction"]);
+    }
+
+    // Fragment
+    if (decodedMap.find("fragmentIsSmoothedIntensity") != decodedMap.end()) {
+        secSearchParameters->fragmentIsSmoothedIntensity = decodedMap["fragmentIsSmoothedIntensity"] == "1";
+    }
+
+    // Similarity Scoring
+    if (decodedMap.find("similarityMinNumPeaks") != decodedMap.end()) {
+        secSearchParameters->similarityMinNumPeaks = stoi(decodedMap["similarityMinNumPeaks"]);
+    }
+    if (decodedMap.find("similarityFractionDiffTol") != decodedMap.end()) {
+        secSearchParameters->similarityFractionDiffTol = stoi(decodedMap["similarityFractionDiffTol"]);
     }
 
     return secSearchParameters;
@@ -159,8 +179,8 @@ SECTrace::SECTrace(SECTraceType type,
     EIC *eic = new EIC();
 
     eic->intensity = this->rawIntensities;
-    eic->rt = pseudoRt;
-    eic->mz = vector<float>(static_cast<unsigned long>(N));
+    eic->rt = pseudoRt; // x axis: fractions
+    eic->mz = pseudoRt; // x axis: fractions
     eic->scannum = this->fractionNums;
 
     eic->setSmootherType(params->traceSmoothingType);
@@ -222,4 +242,41 @@ vector<string> SECTrace::getPeakSummaryString(
     }
 
     return summaryString;
+}
+
+Fragment* SECTrace::getFragment(shared_ptr<SECSearchParameters> params, bool debug) {
+
+    if (fragment) return fragment;
+
+    if (debug) {
+        cout << "[SECTrace::getFragment()]: Computing fragment." << endl;
+    }
+
+    fragment = new Fragment();
+
+    for (auto p : peaks) {
+        fragment->mzs.push_back(fractionNums[p.pos]);
+
+        float intensityVal = params->fragmentIsSmoothedIntensity ? smoothedIntensities[p.pos] : rawIntensities[p.pos];
+        fragment->intensity_array.push_back(intensityVal);
+    }
+
+    return fragment;
+}
+
+float SECTraceSimilarityCosine::getSimilarity(SECTrace* first, SECTrace* second, shared_ptr<SECSearchParameters> params, bool debug) {
+    if (!first || !second || similarity > -1.0f) return similarity;
+
+    unsigned int minPeaks = static_cast<unsigned int>(params->similarityMinNumPeaks);
+    if (first->peaks.size() < minPeaks || second->peaks.size() < minPeaks) return similarity;
+
+    Fragment *f1 = first->getFragment(params, debug);
+    Fragment *f2 = second->getFragment(params, debug);
+
+    float productPpmTolr = params->similarityFractionDiffTol + 0.001f; // avoid rounding errors
+
+    auto ranks = Fragment::compareRanks(f1, f2, productPpmTolr);
+    similarity = static_cast<float>(Fragment::normCosineScore(f1, f2, ranks));
+
+    return similarity;
 }

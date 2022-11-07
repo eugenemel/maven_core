@@ -41,6 +41,25 @@ class SECSearchParameters {
      int traceBaselineDropTopX = 80; //EIC is full width
      float tracePeakBoundsMaxIntensityFraction = 0.1f;
 
+     /** =======================
+      * FRAGMENT
+      * comments:
+      * Parameters associated with =eneration of Fragment from SECTrace
+      * Used primarily for similarity metrics.
+      * @param fragmentIsSmoothedIntensity: use smoothed intensity for peak values.
+      * ========================*/
+     bool fragmentIsSmoothedIntensity = true;
+
+     /** =======================
+      * SIMILARITY SCORING
+      * comments:
+      * parameters specific to similarity scoring computations.
+      * @param similarityMinNumPeaks: minimum number of peaks required in each SECTrace to perform comparison.
+      * @param csimilarityFractionDiffTol: maximum number of fractions off where peaks can be matched.
+      * ========================*/
+     int similarityMinNumPeaks = 2;
+     int similarityFractionDiffTol = 1;
+
      string encodeParams();
      shared_ptr<SECSearchParameters> static decode(string encodedParams);
 };
@@ -59,6 +78,8 @@ class SECTrace {
 
 public:
 
+    string id; //unique name-type string
+
     SECTraceType type = SECTraceType::Unset;
 
     vector<int> fractionNums{}; //Includes missing fractions, e.g. from params
@@ -69,6 +90,8 @@ public:
     shared_ptr<SECSearchParameters> params;
 
     vector<Peak> peaks{};
+
+    Fragment *fragment = nullptr;
 
     /**
      * @brief SECTrace
@@ -88,6 +111,26 @@ public:
             string leftPrefix = "L",
             string maxPrefix = "M",
             string rightPrefix = "R");
+
+    Fragment* getFragment(
+            shared_ptr<SECSearchParameters> params,
+            bool debug = false);
+};
+
+class SECTraceSimilarity {
+public:
+
+    float similarity = -1.0f; //unset
+
+    virtual string getName() = 0;
+    virtual float getSimilarity(SECTrace* first, SECTrace* second, shared_ptr<SECSearchParameters> params, bool debug = false) = 0;
+
+    virtual ~SECTraceSimilarity();
+};
+
+class SECTraceSimilarityCosine : public SECTraceSimilarity {
+    float getSimilarity(SECTrace* first, SECTrace* second, shared_ptr<SECSearchParameters> params, bool debug = false);
+    virtual ~SECTraceSimilarityCosine();
 };
 
 #endif // SECPROCESSOR_H
