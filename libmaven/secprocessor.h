@@ -129,8 +129,12 @@ public:
 };
 
 class SECTraceSimilarityCosine : public SECTraceSimilarity {
+public:
     float getSimilarity(SECTrace* first, SECTrace* second, shared_ptr<SECSearchParameters> params, bool debug = false);
     virtual ~SECTraceSimilarityCosine();
 };
+
+SECTraceSimilarity::~SECTraceSimilarity(){};
+SECTraceSimilarityCosine::~SECTraceSimilarityCosine(){};
 
 #endif // SECPROCESSOR_H
