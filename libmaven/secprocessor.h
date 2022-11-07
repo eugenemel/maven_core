@@ -95,15 +95,18 @@ public:
 
     /**
      * @brief SECTrace
+     * @param id
      * @param type
      * @param fractionNums
      * @param rawIntensities
      * @param params
+     * @param debug
      */
     SECTrace(SECTraceType type,
              vector<int> fractionNums,
              vector<float> rawIntensities,
              shared_ptr<SECSearchParameters> params,
+             string id = "",
              bool debug = false);
 
     vector<string> getPeakSummaryString(

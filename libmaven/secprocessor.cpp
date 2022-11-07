@@ -120,6 +120,7 @@ SECTrace::SECTrace(SECTraceType type,
                    vector<int> fractionNums,
                    vector<float> rawIntensities,
                    shared_ptr<SECSearchParameters> params,
+                   string id,
                    bool debug) {
 
     if (fractionNums.size() != rawIntensities.size()) {
@@ -127,6 +128,7 @@ SECTrace::SECTrace(SECTraceType type,
         abort();
     }
 
+    this->id = id;
     this->params = params;
     this->type = type;
 
