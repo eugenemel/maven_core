@@ -123,15 +123,22 @@ public:
     float similarity = -1.0f; //unset
 
     virtual string getName();
-    virtual float getSimilarity(SECTrace* first, SECTrace* second, shared_ptr<SECSearchParameters> params, bool debug = false) = 0;
+    virtual float getSimilarity(bool debug = false) = 0;
 
     virtual ~SECTraceSimilarity(){}
 };
 
 class SECTraceSimilarityCosine : public SECTraceSimilarity {
 public:
+
+    SECTrace *first;
+    SECTrace *second;
+    shared_ptr<SECSearchParameters> params;
+
+    SECTraceSimilarityCosine(SECTrace* first, SECTrace* second, shared_ptr<SECSearchParameters> params);
+
     string getName(){return "cosine";}
-    float getSimilarity(SECTrace* first, SECTrace* second, shared_ptr<SECSearchParameters> params, bool debug = false);
+    float getSimilarity(bool debug = false);
     virtual ~SECTraceSimilarityCosine(){}
 };
 

@@ -264,7 +264,13 @@ Fragment* SECTrace::getFragment(shared_ptr<SECSearchParameters> params, bool deb
     return fragment;
 }
 
-float SECTraceSimilarityCosine::getSimilarity(SECTrace* first, SECTrace* second, shared_ptr<SECSearchParameters> params, bool debug) {
+SECTraceSimilarityCosine::SECTraceSimilarityCosine(SECTrace* first, SECTrace* second, shared_ptr<SECSearchParameters> params) {
+    this->first = first;
+    this->second = second;
+    this->params = params;
+}
+
+float SECTraceSimilarityCosine::getSimilarity(bool debug) {
     if (!first || !second || similarity > -1.0f) return similarity;
 
     unsigned int minPeaks = static_cast<unsigned int>(params->similarityMinNumPeaks);
