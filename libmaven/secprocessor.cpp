@@ -116,11 +116,11 @@ shared_ptr<SECSearchParameters> SECSearchParameters::decode(string encodedParams
     return secSearchParameters;
 }
 
-SECTrace::SECTrace(SECTraceType type,
+SECTrace::SECTrace(string id,
+                   SECTraceType type,
                    vector<int> fractionNums,
                    vector<float> rawIntensities,
                    shared_ptr<SECSearchParameters> params,
-                   string id,
                    bool debug) {
 
     if (fractionNums.size() != rawIntensities.size()) {

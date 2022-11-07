@@ -102,11 +102,11 @@ public:
      * @param params
      * @param debug
      */
-    SECTrace(SECTraceType type,
+    SECTrace(string id,
+             SECTraceType type,
              vector<int> fractionNums,
              vector<float> rawIntensities,
              shared_ptr<SECSearchParameters> params,
-             string id = "",
              bool debug = false);
 
     vector<string> getPeakSummaryString(
