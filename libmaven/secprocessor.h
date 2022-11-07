@@ -122,19 +122,17 @@ public:
 
     float similarity = -1.0f; //unset
 
-    virtual string getName() = 0;
+    virtual string getName();
     virtual float getSimilarity(SECTrace* first, SECTrace* second, shared_ptr<SECSearchParameters> params, bool debug = false) = 0;
 
-    virtual ~SECTraceSimilarity();
+    virtual ~SECTraceSimilarity(){}
 };
 
 class SECTraceSimilarityCosine : public SECTraceSimilarity {
 public:
+    string getName(){return "cosine";}
     float getSimilarity(SECTrace* first, SECTrace* second, shared_ptr<SECSearchParameters> params, bool debug = false);
-    virtual ~SECTraceSimilarityCosine();
+    virtual ~SECTraceSimilarityCosine(){}
 };
-
-SECTraceSimilarity::~SECTraceSimilarity(){};
-SECTraceSimilarityCosine::~SECTraceSimilarityCosine(){};
 
 #endif // SECPROCESSOR_H
