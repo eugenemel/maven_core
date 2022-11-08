@@ -307,7 +307,8 @@ float SECTraceSimilarityCosine::getSimilarity(bool debug) {
 
     float productPpmTolr = params->similarityFractionDiffTol + 0.001f; // avoid rounding errors
 
-    auto ranks = Fragment::compareRanks(f1, f2, productPpmTolr);
+    this->ranks = Fragment::compareRanks(f1, f2, productPpmTolr);
+
     similarity = static_cast<float>(Fragment::normCosineScore(f1, f2, ranks));
 
     //TODO: switch to using FragmentationMatchScore?

@@ -140,6 +140,7 @@ public:
     SECTrace *second;
     shared_ptr<SECSearchParameters> params;
     string compareId;
+    vector<int> ranks;
 
     SECTraceSimilarityCosine(SECTrace* first, SECTrace* second, shared_ptr<SECSearchParameters> params);
 
