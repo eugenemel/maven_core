@@ -31,8 +31,8 @@ string SECSearchParameters::encodeParams() {
     encodedParams = encodedParams + "traceWindowSize" + "=" + to_string(traceWindowSize) + ";";
     encodedParams = encodedParams + "traceMinPeakIntensity" + "=" + to_string(traceMinPeakIntensity) + ";";
     encodedParams = encodedParams + "traceMinSmoothedIntensity" + "=" + to_string(traceMinSmoothedIntensity) + ";";
-    encodedParams = encodedParams + "traceMinFracPeakIntensity" + "=" + to_string(traceMinFracPeakIntensity) + ";";
-    encodedParams = encodedParams + "traceMinFracSmoothedIntensity" + "=" + to_string(traceMinFracSmoothedIntensity) + ";";
+    encodedParams = encodedParams + "traceMinFracTopPeakIntensity" + "=" + to_string(traceMinFracTopPeakIntensity) + ";";
+    encodedParams = encodedParams + "traceMinFracTopSmoothedIntensity" + "=" + to_string(traceMinFracTopSmoothedIntensity) + ";";
     encodedParams = encodedParams + "traceMinPeakSN" + "=" + to_string(traceMinPeakSN) + ";";
     encodedParams = encodedParams + "traceBaselineDropTopX" + "=" + to_string(traceBaselineDropTopX) + ";";
     encodedParams = encodedParams + "tracePeakBoundsMaxIntensityFraction" + "=" + to_string(tracePeakBoundsMaxIntensityFraction) + ";";
@@ -92,11 +92,11 @@ shared_ptr<SECSearchParameters> SECSearchParameters::decode(string encodedParams
     if (decodedMap.find("traceMinSmoothedIntensity") != decodedMap.end()) {
         secSearchParameters->traceMinSmoothedIntensity = stof(decodedMap["traceMinSmoothedIntensity"]);
     }
-    if (decodedMap.find("traceMinFracPeakIntensity") != decodedMap.end()) {
-        secSearchParameters->traceMinFracPeakIntensity = stof(decodedMap["traceMinFracPeakIntensity"]);
+    if (decodedMap.find("traceMinFracTopPeakIntensity") != decodedMap.end()) {
+        secSearchParameters->traceMinFracTopPeakIntensity = stof(decodedMap["traceMinFracTopPeakIntensity"]);
     }
-    if (decodedMap.find("traceMinFracSmoothedIntensity") != decodedMap.end()) {
-        secSearchParameters->traceMinFracSmoothedIntensity = stof(decodedMap["traceMinFracSmoothedIntensity"]);
+    if (decodedMap.find("traceMinFracTopSmoothedIntensity") != decodedMap.end()) {
+        secSearchParameters->traceMinFracTopSmoothedIntensity = stof(decodedMap["traceMinFracTopSmoothedIntensity"]);
     }
     if (decodedMap.find("traceMinPeakSN") != decodedMap.end()) {
         secSearchParameters->traceMinPeakSN = stof(decodedMap["traceMinPeakSN"]);
@@ -205,8 +205,8 @@ SECTrace::SECTrace(string id,
     float maxRawIntensity = *max_element(this->rawIntensities.begin(), this->rawIntensities.end());
     float maxSmoothedIntensity = *max_element(this->smoothedIntensities.begin(), this->smoothedIntensities.end());
 
-    float rawIntensityThreshold = max(params->traceMinFracPeakIntensity * maxRawIntensity, params->traceMinPeakIntensity);
-    float smoothedIntensityThreshold = max(params->traceMinFracSmoothedIntensity * maxSmoothedIntensity, params->traceMinSmoothedIntensity);
+    float rawIntensityThreshold = max(params->traceMinFracTopPeakIntensity * maxRawIntensity, params->traceMinPeakIntensity);
+    float smoothedIntensityThreshold = max(params->traceMinFracTopSmoothedIntensity * maxSmoothedIntensity, params->traceMinSmoothedIntensity);
 
     //float minPeakIntensity = maxRawIntensity * params->trace
     for (auto p : eic->peaks) {
