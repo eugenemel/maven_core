@@ -31,6 +31,8 @@ string SECSearchParameters::encodeParams() {
     encodedParams = encodedParams + "traceWindowSize" + "=" + to_string(traceWindowSize) + ";";
     encodedParams = encodedParams + "traceMinPeakIntensity" + "=" + to_string(traceMinPeakIntensity) + ";";
     encodedParams = encodedParams + "traceMinSmoothedIntensity" + "=" + to_string(traceMinSmoothedIntensity) + ";";
+    encodedParams = encodedParams + "traceMinFracPeakIntensity" + "=" + to_string(traceMinFracPeakIntensity) + ";";
+    encodedParams = encodedParams + "traceMinFracSmoothedIntensity" + "=" + to_string(traceMinFracSmoothedIntensity) + ";";
     encodedParams = encodedParams + "traceMinPeakSN" + "=" + to_string(traceMinPeakSN) + ";";
     encodedParams = encodedParams + "traceBaselineDropTopX" + "=" + to_string(traceBaselineDropTopX) + ";";
     encodedParams = encodedParams + "tracePeakBoundsMaxIntensityFraction" + "=" + to_string(tracePeakBoundsMaxIntensityFraction) + ";";
@@ -89,6 +91,12 @@ shared_ptr<SECSearchParameters> SECSearchParameters::decode(string encodedParams
     }
     if (decodedMap.find("traceMinSmoothedIntensity") != decodedMap.end()) {
         secSearchParameters->traceMinSmoothedIntensity = stof(decodedMap["traceMinSmoothedIntensity"]);
+    }
+    if (decodedMap.find("traceMinFracPeakIntensity") != decodedMap.end()) {
+        secSearchParameters->traceMinFracPeakIntensity = stof(decodedMap["traceMinFracPeakIntensity"]);
+    }
+    if (decodedMap.find("traceMinFracSmoothedIntensity") != decodedMap.end()) {
+        secSearchParameters->traceMinFracSmoothedIntensity = stof(decodedMap["traceMinFracSmoothedIntensity"]);
     }
     if (decodedMap.find("traceMinPeakSN") != decodedMap.end()) {
         secSearchParameters->traceMinPeakSN = stof(decodedMap["traceMinPeakSN"]);
@@ -161,6 +169,7 @@ SECTrace::SECTrace(string id,
         }
 
         this->rawIntensities[counter] = intensityVal;
+
         counter++;
         fracNum++;
     }
@@ -193,10 +202,19 @@ SECTrace::SECTrace(string id,
 
     this->smoothedIntensities = eic->spline;
 
+    float maxRawIntensity = *max_element(this->rawIntensities.begin(), this->rawIntensities.end());
+    float maxSmoothedIntensity = *max_element(this->smoothedIntensities.begin(), this->smoothedIntensities.end());
+
+    float rawIntensityThreshold = max(params->traceMinFracPeakIntensity * maxRawIntensity, params->traceMinPeakIntensity);
+    float smoothedIntensityThreshold = max(params->traceMinFracSmoothedIntensity * maxSmoothedIntensity, params->traceMinSmoothedIntensity);
+
+    //float minPeakIntensity = maxRawIntensity * params->trace
     for (auto p : eic->peaks) {
-        if (this->rawIntensities[p.pos] >= params->traceMinPeakIntensity
-                && this->smoothedIntensities[p.pos] >= params->traceMinSmoothedIntensity
-                && p.signalBaselineRatio >= params->traceMinPeakSN) {
+
+        float peakRawIntensity = this->rawIntensities[p.pos];
+        float peakSmoothedIntensity = this->smoothedIntensities[p.pos];
+
+        if (peakRawIntensity >= rawIntensityThreshold && peakSmoothedIntensity >= smoothedIntensityThreshold && p.signalBaselineRatio >= params->traceMinPeakSN) {
             this->peaks.push_back(p);
         }
     }
