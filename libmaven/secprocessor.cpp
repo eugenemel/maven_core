@@ -275,6 +275,7 @@ SECTraceSimilarityCosine::SECTraceSimilarityCosine(SECTrace* first, SECTrace* se
     this->first = first;
     this->second = second;
     this->params = params;
+    this->compareId = first->id + "_" + second->id;
 }
 
 float SECTraceSimilarityCosine::getSimilarity(bool debug) {
@@ -294,4 +295,46 @@ float SECTraceSimilarityCosine::getSimilarity(bool debug) {
     //TODO: switch to using FragmentationMatchScore?
 
     return similarity;
+}
+
+vector<SECTraceSimilarityCosine> SECTraceCosineSimilarityScorer::scoreTraces(
+        vector<SECTrace*> traces,
+        shared_ptr<SECSearchParameters> params,
+        bool debug){
+
+    vector<SECTraceSimilarityCosine> similarityScores{};
+
+    sort(traces.begin(), traces.end(), [](SECTrace* lhs, SECTrace* rhs){
+       return lhs->id < rhs->id;
+    });
+
+    for (unsigned int i = 0; i < traces.size(); i++) {
+
+        auto ithTrace = traces[i];
+
+        if (static_cast<int>(ithTrace->peaks.size()) < params->similarityMinNumPeaks) continue;
+
+        for (unsigned int j = i+1; j < traces.size(); j++) {
+
+            auto jthTrace = traces[j];
+
+            if (static_cast<int>(jthTrace->peaks.size()) < params->similarityMinNumPeaks) continue;
+
+            auto similarityScore = SECTraceSimilarityCosine(ithTrace, jthTrace, params);
+            similarityScore.getSimilarity(debug);
+
+            similarityScores.push_back(similarityScore);
+
+        }
+    }
+
+    sort(similarityScores.begin(), similarityScores.end(), [](SECTraceSimilarityCosine& lhs, SECTraceSimilarityCosine& rhs){
+       if (lhs.similarity == rhs.similarity) {
+           return lhs.compareId < rhs.compareId;
+       } else {
+           return lhs.similarity < rhs.similarity;
+       }
+    });
+
+    return similarityScores;
 }

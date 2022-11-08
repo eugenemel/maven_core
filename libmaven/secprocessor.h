@@ -137,12 +137,20 @@ public:
     SECTrace *first;
     SECTrace *second;
     shared_ptr<SECSearchParameters> params;
+    string compareId;
 
     SECTraceSimilarityCosine(SECTrace* first, SECTrace* second, shared_ptr<SECSearchParameters> params);
 
     string getName(){return "cosine";}
     float getSimilarity(bool debug = false);
     virtual ~SECTraceSimilarityCosine(){}
+};
+
+class SECTraceCosineSimilarityScorer {
+public:
+    static vector<SECTraceSimilarityCosine> scoreTraces(vector<SECTrace*> traces,
+                                                        shared_ptr<SECSearchParameters> params,
+                                                        bool debug = false);
 };
 
 #endif // SECPROCESSOR_H
