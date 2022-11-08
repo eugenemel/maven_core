@@ -332,7 +332,7 @@ vector<SECTraceSimilarityCosine> SECTraceCosineSimilarityScorer::scoreTraces(
        if (lhs.similarity == rhs.similarity) {
            return lhs.compareId < rhs.compareId;
        } else {
-           return lhs.similarity < rhs.similarity;
+           return lhs.similarity > rhs.similarity;
        }
     });
 
