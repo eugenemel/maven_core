@@ -100,6 +100,9 @@ vector<SRMTransition*> QQQProcessor::getSRMTransitions(
             // SRMTransition //
             // ------------- //
 
+            // Issue 578: silently ignore any SRM scans where the precursorMz, productMz are invalid.
+            if (precursorMz <= 0 || productMz <= 0) continue;
+
             tuple<float, float, string> srmKey = make_tuple(precursorMz, productMz, transitionName);
 
             SRMTransition *srmTransition;
