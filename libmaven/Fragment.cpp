@@ -1635,15 +1635,20 @@ double Fragment::normCosineScore(Fragment* a, Fragment* b, vector<int> ranks) {
     vector<float> aNorm = mzUtils::sumOfSquaresNorm(a->intensity_array);
     vector<float> bNorm = mzUtils::sumOfSquaresNorm(b->intensity_array);
 
-    double normCosineScore = 0.0;
+    double score = 0.0;
     for (unsigned int i = 0; i < ranks.size(); i++) {
         int observedIndex = ranks[i];
         if (observedIndex != -1) {
-            normCosineScore += static_cast<double>(aNorm[i]) * static_cast<double>(bNorm[static_cast<unsigned int>(observedIndex)]);
+            score += static_cast<double>(aNorm[i]) * static_cast<double>(bNorm[static_cast<unsigned int>(observedIndex)]);
         }
     }
 
-    return normCosineScore;
+    if (score > 1.0) {
+        score = 1.0;
+    } else if (score < 0) {
+        score = 0;
+    }
+    return score;
 }
 
 /**
@@ -1679,12 +1684,17 @@ double Fragment::matchedPeakCosineScore(Fragment* a, Fragment* b, vector<int> ra
     vector<float> aNorm = mzUtils::sumOfSquaresNorm(aMatchedIntensities);
     vector<float> bNorm = mzUtils::sumOfSquaresNorm(bMatchedIntensities);
 
-    double normCosineScore = 0.0;
+    double score = 0.0;
     for (unsigned int i = 0; i < aNorm.size(); i++) {
-        normCosineScore += static_cast<double>(aNorm[i]) * static_cast<double>(bNorm[i]);
+        score += static_cast<double>(aNorm[i]) * static_cast<double>(bNorm[i]);
     }
 
-    return normCosineScore;
+    if (score > 1.0) {
+        score = 1.0;
+    } else if (score < 0) {
+        score = 0;
+    }
+    return score;
 }
 
 /**
