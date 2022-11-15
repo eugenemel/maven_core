@@ -251,6 +251,7 @@ class Fragment {
         static vector<int> findFragPairsGreedyMz(Fragment* a, Fragment* b, float maxMzDiff, bool isMatchToNLMassShift=false);
         static double normCosineScore(Fragment* a, Fragment* b, vector<int> ranks);
         static double normNLCosineScore(Fragment* library, Fragment* observed, float productPpmTolr);
+        static double matchedPeakCosineScore(Fragment* a, Fragment* b, vector<int> ranks);
 
         string encodeSpectrum(int numDigits=5, string type="encoded", bool isNormalizeToMaxIntensity=true);
 

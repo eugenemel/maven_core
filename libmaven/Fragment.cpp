@@ -1647,6 +1647,47 @@ double Fragment::normCosineScore(Fragment* a, Fragment* b, vector<int> ranks) {
 }
 
 /**
+ * @brief Fragment::matchedPeakCosineScore
+ * @param a
+ * @param b
+ * @param ranks
+ *
+ * Discard any unmatched peaks from a or b and compute a regular cosine score
+ * considering only the matched peaks.
+ *
+ * Note that an unmatched peak is identical to matching to a peak with intensity 0.
+ *
+ * One might generalize this function by setting a minimum intensity threshold for
+ * a matched peak intensity to be real, with a default value of 0.
+ * @return
+ */
+double Fragment::matchedPeakCosineScore(Fragment* a, Fragment* b, vector<int> ranks) {
+    if (!a || !b) return -1.0;
+
+    vector<float> aMatchedIntensities{};
+    vector<float> bMatchedIntensities{};
+
+    for (unsigned int i = 0; i < ranks.size(); i++) {
+        if (ranks[i] != -1) {
+            aMatchedIntensities.push_back(a->intensity_array[i]);
+            bMatchedIntensities.push_back(b->intensity_array[static_cast<unsigned long>(ranks[i])]);
+        }
+    }
+
+    if (aMatchedIntensities.empty()) return 0;
+
+    vector<float> aNorm = mzUtils::sumOfSquaresNorm(aMatchedIntensities);
+    vector<float> bNorm = mzUtils::sumOfSquaresNorm(bMatchedIntensities);
+
+    double normCosineScore = 0.0;
+    for (unsigned int i = 0; i < aNorm.size(); i++) {
+        normCosineScore += static_cast<double>(aNorm[i]) * static_cast<double>(bNorm[i]);
+    }
+
+    return normCosineScore;
+}
+
+/**
  * @brief encodeMsMsSpectrum
  * Convert masses and intensities from *fragment into string of form {{masses}{intensities}}
  * e.g.{{mass1,mass2,mass3},{intensity1,intensity2,intensity3}}
