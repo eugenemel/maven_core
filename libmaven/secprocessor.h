@@ -144,8 +144,10 @@ public:
 
     //scores
     //float similarity = -1.0f; //inherited (value=matchedPeakCosineScore)
+    int numPeakMatches = 0;
     float cosineScore = -1.0f;
     float matchedPeakCosineScore = -1.0f;
+    float fractionPeaksMatched = 0.0f;
 
     SECTraceSimilarityCosine(SECTrace* first, SECTrace* second, shared_ptr<SECSearchParameters> params);
 

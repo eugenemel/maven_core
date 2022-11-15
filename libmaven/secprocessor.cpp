@@ -310,6 +310,10 @@ float SECTraceSimilarityCosine::getSimilarity(bool debug) {
     this->ranks = Fragment::compareRanks(f1, f2, productPpmTolr);
 
     //all scores
+    for(int rank: ranks){
+        if(rank != -1) numPeakMatches++;
+    }
+    fractionPeaksMatched = 2.0f * numPeakMatches / (f1->mzs.size() + f2->mzs.size());
     cosineScore = static_cast<float>(Fragment::normCosineScore(f1, f2, ranks));
     matchedPeakCosineScore = static_cast<float>(Fragment::matchedPeakCosineScore(f1, f2, ranks));
 
