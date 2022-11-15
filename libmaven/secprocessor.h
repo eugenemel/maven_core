@@ -142,6 +142,11 @@ public:
     string compareId;
     vector<int> ranks;
 
+    //scores
+    //float similarity = -1.0f; //inherited (value=matchedPeakCosineScore)
+    float cosineScore = -1.0f;
+    float matchedPeakCosineScore = -1.0f;
+
     SECTraceSimilarityCosine(SECTrace* first, SECTrace* second, shared_ptr<SECSearchParameters> params);
 
     string getName(){return "cosine";}

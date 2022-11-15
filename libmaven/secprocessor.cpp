@@ -309,9 +309,12 @@ float SECTraceSimilarityCosine::getSimilarity(bool debug) {
 
     this->ranks = Fragment::compareRanks(f1, f2, productPpmTolr);
 
-    similarity = static_cast<float>(Fragment::normCosineScore(f1, f2, ranks));
+    //all scores
+    cosineScore = static_cast<float>(Fragment::normCosineScore(f1, f2, ranks));
+    matchedPeakCosineScore = static_cast<float>(Fragment::matchedPeakCosineScore(f1, f2, ranks));
 
-    //TODO: switch to using FragmentationMatchScore?
+    //main score
+    similarity = matchedPeakCosineScore;
 
     return similarity;
 }
@@ -348,10 +351,12 @@ vector<SECTraceSimilarityCosine> SECTraceCosineSimilarityScorer::scoreTraces(
     }
 
     sort(similarityScores.begin(), similarityScores.end(), [](SECTraceSimilarityCosine& lhs, SECTraceSimilarityCosine& rhs){
-       if (lhs.similarity == rhs.similarity) {
-           return lhs.compareId < rhs.compareId;
+       if (lhs.matchedPeakCosineScore != rhs.matchedPeakCosineScore) {
+           return lhs.matchedPeakCosineScore < rhs.matchedPeakCosineScore;
+       }  else if (lhs.cosineScore != rhs.cosineScore) {
+           return lhs.cosineScore < rhs.cosineScore;
        } else {
-           return lhs.similarity > rhs.similarity;
+           return lhs.compareId < rhs.compareId;
        }
     });
 
