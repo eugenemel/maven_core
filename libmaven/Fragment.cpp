@@ -1679,7 +1679,8 @@ double Fragment::matchedPeakCosineScore(Fragment* a, Fragment* b, vector<int> ra
         }
     }
 
-    if (aMatchedIntensities.empty()) return 0;
+    // Need at least two peaks for this score to make any sense.
+    if (aMatchedIntensities.size() < 2) return 0;
 
     vector<float> aNorm = mzUtils::sumOfSquaresNorm(aMatchedIntensities);
     vector<float> bNorm = mzUtils::sumOfSquaresNorm(bMatchedIntensities);
