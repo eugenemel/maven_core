@@ -316,6 +316,8 @@ float SECTraceSimilarityCosine::getSimilarity(bool debug) {
     fractionPeaksMatched = 2.0f * numPeakMatches / (f1->mzs.size() + f2->mzs.size());
     cosineScore = static_cast<float>(Fragment::normCosineScore(f1, f2, ranks));
     matchedPeakCosineScore = static_cast<float>(Fragment::matchedPeakCosineScore(f1, f2, ranks));
+    pearsonCorrelationRaw = mzUtils::correlation(first->rawIntensities, second->rawIntensities);
+    pearsonCorrelationSmoothed = mzUtils::correlation(first->smoothedIntensities, second->smoothedIntensities);
 
     //main score
     similarity = matchedPeakCosineScore;

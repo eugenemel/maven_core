@@ -530,7 +530,7 @@ int isDir(const char* path) {
     return (!retval && (sbuf.st_mode & S_IFDIR));
 }
 
-
+//Pearson Correlation Coefficient
 float correlation(const vector<float>&x, const vector<float>&y) {
     int n = x.size();
     if (n == 0) return 0;

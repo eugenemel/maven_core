@@ -148,6 +148,8 @@ public:
     float cosineScore = -1.0f;
     float matchedPeakCosineScore = -1.0f;
     float fractionPeaksMatched = 0.0f;
+    float pearsonCorrelationRaw = -1.0f;
+    float pearsonCorrelationSmoothed = -1.0f;
 
     SECTraceSimilarityCosine(SECTrace* first, SECTrace* second, shared_ptr<SECSearchParameters> params);
 
