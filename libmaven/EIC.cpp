@@ -456,6 +456,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
                 cout << "Peak @ i=" << i << ":" << endl;
             }
 
+            float smoothedPeakIntensity = spline[i];
             float intensityThreshold = baselineQCutVal;
 
             //Issue 569: Use rtBoundsMaxIntensityFraction instead of intensity value
@@ -472,6 +473,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
             //descend to the left
             unsigned int leftMinimumIntensityIndex = i-1;
             unsigned int leftIndex = i-1;
+            unsigned int leftNextIndex = i-2;
 
             while(true) {
 
@@ -497,9 +499,9 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
 
                 //Issue 572: Use slope based peak boundary detection
                 if (rtBoundsMaxSlope > 0) {
-                    float slope = (spline[i] - spline[leftIndex])/(rt[i]-rt[leftIndex]);
+                    float slope = ( (spline[leftIndex] - spline[leftNextIndex]) / smoothedPeakIntensity) / (rt[leftIndex]-rt[leftNextIndex]);
                     if (slope < rtBoundsMaxSlope) {
-                        leftMinimumIntensityIndex = i;
+                        leftMinimumIntensityIndex = leftIndex;
                         break;
                     }
                 }
@@ -515,6 +517,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
             //descend to the right
             unsigned int rightMinimumIntensityIndex = i+1;
             unsigned int rightIndex = i+1;
+            unsigned int rightNextIndex = i+2;
 
             while(true) {
 
@@ -539,10 +542,10 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
                 }
 
                 //Issue 572: Use slope based peak boundary detection
-                if (rtBoundsMaxSlope > 0) {
-                    float slope = (spline[i] - spline[rightIndex])/(rt[i]-rt[rightIndex]);
+                if (rtBoundsMaxSlope > 0 && rightNextIndex <= N-1) {
+                    float slope =  ( (spline[rightIndex] - spline[rightNextIndex]) / smoothedPeakIntensity)/(rt[rightIndex]-rt[rightNextIndex]);
                     if (slope < rtBoundsMaxSlope) {
-                        rightMinimumIntensityIndex = i;
+                        rightMinimumIntensityIndex = rightIndex;
                         break;
                     }
                 }
