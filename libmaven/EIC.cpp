@@ -366,12 +366,13 @@ void EIC::getPeakPositionsB(int smoothWindow, float minSmoothedPeakIntensity) {
  * When computing Rt bounds, stop when the intensity crosses this threshold
  *
  * Issue 572: Slope-based peak boundary detection.
- * @param rtBoundsMaxSlope
+ * @param rtBoundsSlopeThreshold: once the slope between adjacent points in a peak is lower than this value,
+ * a peak boundary has been reached.
  *
  * @author phillipseitzer
  * @since 20191104
  */
-void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBounds, float rtBoundsMaxIntensityFraction, float rtBoundsMaxSlope) {
+void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBounds, float rtBoundsMaxIntensityFraction, float rtBoundsSlopeThreshold) {
 
     peaks.clear();
 
@@ -498,9 +499,9 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
                 }
 
                 //Issue 572: Use slope based peak boundary detection
-                if (rtBoundsMaxSlope > 0) {
+                if (rtBoundsSlopeThreshold > 0) {
                     float slope = ( (spline[leftIndex] - spline[leftNextIndex]) / smoothedPeakIntensity) / (rt[leftIndex]-rt[leftNextIndex]);
-                    if (slope < rtBoundsMaxSlope) {
+                    if (slope < rtBoundsSlopeThreshold) {
                         leftMinimumIntensityIndex = leftIndex;
                         break;
                     }
@@ -542,9 +543,9 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
                 }
 
                 //Issue 572: Use slope based peak boundary detection
-                if (rtBoundsMaxSlope > 0 && rightNextIndex <= N-1) {
+                if (rtBoundsSlopeThreshold > 0 && rightNextIndex <= N-1) {
                     float slope =  ( (spline[rightIndex] - spline[rightNextIndex]) / smoothedPeakIntensity)/(rt[rightIndex]-rt[rightNextIndex]);
-                    if (slope < rtBoundsMaxSlope) {
+                    if (slope < rtBoundsSlopeThreshold) {
                         rightMinimumIntensityIndex = rightIndex;
                         break;
                     }

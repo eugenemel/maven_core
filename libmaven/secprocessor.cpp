@@ -36,6 +36,7 @@ string SECSearchParameters::encodeParams() {
     encodedParams = encodedParams + "traceMinPeakSN" + "=" + to_string(traceMinPeakSN) + ";";
     encodedParams = encodedParams + "traceBaselineDropTopX" + "=" + to_string(traceBaselineDropTopX) + ";";
     encodedParams = encodedParams + "tracePeakBoundsMaxIntensityFraction" + "=" + to_string(tracePeakBoundsMaxIntensityFraction) + ";";
+    encodedParams = encodedParams + "traceRtBoundsSlopeThreshold" + "=" + to_string(traceRtBoundsSlopeThreshold) + ";";
 
     // Fragment
     encodedParams = encodedParams + "fragmentIsSmoothedIntensity" + "=" + to_string(fragmentIsSmoothedIntensity) +";";
@@ -106,6 +107,9 @@ shared_ptr<SECSearchParameters> SECSearchParameters::decode(string encodedParams
     }
     if (decodedMap.find("tracePeakBoundsMaxIntensityFraction") != decodedMap.end()) {
         secSearchParameters->tracePeakBoundsMaxIntensityFraction = stof(decodedMap["tracePeakBoundsMaxIntensityFraction"]);
+    }
+    if (decodedMap.find("traceRtBoundsSlopeThreshold") != decodedMap.end()) {
+        secSearchParameters->traceRtBoundsSlopeThreshold = stof(decodedMap["traceRtBoundsSlopeThreshold"]);
     }
 
     // Fragment
