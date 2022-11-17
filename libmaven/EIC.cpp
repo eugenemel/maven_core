@@ -544,7 +544,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
 
                 //Issue 572: Use slope based peak boundary detection
                 if (rtBoundsSlopeThreshold > 0 && rightNextIndex <= N-1) {
-                    float slope =  ( (spline[rightIndex] - spline[rightNextIndex]) / smoothedPeakIntensity)/(rt[rightIndex]-rt[rightNextIndex]);
+                    float slope = ( -1* (spline[rightIndex] - spline[rightNextIndex]) / smoothedPeakIntensity)/(rt[rightIndex]-rt[rightNextIndex]);
                     if (slope < rtBoundsSlopeThreshold) {
                         rightMinimumIntensityIndex = rightIndex;
                         break;
