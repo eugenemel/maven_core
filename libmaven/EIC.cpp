@@ -365,10 +365,13 @@ void EIC::getPeakPositionsB(int smoothWindow, float minSmoothedPeakIntensity) {
  * @param rtBoundsMaxIntensityFraction
  * When computing Rt bounds, stop when the intensity crosses this threshold
  *
+ * Issue 572: Slope-based peak boundary detection.
+ * @param rtBoundsMaxSlope
+ *
  * @author phillipseitzer
  * @since 20191104
  */
-void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBounds, float rtBoundsMaxIntensityFraction) {
+void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBounds, float rtBoundsMaxIntensityFraction, float rtBoundsMaxSlope) {
 
     peaks.clear();
 
@@ -472,6 +475,11 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
 
             while(true) {
 
+                //stop at the end of the EIC - this is the last valid point to the left
+                if (leftIndex == 0) {
+                    break;
+                }
+
                 //if this point is below the baseline, it is invalid, stop immediately
                 if (intensity[leftIndex] < intensityThreshold) {
                     break;
@@ -487,9 +495,13 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
                     leftMinimumIntensityIndex = leftIndex;
                 }
 
-                //stop at the end of the EIC - this is the last valid point to the left
-                if (leftIndex == 0) {
-                    break;
+                //Issue 572: Use slope based peak boundary detection
+                if (rtBoundsMaxSlope > 0) {
+                    float slope = (spline[i] - spline[leftIndex])/(rt[i]-rt[leftIndex]);
+                    if (slope < rtBoundsMaxSlope) {
+                        leftMinimumIntensityIndex = i;
+                        break;
+                    }
                 }
 
                 //continue moving to the left, check for more valid points
@@ -506,6 +518,11 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
 
             while(true) {
 
+                //stop at the end of the EIC - this is the last valid point to the right
+                if (rightIndex == N-1) {
+                    break;
+                }
+
                 //if this point is below the baseline, it is invalid, stop immediately
                 if (intensity[rightIndex] < intensityThreshold) {
                     break;
@@ -521,9 +538,13 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
                     rightMinimumIntensityIndex = rightIndex;
                 }
 
-                //stop at the end of the EIC - this is the last valid point to the right
-                if (rightIndex == N-1) {
-                    break;
+                //Issue 572: Use slope based peak boundary detection
+                if (rtBoundsMaxSlope > 0) {
+                    float slope = (spline[i] - spline[rightIndex])/(rt[i]-rt[rightIndex]);
+                    if (slope < rtBoundsMaxSlope) {
+                        rightMinimumIntensityIndex = i;
+                        break;
+                    }
                 }
 
                 //continue moving to the right, check for more valid points
