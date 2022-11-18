@@ -509,6 +509,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
 
                 //continue moving to the left, check for more valid points
                 leftIndex--;
+                leftNextIndex--;
             }
 
             if (debug) {
@@ -544,15 +545,29 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
 
                 //Issue 572: Use slope based peak boundary detection
                 if (rtBoundsSlopeThreshold > 0 && rightNextIndex <= N-1) {
-                    float slope = ( -1* (spline[rightIndex] - spline[rightNextIndex]) / smoothedPeakIntensity)/(rt[rightIndex]-rt[rightNextIndex]);
+
+
+                    float diff = spline[rightIndex] - spline[rightNextIndex];
+
+                    //avoid possible divide-by-zero error
+                    if (diff < 1e-10f) {
+                        if (debug) {
+                            cout << "slope < rtBoundsSlopeThreshold --> R=" << rightMinimumIntensityIndex << endl;
+                        }
+                        rightMinimumIntensityIndex = rightIndex;
+                        break;
+                    }
+
+                    float slope = ( -1* diff / smoothedPeakIntensity)/(rt[rightIndex]-rt[rightNextIndex]);
                     if (debug) {
                         cout << "slope R: (" << rightIndex << ", " << rightNextIndex << "): ("
                              << spline[rightIndex] << ", " << spline[rightNextIndex] << ")"
-                             << " diff = " << (spline[rightIndex] - spline[rightNextIndex])
-                             << " frac = " << ( -1* (spline[rightIndex] - spline[rightNextIndex]) / smoothedPeakIntensity)
+                             << " diff = " << diff
+                             << " frac = " << ( -1* diff / smoothedPeakIntensity)
                              << " slope = " << slope
                              << endl;
                     }
+
                     if (slope < rtBoundsSlopeThreshold) {
                         if (debug) {
                             cout << "slope < rtBoundsSlopeThreshold --> R=" << rightMinimumIntensityIndex << endl;
@@ -564,6 +579,7 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
 
                 //continue moving to the right, check for more valid points
                 rightIndex++;
+                rightNextIndex++;
             }
 
             if (debug) {
