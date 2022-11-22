@@ -3034,7 +3034,7 @@ string LipidSearchParameters::encodeByLipidToClassAndAdductToBoolMap(map<pair<st
         encodedMap = encodedMap + key + "=" + value + INTERNAL_MAP_DELIMITER;
     }
 
-    encodedMap = encodedMap + "}";
+    encodedMap = encodedMap + "};";
 
     return encodedMap;
 }
