@@ -1796,8 +1796,8 @@ void FragmentationMatchScore::addLabelSpecificMatches(string compoundLabel) {
 
     bool isAcylChainFragment = false;
 
-    //check all characters in the label to determine fragment type.
-    //TODO: this is buggy. Also, test this, consider refactoring
+    //check key characters to determine fragment type
+
     for (char c : compoundLabel){
 
         if (c == '*'){
