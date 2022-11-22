@@ -1790,3 +1790,35 @@ string Fragment::encodeSpectrum(int numDigits, string type, bool isNormalizeToMa
 
     return encodedSpectrum.str();
 }
+
+//Issue 585
+void FragmentationMatchScore::addLabelSpecificMatches(string compoundLabel) {
+
+    bool isAcylChainFragment = false;
+
+    //check all characters in the label to determine fragment type.
+    //TODO: this is buggy. Also, test this, consider refactoring
+    for (char c : compoundLabel){
+
+        if (c == '*'){
+            numDiagnosticMatches++;
+        } else if (c == '@') {
+            numSn1Matches++;
+            isAcylChainFragment = true;
+        } else if (c == '$'){
+            numSn2Matches++;
+            isAcylChainFragment = true;
+        } else if (c == '!') {
+            numSn3Matches++;
+            isAcylChainFragment = true;
+        } else if (c == '^') {
+            numSn4Matches++;
+            isAcylChainFragment = true;
+        } else if (c == '&') {
+            numOxidations++;
+        }
+
+    }
+
+    if (isAcylChainFragment) numAcylChainMatches++;
+}

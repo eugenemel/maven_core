@@ -113,27 +113,7 @@ void MzKitchenProcessor::matchLipids_LC(
 
                     string compoundLabel = compound->fragment_labels[i];
 
-                    //check labels
-                    for (char c : compoundLabel){
-
-                        if (c == '*'){
-                            s.numDiagnosticMatches++;
-                        } else if (c == '@') {
-                            s.numSn1Matches++;
-                        } else if (c == '$'){
-                            s.numSn2Matches++;
-                        } else if (c == '!') {
-                            s.numSn3Matches++;
-                        } else if (c == '^') {
-                            s.numSn4Matches++;
-                        } else if (c == '&') {
-                            s.numOxidations++;
-                        } else {
-                            //finished with special labels for this fragment
-                            break;
-                        }
-
-                    }
+                    s.addLabelSpecificMatches(compoundLabel);
                 }
             }
 

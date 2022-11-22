@@ -48,6 +48,7 @@ struct FragmentationMatchScore {
 
     double numMatches;
     double numDiagnosticMatches;
+    double numAcylChainMatches;
     double numSn1Matches; //Issue 312
     double numSn2Matches; //Issue 312
     double numSn3Matches; //Issue 455
@@ -163,6 +164,8 @@ struct FragmentationMatchScore {
 
         return *this;
     }
+
+    void addLabelSpecificMatches(string compoundLabel);
 };
 
 class Fragment {
