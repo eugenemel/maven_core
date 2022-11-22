@@ -1794,31 +1794,47 @@ string Fragment::encodeSpectrum(int numDigits, string type, bool isNormalizeToMa
 //Issue 585
 void FragmentationMatchScore::addLabelSpecificMatches(string compoundLabel) {
 
+    bool isDiagnosticFragment = false;
     bool isAcylChainFragment = false;
+    bool isSn1Fragment = false;
+    bool isSn2Fragment = false;
+    bool isSn3Fragment = false;
+    bool isSn4Fragment = false;
+    bool isOxidationFragment = false;
+
+    vector<string> labelElements{};
+    mzUtils::split(compoundLabel, '/', labelElements);
 
     //check key characters to determine fragment type
 
-    for (char c : compoundLabel){
-
-        if (c == '*'){
-            numDiagnosticMatches++;
-        } else if (c == '@') {
-            numSn1Matches++;
-            isAcylChainFragment = true;
-        } else if (c == '$'){
-            numSn2Matches++;
-            isAcylChainFragment = true;
-        } else if (c == '!') {
-            numSn3Matches++;
-            isAcylChainFragment = true;
-        } else if (c == '^') {
-            numSn4Matches++;
-            isAcylChainFragment = true;
-        } else if (c == '&') {
-            numOxidations++;
+    for (string frag : labelElements) {
+        if (frag.size() > 0) {
+            char c = frag[0];
+            if (c == '*'){
+                isDiagnosticFragment = true;
+            } else if (c == '@') {
+                isSn1Fragment = true;
+                isAcylChainFragment = true;
+            } else if (c == '$'){
+                isSn2Fragment = true;
+                isAcylChainFragment = true;
+            } else if (c == '!') {
+                isSn3Fragment = true;
+                isAcylChainFragment = true;
+            } else if (c == '^') {
+                isSn4Fragment = true;
+                isAcylChainFragment = true;
+            } else if (c == '&') {
+                isOxidationFragment = true;
+            }
         }
-
     }
 
+    if (isDiagnosticFragment) numDiagnosticMatches++;
     if (isAcylChainFragment) numAcylChainMatches++;
+    if (isSn1Fragment) numSn1Matches++;
+    if (isSn2Fragment) numSn2Matches++;
+    if (isSn3Fragment) numSn3Matches++;
+    if (isSn4Fragment) numSn4Matches++;
+    if (isOxidationFragment) numOxidations++;
 }
