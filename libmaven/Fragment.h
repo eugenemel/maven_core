@@ -48,7 +48,7 @@ struct FragmentationMatchScore {
 
     double numMatches;
     double numDiagnosticMatches;
-    double numAcylChainMatches;
+    double numAcylChainMatches; //Issue 585
     double numSn1Matches; //Issue 312
     double numSn2Matches; //Issue 312
     double numSn3Matches; //Issue 455
