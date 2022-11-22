@@ -1891,9 +1891,21 @@ enum ByLipidClassAndAdduct{MIN_NUM_MATCHES=0,
                            REQUIRE_PRECURSOR_IN_MS2=4,
                            MIN_NUM_ACYL_MATCHES=5};
 
-//Issue 586
+//Issue 586:
+//dedicated class for lipid search parameters
 class LipidSearchParameters {
 
+    //RESERVED DELIMITERS - DO NOT CHANGE!
+    static constexpr const char* const INTERNAL_MAP_DELIMITER = "|,|";
+    static constexpr const char* const TUPLE_MAP_KEY_DELIMITER = "&";
+
+    map<pair<string, string>, int> ms2MinNumMatchesByLipidClassAndAdduct{};
+    map<pair<string, string>, int> ms2MinNumDiagnosticMatchesByLipidClassAndAdduct{};
+    map<pair<string, string>, int> ms2sn1MinNumMatchesByLipidClassAndAdduct{};
+    map<pair<string, string>, int> ms2sn2MinNumMatchesByLipidClassAndAdduct{};
+    map<pair<string, string>, bool> ms2IsRequirePrecursorMatchByLipidClassAndAdduct{};
+
+    void addByLipidClassAndAdductMap(string encodedByClassAndAdductMap, ByLipidClassAndAdduct byLipidClassAndAdduct);
 };
 
 //Issue 455

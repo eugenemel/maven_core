@@ -2965,3 +2965,35 @@ shared_ptr<LoopInjectionMs2SpectrumParameters> LoopInjectionMs2SpectrumParameter
 
     return loopInjectionMs2SpectrumParameters;
 }
+
+void LipidSearchParameters::addByLipidClassAndAdductMap(string encodedByClassAndAdductMap, ByLipidClassAndAdduct byLipidClassAndAdduct){
+    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedByClassAndAdductMap, INTERNAL_MAP_DELIMITER);
+
+    for (auto it = decodedMap.begin(); it != decodedMap.end(); ++it){
+        string keyEncoded = it->first;
+
+        auto pos = keyEncoded.find(TUPLE_MAP_KEY_DELIMITER);
+
+        string lipidClass = keyEncoded.substr(0, pos);
+        string adductName;
+        if (pos != keyEncoded.length()) {
+            adductName = keyEncoded.substr(pos+1, keyEncoded.size());
+        }
+
+        pair<string, string> key = make_pair(lipidClass, adductName);
+
+        int value = stoi(it->second);
+        if (byLipidClassAndAdduct == ByLipidClassAndAdduct::MIN_NUM_MATCHES) {
+            ms2MinNumMatchesByLipidClassAndAdduct.insert(make_pair(key, value));
+        } else if (byLipidClassAndAdduct == ByLipidClassAndAdduct::MIN_NUM_DIAGNOSTIC_MATCHES) {
+            ms2MinNumDiagnosticMatchesByLipidClassAndAdduct.insert(make_pair(key, value));
+        } else if (byLipidClassAndAdduct == ByLipidClassAndAdduct::MIN_SN1_MATCHES) {
+            ms2sn1MinNumMatchesByLipidClassAndAdduct.insert(make_pair(key, value));
+        } else if (byLipidClassAndAdduct == ByLipidClassAndAdduct::MIN_SN2_MATCHES) {
+            ms2sn2MinNumMatchesByLipidClassAndAdduct.insert(make_pair(key, value));
+        } else if (byLipidClassAndAdduct == ByLipidClassAndAdduct::REQUIRE_PRECURSOR_IN_MS2) {
+          bool ms2IsRequirePrecursorMatch = it->second == "1";
+          ms2IsRequirePrecursorMatchByLipidClassAndAdduct.insert(make_pair(key, ms2IsRequirePrecursorMatch));
+        }
+    }
+}
