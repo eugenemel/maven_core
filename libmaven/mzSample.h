@@ -1893,6 +1893,9 @@ public:
     static constexpr const char* const INTERNAL_MAP_DELIMITER = "|,|";
     static constexpr const char* const TUPLE_MAP_KEY_DELIMITER = "&";
 
+    int ms2sn1MinNumMatches = 0;
+    int ms2sn2MinNumMatches = 0;
+
     map<pair<string, string>, int> ms2MinNumMatchesByLipidClassAndAdduct{};
     map<pair<string, string>, int> ms2MinNumDiagnosticMatchesByLipidClassAndAdduct{};
     map<pair<string, string>, int> ms2sn1MinNumMatchesByLipidClassAndAdduct{};

@@ -108,29 +108,17 @@ public:
      * If a fragment label starts with any of these substrings, it is flagged with the appropriate type.
      * Once a fragment label encounters a character that is not covered by any of the fragment labels,
      * all labels have been assigned and the check for labeling fragments stops.
-     * @param ms2DiagnosticFragmentLabelTag: label indicates this ms2 fragment is diagnostic.
-     * @param ms2sn1FragmentLabelTag: label indicates this ms2 fragment is associated with an sn1 acyl chain.
-     * @param ms2sn2FragmentLabelTag: label indicates this ms2 fragment is associated with an sn2 acyl chain.
-     * @param ms2MinNumMatchesByLipidClassAndAdduct: override default ms2MinNumMatches with a new value specific to <lipidClass, adductName>.
-     * @param ms2MinNumDiagnosticMatchesByClassAndAdduct: override default ms2MinNumMatches with a new value specific to <lipidClass, adductName>.
+     * @param ms2DiagnosticFragmentLabelTag: label indicates this ms2 fragment is diagnostic. [DEPRECATED]
+     * @param ms2sn1FragmentLabelTag: label indicates this ms2 fragment is associated with an sn1 acyl chain. [DEPRECATED]
+     * @param ms2sn2FragmentLabelTag: label indicates this ms2 fragment is associated with an sn2 acyl chain. [DEPRECATED]
      * @param ms2sn1MinNumMatches: min num sn1-associated reference peaks found in observed spectrum.
      * @param ms2sn2MinNumMatches: min num sn2-associated reference peaks found in observed spectrum.
-     * @param ms2sn1MinNumMatchesByLipidClassAndAdduct: override default ms2sn1MinNumMatches with a new value specific to <lipidClass, adductName>.
-     * @param ms2sn2MinNumMatchesByLipidClassAndAdduct: override default ms2sn2MinNumMatches with a new value specific to <lipidClass, adductName>.
      * @param ms2IsRequirePrecursorMatch: Require that a fragment m/z matched in the MS2 spectrum matches within MS2 tolerance to the compound MS1 precursor m/z.
-     * @param ms2IsRequirePrecursorMatchByLipidClassAndAdduct: override default ms2IsRequirePrecursorMatch with a new value specific to <lipidClass, adductName>.
      * ==================== */
     string ms2DiagnosticFragmentLabelTag = "*";
     string ms2sn1FragmentLabelTag = "@";
     string ms2sn2FragmentLabelTag = "$";
-//    map<pair<string, string>, int> ms2MinNumMatchesByLipidClassAndAdduct{};
-//    map<pair<string, string>, int> ms2MinNumDiagnosticMatchesByLipidClassAndAdduct{};
-    int ms2sn1MinNumMatches = 0;
-    int ms2sn2MinNumMatches = 0;
-//    map<pair<string, string>, int> ms2sn1MinNumMatchesByLipidClassAndAdduct{};
-//    map<pair<string, string>, int> ms2sn2MinNumMatchesByLipidClassAndAdduct{};
     bool ms2IsRequirePrecursorMatch = false; //Issue 390
-//    map<pair<string, string>, bool> ms2IsRequirePrecursorMatchByLipidClassAndAdduct{};
 
     /** ===================
      * MS3 SEARCH RELATED
