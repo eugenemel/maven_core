@@ -3010,3 +3010,31 @@ void LipidSearchParameters::addByLipidClassAndAdductToBoolMap(string encodedByCl
     }
 }
 
+string LipidSearchParameters::encodeByLipidToClassAndAdductToIntMap(map<pair<string, string>, int> &classAdductMap){
+
+    string encodedMap = "{";
+
+    for (auto it = classAdductMap.begin(); it != classAdductMap.end(); ++it) {
+        string key = it->first.first + TUPLE_MAP_KEY_DELIMITER + it->first.second;
+        string value = to_string(it->second);
+        encodedMap = encodedMap + key + "=" + value + INTERNAL_MAP_DELIMITER;
+    }
+
+    encodedMap = encodedMap + "}";
+
+    return encodedMap;
+}
+
+string LipidSearchParameters::encodeByLipidToClassAndAdductToBoolMap(map<pair<string, string>, bool> &classAdductMap){
+    string encodedMap = "{";
+
+    for (auto it = classAdductMap.begin(); it != classAdductMap.end(); ++it) {
+        string key = it->first.first + TUPLE_MAP_KEY_DELIMITER + it->first.second;
+        string value = to_string(it->second);
+        encodedMap = encodedMap + key + "=" + value + INTERNAL_MAP_DELIMITER;
+    }
+
+    encodedMap = encodedMap + "}";
+
+    return encodedMap;
+}

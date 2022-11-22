@@ -3572,15 +3572,16 @@ string DirectInfusionSearchParameters::encodeParams(){
     encodedParams = encodedParams + "};";
 
     //Issue 316
-    encodedParams = encodedParams + "ms2MinNumMatchesByLipidClassAndAdduct" +"=" + "{";
+//    encodedParams = encodedParams + "ms2MinNumMatchesByLipidClassAndAdduct" +"=" + "{";
 
-    for (auto it = ms2MinNumMatchesByLipidClassAndAdduct.begin(); it != ms2MinNumMatchesByLipidClassAndAdduct.end(); ++it) {
-        string key = it->first.first + TUPLE_MAP_KEY_DELIMITER + it->first.second;
-        string value = to_string(it->second);
-        encodedParams = encodedParams + key + "=" + value + INTERNAL_MAP_DELIMITER;
-    }
+//    for (auto it = ms2MinNumMatchesByLipidClassAndAdduct.begin(); it != ms2MinNumMatchesByLipidClassAndAdduct.end(); ++it) {
+//        string key = it->first.first + TUPLE_MAP_KEY_DELIMITER + it->first.second;
+//        string value = to_string(it->second);
+//        encodedParams = encodedParams + key + "=" + value + INTERNAL_MAP_DELIMITER;
+//    }
 
-    encodedParams = encodedParams + "};";
+//    encodedParams = encodedParams + "};";
+    encodedParams = encodedParams + "ms2MinNumMatchesByLipidClassAndAdduct" +"=" + encodeByLipidToClassAndAdductToIntMap(ms2MinNumMatchesByLipidClassAndAdduct);
 
     encodedParams = encodedParams + "ms2MinNumDiagnosticMatchesByLipidClassAndAdduct" +"=" + "{";
 
