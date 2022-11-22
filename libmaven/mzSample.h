@@ -1884,6 +1884,18 @@ public:
 
 };
 
+enum ByLipidClassAndAdduct{MIN_NUM_MATCHES=0,
+                           MIN_NUM_DIAGNOSTIC_MATCHES=1,
+                           MIN_SN1_MATCHES=2,
+                           MIN_SN2_MATCHES=3,
+                           REQUIRE_PRECURSOR_IN_MS2=4,
+                           MIN_NUM_ACYL_MATCHES=5};
+
+//Issue 586
+class LipidSearchParameters {
+
+};
+
 //Issue 455
 class LCLipidSearchParameters : public MzkitchenMspSearchParameters {
 
@@ -1896,15 +1908,27 @@ public:
 
     /** =======================
      * RT Matching
-     * lipidClassToRtRange: map describing valid RT range for lipid class, if available.
+     * @param lipidClassToRtRange: map describing valid RT range for lipid class, if available.
      * If none available, retain all RTs
      * ========================*/
     map<string, pair<float, float>> lipidClassToRtRange{};
+
+    /** =======================
+     * Enhanced MS2 matching
+     * @param ms2MinNumAcylMatches: number of acyl chain matches, irrespective of (class, adduct)
+     * @param ms2MinNumAcylMatchesByLipidClassAndAdduct: (class, adduct) specific override of ms2MinNumAcylMatches
+     * ========================*/
+    int ms2MinNumAcylMatches = 0;
+    map<pair<string, string>, int> ms2MinNumAcylMatchesByLipidClassAndAdduct{};
 
     string getMzKitchenSearchType(){return "lipidSearch";}
 
     string encodeParams();
     static shared_ptr<LCLipidSearchParameters> decode(string encodedParams);
+
+    static void addByLipidClassAndAdductMap(shared_ptr<LCLipidSearchParameters> lipidSearchParameters,
+                                            string encodedByClassAndAdductMap,
+                                            ByLipidClassAndAdduct byLipidClassAndAdduct)
 
 };
 

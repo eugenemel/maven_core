@@ -294,6 +294,17 @@ string LCLipidSearchParameters::encodeParams() {
 
     encodedParams = encodedParams + "};";
 
+    //Issue 586
+    encodedParams = encodedParams + "ms2MinNumAcylMatches" + "=" + to_string(ms2MinNumAcylMatches) + ";";
+
+    encodedParams = encodedParams + "ms2MinNumAcylMatchesByLipidClassAndAdduct" + "=" + "{";
+    for (auto it = ms2MinNumAcylMatchesByLipidClassAndAdduct.begin(); it != ms2MinNumAcylMatchesByLipidClassAndAdduct.end(); ++it) {
+        string key = it->first.first + TUPLE_MAP_KEY_DELIMITER + it->first.second;
+        string value = to_string(it->second);
+        encodedParams = encodedParams + key + "=" + value + INTERNAL_MAP_DELIMITER;
+    }
+    encodedParams = encodedParams + "};";
+
     return encodedParams;
 }
 
@@ -441,6 +452,15 @@ shared_ptr<LCLipidSearchParameters> LCLipidSearchParameters::decode(string encod
                 //skip this entry - something wrong with the encoding
             }
         }
+    }
+
+    if (decodedMap.find("ms2MinNumAcylMatches") != decodedMap.end()) {
+        lipidSearchParameters->ms2MinNumAcylMatches = stoi(decodedMap["ms2MinNumAcylMatches"]);
+    }
+
+    if (decodedMap.find("ms2MinNumAcylMatchesByLipidClassAndAdduct") != decodedMap.end()) {
+        string encodedMs2MinNumAcylMatchesByLipidClassAndAdduct = decodedMap["ms2MinNumAcylMatchesByLipidClassAndAdduct"];
+        //TODO: decoding
     }
 
     // END LCLipidSearchParameters
