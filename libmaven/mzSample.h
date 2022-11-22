@@ -1933,10 +1933,6 @@ public:
     string encodeParams();
     static shared_ptr<LCLipidSearchParameters> decode(string encodedParams);
 
-    static void addByLipidClassAndAdductMap(shared_ptr<LCLipidSearchParameters> lipidSearchParameters,
-                                            string encodedByClassAndAdductMap,
-                                            ByLipidClassAndAdduct byLipidClassAndAdduct);
-
 };
 
 //Issue 538
