@@ -115,9 +115,9 @@ public:
      * @param ms2sn2MinNumMatches: min num sn2-associated reference peaks found in observed spectrum.
      * @param ms2IsRequirePrecursorMatch: Require that a fragment m/z matched in the MS2 spectrum matches within MS2 tolerance to the compound MS1 precursor m/z.
      * ==================== */
-    string ms2DiagnosticFragmentLabelTag = "*";
-    string ms2sn1FragmentLabelTag = "@";
-    string ms2sn2FragmentLabelTag = "$";
+    string ms2DiagnosticFragmentLabelTag = "*"; //here instead of LipidSearchParameters only because deprecated
+    string ms2sn1FragmentLabelTag = "@"; //here instead of LipidSearchParameters only because deprecated
+    string ms2sn2FragmentLabelTag = "$"; //here instead of LipidSearchParameters only because deprecated
     bool ms2IsRequirePrecursorMatch = false; //Issue 390
 
     /** ===================
@@ -204,10 +204,6 @@ public:
     bool isDiagnosticFragmentMapAgreement(map<string, int> observedNumDiagnosticMatchesMap);
 
     void printParams();
-
-    //RESERVED DELIMITERS - DO NOT CHANGE!
-    static constexpr const char* const INTERNAL_MAP_DELIMITER = "|,|";
-    static constexpr const char* const TUPLE_MAP_KEY_DELIMITER = "&";
 
     string encodeParams();
 
