@@ -1894,6 +1894,7 @@ enum ByLipidClassAndAdduct{MIN_NUM_MATCHES=0,
 //Issue 586:
 //dedicated class for lipid search parameters
 class LipidSearchParameters {
+public:
 
     //RESERVED DELIMITERS - DO NOT CHANGE!
     static constexpr const char* const INTERNAL_MAP_DELIMITER = "|,|";
@@ -1905,7 +1906,7 @@ class LipidSearchParameters {
     map<pair<string, string>, int> ms2sn2MinNumMatchesByLipidClassAndAdduct{};
     map<pair<string, string>, bool> ms2IsRequirePrecursorMatchByLipidClassAndAdduct{};
 
-    void addByLipidClassAndAdductMap(string encodedByClassAndAdductMap, ByLipidClassAndAdduct byLipidClassAndAdduct);
+    void addByLipidClassAndAdductToIntMap(string encodedByClassAndAdductMap, map<pair<string, string>, int>& classAdductMap);
 };
 
 //Issue 455

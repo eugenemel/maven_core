@@ -3909,9 +3909,13 @@ shared_ptr<DirectInfusionSearchParameters> DirectInfusionSearchParameters::decod
 
     if (decodedMap.find("ms2MinNumMatchesByLipidClassAndAdduct") != decodedMap.end()) {
         string encodedMs2MinNumMatchesByLipidClassAndAdduct = decodedMap["ms2MinNumMatchesByLipidClassAndAdduct"];
-        addByLipidClassAndAdductMap(directInfusionSearchParameters,
-                                    encodedMs2MinNumMatchesByLipidClassAndAdduct,
-                                    ByLipidClassAndAdduct::MIN_NUM_MATCHES);
+//        addByLipidClassAndAdductMap(directInfusionSearchParameters,
+//                                    encodedMs2MinNumMatchesByLipidClassAndAdduct,
+//                                    ByLipidClassAndAdduct::MIN_NUM_MATCHES);
+
+        directInfusionSearchParameters->addByLipidClassAndAdductToIntMap(
+                    encodedMs2MinNumMatchesByLipidClassAndAdduct,
+                    directInfusionSearchParameters->ms2MinNumMatchesByLipidClassAndAdduct);
     }
 
     if (decodedMap.find("ms2MinNumDiagnosticMatchesByLipidClassAndAdduct") != decodedMap.end()) {

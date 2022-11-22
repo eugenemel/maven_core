@@ -74,7 +74,7 @@ enum class Ms3IntensityType{
  *
  * single class to contain all parameters used in direct infusion search analysis.
  */
-class DirectInfusionSearchParameters : public SearchParameters {
+class DirectInfusionSearchParameters : public SearchParameters, public LipidSearchParameters {
 
 public:
 
@@ -123,14 +123,14 @@ public:
     string ms2DiagnosticFragmentLabelTag = "*";
     string ms2sn1FragmentLabelTag = "@";
     string ms2sn2FragmentLabelTag = "$";
-    map<pair<string, string>, int> ms2MinNumMatchesByLipidClassAndAdduct{};
-    map<pair<string, string>, int> ms2MinNumDiagnosticMatchesByLipidClassAndAdduct{};
+//    map<pair<string, string>, int> ms2MinNumMatchesByLipidClassAndAdduct{};
+//    map<pair<string, string>, int> ms2MinNumDiagnosticMatchesByLipidClassAndAdduct{};
     int ms2sn1MinNumMatches = 0;
     int ms2sn2MinNumMatches = 0;
-    map<pair<string, string>, int> ms2sn1MinNumMatchesByLipidClassAndAdduct{};
-    map<pair<string, string>, int> ms2sn2MinNumMatchesByLipidClassAndAdduct{};
+//    map<pair<string, string>, int> ms2sn1MinNumMatchesByLipidClassAndAdduct{};
+//    map<pair<string, string>, int> ms2sn2MinNumMatchesByLipidClassAndAdduct{};
     bool ms2IsRequirePrecursorMatch = false; //Issue 390
-    map<pair<string, string>, bool> ms2IsRequirePrecursorMatchByLipidClassAndAdduct{};
+//    map<pair<string, string>, bool> ms2IsRequirePrecursorMatchByLipidClassAndAdduct{};
 
     /** ===================
      * MS3 SEARCH RELATED
