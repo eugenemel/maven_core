@@ -223,6 +223,14 @@ public:
 
     string encodeParams();
 
+    /**
+     * @brief addMs2MinNumDiagnosticMatchesMap
+     * @param directInfusionSearchParameters
+     * @param encodedMs2MinNumDiagnosticMatchesMap
+     *
+     * @deprecated
+     * TODO: remove this if it starts to get in the way.
+     */
     static void addMs2MinNumDiagnosticMatchesMap(shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters, string encodedMs2MinNumDiagnosticMatchesMap);
 
     static shared_ptr<DirectInfusionSearchParameters> decode(string encodedParams);
