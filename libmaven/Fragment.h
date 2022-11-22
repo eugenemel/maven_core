@@ -115,8 +115,12 @@ struct FragmentationMatchScore {
 
         numMatches=0;
         numDiagnosticMatches=0;
+        numAcylChainMatches=0;
         numSn1Matches=0;
         numSn2Matches=0;
+        numSn3Matches=0;
+        numSn4Matches=0;
+        numOxidations=0;
         isHasPrecursorMatch = false;
 
         ppmError=DBL_MAX;
@@ -141,8 +145,12 @@ struct FragmentationMatchScore {
 
         numMatches=b.numMatches;
         numDiagnosticMatches=b.numDiagnosticMatches;
+        numAcylChainMatches=b.numAcylChainMatches;
         numSn1Matches=b.numSn1Matches;
         numSn2Matches=b.numSn2Matches;
+        numSn3Matches=b.numSn3Matches;
+        numSn4Matches=b.numSn4Matches;
+        numOxidations=b.numOxidations;
 
         ppmError=b.ppmError;
         mzFragError=b.mzFragError;
