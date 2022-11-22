@@ -1928,7 +1928,7 @@ public:
 
     static void addByLipidClassAndAdductMap(shared_ptr<LCLipidSearchParameters> lipidSearchParameters,
                                             string encodedByClassAndAdductMap,
-                                            ByLipidClassAndAdduct byLipidClassAndAdduct)
+                                            ByLipidClassAndAdduct byLipidClassAndAdduct);
 
 };
 
