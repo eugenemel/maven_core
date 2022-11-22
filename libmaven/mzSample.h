@@ -1884,13 +1884,6 @@ public:
 
 };
 
-enum ByLipidClassAndAdduct{MIN_NUM_MATCHES=0,
-                           MIN_NUM_DIAGNOSTIC_MATCHES=1,
-                           MIN_SN1_MATCHES=2,
-                           MIN_SN2_MATCHES=3,
-                           REQUIRE_PRECURSOR_IN_MS2=4,
-                           MIN_NUM_ACYL_MATCHES=5};
-
 //Issue 586:
 //dedicated class for lipid search parameters
 class LipidSearchParameters {
