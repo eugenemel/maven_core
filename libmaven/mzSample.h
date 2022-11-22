@@ -1907,6 +1907,7 @@ public:
     map<pair<string, string>, bool> ms2IsRequirePrecursorMatchByLipidClassAndAdduct{};
 
     void addByLipidClassAndAdductToIntMap(string encodedByClassAndAdductMap, map<pair<string, string>, int>& classAdductMap);
+    void addByLipidClassAndAdductToBoolMap(string encodedByClassAndAdductMap, map<pair<string, string>, bool>& classAdductMap);
 };
 
 //Issue 455

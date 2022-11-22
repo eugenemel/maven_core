@@ -3909,10 +3909,6 @@ shared_ptr<DirectInfusionSearchParameters> DirectInfusionSearchParameters::decod
 
     if (decodedMap.find("ms2MinNumMatchesByLipidClassAndAdduct") != decodedMap.end()) {
         string encodedMs2MinNumMatchesByLipidClassAndAdduct = decodedMap["ms2MinNumMatchesByLipidClassAndAdduct"];
-//        addByLipidClassAndAdductMap(directInfusionSearchParameters,
-//                                    encodedMs2MinNumMatchesByLipidClassAndAdduct,
-//                                    ByLipidClassAndAdduct::MIN_NUM_MATCHES);
-
         directInfusionSearchParameters->addByLipidClassAndAdductToIntMap(
                     encodedMs2MinNumMatchesByLipidClassAndAdduct,
                     directInfusionSearchParameters->ms2MinNumMatchesByLipidClassAndAdduct);
@@ -3920,30 +3916,30 @@ shared_ptr<DirectInfusionSearchParameters> DirectInfusionSearchParameters::decod
 
     if (decodedMap.find("ms2MinNumDiagnosticMatchesByLipidClassAndAdduct") != decodedMap.end()) {
         string encodedMs2MinNumDiagnosticMatchesByLipidClassAndAdduct = decodedMap["ms2MinNumDiagnosticMatchesByLipidClassAndAdduct"];
-        addByLipidClassAndAdductMap(directInfusionSearchParameters,
-                                    encodedMs2MinNumDiagnosticMatchesByLipidClassAndAdduct,
-                                    ByLipidClassAndAdduct::MIN_NUM_DIAGNOSTIC_MATCHES);
+        directInfusionSearchParameters->addByLipidClassAndAdductToIntMap(
+                    encodedMs2MinNumDiagnosticMatchesByLipidClassAndAdduct,
+                    directInfusionSearchParameters->ms2MinNumDiagnosticMatchesByLipidClassAndAdduct);
     }
 
     if (decodedMap.find("ms2sn1MinNumMatchesByLipidClassAndAdduct") != decodedMap.end()) {
         string encodedms2sn1MinNumMatchesByLipidClassAndAdduct = decodedMap["ms2sn1MinNumMatchesByLipidClassAndAdduct"];
-        addByLipidClassAndAdductMap(directInfusionSearchParameters,
-                                    encodedms2sn1MinNumMatchesByLipidClassAndAdduct,
-                                    ByLipidClassAndAdduct::MIN_SN1_MATCHES);
+        directInfusionSearchParameters->addByLipidClassAndAdductToIntMap(
+                    encodedms2sn1MinNumMatchesByLipidClassAndAdduct,
+                    directInfusionSearchParameters->ms2sn1MinNumMatchesByLipidClassAndAdduct);
     }
 
     if (decodedMap.find("ms2sn2MinNumMatchesByLipidClassAndAdduct") != decodedMap.end()) {
         string encodedms2sn2MinNumMatchesByLipidClassAndAdduct = decodedMap["ms2sn2MinNumMatchesByLipidClassAndAdduct"];
-        addByLipidClassAndAdductMap(directInfusionSearchParameters,
-                                    encodedms2sn2MinNumMatchesByLipidClassAndAdduct,
-                                    ByLipidClassAndAdduct::MIN_SN2_MATCHES);
+        directInfusionSearchParameters->addByLipidClassAndAdductToIntMap(
+                    encodedms2sn2MinNumMatchesByLipidClassAndAdduct,
+                    directInfusionSearchParameters->ms2sn2MinNumMatchesByLipidClassAndAdduct);
     }
 
     if (decodedMap.find("ms2IsRequirePrecursorMatchByLipidClassAndAdduct") != decodedMap.end()) {
         string encodedms2IsRequirePrecursorMatchByLipidClassAndAdduct = decodedMap["ms2IsRequirePrecursorMatchByLipidClassAndAdduct"];
-        addByLipidClassAndAdductMap(directInfusionSearchParameters,
-                                    encodedms2IsRequirePrecursorMatchByLipidClassAndAdduct,
-                                    ByLipidClassAndAdduct::REQUIRE_PRECURSOR_IN_MS2);
+        directInfusionSearchParameters->addByLipidClassAndAdductToBoolMap(
+                    encodedms2IsRequirePrecursorMatchByLipidClassAndAdduct,
+                    directInfusionSearchParameters->ms2IsRequirePrecursorMatchByLipidClassAndAdduct);
     }
 
     //ms1 search params
