@@ -3691,43 +3691,6 @@ void DirectInfusionSearchParameters::addMs2MinNumDiagnosticMatchesMap(shared_ptr
         }
     }
 
-//TODO: refactor this (Issue 586)
-void DirectInfusionSearchParameters::addByLipidClassAndAdductMap(
-        shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters,
-        string encodedByClassAndAdductMap,
-        ByLipidClassAndAdduct byLipidClassAndAdduct) {
-
-    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedByClassAndAdductMap, INTERNAL_MAP_DELIMITER);
-
-    for (auto it = decodedMap.begin(); it != decodedMap.end(); ++it){
-        string keyEncoded = it->first;
-
-        auto pos = keyEncoded.find(TUPLE_MAP_KEY_DELIMITER);
-
-        string lipidClass = keyEncoded.substr(0, pos);
-        string adductName;
-        if (pos != keyEncoded.length()) {
-            adductName = keyEncoded.substr(pos+1, keyEncoded.size());
-        }
-
-        pair<string, string> key = make_pair(lipidClass, adductName);
-
-        int value = stoi(it->second);
-        if (byLipidClassAndAdduct == ByLipidClassAndAdduct::MIN_NUM_MATCHES) {
-            directInfusionSearchParameters->ms2MinNumMatchesByLipidClassAndAdduct.insert(make_pair(key, value));
-        } else if (byLipidClassAndAdduct == ByLipidClassAndAdduct::MIN_NUM_DIAGNOSTIC_MATCHES) {
-            directInfusionSearchParameters->ms2MinNumDiagnosticMatchesByLipidClassAndAdduct.insert(make_pair(key, value));
-        } else if (byLipidClassAndAdduct == ByLipidClassAndAdduct::MIN_SN1_MATCHES) {
-            directInfusionSearchParameters->ms2sn1MinNumMatchesByLipidClassAndAdduct.insert(make_pair(key, value));
-        } else if (byLipidClassAndAdduct == ByLipidClassAndAdduct::MIN_SN2_MATCHES) {
-            directInfusionSearchParameters->ms2sn2MinNumMatchesByLipidClassAndAdduct.insert(make_pair(key, value));
-        } else if (byLipidClassAndAdduct == ByLipidClassAndAdduct::REQUIRE_PRECURSOR_IN_MS2) {
-          bool ms2IsRequirePrecursorMatch = it->second == "1";
-          directInfusionSearchParameters->ms2IsRequirePrecursorMatchByLipidClassAndAdduct.insert(make_pair(key, ms2IsRequirePrecursorMatch));
-        }
-    }
-}
-
 shared_ptr<DirectInfusionSearchParameters> DirectInfusionSearchParameters::decode(string encodedParams){
     shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters = shared_ptr<DirectInfusionSearchParameters>(new DirectInfusionSearchParameters());
 

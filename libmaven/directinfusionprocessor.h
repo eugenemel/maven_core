@@ -225,10 +225,6 @@ public:
 
     static void addMs2MinNumDiagnosticMatchesMap(shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters, string encodedMs2MinNumDiagnosticMatchesMap);
 
-    static void addByLipidClassAndAdductMap(shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters,
-                                            string encodedByClassAndAdductMap,
-                                            ByLipidClassAndAdduct byLipidClassAndAdduct);
-
     static shared_ptr<DirectInfusionSearchParameters> decode(string encodedParams);
 };
 
