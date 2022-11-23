@@ -1686,6 +1686,8 @@ class SearchParameters {
 
     virtual string encodeParams() = 0;
 
+    void fillInBaseParams(unordered_map<string, string> decodedMap);
+
     virtual ~SearchParameters();
 
     string baseParams() {

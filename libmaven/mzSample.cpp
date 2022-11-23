@@ -3055,3 +3055,111 @@ string LipidSearchParameters::encodeByLipidToClassAndAdductToBoolMap(
 
     return encodedMap;
 }
+
+void SearchParameters::fillInBaseParams(unordered_map<string, string> decodedMap){
+
+     //program level
+     if (decodedMap.find("searchVersion") != decodedMap.end()) {
+         searchVersion = decodedMap["searchVersion"];
+     }
+
+     //scan filter params
+     if (decodedMap.find("scanFilterMinFracIntensity") != decodedMap.end()){
+         scanFilterMinFracIntensity = stof(decodedMap["scanFilterMinFracIntensity"]);
+     }
+     if (decodedMap.find("scanFilterMinSNRatio") != decodedMap.end()){
+         scanFilterMinSNRatio = stof(decodedMap["scanFilterMinSNRatio"]);
+     }
+     if (decodedMap.find("scanFilterMaxNumberOfFragments") != decodedMap.end()) {
+         scanFilterMaxNumberOfFragments = stoi(decodedMap["scanFilterMaxNumberOfFragments"]);
+     }
+     if (decodedMap.find("scanFilterBaseLinePercentile") != decodedMap.end()) {
+         scanFilterBaseLinePercentile = stoi(decodedMap["scanFilterBaseLinePercentile"]);
+     }
+     if (decodedMap.find("scanFilterIsRetainFragmentsAbovePrecursorMz") != decodedMap.end()) {
+         scanFilterIsRetainFragmentsAbovePrecursorMz = decodedMap["scanFilterIsRetainFragmentsAbovePrecursorMz"] == "1";
+     }
+     if (decodedMap.find("scanFilterPrecursorPurityPpm") != decodedMap.end()){
+         scanFilterPrecursorPurityPpm = stof(decodedMap["scanFilterPrecursorPurityPpm"]);
+     }
+     if (decodedMap.find("scanFilterMinIntensity") != decodedMap.end()){
+         scanFilterMinIntensity = stof(decodedMap["scanFilterMinIntensity"]);
+     }
+
+     //scan filter for MS1 scans
+     if (decodedMap.find("scanFilterMs1MinRt") != decodedMap.end()) {
+         scanFilterMs1MinRt = stof(decodedMap["scanFilterMs1MinRt"]);
+     }
+     if (decodedMap.find("scanFilterMs1MaxRt") != decodedMap.end()) {
+         scanFilterMs1MaxRt = stof(decodedMap["scanFilterMs1MaxRt"]);
+     }
+
+     //scan filter for MS2 scans
+     if (decodedMap.find("scanFilterMs2MinRt") != decodedMap.end()) {
+         scanFilterMs2MinRt = stof(decodedMap["scanFilterMs2MinRt"]);
+     }
+     if (decodedMap.find("scanFilterMs2MaxRt") != decodedMap.end()) {
+         scanFilterMs2MaxRt = stof(decodedMap["scanFilterMs2MaxRt"]);
+     }
+
+     //consensus spectrum params (all ms levels)
+
+     if (decodedMap.find("consensusIsIntensityAvgByObserved") != decodedMap.end()){
+         consensusIsIntensityAvgByObserved = decodedMap["consensusIsIntensityAvgByObserved"] == "1";
+     }
+     if (decodedMap.find("consensusIsNormalizeTo10K") != decodedMap.end()){
+         consensusIsNormalizeTo10K = decodedMap["consensusIsNormalizeTo10K"] == "1";
+     }
+     if (decodedMap.find("consensusIntensityAgglomerationType") != decodedMap.end()) {
+         string consensusIntensityAgglomerationTypeStr = decodedMap["consensusIntensityAgglomerationType"];
+         if (consensusIntensityAgglomerationTypeStr == "MEAN") {
+             consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
+         } else if (consensusIntensityAgglomerationTypeStr == "MEDIAN") {
+             consensusIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
+         }
+     }
+
+     //ms1 consensus spectrum params
+     if (decodedMap.find("consensusMs1PpmTolr") != decodedMap.end()){
+         consensusMs1PpmTolr = stof(decodedMap["consensusMs1PpmTolr"]);
+     }
+     if (decodedMap.find("consensusMinNumMs1Scans") != decodedMap.end()){
+         consensusMinNumMs1Scans = stoi(decodedMap["consensusMinNumMs1Scans"]);
+     }
+     if (decodedMap.find("consensusMinFractionMs1Scans") != decodedMap.end()){
+         consensusMinFractionMs1Scans = stof(decodedMap["consensusMinFractionMs1Scans"]);
+     }
+
+     //ms2 consensus spectrum params
+     if (decodedMap.find("consensusPpmTolr") != decodedMap.end()){
+         consensusPpmTolr = stof(decodedMap["consensusPpmTolr"]);
+     }
+     if (decodedMap.find("consensusMinNumMs2Scans") != decodedMap.end()){
+         consensusMinNumMs2Scans = stoi(decodedMap["consensusMinNumMs2Scans"]);
+     }
+     if (decodedMap.find("consensusMinFractionMs2Scans") != decodedMap.end()){
+         consensusMinFractionMs2Scans = stof(decodedMap["consensusMinFractionMs2Scans"]);
+     }
+
+     // ms1 matching
+     if (decodedMap.find("ms1PpmTolr") != decodedMap.end()) {
+         ms1PpmTolr = stof(decodedMap["ms1PpmTolr"]);
+     }
+
+     // ms2 search
+     if (decodedMap.find("ms2MinNumMatches") != decodedMap.end()) {
+         ms2MinNumMatches = stoi(decodedMap["ms2MinNumMatches"]);
+     }
+     if (decodedMap.find("ms2MinNumDiagnosticMatches") != decodedMap.end()) {
+         ms2MinNumDiagnosticMatches = stoi(decodedMap["ms2MinNumDiagnosticMatches"]);
+     }
+     if (decodedMap.find("ms2MinNumUniqueMatches") != decodedMap.end()) {
+         ms2MinNumUniqueMatches = stoi(decodedMap["ms2MinNumUniqueMatches"]);
+     }
+     if (decodedMap.find("ms2PpmTolr") != decodedMap.end()) {
+         ms2PpmTolr = stof(decodedMap["ms2PpmTolr"]);
+     }
+     if (decodedMap.find("ms2MinIntensity") != decodedMap.end()) {
+         ms2MinIntensity = stof(decodedMap["ms2MinIntensity"]);
+     }
+}
