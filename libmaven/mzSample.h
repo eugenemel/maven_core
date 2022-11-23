@@ -1594,6 +1594,10 @@ class SearchParameters {
 
     public:
 
+    //RESERVED DELIMITERS - DO NOT CHANGE!
+    static constexpr const char* const INTERNAL_MAP_DELIMITER = "|,|";
+    static constexpr const char* const TUPLE_MAP_KEY_DELIMITER = "&";
+
     /** =======================
      * PROGRAM LEVEL
      * searchVersion: version of search protocol used to generate results.
@@ -1877,11 +1881,6 @@ public:
     virtual ~MzkitchenMspSearchParameters();
 
     void setLegacyPeakGroupParameters();
-
-    //RESERVED DELIMITERS - DO NOT CHANGE!
-    static constexpr const char* const INTERNAL_MAP_DELIMITER = "|,|";
-    static constexpr const char* const TUPLE_MAP_KEY_DELIMITER = "&";
-
 };
 
 //Issue 586:
@@ -1889,28 +1888,42 @@ public:
 class LipidSearchParameters {
 public:
 
-    //RESERVED DELIMITERS - DO NOT CHANGE!
-    static constexpr const char* const INTERNAL_MAP_DELIMITER = "|,|";
-    static constexpr const char* const TUPLE_MAP_KEY_DELIMITER = "&";
-
     int ms2sn1MinNumMatches = 0;
     int ms2sn2MinNumMatches = 0;
+    int ms2MinNumAcylMatches = 0;
 
     map<pair<string, string>, int> ms2MinNumMatchesByLipidClassAndAdduct{};
     map<pair<string, string>, int> ms2MinNumDiagnosticMatchesByLipidClassAndAdduct{};
     map<pair<string, string>, int> ms2sn1MinNumMatchesByLipidClassAndAdduct{};
     map<pair<string, string>, int> ms2sn2MinNumMatchesByLipidClassAndAdduct{};
+    map<pair<string, string>, int> ms2MinNumAcylMatchesByLipidClassAndAdduct{};
     map<pair<string, string>, bool> ms2IsRequirePrecursorMatchByLipidClassAndAdduct{};
 
-    void addByLipidClassAndAdductToIntMap(string encodedByClassAndAdductMap, map<pair<string, string>, int>& classAdductMap);
-    void addByLipidClassAndAdductToBoolMap(string encodedByClassAndAdductMap, map<pair<string, string>, bool>& classAdductMap);
+    void addByLipidClassAndAdductToIntMap(
+            string encodedByClassAndAdductMap,
+            map<pair<string, string>, int>& classAdductMap,
+            string tupleMapDelimiter,
+            string internalMapDelimiter);
 
-    static string encodeByLipidToClassAndAdductToIntMap(map<pair<string, string>, int>& classAdductMap);
-    static string encodeByLipidToClassAndAdductToBoolMap(map<pair<string, string>, bool>& classAdductMap);
+    void addByLipidClassAndAdductToBoolMap(
+            string encodedByClassAndAdductMap,
+            map<pair<string, string>, bool>& classAdductMap,
+            string tupleMapDelimiter,
+            string internalMapDelimiter);
+
+    static string encodeByLipidToClassAndAdductToIntMap(
+            map<pair<string, string>, int>& classAdductMap,
+            string tupleMapDelimiter,
+            string internalMapDelimiter);
+
+    static string encodeByLipidToClassAndAdductToBoolMap(
+            map<pair<string, string>, bool>& classAdductMap,
+            string tupleMapDelimiter,
+            string internalMapDelimiter);
 };
 
 //Issue 455
-class LCLipidSearchParameters : public MzkitchenMspSearchParameters {
+class LCLipidSearchParameters : public MzkitchenMspSearchParameters, public LipidSearchParameters {
 
 public:
 
@@ -1925,14 +1938,6 @@ public:
      * If none available, retain all RTs
      * ========================*/
     map<string, pair<float, float>> lipidClassToRtRange{};
-
-    /** =======================
-     * Enhanced MS2 matching
-     * @param ms2MinNumAcylMatches: number of acyl chain matches, irrespective of (class, adduct)
-     * @param ms2MinNumAcylMatchesByLipidClassAndAdduct: (class, adduct) specific override of ms2MinNumAcylMatches
-     * ========================*/
-    int ms2MinNumAcylMatches = 0;
-    map<pair<string, string>, int> ms2MinNumAcylMatchesByLipidClassAndAdduct{};
 
     string getMzKitchenSearchType(){return "lipidSearch";}
 

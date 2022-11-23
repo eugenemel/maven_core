@@ -297,13 +297,10 @@ string LCLipidSearchParameters::encodeParams() {
     //Issue 586
     encodedParams = encodedParams + "ms2MinNumAcylMatches" + "=" + to_string(ms2MinNumAcylMatches) + ";";
 
-    encodedParams = encodedParams + "ms2MinNumAcylMatchesByLipidClassAndAdduct" + "=" + "{";
-    for (auto it = ms2MinNumAcylMatchesByLipidClassAndAdduct.begin(); it != ms2MinNumAcylMatchesByLipidClassAndAdduct.end(); ++it) {
-        string key = it->first.first + TUPLE_MAP_KEY_DELIMITER + it->first.second;
-        string value = to_string(it->second);
-        encodedParams = encodedParams + key + "=" + value + INTERNAL_MAP_DELIMITER;
-    }
-    encodedParams = encodedParams + "};";
+    encodedParams = encodedParams + "ms2MinNumAcylMatchesByLipidClassAndAdduct" + "=" + encodeByLipidToClassAndAdductToIntMap(
+                ms2MinNumAcylMatchesByLipidClassAndAdduct,
+                TUPLE_MAP_KEY_DELIMITER,
+                INTERNAL_MAP_DELIMITER);
 
     return encodedParams;
 }

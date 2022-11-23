@@ -2966,13 +2966,18 @@ shared_ptr<LoopInjectionMs2SpectrumParameters> LoopInjectionMs2SpectrumParameter
     return loopInjectionMs2SpectrumParameters;
 }
 
-void LipidSearchParameters::addByLipidClassAndAdductToIntMap(string encodedByClassAndAdductMap, map<pair<string, string>, int>& classAdductMap){
-    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedByClassAndAdductMap, INTERNAL_MAP_DELIMITER);
+void LipidSearchParameters::addByLipidClassAndAdductToIntMap(
+        string encodedByClassAndAdductMap,
+        map<pair<string, string>, int>& classAdductMap,
+        string tupleMapDelimiter,
+        string internalMapDelimiter){
+
+    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedByClassAndAdductMap, internalMapDelimiter);
 
     for (auto it = decodedMap.begin(); it != decodedMap.end(); ++it){
         string keyEncoded = it->first;
 
-        auto pos = keyEncoded.find(TUPLE_MAP_KEY_DELIMITER);
+        auto pos = keyEncoded.find(tupleMapDelimiter);
 
         string lipidClass = keyEncoded.substr(0, pos);
         string adductName;
@@ -2988,13 +2993,18 @@ void LipidSearchParameters::addByLipidClassAndAdductToIntMap(string encodedByCla
     }
 }
 
-void LipidSearchParameters::addByLipidClassAndAdductToBoolMap(string encodedByClassAndAdductMap, map<pair<string, string>, bool>& classAdductMap){
-    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedByClassAndAdductMap, INTERNAL_MAP_DELIMITER);
+void LipidSearchParameters::addByLipidClassAndAdductToBoolMap(
+        string encodedByClassAndAdductMap,
+        map<pair<string, string>, bool>& classAdductMap,
+        string tupleMapDelimiter,
+        string internalMapDelimiter){
+
+    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedByClassAndAdductMap, internalMapDelimiter);
 
     for (auto it = decodedMap.begin(); it != decodedMap.end(); ++it){
         string keyEncoded = it->first;
 
-        auto pos = keyEncoded.find(TUPLE_MAP_KEY_DELIMITER);
+        auto pos = keyEncoded.find(tupleMapDelimiter);
 
         string lipidClass = keyEncoded.substr(0, pos);
         string adductName;
@@ -3010,14 +3020,17 @@ void LipidSearchParameters::addByLipidClassAndAdductToBoolMap(string encodedByCl
     }
 }
 
-string LipidSearchParameters::encodeByLipidToClassAndAdductToIntMap(map<pair<string, string>, int> &classAdductMap){
+string LipidSearchParameters::encodeByLipidToClassAndAdductToIntMap(
+        map<pair<string, string>, int> &classAdductMap,
+        string tupleMapDelimiter,
+        string internalMapDelimiter){
 
     string encodedMap = "{";
 
     for (auto it = classAdductMap.begin(); it != classAdductMap.end(); ++it) {
-        string key = it->first.first + TUPLE_MAP_KEY_DELIMITER + it->first.second;
+        string key = it->first.first + tupleMapDelimiter + it->first.second;
         string value = to_string(it->second);
-        encodedMap = encodedMap + key + "=" + value + INTERNAL_MAP_DELIMITER;
+        encodedMap = encodedMap + key + "=" + value + internalMapDelimiter;
     }
 
     encodedMap = encodedMap + "};";
@@ -3025,13 +3038,17 @@ string LipidSearchParameters::encodeByLipidToClassAndAdductToIntMap(map<pair<str
     return encodedMap;
 }
 
-string LipidSearchParameters::encodeByLipidToClassAndAdductToBoolMap(map<pair<string, string>, bool> &classAdductMap){
+string LipidSearchParameters::encodeByLipidToClassAndAdductToBoolMap(
+        map<pair<string, string>, bool> &classAdductMap,
+        string tupleMapDelimiter,
+        string internalMapDelimiter){
+
     string encodedMap = "{";
 
     for (auto it = classAdductMap.begin(); it != classAdductMap.end(); ++it) {
-        string key = it->first.first + TUPLE_MAP_KEY_DELIMITER + it->first.second;
+        string key = it->first.first + tupleMapDelimiter + it->first.second;
         string value = to_string(it->second);
-        encodedMap = encodedMap + key + "=" + value + INTERNAL_MAP_DELIMITER;
+        encodedMap = encodedMap + key + "=" + value + internalMapDelimiter;
     }
 
     encodedMap = encodedMap + "};";
