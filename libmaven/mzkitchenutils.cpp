@@ -345,6 +345,21 @@ shared_ptr<LCLipidSearchParameters> LCLipidSearchParameters::decode(string encod
     return lipidSearchParameters;
 }
 
+bool LCLipidSearchParameters::isMatchPassesLCLipidSearchThresholds(
+        FragmentationMatchScore &s,
+        string lipidClass,
+        string adductName,
+        bool debug){
+
+    return isMatchPassesLipidSearchThresholds(
+                s,
+                lipidClass,
+                adductName,
+                ms2MinNumMatches,
+                ms2MinNumDiagnosticMatches,
+                false, // TODO: refactor precursor into basic search params, will be available here
+                debug);
+}
 string MzkitchenMetaboliteSearchParameters::encodeParams() {
 
     string encodedParams = baseParams();
@@ -427,3 +442,4 @@ void MzkitchenMspSearchParameters::setLegacyPeakGroupParameters(){
 }
 
 MzkitchenMspSearchParameters::~MzkitchenMspSearchParameters() = default;
+

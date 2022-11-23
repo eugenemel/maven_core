@@ -3279,8 +3279,8 @@ bool LipidParameterGroup::isMatchPassSingleIntThreshold(
     return thresholdVal >= fragmentationMatchScoreVal;
 }
 
-bool LipidParameterGroup::isMatchPassesThresholds(
-        FragmentationMatchScore s,
+bool LipidParameterGroup::isMatchPassesLipidSearchThresholds(
+        FragmentationMatchScore& s,
         string lipidClass,
         string adductName,
         int ms2MinNumMatches,
