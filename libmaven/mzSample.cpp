@@ -3038,6 +3038,40 @@ string LipidParameterGroup::encodeByLipidToClassAndAdductToIntMap(
     return encodedMap;
 }
 
+string LipidParameterGroup::getEncodedLipidParameters(string tupleMapDelimiter, string internalMapDelimiter) {
+    string encodedParams;
+
+    encodedParams = encodedParams + "ms2sn1MinNumMatches" + "=" + to_string(ms2sn1MinNumMatches) + ";"; //Issue 359
+    encodedParams = encodedParams + "ms2sn2MinNumMatches" + "=" + to_string(ms2sn2MinNumMatches) + ";"; //Issue 359
+    encodedParams = encodedParams + "ms2MinNumAcylMatches" + "=" + to_string(ms2MinNumAcylMatches) + ";"; //Issue 586
+
+    //Issue 316
+    encodedParams = encodedParams + "ms2MinNumMatchesByLipidClassAndAdduct" +"=" +
+            encodeByLipidToClassAndAdductToIntMap(ms2MinNumMatchesByLipidClassAndAdduct, tupleMapDelimiter, internalMapDelimiter);
+
+    encodedParams = encodedParams + "ms2MinNumDiagnosticMatchesByLipidClassAndAdduct" +"=" +
+            encodeByLipidToClassAndAdductToIntMap(ms2MinNumDiagnosticMatchesByLipidClassAndAdduct, tupleMapDelimiter, internalMapDelimiter);
+
+    //Issue 390
+    encodedParams = encodedParams + "ms2IsRequirePrecursorMatchByLipidClassAndAdduct" + "=" +
+            encodeByLipidToClassAndAdductToBoolMap(ms2IsRequirePrecursorMatchByLipidClassAndAdduct, tupleMapDelimiter, internalMapDelimiter);
+
+    encodedParams = encodedParams + "ms2sn1MinNumMatchesByLipidClassAndAdduct" +"=" +
+            encodeByLipidToClassAndAdductToIntMap(ms2sn1MinNumMatchesByLipidClassAndAdduct, tupleMapDelimiter, internalMapDelimiter);
+    encodedParams = encodedParams + "ms2sn2MinNumMatchesByLipidClassAndAdduct" +"=" +
+            encodeByLipidToClassAndAdductToIntMap(ms2sn2MinNumMatchesByLipidClassAndAdduct, tupleMapDelimiter, internalMapDelimiter);
+
+    //Issue 586
+    encodedParams = encodedParams + "ms2MinNumAcylMatchesByLipidClassAndAdduct" + "=" +
+            encodeByLipidToClassAndAdductToIntMap(ms2MinNumAcylMatchesByLipidClassAndAdduct, tupleMapDelimiter, internalMapDelimiter);
+
+    return encodedParams;
+}
+
+void LipidParameterGroup::fillInLipidParameters(unordered_map<string, string> decodedMap, string tupleMapDelimiter, string internalMapDelimiter){
+    //TODO: implement
+}
+
 string LipidParameterGroup::encodeByLipidToClassAndAdductToBoolMap(
         map<pair<string, string>, bool> &classAdductMap,
         string tupleMapDelimiter,
