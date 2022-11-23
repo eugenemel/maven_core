@@ -2972,10 +2972,6 @@ void LipidSearchParameters::addByLipidClassAndAdductToIntMap(
         string tupleMapDelimiter,
         string internalMapDelimiter){
 
-    //debugging
-    tupleMapDelimiter = "&";
-    internalMapDelimiter = "|,|";
-
     unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedByClassAndAdductMap, internalMapDelimiter);
 
     for (auto it = decodedMap.begin(); it != decodedMap.end(); ++it){
@@ -3003,10 +2999,6 @@ void LipidSearchParameters::addByLipidClassAndAdductToBoolMap(
         string tupleMapDelimiter,
         string internalMapDelimiter){
 
-    //debugging
-    tupleMapDelimiter = "&";
-    internalMapDelimiter = "|,|";
-
     unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedByClassAndAdductMap, internalMapDelimiter);
 
     for (auto it = decodedMap.begin(); it != decodedMap.end(); ++it){
@@ -3033,11 +3025,6 @@ string LipidSearchParameters::encodeByLipidToClassAndAdductToIntMap(
         string tupleMapDelimiter,
         string internalMapDelimiter){
 
-    //debugging
-//    //debugging 2: commented
-//    tupleMapDelimiter = "&";
-//    internalMapDelimiter = "|,|";
-
     string encodedMap = "{";
 
     for (auto it = classAdductMap.begin(); it != classAdductMap.end(); ++it) {
@@ -3055,11 +3042,6 @@ string LipidSearchParameters::encodeByLipidToClassAndAdductToBoolMap(
         map<pair<string, string>, bool> &classAdductMap,
         string tupleMapDelimiter,
         string internalMapDelimiter){
-
-    //debugging
-//    //debugging 2: commented
-//    tupleMapDelimiter = "&";
-//    internalMapDelimiter = "|,|";
 
     string encodedMap = "{";
 
