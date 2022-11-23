@@ -3057,8 +3057,9 @@ string LipidSearchParameters::encodeByLipidToClassAndAdductToBoolMap(
         string internalMapDelimiter){
 
     //debugging
-    tupleMapDelimiter = "&";
-    internalMapDelimiter = "|,|";
+//    //debugging 2: commented
+//    tupleMapDelimiter = "&";
+//    internalMapDelimiter = "|,|";
 
     string encodedMap = "{";
 
