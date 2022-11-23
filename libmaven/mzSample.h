@@ -1887,7 +1887,7 @@ public:
 
 //Issue 586:
 //dedicated class for lipid search parameters
-class LipidSearchParameters {
+class LipidParameterGroup {
 public:
 
     int ms2sn1MinNumMatches = 0;
@@ -1922,10 +1922,14 @@ public:
             map<pair<string, string>, bool>& classAdductMap,
             string tupleMapDelimiter,
             string internalMapDelimiter);
+
+    //TODO: need to implement these
+    string getEncodedLipidParameters(string tupleMapDelimiter, string internalMapDelimiter);
+    void fillInLipidParameters(unordered_map<string, string> decodedMap, string tupleMapDelimiter, string internalMapDelimiter);
 };
 
 //Issue 455
-class LCLipidSearchParameters : public MzkitchenMspSearchParameters, public LipidSearchParameters {
+class LCLipidSearchParameters : public MzkitchenMspSearchParameters, public LipidParameterGroup {
 
 public:
 

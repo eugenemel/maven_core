@@ -2966,7 +2966,7 @@ shared_ptr<LoopInjectionMs2SpectrumParameters> LoopInjectionMs2SpectrumParameter
     return loopInjectionMs2SpectrumParameters;
 }
 
-void LipidSearchParameters::addByLipidClassAndAdductToIntMap(
+void LipidParameterGroup::addByLipidClassAndAdductToIntMap(
         string encodedByClassAndAdductMap,
         map<pair<string, string>, int>& classAdductMap,
         string tupleMapDelimiter,
@@ -2993,7 +2993,7 @@ void LipidSearchParameters::addByLipidClassAndAdductToIntMap(
     }
 }
 
-void LipidSearchParameters::addByLipidClassAndAdductToBoolMap(
+void LipidParameterGroup::addByLipidClassAndAdductToBoolMap(
         string encodedByClassAndAdductMap,
         map<pair<string, string>, bool>& classAdductMap,
         string tupleMapDelimiter,
@@ -3020,7 +3020,7 @@ void LipidSearchParameters::addByLipidClassAndAdductToBoolMap(
     }
 }
 
-string LipidSearchParameters::encodeByLipidToClassAndAdductToIntMap(
+string LipidParameterGroup::encodeByLipidToClassAndAdductToIntMap(
         map<pair<string, string>, int> &classAdductMap,
         string tupleMapDelimiter,
         string internalMapDelimiter){
@@ -3038,7 +3038,7 @@ string LipidSearchParameters::encodeByLipidToClassAndAdductToIntMap(
     return encodedMap;
 }
 
-string LipidSearchParameters::encodeByLipidToClassAndAdductToBoolMap(
+string LipidParameterGroup::encodeByLipidToClassAndAdductToBoolMap(
         map<pair<string, string>, bool> &classAdductMap,
         string tupleMapDelimiter,
         string internalMapDelimiter){

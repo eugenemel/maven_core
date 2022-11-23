@@ -74,7 +74,7 @@ enum class Ms3IntensityType{
  *
  * single class to contain all parameters used in direct infusion search analysis.
  */
-class DirectInfusionSearchParameters : public SearchParameters, public LipidSearchParameters {
+class DirectInfusionSearchParameters : public SearchParameters, public LipidParameterGroup {
 
 public:
 
