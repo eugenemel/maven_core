@@ -1923,9 +1923,17 @@ public:
             string tupleMapDelimiter,
             string internalMapDelimiter);
 
-    //TODO: need to implement these
     string getEncodedLipidParameters(string tupleMapDelimiter, string internalMapDelimiter);
     void fillInLipidParameters(unordered_map<string, string> decodedMap, string tupleMapDelimiter, string internalMapDelimiter);
+
+    //Issue 587
+    bool isMatchPassesThresholds(FragmentationMatchScore s,
+                                 string lipidClass,
+                                 string adductName,
+                                 int ms2MinNumMatches,
+                                 int ms2MinNumDiagnosticMatches,
+                                 bool ms2IsRequirePrecursorMatch,
+                                 bool debug);
 };
 
 //Issue 455
