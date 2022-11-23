@@ -295,12 +295,7 @@ string LCLipidSearchParameters::encodeParams() {
     encodedParams = encodedParams + "};";
 
     //Issue 586
-    encodedParams = encodedParams + "ms2MinNumAcylMatches" + "=" + to_string(ms2MinNumAcylMatches) + ";";
-
-    encodedParams = encodedParams + "ms2MinNumAcylMatchesByLipidClassAndAdduct" + "=" + encodeByLipidToClassAndAdductToIntMap(
-                ms2MinNumAcylMatchesByLipidClassAndAdduct,
-                TUPLE_MAP_KEY_DELIMITER,
-                INTERNAL_MAP_DELIMITER);
+    encodedParams = encodedParams + getEncodedLipidParameters(TUPLE_MAP_KEY_DELIMITER, INTERNAL_MAP_DELIMITER);
 
     return encodedParams;
 }
@@ -311,6 +306,7 @@ shared_ptr<LCLipidSearchParameters> LCLipidSearchParameters::decode(string encod
     unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams); //use semicolon (default)
 
     lipidSearchParameters->fillInBaseParams(decodedMap);
+    lipidSearchParameters->fillInLipidParameters(decodedMap, TUPLE_MAP_KEY_DELIMITER, INTERNAL_MAP_DELIMITER);
 
     // START LCLipidSearchParameters
 
@@ -344,16 +340,6 @@ shared_ptr<LCLipidSearchParameters> LCLipidSearchParameters::decode(string encod
             }
         }
     }
-
-    if (decodedMap.find("ms2MinNumAcylMatches") != decodedMap.end()) {
-        lipidSearchParameters->ms2MinNumAcylMatches = stoi(decodedMap["ms2MinNumAcylMatches"]);
-    }
-
-    if (decodedMap.find("ms2MinNumAcylMatchesByLipidClassAndAdduct") != decodedMap.end()) {
-        string encodedMs2MinNumAcylMatchesByLipidClassAndAdduct = decodedMap["ms2MinNumAcylMatchesByLipidClassAndAdduct"];
-        //TODO: decoding
-    }
-
     // END LCLipidSearchParameters
 
     return lipidSearchParameters;
