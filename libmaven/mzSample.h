@@ -1934,6 +1934,13 @@ public:
                                  int ms2MinNumDiagnosticMatches,
                                  bool ms2IsRequirePrecursorMatch,
                                  bool debug);
+
+    bool isMatchPassSingleIntThreshold(
+            int fragmentationMatchScoreVal,
+            int simpleThreshold,
+            pair<string, string>& doubleStringKey,
+            pair<string, string>& singleStringKey,
+            map<pair<string, string>, int>& intOverrideMap);
 };
 
 //Issue 455

@@ -3261,6 +3261,24 @@ void SearchParameters::fillInBaseParams(unordered_map<string, string> decodedMap
      }
 }
 
+bool LipidParameterGroup::isMatchPassSingleIntThreshold(
+        int fragmentationMatchScoreVal,
+        int simpleThreshold,
+        pair<string, string>& doubleStringKey,
+        pair<string, string>& singleStringKey,
+        map<pair<string, string>, int>& intOverrideMap){
+
+    int thresholdVal = simpleThreshold;
+
+    if (intOverrideMap.find(doubleStringKey) != intOverrideMap.end()) {
+        thresholdVal = intOverrideMap[doubleStringKey];
+    } else if (intOverrideMap.find(singleStringKey) != intOverrideMap.end()) {
+        thresholdVal = intOverrideMap[singleStringKey];
+    }
+
+    return thresholdVal >= fragmentationMatchScoreVal;
+}
+
 bool LipidParameterGroup::isMatchPassesThresholds(
         FragmentationMatchScore s,
         string lipidClass,
