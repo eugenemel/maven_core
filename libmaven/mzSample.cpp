@@ -3069,7 +3069,70 @@ string LipidParameterGroup::getEncodedLipidParameters(string tupleMapDelimiter, 
 }
 
 void LipidParameterGroup::fillInLipidParameters(unordered_map<string, string> decodedMap, string tupleMapDelimiter, string internalMapDelimiter){
-    //TODO: implement
+
+    if (decodedMap.find("ms2sn1MinNumMatches") != decodedMap.end()) {
+        ms2sn1MinNumMatches = stoi(decodedMap["ms2sn1MinNumMatches"]);
+    }
+    if (decodedMap.find("ms2sn2MinNumMatches") != decodedMap.end()) {
+        ms2sn2MinNumMatches = stoi(decodedMap["ms2sn2MinNumMatches"]);
+    }
+    if (decodedMap.find("ms2MinNumAcylMatches") != decodedMap.end()) {
+        ms2MinNumAcylMatches = stoi(decodedMap["ms2MinNumAcylMatches"]);
+    }
+
+    if (decodedMap.find("ms2MinNumMatchesByLipidClassAndAdduct") != decodedMap.end()) {
+        string encodedMs2MinNumMatchesByLipidClassAndAdduct = decodedMap["ms2MinNumMatchesByLipidClassAndAdduct"];
+        addByLipidClassAndAdductToIntMap(
+                    encodedMs2MinNumMatchesByLipidClassAndAdduct,
+                    ms2MinNumMatchesByLipidClassAndAdduct,
+                    tupleMapDelimiter,
+                    internalMapDelimiter);
+    }
+
+    if (decodedMap.find("ms2MinNumDiagnosticMatchesByLipidClassAndAdduct") != decodedMap.end()) {
+        string encodedMs2MinNumDiagnosticMatchesByLipidClassAndAdduct = decodedMap["ms2MinNumDiagnosticMatchesByLipidClassAndAdduct"];
+        addByLipidClassAndAdductToIntMap(
+                    encodedMs2MinNumDiagnosticMatchesByLipidClassAndAdduct,
+                    ms2MinNumDiagnosticMatchesByLipidClassAndAdduct,
+                    tupleMapDelimiter,
+                    internalMapDelimiter);
+    }
+
+    if (decodedMap.find("ms2sn1MinNumMatchesByLipidClassAndAdduct") != decodedMap.end()) {
+        string encodedms2sn1MinNumMatchesByLipidClassAndAdduct = decodedMap["ms2sn1MinNumMatchesByLipidClassAndAdduct"];
+        addByLipidClassAndAdductToIntMap(
+                    encodedms2sn1MinNumMatchesByLipidClassAndAdduct,
+                    ms2sn1MinNumMatchesByLipidClassAndAdduct,
+                    tupleMapDelimiter,
+                    internalMapDelimiter);
+    }
+
+    if (decodedMap.find("ms2sn2MinNumMatchesByLipidClassAndAdduct") != decodedMap.end()) {
+        string encodedms2sn2MinNumMatchesByLipidClassAndAdduct = decodedMap["ms2sn2MinNumMatchesByLipidClassAndAdduct"];
+        addByLipidClassAndAdductToIntMap(
+                    encodedms2sn2MinNumMatchesByLipidClassAndAdduct,
+                    ms2sn2MinNumMatchesByLipidClassAndAdduct,
+                    tupleMapDelimiter,
+                    internalMapDelimiter);
+    }
+
+    if (decodedMap.find("ms2IsRequirePrecursorMatchByLipidClassAndAdduct") != decodedMap.end()) {
+        string encodedms2IsRequirePrecursorMatchByLipidClassAndAdduct = decodedMap["ms2IsRequirePrecursorMatchByLipidClassAndAdduct"];
+        addByLipidClassAndAdductToBoolMap(
+                    encodedms2IsRequirePrecursorMatchByLipidClassAndAdduct,
+                    ms2IsRequirePrecursorMatchByLipidClassAndAdduct,
+                    tupleMapDelimiter,
+                    internalMapDelimiter);
+    }
+
+    if (decodedMap.find("ms2MinNumAcylMatchesByLipidClassAndAdduct") != decodedMap.end()) {
+        string encodedMs2MinNumAcylMatchesByLipidClassAndAdduct = decodedMap["ms2MinNumAcylMatchesByLipidClassAndAdduct"];
+        addByLipidClassAndAdductToIntMap(
+                    encodedMs2MinNumAcylMatchesByLipidClassAndAdduct,
+                    ms2MinNumAcylMatchesByLipidClassAndAdduct,
+                    tupleMapDelimiter,
+                    internalMapDelimiter);
+    }
 }
 
 string LipidParameterGroup::encodeByLipidToClassAndAdductToBoolMap(

@@ -3571,28 +3571,6 @@ string DirectInfusionSearchParameters::encodeParams(){
 
     encodedParams = encodedParams + "};";
 
-    encodedParams = encodedParams + getEncodedLipidParameters(TUPLE_MAP_KEY_DELIMITER, INTERNAL_MAP_DELIMITER);
-
-//    //Issue 316
-//    encodedParams = encodedParams + "ms2MinNumMatchesByLipidClassAndAdduct" +"=" +
-//            encodeByLipidToClassAndAdductToIntMap(ms2MinNumMatchesByLipidClassAndAdduct, TUPLE_MAP_KEY_DELIMITER, INTERNAL_MAP_DELIMITER);
-
-//    encodedParams = encodedParams + "ms2MinNumDiagnosticMatchesByLipidClassAndAdduct" +"=" +
-//            encodeByLipidToClassAndAdductToIntMap(ms2MinNumDiagnosticMatchesByLipidClassAndAdduct, TUPLE_MAP_KEY_DELIMITER, INTERNAL_MAP_DELIMITER);
-
-//    //Issue 390
-//    encodedParams = encodedParams + "ms2IsRequirePrecursorMatchByLipidClassAndAdduct" + "=" +
-//            encodeByLipidToClassAndAdductToBoolMap(ms2IsRequirePrecursorMatchByLipidClassAndAdduct, TUPLE_MAP_KEY_DELIMITER, INTERNAL_MAP_DELIMITER);
-
-//    //Issue 359
-//    encodedParams = encodedParams + "ms2sn1MinNumMatches" + "=" + to_string(ms2sn1MinNumMatches) + ";";
-//    encodedParams = encodedParams + "ms2sn2MinNumMatches" + "=" + to_string(ms2sn2MinNumMatches) + ";";
-
-//    encodedParams = encodedParams + "ms2sn1MinNumMatchesByLipidClassAndAdduct" +"=" +
-//            encodeByLipidToClassAndAdductToIntMap(ms2sn1MinNumMatchesByLipidClassAndAdduct, TUPLE_MAP_KEY_DELIMITER, INTERNAL_MAP_DELIMITER);
-//    encodedParams = encodedParams + "ms2sn2MinNumMatchesByLipidClassAndAdduct" +"=" +
-//            encodeByLipidToClassAndAdductToIntMap(ms2sn2MinNumMatchesByLipidClassAndAdduct, TUPLE_MAP_KEY_DELIMITER, INTERNAL_MAP_DELIMITER);
-
     //ms1 search params
     encodedParams = encodedParams + "ms1IsRequireAdductPrecursorMatch" + "=" + to_string(ms1IsRequireAdductPrecursorMatch) + ";";
     encodedParams = encodedParams + "ms1IsFindPrecursorIon" + "=" + to_string(ms1IsFindPrecursorIon) + ";";
@@ -3644,6 +3622,9 @@ string DirectInfusionSearchParameters::encodeParams(){
     encodedParams = encodedParams + "spectralCompositionAlgorithm" + "=" + spectralCompositionAlgorithmStr + ";";
 
     encodedParams = encodedParams + "isReduceBySimpleParsimony" + "=" + to_string(isReduceBySimpleParsimony) + ";";
+
+    // lipid parameters
+    encodedParams = encodedParams + getEncodedLipidParameters(TUPLE_MAP_KEY_DELIMITER, INTERNAL_MAP_DELIMITER);
 
     return encodedParams;
 }
@@ -3821,12 +3802,7 @@ shared_ptr<DirectInfusionSearchParameters> DirectInfusionSearchParameters::decod
     if (decodedMap.find("ms2sn2FragmentLabelTag") != decodedMap.end()){
         directInfusionSearchParameters->ms2sn2FragmentLabelTag = decodedMap["ms2sn2FragmentLabelTag"];
     }
-    if (decodedMap.find("ms2sn1MinNumMatches") != decodedMap.end()) {
-        directInfusionSearchParameters->ms2sn1MinNumMatches = stoi(decodedMap["ms2sn1MinNumMatches"]);
-    }
-    if (decodedMap.find("ms2sn2MinNumMatches") != decodedMap.end()) {
-        directInfusionSearchParameters->ms2sn2MinNumMatches = stoi(decodedMap["ms2sn2MinNumMatches"]);
-    }
+
     if (decodedMap.find("ms2IsRequirePrecursorMatch") != decodedMap.end()) { //Issue 390
         directInfusionSearchParameters->ms2IsRequirePrecursorMatch = decodedMap["ms2IsRequirePrecursorMatch"] == "1";
     }
@@ -3836,50 +3812,56 @@ shared_ptr<DirectInfusionSearchParameters> DirectInfusionSearchParameters::decod
         addMs2MinNumDiagnosticMatchesMap(directInfusionSearchParameters, encodedDiagnosticFragmentsMap);
     }
 
-    if (decodedMap.find("ms2MinNumMatchesByLipidClassAndAdduct") != decodedMap.end()) {
-        string encodedMs2MinNumMatchesByLipidClassAndAdduct = decodedMap["ms2MinNumMatchesByLipidClassAndAdduct"];
-        directInfusionSearchParameters->addByLipidClassAndAdductToIntMap(
-                    encodedMs2MinNumMatchesByLipidClassAndAdduct,
-                    directInfusionSearchParameters->ms2MinNumMatchesByLipidClassAndAdduct,
-                    TUPLE_MAP_KEY_DELIMITER,
-                    INTERNAL_MAP_DELIMITER);
-    }
+    //    if (decodedMap.find("ms2sn1MinNumMatches") != decodedMap.end()) {
+    //        directInfusionSearchParameters->ms2sn1MinNumMatches = stoi(decodedMap["ms2sn1MinNumMatches"]);
+    //    }
+    //    if (decodedMap.find("ms2sn2MinNumMatches") != decodedMap.end()) {
+    //        directInfusionSearchParameters->ms2sn2MinNumMatches = stoi(decodedMap["ms2sn2MinNumMatches"]);
+    //    }
+//    if (decodedMap.find("ms2MinNumMatchesByLipidClassAndAdduct") != decodedMap.end()) {
+//        string encodedMs2MinNumMatchesByLipidClassAndAdduct = decodedMap["ms2MinNumMatchesByLipidClassAndAdduct"];
+//        directInfusionSearchParameters->addByLipidClassAndAdductToIntMap(
+//                    encodedMs2MinNumMatchesByLipidClassAndAdduct,
+//                    directInfusionSearchParameters->ms2MinNumMatchesByLipidClassAndAdduct,
+//                    TUPLE_MAP_KEY_DELIMITER,
+//                    INTERNAL_MAP_DELIMITER);
+//    }
 
-    if (decodedMap.find("ms2MinNumDiagnosticMatchesByLipidClassAndAdduct") != decodedMap.end()) {
-        string encodedMs2MinNumDiagnosticMatchesByLipidClassAndAdduct = decodedMap["ms2MinNumDiagnosticMatchesByLipidClassAndAdduct"];
-        directInfusionSearchParameters->addByLipidClassAndAdductToIntMap(
-                    encodedMs2MinNumDiagnosticMatchesByLipidClassAndAdduct,
-                    directInfusionSearchParameters->ms2MinNumDiagnosticMatchesByLipidClassAndAdduct,
-                    TUPLE_MAP_KEY_DELIMITER,
-                    INTERNAL_MAP_DELIMITER);
-    }
+//    if (decodedMap.find("ms2MinNumDiagnosticMatchesByLipidClassAndAdduct") != decodedMap.end()) {
+//        string encodedMs2MinNumDiagnosticMatchesByLipidClassAndAdduct = decodedMap["ms2MinNumDiagnosticMatchesByLipidClassAndAdduct"];
+//        directInfusionSearchParameters->addByLipidClassAndAdductToIntMap(
+//                    encodedMs2MinNumDiagnosticMatchesByLipidClassAndAdduct,
+//                    directInfusionSearchParameters->ms2MinNumDiagnosticMatchesByLipidClassAndAdduct,
+//                    TUPLE_MAP_KEY_DELIMITER,
+//                    INTERNAL_MAP_DELIMITER);
+//    }
 
-    if (decodedMap.find("ms2sn1MinNumMatchesByLipidClassAndAdduct") != decodedMap.end()) {
-        string encodedms2sn1MinNumMatchesByLipidClassAndAdduct = decodedMap["ms2sn1MinNumMatchesByLipidClassAndAdduct"];
-        directInfusionSearchParameters->addByLipidClassAndAdductToIntMap(
-                    encodedms2sn1MinNumMatchesByLipidClassAndAdduct,
-                    directInfusionSearchParameters->ms2sn1MinNumMatchesByLipidClassAndAdduct,
-                    TUPLE_MAP_KEY_DELIMITER,
-                    INTERNAL_MAP_DELIMITER);
-    }
+//    if (decodedMap.find("ms2sn1MinNumMatchesByLipidClassAndAdduct") != decodedMap.end()) {
+//        string encodedms2sn1MinNumMatchesByLipidClassAndAdduct = decodedMap["ms2sn1MinNumMatchesByLipidClassAndAdduct"];
+//        directInfusionSearchParameters->addByLipidClassAndAdductToIntMap(
+//                    encodedms2sn1MinNumMatchesByLipidClassAndAdduct,
+//                    directInfusionSearchParameters->ms2sn1MinNumMatchesByLipidClassAndAdduct,
+//                    TUPLE_MAP_KEY_DELIMITER,
+//                    INTERNAL_MAP_DELIMITER);
+//    }
 
-    if (decodedMap.find("ms2sn2MinNumMatchesByLipidClassAndAdduct") != decodedMap.end()) {
-        string encodedms2sn2MinNumMatchesByLipidClassAndAdduct = decodedMap["ms2sn2MinNumMatchesByLipidClassAndAdduct"];
-        directInfusionSearchParameters->addByLipidClassAndAdductToIntMap(
-                    encodedms2sn2MinNumMatchesByLipidClassAndAdduct,
-                    directInfusionSearchParameters->ms2sn2MinNumMatchesByLipidClassAndAdduct,
-                    TUPLE_MAP_KEY_DELIMITER,
-                    INTERNAL_MAP_DELIMITER);
-    }
+//    if (decodedMap.find("ms2sn2MinNumMatchesByLipidClassAndAdduct") != decodedMap.end()) {
+//        string encodedms2sn2MinNumMatchesByLipidClassAndAdduct = decodedMap["ms2sn2MinNumMatchesByLipidClassAndAdduct"];
+//        directInfusionSearchParameters->addByLipidClassAndAdductToIntMap(
+//                    encodedms2sn2MinNumMatchesByLipidClassAndAdduct,
+//                    directInfusionSearchParameters->ms2sn2MinNumMatchesByLipidClassAndAdduct,
+//                    TUPLE_MAP_KEY_DELIMITER,
+//                    INTERNAL_MAP_DELIMITER);
+//    }
 
-    if (decodedMap.find("ms2IsRequirePrecursorMatchByLipidClassAndAdduct") != decodedMap.end()) {
-        string encodedms2IsRequirePrecursorMatchByLipidClassAndAdduct = decodedMap["ms2IsRequirePrecursorMatchByLipidClassAndAdduct"];
-        directInfusionSearchParameters->addByLipidClassAndAdductToBoolMap(
-                    encodedms2IsRequirePrecursorMatchByLipidClassAndAdduct,
-                    directInfusionSearchParameters->ms2IsRequirePrecursorMatchByLipidClassAndAdduct,
-                    TUPLE_MAP_KEY_DELIMITER,
-                    INTERNAL_MAP_DELIMITER);
-    }
+//    if (decodedMap.find("ms2IsRequirePrecursorMatchByLipidClassAndAdduct") != decodedMap.end()) {
+//        string encodedms2IsRequirePrecursorMatchByLipidClassAndAdduct = decodedMap["ms2IsRequirePrecursorMatchByLipidClassAndAdduct"];
+//        directInfusionSearchParameters->addByLipidClassAndAdductToBoolMap(
+//                    encodedms2IsRequirePrecursorMatchByLipidClassAndAdduct,
+//                    directInfusionSearchParameters->ms2IsRequirePrecursorMatchByLipidClassAndAdduct,
+//                    TUPLE_MAP_KEY_DELIMITER,
+//                    INTERNAL_MAP_DELIMITER);
+//    }
 
     //ms1 search params
     if (decodedMap.find("ms1IsRequireAdductPrecursorMatch") != decodedMap.end()){
@@ -3963,6 +3945,9 @@ shared_ptr<DirectInfusionSearchParameters> DirectInfusionSearchParameters::decod
     if (decodedMap.find("isReduceBySimpleParsimony") != decodedMap.end()) {
         directInfusionSearchParameters->isReduceBySimpleParsimony = decodedMap["isReduceBySimpleParsimony"] == "1";
     }
+
+    //lipid parameters
+    directInfusionSearchParameters->fillInLipidParameters(decodedMap, TUPLE_MAP_KEY_DELIMITER, INTERNAL_MAP_DELIMITER);
 
     return directInfusionSearchParameters;
 }
