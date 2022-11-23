@@ -1968,9 +1968,9 @@ public:
 
     bool isMatchPassesLCLipidSearchThresholds(
             FragmentationMatchScore& s,
-            string lipidClass,
-            string adductName,
-            bool debug);
+            string lipidClass = "",
+            string adductName = "",
+            bool debug = false);
 
 };
 
