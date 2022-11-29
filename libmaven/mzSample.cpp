@@ -3303,7 +3303,7 @@ bool LipidParameterGroup::isMatchPassesLipidSearchThresholds(
         ms2MinNumMatches = ms2MinNumMatchesByLipidClassAndAdduct[lipidClassKey];
     }
 
-    if (debug) cout << "ms2MinNumMatches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": " << ms2MinNumMatches << endl;
+    if (debug) cout << "ms2MinNumMatches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": scored=" << s.numMatches << ", thresh=" << ms2MinNumMatches << endl;
 
     if (s.numMatches < ms2MinNumMatches) return false;
 
@@ -3315,7 +3315,7 @@ bool LipidParameterGroup::isMatchPassesLipidSearchThresholds(
         ms2MinNumDiagnosticMatches = ms2MinNumDiagnosticMatchesByLipidClassAndAdduct[lipidClassKey];
     }
 
-    if (debug) cout << "ms2MinNumDiagnosticMatches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": " << ms2MinNumDiagnosticMatches << endl;
+    if (debug) cout << "ms2MinNumDiagnosticMatches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": scored=" << s.numDiagnosticMatches << ", thresh=" << ms2MinNumDiagnosticMatches << endl;
 
     if (s.numDiagnosticMatches < ms2MinNumDiagnosticMatches) return false;
 
@@ -3327,7 +3327,7 @@ bool LipidParameterGroup::isMatchPassesLipidSearchThresholds(
         minNumAcylMatches = ms2MinNumAcylMatchesByLipidClassAndAdduct[lipidClassKey];
     }
 
-    if (debug) cout << "ms2MinNumAcylMatches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": " << minNumAcylMatches << endl;
+    if (debug) cout << "ms2MinNumAcylMatches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": scored=" << s.numAcylChainMatches << ", thresh=" << minNumAcylMatches << endl;
 
     if (s.numAcylChainMatches < minNumAcylMatches) return false;
 
@@ -3339,7 +3339,7 @@ bool LipidParameterGroup::isMatchPassesLipidSearchThresholds(
         minNumSn1Matches = ms2sn1MinNumMatchesByLipidClassAndAdduct[lipidClassKey];
     }
 
-    if (debug) cout << "ms2MinNumSn1Matches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": " << minNumSn1Matches << endl;
+    if (debug) cout << "ms2MinNumSn1Matches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": scored=" << s.numSn1Matches << ", thresh=" << minNumSn1Matches << endl;
 
     if (s.numSn1Matches < ms2MinNumMatches) return false;
 
@@ -3351,7 +3351,7 @@ bool LipidParameterGroup::isMatchPassesLipidSearchThresholds(
         minNumSn2Matches = ms2sn2MinNumMatchesByLipidClassAndAdduct[lipidClassKey];
     }
 
-    if (debug) cout << "ms2MinNumSn2Matches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": " << minNumSn2Matches << endl;
+    if (debug) cout << "ms2MinNumSn2Matches for lipidClass=" << lipidClass << ", adduct=" << ": scored=" << s.numSn2Matches << ", thresh=" <<  minNumSn2Matches << endl;
 
     if (s.numSn2Matches < ms2MinNumMatches) return false;
 
