@@ -3364,7 +3364,10 @@ bool LipidParameterGroup::isMatchPassesLipidSearchThresholds(
         ms2IsRequirePrecursorMatch = ms2IsRequirePrecursorMatchByLipidClassAndAdduct[lipidClassKey];
     }
 
-    if (debug) cout << "ms2IsRequirePrecursorMatch for lipidClass=" << lipidClass << ", adduct=" << adductName << ": " << (ms2IsRequirePrecursorMatch ? "true" : "false") << endl;
+    if (debug) cout << "ms2IsRequirePrecursorMatch for lipidClass=" << lipidClass << ", adduct=" << adductName
+                    << ": scored="
+                    << (s.isHasPrecursorMatch ? "true" : "false") << ", thresh="
+                    << (ms2IsRequirePrecursorMatch ? "true" : "false") << endl;
 
     if (ms2IsRequirePrecursorMatch && !s.isHasPrecursorMatch) return false;
 

@@ -1680,6 +1680,7 @@ class SearchParameters {
     int ms2MinNumUniqueMatches = 0;
     float ms2PpmTolr = 20;
     float ms2MinIntensity = 0;
+    bool ms2IsRequirePrecursorMatch = false;
 
     /** New Param 2020-05-04 **/
     map<string, int> ms2MinNumDiagnosticMatchesMap {};
@@ -1746,6 +1747,7 @@ class SearchParameters {
         encodedParams = encodedParams + "ms2MinNumUniqueMatches" + "=" + to_string(ms2MinNumUniqueMatches) + ";";
         encodedParams = encodedParams + "ms2PpmTolr" + "=" + to_string(ms2PpmTolr) + ";";
         encodedParams = encodedParams + "ms2MinIntensity" + "=" + to_string(ms2MinIntensity) + ";";
+        encodedParams = encodedParams + "ms2IsRequirePrecursorMatch"  + "=" + to_string(ms2IsRequirePrecursorMatch) + ";"; //Issue 390
 
         // END SearchParameters
 

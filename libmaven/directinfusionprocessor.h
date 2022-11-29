@@ -118,7 +118,6 @@ public:
     string ms2DiagnosticFragmentLabelTag = "*"; //here instead of LipidSearchParameters only because deprecated
     string ms2sn1FragmentLabelTag = "@"; //here instead of LipidSearchParameters only because deprecated
     string ms2sn2FragmentLabelTag = "$"; //here instead of LipidSearchParameters only because deprecated
-    bool ms2IsRequirePrecursorMatch = false; //Issue 390
 
     /** ===================
      * MS3 SEARCH RELATED

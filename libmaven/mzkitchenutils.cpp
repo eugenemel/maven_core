@@ -357,7 +357,7 @@ bool LCLipidSearchParameters::isMatchPassesLCLipidSearchThresholds(
                 adductName,
                 ms2MinNumMatches,
                 ms2MinNumDiagnosticMatches,
-                false, // TODO: refactor precursor into basic search params, will be available here
+                ms2IsRequirePrecursorMatch,
                 debug);
 }
 string MzkitchenMetaboliteSearchParameters::encodeParams() {

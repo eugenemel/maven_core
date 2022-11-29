@@ -3559,7 +3559,6 @@ string DirectInfusionSearchParameters::encodeParams(){
     encodedParams = encodedParams + "ms2DiagnosticFragmentLabelTag" + "=" + ms2DiagnosticFragmentLabelTag + ";";
     encodedParams = encodedParams + "ms2sn1FragmentLabelTag" + "=" + ms2sn1FragmentLabelTag + ";";
     encodedParams = encodedParams + "ms2sn2FragmentLabelTag" + "=" + ms2sn2FragmentLabelTag + ";";
-    encodedParams = encodedParams + "ms2IsRequirePrecursorMatch" + "=" + to_string(ms2IsRequirePrecursorMatch) + ";"; //Issue 390
 
     encodedParams = encodedParams + "ms2MinNumDiagnosticMatchesMap" + "=" + "{";
 
