@@ -3276,7 +3276,7 @@ bool LipidParameterGroup::isMatchPassSingleIntThreshold(
         thresholdVal = intOverrideMap[singleStringKey];
     }
 
-    return thresholdVal >= fragmentationMatchScoreVal;
+    return fragmentationMatchScoreVal >= thresholdVal;
 }
 
 bool LipidParameterGroup::isMatchPassesLipidSearchThresholds(
