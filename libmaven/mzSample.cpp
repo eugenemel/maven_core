@@ -3065,6 +3065,16 @@ string LipidParameterGroup::getEncodedLipidParameters(string tupleMapDelimiter, 
     encodedParams = encodedParams + "ms2MinNumAcylMatchesByLipidClassAndAdduct" + "=" +
             encodeByLipidToClassAndAdductToIntMap(ms2MinNumAcylMatchesByLipidClassAndAdduct, tupleMapDelimiter, internalMapDelimiter);
 
+    //Issue 588
+    encodedParams = encodedParams + "validClassAdducts" + "=";
+    for (unsigned int i = 0; i < validClassAdducts.size(); i++) {
+        if (i>1){
+            encodedParams = encodedParams + tupleMapDelimiter;
+        }
+        encodedParams = encodedParams + "{" + validClassAdducts[i].first + internalMapDelimiter + validClassAdducts[i].second + "}";
+    }
+    encodedParams = encodedParams + ";";
+
     return encodedParams;
 }
 
@@ -3132,6 +3142,23 @@ void LipidParameterGroup::fillInLipidParameters(unordered_map<string, string> de
                     ms2MinNumAcylMatchesByLipidClassAndAdduct,
                     tupleMapDelimiter,
                     internalMapDelimiter);
+    }
+
+    if (decodedMap.find("validClassAdducts") != decodedMap.end()) {
+        string encodedValidClassAdducts = decodedMap["validClassAdducts"];
+        vector<string> pairs;
+        mzUtils::split(encodedValidClassAdducts, tupleMapDelimiter, pairs);
+
+        for (auto pair : pairs) {
+            if (pair.length() > 2 && pair[0] == '{' && pair[pair.length()-1] == '}') {
+                auto cleanedPair = pair.substr(pair.size() - 2);
+                vector<string> cleanedPairVector{};
+                mzUtils::split(cleanedPair, internalMapDelimiter, cleanedPairVector);
+                if (cleanedPairVector.size() == 2) {
+                    validClassAdducts.push_back(make_pair(cleanedPairVector[0], cleanedPairVector[1]));
+                }
+            }
+        }
     }
 }
 

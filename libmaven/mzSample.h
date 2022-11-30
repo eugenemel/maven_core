@@ -1903,6 +1903,8 @@ public:
     map<pair<string, string>, int> ms2MinNumAcylMatchesByLipidClassAndAdduct{};
     map<pair<string, string>, bool> ms2IsRequirePrecursorMatchByLipidClassAndAdduct{};
 
+    vector<pair<string, string>> validClassAdducts{}; //empty implies no filter
+
     void addByLipidClassAndAdductToIntMap(
             string encodedByClassAndAdductMap,
             map<pair<string, string>, int>& classAdductMap,
