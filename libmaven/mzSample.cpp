@@ -3305,7 +3305,7 @@ bool LipidParameterGroup::isMatchPassesLipidSearchThresholds(
 
     if (debug) cout << "ms2MinNumMatches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": scored=" << s.numMatches << ", thresh=" << ms2MinNumMatches << endl;
 
-    if (s.numMatches < ms2MinNumMatches) return false;
+    //if (s.numMatches < ms2MinNumMatches) return false;
 
     // ====== ms2MinNumDiagnosticMatches ===== //
 
@@ -3317,7 +3317,7 @@ bool LipidParameterGroup::isMatchPassesLipidSearchThresholds(
 
     if (debug) cout << "ms2MinNumDiagnosticMatches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": scored=" << s.numDiagnosticMatches << ", thresh=" << ms2MinNumDiagnosticMatches << endl;
 
-    if (s.numDiagnosticMatches < ms2MinNumDiagnosticMatches) return false;
+    //if (s.numDiagnosticMatches < ms2MinNumDiagnosticMatches) return false;
 
     // ====== ms2MinNumAcylMatches ===== //
 
@@ -3329,7 +3329,7 @@ bool LipidParameterGroup::isMatchPassesLipidSearchThresholds(
 
     if (debug) cout << "ms2MinNumAcylMatches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": scored=" << s.numAcylChainMatches << ", thresh=" << minNumAcylMatches << endl;
 
-    if (s.numAcylChainMatches < minNumAcylMatches) return false;
+    //if (s.numAcylChainMatches < minNumAcylMatches) return false;
 
     // ====== minNumSn1Matches ===== //
 
@@ -3341,7 +3341,7 @@ bool LipidParameterGroup::isMatchPassesLipidSearchThresholds(
 
     if (debug) cout << "ms2MinNumSn1Matches for lipidClass=" << lipidClass << ", adduct=" << adductName << ": scored=" << s.numSn1Matches << ", thresh=" << minNumSn1Matches << endl;
 
-    if (s.numSn1Matches < minNumSn1Matches) return false;
+    //if (s.numSn1Matches < minNumSn1Matches) return false;
 
     // ====== minNumSn2Matches ===== //
 
@@ -3353,7 +3353,13 @@ bool LipidParameterGroup::isMatchPassesLipidSearchThresholds(
 
     if (debug) cout << "ms2MinNumSn2Matches for lipidClass=" << lipidClass << ", adduct=" << ": scored=" << s.numSn2Matches << ", thresh=" <<  minNumSn2Matches << endl;
 
-    if (s.numSn2Matches < minNumSn2Matches) return false;
+    //if (s.numSn2Matches < minNumSn2Matches) return false;
+
+    if (!isMatchPassSingleIntThreshold(static_cast<int>(s.numMatches), ms2MinNumMatches, lipidClassAndAdductKey, lipidClassKey, ms2MinNumMatchesByLipidClassAndAdduct)) return false;
+    if (!isMatchPassSingleIntThreshold(static_cast<int>(s.numDiagnosticMatches), ms2MinNumDiagnosticMatches, lipidClassAndAdductKey, lipidClassKey, ms2MinNumDiagnosticMatchesByLipidClassAndAdduct)) return false;
+    if (!isMatchPassSingleIntThreshold(static_cast<int>(s.numAcylChainMatches), ms2MinNumAcylMatches, lipidClassAndAdductKey, lipidClassKey, ms2MinNumAcylMatchesByLipidClassAndAdduct)) return false;
+    if (!isMatchPassSingleIntThreshold(static_cast<int>(s.numSn1Matches), ms2sn1MinNumMatches, lipidClassAndAdductKey, lipidClassKey, ms2sn1MinNumMatchesByLipidClassAndAdduct)) return false;
+    if (!isMatchPassSingleIntThreshold(static_cast<int>(s.numSn2Matches), ms2sn2MinNumMatches, lipidClassAndAdductKey, lipidClassKey, ms2sn2MinNumMatchesByLipidClassAndAdduct)) return false;
 
     // ====== ms2IsRequirePrecursorMatch ===== //
 
