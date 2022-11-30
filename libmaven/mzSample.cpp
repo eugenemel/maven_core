@@ -3279,6 +3279,24 @@ bool LipidParameterGroup::isMatchPassSingleIntThreshold(
     return fragmentationMatchScoreVal >= thresholdVal;
 }
 
+bool LipidParameterGroup::isMatchPassSingleBoolThreshold(
+        int fragmentationMatchScoreVal,
+        bool simpleThreshold,
+        pair<string, string>& doubleStringKey,
+        pair<string, string>& singleStringKey,
+        map<pair<string, string>, bool>& boolOverrideMap){
+
+    bool thresholdVal = simpleThreshold;
+
+    if (boolOverrideMap.find(doubleStringKey) != boolOverrideMap.end()) {
+        thresholdVal = boolOverrideMap[doubleStringKey];
+    } else if (boolOverrideMap.find(singleStringKey) != boolOverrideMap.end()) {
+        thresholdVal = boolOverrideMap[singleStringKey];
+    }
+
+    return !thresholdVal || (thresholdVal && fragmentationMatchScoreVal);
+}
+
 bool LipidParameterGroup::isMatchPassesLipidSearchThresholds(
         FragmentationMatchScore& s,
         string lipidClass,
@@ -3355,12 +3373,6 @@ bool LipidParameterGroup::isMatchPassesLipidSearchThresholds(
 
     //if (s.numSn2Matches < minNumSn2Matches) return false;
 
-    if (!isMatchPassSingleIntThreshold(static_cast<int>(s.numMatches), ms2MinNumMatches, lipidClassAndAdductKey, lipidClassKey, ms2MinNumMatchesByLipidClassAndAdduct)) return false;
-    if (!isMatchPassSingleIntThreshold(static_cast<int>(s.numDiagnosticMatches), ms2MinNumDiagnosticMatches, lipidClassAndAdductKey, lipidClassKey, ms2MinNumDiagnosticMatchesByLipidClassAndAdduct)) return false;
-    if (!isMatchPassSingleIntThreshold(static_cast<int>(s.numAcylChainMatches), ms2MinNumAcylMatches, lipidClassAndAdductKey, lipidClassKey, ms2MinNumAcylMatchesByLipidClassAndAdduct)) return false;
-    if (!isMatchPassSingleIntThreshold(static_cast<int>(s.numSn1Matches), ms2sn1MinNumMatches, lipidClassAndAdductKey, lipidClassKey, ms2sn1MinNumMatchesByLipidClassAndAdduct)) return false;
-    if (!isMatchPassSingleIntThreshold(static_cast<int>(s.numSn2Matches), ms2sn2MinNumMatches, lipidClassAndAdductKey, lipidClassKey, ms2sn2MinNumMatchesByLipidClassAndAdduct)) return false;
-
     // ====== ms2IsRequirePrecursorMatch ===== //
 
     //Issue 390
@@ -3375,7 +3387,14 @@ bool LipidParameterGroup::isMatchPassesLipidSearchThresholds(
                     << (s.isHasPrecursorMatch ? "true" : "false") << ", thresh="
                     << (ms2IsRequirePrecursorMatch ? "true" : "false") << endl;
 
-    if (ms2IsRequirePrecursorMatch && !s.isHasPrecursorMatch) return false;
+    //if (ms2IsRequirePrecursorMatch && !s.isHasPrecursorMatch) return false;
+
+    if (!isMatchPassSingleIntThreshold(static_cast<int>(s.numMatches), ms2MinNumMatches, lipidClassAndAdductKey, lipidClassKey, ms2MinNumMatchesByLipidClassAndAdduct)) return false;
+    if (!isMatchPassSingleIntThreshold(static_cast<int>(s.numDiagnosticMatches), ms2MinNumDiagnosticMatches, lipidClassAndAdductKey, lipidClassKey, ms2MinNumDiagnosticMatchesByLipidClassAndAdduct)) return false;
+    if (!isMatchPassSingleIntThreshold(static_cast<int>(s.numAcylChainMatches), ms2MinNumAcylMatches, lipidClassAndAdductKey, lipidClassKey, ms2MinNumAcylMatchesByLipidClassAndAdduct)) return false;
+    if (!isMatchPassSingleIntThreshold(static_cast<int>(s.numSn1Matches), ms2sn1MinNumMatches, lipidClassAndAdductKey, lipidClassKey, ms2sn1MinNumMatchesByLipidClassAndAdduct)) return false;
+    if (!isMatchPassSingleIntThreshold(static_cast<int>(s.numSn2Matches), ms2sn2MinNumMatches, lipidClassAndAdductKey, lipidClassKey, ms2sn2MinNumMatchesByLipidClassAndAdduct)) return false;
+    if (!isMatchPassSingleBoolThreshold(s.isHasPrecursorMatch, ms2IsRequirePrecursorMatch, lipidClassAndAdductKey, lipidClassKey, ms2IsRequirePrecursorMatchByLipidClassAndAdduct)) return false;
 
     //passes all filters
     return true;

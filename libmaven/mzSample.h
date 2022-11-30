@@ -1944,6 +1944,13 @@ public:
             pair<string, string>& doubleStringKey,
             pair<string, string>& singleStringKey,
             map<pair<string, string>, int>& intOverrideMap);
+
+    bool isMatchPassSingleBoolThreshold(
+            int fragmentationMatchScoreVal,
+            bool simpleThreshold,
+            pair<string, string>& doubleStringKey,
+            pair<string, string>& singleStringKey,
+            map<pair<string, string>, bool>& boolOverrideMap);
 };
 
 //Issue 455
