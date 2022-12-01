@@ -3069,9 +3069,9 @@ string LipidParameterGroup::getEncodedLipidParameters(string tupleMapDelimiter, 
     encodedParams = encodedParams + "validClassAdducts" + "=";
     for (unsigned int i = 0; i < validClassAdducts.size(); i++) {
         if (i>0){
-            encodedParams = encodedParams + tupleMapDelimiter;
+            encodedParams = encodedParams + internalMapDelimiter;
         }
-        encodedParams = encodedParams + "{" + validClassAdducts[i].first + internalMapDelimiter + validClassAdducts[i].second + "}";
+        encodedParams = encodedParams + "{" + validClassAdducts[i].first + tupleMapDelimiter + validClassAdducts[i].second + "}";
     }
     encodedParams = encodedParams + ";";
 
@@ -3147,13 +3147,13 @@ void LipidParameterGroup::fillInLipidParameters(unordered_map<string, string> de
     if (decodedMap.find("validClassAdducts") != decodedMap.end()) {
         string encodedValidClassAdducts = decodedMap["validClassAdducts"];
         vector<string> pairs;
-        mzUtils::split(encodedValidClassAdducts, tupleMapDelimiter, pairs);
+        mzUtils::split(encodedValidClassAdducts, internalMapDelimiter, pairs);
 
         for (auto pair : pairs) {
             if (pair.length() > 2 && pair[0] == '{' && pair[pair.length()-1] == '}') {
                 auto cleanedPair = pair.substr(pair.size() - 2);
                 vector<string> cleanedPairVector{};
-                mzUtils::split(cleanedPair, internalMapDelimiter, cleanedPairVector);
+                mzUtils::split(cleanedPair, tupleMapDelimiter, cleanedPairVector);
                 if (cleanedPairVector.size() == 2) {
                     validClassAdducts.push_back(make_pair(cleanedPairVector[0], cleanedPairVector[1]));
                 }
