@@ -88,8 +88,20 @@ void MzKitchenProcessor::matchLipids_LC(
                 compound->metaDataMap.insert(make_pair(LipidSummarizationUtils::getLipidClassSummaryKey(), lipidNameComponents.lipidClass));
             }
 
-            //skip entries when the RT is out of range
             string lipidClass = compound->metaDataMap[LipidSummarizationUtils::getLipidClassSummaryKey()];
+
+            //Issue 588: skip entries unless the (class, adduct) is explicitly permitted, or no entries provided.
+            bool isValidClassAdduct = params->validClassAdducts.empty();
+            for (auto pair : params->validClassAdducts) {
+                if (pair.first == lipidClass && (pair.second == "*" || pair.second == compound->adductString)) {
+                    isValidClassAdduct = true;
+                    break;
+                }
+            }
+
+            if (!isValidClassAdduct) continue;
+
+            //skip entries when the RT is out of range
             if (params->lipidClassToRtRange.find(lipidClass) != params->lipidClassToRtRange.end()) {
                 pair<float, float> validRtRange = params->lipidClassToRtRange[lipidClass];
 
