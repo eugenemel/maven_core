@@ -3145,13 +3145,20 @@ void LipidParameterGroup::fillInLipidParameters(unordered_map<string, string> de
     }
 
     if (decodedMap.find("validClassAdducts") != decodedMap.end()) {
+
         string encodedValidClassAdducts = decodedMap["validClassAdducts"];
+
+        string encodedValidClassAdductsCleaned = encodedValidClassAdducts;
+        if (encodedValidClassAdducts.size() > 1 && encodedValidClassAdducts[encodedValidClassAdducts.size()-1] == ';') {
+            encodedValidClassAdductsCleaned = encodedValidClassAdducts.substr(0, encodedValidClassAdducts.size()-1);
+        }
+
         vector<string> pairs;
         mzUtils::split(encodedValidClassAdducts, internalMapDelimiter, pairs);
 
         for (auto pair : pairs) {
             if (pair.length() > 2 && pair[0] == '{' && pair[pair.length()-1] == '}') {
-                auto cleanedPair = pair.substr(pair.size() - 2);
+                auto cleanedPair = pair.substr(1, pair.size() - 2);
                 vector<string> cleanedPairVector{};
                 mzUtils::split(cleanedPair, tupleMapDelimiter, cleanedPairVector);
                 if (cleanedPairVector.size() == 2) {
