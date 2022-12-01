@@ -3068,7 +3068,7 @@ string LipidParameterGroup::getEncodedLipidParameters(string tupleMapDelimiter, 
     //Issue 588
     encodedParams = encodedParams + "validClassAdducts" + "=";
     for (unsigned int i = 0; i < validClassAdducts.size(); i++) {
-        if (i>1){
+        if (i>0){
             encodedParams = encodedParams + tupleMapDelimiter;
         }
         encodedParams = encodedParams + "{" + validClassAdducts[i].first + internalMapDelimiter + validClassAdducts[i].second + "}";
