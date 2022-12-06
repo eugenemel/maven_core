@@ -148,25 +148,19 @@ void MzKitchenProcessor::matchLipids_LC(
             cout << "\n";
         }
 
-        //based on scores, determine a result
-        //TODO: compare scores, summarization, etc
+        if (!scores.empty()) {
 
-        //this is a dummy for testing
-        float maxScore = -1.0f;
-        pair<Compound*, FragmentationMatchScore> bestPair;
-        for (auto score : scores) {
+            //Issue 593: guarantee non-determinism
+            sort(scores.begin(), scores.end(), [](pair<Compound*, FragmentationMatchScore>& lhs, pair<Compound*, FragmentationMatchScore>& rhs){
+                if (lhs.second.hypergeomScore == rhs.second.hypergeomScore) {
+                    return lhs.first->name < rhs.first->name;
+                } else {
+                    return lhs.second.hypergeomScore > rhs.second.hypergeomScore;
+                }
+            });
 
-            if (debug) {
-                cout << score.first->id << ", score=" << score.second.hypergeomScore << "\n";
-            }
+            pair<Compound*, FragmentationMatchScore> bestPair = scores[0];
 
-            if (score.second.hypergeomScore > maxScore) {
-                bestPair = score;
-                maxScore = score.second.hypergeomScore;
-            }
-        }
-
-        if (maxScore > -1.0f) {
             group.compound = bestPair.first;
             group.fragMatchScore = bestPair.second;
             group.fragMatchScore.mergedScore = bestPair.second.hypergeomScore;
