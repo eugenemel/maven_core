@@ -64,6 +64,8 @@ class SearchParameters;
 class PeaksSearchParameters;
 class MzKitchenProcessor;
 
+class PeakPickingAndGroupingParameters;
+
 using namespace pugi;
 using namespace mzUtils;
 using namespace std;
@@ -1759,6 +1761,48 @@ enum PeakGroupCompoundMatchingPolicy {
     ALL_MATCHES,
     SINGLE_TOP_HIT,
     TOP_SCORE_HITS
+};
+
+/**
+ * @brief The PeakPickingAndGroupingParameters class
+ *
+ * Modeled as a way to store multiple peakdetector defaults.
+ *
+ * These parameters are meant for the following workflow:
+ *
+ * [1] Determine peaks in individual samples.
+ * [2] Determine peaks in merged EIC.
+ * [3] Assemble peaks from [1] and [2] into groups.
+ * [4] Apply filters to resulting groups from [3]
+ *
+ */
+class PeakPickingAndGroupingParameters {
+public:
+
+    //peak picking
+    int peakSmoothingWindow = 5;
+    float peakRtBoundsMaxIntensityFraction = -1.0f; // do not use
+    float peakRtBoundsSlopeThreshold = -1.0f; //do not use
+    int peakBaselineSmoothingWindow = 5;
+    int peakBaselineDropTopX = 60;
+    bool peakIsComputeBounds = true;
+
+    //merged EIC
+    //TODO
+    float mergedPeakRtBoundsSlopeThreshold = 0.01f;
+    float mergedMaxToBoundsMinRatio = 1.5f;
+
+    //grouping
+    float groupMaxRtWindow = 0.25f;
+    float groupMergeOverlap = 0.8f;
+
+    //post-grouping filters
+    int filterMinGoodGroupCount = 0;
+    float filterMinQuality = 0;
+    int filterMinNoNoiseObs = 0;
+    float filterMinSignalBaselineRatio = 0;
+    float filterMinGroupIntensity = 0;
+    int filterMinPrecursorCharge = 0;
 };
 
 /**
