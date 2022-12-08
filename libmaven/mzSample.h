@@ -1803,6 +1803,10 @@ public:
     float filterMinSignalBaselineRatio = 0;
     float filterMinGroupIntensity = 0;
     int filterMinPrecursorCharge = 0;
+
+    //TODO: Encoding
+    //TODO: decoding
+    //TODO: testing of encoding/decoding
 };
 
 /**
