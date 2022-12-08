@@ -695,6 +695,8 @@ class EIC {
         static vector<PeakGroup> groupPeaksC(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, int baselineSmoothingWindow, int baselineDropTopX);
         static vector<PeakGroup> groupPeaksD(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, int baselineSmoothingWindow, int baselineDropTopX, float mergeOverlap, bool debug=false);
 
+        static vector<PeakGroup> groupPeaksE(vector<EIC*> eics, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug=false);
+
 		static EIC* eicMerge(const vector<EIC*>& eics);
 		static void removeLowRankGroups(vector<PeakGroup>&groups, unsigned int rankLimit );
 		static bool compMaxIntensity(EIC* a, EIC* b ) { return a->maxIntensity > b->maxIntensity; }
@@ -1787,14 +1789,20 @@ public:
     int peakBaselineDropTopX = 60;
     bool peakIsComputeBounds = true;
 
+    // START EIC::groupPeaksE()
     //merged EIC
-    //TODO
-    float mergedPeakRtBoundsSlopeThreshold = 0.01f;
-    float mergedMaxToBoundsMinRatio = 1.5f;
+    int mergedSmoothingWindow = 5;
+    float mergedPeakRtBoundsMaxIntensityFraction = -1.0f;
+    float mergedPeakRtBoundsSlopeThreshold = -1.0f;
+    float mergedMaxToBoundsMinRatio = -1.0f;
+    int mergedBaselineSmoothingWindow = 5;
+    int mergedBaselineDropTopX = 60;
+    bool mergedIsComputeBounds = false;
 
     //grouping
-    float groupMaxRtWindow = 0.25f;
+    float groupMaxRtDiff = 0.25f;
     float groupMergeOverlap = 0.8f;
+    // END EIC::groupPeaksE()
 
     //post-grouping filters
     int filterMinGoodGroupCount = 0;
