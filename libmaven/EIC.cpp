@@ -1933,13 +1933,28 @@ vector<PeakGroup> EIC::groupPeaksE(vector<EIC*> eics, shared_ptr<PeakPickingAndG
 
             if (debug) cout << "max: " << maxSmoothedIntensity << ", left=" << leftSmoothedIntensity << ", right=" << rightSmoothedIntensity;
 
-            if (leftSmoothedIntensity <= 0 || rightSmoothedIntensity <= 0) {
+            float boundsIntensity;
+            if (params->mergedSmoothedMaxToBoundsIntensityPolicy == SmoothedMaxToBoundsIntensityPolicy::MINIMUM) {
+                boundsIntensity = min(leftSmoothedIntensity, rightSmoothedIntensity);
+            } else if (params->mergedSmoothedMaxToBoundsIntensityPolicy == SmoothedMaxToBoundsIntensityPolicy::MAXIMUM) {
+                boundsIntensity = max(leftSmoothedIntensity, rightSmoothedIntensity);
+            } else if (params->mergedSmoothedMaxToBoundsIntensityPolicy == SmoothedMaxToBoundsIntensityPolicy::MEDIAN) {
+                boundsIntensity = 0.5f * (leftSmoothedIntensity + rightSmoothedIntensity);
+            } else {
+                cerr << "Unhandled SmoothedMaxToBoundsIntensityPolicy policy in EIC::groupPeaksE()! exiting." << endl;
+                abort();
+            }
+
+            if (debug) cout << ", boundsIntensity=" << boundsIntensity;
+
+            if (boundsIntensity <= 0.0f) {
                 passingPeaks.push_back(p);
 
                 if (debug) cout << ", peak retained.";
 
             } else {
-                float smoothedBoundsRatio = maxSmoothedIntensity / min(leftSmoothedIntensity, rightSmoothedIntensity);
+
+                float smoothedBoundsRatio = maxSmoothedIntensity / boundsIntensity;
 
                 if (debug) cout << ", ratio=" << smoothedBoundsRatio;
 
