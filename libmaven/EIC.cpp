@@ -1919,6 +1919,42 @@ vector<PeakGroup> EIC::groupPeaksE(vector<EIC*> eics, shared_ptr<PeakPickingAndG
                 params->mergedPeakRtBoundsSlopeThreshold
     );
 
+    //Issue 597: Remove peaks with insufficient ratios
+    if (params->mergedSmoothedMaxToBoundsMinRatio > 0) {
+
+        if (debug) cout << "mergedSmoothedMaxToBoundsMinRatio filtering applied." << endl;
+
+        vector<Peak> passingPeaks{};
+        for (auto p : m->peaks) {
+
+            float leftSmoothedIntensity = m->spline[p.minpos];
+            float rightSmoothedIntensity = m->spline[p.maxpos];
+            float maxSmoothedIntensity = m->spline[p.pos];
+
+            if (debug) cout << "max: " << maxSmoothedIntensity << ", left=" << leftSmoothedIntensity << ", right=" << rightSmoothedIntensity;
+
+            if (leftSmoothedIntensity <= 0 || rightSmoothedIntensity <= 0) {
+                passingPeaks.push_back(p);
+
+                if (debug) cout << ", peak retained.";
+
+            } else {
+                float smoothedBoundsRatio = maxSmoothedIntensity / min(leftSmoothedIntensity, rightSmoothedIntensity);
+
+                if (debug) cout << ", ratio=" << smoothedBoundsRatio;
+
+                if (smoothedBoundsRatio >= params->mergedSmoothedMaxToBoundsMinRatio) {
+                    passingPeaks.push_back(p);
+
+                    if (debug) cout << ", peak retained.";
+                }
+            }
+
+            if (debug) cout << endl;
+        }
+        m->peaks = passingPeaks;
+    }
+
     //RT values should never be identical for merged EIC.
     sort(m->peaks.begin(), m->peaks.end(), [](Peak& lhs, Peak& rhs){
         return lhs.rt < rhs.rt;

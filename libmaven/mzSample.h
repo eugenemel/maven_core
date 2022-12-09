@@ -1794,7 +1794,7 @@ public:
     int mergedSmoothingWindow = 5;
     float mergedPeakRtBoundsMaxIntensityFraction = -1.0f;
     float mergedPeakRtBoundsSlopeThreshold = -1.0f;
-    float mergedMaxToBoundsMinRatio = -1.0f;
+    float mergedSmoothedMaxToBoundsMinRatio = -1.0f;
     int mergedBaselineSmoothingWindow = 5;
     int mergedBaselineDropTopX = 60;
     bool mergedIsComputeBounds = false;
