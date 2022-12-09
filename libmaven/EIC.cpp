@@ -1987,13 +1987,13 @@ vector<PeakGroup> EIC::groupPeaksE(vector<EIC*> eics, shared_ptr<PeakPickingAndG
     }
 
     if (debug) {
-       cout << "EIC::groupPeaksD(): START allPeaks" << endl;
+       cout << "EIC::groupPeaksE(): START allPeaks" << endl;
        for (auto peak : allPeaks) {
            cout << fixed << setprecision(5)
                 << "(" << peak.peakMz << ", " << peak.rt << ", " << peak.peakIntensity << ") " << peak.sample->sampleName
                 << endl;
        }
-       cout << "EIC::groupPeaksD(): END allPeaks" << endl;
+       cout << "EIC::groupPeaksE(): END allPeaks" << endl;
     }
 
     //try to annotate most intense peaks first
