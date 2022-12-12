@@ -429,8 +429,10 @@ vector<int> SECTracePeak::getFractionNums() {
 
     vector<int> peakFractions(p.width);
 
+    unsigned int index = 0;
     for (int i = left_coord; i <= right_coord; i++) {
-        peakFractions.push_back(i);
+        peakFractions[index] = i;
+        index++;
     }
 
     return peakFractions;
