@@ -377,3 +377,45 @@ vector<SECTraceSimilarityCosine> SECTraceCosineSimilarityScorer::scoreTraces(
 
     return similarityScores;
 }
+
+bool SECTracePeak::isValid() {
+    if (!trace || peakNum < 0) return false;
+    if (static_cast<unsigned int>(peakNum) >= trace->peaks.size()) return false;
+
+    return true;
+}
+
+int SECTracePeak::getPeakFractionNum(){
+    if (!isValid()) return -1;
+    return static_cast<int>(trace->peaks[static_cast<unsigned int>(peakNum)].rt);
+}
+
+int SECTracePeak::getMinFractionNum(){
+    if (!isValid()) return -1;
+    return static_cast<int>(trace->peaks[static_cast<unsigned int>(peakNum)].rtmin);
+}
+
+int SECTracePeak::getMaxFractionNum(){
+    if (!isValid()) return -1;
+    return static_cast<int>(trace->peaks[static_cast<unsigned int>(peakNum)].rtmax);
+}
+
+vector<float> SECTracePeak::getSmoothedIntensities(){
+    if (!isValid()) return vector<float>{};
+    Peak p = trace->peaks[static_cast<unsigned int>(peakNum)];
+    vector<float> peakSmoothedIntensities(p.width);
+    for (unsigned int i = p.minpos; i >= p.maxpos; i++) {
+        peakSmoothedIntensities.push_back(trace->smoothedIntensities[i]);
+    }
+    return peakSmoothedIntensities;
+}
+
+vector<float> SECTracePeak::getRawIntensities(){
+    if (!isValid()) return vector<float>{};
+    Peak p = trace->peaks[static_cast<unsigned int>(peakNum)];
+    vector<float> peakRawIntensities(p.width);
+    for (unsigned int i = p.minpos; i >= p.maxpos; i++) {
+        peakRawIntensities.push_back(trace->rawIntensities[i]);
+    }
+    return peakRawIntensities;
+}

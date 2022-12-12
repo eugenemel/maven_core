@@ -173,12 +173,15 @@ public:
     SECTrace *trace=nullptr;
     int peakNum = -1;
 
+    int getPeakFractionNum();
+    int getMinFractionNum();
     int getMaxFractionNum();
-    int getLeftFractionNum();
-    int getRightFractionNum();
 
     vector<float> getSmoothedIntensities();
     vector<float> getRawIntensities();
+
+private:
+    bool isValid();
 };
 
 class SECTracePeakComparison {
