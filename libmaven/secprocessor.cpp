@@ -402,21 +402,31 @@ int SECTracePeak::getMaxFractionNum(){
 
 vector<float> SECTracePeak::getSmoothedIntensities(){
     if (!isValid()) return vector<float>{};
+
     Peak p = trace->peaks[static_cast<unsigned int>(peakNum)];
-    vector<float> peakSmoothedIntensities(p.width);
-    for (unsigned int i = p.minpos; i >= p.maxpos; i++) {
-        peakSmoothedIntensities.push_back(trace->smoothedIntensities[i]);
+    vector<float> peakSmoothedIntensities(p.width+1);
+
+    unsigned int index = 0;
+    for (unsigned int i = p.minpos; i <= p.maxpos; i++) {
+        peakSmoothedIntensities[index] = trace->smoothedIntensities[i];
+        index++;
     }
+
     return peakSmoothedIntensities;
 }
 
 vector<float> SECTracePeak::getRawIntensities(){
     if (!isValid()) return vector<float>{};
+
     Peak p = trace->peaks[static_cast<unsigned int>(peakNum)];
-    vector<float> peakRawIntensities(p.width);
-    for (unsigned int i = p.minpos; i >= p.maxpos; i++) {
-        peakRawIntensities.push_back(trace->rawIntensities[i]);
+    vector<float> peakRawIntensities(p.width+1);
+
+    unsigned int index = 0;
+    for (unsigned int i = p.minpos; i <= p.maxpos; i++) {
+        peakRawIntensities[index] = trace->rawIntensities[i];
+        index++;
     }
+
     return peakRawIntensities;
 }
 
@@ -427,7 +437,7 @@ vector<int> SECTracePeak::getFractionNums() {
     int left_coord = static_cast<int>(p.rtmin);
     int right_coord = static_cast<int>(p.rtmax);
 
-    vector<int> peakFractions(p.width);
+    vector<int> peakFractions(p.width+1);
 
     unsigned int index = 0;
     for (int i = left_coord; i <= right_coord; i++) {
