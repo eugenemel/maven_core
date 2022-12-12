@@ -167,3 +167,38 @@ public:
 };
 
 #endif // SECPROCESSOR_H
+
+class SECTracePeak {
+public:
+    SECTrace *trace=nullptr;
+    int peakNum = -1;
+
+    int getMaxFractionNum();
+    int getLeftFractionNum();
+    int getRightFractionNum();
+
+    vector<float> getSmoothedIntensities();
+    vector<float> getRawIntensities();
+};
+
+class SECTracePeakComparison {
+public:
+    SECTracePeak first;
+    SECTracePeak second;
+
+    float pearsonCorrelationSmoothed = -1.0f;
+    float pearsonCorrelationRaw = -1.0f;
+
+    float secFractionOverlap = -1.0f;
+
+    int peakCenterDistance = -1;
+
+};
+
+class SECTracePeakScorer {
+public:
+    static vector<SECTracePeakComparison> scorePeaks(
+            vector<SECTrace*> traces,
+            shared_ptr<SECSearchParameters> params,
+            bool debug);
+};
