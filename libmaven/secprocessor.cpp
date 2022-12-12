@@ -419,3 +419,15 @@ vector<float> SECTracePeak::getRawIntensities(){
     }
     return peakRawIntensities;
 }
+
+vector<int> SECTracePeak::getFractionNums() {
+    if (!isValid()) return vector<int>{};
+    Peak p = trace->peaks[static_cast<unsigned int>(peakNum)];
+    vector<int> peakFractions(p.width);
+    int frac = static_cast<int>(p.rtmin);
+    while (frac <= static_cast<int>(p.rtmax)) {
+        frac++;
+        peakFractions.push_back(frac);
+    }
+    return peakFractions;
+}

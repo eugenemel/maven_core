@@ -179,6 +179,7 @@ public:
 
     vector<float> getSmoothedIntensities();
     vector<float> getRawIntensities();
+    vector<int> getFractionNums();
 
 private:
     bool isValid();
