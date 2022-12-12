@@ -220,6 +220,11 @@ SECTrace::SECTrace(string id,
     //float minPeakIntensity = maxRawIntensity * params->trace
     for (auto p : eic->peaks) {
 
+        //Issue 598: peak width has a different meaning for LC data, involving noise estimates
+        //here, it simply means the total # of fractions the peak spans
+        //fractions are numbered as integers, so position difference can be used.
+        p.width = p.maxpos - p.minpos;
+
         float peakRawIntensity = this->rawIntensities[p.pos];
         float peakSmoothedIntensity = this->smoothedIntensities[p.pos];
 
