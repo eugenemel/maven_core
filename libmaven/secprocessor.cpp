@@ -34,6 +34,7 @@ string SECSearchParameters::encodeParams() {
     encodedParams = encodedParams + "traceMinFracTopPeakIntensity" + "=" + to_string(traceMinFracTopPeakIntensity) + ";";
     encodedParams = encodedParams + "traceMinFracTopSmoothedIntensity" + "=" + to_string(traceMinFracTopSmoothedIntensity) + ";";
     encodedParams = encodedParams + "traceMinPeakSN" + "=" + to_string(traceMinPeakSN) + ";";
+    encodedParams = encodedParams + "traceMinPeakWidth" + "=" + to_string(traceMinPeakWidth) + ";";
     encodedParams = encodedParams + "traceBaselineDropTopX" + "=" + to_string(traceBaselineDropTopX) + ";";
     encodedParams = encodedParams + "tracePeakBoundsMaxIntensityFraction" + "=" + to_string(tracePeakBoundsMaxIntensityFraction) + ";";
     encodedParams = encodedParams + "traceRtBoundsSlopeThreshold" + "=" + to_string(traceRtBoundsSlopeThreshold) + ";";
@@ -41,9 +42,12 @@ string SECSearchParameters::encodeParams() {
     // Fragment
     encodedParams = encodedParams + "fragmentIsSmoothedIntensity" + "=" + to_string(fragmentIsSmoothedIntensity) +";";
 
-    // Similarity Scoring
+    // Trace Similarity Scoring
     encodedParams = encodedParams + "similarityMinNumPeaks" + "=" + to_string(similarityMinNumPeaks) + ";";
     encodedParams = encodedParams + "similarityFractionDiffTol" + "=" + to_string(similarityFractionDiffTol) + ";";
+
+    // Peak Similarity Scoring
+    encodedParams = encodedParams + "peakSimMaxCenterDiff" + "=" + to_string(peakSimMaxCenterDiff) + ";";
 
     return encodedParams;
 }
@@ -102,6 +106,9 @@ shared_ptr<SECSearchParameters> SECSearchParameters::decode(string encodedParams
     if (decodedMap.find("traceMinPeakSN") != decodedMap.end()) {
         secSearchParameters->traceMinPeakSN = stof(decodedMap["traceMinPeakSN"]);
     }
+    if (decodedMap.find("traceMinPeakWidth") != decodedMap.end()) {
+        secSearchParameters->traceMinPeakWidth = stoi(decodedMap["traceMinPeakWidth"]);
+    }
     if (decodedMap.find("traceBaselineDropTopX") != decodedMap.end()) {
         secSearchParameters->traceBaselineDropTopX = stoi(decodedMap["traceBaselineDropTopX"]);
     }
@@ -123,6 +130,11 @@ shared_ptr<SECSearchParameters> SECSearchParameters::decode(string encodedParams
     }
     if (decodedMap.find("similarityFractionDiffTol") != decodedMap.end()) {
         secSearchParameters->similarityFractionDiffTol = stoi(decodedMap["similarityFractionDiffTol"]);
+    }
+
+    // Peak Similarity Scoring
+    if (decodedMap.find("peakSimMaxCenterDiff") != decodedMap.end()) {
+        secSearchParameters->peakSimMaxCenterDiff = stoi(decodedMap["peakSimMaxCenterDiff"]);
     }
 
     return secSearchParameters;
@@ -462,6 +474,27 @@ string SECTracePeakComparison::getPeakComparisonId() {
     return first.getPeakId() + "_" + second.getPeakId();
 }
 
+SECTracePeak::SECTracePeak(SECTrace *trace, int peakNum){
+    this->trace = trace;
+    this->peakNum = peakNum;
+}
+
+SECTracePeakComparison::SECTracePeakComparison(SECTrace *firstTrace, int firstPeakNum, SECTrace *secondTrace, int secondPeakNum){
+    this->first = SECTracePeak(firstTrace, firstPeakNum);
+    this->second = SECTracePeak(secondTrace, secondPeakNum);
+
+    //TODO: vectors need to be adjusted to maxima, these will fail
+//    pearsonCorrelationSmoothed = mzUtils::correlation(first.getSmoothedIntensities(), second.getSmoothedIntensities());
+//    pearsonCorrelationRaw = mzUtils::correlation(first.getRawIntensities(), second.getRawIntensities());
+
+    secFractionOverlap = mzUtils::checkOverlap(
+                first.getMinFractionNum(), first.getMaxFractionNum(),
+                second.getMinFractionNum(), second.getMaxFractionNum());
+
+    peakCenterDistance = abs(first.getPeakFractionNum() - second.getPeakFractionNum());
+
+}
+
 vector<SECTracePeakComparison> SECTracePeakScorer::scorePeaks(
         vector<SECTrace*> traces,
         shared_ptr<SECSearchParameters> params,
@@ -485,7 +518,19 @@ vector<SECTracePeakComparison> SECTracePeakScorer::scorePeaks(
 
             if (jthTrace->peaks.empty()) continue;
 
-            //TODO: compare peaks in ithTrace to peaks in jthTrace
+            for (unsigned int k = 0; i < ithTrace->peaks.size(); k++) {
+                Peak peakI = ithTrace->peaks.at(k);
+                for (unsigned int l = 0; l < jthTrace->peaks.size(); l++) {
+                    Peak peakJ = jthTrace->peaks.at(l);
+                    int fracDiff = static_cast<int>(abs(peakI.rt - peakJ.rt));
+                    if (fracDiff < params->peakSimMaxCenterDiff) {
+                        SECTracePeakComparison comparison = SECTracePeakComparison(
+                                    ithTrace, static_cast<int>(k),
+                                    jthTrace, static_cast<int>(l));
+                        peakComparisons.push_back(comparison);
+                    }
+                }
+            }
         }
     }
 

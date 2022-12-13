@@ -40,6 +40,7 @@ class SECSearchParameters {
      float traceMinFracTopPeakIntensity = 0.0f; // fraction of max intensity
      float traceMinFracTopSmoothedIntensity = 0.0f; // fraction of max intensity
      float traceMinPeakSN = 0.0f;
+     int traceMinPeakWidth = 0; // # of fractions in peak
      int traceBaselineDropTopX = 80; //EIC is full width
      float tracePeakBoundsMaxIntensityFraction = 0.0f;
      float traceRtBoundsSlopeThreshold = 0.01f; //minimum change in slope between peak points, as a fraction of the peak's max intensity (otherwise, reached edge of peak)
@@ -67,7 +68,7 @@ class SECSearchParameters {
       * Peak similarity scoring
       * comments:
       * ========================*/
-
+     int peakSimMaxCenterDiff = 0;
 
      string encodeParams();
      shared_ptr<SECSearchParameters> static decode(string encodedParams);
@@ -189,6 +190,9 @@ public:
 
     string getPeakId();
 
+    SECTracePeak(SECTrace *trace, int peakNum);
+    SECTracePeak();
+
 private:
     bool isValid();
 };
@@ -207,7 +211,10 @@ public:
 
     string getPeakComparisonId();
 
+    SECTracePeakComparison(SECTrace *first, int firstPeakNum, SECTrace *second, int secondPeakNum);
+
 };
+
 
 class SECTracePeakScorer {
 public:
