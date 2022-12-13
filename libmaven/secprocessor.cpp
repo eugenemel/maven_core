@@ -452,3 +452,54 @@ vector<int> SECTracePeak::getFractionNums() {
 
     return peakFractions;
 }
+
+string SECTracePeak::getPeakId() {
+    if (!isValid()) return "no_peak";
+    return trace->id + "_" + to_string(peakNum);
+}
+
+string SECTracePeakComparison::getPeakComparisonId() {
+    return first.getPeakId() + "_" + second.getPeakId();
+}
+
+vector<SECTracePeakComparison> SECTracePeakScorer::scorePeaks(
+        vector<SECTrace*> traces,
+        shared_ptr<SECSearchParameters> params,
+        bool debug){
+
+    vector<SECTracePeakComparison> peakComparisons{};
+
+    sort(traces.begin(), traces.end(), [](SECTrace* lhs, SECTrace* rhs){
+       return lhs->id < rhs->id;
+    });
+
+    for (unsigned int i = 0; i < traces.size(); i++) {
+
+        auto ithTrace = traces[i];
+
+        if (ithTrace->peaks.empty()) continue;
+
+        for (unsigned int j = i+1; j < traces.size(); j++) {
+
+            auto jthTrace = traces[j];
+
+            if (jthTrace->peaks.empty()) continue;
+
+            //TODO: compare peaks in ithTrace to peaks in jthTrace
+        }
+    }
+
+    sort(peakComparisons.begin(), peakComparisons.end(), [](SECTracePeakComparison& lhs, SECTracePeakComparison& rhs){
+        if (lhs.pearsonCorrelationSmoothed == rhs.pearsonCorrelationSmoothed) {
+            if (lhs.pearsonCorrelationRaw == rhs.pearsonCorrelationRaw) {
+                return lhs.getPeakComparisonId() <  rhs.getPeakComparisonId();
+            } else {
+                return lhs.pearsonCorrelationRaw < rhs.pearsonCorrelationRaw;
+            }
+        } else {
+            return lhs.pearsonCorrelationSmoothed < rhs.pearsonCorrelationSmoothed;
+        }
+    });
+
+    return peakComparisons;
+}

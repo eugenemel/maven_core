@@ -63,6 +63,12 @@ class SECSearchParameters {
      int similarityMinNumPeaks = 2;
      int similarityFractionDiffTol = 1;
 
+     /** =======================
+      * Peak similarity scoring
+      * comments:
+      * ========================*/
+
+
      string encodeParams();
      shared_ptr<SECSearchParameters> static decode(string encodedParams);
 };
@@ -181,6 +187,8 @@ public:
     vector<float> getRawIntensities();
     vector<int> getFractionNums();
 
+    string getPeakId();
+
 private:
     bool isValid();
 };
@@ -196,6 +204,8 @@ public:
     float secFractionOverlap = -1.0f;
 
     int peakCenterDistance = -1;
+
+    string getPeakComparisonId();
 
 };
 
