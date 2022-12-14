@@ -191,7 +191,7 @@ public:
     string getPeakId();
 
     SECTracePeak(SECTrace *trace, int peakNum);
-    SECTracePeak();
+    SECTracePeak(){}
 
 private:
     bool isValid();
