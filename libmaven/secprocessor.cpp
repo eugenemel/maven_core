@@ -417,6 +417,23 @@ int SECTracePeak::getMaxFractionNum(){
     return static_cast<int>(trace->peaks[static_cast<unsigned int>(peakNum)].rtmax);
 }
 
+int SECTracePeak::getPeakFractionIndex() {
+    if (!isValid()) return -1;
+    Peak p = trace->peaks[static_cast<unsigned int>(peakNum)];
+    return trace->fractionNums[(p.pos - p.minpos)];
+}
+
+int SECTracePeak::getMinFractionIndex() {
+    if (!isValid()) return -1;
+    return 0;
+}
+
+int SECTracePeak::getMaxFractionIndex() {
+    if (!isValid()) return -1;
+    Peak p = trace->peaks[static_cast<unsigned int>(peakNum)];
+    return trace->fractionNums[(p.maxpos - p.minpos)];
+}
+
 vector<float> SECTracePeak::getSmoothedIntensities(){
     if (!isValid()) return vector<float>{};
 
