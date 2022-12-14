@@ -264,9 +264,14 @@ vector<string> SECTrace::getPeakSummaryString(
         string max = maxPrefix + to_string(i);
         string right = rightPrefix + to_string(i);
 
-        unsigned int left_coord = static_cast<unsigned int>(p.rtmin - params->traceMinFractionNumber + 0.00001f);
-        unsigned int max_coord = static_cast<unsigned int>(p.rt - params->traceMinFractionNumber + 0.00001f);
-        unsigned int right_coord = static_cast<unsigned int>(p.rtmax - params->traceMinFractionNumber + 0.00001f);
+        //Issue 598 testing: use saved indices of smoothed intensity vector instead of from fraction values
+        unsigned int left_coord = p.minpos;
+        unsigned int max_coord = p.pos;
+        unsigned int right_coord = p.maxpos;
+
+//        unsigned int left_coord = static_cast<unsigned int>(p.rtmin - params->traceMinFractionNumber + 0.00001f);
+//        unsigned int max_coord = static_cast<unsigned int>(p.rt - params->traceMinFractionNumber + 0.00001f);
+//        unsigned int right_coord = static_cast<unsigned int>(p.rtmax - params->traceMinFractionNumber + 0.00001f);
 
         if (summaryString.at(left_coord) != empty) {
             summaryString[left_coord] = summaryString[left_coord] + ", " + left;
