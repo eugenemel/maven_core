@@ -487,6 +487,12 @@ SECTracePeakComparison::SECTracePeakComparison(SECTrace *firstTrace, int firstPe
 //    pearsonCorrelationSmoothed = mzUtils::correlation(first.getSmoothedIntensities(), second.getSmoothedIntensities());
 //    pearsonCorrelationRaw = mzUtils::correlation(first.getRawIntensities(), second.getRawIntensities());
 
+    //TODO: relocate this to utility method, e.g. mzUtils::maxCenteredCorrelation()
+    auto max_val_first = max_element(first.getSmoothedIntensities().begin(), first.getSmoothedIntensities().end());
+    auto max_val_second = max_element(second.getSmoothedIntensities().begin(), second.getSmoothedIntensities().end());
+
+    //auto max_index = distance(first.getSmoothedIntensities(), max_val_first);
+
     secFractionOverlap = mzUtils::checkOverlap(
                 first.getMinFractionNum(), first.getMaxFractionNum(),
                 second.getMinFractionNum(), second.getMaxFractionNum());
