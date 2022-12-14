@@ -269,10 +269,6 @@ vector<string> SECTrace::getPeakSummaryString(
         unsigned int max_coord = p.pos;
         unsigned int right_coord = p.maxpos;
 
-//        unsigned int left_coord = static_cast<unsigned int>(p.rtmin - params->traceMinFractionNumber + 0.00001f);
-//        unsigned int max_coord = static_cast<unsigned int>(p.rt - params->traceMinFractionNumber + 0.00001f);
-//        unsigned int right_coord = static_cast<unsigned int>(p.rtmax - params->traceMinFractionNumber + 0.00001f);
-
         if (summaryString.at(left_coord) != empty) {
             summaryString[left_coord] = summaryString[left_coord] + ", " + left;
         } else {
@@ -425,7 +421,7 @@ int SECTracePeak::getMaxFractionNum(){
 int SECTracePeak::getPeakFractionIndex() {
     if (!isValid()) return -1;
     Peak p = trace->peaks[static_cast<unsigned int>(peakNum)];
-    return trace->fractionNums[(p.pos - p.minpos)];
+    return static_cast<int>(p.pos - p.minpos);
 }
 
 int SECTracePeak::getMinFractionIndex() {
@@ -436,7 +432,7 @@ int SECTracePeak::getMinFractionIndex() {
 int SECTracePeak::getMaxFractionIndex() {
     if (!isValid()) return -1;
     Peak p = trace->peaks[static_cast<unsigned int>(peakNum)];
-    return trace->fractionNums[(p.maxpos - p.minpos)];
+    return static_cast<int>(p.maxpos - p.minpos);
 }
 
 vector<float> SECTracePeak::getSmoothedIntensities(){
