@@ -184,10 +184,9 @@ public:
     int getMinFractionNum();
     int getMaxFractionNum();
 
-    //positions in each peak's intensity vectors
-    int getPeakFractionIndex();
-    int getMinFractionIndex();
-    int getMaxFractionIndex();
+    // position according to peak intensity vectors (getSmoothedIntensities(), getRawIntensities())
+    // use peak.pos for position according to trace intensity vector
+    int getPeakIndex();
 
     vector<float> getSmoothedIntensities();
     vector<float> getRawIntensities();
