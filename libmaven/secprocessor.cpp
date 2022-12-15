@@ -424,7 +424,7 @@ int SECTracePeak::getPeakIndex() {
     return static_cast<int>(p.pos - p.minpos);
 }
 
-vector<float> SECTracePeak::getSmoothedIntensities(){
+vector<float> SECTracePeak::getSmoothedIntensities(pair<int, int> comparableRange){
     if (!isValid()) return vector<float>{};
 
     Peak p = trace->peaks[static_cast<unsigned int>(peakNum)];
@@ -436,10 +436,14 @@ vector<float> SECTracePeak::getSmoothedIntensities(){
         index++;
     }
 
+    if (comparableRange.first >= 0 && comparableRange.second >= 0) {
+        peakSmoothedIntensities = getComparableRangeSubset(peakSmoothedIntensities, comparableRange);
+    }
+
     return peakSmoothedIntensities;
 }
 
-vector<float> SECTracePeak::getRawIntensities(){
+vector<float> SECTracePeak::getRawIntensities(pair<int, int> comparableRange){
     if (!isValid()) return vector<float>{};
 
     Peak p = trace->peaks[static_cast<unsigned int>(peakNum)];
@@ -451,10 +455,14 @@ vector<float> SECTracePeak::getRawIntensities(){
         index++;
     }
 
+    if (comparableRange.first >= 0 && comparableRange.second >= 0) {
+        peakRawIntensities = getComparableRangeSubset(peakRawIntensities, comparableRange);
+    }
+
     return peakRawIntensities;
 }
 
-vector<int> SECTracePeak::getFractionNums() {
+vector<int> SECTracePeak::getFractionNums(pair<int, int> comparableRange) {
     if (!isValid()) return vector<int>{};
     Peak p = trace->peaks[static_cast<unsigned int>(peakNum)];
 
@@ -467,6 +475,10 @@ vector<int> SECTracePeak::getFractionNums() {
     for (int i = left_coord; i <= right_coord; i++) {
         peakFractions[index] = i;
         index++;
+    }
+
+    if (comparableRange.first >= 0 && comparableRange.second >= 0) {
+        peakFractions = getComparableRangeSubset(peakFractions, comparableRange);
     }
 
     return peakFractions;
@@ -486,19 +498,66 @@ SECTracePeak::SECTracePeak(SECTrace *trace, int peakNum){
     this->peakNum = peakNum;
 }
 
+vector<float> SECTracePeak::getComparableRangeSubset(const vector<float>&x, pair<int, int> comparableRange){
+    unsigned int N = comparableRange.first + comparableRange.second + 1;
+
+    vector<float> subset(N);
+
+    unsigned int index = 0;
+
+    unsigned int start = static_cast<unsigned int>(getPeakIndex() - comparableRange.first);
+    unsigned int stop = static_cast<unsigned int>(getPeakIndex() + comparableRange.second);
+
+    for (unsigned int i = start; i <= stop; i++) {
+        subset[index] = x[i];
+        index++;
+    }
+
+    return subset;
+}
+
+vector<int> SECTracePeak::getComparableRangeSubset(const vector<int>& x, pair<int, int> comparableRange) {
+    unsigned int N = comparableRange.first + comparableRange.second + 1;
+
+    vector<int> subset(N);
+
+    unsigned int index = 0;
+
+    unsigned int start = static_cast<unsigned int>(getPeakIndex() - comparableRange.first);
+    unsigned int stop = static_cast<unsigned int>(getPeakIndex() + comparableRange.second);
+
+    for (unsigned int i = start; i <= stop; i++) {
+        subset[index] = x[i];
+        index++;
+    }
+
+    return subset;
+}
+
+void SECTracePeakComparison::computeComparableRange(){
+    int firstPeakIndex = first.getPeakIndex();
+    int secondPeakIndex = second.getPeakIndex();
+
+    int firstPointsLeftOfMax = firstPeakIndex;
+    int firstPointsRightOfMax = first.getRawIntensities().size()-firstPeakIndex-1; // exclude max
+
+    int secondPointsLeftOfMax = secondPeakIndex;
+    int secondPointsRightOfMax = second.getRawIntensities().size()-secondPeakIndex-1;
+
+    int finalPointsLeftOfMax = min(firstPointsLeftOfMax, secondPointsLeftOfMax);
+    int finalPointsRightOfMax = min(firstPointsRightOfMax, secondPointsRightOfMax);
+
+    comparableRange = make_pair(finalPointsLeftOfMax, finalPointsRightOfMax);
+}
+
 SECTracePeakComparison::SECTracePeakComparison(SECTrace *firstTrace, int firstPeakNum, SECTrace *secondTrace, int secondPeakNum){
     this->first = SECTracePeak(firstTrace, firstPeakNum);
     this->second = SECTracePeak(secondTrace, secondPeakNum);
 
-    //TODO: vectors need to be adjusted to maxima, these will fail
-//    pearsonCorrelationSmoothed = mzUtils::correlation(first.getSmoothedIntensities(), second.getSmoothedIntensities());
-//    pearsonCorrelationRaw = mzUtils::correlation(first.getRawIntensities(), second.getRawIntensities());
+    computeComparableRange();
 
-    //TODO: relocate this to utility method, e.g. mzUtils::maxCenteredCorrelation()
-    auto max_val_first = max_element(first.getSmoothedIntensities().begin(), first.getSmoothedIntensities().end());
-    auto max_val_second = max_element(second.getSmoothedIntensities().begin(), second.getSmoothedIntensities().end());
-
-    //auto max_index = distance(first.getSmoothedIntensities(), max_val_first);
+    pearsonCorrelationSmoothed = mzUtils::correlation(first.getSmoothedIntensities(comparableRange), second.getSmoothedIntensities(comparableRange));
+    pearsonCorrelationRaw = mzUtils::correlation(first.getRawIntensities(comparableRange), second.getSmoothedIntensities(comparableRange));
 
     secFractionOverlap = mzUtils::checkOverlap(
                 first.getMinFractionNum(), first.getMaxFractionNum(),

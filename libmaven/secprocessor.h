@@ -188,9 +188,11 @@ public:
     // use peak.pos for position according to trace intensity vector
     int getPeakIndex();
 
-    vector<float> getSmoothedIntensities();
-    vector<float> getRawIntensities();
-    vector<int> getFractionNums();
+    //comparableRange is <number left of peakIndex, number right of peakIndex>.
+    //if unspecified, return the whole range (from peak min to max)
+    vector<float> getSmoothedIntensities(pair<int, int> comparableRange = make_pair(-1, -1));
+    vector<float> getRawIntensities(pair<int, int> comparableRange = make_pair(-1, -1));
+    vector<int> getFractionNums(pair<int, int> comparableRange = make_pair(-1, -1));
 
     string getPeakId();
 
@@ -199,12 +201,17 @@ public:
 
 private:
     bool isValid();
+    vector<float> getComparableRangeSubset(const vector<float>&x, pair<int, int> comparableRange);
+    vector<int> getComparableRangeSubset(const vector<int>&x, pair<int, int> comparableRange);
 };
 
 class SECTracePeakComparison {
 public:
     SECTracePeak first;
     SECTracePeak second;
+
+    // <number left of pivot, number right of pivot>
+    pair<int, int> comparableRange = make_pair(-1, -1);
 
     float pearsonCorrelationSmoothed = -1.0f;
     float pearsonCorrelationRaw = -1.0f;
@@ -216,6 +223,9 @@ public:
     string getPeakComparisonId();
 
     SECTracePeakComparison(SECTrace *first, int firstPeakNum, SECTrace *second, int secondPeakNum);
+
+private:
+    void computeComparableRange();
 
 };
 
