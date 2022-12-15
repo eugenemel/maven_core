@@ -216,6 +216,9 @@ public:
     float pearsonCorrelationSmoothed = -1.0f;
     float pearsonCorrelationRaw = -1.0f;
 
+    //TODO: this metric returns 1 if one is a proper subset of the other
+    //It would be useful to include a metric that penalizes proper subsets
+    //Additionally, weight the overlap by proportion of area?
     float secFractionOverlap = -1.0f;
 
     int peakCenterDistance = -1;
