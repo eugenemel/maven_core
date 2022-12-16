@@ -509,6 +509,10 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
                     if (diff < 1e-10f) {
                         leftMinimumIntensityIndex = leftIndex;
                         if (debug) {
+                            cout << "diff L: (" << leftIndex << ", " << leftNextIndex << "): ("
+                                 << spline[leftIndex] << ", " << spline[leftNextIndex] << ")"
+                                 << " diff = " << diff
+                                 << endl;
                             cout << "slope < rtBoundsSlopeThreshold --> L=" <<  leftMinimumIntensityIndex << endl;
                         }
                         break;
@@ -578,6 +582,10 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
                     if (diff < 1e-10f) {
                         rightMinimumIntensityIndex = rightIndex;
                         if (debug) {
+                            cout << "diff R: (" << rightIndex << ", " << rightNextIndex << "): ("
+                                 << spline[rightIndex] << ", " << spline[rightNextIndex] << ")"
+                                 << " diff = " << diff
+                                 << endl;
                             cout << "slope < rtBoundsSlopeThreshold --> R=" << rightMinimumIntensityIndex << endl;
                         }
                         break;
