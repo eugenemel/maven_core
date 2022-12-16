@@ -478,11 +478,6 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
 
             while(true) {
 
-                //stop at the end of the EIC - this is the last valid point to the left
-                if (leftIndex == 0) {
-                    break;
-                }
-
                 //if this point is below the baseline, it is invalid, stop immediately
                 if (intensity[leftIndex] < intensityThreshold) {
                     break;
@@ -496,6 +491,11 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
                 //this point is valid, compare for minimum intensity
                 if (spline[leftIndex] < spline[leftMinimumIntensityIndex]) {
                     leftMinimumIntensityIndex = leftIndex;
+                }
+
+                //stop at the end of the EIC - this is the last valid point to the left.
+                if (leftIndex == 0) {
+                    break;
                 }
 
                 //Issue 572: Use slope based peak boundary detection
@@ -547,11 +547,6 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
 
             while(true) {
 
-                //stop at the end of the EIC - this is the last valid point to the right
-                if (rightIndex == N-1) {
-                    break;
-                }
-
                 //if this point is below the baseline, it is invalid, stop immediately
                 if (intensity[rightIndex] < intensityThreshold) {
                     break;
@@ -565,6 +560,11 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
                 //this point is valid, compare for minimum intensity
                 if (spline[rightIndex] < spline[rightMinimumIntensityIndex]) {
                     rightMinimumIntensityIndex = rightIndex;
+                }
+
+                //stop at the end of the EIC - this is the last valid point to the right
+                if (rightIndex == N-1) {
+                    break;
                 }
 
                 //Issue 572: Use slope based peak boundary detection
