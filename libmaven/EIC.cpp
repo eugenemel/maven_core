@@ -467,6 +467,8 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
 
             if (debug) {
                 cout << "intensityThreshold: " << intensityThreshold << endl;
+                cout << "rtBoundsMaxIntensityFraction: " << rtBoundsMaxIntensityFraction << endl;
+                cout << "rtBoundsSlopeThreshold: " << rtBoundsSlopeThreshold << endl;
             }
 
             Peak* peak = addPeak(static_cast<int>(i));
