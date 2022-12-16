@@ -550,6 +550,20 @@ void SECTracePeakComparison::computeComparableRange(){
     comparableRange = make_pair(finalPointsLeftOfMax, finalPointsRightOfMax);
 }
 
+void SECTracePeakComparison::computeSecFractionJaccard(){
+
+    int intersectMinFrac = max(first.getMinFractionNum(), second.getMinFractionNum());
+    int intersectMaxFrac = min(first.getMaxFractionNum(), second.getMaxFractionNum());
+
+    int minFrac = min(first.getMinFractionNum(), second.getMinFractionNum());
+    int maxFrac = max(first.getMaxFractionNum(), second.getMaxFractionNum());
+
+    int numIntersect = intersectMaxFrac - intersectMinFrac + 1;
+    int numUnion = maxFrac - minFrac + 1;
+
+    secFractionJaccard = static_cast<float>(numIntersect)/static_cast<float>(numUnion);
+}
+
 SECTracePeakComparison::SECTracePeakComparison(SECTrace *firstTrace, int firstPeakNum, SECTrace *secondTrace, int secondPeakNum){
     this->first = SECTracePeak(firstTrace, firstPeakNum);
     this->second = SECTracePeak(secondTrace, secondPeakNum);
@@ -563,8 +577,20 @@ SECTracePeakComparison::SECTracePeakComparison(SECTrace *firstTrace, int firstPe
                 first.getMinFractionNum(), first.getMaxFractionNum(),
                 second.getMinFractionNum(), second.getMaxFractionNum());
 
+    computeSecFractionJaccard();
+
     peakCenterDistance = abs(first.getPeakFractionNum() - second.getPeakFractionNum());
 
+}
+
+void SECTracePeakComparison::printSummary() {
+    cout << getPeakComparisonId() << ":\n"
+         << "\tpearsonCorrelationSmoothed: " << pearsonCorrelationSmoothed << "\n"
+         << "\tpearsonCorrelationRaw: " << pearsonCorrelationRaw << "\n"
+         << "\tsecFractionOverlap: " << secFractionOverlap << "\n"
+         << "\tsecFractionJaccard: " << secFractionJaccard << "\n"
+         << "\tpeakCenterDistance: " << peakCenterDistance
+         << endl;
 }
 
 vector<SECTracePeakComparison> SECTracePeakScorer::scorePeaks(
