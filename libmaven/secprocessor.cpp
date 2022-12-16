@@ -607,12 +607,14 @@ vector<SECTracePeakComparison> SECTracePeakScorer::scorePeaks(
     for (unsigned int i = 0; i < traces.size(); i++) {
 
         auto ithTrace = traces[i];
+        if (debug)  cout << "i=" << i << ": " << ithTrace->id << ", " << ithTrace->peaks.size() << " peaks." << endl;
 
         if (ithTrace->peaks.empty()) continue;
 
         for (unsigned int j = i+1; j < traces.size(); j++) {
 
             auto jthTrace = traces[j];
+            if (debug)  cout << "j=" << j << ": " << jthTrace->id << ", " << jthTrace->peaks.size() << " peaks." << endl;
 
             if (jthTrace->peaks.empty()) continue;
 
@@ -620,11 +622,17 @@ vector<SECTracePeakComparison> SECTracePeakScorer::scorePeaks(
                 Peak peakI = ithTrace->peaks.at(k);
                 for (unsigned int l = 0; l < jthTrace->peaks.size(); l++) {
                     Peak peakJ = jthTrace->peaks.at(l);
+
                     int fracDiff = static_cast<int>(abs(peakI.rt - peakJ.rt));
+                    if (debug) cout << "((i, j), (k, l)): " << "((" << i << ", " << j << "), (" << k << ", " << l << ")): fracDiff = " << fracDiff << endl;
+
                     if (fracDiff <= params->peakSimMaxCenterDiff) {
                         SECTracePeakComparison comparison = SECTracePeakComparison(
                                     ithTrace, static_cast<int>(k),
                                     jthTrace, static_cast<int>(l));
+
+                        if (debug) comparison.printSummary();
+
                         peakComparisons.push_back(comparison);
                     }
                 }
