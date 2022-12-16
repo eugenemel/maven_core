@@ -621,7 +621,7 @@ vector<SECTracePeakComparison> SECTracePeakScorer::scorePeaks(
                 for (unsigned int l = 0; l < jthTrace->peaks.size(); l++) {
                     Peak peakJ = jthTrace->peaks.at(l);
                     int fracDiff = static_cast<int>(abs(peakI.rt - peakJ.rt));
-                    if (fracDiff < params->peakSimMaxCenterDiff) {
+                    if (fracDiff <= params->peakSimMaxCenterDiff) {
                         SECTracePeakComparison comparison = SECTracePeakComparison(
                                     ithTrace, static_cast<int>(k),
                                     jthTrace, static_cast<int>(l));
