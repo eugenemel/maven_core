@@ -624,9 +624,12 @@ vector<SECTracePeakComparison> SECTracePeakScorer::scorePeaks(
                     Peak peakJ = jthTrace->peaks.at(l);
 
                     int fracDiff = static_cast<int>(abs(peakI.rt - peakJ.rt));
-                    if (debug) cout << "(i[k], j[l]): " << "(" << i << "[" << k << "], " << j << "[" << l << "]) fracDiff = " << fracDiff << endl;
+                    if (debug) cout << "(i[k], j[l]): " << "(" << i << "[" << k << "], " << j << "[" << l << "]) fracDiff = " << fracDiff;
 
                     if (fracDiff <= params->peakSimMaxCenterDiff) {
+
+                        if (debug) cout << " (comparison)" << endl;
+
                         SECTracePeakComparison comparison = SECTracePeakComparison(
                                     ithTrace, static_cast<int>(k),
                                     jthTrace, static_cast<int>(l));
@@ -634,6 +637,8 @@ vector<SECTracePeakComparison> SECTracePeakScorer::scorePeaks(
                         if (debug) comparison.printSummary();
 
                         peakComparisons.push_back(comparison);
+                    } else if (debug) {
+                        cout << " (no comparison)" << endl;
                     }
                 }
             }
