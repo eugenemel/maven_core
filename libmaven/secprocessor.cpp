@@ -618,7 +618,7 @@ vector<SECTracePeakComparison> SECTracePeakScorer::scorePeaks(
 
             if (jthTrace->peaks.empty()) continue;
 
-            for (unsigned int k = 0; i < ithTrace->peaks.size(); k++) {
+            for (unsigned int k = 0; k < ithTrace->peaks.size(); k++) {
                 Peak peakI = ithTrace->peaks.at(k);
                 for (unsigned int l = 0; l < jthTrace->peaks.size(); l++) {
                     Peak peakJ = jthTrace->peaks.at(l);
