@@ -624,7 +624,7 @@ vector<SECTracePeakComparison> SECTracePeakScorer::scorePeaks(
                     Peak peakJ = jthTrace->peaks.at(l);
 
                     int fracDiff = static_cast<int>(abs(peakI.rt - peakJ.rt));
-                    if (debug) cout << "((i, j), (k, l)): " << "((" << i << ", " << j << "), (" << k << ", " << l << ")): fracDiff = " << fracDiff << endl;
+                    if (debug) cout << "(i[k], j[l]): " << "(" << i << "[" << k << "], " << j << "[" << l << "]) fracDiff = " << fracDiff << endl;
 
                     if (fracDiff <= params->peakSimMaxCenterDiff) {
                         SECTracePeakComparison comparison = SECTracePeakComparison(
@@ -640,10 +640,12 @@ vector<SECTracePeakComparison> SECTracePeakScorer::scorePeaks(
         }
     }
 
+    if (debug) cout << "Retained " << peakComparisons.size() << " peak comparisons." << endl;
+
     sort(peakComparisons.begin(), peakComparisons.end(), [](SECTracePeakComparison& lhs, SECTracePeakComparison& rhs){
         if (lhs.pearsonCorrelationSmoothed == rhs.pearsonCorrelationSmoothed) {
             if (lhs.pearsonCorrelationRaw == rhs.pearsonCorrelationRaw) {
-                return lhs.getPeakComparisonId() <  rhs.getPeakComparisonId();
+                return lhs.getPeakComparisonId() < rhs.getPeakComparisonId();
             } else {
                 return lhs.pearsonCorrelationRaw < rhs.pearsonCorrelationRaw;
             }
