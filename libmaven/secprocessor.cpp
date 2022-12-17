@@ -642,7 +642,11 @@ vector<SECTracePeakComparison> SECTracePeakScorer::scorePeaks(
                     }
                 }
             }
+
+            if (debug) cout << "Completed j=" << j << ": " << jthTrace->id << endl;
         }
+
+        if (debug) cout << "Completed i=" << i << ": " << ithTrace->id << endl;
     }
 
     if (debug) cout << "Retained " << peakComparisons.size() << " peak comparisons." << endl;
