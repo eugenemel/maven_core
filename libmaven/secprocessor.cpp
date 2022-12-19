@@ -240,7 +240,10 @@ SECTrace::SECTrace(string id,
         float peakRawIntensity = this->rawIntensities[p.pos];
         float peakSmoothedIntensity = this->smoothedIntensities[p.pos];
 
-        if (peakRawIntensity >= rawIntensityThreshold && peakSmoothedIntensity >= smoothedIntensityThreshold && p.signalBaselineRatio >= params->traceMinPeakSN) {
+        if (peakRawIntensity >= rawIntensityThreshold
+                && peakSmoothedIntensity >= smoothedIntensityThreshold
+                && p.signalBaselineRatio >= params->traceMinPeakSN
+                && p.width >= static_cast<unsigned int>(params->traceMinPeakWidth)) {
             this->peaks.push_back(p);
         }
     }
