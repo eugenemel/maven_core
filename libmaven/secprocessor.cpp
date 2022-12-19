@@ -48,6 +48,10 @@ string SECSearchParameters::encodeParams() {
 
     // Peak Similarity Scoring
     encodedParams = encodedParams + "peakSimMaxCenterDiff" + "=" + to_string(peakSimMaxCenterDiff) + ";";
+    encodedParams = encodedParams + "peakSimMinSecFractionOverlap" + "=" + to_string(peakSimMinSecFractionOverlap) + ";";
+    encodedParams = encodedParams + "peakSimMinSecFractionJaccard" + "=" + to_string(peakSimMinSecFractionJaccard) + ";";
+    encodedParams = encodedParams + "peakSimMinSmoothedCorrelation" + "=" + to_string(peakSimMinSmoothedCorrelation) + ";";
+    encodedParams = encodedParams + "peakSimMinRawCorrelation" + "=" + to_string(peakSimMinRawCorrelation) + ";";
 
     return encodedParams;
 }
@@ -135,6 +139,18 @@ shared_ptr<SECSearchParameters> SECSearchParameters::decode(string encodedParams
     // Peak Similarity Scoring
     if (decodedMap.find("peakSimMaxCenterDiff") != decodedMap.end()) {
         secSearchParameters->peakSimMaxCenterDiff = stoi(decodedMap["peakSimMaxCenterDiff"]);
+    }
+    if (decodedMap.find("peakSimMinSecFractionOverlap") != decodedMap.end()) {
+        secSearchParameters->peakSimMinSecFractionOverlap = stof(decodedMap["peakSimMinSecFractionOverlap"]);
+    }
+    if (decodedMap.find("peakSimMinSecFractionJaccard") != decodedMap.end()) {
+        secSearchParameters->peakSimMinSecFractionJaccard = stof(decodedMap["peakSimMinSecFractionJaccard"]);
+    }
+    if (decodedMap.find("peakSimMinSmoothedCorrelation") != decodedMap.end()) {
+        secSearchParameters->peakSimMinSmoothedCorrelation = stof(decodedMap["peakSimMinSmoothedCorrelation"]);
+    }
+    if (decodedMap.find("peakSimMinRawCorrelation") != decodedMap.end()) {
+        secSearchParameters->peakSimMinRawCorrelation = stof(decodedMap["peakSimMinRawCorrelation"]);
     }
 
     return secSearchParameters;
@@ -575,23 +591,35 @@ int SECTracePeakComparison::getMaxFractionNum() {
     return max(first.getMaxFractionNum(), second.getMaxFractionNum());
 }
 
-SECTracePeakComparison::SECTracePeakComparison(SECTrace *firstTrace, int firstPeakNum, SECTrace *secondTrace, int secondPeakNum){
+SECTracePeakComparison::SECTracePeakComparison(SECTrace *firstTrace, int firstPeakNum, SECTrace *secondTrace, int secondPeakNum, shared_ptr<SECSearchParameters> params){
     this->first = SECTracePeak(firstTrace, firstPeakNum);
     this->second = SECTracePeak(secondTrace, secondPeakNum);
 
-    computeComparableRange();
-
-    pearsonCorrelationSmoothed = mzUtils::correlation(first.getSmoothedIntensities(comparableRange), second.getSmoothedIntensities(comparableRange));
-    pearsonCorrelationRaw = mzUtils::correlation(first.getRawIntensities(comparableRange), second.getSmoothedIntensities(comparableRange));
+    //this comparison is made prior to the creation of SECTracePeakComparison object
+    peakCenterDistance = abs(first.getPeakFractionNum() - second.getPeakFractionNum());
 
     secFractionOverlap = mzUtils::checkOverlap(
                 first.getMinFractionNum(), first.getMaxFractionNum(),
                 second.getMinFractionNum(), second.getMaxFractionNum());
 
+    if (secFractionOverlap < params->peakSimMinSecFractionOverlap) return;
+
     computeSecFractionJaccard();
 
-    peakCenterDistance = abs(first.getPeakFractionNum() - second.getPeakFractionNum());
+    if (secFractionJaccard < params->peakSimMinSecFractionJaccard) return;
 
+    computeComparableRange();
+
+    pearsonCorrelationSmoothed = mzUtils::correlation(first.getSmoothedIntensities(comparableRange), second.getSmoothedIntensities(comparableRange));
+
+    if (pearsonCorrelationSmoothed < params->peakSimMinSmoothedCorrelation) return;
+
+    pearsonCorrelationRaw = mzUtils::correlation(first.getRawIntensities(comparableRange), second.getSmoothedIntensities(comparableRange));
+
+    if (pearsonCorrelationRaw < params->peakSimMinRawCorrelation) return;
+
+    //by default, this is set to false, early returns from this constructor fail to set this to true.
+    isPassesParameterFilters = true;
 }
 
 void SECTracePeakComparison::printSummary() {
@@ -643,11 +671,18 @@ vector<SECTracePeakComparison> SECTracePeakScorer::scorePeaks(
 
                         SECTracePeakComparison comparison = SECTracePeakComparison(
                                     ithTrace, static_cast<int>(k),
-                                    jthTrace, static_cast<int>(l));
+                                    jthTrace, static_cast<int>(l),
+                                    params);
 
                         if (debug) comparison.printSummary();
 
-                        peakComparisons.push_back(comparison);
+                        if (comparison.isPassesParameterFilters) {
+                            peakComparisons.push_back(comparison);
+                            if (debug) cout << "PASSES peakSim FILTERS" << endl;
+                        } else if (debug) {
+                            cout << "FAILS peakSim FILTERS" << endl;
+                        }
+
                     } else if (debug) {
                         cout << " (no comparison)" << endl;
                     }

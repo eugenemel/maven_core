@@ -67,8 +67,15 @@ class SECSearchParameters {
      /** =======================
       * Peak similarity scoring
       * comments:
+      * parameters used to compute/return peak similarity metric.
+      * Once a comparison filter fails, the SECTracePeakSimilarity immediately stops being built.
+      * SECTracePeakScorer checks a SECTracePeakSimilarity flag to decide to keep the SECTracePeakSimilarity or not.
       * ========================*/
      int peakSimMaxCenterDiff = 0;
+     float peakSimMinSecFractionOverlap = 0.0f;
+     float peakSimMinSecFractionJaccard = 0.0f;
+     float peakSimMinSmoothedCorrelation = 0.0f;
+     float peakSimMinRawCorrelation = 0.0f;
 
      string encodeParams();
      shared_ptr<SECSearchParameters> static decode(string encodedParams);
@@ -221,13 +228,15 @@ public:
 
     int peakCenterDistance = -1;
 
+    bool isPassesParameterFilters = false;
+
     int getMinFractionNum();
     int getMaxFractionNum();
     string getPeakComparisonId();
 
     void printSummary();
 
-    SECTracePeakComparison(SECTrace *first, int firstPeakNum, SECTrace *second, int secondPeakNum);
+    SECTracePeakComparison(SECTrace *first, int firstPeakNum, SECTrace *second, int secondPeakNum, shared_ptr<SECSearchParameters> params);
 
 private:
     void computeComparableRange();
