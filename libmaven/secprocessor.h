@@ -221,6 +221,8 @@ public:
 
     int peakCenterDistance = -1;
 
+    int getMinFractionNum();
+    int getMaxFractionNum();
     string getPeakComparisonId();
 
     void printSummary();

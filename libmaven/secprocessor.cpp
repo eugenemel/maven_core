@@ -564,6 +564,14 @@ void SECTracePeakComparison::computeSecFractionJaccard(){
     secFractionJaccard = static_cast<float>(numIntersect)/static_cast<float>(numUnion);
 }
 
+int SECTracePeakComparison::getMinFractionNum() {
+    return min(first.getMinFractionNum(), second.getMinFractionNum());
+}
+
+int SECTracePeakComparison::getMaxFractionNum() {
+    return max(first.getMaxFractionNum(), second.getMaxFractionNum());
+}
+
 SECTracePeakComparison::SECTracePeakComparison(SECTrace *firstTrace, int firstPeakNum, SECTrace *secondTrace, int secondPeakNum){
     this->first = SECTracePeak(firstTrace, firstPeakNum);
     this->second = SECTracePeak(secondTrace, secondPeakNum);
