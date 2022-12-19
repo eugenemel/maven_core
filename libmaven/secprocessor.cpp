@@ -52,6 +52,8 @@ string SECSearchParameters::encodeParams() {
     encodedParams = encodedParams + "peakSimMinSecFractionJaccard" + "=" + to_string(peakSimMinSecFractionJaccard) + ";";
     encodedParams = encodedParams + "peakSimMinSmoothedCorrelation" + "=" + to_string(peakSimMinSmoothedCorrelation) + ";";
     encodedParams = encodedParams + "peakSimMinRawCorrelation" + "=" + to_string(peakSimMinRawCorrelation) + ";";
+    encodedParams = encodedParams + "peakSimMinFractionNumber" + "=" + to_string(peakSimMinFractionNumber) + ";";
+    encodedParams = encodedParams + "peakSimMaxFractionNumber" + "=" + to_string(peakSimMaxFractionNumber) + ";";
 
     return encodedParams;
 }
@@ -151,6 +153,12 @@ shared_ptr<SECSearchParameters> SECSearchParameters::decode(string encodedParams
     }
     if (decodedMap.find("peakSimMinRawCorrelation") != decodedMap.end()) {
         secSearchParameters->peakSimMinRawCorrelation = stof(decodedMap["peakSimMinRawCorrelation"]);
+    }
+    if (decodedMap.find("peakSimMinFractionNumber") != decodedMap.end()) {
+        secSearchParameters->peakSimMinFractionNumber = stoi(decodedMap["peakSimMinFractionNumber"]);
+    }
+    if (decodedMap.find("peakSimMaxFractionNumber") != decodedMap.end()) {
+        secSearchParameters->peakSimMaxFractionNumber = stoi(decodedMap["peakSimMaxFractionNumber"]);
     }
 
     return secSearchParameters;
@@ -659,8 +667,17 @@ vector<SECTracePeakComparison> SECTracePeakScorer::scorePeaks(
 
             for (unsigned int k = 0; k < ithTrace->peaks.size(); k++) {
                 Peak peakI = ithTrace->peaks.at(k);
+
+                int ithFractionNum = static_cast<int>(peakI.rt);
+                if (params->peakSimMinFractionNumber > 0 && ithFractionNum < params->peakSimMinFractionNumber) continue;
+                if (params->peakSimMaxFractionNumber > 0 && ithFractionNum > params->peakSimMaxFractionNumber) continue;
+
                 for (unsigned int l = 0; l < jthTrace->peaks.size(); l++) {
                     Peak peakJ = jthTrace->peaks.at(l);
+
+                    int jthFractionNum = static_cast<int>(peakJ.rt);
+                    if (params->peakSimMinFractionNumber > 0 && jthFractionNum < params->peakSimMinFractionNumber) continue;
+                    if (params->peakSimMaxFractionNumber > 0 && jthFractionNum > params->peakSimMaxFractionNumber) continue;
 
                     int fracDiff = static_cast<int>(abs(peakI.rt - peakJ.rt));
                     if (debug) cout << "(i[k], j[l]): " << "(" << i << "[" << k << "], " << j << "[" << l << "]) fracDiff = " << fracDiff;

@@ -76,6 +76,8 @@ class SECSearchParameters {
      float peakSimMinSecFractionJaccard = 0.0f;
      float peakSimMinSmoothedCorrelation = 0.0f;
      float peakSimMinRawCorrelation = 0.0f;
+     int peakSimMinFractionNumber = -1;
+     int peakSimMaxFractionNumber = -1;
 
      string encodeParams();
      shared_ptr<SECSearchParameters> static decode(string encodedParams);
