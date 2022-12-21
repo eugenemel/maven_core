@@ -600,6 +600,10 @@ int SECTracePeakComparison::getMaxFractionNum() {
 }
 
 SECTracePeakComparison::SECTracePeakComparison(SECTrace *firstTrace, int firstPeakNum, SECTrace *secondTrace, int secondPeakNum, shared_ptr<SECSearchParameters> params){
+
+    //explicitly set this to false initially so that early returns indicate failure to pass parameters.
+    isPassesParameterFilters = false;
+
     this->first = SECTracePeak(firstTrace, firstPeakNum);
     this->second = SECTracePeak(secondTrace, secondPeakNum);
 
