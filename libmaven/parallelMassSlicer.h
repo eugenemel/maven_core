@@ -54,7 +54,9 @@ class ParallelMassSlicer {
 		float _precursorPPM;
 
 		vector<mzSample*> samples;
-		multimap<int,mzSlice*>cache;
+        multimap<int,mzSlice*>cache;
+
+        unsigned long mergeOverlappingSlices(vector<mzSlice*>& slices, float ppm, bool debug);
 
 };
 #endif

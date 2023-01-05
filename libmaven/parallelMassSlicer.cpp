@@ -230,66 +230,68 @@ void ParallelMassSlicer::algorithmE(float ppm, float rtHalfWindowInMin) {       
             }
 		}
 
-        //sort only by m/z, rely on RT tolerance downstream
-        sort(sample_slices.begin(), sample_slices.end(), [ ](const mzSlice* lhs, const mzSlice* rhs){
-            return lhs->mz < rhs->mz;
-        });
+        unsigned long deleteCounter = mergeOverlappingSlices(sample_slices, ppm, true);
 
-        cout << "#algorithmE number of mz slices before merge: " << sample_slices.size() << endl;
+//        //sort only by m/z, rely on RT tolerance downstream
+//        sort(sample_slices.begin(), sample_slices.end(), [ ](const mzSlice* lhs, const mzSlice* rhs){
+//            return lhs->mz < rhs->mz;
+//        });
 
-        unsigned int deleteCounter = 0;
+//        cout << "#algorithmE number of mz slices before merge: " << sample_slices.size() << endl;
 
-        for(unsigned int i=0; i < sample_slices.size(); i++ ) {
+//        unsigned int deleteCounter = 0;
 
-			mzSlice* a  = sample_slices[i];
+//        for(unsigned int i=0; i < sample_slices.size(); i++ ) {
 
-            if (a->deleteFlag) continue; //skip over if already marked
+//			mzSlice* a  = sample_slices[i];
 
-            // cout << a->mz << "\t" << a->rt << endl;
+//            if (a->deleteFlag) continue; //skip over if already marked
 
-            for(unsigned int j=i+1; j < sample_slices.size(); j++ ) {
+//            // cout << a->mz << "\t" << a->rt << endl;
 
-				mzSlice* b  = sample_slices[j];
+//            for(unsigned int j=i+1; j < sample_slices.size(); j++ ) {
 
-                //debugging
-//                cout << "(" << i << ", " << j << "): "
-//                     << "(i=[" << to_string(a->mzmin) << "-" << to_string(a->mzmax)
-//                     << ", " << to_string(a->rtmin) << "-" << to_string(a->rtmax) << "]"
-//                     << " deleteFlag= " << (a->deleteFlag ? "TRUE" : "FALSE")
-//                     << ") (j=[" << to_string(b->mzmin) << "-" << to_string(b->mzmax)
-//                     << ", " << to_string(b->rtmin) << "-" << to_string(b->rtmax) << "]"
-//                     << " deleteFlag= " << (b->deleteFlag ? "TRUE" : "FALSE")
-//                     << ")"
-//                     << endl;
+//				mzSlice* b  = sample_slices[j];
 
-                //Once the distance in m/z exceeds user-specified limit, no need to keep comparing for merges.
-                //Note that b->mzmin < a->mzmax comparison is necessary
-                if (b->mzmin > a->mzmax && ppmDist(a->mzmax, b->mzmin) > ppm) break;
+//                //debugging
+////                cout << "(" << i << ", " << j << "): "
+////                     << "(i=[" << to_string(a->mzmin) << "-" << to_string(a->mzmax)
+////                     << ", " << to_string(a->rtmin) << "-" << to_string(a->rtmax) << "]"
+////                     << " deleteFlag= " << (a->deleteFlag ? "TRUE" : "FALSE")
+////                     << ") (j=[" << to_string(b->mzmin) << "-" << to_string(b->mzmax)
+////                     << ", " << to_string(b->rtmin) << "-" << to_string(b->rtmax) << "]"
+////                     << " deleteFlag= " << (b->deleteFlag ? "TRUE" : "FALSE")
+////                     << ")"
+////                     << endl;
 
-                //skip over mz slices that have already been merged
-                if (b->deleteFlag) continue;
+//                //Once the distance in m/z exceeds user-specified limit, no need to keep comparing for merges.
+//                //Note that b->mzmin < a->mzmax comparison is necessary
+//                if (b->mzmin > a->mzmax && ppmDist(a->mzmax, b->mzmin) > ppm) break;
 
-                if (ParallelMassSlicer::isOverlapping(a, b)) {
+//                //skip over mz slices that have already been merged
+//                if (b->deleteFlag) continue;
 
-                    //b swallows up a
-                    b->rtmin = min(a->rtmin, b->rtmin);
-                    b->rtmax = max(a->rtmax, b->rtmax);
+//                if (ParallelMassSlicer::isOverlapping(a, b)) {
 
-                    b->mzmin = min(a->mzmin, b->mzmin);
-                    b->mzmax = max(a->mzmax, b->mzmax);
+//                    //b swallows up a
+//                    b->rtmin = min(a->rtmin, b->rtmin);
+//                    b->rtmax = max(a->rtmax, b->rtmax);
 
-                    b->mz  = (b->mzmax - b->mzmin)/2;
-                    b->rt  = (b->rtmax - b->rtmin)/2;
+//                    b->mzmin = min(a->mzmin, b->mzmin);
+//                    b->mzmax = max(a->mzmax, b->mzmax);
 
-                    //a is marked to be ignored in the future
-                    a->deleteFlag = true;
-                    deleteCounter++;
-				}
+//                    b->mz  = (b->mzmax - b->mzmin)/2;
+//                    b->rt  = (b->rtmax - b->rtmin)/2;
 
-                //b now contains all of the information in a, so proceed to next index
-                if (a->deleteFlag) break;
-			}
-		}
+//                    //a is marked to be ignored in the future
+//                    a->deleteFlag = true;
+//                    deleteCounter++;
+//				}
+
+//                //b now contains all of the information in a, so proceed to next index
+//                if (a->deleteFlag) break;
+//			}
+//		}
 
         cout << deleteCounter << " mz slices flagged for exclusion." << endl;
 
@@ -320,6 +322,75 @@ bool ParallelMassSlicer::isOverlapping(mzSlice *a, mzSlice *b){
 
     return isMzOverlapping && isRtOverlapping;
 }
+
+//Issue 586
+unsigned long ParallelMassSlicer::mergeOverlappingSlices(vector<mzSlice*>& slices, float ppm, bool debug){
+    unsigned long deleteCounter = 0;
+    unsigned int iterationCounter = 0;
+
+    bool isCheckMerges = true;
+
+    while (isCheckMerges) {
+
+        if (debug) {
+            iterationCounter++;
+            cout << "mergeUntilConvergence() iteration " << iterationCounter << ": " << deleteCounter << "/" << slices.size() << " slices marked for deletion." << endl;
+        }
+
+        isCheckMerges = false;
+
+        //sort only by m/z, rely on RT tolerance downstream
+        sort(slices.begin(), slices.end(), [ ](const mzSlice* lhs, const mzSlice* rhs){
+            return lhs->mz < rhs->mz;
+        });
+
+        for(unsigned int i=0; i < slices.size(); i++ ) {
+
+            mzSlice* a  = slices[i];
+
+            if (a->deleteFlag) continue; //skip over if already marked
+
+            for(unsigned int j=i+1; j < slices.size(); j++ ) {
+
+                mzSlice* b  = slices[j];
+
+                //Once the distance in m/z exceeds user-specified limit, no need to keep comparing for merges.
+                //Note that b->mzmin < a->mzmax comparison is necessary
+                if (b->mzmin > a->mzmax && ppmDist(a->mzmax, b->mzmin) > ppm) break;
+
+                //skip over mz slices that have already been merged
+                if (b->deleteFlag) continue;
+
+                if (ParallelMassSlicer::isOverlapping(a, b)) {
+
+                    //b swallows up a
+                    b->rtmin = min(a->rtmin, b->rtmin);
+                    b->rtmax = max(a->rtmax, b->rtmax);
+
+                    b->mzmin = min(a->mzmin, b->mzmin);
+                    b->mzmax = max(a->mzmax, b->mzmax);
+
+                    b->mz  = b->mzmin + ((b->mzmax - b->mzmin)/2.0f);
+                    b->rt  = b->rtmin + ((b->rtmax - b->rtmin)/2.0f);
+
+                    //a is marked to be ignored in the future
+                    a->deleteFlag = true;
+                    deleteCounter++;
+
+                    //Issue 586: the entire vector will need to be checked to avoid transitivity issues
+                    isCheckMerges = true;
+                }
+
+                //b now contains all of the information in a, so proceed to next index
+                if (a->deleteFlag) break;
+            }
+        }
+
+    }
+
+    return deleteCounter;
+}
+
 
 mzSlice*  ParallelMassSlicer::sliceExists(float mz, float rt) {
 	pair< multimap<int, mzSlice*>::iterator,  multimap<int, mzSlice*>::iterator > ppp;
