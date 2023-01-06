@@ -2174,7 +2174,7 @@ struct IntegerSetContainer {
     //standardizes the set of elements referenced by each key.
     //all elements referenced by any key in a set are now referenced by every key in the set.
     //calling this function does not add new keys to the map.
-    void combineContainers(bool debug);
+    void combineContainers(bool debug=false);
 };
 
 
