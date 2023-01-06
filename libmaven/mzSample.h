@@ -2213,8 +2213,8 @@ struct IntegerSetContainer {
                         secondContainer.begin(), secondContainer.end(),
                         std::inserter(mergedSet, mergedSet.begin()));
 
-            containerBySet.insert(make_pair(first, mergedSet));
-            containerBySet.insert(make_pair(second, mergedSet));
+            containerBySet[first] = mergedSet;
+            containerBySet[second] = mergedSet;
             mergeResult = MergeResult::MERGE_CONTAINERS;
         }
 
