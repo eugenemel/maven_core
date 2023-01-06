@@ -3443,3 +3443,46 @@ bool IntegerSetContainer::isAllContainersSize(unsigned int containerSize) {
     }
     return true;
 }
+
+//Issue 584
+void IntegerSetContainer::combineContainers(bool debug){
+    bool isCheckMerges = true;
+
+    unsigned long iterationCounter = 0;
+    while (isCheckMerges) {
+
+        iterationCounter++;
+        if (debug) cout << "IntegerSetContainer::combineContainers(): iteration #" << iterationCounter << endl;
+
+        isCheckMerges = false;
+        map<int, set<int>> containerBySetCurrent = containerBySet;
+
+        if (debug) {
+            cout << "containerBySet:\n";
+            for (auto it = containerBySetCurrent. begin(); it != containerBySetCurrent.end(); ++it) {
+                cout << "[" << it->first << "]: ";
+                for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
+                    cout << *(it2) << " ";
+                }
+                cout << endl;
+            }
+        }
+
+        for (auto it = containerBySetCurrent.begin(); it != containerBySetCurrent.end(); ++it) {
+            int key = it->first;
+            set<int> intsToMerge = it->second;
+
+            for (auto it2 = intsToMerge.begin(); it2 != intsToMerge.end(); ++it2) {
+                int secondInt = *(it2);
+                if (key != secondInt) {
+                    pair<int, int> intPair = make_pair(key, *(it2));
+                    IntegerSetContainer::MergeResult mergeResult = addMerge(intPair);
+                    if (mergeResult == IntegerSetContainer::MERGE_CONTAINERS) {
+                        isCheckMerges = true;
+                    }
+                }
+            }
+        }
+
+    }
+}
