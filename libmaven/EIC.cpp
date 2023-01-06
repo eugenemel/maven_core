@@ -1678,224 +1678,226 @@ vector<PeakGroup> EIC::groupPeaksD(vector<EIC*>& eics, int smoothingWindow, floa
         }
     }
 
-    //m->peaks.pos, sample peaks
-    map<int, PeakContainer> peakGroupData{};
+    pgroups = mergedEICToGroups(eics, m, maxRtDiff, mergeOverlap, debug);
 
-    map<int, set<mzSample*>> peakGroupSamples{};
-    for (unsigned int i = 0; i < m->peaks.size(); i++) {
-        peakGroupData.insert(make_pair(i, PeakContainer()));
-        peakGroupSamples.insert(make_pair(i, set<mzSample*>{}));
-    }
+//    //m->peaks.pos, sample peaks
+//    map<int, PeakContainer> peakGroupData{};
 
-    vector<Peak> allPeaks{};
-    for (auto& eic : eics) {
-        for (auto peak : eic->peaks) {
-            allPeaks.push_back(peak);
-        }
-    }
+//    map<int, set<mzSample*>> peakGroupSamples{};
+//    for (unsigned int i = 0; i < m->peaks.size(); i++) {
+//        peakGroupData.insert(make_pair(i, PeakContainer()));
+//        peakGroupSamples.insert(make_pair(i, set<mzSample*>{}));
+//    }
 
-    if (debug) {
-       cout << "EIC::groupPeaksD(): START allPeaks" << endl;
-       for (auto peak : allPeaks) {
-           cout << fixed << setprecision(5)
-                << "(" << peak.peakMz << ", " << peak.rt << ", " << peak.peakIntensity << ") " << peak.sample->sampleName
-                << endl;
-       }
-       cout << "EIC::groupPeaksD(): END allPeaks" << endl;
-    }
+//    vector<Peak> allPeaks{};
+//    for (auto& eic : eics) {
+//        for (auto peak : eic->peaks) {
+//            allPeaks.push_back(peak);
+//        }
+//    }
 
-    //try to annotate most intense peaks first
-    // fall back to other metrics of intensity
-    // use, samples, rt to break ties
-    sort(allPeaks.begin(), allPeaks.end(), [](Peak& lhs, Peak& rhs){
+//    if (debug) {
+//       cout << "EIC::groupPeaksD(): START allPeaks" << endl;
+//       for (auto peak : allPeaks) {
+//           cout << fixed << setprecision(5)
+//                << "(" << peak.peakMz << ", " << peak.rt << ", " << peak.peakIntensity << ") " << peak.sample->sampleName
+//                << endl;
+//       }
+//       cout << "EIC::groupPeaksD(): END allPeaks" << endl;
+//    }
 
-        if (lhs.peakIntensity != rhs.peakIntensity) {
-            return lhs.peakIntensity > rhs.peakIntensity;
-        }
+//    //try to annotate most intense peaks first
+//    // fall back to other metrics of intensity
+//    // use, samples, rt to break ties
+//    sort(allPeaks.begin(), allPeaks.end(), [](Peak& lhs, Peak& rhs){
 
-        if (lhs.peakAreaTop != rhs.peakAreaTop) {
-            return lhs.peakAreaTop > rhs.peakAreaTop;
-        }
+//        if (lhs.peakIntensity != rhs.peakIntensity) {
+//            return lhs.peakIntensity > rhs.peakIntensity;
+//        }
 
-        if (lhs.peakAreaCorrected != rhs.peakAreaCorrected) {
-            return lhs.peakAreaCorrected > rhs.peakAreaCorrected;
-        }
+//        if (lhs.peakAreaTop != rhs.peakAreaTop) {
+//            return lhs.peakAreaTop > rhs.peakAreaTop;
+//        }
 
-        if (lhs.peakArea != rhs.peakArea) {
-            return lhs.peakArea > rhs.peakArea;
-        }
+//        if (lhs.peakAreaCorrected != rhs.peakAreaCorrected) {
+//            return lhs.peakAreaCorrected > rhs.peakAreaCorrected;
+//        }
 
-        //sample name is arbitrary tiebreaker if every measure of quant is equal
-        if (lhs.sample != rhs.sample) {
-            return lhs.sample < rhs.sample;
-        }
+//        if (lhs.peakArea != rhs.peakArea) {
+//            return lhs.peakArea > rhs.peakArea;
+//        }
 
-        //rt is last resort tiebreaker to produce deterministic ordering
-        return lhs.rt < rhs.rt;
-    });
+//        //sample name is arbitrary tiebreaker if every measure of quant is equal
+//        if (lhs.sample != rhs.sample) {
+//            return lhs.sample < rhs.sample;
+//        }
 
-    for (auto peak : allPeaks) {
+//        //rt is last resort tiebreaker to produce deterministic ordering
+//        return lhs.rt < rhs.rt;
+//    });
 
-        float peakRt = peak.rt;
-        float minPeakRt = max(0.0f, peakRt-maxRtDiff);
+//    for (auto peak : allPeaks) {
 
-        auto lb = lower_bound(m->peaks.begin(), m->peaks.end(), minPeakRt, [](const Peak& p, float rt){
-            return p.rt < rt;
-        });
+//        float peakRt = peak.rt;
+//        float minPeakRt = max(0.0f, peakRt-maxRtDiff);
 
-        float deltaRt = 999999.0f;
-        float bestDeltaRt = deltaRt;
-        int bestGroupIndex = -1;
+//        auto lb = lower_bound(m->peaks.begin(), m->peaks.end(), minPeakRt, [](const Peak& p, float rt){
+//            return p.rt < rt;
+//        });
 
-        //TODO: How to handle cases where there are multiple peaks from the same sample
-        //with identical intensities, one should be associated with a peak group, while another gets associated with no peak?
-        //Currently, this is peak-centric assignment.
-        //Probably, instead of skipping over cases where the peak is already associated,
-        //need to record multiple associations, and take only the one that is closest to the group Rt.
+//        float deltaRt = 999999.0f;
+//        float bestDeltaRt = deltaRt;
+//        int bestGroupIndex = -1;
 
-        for (long k = lb - m->peaks.begin(); k < static_cast<long>(m->peaks.size()); k++){
+//        //TODO: How to handle cases where there are multiple peaks from the same sample
+//        //with identical intensities, one should be associated with a peak group, while another gets associated with no peak?
+//        //Currently, this is peak-centric assignment.
+//        //Probably, instead of skipping over cases where the peak is already associated,
+//        //need to record multiple associations, and take only the one that is closest to the group Rt.
 
-            //corresponds to a merged EIC peak group.
-            int groupIndex = static_cast<int>(k);
+//        for (long k = lb - m->peaks.begin(); k < static_cast<long>(m->peaks.size()); k++){
 
-            //Check if RT for sample query peak is within range of merged eic peak.
-            deltaRt = abs(m->peaks[static_cast<unsigned long>(groupIndex)].rt-peakRt);
+//            //corresponds to a merged EIC peak group.
+//            int groupIndex = static_cast<int>(k);
 
-            //once out of range, always out of range for rest of the loop.
-            if (deltaRt > maxRtDiff) break;
+//            //Check if RT for sample query peak is within range of merged eic peak.
+//            deltaRt = abs(m->peaks[static_cast<unsigned long>(groupIndex)].rt-peakRt);
 
-            //if a merged eic peak group already contains a peak from the sample query peak's sample,
-            //unable to add sample query peak to this merged eic peak group.
-            //use mzSample* name to determine uniqueness.
-            set<mzSample*> samples = peakGroupSamples[groupIndex];
+//            //once out of range, always out of range for rest of the loop.
+//            if (deltaRt > maxRtDiff) break;
 
-            if (std::find_if(samples.begin(), samples.end(),[peak](mzSample* sample) {
-                         return sample->sampleName == peak.sample->sampleName;}) != samples.end()) continue;
+//            //if a merged eic peak group already contains a peak from the sample query peak's sample,
+//            //unable to add sample query peak to this merged eic peak group.
+//            //use mzSample* name to determine uniqueness.
+//            set<mzSample*> samples = peakGroupSamples[groupIndex];
 
-            //only update groupIndex when a closer RT comes along.
-            if (deltaRt < bestDeltaRt || bestGroupIndex == -1) {
-                bestDeltaRt = deltaRt;
-                bestGroupIndex = static_cast<int>(groupIndex);
-            }
+//            if (std::find_if(samples.begin(), samples.end(),[peak](mzSample* sample) {
+//                         return sample->sampleName == peak.sample->sampleName;}) != samples.end()) continue;
 
-        }
+//            //only update groupIndex when a closer RT comes along.
+//            if (deltaRt < bestDeltaRt || bestGroupIndex == -1) {
+//                bestDeltaRt = deltaRt;
+//                bestGroupIndex = static_cast<int>(groupIndex);
+//            }
 
-        if (bestGroupIndex != -1) {
-            peakGroupSamples[bestGroupIndex].insert(peak.sample);
-            peakGroupData[bestGroupIndex].peaks.insert(make_pair(peak.sample, peak));
-        }
+//        }
 
-    }
+//        if (bestGroupIndex != -1) {
+//            peakGroupSamples[bestGroupIndex].insert(peak.sample);
+//            peakGroupData[bestGroupIndex].peaks.insert(make_pair(peak.sample, peak));
+//        }
 
-    for (auto& it : peakGroupData) {
-        it.second.recomputeProperties();
-    }
+//    }
 
-    //Progressively merge peaks until group overlap issues are resolved
-    while (true) {
+//    for (auto& it : peakGroupData) {
+//        it.second.recomputeProperties();
+//    }
 
-        IntegerSetContainer merges;
+//    //Progressively merge peaks until group overlap issues are resolved
+//    while (true) {
 
-        for (unsigned int i = 0; i < m->peaks.size(); i++) {
+//        IntegerSetContainer merges;
 
-            PeakContainer peaksI = peakGroupData[static_cast<int>(i)];
+//        for (unsigned int i = 0; i < m->peaks.size(); i++) {
 
-            if (peaksI.peaks.empty()) continue;
+//            PeakContainer peaksI = peakGroupData[static_cast<int>(i)];
 
-            float minPeakRtI = peaksI.minPeakRt;
-            float maxPeakRtI = peaksI.maxPeakRt;
+//            if (peaksI.peaks.empty()) continue;
 
-            for (unsigned int j = i+1; j < m->peaks.size(); j++) {
+//            float minPeakRtI = peaksI.minPeakRt;
+//            float maxPeakRtI = peaksI.maxPeakRt;
 
-                PeakContainer peaksJ = peakGroupData[static_cast<int>(j)];
+//            for (unsigned int j = i+1; j < m->peaks.size(); j++) {
 
-                if (peaksJ.peaks.empty()) continue;
+//                PeakContainer peaksJ = peakGroupData[static_cast<int>(j)];
 
-                float minPeakRtJ = peaksJ.minPeakRt;
-                float maxPeakRtJ = peaksJ.maxPeakRt;
+//                if (peaksJ.peaks.empty()) continue;
 
-                //Implies an overlap of 0, and all subsequent peaks should have an overlap of 0 compared to peaksI.
-                if (minPeakRtJ > maxPeakRtI) break;
+//                float minPeakRtJ = peaksJ.minPeakRt;
+//                float maxPeakRtJ = peaksJ.maxPeakRt;
 
-                float rtOverlap = mzUtils::checkOverlap(minPeakRtI, maxPeakRtI, minPeakRtJ, maxPeakRtJ);
+//                //Implies an overlap of 0, and all subsequent peaks should have an overlap of 0 compared to peaksI.
+//                if (minPeakRtJ > maxPeakRtI) break;
 
-                if (rtOverlap >= mergeOverlap) {
-                    merges.addMerge((make_pair(i, j)));
-                }
-            }
-        }
+//                float rtOverlap = mzUtils::checkOverlap(minPeakRtI, maxPeakRtI, minPeakRtJ, maxPeakRtJ);
 
-        //stay in the while loop until no more merges need to be made.
-        if (merges.containerBySet.empty()) {
-            break;
+//                if (rtOverlap >= mergeOverlap) {
+//                    merges.addMerge((make_pair(i, j)));
+//                }
+//            }
+//        }
 
-        //recreate peakGroupData using the containers indicated by merges.
-        } else {
-            map<int, PeakContainer> updatedPeakGroupData{};
+//        //stay in the while loop until no more merges need to be made.
+//        if (merges.containerBySet.empty()) {
+//            break;
 
-            for (unsigned int i = 0; i < m->peaks.size(); i++) {
+//        //recreate peakGroupData using the containers indicated by merges.
+//        } else {
+//            map<int, PeakContainer> updatedPeakGroupData{};
 
-                int intKey = static_cast<int>(i);
+//            for (unsigned int i = 0; i < m->peaks.size(); i++) {
 
-                //ensure that every peak index is reassociated in the map
-                if (updatedPeakGroupData.find(intKey) == updatedPeakGroupData.end()) {
+//                int intKey = static_cast<int>(i);
 
-                    //Case 1: create a new peak container from the merged data
-                    if (merges.containerBySet.find(intKey) != merges.containerBySet.end()) {
+//                //ensure that every peak index is reassociated in the map
+//                if (updatedPeakGroupData.find(intKey) == updatedPeakGroupData.end()) {
 
-                        set<int> container = merges.containerBySet[intKey];
+//                    //Case 1: create a new peak container from the merged data
+//                    if (merges.containerBySet.find(intKey) != merges.containerBySet.end()) {
 
-                        PeakContainer mergedContainer;
-                        for (auto index : container) {
-                            mergedContainer.mergePeakContainer(peakGroupData[index]);
-                        }
-                        mergedContainer.recomputeProperties();
+//                        set<int> container = merges.containerBySet[intKey];
 
-                        bool isAddedMerged = false;
-                        for (auto index : container) {
-                            if (isAddedMerged) {
-                                updatedPeakGroupData.insert(make_pair(index, PeakContainer()));
-                            } else {
-                                updatedPeakGroupData.insert(make_pair(index, mergedContainer));
-                                isAddedMerged = true;
-                            }
-                        }
+//                        PeakContainer mergedContainer;
+//                        for (auto index : container) {
+//                            mergedContainer.mergePeakContainer(peakGroupData[index]);
+//                        }
+//                        mergedContainer.recomputeProperties();
 
-                    //Case 2: peak container is unchanged from previous set
-                    } else {
-                        updatedPeakGroupData.insert(make_pair(i, peakGroupData[intKey]));
-                    }
+//                        bool isAddedMerged = false;
+//                        for (auto index : container) {
+//                            if (isAddedMerged) {
+//                                updatedPeakGroupData.insert(make_pair(index, PeakContainer()));
+//                            } else {
+//                                updatedPeakGroupData.insert(make_pair(index, mergedContainer));
+//                                isAddedMerged = true;
+//                            }
+//                        }
 
-                }
-            }
+//                    //Case 2: peak container is unchanged from previous set
+//                    } else {
+//                        updatedPeakGroupData.insert(make_pair(i, peakGroupData[intKey]));
+//                    }
 
-            peakGroupData = updatedPeakGroupData;
-        }
-    }
+//                }
+//            }
 
-    for (auto it = peakGroupData.begin(); it != peakGroupData.end(); ++it) {
-        int groupIndex = it->first;
-        map<mzSample*, Peak> peaks = it->second.peaks;
+//            peakGroupData = updatedPeakGroupData;
+//        }
+//    }
 
-        if (peaks.empty()) continue;
+//    for (auto it = peakGroupData.begin(); it != peakGroupData.end(); ++it) {
+//        int groupIndex = it->first;
+//        map<mzSample*, Peak> peaks = it->second.peaks;
 
-        PeakGroup grp;
-        grp.groupId = groupIndex;
-        for (auto peak : peaks) {
-            grp.addPeak(peak.second);
-        }
-        sort(grp.peaks.begin(), grp.peaks.end(), Peak::compSampleName);
+//        if (peaks.empty()) continue;
 
-        grp.groupStatistics();
+//        PeakGroup grp;
+//        grp.groupId = groupIndex;
+//        for (auto peak : peaks) {
+//            grp.addPeak(peak.second);
+//        }
+//        sort(grp.peaks.begin(), grp.peaks.end(), Peak::compSampleName);
 
-        pgroups.push_back(grp);
-    }
+//        grp.groupStatistics();
+
+//        pgroups.push_back(grp);
+//    }
 
     if (m) delete(m);
     return pgroups;
 }
 
-vector<PeakGroup> EIC::groupPeaksE(vector<EIC*> eics, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug){
+vector<PeakGroup> EIC::groupPeaksE(vector<EIC*>& eics, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug){
 
     //list filled and return by this function
     vector<PeakGroup> pgroups{};
@@ -2209,6 +2211,228 @@ vector<PeakGroup> EIC::groupPeaksE(vector<EIC*> eics, shared_ptr<PeakPickingAndG
     }
 
     if (m) delete(m);
+    return pgroups;
+}
+
+vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float groupMaxRtDiff, float groupMergeOverlap, bool debug){
+
+    vector<PeakGroup> pgroups{};
+
+    if (!m) return pgroups;
+
+    //m->peaks.pos, sample peaks
+    map<int, PeakContainer> peakGroupData{};
+
+    map<int, set<mzSample*>> peakGroupSamples{};
+    for (unsigned int i = 0; i < m->peaks.size(); i++) {
+        peakGroupData.insert(make_pair(i, PeakContainer()));
+        peakGroupSamples.insert(make_pair(i, set<mzSample*>{}));
+    }
+
+    vector<Peak> allPeaks{};
+    for (auto& eic : eics) {
+        for (auto peak : eic->peaks) {
+            allPeaks.push_back(peak);
+        }
+    }
+
+    if (debug) {
+       cout << "EIC::groupPeaksE(): START allPeaks" << endl;
+       for (auto peak : allPeaks) {
+           cout << fixed << setprecision(5)
+                << "(" << peak.peakMz << ", " << peak.rt << ", " << peak.peakIntensity << ") " << peak.sample->sampleName
+                << endl;
+       }
+       cout << "EIC::groupPeaksE(): END allPeaks" << endl;
+    }
+
+    //try to annotate most intense peaks first
+    // fall back to other metrics of intensity
+    // use, samples, rt to break ties
+    sort(allPeaks.begin(), allPeaks.end(), [](Peak& lhs, Peak& rhs){
+
+        if (lhs.peakIntensity != rhs.peakIntensity) {
+            return lhs.peakIntensity > rhs.peakIntensity;
+        }
+
+        if (lhs.peakAreaTop != rhs.peakAreaTop) {
+            return lhs.peakAreaTop > rhs.peakAreaTop;
+        }
+
+        if (lhs.peakAreaCorrected != rhs.peakAreaCorrected) {
+            return lhs.peakAreaCorrected > rhs.peakAreaCorrected;
+        }
+
+        if (lhs.peakArea != rhs.peakArea) {
+            return lhs.peakArea > rhs.peakArea;
+        }
+
+        //sample name is arbitrary tiebreaker if every measure of quant is equal
+        if (lhs.sample != rhs.sample) {
+            return lhs.sample < rhs.sample;
+        }
+
+        //rt is last resort tiebreaker to produce deterministic ordering
+        return lhs.rt < rhs.rt;
+    });
+
+    for (auto peak : allPeaks) {
+
+        float peakRt = peak.rt;
+        float minPeakRt = max(0.0f, peakRt-groupMaxRtDiff);
+
+        auto lb = lower_bound(m->peaks.begin(), m->peaks.end(), minPeakRt, [](const Peak& p, float rt){
+            return p.rt < rt;
+        });
+
+        float deltaRt = 999999.0f;
+        float bestDeltaRt = deltaRt;
+        int bestGroupIndex = -1;
+
+        //TODO: How to handle cases where there are multiple peaks from the same sample
+        //with identical intensities, one should be associated with a peak group, while another gets associated with no peak?
+        //Currently, this is peak-centric assignment.
+        //Probably, instead of skipping over cases where the peak is already associated,
+        //need to record multiple associations, and take only the one that is closest to the group Rt.
+
+        for (long k = lb - m->peaks.begin(); k < static_cast<long>(m->peaks.size()); k++){
+
+            //corresponds to a merged EIC peak group.
+            int groupIndex = static_cast<int>(k);
+
+            //Check if RT for sample query peak is within range of merged eic peak.
+            deltaRt = abs(m->peaks[static_cast<unsigned long>(groupIndex)].rt-peakRt);
+
+            //once out of range, always out of range for rest of the loop.
+            if (deltaRt > groupMaxRtDiff) break;
+
+            //if a merged eic peak group already contains a peak from the sample query peak's sample,
+            //unable to add sample query peak to this merged eic peak group.
+            //use mzSample* name to determine uniqueness.
+            set<mzSample*> samples = peakGroupSamples[groupIndex];
+
+            if (std::find_if(samples.begin(), samples.end(),[peak](mzSample* sample) {
+                         return sample->sampleName == peak.sample->sampleName;}) != samples.end()) continue;
+
+            //only update groupIndex when a closer RT comes along.
+            if (deltaRt < bestDeltaRt || bestGroupIndex == -1) {
+                bestDeltaRt = deltaRt;
+                bestGroupIndex = static_cast<int>(groupIndex);
+            }
+
+        }
+
+        if (bestGroupIndex != -1) {
+            peakGroupSamples[bestGroupIndex].insert(peak.sample);
+            peakGroupData[bestGroupIndex].peaks.insert(make_pair(peak.sample, peak));
+        }
+
+    }
+
+    for (auto& it : peakGroupData) {
+        it.second.recomputeProperties();
+    }
+
+    //Progressively merge peaks until group overlap issues are resolved
+    while (true) {
+
+        IntegerSetContainer merges;
+
+        for (unsigned int i = 0; i < m->peaks.size(); i++) {
+
+            PeakContainer peaksI = peakGroupData[static_cast<int>(i)];
+
+            if (peaksI.peaks.empty()) continue;
+
+            float minPeakRtI = peaksI.minPeakRt;
+            float maxPeakRtI = peaksI.maxPeakRt;
+
+            for (unsigned int j = i+1; j < m->peaks.size(); j++) {
+
+                PeakContainer peaksJ = peakGroupData[static_cast<int>(j)];
+
+                if (peaksJ.peaks.empty()) continue;
+
+                float minPeakRtJ = peaksJ.minPeakRt;
+                float maxPeakRtJ = peaksJ.maxPeakRt;
+
+                //Implies an overlap of 0, and all subsequent peaks should have an overlap of 0 compared to peaksI.
+                if (minPeakRtJ > maxPeakRtI) break;
+
+                float rtOverlap = mzUtils::checkOverlap(minPeakRtI, maxPeakRtI, minPeakRtJ, maxPeakRtJ);
+
+                if (rtOverlap >= groupMergeOverlap) {
+                    merges.addMerge((make_pair(i, j)));
+                }
+            }
+        }
+
+        //stay in the while loop until no more merges need to be made.
+        if (merges.containerBySet.empty()) {
+            break;
+
+        //recreate peakGroupData using the containers indicated by merges.
+        } else {
+            map<int, PeakContainer> updatedPeakGroupData{};
+
+            for (unsigned int i = 0; i < m->peaks.size(); i++) {
+
+                int intKey = static_cast<int>(i);
+
+                //ensure that every peak index is reassociated in the map
+                if (updatedPeakGroupData.find(intKey) == updatedPeakGroupData.end()) {
+
+                    //Case 1: create a new peak container from the merged data
+                    if (merges.containerBySet.find(intKey) != merges.containerBySet.end()) {
+
+                        set<int> container = merges.containerBySet[intKey];
+
+                        PeakContainer mergedContainer;
+                        for (auto index : container) {
+                            mergedContainer.mergePeakContainer(peakGroupData[index]);
+                        }
+                        mergedContainer.recomputeProperties();
+
+                        bool isAddedMerged = false;
+                        for (auto index : container) {
+                            if (isAddedMerged) {
+                                updatedPeakGroupData.insert(make_pair(index, PeakContainer()));
+                            } else {
+                                updatedPeakGroupData.insert(make_pair(index, mergedContainer));
+                                isAddedMerged = true;
+                            }
+                        }
+
+                    //Case 2: peak container is unchanged from previous set
+                    } else {
+                        updatedPeakGroupData.insert(make_pair(i, peakGroupData[intKey]));
+                    }
+
+                }
+            }
+
+            peakGroupData = updatedPeakGroupData;
+        }
+    }
+
+    for (auto it = peakGroupData.begin(); it != peakGroupData.end(); ++it) {
+        int groupIndex = it->first;
+        map<mzSample*, Peak> peaks = it->second.peaks;
+
+        if (peaks.empty()) continue;
+
+        PeakGroup grp;
+        grp.groupId = groupIndex;
+        for (auto peak : peaks) {
+            grp.addPeak(peak.second);
+        }
+        sort(grp.peaks.begin(), grp.peaks.end(), Peak::compSampleName);
+
+        grp.groupStatistics();
+
+        pgroups.push_back(grp);
+    }
+
     return pgroups;
 }
 

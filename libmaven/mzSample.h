@@ -695,7 +695,7 @@ class EIC {
         static vector<PeakGroup> groupPeaksC(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, int baselineSmoothingWindow, int baselineDropTopX);
         static vector<PeakGroup> groupPeaksD(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, int baselineSmoothingWindow, int baselineDropTopX, float mergeOverlap, bool debug=false);
 
-        static vector<PeakGroup> groupPeaksE(vector<EIC*> eics, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug=false);
+        static vector<PeakGroup> groupPeaksE(vector<EIC*>& eics, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug=false);
 
 		static EIC* eicMerge(const vector<EIC*>& eics);
 		static void removeLowRankGroups(vector<PeakGroup>&groups, unsigned int rankLimit );
@@ -705,6 +705,9 @@ class EIC {
                 SmootherType smootherType;
                 int baselineSmoothingWindow;
                 int baselineDropTopX;
+
+        //internal methods associated with peak grouping
+        static vector<PeakGroup> mergedEICToGroups(vector<EIC*>& eics, EIC* m, float groupMaxRtDiff, float groupMergeOverlap, bool debug=false);
 
 };
 
