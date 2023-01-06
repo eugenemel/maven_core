@@ -2228,6 +2228,15 @@ struct IntegerSetContainer {
         }
         return allContainers;
     }
+
+    bool isAllContainersSize(unsigned int containerSize=1) {
+        for (auto it = containerBySet.begin(); it != containerBySet.end(); ++it) {
+            if (it->second.size() != containerSize) {
+                return false;
+            }
+        }
+        return true;
+    }
 };
 
 
