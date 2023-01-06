@@ -2101,7 +2101,6 @@ struct PeakContainer {
     float meanMz = 0.0f;
 
     //replace less intense peaks with more intense peaks,
-    //update min and max rt computations
     void mergePeakContainer(PeakContainer container) {
 
         for (auto it = container.peaks.begin(); it != container.peaks.end(); ++it) {
@@ -2117,6 +2116,7 @@ struct PeakContainer {
         }
     }
 
+    //update mz, rt computations based on peaks included in peak group.
     void recomputeProperties() {
 
         //reinitialize
@@ -2151,11 +2151,23 @@ struct PeakContainer {
  */
 struct IntegerSetContainer {
 
+    //Issue 584: Useful for keeping track of merging progress
+    enum MergeResult {
+        UNSPECIFIED = 0,
+        BOTH_NEW = 1,
+        FIRST_NEW = 2,
+        SECOND_NEW = 3,
+        BOTH_IN_SAME = 4,
+        MERGE_CONTAINERS = 5
+    };
 
     //given an element, return the container containing the element, if it is present.
     map<int, set<int>> containerBySet{};
 
-    void addMerge(pair<int, int> pair) {
+    //returns an int 'actionCode' describing which action was taken to handle the input <int, int> pair
+    MergeResult addMerge(pair<int, int> pair) {
+
+        MergeResult mergeResult = MergeResult::UNSPECIFIED;
 
         int first = pair.first;
         int second = pair.second;
@@ -2176,18 +2188,22 @@ struct IntegerSetContainer {
             set<int> newContainer{first, second};
             containerBySet.insert(make_pair(first, newContainer));
             containerBySet.insert(make_pair(second, newContainer));
+            mergeResult = MergeResult::BOTH_NEW;
 
         //Case 2: the first element is new, the second element is old
         } else if (firstContainer.empty() && !secondContainer.empty()) {
             containerBySet[second].insert(first);
+            mergeResult = MergeResult::FIRST_NEW;
 
         //Case 3: the first element is old, the second element is new
         } else if (!firstContainer.empty() && secondContainer.empty()) {
             containerBySet[first].insert(second);
+            mergeResult = MergeResult::SECOND_NEW;
 
         //Case 4: both elements are already in the same container
         } else if (firstContainer == secondContainer){
             //no action needs to be taken
+            mergeResult = MergeResult::BOTH_IN_SAME;
 
         //Case 5: both elements exist, but are in different containers
         //create a new combined set joining the two containers
@@ -2199,7 +2215,10 @@ struct IntegerSetContainer {
 
             containerBySet.insert(make_pair(first, mergedSet));
             containerBySet.insert(make_pair(second, mergedSet));
+            mergeResult = MergeResult::MERGE_CONTAINERS;
         }
+
+        return mergeResult;
     }
 
     set<set<int>> getContainers(){
