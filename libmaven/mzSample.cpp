@@ -3370,3 +3370,76 @@ bool LipidParameterGroup::isMatchPassesLipidSearchThresholds(
     //passes all filters
     return true;
 }
+
+IntegerSetContainer::MergeResult IntegerSetContainer::addMerge(pair<int, int> pair) {
+
+    MergeResult mergeResult = MergeResult::UNSPECIFIED;
+
+    int first = pair.first;
+    int second = pair.second;
+
+    set<int> firstContainer{};
+    set<int> secondContainer{};
+
+    if (containerBySet.find(first) != containerBySet.end()) {
+        firstContainer = containerBySet[first];
+    }
+
+    if (containerBySet.find(second) != containerBySet.end()) {
+        secondContainer = containerBySet[second];
+    }
+
+    //Case 1: both elements are new
+    if (firstContainer.empty() && secondContainer.empty()) {
+        set<int> newContainer{first, second};
+        containerBySet.insert(make_pair(first, newContainer));
+        containerBySet.insert(make_pair(second, newContainer));
+        mergeResult = MergeResult::BOTH_NEW;
+
+    //Case 2: the first element is new, the second element is old
+    } else if (firstContainer.empty() && !secondContainer.empty()) {
+        containerBySet[second].insert(first);
+        mergeResult = MergeResult::FIRST_NEW;
+
+    //Case 3: the first element is old, the second element is new
+    } else if (!firstContainer.empty() && secondContainer.empty()) {
+        containerBySet[first].insert(second);
+        mergeResult = MergeResult::SECOND_NEW;
+
+    //Case 4: both elements are already in the same container
+    } else if (firstContainer == secondContainer){
+        //no action needs to be taken
+        mergeResult = MergeResult::BOTH_IN_SAME;
+
+    //Case 5: both elements exist, but are in different containers
+    //create a new combined set joining the two containers
+    } else {
+        set<int> mergedSet;
+        std::merge(firstContainer.begin(), firstContainer.end(),
+                    secondContainer.begin(), secondContainer.end(),
+                    std::inserter(mergedSet, mergedSet.begin()));
+
+        containerBySet[first] = mergedSet;
+        containerBySet[second] = mergedSet;
+        mergeResult = MergeResult::MERGE_CONTAINERS;
+    }
+
+    return mergeResult;
+}
+
+set<set<int>> IntegerSetContainer::getContainers() {
+    set<set<int>> allContainers{};
+    for (auto container : containerBySet) {
+        allContainers.insert(container.second);
+    }
+    return allContainers;
+}
+
+bool IntegerSetContainer::isAllContainersSize(unsigned int containerSize) {
+    for (auto it = containerBySet.begin(); it != containerBySet.end(); ++it) {
+        if (it->second.size() != containerSize) {
+            return false;
+        }
+    }
+    return true;
+}
