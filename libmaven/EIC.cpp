@@ -1637,7 +1637,7 @@ vector<PeakGroup> EIC::groupPeaksC(vector<EIC*>& eics, int smoothingWindow, floa
  */
 vector<PeakGroup> EIC::groupPeaksD(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, int baselineSmoothingWindow, int baselineDropTopX, float mergeOverlap, bool debug) {
 
-    shared_ptr<PeakPickingAndGroupingParameters> params;
+    shared_ptr<PeakPickingAndGroupingParameters> params = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
 
     params->mergedBaselineSmoothingWindow = baselineSmoothingWindow;
     params->mergedBaselineDropTopX = baselineDropTopX;
