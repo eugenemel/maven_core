@@ -1637,51 +1637,64 @@ vector<PeakGroup> EIC::groupPeaksC(vector<EIC*>& eics, int smoothingWindow, floa
  */
 vector<PeakGroup> EIC::groupPeaksD(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, int baselineSmoothingWindow, int baselineDropTopX, float mergeOverlap, bool debug) {
 
-    //list filled and return by this function
-    vector<PeakGroup> pgroups{};
+    shared_ptr<PeakPickingAndGroupingParameters> params;
 
-    //case there is only a single EIC, there is nothing to group
-    if ( eics.size() == 1 && eics[0]) {
-        EIC* m=eics[0];
-        for(unsigned int i=0; i< m->peaks.size(); i++ ) {
-            PeakGroup grp;
-            grp.groupId = static_cast<int>(i);
-            grp.addPeak(m->peaks[i]);
-            grp.groupStatistics();
-            pgroups.push_back(grp);
-        }
-        return pgroups;
-    }
+    params->mergedBaselineSmoothingWindow = baselineSmoothingWindow;
+    params->mergedBaselineDropTopX = baselineDropTopX;
+    params->mergedSmoothingWindow = smoothingWindow;
+    params->mergedIsComputeBounds = false;
+    params->mergedPeakRtBoundsMaxIntensityFraction = -1.0f;
+    params->mergedPeakRtBoundsSlopeThreshold = -1.0f;
+    params->groupMaxRtDiff = maxRtDiff;
+    params->groupMergeOverlap = mergeOverlap;
 
-    //create EIC composed from all sample eics
-    EIC* m = EIC::eicMerge(eics);
-    if (!m) return pgroups;
+    return groupPeaksE(eics, params, debug);
 
-    m->setBaselineSmoothingWindow(baselineSmoothingWindow);
-    m->setBaselineDropTopX(baselineDropTopX);
+//    //list filled and return by this function
+//    vector<PeakGroup> pgroups{};
 
-    //find peaks in merged eic
-    m->getPeakPositionsC(smoothingWindow, false, false);
+//    //case there is only a single EIC, there is nothing to group
+//    if ( eics.size() == 1 && eics[0]) {
+//        EIC* m=eics[0];
+//        for(unsigned int i=0; i< m->peaks.size(); i++ ) {
+//            PeakGroup grp;
+//            grp.groupId = static_cast<int>(i);
+//            grp.addPeak(m->peaks[i]);
+//            grp.groupStatistics();
+//            pgroups.push_back(grp);
+//        }
+//        return pgroups;
+//    }
 
-    //RT values should never be identical for merged EIC.
-    sort(m->peaks.begin(), m->peaks.end(), [](Peak& lhs, Peak& rhs){
-        return lhs.rt < rhs.rt;
-    });
+//    //create EIC composed from all sample eics
+//    EIC* m = EIC::eicMerge(eics);
+//    if (!m) return pgroups;
 
-    if (debug) {
-        for (unsigned int i = 1; i < m->peaks.size(); i++) {
-            if (m->peaks.at(i).rt == m->peaks.at(i-1).rt) {
-                cerr << "Merged EIC Peaks found with identical RT!";
-                cerr << "RT="<< m->peaks.at(i).rt << endl;
-                abort();
-            }
-        }
-    }
+//    m->setBaselineSmoothingWindow(baselineSmoothingWindow);
+//    m->setBaselineDropTopX(baselineDropTopX);
 
-    pgroups = mergedEICToGroups(eics, m, maxRtDiff, mergeOverlap, debug);
+//    //find peaks in merged eic
+//    m->getPeakPositionsC(smoothingWindow, false, false);
 
-    if (m) delete(m);
-    return pgroups;
+//    //RT values should never be identical for merged EIC.
+//    sort(m->peaks.begin(), m->peaks.end(), [](Peak& lhs, Peak& rhs){
+//        return lhs.rt < rhs.rt;
+//    });
+
+//    if (debug) {
+//        for (unsigned int i = 1; i < m->peaks.size(); i++) {
+//            if (m->peaks.at(i).rt == m->peaks.at(i-1).rt) {
+//                cerr << "Merged EIC Peaks found with identical RT!";
+//                cerr << "RT="<< m->peaks.at(i).rt << endl;
+//                abort();
+//            }
+//        }
+//    }
+
+//    pgroups = mergedEICToGroups(eics, m, maxRtDiff, mergeOverlap, debug);
+
+//    if (m) delete(m);
+//    return pgroups;
 }
 
 vector<PeakGroup> EIC::groupPeaksE(vector<EIC*>& eics, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug){
