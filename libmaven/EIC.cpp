@@ -1780,13 +1780,13 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
     }
 
     if (debug) {
-       cout << "EIC::groupPeaksE(): START allPeaks" << endl;
+       cout << "EIC::mergedEICToGroups(): START allPeaks" << endl;
        for (auto peak : allPeaks) {
            cout << fixed << setprecision(5)
                 << "(" << peak.peakMz << ", " << peak.rt << ", " << peak.peakIntensity << ") " << peak.sample->sampleName
                 << endl;
        }
-       cout << "EIC::groupPeaksE(): END allPeaks" << endl;
+       cout << "EIC::mergedEICToGroups(): END allPeaks" << endl;
     }
 
     //try to annotate most intense peaks first
@@ -1876,11 +1876,23 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
         it.second.recomputeProperties();
     }
 
+    unsigned long iterationCounter = 0;
+
     //Progressively merge peaks until group overlap issues are resolved
     while (true) {
 
+        if (debug) {
+            cout << "ITERATION #" << iterationCounter << ":" << endl;
+        }
+
         IntegerSetContainer merges;
 
+        //initialize set container
+        for (unsigned int i = 0; i < m->peaks.size(); i++) {
+            merges.containerBySet.insert(make_pair(i, set<int>{static_cast<int>(i)}));
+        }
+
+        //merge data based on existing containers
         for (unsigned int i = 0; i < m->peaks.size(); i++) {
 
             PeakContainer peaksI = peakGroupData[static_cast<int>(i)];
@@ -1910,8 +1922,10 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
             }
         }
 
+        merges.combineContainers(false);
+
         //stay in the while loop until no more merges need to be made.
-        if (merges.containerBySet.empty()) {
+        if (merges.isAllContainersSize(1)) {
             break;
 
         //recreate peakGroupData using the containers indicated by merges.
@@ -1926,7 +1940,7 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
                 if (updatedPeakGroupData.find(intKey) == updatedPeakGroupData.end()) {
 
                     //Case 1: create a new peak container from the merged data
-                    if (merges.containerBySet.find(intKey) != merges.containerBySet.end()) {
+                    if (merges.containerBySet.find(intKey) != merges.containerBySet.end() && merges.containerBySet[intKey].size() > 1) {
 
                         set<int> container = merges.containerBySet[intKey];
 
@@ -1954,6 +1968,7 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
                 }
             }
 
+            iterationCounter++;
             peakGroupData = updatedPeakGroupData;
         }
     }
