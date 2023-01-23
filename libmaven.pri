@@ -26,10 +26,13 @@ QMAKE_CC = gcc
 QMAKE_CXX = g++
 
 
+# Issue 600/601: decoding issues
+DEFINES += ZLIB
+LIBS += -lz
+
 win32-g++:contains(QMAKE_HOST.arch, x86_64):{
     DEFINES -= CDFPARSER
-    DEFINES -= ZLIB
-    LIBS -= -lz -lcdfread -lnetcdf
+    LIBS -= -lcdfread -lnetcdf
 }
 
 win32 {
@@ -45,9 +48,6 @@ mac {
 
     DEFINES -= CDFPARSER
     LIBS -= -lcdfread -lnetcdf
-
-    DEFINES += ZLIB
-    LIBS += -lz
 }
 
 unix {
@@ -55,7 +55,6 @@ unix {
     DEFINES -= LITTLE_ENDIAN
  #  DEFINES += CDFPARSER
  #  LIBS += -lcdfread -lnetcdf
-    DEFINES += ZLIB
  #  LIBS += -lz -lcdfread -lnetcdf
 }
 
