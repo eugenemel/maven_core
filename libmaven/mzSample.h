@@ -2015,6 +2015,15 @@ public:
             pair<string, string>& doubleStringKey,
             pair<string, string>& singleStringKey,
             map<pair<string, string>, bool>& boolOverrideMap);
+
+    //Issue 606
+    void addClassAdductParamsFromCSVFile(string csvFile, bool debug);
+
+private:
+    void updateIntMap(pair<string, string>& lipidClassAdductKey, map<string, int>& headerToIndex, vector<string>& fields,
+                      string headerKey, map<pair<string, string>, int>& dataMap);
+    void updateBoolMap(pair<string, string>& lipidClassAdductKey, map<string, int>& headerToIndex, vector<string>& fields,
+                      string headerKey, map<pair<string, string>, bool>& dataMap);
 };
 
 //Issue 455

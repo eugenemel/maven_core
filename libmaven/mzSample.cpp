@@ -3371,6 +3371,106 @@ bool LipidParameterGroup::isMatchPassesLipidSearchThresholds(
     return true;
 }
 
+void LipidParameterGroup::updateIntMap(
+        pair<string, string>& lipidClassAdductKey, map<string, int>& headerToIndex, vector<string>& fields,
+        string headerKey, map<pair<string, string>, int>& dataMap){
+
+    if (headerToIndex.find(headerKey) != headerToIndex.end()) {
+        int value = stoi(fields[headerToIndex[headerKey]]);
+        if (dataMap.find(lipidClassAdductKey) != dataMap.end()) {
+            dataMap[lipidClassAdductKey] = value;
+        } else {
+            dataMap.insert(make_pair(lipidClassAdductKey, value));
+        }
+    }
+}
+
+void LipidParameterGroup::updateBoolMap(
+        pair<string, string>& lipidClassAdductKey, map<string, int>& headerToIndex, vector<string>& fields,
+        string headerKey, map<pair<string, string>, bool>& dataMap ) {
+
+    if (headerToIndex.find(headerKey) != headerToIndex.end()) {
+
+        string encodedValue = fields[headerToIndex[headerKey]];
+
+        std::transform(encodedValue.begin(),
+                       encodedValue.end(),
+                       encodedValue.begin(),
+                       [](unsigned char c){return toupper(c);});
+
+        bool value = (encodedValue == "TRUE" || encodedValue == "1");
+
+        if (dataMap.find(lipidClassAdductKey) != dataMap.end()) {
+            dataMap[lipidClassAdductKey] = value;
+        } else {
+            dataMap.insert(make_pair(lipidClassAdductKey, value));
+        }
+    }
+}
+
+void LipidParameterGroup::addClassAdductParamsFromCSVFile(string csvFile, bool debug){
+    ifstream csvFileStream(csvFile);
+
+    if (! csvFileStream.is_open()) return; //unable to open file
+
+    bool isReadHeader = true;
+    map<string, int> headerToIndex{};
+
+    string line;
+    while( getline(csvFileStream, line)) {
+
+        if (debug) {
+            cout << line << endl;
+        }
+
+        if (line.empty()) continue;
+        if (line[0] == '#') continue; //comment
+
+        vector<string>fields;
+        mzUtils::split(line,',', fields);
+
+        if (isReadHeader) {
+            for (unsigned int i = 0; i < fields.size(); i++) {
+                headerToIndex.insert(make_pair(fields[i], i));
+            }
+            isReadHeader = false;
+            continue;
+        }
+
+        string lipidClass, adductName;
+
+        if (headerToIndex.find("lipidClass") != headerToIndex.end()) {
+            lipidClass = fields[headerToIndex["lipidClass"]];
+        }
+        if (headerToIndex.find("adductName") != headerToIndex.end()) {
+            adductName = fields[headerToIndex["adductName"]];
+        }
+
+        if (lipidClass.empty() || adductName.empty()) continue;
+
+        pair<string, string> key = make_pair(lipidClass, adductName);
+
+        //Assume that the CSV file covers all possible (lipidClass, adduct) forms.
+        validClassAdducts.push_back(key);
+
+        if (debug) {
+            cout << "(" << lipidClass << ", " << adductName
+                 << ") added to params->validClassAdducts [N=" << validClassAdducts.size() << "]"
+                 << endl;
+        }
+
+        updateIntMap(key, headerToIndex, fields, "ms2MinNumMatches", ms2MinNumMatchesByLipidClassAndAdduct);
+        updateIntMap(key, headerToIndex, fields, "ms2MinNumDiagnosticMatches", ms2MinNumDiagnosticMatchesByLipidClassAndAdduct);
+        updateIntMap(key, headerToIndex, fields, "ms2sn1MinNumMatches", ms2sn1MinNumMatchesByLipidClassAndAdduct);
+        updateIntMap(key, headerToIndex, fields, "ms2sn2MinNumMatches", ms2sn2MinNumMatchesByLipidClassAndAdduct);
+        updateIntMap(key, headerToIndex, fields, "ms2MinNumAcylMatches", ms2MinNumAcylMatchesByLipidClassAndAdduct);
+
+        updateBoolMap(key, headerToIndex, fields, "ms2IsRequirePrecursorMatch", ms2IsRequirePrecursorMatchByLipidClassAndAdduct);
+
+    }
+
+}
+
 IntegerSetContainer::MergeResult IntegerSetContainer::addMerge(pair<int, int> pair) {
 
     MergeResult mergeResult = MergeResult::UNSPECIFIED;
