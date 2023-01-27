@@ -129,12 +129,15 @@ void MzKitchenProcessor::matchLipids_LC(
                 }
             }
 
-            if (s.numMatches < params->ms2MinNumMatches) continue;
-            if (s.numDiagnosticMatches < params->ms2MinNumDiagnosticMatches) continue;
+            //Issue 606: START OLD APPROACH
+//            if (s.numMatches < params->ms2MinNumMatches) continue;
+//            if (s.numDiagnosticMatches < params->ms2MinNumDiagnosticMatches) continue;
+            //Issue 606: END OLD APPROACH
 
-            //Issue 606: more complex parameter matching
+            //Issue 606: NEW APPROACH more complex parameter matching
             if (compound->adductString == "") continue;
             if (!params->isMatchPassesLCLipidSearchThresholds(s, lipidClass, compound->adductString)) continue;
+            //Issue 606: END NEW APPROACH
 
             s.hypergeomScore = Fragment::SHP(static_cast<int>(s.numMatches),
                                              static_cast<int>(library.mzs.size()),
