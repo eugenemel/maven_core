@@ -52,34 +52,34 @@ void MzKitchenProcessor::matchLipids_LC(
             Compound *compound = compounds[static_cast<unsigned long>(pos)];
             float precMz = compound->precursorMz;
 
-            if (debug) {
-                cout << compound->name << " " << compound->adductString << ": " << precMz << endl;
-            }
+//            if (debug) {
+//                cout << compound->name << " " << compound->adductString << ": " << precMz << endl;
+//            }
 
             //stop searching when the maxMz has been exceeded.
             if (precMz > maxMz) {
                 break;
             }
 
-            if (debug) {
+//            if (debug) {
 
-                cout << "(" << minMz << ", " << maxMz << ")\n";
+//                cout << "(" << minMz << ", " << maxMz << ")\n";
 
-                if (pos >= 2){
-                    cout << "compounds[" << (pos-2) << "]: " << compounds[pos-2]->precursorMz << "\n";
-                    cout << "compounds[" << (pos-1) << "]: " << compounds[pos-1]->precursorMz << "\n";
-                }
+//                if (pos >= 2){
+//                    cout << "compounds[" << (pos-2) << "]: " << compounds[pos-2]->precursorMz << "\n";
+//                    cout << "compounds[" << (pos-1) << "]: " << compounds[pos-1]->precursorMz << "\n";
+//                }
 
-                cout << "compounds[" << (pos) << "]: " << precMz << " <--> " << compound->id << "\n";
+//                cout << "compounds[" << (pos) << "]: " << precMz << " <--> " << compound->id << "\n";
 
-                if (pos <= compounds.size()-2) {
-                    cout << "compounds[" << (pos+1) << "]: " << compounds[pos+1]->precursorMz << "\n";
-                    cout << "compounds[" << (pos+2) << "]: " << compounds[pos+1]->precursorMz << "\n";
-                }
+//                if (pos <= compounds.size()-2) {
+//                    cout << "compounds[" << (pos+1) << "]: " << compounds[pos+1]->precursorMz << "\n";
+//                    cout << "compounds[" << (pos+2) << "]: " << compounds[pos+1]->precursorMz << "\n";
+//                }
 
-                cout << "\n\n";
+//                cout << "\n\n";
 
-            }
+//            }
 
             Fragment library;
             library.precursorMz = static_cast<double>(precMz);
@@ -156,9 +156,9 @@ void MzKitchenProcessor::matchLipids_LC(
             scores.push_back(make_pair(compound, s));
         }
 
-        if (debug) {
-            cout << "\n";
-        }
+//        if (debug) {
+//            cout << "\n";
+//        }
 
         if (!scores.empty()) {
 
@@ -177,9 +177,9 @@ void MzKitchenProcessor::matchLipids_LC(
             group.fragMatchScore = bestPair.second;
             group.fragMatchScore.mergedScore = bestPair.second.hypergeomScore;
 
-            if (debug) {
-                cout << "MATCH: " << group.meanMz << "@" << group.meanRt  << " <--> " << group.compound->id << "\n" << endl;
-            }
+//            if (debug) {
+//                cout << "MATCH: " << group.meanMz << "@" << group.meanRt  << " <--> " << group.compound->id << "\n" << endl;
+//            }
         }
     }
 }
