@@ -44,12 +44,17 @@ void MzKitchenProcessor::matchLipids_LC(
 
         if (debug) {
             cout << group.meanMz << "@" << group.meanRt << ":\n";
+            cout << "search range: [" << minMz << " - " << maxMz << "]\n";
         }
 
         for (long pos = lb - compounds.begin(); pos < static_cast<long>(compounds.size()); pos++){
 
             Compound *compound = compounds[static_cast<unsigned long>(pos)];
             float precMz = compound->precursorMz;
+
+            if (debug) {
+                cout << compound->name << " " << compound->adductString << ": " << precMz << endl;
+            }
 
             //stop searching when the maxMz has been exceeded.
             if (precMz > maxMz) {
