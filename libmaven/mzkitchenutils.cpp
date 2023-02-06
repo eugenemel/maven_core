@@ -31,6 +31,7 @@ void MzKitchenProcessor::matchLipids_LC(
 
         float minMz = group.meanMz - (group.meanMz*params->ms1PpmTolr/1000000);
         float maxMz = group.meanMz + (group.meanMz*params->ms1PpmTolr/1000000);
+        float deltaMz = group.meanMz*params->ms1PpmTolr/1000000;
 
         auto lb = lower_bound(compounds.begin(), compounds.end(), minMz, [](const Compound* lhs, const float& rhs){
             return lhs->precursorMz < rhs;
@@ -44,7 +45,10 @@ void MzKitchenProcessor::matchLipids_LC(
 
         if (debug) {
             cout << group.meanMz << "@" << group.meanRt << ":\n";
-            cout << "search range: [" << minMz << " - " << maxMz << "]\n";
+            cout << "tol: " << params->ms1PpmTolr
+                 << " ppm, deltaMz=" << deltaMz
+                 <<  ", search range: ["
+                 << minMz << " - " << maxMz << "]\n";
         }
 
         for (long pos = lb - compounds.begin(); pos < static_cast<long>(compounds.size()); pos++){
