@@ -166,6 +166,9 @@ void MzKitchenProcessor::matchLipids_LC(
 
         if (!scores.empty()) {
 
+            //Issue 606: Pass along lipid scores values as additional table.
+            group.compounds = scores;
+
             //Issue 593: guarantee non-determinism
             sort(scores.begin(), scores.end(), [](pair<Compound*, FragmentationMatchScore>& lhs, pair<Compound*, FragmentationMatchScore>& rhs){
                 if (lhs.second.hypergeomScore == rhs.second.hypergeomScore) {
