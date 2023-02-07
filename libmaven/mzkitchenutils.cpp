@@ -156,6 +156,7 @@ void MzKitchenProcessor::matchLipids_LC(
             s.dotProduct = library.dotProduct(&observed);
 
             s.fractionMatched = s.numMatches/library.mzs.size();
+            s.ppmError = static_cast<double>(mzUtils::ppmDist(compound->precursorMz, group.meanMz));
 
             scores.push_back(make_pair(compound, s));
         }
