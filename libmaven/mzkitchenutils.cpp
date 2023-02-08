@@ -153,7 +153,7 @@ void MzKitchenProcessor::matchLipids_LC(
                                              static_cast<int>(observed.nobs()),
                                              100000);
 
-            s.dotProduct = library.dotProduct(&observed);
+            s.dotProduct = Fragment::normCosineScore(&library, &observed, ranks);
 
             s.fractionMatched = s.numMatches/library.mzs.size();
             s.ppmError = static_cast<double>(mzUtils::ppmDist(compound->precursorMz, group.meanMz));
@@ -172,12 +172,29 @@ void MzKitchenProcessor::matchLipids_LC(
 
             //Issue 593: guarantee non-determinism
             sort(scores.begin(), scores.end(), [](pair<Compound*, FragmentationMatchScore>& lhs, pair<Compound*, FragmentationMatchScore>& rhs){
-                if (lhs.second.hypergeomScore == rhs.second.hypergeomScore) {
-                    return lhs.first->name < rhs.first->name;
-                } else {
+                if (lhs.second.hypergeomScore != rhs.second.hypergeomScore) {
                     return lhs.second.hypergeomScore > rhs.second.hypergeomScore;
                 }
+
+                if (lhs.second.dotProduct != rhs.second.dotProduct) {
+                    return lhs.second.dotProduct > rhs.second.dotProduct;
+                }
+
+                return lhs.first->name < rhs.first->name;
             });
+
+            if (debug) {
+                cout << "Sorted scores:\n";
+                for (auto score : scores) {
+                    cout << score.first->name << " " << score.first->adductString << ":\n";
+                    cout << "numMatches= " << score.second.numMatches
+                         << ", numDiagnosticMatches= " << score.second.numDiagnosticMatches
+                         << ", numAcylMatches= " << score.second.numAcylChainMatches
+                         << ", hyperGeometricScore= " << score.second.hypergeomScore
+                         << ", cosineScore= " << score.second.dotProduct
+                         << endl;
+                }
+            }
 
             pair<Compound*, FragmentationMatchScore> bestPair = scores[0];
 
