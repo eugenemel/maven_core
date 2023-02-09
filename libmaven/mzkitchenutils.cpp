@@ -80,7 +80,13 @@ void MzKitchenProcessor::assignBestLipidToGroup(
     for (long pos = lb - compounds.begin(); pos < static_cast<long>(compounds.size()); pos++){
 
         CompoundIon ion = compounds[static_cast<unsigned long>(pos)];
-        Compound *compound = compounds[static_cast<unsigned long>(pos)].compound;
+        Compound *compound = ion.compound;
+        Adduct *adduct = ion.adduct;
+
+        bool isMatchingAdduct = adduct && compound->adductString == adduct->name;
+        if (params->IDisRequireMatchingAdduct && !isMatchingAdduct) {
+            continue;
+        }
 
         float precMz = ion.precursorMz;
         string adductName = ion.getAdductName();
