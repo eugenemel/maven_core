@@ -2096,7 +2096,9 @@ public:
     Adduct* adduct = nullptr;
     float precursorMz = 0;
 
-    CompoundIon();
+    CompoundIon(){}
+    ~CompoundIon(){}
+
     CompoundIon(Compound* compound) {
         this->compound = compound;
         if (compound) this->precursorMz = compound->precursorMz;
