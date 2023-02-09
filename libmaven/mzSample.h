@@ -2090,6 +2090,40 @@ public:
 
 };
 
+class CompoundIon {
+public:
+    Compound* compound = nullptr;
+    Adduct* adduct = nullptr;
+    float precursorMz = 0;
+
+    CompoundIon();
+    CompoundIon(Compound* compound) {
+        this->compound = compound;
+        if (compound) this->precursorMz = compound->precursorMz;
+    }
+
+    CompoundIon(Compound* compound, Adduct* adduct){
+        this->compound = compound;
+        this->adduct = adduct;
+        if (compound) this->precursorMz = compound->precursorMz;
+    }
+    CompoundIon(Compound* compound, Adduct* adduct, float precMz){
+        this->compound = compound;
+        this->adduct = adduct;
+        this->precursorMz = precMz;
+    }
+
+    //If adduct->name not supported, fall back to compound->adductString.
+    string getAdductName(){
+        if (adduct) {
+            return adduct->name;
+        } else if (compound){
+            return compound->adductString;
+        }
+        return "";
+    }
+};
+
 class MzKitchenProcessor{
 public:
     static void matchLipids_LC(vector<PeakGroup>& groups,
@@ -2097,10 +2131,21 @@ public:
                                shared_ptr<LCLipidSearchParameters> params,
                                bool debug=false);
 
+    static void assignBestLipidToGroup(PeakGroup *g,
+                                       vector<CompoundIon>& compounds,
+                                       shared_ptr<LCLipidSearchParameters> params,
+                                       bool debug=false);
+
     static void matchMetabolites(vector<PeakGroup>& groups,
                                  vector<Compound*>& compounds,
                                  shared_ptr<MzkitchenMetaboliteSearchParameters> params,
                                  bool debug=false);
+
+    // TODO
+//    static void assignBestMetaboliteToGroup(PeakGroup* g,
+//                                            vector<CompoundIon>& compound,
+//                                            shared_ptr<MzkitchenMetaboliteSearchParameters> params,
+//                                            bool debug=false);
 };
 
 //Issue 482

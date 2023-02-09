@@ -235,6 +235,218 @@ void MzKitchenProcessor::matchLipids_LC(
 }
 
 /**
+ * @brief MzKitchenProcessor::assignBestLipidToGroup
+ * @param g
+ * @param compounds
+ * @param params
+ * @param debug
+ *
+ */
+void MzKitchenProcessor::assignBestLipidToGroup(
+        PeakGroup *g,
+        vector<CompoundIon>& compounds,
+        shared_ptr<LCLipidSearchParameters> params,
+        bool debug){
+
+    float minMz = g->meanMz - (g->meanMz*params->ms1PpmTolr/1000000);
+    float maxMz = g->meanMz + (g->meanMz*params->ms1PpmTolr/1000000);
+    float deltaMz = g->meanMz*params->ms1PpmTolr/1000000;
+
+    auto lb = lower_bound(compounds.begin(), compounds.end(), minMz, [](const CompoundIon& lhs, const float& rhs){
+        return lhs.precursorMz < rhs;
+    });
+
+    if (g->fragmentationPattern.mzs.empty()) {
+        g->computeFragPattern(params.get());
+    }
+
+    vector<pair<Compound*, FragmentationMatchScore>> scores{};
+
+    if (debug) {
+        cout << g->meanMz << "@" << g->meanRt << ":\n";
+        cout << "tol: " << params->ms1PpmTolr
+             << " ppm, deltaMz=" << deltaMz
+             <<  ", search range: ["
+             << minMz << " - " << maxMz << "]\n";
+    }
+
+    for (long pos = lb - compounds.begin(); pos < static_cast<long>(compounds.size()); pos++){
+
+        CompoundIon ion = compounds[static_cast<unsigned long>(pos)];
+        Compound *compound = compounds[static_cast<unsigned long>(pos)].compound;
+
+        float precMz = ion.precursorMz;
+        string adductName = ion.getAdductName();
+
+        if (debug) {
+            cout << compound->name << " " << adductName << ": " << precMz << "\n";
+        }
+
+        //stop searching when the maxMz has been exceeded.
+        if (precMz > maxMz) {
+            break;
+        }
+
+        if (debug) {
+
+            cout << "(minMz=" << minMz << ", maxMz=" << maxMz << "):\n";
+
+            if (pos >= 2){
+                cout << "compounds[" << (pos-2) << "]: " << compounds[pos-2].precursorMz << "\n";
+                cout << "compounds[" << (pos-1) << "]: " << compounds[pos-1].precursorMz << "\n";
+            }
+
+            cout << "compounds[" << (pos) << "]: " << precMz << " <--> " << compound->id << "\n";
+
+            if (pos <= static_cast<long>(compounds.size()-2)) {
+                cout << "compounds[" << (pos+1) << "]: " << compounds[pos+1].precursorMz << "\n";
+                cout << "compounds[" << (pos+2) << "]: " << compounds[pos+1].precursorMz << "\n";
+            }
+
+            cout << "\n";
+
+        }
+
+        Fragment library;
+        library.precursorMz = static_cast<double>(precMz);
+        library.mzs = compound->fragment_mzs;
+        library.intensity_array = compound->fragment_intensity;
+        library.fragment_labels = compound->fragment_labels;
+
+        //lazily enumerate summarization info, cache for future comparisons
+        if (compound->metaDataMap.find(LipidSummarizationUtils::getLipidClassSummaryKey()) == compound->metaDataMap.end()) {
+            LipidNameComponents lipidNameComponents = LipidSummarizationUtils::getNameComponents(compound->name);
+            compound->metaDataMap.insert(make_pair(LipidSummarizationUtils::getLipidClassSummaryKey(), lipidNameComponents.lipidClass));
+        }
+
+        string lipidClass = compound->metaDataMap[LipidSummarizationUtils::getLipidClassSummaryKey()];
+
+        //Issue 588: skip entries unless the (class, adduct) is explicitly permitted, or no entries provided.
+        bool isValidClassAdduct = params->validClassAdducts.empty();
+        for (auto pair : params->validClassAdducts) {
+            if (pair.first == lipidClass && (pair.second == "*" || pair.second == adductName)) {
+                isValidClassAdduct = true;
+                break;
+            }
+        }
+
+        if (!isValidClassAdduct) continue;
+
+        //skip entries when the RT is out of range
+        if (params->lipidClassToRtRange.find(lipidClass) != params->lipidClassToRtRange.end()) {
+            pair<float, float> validRtRange = params->lipidClassToRtRange[lipidClass];
+
+            if (g->medianRt() < validRtRange.first || g->medianRt() > validRtRange.second) continue;
+        }
+
+        Fragment observed = g->fragmentationPattern;
+        float maxDeltaMz = (params->ms2PpmTolr * precMz)/ 1000000;
+
+        FragmentationMatchScore s;
+
+        vector<int> ranks = Fragment::findFragPairsGreedyMz(&library, &observed, maxDeltaMz);
+
+        if (debug) {
+            for (unsigned int i = 0; i < library.mzs.size(); i++) {
+                cout << "i=" << i << ": " << library.fragment_labels[i] << " " << library.mzs[i];
+                int observedIndex = ranks.at(i);
+                if (observedIndex >= 0) {
+                    cout << " <--> " << observed.mzs.at(static_cast<unsigned int>(observedIndex));
+                }
+                cout << "\n";
+            }
+        }
+
+        for (unsigned int i = 0; i < ranks.size(); i++) {
+
+            int observedIndex = ranks[i];
+
+            if (observedIndex != -1) {
+
+                s.numMatches++;
+
+                string compoundLabel = library.fragment_labels[i];
+
+                s.addLabelSpecificMatches(compoundLabel, debug);
+            }
+        }
+
+        if (adductName == "") continue;
+        if (!params->isMatchPassesLCLipidSearchThresholds(s, lipidClass, adductName)) continue;
+
+        s.hypergeomScore = Fragment::SHP(static_cast<int>(s.numMatches),
+                                         static_cast<int>(library.mzs.size()),
+                                         static_cast<int>(observed.nobs()),
+                                         100000);
+
+        s.dotProduct = Fragment::normCosineScore(&library, &observed, ranks);
+
+        s.fractionMatched = s.numMatches/library.mzs.size();
+        s.ppmError = static_cast<double>(mzUtils::ppmDist(compound->precursorMz, g->meanMz));
+
+        //debugging
+        if (debug) {
+            cout << "Candidate Score: " << compound->name << " " << adductName <<":\n";
+            cout << "numMatches= " << s.numMatches
+                 << ", numDiagnosticMatches= " << s.numDiagnosticMatches
+                 << ", numAcylMatches= " << s.numAcylChainMatches
+                 << ", hyperGeometricScore= " << s.hypergeomScore
+                 << ", cosineScore= " << s.dotProduct
+                 << "\n\n\n";
+        }
+
+        scores.push_back(make_pair(compound, s));
+    }
+
+    if (debug) {
+        cout << endl;
+    }
+
+    if (!scores.empty()) {
+
+        //Issue 606: Pass along lipid scores values as additional table.
+        g->compounds = scores;
+
+        //Issue 593: guarantee non-determinism
+        sort(scores.begin(), scores.end(), [](pair<Compound*, FragmentationMatchScore>& lhs, pair<Compound*, FragmentationMatchScore>& rhs){
+            if (lhs.second.hypergeomScore != rhs.second.hypergeomScore) {
+                return lhs.second.hypergeomScore > rhs.second.hypergeomScore;
+            }
+
+            if (lhs.second.dotProduct != rhs.second.dotProduct) {
+                return lhs.second.dotProduct > rhs.second.dotProduct;
+            }
+
+            return lhs.first->name < rhs.first->name;
+        });
+
+        if (debug) {
+            cout << "Sorted scores:\n";
+            for (auto score : scores) {
+                cout << score.first->name << " " << score.first->adductString << ":\n";
+                cout << "numMatches= " << score.second.numMatches
+                     << ", numDiagnosticMatches= " << score.second.numDiagnosticMatches
+                     << ", numAcylMatches= " << score.second.numAcylChainMatches
+                     << ", hyperGeometricScore= " << score.second.hypergeomScore
+                     << ", cosineScore= " << score.second.dotProduct
+                     << endl;
+            }
+        }
+
+        pair<Compound*, FragmentationMatchScore> bestPair = scores[0];
+
+        g->compound = bestPair.first;
+        g->fragMatchScore = bestPair.second;
+        g->fragMatchScore.mergedScore = bestPair.second.hypergeomScore;
+
+        if (debug) {
+            cout << "MATCH: " << g->meanMz << "@" << g->meanRt  << " <--> " << g->compound->id << "\n" << endl;
+        }
+    }
+
+}
+
+/**
  * @brief MzKitchenProcessor::matchMetabolites
  * @param groups
  * @param compounds
