@@ -3293,6 +3293,11 @@ void SearchParameters::fillInBaseParams(unordered_map<string, string> decodedMap
      if (decodedMap.find("ms2MinIntensity") != decodedMap.end()) {
          ms2MinIntensity = stof(decodedMap["ms2MinIntensity"]);
      }
+
+     //Identification related
+     if (decodedMap.find("IDisRequireMatchingAdduct") != decodedMap.end()) {
+         IDisRequireMatchingAdduct = decodedMap["IDisRequireMatchingAdduct"] == "1";
+     }
 }
 
 bool LipidParameterGroup::isMatchPassSingleIntThreshold(

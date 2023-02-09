@@ -1694,6 +1694,12 @@ class SearchParameters {
 
     virtual string encodeParams() = 0;
 
+    /** ===================
+     * IDENTIFICATION RELATED
+     * @param isRequireMatchingAdduct
+     * ==================== */
+    bool IDisRequireMatchingAdduct = false;
+
     void fillInBaseParams(unordered_map<string, string> decodedMap);
 
     virtual ~SearchParameters();
@@ -1755,6 +1761,9 @@ class SearchParameters {
         encodedParams = encodedParams + "ms2PpmTolr" + "=" + to_string(ms2PpmTolr) + ";";
         encodedParams = encodedParams + "ms2MinIntensity" + "=" + to_string(ms2MinIntensity) + ";";
         encodedParams = encodedParams + "ms2IsRequirePrecursorMatch"  + "=" + to_string(ms2IsRequirePrecursorMatch) + ";"; //Issue 390
+
+        //Identification related
+        encodedParams = encodedParams + "IDisRequireMatchingAdduct" + "=" + to_string(IDisRequireMatchingAdduct) + ";"; //Issue 606
 
         // END SearchParameters
 
