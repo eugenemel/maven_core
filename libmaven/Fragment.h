@@ -173,7 +173,7 @@ struct FragmentationMatchScore {
         return *this;
     }
 
-    void addLabelSpecificMatches(string compoundLabel);
+    void addLabelSpecificMatches(string compoundLabel, bool debug=false);
 };
 
 class Fragment {

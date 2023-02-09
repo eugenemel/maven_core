@@ -1792,7 +1792,7 @@ string Fragment::encodeSpectrum(int numDigits, string type, bool isNormalizeToMa
 }
 
 //Issue 585
-void FragmentationMatchScore::addLabelSpecificMatches(string compoundLabel) {
+void FragmentationMatchScore::addLabelSpecificMatches(string compoundLabel, bool debug) {
 
     bool isDiagnosticFragment = false;
     bool isAcylChainFragment = false;
@@ -1808,8 +1808,16 @@ void FragmentationMatchScore::addLabelSpecificMatches(string compoundLabel) {
     //check key characters to determine fragment type
 
     for (string frag : labelElements) {
+        if (debug) {
+            cout << "frag: '" << frag;
+        }
+
         if (frag.size() > 0) {
             char c = frag[0];
+            if (debug) {
+                cout << "', char: '" << c << "':" << endl;
+            }
+
             if (c == '*'){
                 isDiagnosticFragment = true;
             } else if (c == '@') {
@@ -1828,6 +1836,16 @@ void FragmentationMatchScore::addLabelSpecificMatches(string compoundLabel) {
                 isOxidationFragment = true;
             }
         }
+    }
+
+    if (debug) {
+        cout << "\tisDiagnosticFragment? " << (isDiagnosticFragment ? "yes" : "no") << "\n"
+             << "\tisAcylChainFragment? " << (isAcylChainFragment ? "yes" : "no") << "\n"
+             << "\tisSn1Fragment? " << (isSn1Fragment ? "yes" : "no") << "\n"
+             << "\tisSn2Fragment? " << (isSn2Fragment ? "yes" : "no") << "\n"
+             << "\tisSn3Fragment? " << (isSn3Fragment ? "yes" : "no") << "\n"
+             << "\tisSn4Fragment? " << (isSn4Fragment ? "yes" : "no") << "\n"
+             << "\tisOxidationFragment? " << (isOxidationFragment ? "yes" : "no") << "\n";
     }
 
     if (isDiagnosticFragment) numDiagnosticMatches++;
