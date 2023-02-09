@@ -57,7 +57,7 @@ void MzKitchenProcessor::matchLipids_LC(
             float precMz = compound->precursorMz;
 
             if (debug) {
-                cout << compound->name << " " << compound->adductString << ": " << precMz << endl;
+                cout << compound->name << " " << compound->adductString << ": " << precMz << "\n";
             }
 
             //stop searching when the maxMz has been exceeded.
@@ -67,7 +67,7 @@ void MzKitchenProcessor::matchLipids_LC(
 
             if (debug) {
 
-                cout << "(" << minMz << ", " << maxMz << ")\n";
+                cout << "(minMz=" << minMz << ", maxMz=" << maxMz << "):\n";
 
                 if (pos >= 2){
                     cout << "compounds[" << (pos-2) << "]: " << compounds[pos-2]->precursorMz << "\n";
@@ -81,7 +81,7 @@ void MzKitchenProcessor::matchLipids_LC(
                     cout << "compounds[" << (pos+2) << "]: " << compounds[pos+1]->precursorMz << "\n";
                 }
 
-                cout << "\n\n";
+                cout << "\n";
 
             }
 
@@ -124,6 +124,17 @@ void MzKitchenProcessor::matchLipids_LC(
 
             vector<int> ranks = Fragment::findFragPairsGreedyMz(&library, &observed, maxDeltaMz);
 
+            if (debug) {
+                for (unsigned int i = 0; i < library.mzs.size(); i++) {
+                    cout << "i=" << i << ": " << library.fragment_labels[i] << " " << library.mzs[i];
+                    int observedIndex = ranks.at(i);
+                    if (observedIndex >= 0) {
+                        cout << " <--> " << observed.mzs.at(static_cast<unsigned int>(observedIndex));
+                    }
+                    cout << "\n";
+                }
+            }
+
             for (unsigned int i = 0; i < ranks.size(); i++) {
 
                 int observedIndex = ranks[i];
@@ -132,9 +143,9 @@ void MzKitchenProcessor::matchLipids_LC(
 
                     s.numMatches++;
 
-                    string compoundLabel = compound->fragment_labels[i];
+                    string compoundLabel = library.fragment_labels[i];
 
-                    s.addLabelSpecificMatches(compoundLabel);
+                    s.addLabelSpecificMatches(compoundLabel, debug);
                 }
             }
 
@@ -158,11 +169,25 @@ void MzKitchenProcessor::matchLipids_LC(
             s.fractionMatched = s.numMatches/library.mzs.size();
             s.ppmError = static_cast<double>(mzUtils::ppmDist(compound->precursorMz, group.meanMz));
 
+            //debugging
+            if (debug) {
+                cout << "Candidate Score: " << compound->name << " " << compound->adductString <<":\n";
+                cout << "numMatches= " << s.numMatches
+                     << ", numDiagnosticMatches= " << s.numDiagnosticMatches
+                     << ", numAcylMatches= " << s.numAcylChainMatches
+                     << ", hyperGeometricScore= " << s.hypergeomScore
+                     << ", cosineScore= " << s.dotProduct
+                     << "\n\n\n";
+            }
+
+            //Issue 606: relocated this call here for debugging
+            // if (!params->isMatchPassesLCLipidSearchThresholds(s, lipidClass, compound->adductString)) continue;
+
             scores.push_back(make_pair(compound, s));
         }
 
         if (debug) {
-            cout << "\n";
+            cout << endl;
         }
 
         if (!scores.empty()) {
