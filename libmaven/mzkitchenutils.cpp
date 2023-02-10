@@ -411,6 +411,137 @@ void MzKitchenProcessor::matchMetabolites(
     }
 }
 
+void MzKitchenProcessor::assignBestMetaboliteToGroup(
+        PeakGroup* g,
+        vector<CompoundIon>& compounds,
+        shared_ptr<MzkitchenMetaboliteSearchParameters> params,
+        bool debug){
+
+    float minMz = g->meanMz - (g->meanMz*params->ms1PpmTolr/1000000);
+    float maxMz = g->meanMz + (g->meanMz*params->ms1PpmTolr/1000000);
+
+    auto lb = lower_bound(compounds.begin(), compounds.end(), minMz, [](const CompoundIon& lhs, const float& rhs){
+        return lhs.precursorMz < rhs;
+    });
+
+    if (g->fragmentationPattern.mzs.empty()) {
+        g->computeFragPattern(params.get());
+    }
+
+    vector<pair<CompoundIon, FragmentationMatchScore>> scores{};
+
+    for (long pos = lb - compounds.begin(); pos < static_cast<long>(compounds.size()); pos++){
+
+        CompoundIon ion = compounds[static_cast<unsigned long>(pos)];
+        Compound* compound = ion.compound;
+        Adduct *adduct = ion.adduct;
+
+        if (!compound) continue;
+
+        bool isMatchingAdduct = adduct && compound->adductString == adduct->name;
+        if (params->IDisRequireMatchingAdduct && !isMatchingAdduct) {
+            continue;
+        }
+
+        float precMz = ion.precursorMz;
+
+        //stop searching when the maxMz has been exceeded.
+        if (precMz > maxMz) {
+            break;
+        }
+
+        if (debug) {
+
+            cout << "(minMz=" << minMz << ", maxMz=" << maxMz << "):\n";
+
+            if (pos >= 2){
+                cout << "compounds[" << (pos-2) << "]: " << compounds[pos-2].precursorMz << "\n";
+                cout << "compounds[" << (pos-1) << "]: " << compounds[pos-1].precursorMz << "\n";
+            }
+
+            cout << "compounds[" << (pos) << "]: " << precMz << " <--> " << compound->id << "\n";
+
+            if (pos <= static_cast<long>(compounds.size()-2)) {
+                cout << "compounds[" << (pos+1) << "]: " << compounds[pos+1].precursorMz << "\n";
+                cout << "compounds[" << (pos+2) << "]: " << compounds[pos+1].precursorMz << "\n";
+            }
+
+            cout << "\n";
+
+        }
+
+        Fragment library;
+        library.precursorMz = static_cast<double>(precMz);
+        library.mzs = compound->fragment_mzs;
+        library.intensity_array = compound->fragment_intensity;
+        library.fragment_labels = compound->fragment_labels;
+
+        //skip entries when the RT is required, and out of range
+        float rtDiff = abs(g->medianRt() - compound->expectedRt);
+        if (params->rtIsRequireRtMatch & (rtDiff > params->rtMatchTolerance)) {
+            continue;
+        }
+
+        FragmentationMatchScore s = library.scoreMatch(&(g->fragmentationPattern), params->ms2PpmTolr);
+
+        //debugging
+        if (debug) {
+            cout << "Candidate Score: " << compound->id << ":\n";
+            cout << "numMatches= " << s.numMatches
+                 << ", hyperGeometricScore= " << s.hypergeomScore
+                 << ", cosineScore= " << s.dotProduct
+                 << "\n\n\n";
+        }
+
+        if (s.numMatches < params->ms2MinNumMatches) continue;
+
+        double normCosineScore = Fragment::normCosineScore(&library, &(g->fragmentationPattern), s.ranks);
+        s.dotProduct = normCosineScore;
+
+        scores.push_back(make_pair(ion, s));
+    }
+
+    //Issue 559: print empty groups
+    if (debug) {
+        cout << g->meanMz << "@" << g->medianRt() << " #ms2s=" << g->ms2EventCount << " :" << endl;
+    }
+
+    if (scores.empty()) return;
+
+    g->compounds = scores;
+
+    float maxScore = -1.0f;
+    pair<CompoundIon, FragmentationMatchScore> bestPair;
+    for (auto score : scores) {
+        if (score.second.dotProduct > maxScore) {
+            bestPair = score;
+            maxScore = score.second.dotProduct;
+        }
+    }
+
+    if (maxScore > -1.0f) {
+        g->compound = bestPair.first.compound;
+        if (bestPair.first.adduct) g->adduct = bestPair.first.adduct;
+        g->fragMatchScore = bestPair.second;
+        g->fragMatchScore.mergedScore = bestPair.second.dotProduct;
+    }
+
+    //Issue 546: debugging
+    if (debug) {
+        //cout << g->meanMz << "@" << g->medianRt() << ":" << endl;
+
+        for (auto pair : g->compounds) {
+            cout << "\t" << pair.first.compound->name << " "
+                 << pair.second.numMatches << " "
+                 << pair.second.fractionMatched << " "
+                 << pair.second.dotProduct  << " "
+                 << pair.second.hypergeomScore << " "
+                 << endl;
+        }
+    }
+
+}
+
 string LCLipidSearchParameters::encodeParams() {
 
     string encodedParams = baseParams();

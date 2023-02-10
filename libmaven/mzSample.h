@@ -2168,10 +2168,10 @@ public:
                                  bool debug=false);
 
 
-//    static void assignBestMetaboliteToGroup(PeakGroup* g,
-//                                            vector<CompoundIon>& compound,
-//                                            shared_ptr<MzkitchenMetaboliteSearchParameters> params,
-//                                            bool debug=false);
+    static void assignBestMetaboliteToGroup(PeakGroup* g,
+                                            vector<CompoundIon>& compounds,
+                                            shared_ptr<MzkitchenMetaboliteSearchParameters> params,
+                                            bool debug=false);
 };
 
 //Issue 482
