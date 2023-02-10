@@ -2134,7 +2134,7 @@ public:
         return "";
     }
 
-    string toString(int precision=2) {
+    string toString(int precision=4) {
         stringstream s;
         s << std::fixed << setprecision(precision);
         s << "(";
