@@ -286,6 +286,12 @@ void MzKitchenProcessor::matchMetabolites(
                 return lhs.meanMz < rhs.meanMz;
             }
         });
+
+        cout << "COMPOUNDS:\n";
+        for (auto compound : compounds) {
+            cout << compound->id << ": precMz=" << compound->precursorMz << "\n";
+        }
+        cout << endl;
     }
 
     for (auto& group : groups) {
@@ -308,6 +314,26 @@ void MzKitchenProcessor::matchMetabolites(
             Compound *compound = compounds[static_cast<unsigned long>(pos)];
             float precMz = compound->precursorMz;
 
+            if (debug) {
+
+                cout << "(minMz=" << minMz << ", maxMz=" << maxMz << "):\n";
+
+                if (pos >= 2){
+                    cout << "compounds[" << (pos-2) << "]: " << compounds[pos-2]->precursorMz << "\n";
+                    cout << "compounds[" << (pos-1) << "]: " << compounds[pos-1]->precursorMz << "\n";
+                }
+
+                cout << "compounds[" << (pos) << "]: " << precMz << " <--> " << compound->id << "\n";
+
+                if (pos <= static_cast<long>(compounds.size()-2)) {
+                    cout << "compounds[" << (pos+1) << "]: " << compounds[pos+1]->precursorMz << "\n";
+                    cout << "compounds[" << (pos+2) << "]: " << compounds[pos+1]->precursorMz << "\n";
+                }
+
+                cout << "\n";
+
+            }
+
             //stop searching when the maxMz has been exceeded.
             if (precMz > maxMz) {
                 break;
@@ -326,6 +352,15 @@ void MzKitchenProcessor::matchMetabolites(
             }
 
             FragmentationMatchScore s = library.scoreMatch(&(group.fragmentationPattern), params->ms2PpmTolr);
+
+            //debugging
+            if (debug) {
+                cout << "Candidate Score: " << compound->id << ":\n";
+                cout << "numMatches= " << s.numMatches
+                     << ", hyperGeometricScore= " << s.hypergeomScore
+                     << ", cosineScore= " << s.dotProduct
+                     << "\n\n\n";
+            }
 
             if (s.numMatches < params->ms2MinNumMatches) continue;
 
