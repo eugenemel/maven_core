@@ -55,6 +55,8 @@ void MzKitchenProcessor::assignBestLipidToGroup(
         shared_ptr<LCLipidSearchParameters> params,
         bool debug){
 
+    if (!g) return;
+
     float minMz = g->meanMz - (g->meanMz*params->ms1PpmTolr/1000000);
     float maxMz = g->meanMz + (g->meanMz*params->ms1PpmTolr/1000000);
     float deltaMz = g->meanMz*params->ms1PpmTolr/1000000;

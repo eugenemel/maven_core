@@ -2133,6 +2133,17 @@ public:
         }
         return "";
     }
+
+    string toString(int precision=2) {
+        stringstream s;
+        s << std::fixed << setprecision(precision);
+        s << "(";
+        if (compound) s << compound->name;
+        s << " " << getAdductName();
+        s << " precMz=" << precursorMz << ")";
+
+        return s.str();
+    }
 };
 
 class MzKitchenProcessor{
