@@ -56,6 +56,7 @@ class ChargedSpecies;
 class Fragment;
 class Isotope;
 struct FragmentationMatchScore;
+class CompoundIon;
 
 class LibraryMs2SpectrumParameters;
 class LoopInjectionMs2SpectrumParameters;
@@ -1081,7 +1082,7 @@ class PeakGroup {
         Fragment fragmentationPattern;
 
         //Issue 546: Attach hypotheses to group, same way as vector<Peak> works
-        vector<pair<Compound*, FragmentationMatchScore>> compounds{};
+        vector<pair<CompoundIon, FragmentationMatchScore>> compounds{};
 
 		void deletePeaks();
         bool deletePeak(unsigned int index);
@@ -2166,7 +2167,7 @@ public:
                                  shared_ptr<MzkitchenMetaboliteSearchParameters> params,
                                  bool debug=false);
 
-    // TODO
+
 //    static void assignBestMetaboliteToGroup(PeakGroup* g,
 //                                            vector<CompoundIon>& compound,
 //                                            shared_ptr<MzkitchenMetaboliteSearchParameters> params,

@@ -69,7 +69,7 @@ void MzKitchenProcessor::assignBestLipidToGroup(
         g->computeFragPattern(params.get());
     }
 
-    vector<pair<Compound*, FragmentationMatchScore>> scores{};
+    vector<pair<CompoundIon, FragmentationMatchScore>> scores{};
 
     if (debug) {
         cout << g->meanMz << "@" << g->meanRt << ":\n";
@@ -84,6 +84,8 @@ void MzKitchenProcessor::assignBestLipidToGroup(
         CompoundIon ion = compounds[static_cast<unsigned long>(pos)];
         Compound *compound = ion.compound;
         Adduct *adduct = ion.adduct;
+
+        if (!compound) continue;
 
         bool isMatchingAdduct = adduct && compound->adductString == adduct->name;
         if (params->IDisRequireMatchingAdduct && !isMatchingAdduct) {
@@ -210,7 +212,7 @@ void MzKitchenProcessor::assignBestLipidToGroup(
                  << "\n\n\n";
         }
 
-        scores.push_back(make_pair(compound, s));
+        scores.push_back(make_pair(ion, s));
     }
 
     if (debug) {
@@ -223,7 +225,7 @@ void MzKitchenProcessor::assignBestLipidToGroup(
         g->compounds = scores;
 
         //Issue 593: guarantee non-determinism
-        sort(scores.begin(), scores.end(), [](pair<Compound*, FragmentationMatchScore>& lhs, pair<Compound*, FragmentationMatchScore>& rhs){
+        sort(scores.begin(), scores.end(), [](pair<CompoundIon, FragmentationMatchScore>& lhs, pair<CompoundIon, FragmentationMatchScore>& rhs){
             if (lhs.second.hypergeomScore != rhs.second.hypergeomScore) {
                 return lhs.second.hypergeomScore > rhs.second.hypergeomScore;
             }
@@ -232,13 +234,13 @@ void MzKitchenProcessor::assignBestLipidToGroup(
                 return lhs.second.dotProduct > rhs.second.dotProduct;
             }
 
-            return lhs.first->name < rhs.first->name;
+            return lhs.first.compound->name < rhs.first.compound->name;
         });
 
         if (debug) {
             cout << "Sorted scores:\n";
             for (auto score : scores) {
-                cout << score.first->name << " " << score.first->adductString << ":\n";
+                cout << score.first.compound->name << " " << score.first.getAdductName() << ":\n";
                 cout << "numMatches= " << score.second.numMatches
                      << ", numDiagnosticMatches= " << score.second.numDiagnosticMatches
                      << ", numAcylMatches= " << score.second.numAcylChainMatches
@@ -248,9 +250,10 @@ void MzKitchenProcessor::assignBestLipidToGroup(
             }
         }
 
-        pair<Compound*, FragmentationMatchScore> bestPair = scores[0];
+        pair<CompoundIon, FragmentationMatchScore> bestPair = scores[0];
 
-        g->compound = bestPair.first;
+        g->compound = bestPair.first.compound;
+        if (bestPair.first.adduct) g->adduct = bestPair.first.adduct;
         g->fragMatchScore = bestPair.second;
         g->fragMatchScore.mergedScore = bestPair.second.hypergeomScore;
 
@@ -339,7 +342,8 @@ void MzKitchenProcessor::matchMetabolites(
 
         if (scores.empty()) continue;
 
-        group.compounds = scores;
+        //TODO: fix this after restructuring function call.
+        //group.compounds = scores;
 
         float maxScore = -1.0f;
         pair<Compound*, FragmentationMatchScore> bestPair;
@@ -361,7 +365,7 @@ void MzKitchenProcessor::matchMetabolites(
             //cout << group.meanMz << "@" << group.medianRt() << ":" << endl;
 
             for (auto pair : group.compounds) {
-                cout << "\t" << pair.first->name << " "
+                cout << "\t" << pair.first.compound->name << " "
                      << pair.second.numMatches << " "
                      << pair.second.fractionMatched << " "
                      << pair.second.dotProduct  << " "
