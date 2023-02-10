@@ -2075,10 +2075,10 @@ public:
 
     /** =======================
      * RT Matching
-     * searchVersion: version of search protocol used to generate results.
-     * lipidClassToRtRange: map describing valid RT range for lipid class, if available.  If none available, retain all RTs
+     * rtIsRequireRtMatch: Whether or not to retain match based on RT similarity.
+     * rtMatchTolerance: max distance in minutes between observed and reference RT.
      * ========================*/
-    bool rtIsRequireRtMatch = true;
+    bool rtIsRequireRtMatch = false;
     float rtMatchTolerance = 0.5f;
 
     //default constructor
