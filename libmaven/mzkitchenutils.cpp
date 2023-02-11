@@ -382,6 +382,9 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
 
         FragmentationMatchScore s = library.scoreMatch(&(g->fragmentationPattern), params->ms2PpmTolr);
 
+        double normCosineScore = Fragment::normCosineScore(&library, &(g->fragmentationPattern), s.ranks);
+        s.dotProduct = normCosineScore;
+
         //debugging
         if (debug) {
             cout << "Candidate Score: " << compound->id << ":\n";
@@ -393,11 +396,8 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
                  << "\n\n\n";
         }
 
-
         if (s.numMatches < params->ms2MinNumMatches) continue;
 
-        double normCosineScore = Fragment::normCosineScore(&library, &(g->fragmentationPattern), s.ranks);
-        s.dotProduct = normCosineScore;
 
         scores.push_back(make_pair(ion, s));
     }
@@ -429,8 +429,6 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
 
     //Issue 546: debugging
     if (debug) {
-        //cout << g->meanMz << "@" << g->medianRt() << ":" << endl;
-
         for (auto pair : g->compounds) {
             cout << "\t" << pair.first.compound->name << " "
                  << pair.second.numMatches << " "
