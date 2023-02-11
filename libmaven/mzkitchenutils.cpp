@@ -388,8 +388,11 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
             cout << "numMatches= " << s.numMatches
                  << ", hyperGeometricScore= " << s.hypergeomScore
                  << ", cosineScore= " << s.dotProduct
+                 << " VS params->ms2MinNumMatches = " << params->ms2MinNumMatches
+                 << " " << (s.numMatches >= params->ms2MinNumMatches ? "yes" : "no")
                  << "\n\n\n";
         }
+
 
         if (s.numMatches < params->ms2MinNumMatches) continue;
 
