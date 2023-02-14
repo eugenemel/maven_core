@@ -56,6 +56,7 @@ class ChargedSpecies;
 class Fragment;
 class Isotope;
 struct FragmentationMatchScore;
+class CompoundIon;
 
 class LibraryMs2SpectrumParameters;
 class LoopInjectionMs2SpectrumParameters;
@@ -1081,7 +1082,7 @@ class PeakGroup {
         Fragment fragmentationPattern;
 
         //Issue 546: Attach hypotheses to group, same way as vector<Peak> works
-        vector<pair<Compound*, FragmentationMatchScore>> compounds{};
+        vector<pair<CompoundIon, FragmentationMatchScore>> compounds{};
 
 		void deletePeaks();
         bool deletePeak(unsigned int index);
@@ -2074,10 +2075,10 @@ public:
 
     /** =======================
      * RT Matching
-     * searchVersion: version of search protocol used to generate results.
-     * lipidClassToRtRange: map describing valid RT range for lipid class, if available.  If none available, retain all RTs
+     * rtIsRequireRtMatch: Whether or not to retain match based on RT similarity.
+     * rtMatchTolerance: max distance in minutes between observed and reference RT.
      * ========================*/
-    bool rtIsRequireRtMatch = true;
+    bool rtIsRequireRtMatch = false;
     float rtMatchTolerance = 0.5f;
 
     //default constructor
@@ -2134,7 +2135,7 @@ public:
         return "";
     }
 
-    string toString(int precision=2) {
+    string toString(int precision=4) {
         stringstream s;
         s << std::fixed << setprecision(precision);
         s << "(";
@@ -2166,11 +2167,11 @@ public:
                                  shared_ptr<MzkitchenMetaboliteSearchParameters> params,
                                  bool debug=false);
 
-    // TODO
-//    static void assignBestMetaboliteToGroup(PeakGroup* g,
-//                                            vector<CompoundIon>& compound,
-//                                            shared_ptr<MzkitchenMetaboliteSearchParameters> params,
-//                                            bool debug=false);
+
+    static void assignBestMetaboliteToGroup(PeakGroup* g,
+                                            vector<CompoundIon>& compounds,
+                                            shared_ptr<MzkitchenMetaboliteSearchParameters> params,
+                                            bool debug=false);
 };
 
 //Issue 482
