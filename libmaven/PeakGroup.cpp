@@ -1178,8 +1178,10 @@ string PeakGroup::getPeakGroupLabel() {
  *
  * Issue 371: To avoid confusion surrounding multiple implementations of
  * pullIsotopes(), refactoring to PeakGroup-specific method
+ *
+ * Issue 615: Add option to retain empty isotopes, use for bookmarking
  */
-void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters) {
+void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmptyIsotopes) {
 
     if (_type == PeakGroup::SRMTransitionType) return; //isotopes are not available for SRM types
     if (!isotopeParameters.isIsotopes()) return;
@@ -1222,7 +1224,7 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters) {
             return lhs.mz < rhs.mz;
          });
 
-    map<string,PeakGroup>isotopes;
+    map<string,PeakGroup>isotopes{};
     map<string,PeakGroup>::iterator itr2;
 
     for (auto parentPeak : peaks ) {
@@ -1270,6 +1272,19 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters) {
                 }
             }
             //if(isotopePeakIntensity==0) continue;
+
+            //Issue 615: create empty peak groups for isotopes
+            if (isKeepEmptyIsotopes && isotopes.find(isotopeName) == isotopes.end()) {
+
+                PeakGroup g;
+                g.meanMz=isotopeMass;
+                g.tagString=isotopeName;
+                g.expectedAbundance=expectedAbundance;
+                g.isotopeC13count= isotope.C13;
+                g.isotopicIndex = isotopeNumber;
+
+                isotopes.insert(make_pair(isotopeName, g));
+            }
 
             //natural abundance check
             if (isotopeParameters.isIgnoreNaturalAbundance) {
@@ -1331,14 +1346,15 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters) {
                 }
 
                 if (nearestPeak) {
-                    if (isotopes.count(isotopeName)==0) {
+                    if (isotopes.find(isotopeName) == isotopes.end()) {
                         PeakGroup g;
                         g.meanMz=isotopeMass;
                         g.tagString=isotopeName;
                         g.expectedAbundance=expectedAbundance;
                         g.isotopeC13count= isotope.C13;
                         g.isotopicIndex = isotopeNumber;
-                        isotopes[isotopeName] = g;
+
+                        isotopes.insert(make_pair(isotopeName, g));
                     }
                     isotopes[isotopeName].addPeak(*nearestPeak);
                 }

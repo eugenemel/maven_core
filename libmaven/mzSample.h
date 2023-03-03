@@ -1061,7 +1061,10 @@ class PeakGroup {
 		float medianRt();
         float maxPeakRt();
 		float meanRtW();
-        void pullIsotopes(IsotopeParameters isotopeParameters); //Issue 371: refactor to dedicated method
+
+        //Issue 371: refactor to dedicated method
+        //Issue 615: Option to create empty Isotopic Peak Groups
+        void pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmptyIsotopes=false);
 
         bool isGroupGood();
         bool isGroupBad();
