@@ -672,6 +672,7 @@ class EIC {
         void getPeakDetails(Peak& peak, bool isCorrectPeakByMaxIntensity=true);
 		void getPeakWidth(Peak& peak);
         void computeBaseLine(int smoothingWindow, int dropTopX);
+        void computeBaselineByNonPeakIntensity(bool debug=false);
         void computeSpline(int smoothWindow);
 		void findPeakBounds(Peak& peak);
 		void getPeakStatistics();
@@ -712,11 +713,36 @@ class EIC {
 
 };
 
+/**
+ * @brief The EICBaselineEstimationType enum
+ * manner in which baseline is computed
+ *
+ * DROP_TOP_X: original baseline estimation type, as in EIC::computeBaseline()
+ *
+ * EIC_MAX_SMOOTHED_NON_PEAK_INTENSITY_QCUT:
+ * EIC is first peak-picked initially using the DROP_TOP_X approach.
+ * After an EIC has been peak-picked, with peak boundaries determined, the maximum
+ * intensity of non-peak smoothed intensity becomes the baselineQCutVal, instead of
+ * the dropTopX-computed value.
+ * With this new value, the baseline is recomputed, peak-picking is repeated using the new baseline value.
+ *
+ * Setting the dropTopX > 100 effectively disables baseline, and can be used in combination with
+ * EIC::getPeakPositionsC(isComputePeakBounds=true) to compute peak bounds. This isn't necessary;
+ * it's possible to pick peaks initially considering the original baseline computation, however, it probably
+ * isn't that likely to be used this way.
+ *
+ */
+enum EICBaselineEstimationType {
+    DROP_TOP_X = 0,
+    EIC_MAX_SMOOTHED_NON_PEAK_INTENSITY_QCUT = 1,
+    PEAK_EDGE_AS_BASELINE = 2
+};
+
 class Peak {
 	public:
 		Peak();
 		Peak(EIC* e, int p);
-        Peak(const Peak& p);
+                Peak(const Peak& p);
 		Peak& operator=(const Peak& o);
                 void copyObj(const Peak& o);
 
@@ -758,7 +784,7 @@ class Peak {
 		unsigned int noNoiseObs; 
 		float noNoiseFraction;
 		float symmetry;
-		float signalBaselineRatio;
+                float signalBaselineRatio;
 		float groupOverlap;			// 0 no overlap, 1 perfect overlap
 		float groupOverlapFrac;		
 
@@ -771,6 +797,23 @@ class Peak {
 		bool fromBlankSample;		//true if peak is from blank sample
 
 		char label;		//classification label
+
+                //Issue 549: new fields
+                float smoothedIntensity;
+                float smoothedPeakArea;
+                float smoothedPeakAreaCorrected;
+                float smoothedPeakAreaTop;
+
+                unsigned int minScanFWHM;
+                unsigned int maxScanFWHM;
+                float rtminFWHM;
+                float rtmaxFWHM;
+                float peakAreaFWHM;
+                float smoothedpeakAreaFWHM;
+
+                EICBaselineEstimationType baselineEstimationType;
+
+
         mzSample *sample;  //pointer to sample
 
     private:

@@ -105,6 +105,10 @@ EIC* EIC::eicMerge(const vector<EIC*>& eics) {
 	return meic;
 }
 
+//Issue 549
+void EIC::computeBaselineByNonPeakIntensity(bool debug) {
+    //TODO: recompute baseline based on intensity of peaks
+}
 
 void  EIC::computeBaseLine(int smoothing_window, int dropTopX) {
 
@@ -632,6 +636,14 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
             getPeakDetails(*peak, false);
         }
     }
+
+    // TODO: recompute baseline based on peak boundaries, if necessary
+    // TODO: need method for this
+
+//    //Issue 549: get peak details after the fact
+//    for (auto& peak : peaks) {
+//        getPeakDetails(peak, false);
+//    }
 
     //assign peak ranks based on total area of the peak
     sort(peaks.begin(), peaks.end(), Peak::compArea);
