@@ -110,7 +110,7 @@ void EIC::computeBaselineByNonPeakIntensity(bool debug) {
     //TODO: recompute baseline based on intensity of peaks
 }
 
-void  EIC::computeBaseLine(int smoothing_window, int dropTopX) {
+void EIC::computeBaseLine(int smoothing_window, int dropTopX) {
 
     if (baseline.size()) {  //delete previous baseline if exists
         baseline.clear();
@@ -749,7 +749,7 @@ void EIC::findPeakBounds(Peak& peak) {
  * being reassigned, and can cause pathological behavior.
  *
  */
-void  EIC::getPeakDetails(Peak& peak, bool isCorrectPeakByMaxIntensity) {
+void EIC::getPeakDetails(Peak& peak, bool isCorrectPeakByMaxIntensity) {
 
     unsigned long N = intensity.size();
 
