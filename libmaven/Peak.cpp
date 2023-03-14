@@ -12,7 +12,7 @@ Peak::Peak(EIC* e, int p) {
 		baseMz=0;
 		fromBlankSample=false;
 		groupOverlap=0;
-                groupNum=0;
+        groupNum=0;
 		groupOverlapFrac=0;
 		label=0;
 		localMaxFlag=0;
@@ -51,6 +51,21 @@ Peak::Peak(EIC* e, int p) {
         ms2EventCount=0;
 
         if (eic and eic->sample) sample = eic->sample;
+
+        //Issue 549: new fields
+        smoothedIntensity = 0.0f;
+        smoothedPeakArea = 0.0f;
+        smoothedPeakAreaCorrected = 0.0f;
+        smoothedPeakAreaTop = 0.0f;
+
+        minScanFWHM = 0;
+        maxScanFWHM = 0;
+        rtminFWHM = 0.0f;
+        rtmaxFWHM = 0.0f;
+        peakAreaFWHM = 0.0f;
+        smoothedpeakAreaFWHM = 0.0f;
+
+        baselineEstimationType = EICBaselineEstimationType::DROP_TOP_X;
 }
 
 
@@ -97,6 +112,21 @@ void Peak::copyObj(const Peak& o ) {
 		isMonoIsotopic=o.isMonoIsotopic;
 		ms2EventCount=o.ms2EventCount;
 		selectionScore=o.selectionScore;
+
+        //Issue 549: new fields
+        smoothedIntensity = o.smoothedIntensity;
+        smoothedPeakArea = o.smoothedPeakArea;
+        smoothedPeakAreaCorrected = o.smoothedPeakAreaCorrected;
+        smoothedPeakAreaTop = o.smoothedPeakAreaTop;
+
+        minScanFWHM = o.minScanFWHM;
+        maxScanFWHM = o.maxScanFWHM;
+        rtminFWHM = o.rtminFWHM;
+        rtmaxFWHM = o.rtmaxFWHM;
+        peakAreaFWHM = o.peakAreaFWHM;
+        smoothedpeakAreaFWHM = o.smoothedpeakAreaFWHM;
+
+        baselineEstimationType = o.baselineEstimationType;
 }
 
 Peak& Peak::operator=(const Peak& o)  {
