@@ -756,7 +756,7 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
             if (debug) {
                 cout << "intensityThreshold: " << intensityThreshold << endl;
                 cout << "rtBoundsMaxIntensityFraction: " << params->peakRtBoundsMaxIntensityFraction << endl;
-                cout << "rtBoundsSlopeThreshold: " << params->mergedPeakRtBoundsSlopeThreshold << endl;
+                cout << "rtBoundsSlopeThreshold: " << params->peakRtBoundsSlopeThreshold << endl;
             }
 
             Peak* peak = addPeak(static_cast<int>(i));
