@@ -632,18 +632,15 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
             peak->rtmax = rt[rightMinimumIntensityIndex];
             peak->mzmax = mz[rightMinimumIntensityIndex];
             peak->maxscan = static_cast<unsigned int>(scannum[rightMinimumIntensityIndex]);
-
-            getPeakDetails(*peak, false);
         }
     }
 
     // TODO: recompute baseline based on peak boundaries, if necessary
-    // TODO: need method for this
 
-//    //Issue 549: get peak details after the fact
-//    for (auto& peak : peaks) {
-//        getPeakDetails(peak, false);
-//    }
+    //Issue 549: get peak details after the fact
+    for (auto& peak : peaks) {
+        getPeakDetails(peak, false);
+    }
 
     //assign peak ranks based on total area of the peak
     sort(peaks.begin(), peaks.end(), Peak::compArea);
