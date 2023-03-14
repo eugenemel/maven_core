@@ -661,7 +661,286 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
 }
 
 void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params, bool debug){
-    //TODO
+
+    peaks.clear();
+
+    unsigned int N = static_cast<unsigned int>(intensity.size());
+    if (N == 0) return;
+
+    computeSpline(params->peakSmoothingWindow);
+    if (spline.size() == 0) return;
+
+    //baseline always uses Gaussian smoothing.
+    computeBaseLine(params->peakBaselineSmoothingWindow, params->peakBaselineDropTopX);
+    if (baseline.size() == 0) return;
+
+    enum SplineAnnotation {
+        MAX,
+        MIN,
+        NONE
+    };
+
+    vector<SplineAnnotation> splineAnnotation(N, SplineAnnotation::NONE);
+
+    int lastMax = -1;
+    int firstMax = -1;
+
+    for (unsigned int i=1; i < N-1; i++ ) {
+
+        //only consider peaks above baseline
+        if (spline[i] > spline[i-1] && spline[i] > spline[i+1] && intensity[i] > baselineQCutVal) {
+
+            addPeak(static_cast<int>(i));
+            if (!params->peakIsComputeBounds) peaks[peaks.size()-1].rt = rt[i];
+
+            splineAnnotation[i] = SplineAnnotation::MAX;
+
+            if (firstMax == -1){ //only assigned first time MAX appears
+                firstMax = static_cast<int>(i);
+            }
+            lastMax = static_cast<int>(i); //reassigned every time MAX appears
+
+        }
+    }
+
+    if (firstMax == -1) return; //no peaks determined based on 3-point max rule
+
+    if (debug && !params->peakIsComputeBounds) {
+        cout << "WARNING: peak bounds were not determined.  Returning peaks with no peak boundaries defined." << endl;
+    }
+
+    if (!params->peakIsComputeBounds) return;
+
+    if (debug) cout << "baselineQCutVal=" << baselineQCutVal << endl;
+
+    if (debug) {
+        cout << "===================================" << endl;
+        cout << "BEFORE ASSIGNING MINIMA:" << endl;
+        for (unsigned int i = 0; i < N; i++) {
+            string type = "";
+            if (splineAnnotation[i] == SplineAnnotation::MAX) {
+                type = "MAX";
+            } else if (splineAnnotation[i] == SplineAnnotation::MIN) {
+                type = "MIN";
+            } else if (splineAnnotation[i] == SplineAnnotation::NONE) {
+                type = "NONE";
+            } else {
+                cout << "ILLEGAL TYPE." << endl;
+                abort();
+            }
+            cout << "i=" <<  i << " rt=" << rt[i] << " " << intensity[i] << " (spline=" << spline[i] << ") " << type << endl;
+        }
+        cout << "===================================" << endl;
+    }
+
+   //Issue 482: re-work peak boundary assignments (maxima and minima)
+    peaks.clear();
+
+    for (unsigned int i = 1; i < N-1; i++) {
+
+        //indicates a new peak
+        if (splineAnnotation[i] == SplineAnnotation::MAX) {
+
+            if (debug) {
+                cout << "Peak @ i=" << i << ":" << endl;
+            }
+
+            float smoothedPeakIntensity = spline[i];
+            float intensityThreshold = baselineQCutVal;
+
+            //Issue 569: Use rtBoundsMaxIntensityFraction instead of intensity value
+            if (params->peakRtBoundsMaxIntensityFraction > 0.0f && params->peakRtBoundsMaxIntensityFraction < 1.0f) {
+                intensityThreshold = max(intensityThreshold, params->peakRtBoundsMaxIntensityFraction * intensity[i]);
+            }
+
+            if (debug) {
+                cout << "intensityThreshold: " << intensityThreshold << endl;
+                cout << "rtBoundsMaxIntensityFraction: " << params->peakRtBoundsMaxIntensityFraction << endl;
+                cout << "rtBoundsSlopeThreshold: " << params->mergedPeakRtBoundsSlopeThreshold << endl;
+            }
+
+            Peak* peak = addPeak(static_cast<int>(i));
+
+            //descend to the left
+            unsigned int leftMinimumIntensityIndex = i-1;
+            unsigned int leftIndex = i-1;
+            unsigned int leftNextIndex = i-2;
+
+            while(true) {
+
+                //if this point is below the baseline, it is invalid, stop immediately
+                if (intensity[leftIndex] < intensityThreshold) {
+                    break;
+                }
+
+                //if this point is another maximum, it is invalid, stop immediately
+                if (splineAnnotation[leftIndex] == SplineAnnotation::MAX) {
+                    break;
+                }
+
+                //this point is valid, compare for minimum intensity
+                if (spline[leftIndex] < spline[leftMinimumIntensityIndex]) {
+                    leftMinimumIntensityIndex = leftIndex;
+                }
+
+                //stop at the end of the EIC - this is the last valid point to the left.
+                if (leftIndex == 0) {
+                    break;
+                }
+
+                //Issue 572: Use slope based peak boundary detection
+                if (params->peakRtBoundsSlopeThreshold > 0) {
+
+                    float diff = spline[leftIndex] - spline[leftNextIndex];
+
+                    //avoid possible divide-by-zero error
+                    if (diff < 1e-10f) {
+                        leftMinimumIntensityIndex = leftIndex;
+                        if (debug) {
+                            cout << "diff L: (" << leftIndex << ", " << leftNextIndex << "): ("
+                                 << spline[leftIndex] << ", " << spline[leftNextIndex] << ")"
+                                 << " diff = " << diff
+                                 << endl;
+                            cout << "slope < rtBoundsSlopeThreshold --> L=" <<  leftMinimumIntensityIndex << endl;
+                        }
+                        break;
+                    }
+
+                    float slope = ( diff / smoothedPeakIntensity) / (rt[leftIndex]-rt[leftNextIndex]);
+                    if (debug) {
+                        cout << "slope L: (" << leftIndex << ", " << leftNextIndex << "): ("
+                             << spline[leftIndex] << ", " << spline[leftNextIndex] << ")"
+                             << " diff = " << diff
+                             << " frac = " << ( -1* diff / smoothedPeakIntensity)
+                             << " slope = " << slope
+                             << endl;
+                    }
+
+                    if (slope < params->peakRtBoundsSlopeThreshold) {
+                        leftMinimumIntensityIndex = leftIndex;
+                        if (debug) {
+                            cout << "slope < rtBoundsSlopeThreshold --> L=" << leftMinimumIntensityIndex << endl;
+                        }
+                        break;
+                    }
+                }
+
+                //continue moving to the left, check for more valid points
+                leftIndex--;
+                leftNextIndex--;
+            }
+
+            if (debug) {
+                cout << "leftMinimumIntensityIndex: " << leftMinimumIntensityIndex << endl;
+            }
+
+            //descend to the right
+            unsigned int rightMinimumIntensityIndex = i+1;
+            unsigned int rightIndex = i+1;
+            unsigned int rightNextIndex = i+2;
+
+            while(true) {
+
+                //if this point is below the baseline, it is invalid, stop immediately
+                if (intensity[rightIndex] < intensityThreshold) {
+                    break;
+                }
+
+                //if this point is another maximum, it is invalid, stop immediately
+                if (splineAnnotation[rightIndex] == SplineAnnotation::MAX) {
+                    break;
+                }
+
+                //this point is valid, compare for minimum intensity
+                if (spline[rightIndex] < spline[rightMinimumIntensityIndex]) {
+                    rightMinimumIntensityIndex = rightIndex;
+                }
+
+                //stop at the end of the EIC - this is the last valid point to the right
+                if (rightIndex == N-1) {
+                    break;
+                }
+
+                //Issue 572: Use slope based peak boundary detection
+                if (params->peakRtBoundsSlopeThreshold > 0 && rightNextIndex <= N-1) {
+
+                    float diff = spline[rightIndex] - spline[rightNextIndex];
+
+                    //avoid possible divide-by-zero error
+                    if (diff < 1e-10f) {
+                        rightMinimumIntensityIndex = rightIndex;
+                        if (debug) {
+                            cout << "diff R: (" << rightIndex << ", " << rightNextIndex << "): ("
+                                 << spline[rightIndex] << ", " << spline[rightNextIndex] << ")"
+                                 << " diff = " << diff
+                                 << endl;
+                            cout << "slope < rtBoundsSlopeThreshold --> R=" << rightMinimumIntensityIndex << endl;
+                        }
+                        break;
+                    }
+
+                    float slope = ( -1* diff / smoothedPeakIntensity)/(rt[rightIndex]-rt[rightNextIndex]);
+                    if (debug) {
+                        cout << "slope R: (" << rightIndex << ", " << rightNextIndex << "): ("
+                             << spline[rightIndex] << ", " << spline[rightNextIndex] << ")"
+                             << " diff = " << diff
+                             << " frac = " << ( -1* diff / smoothedPeakIntensity)
+                             << " slope = " << slope
+                             << endl;
+                    }
+
+                    if (slope < params->peakRtBoundsSlopeThreshold) {
+                        rightMinimumIntensityIndex = rightIndex;
+                        if (debug) {
+                            cout << "slope < rtBoundsSlopeThreshold --> R=" << rightMinimumIntensityIndex << endl;
+                        }
+                        break;
+                    }
+                }
+
+                //continue moving to the right, check for more valid points
+                rightIndex++;
+                rightNextIndex++;
+            }
+
+            if (debug) {
+                cout << "rightMinimumIntensityIndex: " << rightMinimumIntensityIndex << endl;
+            }
+
+            peak->minpos = leftMinimumIntensityIndex;
+            peak->rtmin = rt[leftMinimumIntensityIndex];
+            peak->mzmin = mz[leftMinimumIntensityIndex];
+            peak->minscan = static_cast<unsigned int>(scannum[leftMinimumIntensityIndex]);
+
+            peak->maxpos = rightMinimumIntensityIndex;
+            peak->rtmax = rt[rightMinimumIntensityIndex];
+            peak->mzmax = mz[rightMinimumIntensityIndex];
+            peak->maxscan = static_cast<unsigned int>(scannum[rightMinimumIntensityIndex]);
+        }
+    }
+
+    // TODO: recompute baseline based on peak boundaries, if necessary
+
+    //Issue 549: get peak details after the fact
+    for (auto& peak : peaks) {
+        getPeakDetails(peak, false);
+    }
+
+    //assign peak ranks based on total area of the peak
+    sort(peaks.begin(), peaks.end(), Peak::compArea);
+    for(unsigned int i=0; i<peaks.size(); i++) peaks[i].peakRank = i;
+
+    //sort peaks by RT
+    sort(peaks.begin(), peaks.end(), Peak::compRt);
+
+    if (debug) {
+        for (auto peak : peaks) {
+            cout << "PEAK: pos=" << peak.pos << ", mz=" << peak.peakMz << ", rt=" << peak.rt << endl;
+            cout << "\t min=" << peak.minpos << ", minmz=" << peak.mzmin << ", rtmin=" << peak.rtmin << endl;
+            cout << "\t max=" << peak.maxpos << ", maxmz=" << peak.mzmax << ", rtmax=" << peak.rtmax << endl;
+            cout << "\t SN=" << peak.signalBaselineRatio << ", (" << peak.peakIntensity << "/" << peak.peakBaseLineLevel << ")" << endl;
+        }
+    }
 }
 
 void EIC::findPeakBounds(Peak& peak) {
