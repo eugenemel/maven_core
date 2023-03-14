@@ -1844,13 +1844,19 @@ enum SmoothedMaxToBoundsIntensityPolicy{MINIMUM, MEDIAN, MAXIMUM};
 class PeakPickingAndGroupingParameters {
 public:
 
+    // START EIC::getPeakPositionsD()
     //peak picking
     int peakSmoothingWindow = 5;
-    float peakRtBoundsMaxIntensityFraction = -1.0f; // do not use
-    float peakRtBoundsSlopeThreshold = -1.0f; //do not use
+    float peakRtBoundsMaxIntensityFraction = -1.0f;
+    float peakRtBoundsSlopeThreshold = -1.0f;
     int peakBaselineSmoothingWindow = 5;
     int peakBaselineDropTopX = 60;
     bool peakIsComputeBounds = true;
+
+    //eic
+    EICBaselineEstimationType eicBaselineEstimationType = EICBaselineEstimationType::DROP_TOP_X;
+
+    // END EIC::getPeakPositionsD()
 
     // START EIC::groupPeaksE()
     //merged EIC
