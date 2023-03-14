@@ -668,6 +668,8 @@ class EIC {
         void getPeakPositions(int smoothWindow);
         void getPeakPositionsB(int smoothWindow, float minSmoothedPeakIntensity);
         void getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBounds=true, float rtBoundsMaxIntensityFraction = -1.0f, float rtBoundsSlopeThreshold = -1.0f);
+        void getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params, bool debug);
+
         void getSingleGlobalMaxPeak(int smoothWindow);
         void getPeakDetails(Peak& peak, bool isCorrectPeakByMaxIntensity=true);
 		void getPeakWidth(Peak& peak);

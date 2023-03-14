@@ -660,6 +660,10 @@ void EIC::getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBoun
 
 }
 
+void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params, bool debug){
+    //TODO
+}
+
 void EIC::findPeakBounds(Peak& peak) {
 	int apex = peak.pos;
 
