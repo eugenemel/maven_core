@@ -991,9 +991,11 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
         }
     }
 
-    // TODO: recompute baseline based on peak boundaries, if necessary
+    //Issue 549: recompute baseline before computing peak details, if appropriate.
+    if (params->eicBaselineEstimationType != EICBaselineEstimationType::DROP_TOP_X) {
+        computeBaselineByNonPeakIntensity(params, debug);
+    }
 
-    //Issue 549: get peak details after the fact
     for (auto& peak : peaks) {
         getPeakDetails(peak, false);
     }
