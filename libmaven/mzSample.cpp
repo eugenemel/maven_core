@@ -3450,7 +3450,7 @@ string PeakPickingAndGroupingParameters::getEncodedPeakParameters(string tupleMa
     } else {
         baselineEstimationTypeStr = baselineEstimationTypeStr + "UNKNOWN";
     }
-    encodedParams = encodedParams + ";";
+    encodedParams = encodedParams + baselineEstimationTypeStr + ";";
 
     //grouping
     encodedParams = encodedParams + "groupMaxRtDiff" + "=" + to_string(groupMaxRtDiff) + ";";
