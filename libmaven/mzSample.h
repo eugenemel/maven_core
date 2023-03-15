@@ -682,7 +682,7 @@ class EIC {
     void removeOverlapingPeaks();
 
     void computeBaseLine(int smoothingWindow, int dropTopX);
-    void computeBaselineByNonPeakIntensity(bool debug=false);
+    void computeBaselineByNonPeakIntensity(shared_ptr<PeakPickingAndGroupingParameters> params, bool debug=false);
     void subtractBaseLine();
 
     void interpolate();

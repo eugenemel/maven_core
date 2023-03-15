@@ -105,11 +105,6 @@ EIC* EIC::eicMerge(const vector<EIC*>& eics) {
 	return meic;
 }
 
-//Issue 549
-void EIC::computeBaselineByNonPeakIntensity(bool debug) {
-    //TODO: recompute baseline based on intensity of peaks
-}
-
 void EIC::computeBaseLine(int smoothing_window, int dropTopX) {
 
     if (baseline.size()) {  //delete previous baseline if exists
@@ -165,6 +160,83 @@ void EIC::computeBaseLine(int smoothing_window, int dropTopX) {
     //count number of observation in EIC above baseline
     for(unsigned int i=0; i < n; i++) {
         if(intensity[i]>baseline[i]) eic_noNoiseObs++;
+    }
+}
+
+//Issue 549
+void EIC::computeBaselineByNonPeakIntensity(shared_ptr<PeakPickingAndGroupingParameters> params, bool debug) {
+
+    if (params->eicBaselineEstimationType != EICBaselineEstimationType::EIC_NON_PEAK_MAX_SMOOTHED_INTENSITY &&
+            params->eicBaselineEstimationType != EICBaselineEstimationType::EIC_NON_PEAK_MEDIAN_SMOOTHED_INTENSITY) {
+        return;
+    }
+
+    if (peaks.empty()) return;
+
+    unsigned long currentPos = 0;
+
+    vector<float> nonPeakIntensities{};
+
+    for (auto peak : peaks) {
+
+        unsigned long peakMinPos = peak.minpos;
+        unsigned long peakMaxPos = peak.maxpos;
+
+        if (debug) cout << "peakMinPos: " << peakMinPos  << endl;
+
+        while (currentPos < peakMinPos) {
+            if (debug) cout << currentPos << ": " << spline[currentPos] << endl;
+            nonPeakIntensities.push_back(spline[currentPos]);
+            currentPos++;
+        }
+
+        if (debug) cout << "peakMaxPos: " << peakMaxPos  << endl;
+
+        //skip over any positions associated with a peak.
+        currentPos = peakMaxPos + 1;
+    }
+
+    while(currentPos < spline.size()) {
+        if (debug) cout << currentPos << ": " << spline[currentPos] << endl;
+        nonPeakIntensities.push_back(spline[currentPos]);
+        currentPos++;
+    }
+
+    if (params->eicBaselineEstimationType == EICBaselineEstimationType::EIC_NON_PEAK_MAX_SMOOTHED_INTENSITY) {
+        baselineQCutVal =*std::max_element(nonPeakIntensities.begin(), nonPeakIntensities.end());
+    } else if (params->eicBaselineEstimationType == EICBaselineEstimationType::EIC_NON_PEAK_MEDIAN_SMOOTHED_INTENSITY) {
+        baselineQCutVal = mzUtils::median(nonPeakIntensities);
+    }
+
+    //recompute baseline if there are non-peak scans to use for baseline estimation.
+    if (!nonPeakIntensities.empty()) {
+
+        //drop all points above updated baselineQCutVal
+        for(unsigned int i=0; i< intensity.size(); i++ ) {
+            if (intensity[i] > baselineQCutVal) {
+                baseline[i] = baselineQCutVal;
+            } else {
+                baseline[i] = intensity[i];
+            }
+        }
+
+        //smooth baseline
+        mzUtils::GaussianSmoother smoother(static_cast<unsigned int>(params->peakBaselineSmoothingWindow));
+        vector<float> smoothed = smoother.smooth(baseline);
+        for (unsigned int i = 0; i < smoothed.size(); i++) baseline[i] = smoothed.at(i);
+
+        //count number of observation in EIC above baseline
+        eic_noNoiseObs = 0;
+        for(unsigned int i=0; i < intensity.size(); i++) {
+            if(intensity[i] > baseline[i]) eic_noNoiseObs++;
+        }
+
+        if (debug) {
+            cout << "\nBaseline with baselineQCutVal=" << baselineQCutVal << ":" << endl;
+            for (unsigned int i=0; i < intensity.size(); i++) {
+                cout << "i=" << i << ": " << baseline[i] << endl;
+            }
+        }
     }
 }
 
