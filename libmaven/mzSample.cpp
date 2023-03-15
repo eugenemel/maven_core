@@ -3452,6 +3452,9 @@ string PeakPickingAndGroupingParameters::getEncodedPeakParameters(string tupleMa
     }
     encodedParams = encodedParams + baselineEstimationTypeStr + ";";
 
+    //merged EIC
+    //TODO
+
     //grouping
     encodedParams = encodedParams + "groupMaxRtDiff" + "=" + to_string(groupMaxRtDiff) + ";";
     encodedParams = encodedParams + "groupMergeOverlap" + "=" + to_string(groupMergeOverlap) + ";";
@@ -3468,5 +3471,67 @@ string PeakPickingAndGroupingParameters::getEncodedPeakParameters(string tupleMa
 }
 
 void PeakPickingAndGroupingParameters::fillInPeakParameters(unordered_map<string, string> decodedMap, string tupleMapDelimiter, string internalMapDelimiter){
+
+    //peak picking
+    if (decodedMap.find("peakSmoothingWindow") != decodedMap.end()) {
+        peakSmoothingWindow = stoi(decodedMap["peakSmoothingWindow"]);
+    }
+    if (decodedMap.find("peakRtBoundsMaxIntensityFraction") != decodedMap.end()) {
+        peakRtBoundsMaxIntensityFraction = stof(decodedMap["peakRtBoundsMaxIntensityFraction"]);
+    }
+    if (decodedMap.find("peakRtBoundsSlopeThreshold") != decodedMap.end()) {
+        peakRtBoundsSlopeThreshold = stof(decodedMap["peakRtBoundsSlopeThreshold"]);
+    }
+    if (decodedMap.find("peakBaselineDropTopX") != decodedMap.end()) {
+        peakBaselineDropTopX = stoi(decodedMap["peakBaselineDropTopX"]);
+    }
+    if (decodedMap.find("peakBaselineSmoothingWindow") != decodedMap.end()) {
+        peakBaselineSmoothingWindow = stoi(decodedMap["peakBaselineSmoothingWindow"]);
+    }
+    if (decodedMap.find("peakIsComputeBounds") != decodedMap.end()) {
+        peakIsComputeBounds = decodedMap["peakIsComputeBounds"] == "1";
+    }
+
+    //eic
+    if (decodedMap.find("eicBaselineEstimationType") != decodedMap.end()){
+        string eicBaselineEstimationTypeStr = decodedMap["eicBaselineEstimationType"];
+        if (eicBaselineEstimationTypeStr == "DROP_TOP_X") {
+            eicBaselineEstimationType = EICBaselineEstimationType::DROP_TOP_X;
+        } else if (eicBaselineEstimationTypeStr == "EIC_NON_PEAK_MAX_SMOOTHED_INTENSITY") {
+           eicBaselineEstimationType = EICBaselineEstimationType::EIC_NON_PEAK_MAX_SMOOTHED_INTENSITY;
+        } else if (eicBaselineEstimationTypeStr == "EIC_NON_PEAK_MEDIAN_SMOOTHED_INTENSITY") {
+            eicBaselineEstimationType = EICBaselineEstimationType::EIC_NON_PEAK_MEDIAN_SMOOTHED_INTENSITY;
+        }
+    }
+
+    //merged EIC
     //TODO
+
+    //grouping
+    if (decodedMap.find("groupMaxRtDiff") != decodedMap.end()) {
+        groupMaxRtDiff = stof(decodedMap["groupMaxRtDiff"]);
+    }
+    if (decodedMap.find("groupMergeOverlap") != decodedMap.end()) {
+        groupMergeOverlap = stof(decodedMap["groupMergeOverlap"]);
+    }
+
+    //post-grouping filters
+    if (decodedMap.find("filterMinGoodGroupCount") != decodedMap.end()) {
+        filterMinGoodGroupCount = stoi(decodedMap["filterMinGoodGroupCount"]);
+    }
+    if (decodedMap.find("filterMinQuality") != decodedMap.end()) {
+        filterMinQuality = stof(decodedMap["filterMinQuality"]);
+    }
+    if (decodedMap.find("filterMinNoNoiseObs") != decodedMap.end()) {
+        filterMinNoNoiseObs = stoi(decodedMap["filterMinNoNoiseObs"]);
+    }
+    if (decodedMap.find("filterMinSignalBaselineRatio") != decodedMap.end()) {
+        filterMinSignalBaselineRatio = stof(decodedMap["filterMinSignalBaselineRatio"]);
+    }
+    if (decodedMap.find("filterMinGroupIntensity") != decodedMap.end()) {
+        filterMinGroupIntensity = stof(decodedMap["filterMinGroupIntensity"]);
+    }
+    if (decodedMap.find("filterMinPrecursorCharge") != decodedMap.end()) {
+        filterMinPrecursorCharge = stoi(decodedMap["filterMinPrecursorCharge"]);
+    }
 }
