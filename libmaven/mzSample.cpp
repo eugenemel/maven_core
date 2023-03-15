@@ -3453,7 +3453,27 @@ string PeakPickingAndGroupingParameters::getEncodedPeakParameters(string tupleMa
     encodedParams = encodedParams + baselineEstimationTypeStr + ";";
 
     //merged EIC
-    //TODO
+    encodedParams = encodedParams + "mergedSmoothingWindow" + "=" + to_string(mergedSmoothingWindow) + ";";
+    encodedParams = encodedParams + "mergedPeakRtBoundsMaxIntensityFraction" + "=" + to_string(mergedPeakRtBoundsMaxIntensityFraction) + ";";
+    encodedParams = encodedParams + "mergedPeakRtBoundsSlopeThreshold" + "=" + to_string(mergedPeakRtBoundsSlopeThreshold) + ";";
+    encodedParams = encodedParams + "mergedSmoothedMaxToBoundsMinRatio" + "=" + to_string(mergedSmoothedMaxToBoundsMinRatio) + ";";
+
+    string mergedSmoothedMaxToBoundsIntensityPolicyStr = "mergedSmoothedMaxToBoundsIntensityPolicy=";
+    if (mergedSmoothedMaxToBoundsIntensityPolicy == SmoothedMaxToBoundsIntensityPolicy::MEDIAN) {
+        mergedSmoothedMaxToBoundsIntensityPolicyStr = mergedSmoothedMaxToBoundsIntensityPolicyStr + "MEDIAN";
+    } else if (mergedSmoothedMaxToBoundsIntensityPolicy == SmoothedMaxToBoundsIntensityPolicy::MAXIMUM) {
+        mergedSmoothedMaxToBoundsIntensityPolicyStr = mergedSmoothedMaxToBoundsIntensityPolicyStr + "MAXIMUM";
+    } else if (mergedSmoothedMaxToBoundsIntensityPolicy == SmoothedMaxToBoundsIntensityPolicy::MINIMUM) {
+        mergedSmoothedMaxToBoundsIntensityPolicyStr = mergedSmoothedMaxToBoundsIntensityPolicyStr + "MINIMUM";
+    } else {
+        mergedSmoothedMaxToBoundsIntensityPolicyStr = mergedSmoothedMaxToBoundsIntensityPolicyStr + "UNKNOWN";
+    }
+    mergedSmoothedMaxToBoundsIntensityPolicyStr = mergedSmoothedMaxToBoundsIntensityPolicyStr + ";";
+    encodedParams = encodedParams + mergedSmoothedMaxToBoundsIntensityPolicyStr;
+
+    encodedParams = encodedParams + "mergedBaselineSmoothingWindow" + "=" + to_string(mergedBaselineSmoothingWindow) + ";";
+    encodedParams = encodedParams + "mergedBaselineDropTopX" + "=" + to_string(mergedBaselineDropTopX) + ";";
+    encodedParams = encodedParams + "mergedIsComputeBounds" + "=" + to_string(mergedIsComputeBounds) + ";";
 
     //grouping
     encodedParams = encodedParams + "groupMaxRtDiff" + "=" + to_string(groupMaxRtDiff) + ";";
