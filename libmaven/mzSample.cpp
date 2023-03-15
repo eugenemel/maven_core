@@ -3525,7 +3525,37 @@ void PeakPickingAndGroupingParameters::fillInPeakParameters(unordered_map<string
     }
 
     //merged EIC
-    //TODO
+    if (decodedMap.find("mergedSmoothingWindow") != decodedMap.end()) {
+        mergedSmoothingWindow = stoi(decodedMap["mergedSmoothingWindow"]);
+    }
+    if (decodedMap.find("mergedPeakRtBoundsMaxIntensityFraction") != decodedMap.end()) {
+        mergedPeakRtBoundsMaxIntensityFraction = stof(decodedMap["mergedPeakRtBoundsMaxIntensityFraction"]);
+    }
+    if (decodedMap.find("mergedPeakRtBoundsSlopeThreshold") != decodedMap.end()) {
+        mergedPeakRtBoundsSlopeThreshold = stof(decodedMap["mergedPeakRtBoundsSlopeThreshold"]);
+    }
+    if (decodedMap.find("mergedSmoothedMaxToBoundsMinRatio") != decodedMap.end()) {
+        mergedSmoothedMaxToBoundsMinRatio = stof(decodedMap["mergedSmoothedMaxToBoundsMinRatio"]);
+    }
+    if (decodedMap.find("mergedSmoothedMaxToBoundsIntensityPolicy") != decodedMap.end()) {
+        string mergedSmoothedMaxToBoundsIntensityPolicyStr = decodedMap["mergedSmoothedMaxToBoundsIntensityPolicy"];
+        if (mergedSmoothedMaxToBoundsIntensityPolicyStr == "MEDIAN") {
+            mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MEDIAN;
+        } else if (mergedSmoothedMaxToBoundsIntensityPolicyStr == "MAXIMUM") {
+            mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MAXIMUM;
+        } else if (mergedSmoothedMaxToBoundsIntensityPolicyStr == "MINIMUM") {
+            mergedSmoothedMaxToBoundsIntensityPolicy = SmoothedMaxToBoundsIntensityPolicy::MINIMUM;
+        }
+    }
+    if (decodedMap.find("mergedBaselineSmoothingWindow") != decodedMap.end()) {
+        mergedBaselineSmoothingWindow = stoi(decodedMap["mergedBaselineSmoothingWindow"]);
+    }
+    if (decodedMap.find("mergedBaselineDropTopX") != decodedMap.end()) {
+        mergedBaselineDropTopX = stoi(decodedMap["mergedBaselineDropTopX"]);
+    }
+    if (decodedMap.find("mergedIsComputeBounds") != decodedMap.end()) {
+        mergedIsComputeBounds = decodedMap["mergedIsComputeBounds"] == "1";
+    }
 
     //grouping
     if (decodedMap.find("groupMaxRtDiff") != decodedMap.end()) {
