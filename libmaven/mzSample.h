@@ -1882,9 +1882,8 @@ public:
     float filterMinGroupIntensity = 0;
     int filterMinPrecursorCharge = 0;
 
-    //TODO: Encoding
-    //TODO: decoding
-    //TODO: testing of encoding/decoding
+    string getEncodedPeakParameters(string tupleMapDelimiter="&", string internalMapDelimiter="|,|");
+    void fillInPeakParameters(unordered_map<string, string> decodedMap, string tupleMapDelimiter="&", string internalMapDelimiter="|,|");
 };
 
 /**

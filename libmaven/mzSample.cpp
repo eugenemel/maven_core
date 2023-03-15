@@ -3427,3 +3427,46 @@ void IntegerSetContainer::combineContainers(bool debug){
 
     }
 }
+
+string PeakPickingAndGroupingParameters::getEncodedPeakParameters(string tupleMapDelimiter, string internalMapDelimiter){
+    string encodedParams;
+
+    //peak picking
+    encodedParams = encodedParams + "peakSmoothingWindow" + "=" + to_string(peakSmoothingWindow) + ";";
+    encodedParams = encodedParams + "peakRtBoundsMaxIntensityFraction" + "=" + to_string(peakRtBoundsMaxIntensityFraction) + ";";
+    encodedParams = encodedParams + "peakRtBoundsSlopeThreshold" + "=" + to_string(peakRtBoundsSlopeThreshold) + ";";
+    encodedParams = encodedParams + "peakBaselineSmoothingWindow" + "=" + to_string(peakBaselineSmoothingWindow) + ";";
+    encodedParams = encodedParams + "peakBaselineDropTopX" + "=" + to_string(peakBaselineDropTopX) + ";";
+    encodedParams = encodedParams + "peakIsComputeBounds" + "=" + to_string(peakIsComputeBounds) + ";";
+
+    //eic
+    string baselineEstimationTypeStr = "eicBaselineEstimationType=";
+    if (eicBaselineEstimationType == EICBaselineEstimationType::DROP_TOP_X) {
+        baselineEstimationTypeStr = baselineEstimationTypeStr + "DROP_TOP_X";
+    } else if (eicBaselineEstimationType == EICBaselineEstimationType::EIC_NON_PEAK_MAX_SMOOTHED_INTENSITY) {
+        baselineEstimationTypeStr = baselineEstimationTypeStr + "EIC_NON_PEAK_MAX_SMOOTHED_INTENSITY";
+    } else if (eicBaselineEstimationType == EICBaselineEstimationType::EIC_NON_PEAK_MEDIAN_SMOOTHED_INTENSITY) {
+        baselineEstimationTypeStr = baselineEstimationTypeStr + "EIC_NON_PEAK_MEDIAN_SMOOTHED_INTENSITY";
+    } else {
+        baselineEstimationTypeStr = baselineEstimationTypeStr + "UNKNOWN";
+    }
+    encodedParams = encodedParams + ";";
+
+    //grouping
+    encodedParams = encodedParams + "groupMaxRtDiff" + "=" + to_string(groupMaxRtDiff) + ";";
+    encodedParams = encodedParams + "groupMergeOverlap" + "=" + to_string(groupMergeOverlap) + ";";
+
+    //post-grouping filters
+    encodedParams = encodedParams + "filterMinGoodGroupCount" + "=" + to_string(filterMinGoodGroupCount) + ";";
+    encodedParams = encodedParams + "filterMinQuality" + "=" + to_string(filterMinQuality) + ";";
+    encodedParams = encodedParams + "filterMinNoNoiseObs" + "=" + to_string(filterMinNoNoiseObs) + ";";
+    encodedParams = encodedParams + "filterMinSignalBaselineRatio" + "=" + to_string(filterMinSignalBaselineRatio) + ";";
+    encodedParams = encodedParams + "filterMinGroupIntensity" + "=" + to_string(filterMinGroupIntensity) + ";";
+    encodedParams = encodedParams + "filterMinPrecursorCharge" + "=" + to_string(filterMinPrecursorCharge) + ";";
+
+    return encodedParams;
+}
+
+void PeakPickingAndGroupingParameters::fillInPeakParameters(unordered_map<string, string> decodedMap, string tupleMapDelimiter, string internalMapDelimiter){
+    //TODO
+}
