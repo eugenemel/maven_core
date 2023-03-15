@@ -636,82 +636,86 @@ class EIC {
         for(unsigned int i=0; i<4;i++) color[i]=0;
     }
 
-		~EIC();
+    ~EIC();
+    EIC* clone(); //make a copy of self
+    static EIC* eicMerge(const vector<EIC*>& eics);
 
+    enum SmootherType { GAUSSIAN=0, AVG=1, SAVGOL=2 };
+    vector <int> scannum;
+    vector <float> rt;
+    vector <float> mz;
+    vector <float> intensity;
+    vector <Peak>  peaks;
+    string sampleName;
 
-        enum SmootherType { GAUSSIAN=0, AVG=1, SAVGOL=2 };
-        vector <int> scannum;
-		vector <float> rt;
-		vector <float> mz;
-		vector <float> intensity;
-		vector <Peak>  peaks;
-		string sampleName;
+    mzSample* sample;       //pointer to originating sample
+    float color[4];         //color of the eic line, [r,g,b, alpha]
+    vector<float> spline;   //smoothed intensity values
+    vector<float> baseline; //baseline
 
-        mzSample* sample;       //pointer to originating sample
-        float color[4];         //color of the eic line, [r,g,b, alpha]
-        vector<float> spline;   //smoothed intensity values
-        vector<float> baseline; //baseline
+    float maxIntensity;     //maxItensity in eics
+    float totalIntensity;   //sum of all intensities in EIC
+    int   eic_noNoiseObs;   //number of observatiosn above baseline.
 
-        float maxIntensity;     //maxItensity in eics
-        float totalIntensity;   //sum of all intensities in EIC
-        int   eic_noNoiseObs;   //number of observatiosn above baseline.
+    float mzmin;
+    float mzmax;
+    float rtmin;
+    float rtmax;
 
-        float mzmin;
-        float mzmax;
-        float rtmin;
-        float rtmax;
+    float baselineQCutVal; // computed by EIC::computeBaseline(). Deals with raw intensities (not with spline).
 
-        float baselineQCutVal; // computed by EIC::computeBaseline(). Deals with raw intensities (not with spline).
+    Peak* addPeak(int peakPos);
+    void deletePeak(unsigned int i);
 
-		Peak* addPeak(int peakPos);
-		void deletePeak(unsigned int i);
-        void getPeakPositions(int smoothWindow);
-        void getPeakPositionsB(int smoothWindow, float minSmoothedPeakIntensity);
-        void getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBounds=true, float rtBoundsMaxIntensityFraction = -1.0f, float rtBoundsSlopeThreshold = -1.0f);
-        void getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params, bool debug);
+    void getPeakPositions(int smoothWindow);
+    void getPeakPositionsB(int smoothWindow, float minSmoothedPeakIntensity);
+    void getPeakPositionsC(int smoothWindow, bool debug, bool isComputePeakBounds=true, float rtBoundsMaxIntensityFraction = -1.0f, float rtBoundsSlopeThreshold = -1.0f);
+    void getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params, bool debug);
 
-        void getSingleGlobalMaxPeak(int smoothWindow);
-        void getPeakDetails(Peak& peak, bool isCorrectPeakByMaxIntensity=true);
-		void getPeakWidth(Peak& peak);
-        void computeBaseLine(int smoothingWindow, int dropTopX);
-        void computeBaselineByNonPeakIntensity(bool debug=false);
-        void computeSpline(int smoothWindow);
-		void findPeakBounds(Peak& peak);
-		void getPeakStatistics();
-		void checkGaussianFit(Peak& peak);
-        vector<Scan*> getFragmentationEvents();
-		void subtractBaseLine();
-		void removeOverlapingPeaks();
-		EIC* clone(); //make a copy of self
+    void getSingleGlobalMaxPeak(int smoothWindow);
 
+    void getPeakDetails(Peak& peak, bool isCorrectPeakByMaxIntensity=true);
+    void getPeakWidth(Peak& peak);
+    void findPeakBounds(Peak& peak);
+    void checkGaussianFit(Peak& peak);
+    void getPeakStatistics();
+    void removeOverlapingPeaks();
 
-		vector<mzPoint> getIntensityVector(Peak& peak);
-		void summary();
-        void setSmootherType(EIC::SmootherType x) { smootherType=x; }
-        void setBaselineSmoothingWindow(int x) { baselineSmoothingWindow=x;}
-        void setBaselineDropTopX(int x) { baselineDropTopX=x; }
-        void interpolate();
+    void computeBaseLine(int smoothingWindow, int dropTopX);
+    void computeBaselineByNonPeakIntensity(bool debug=false);
+    void subtractBaseLine();
 
-		inline unsigned int size() { return intensity.size();}
-		inline mzSample* getSample() { return sample; } 
-        static vector<PeakGroup> groupPeaks(vector<EIC*>&eics, int smoothingWindow, float maxRtDiff);
-        static vector<PeakGroup> groupPeaksB(vector<EIC*>&eics, int smoothingWindow, float maxRtDiff, float minSmoothedPeakIntensity);
-        static vector<PeakGroup> groupPeaksC(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, int baselineSmoothingWindow, int baselineDropTopX);
-        static vector<PeakGroup> groupPeaksD(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, int baselineSmoothingWindow, int baselineDropTopX, float mergeOverlap, bool debug=false);
+    void interpolate();
+    void computeSpline(int smoothWindow);
 
-        static vector<PeakGroup> groupPeaksE(vector<EIC*>& eics, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug=false);
+    vector<Scan*> getFragmentationEvents();
+    vector<mzPoint> getIntensityVector(Peak& peak);
 
-		static EIC* eicMerge(const vector<EIC*>& eics);
-		static void removeLowRankGroups(vector<PeakGroup>&groups, unsigned int rankLimit );
-		static bool compMaxIntensity(EIC* a, EIC* b ) { return a->maxIntensity > b->maxIntensity; }
+    void summary();
 
-        private:
-                SmootherType smootherType;
-                int baselineSmoothingWindow;
-                int baselineDropTopX;
+    void setSmootherType(EIC::SmootherType x) { smootherType=x; }
+    void setBaselineSmoothingWindow(int x) { baselineSmoothingWindow=x;}
+    void setBaselineDropTopX(int x) { baselineDropTopX=x; }
 
-        //internal methods associated with peak grouping
-        static vector<PeakGroup> mergedEICToGroups(vector<EIC*>& eics, EIC* m, float groupMaxRtDiff, float groupMergeOverlap, bool debug=false);
+    inline unsigned int size() { return intensity.size();}
+    inline mzSample* getSample() { return sample; }
+
+    static vector<PeakGroup> groupPeaks(vector<EIC*>&eics, int smoothingWindow, float maxRtDiff);
+    static vector<PeakGroup> groupPeaksB(vector<EIC*>&eics, int smoothingWindow, float maxRtDiff, float minSmoothedPeakIntensity);
+    static vector<PeakGroup> groupPeaksC(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, int baselineSmoothingWindow, int baselineDropTopX);
+    static vector<PeakGroup> groupPeaksD(vector<EIC*>& eics, int smoothingWindow, float maxRtDiff, int baselineSmoothingWindow, int baselineDropTopX, float mergeOverlap, bool debug=false);
+    static vector<PeakGroup> groupPeaksE(vector<EIC*>& eics, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug=false);
+
+    static void removeLowRankGroups(vector<PeakGroup>&groups, unsigned int rankLimit );
+    static bool compMaxIntensity(EIC* a, EIC* b ) { return a->maxIntensity > b->maxIntensity; }
+
+private:
+    SmootherType smootherType;
+    int baselineSmoothingWindow;
+    int baselineDropTopX;
+
+    //internal methods associated with peak grouping
+    static vector<PeakGroup> mergedEICToGroups(vector<EIC*>& eics, EIC* m, float groupMaxRtDiff, float groupMergeOverlap, bool debug=false);
 
 };
 
