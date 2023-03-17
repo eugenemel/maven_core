@@ -1043,19 +1043,19 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
 
     if (debug) {
         for (auto peak : peaks) {
-            cout << "PEAK: pos=" << peak.pos << ", mz=" << peak.peakMz << ", rt=" << peak.rt << endl;
-            cout << "\t min=" << peak.minpos << ", minmz=" << peak.mzmin << ", rtmin=" << peak.rtmin << endl;
-            cout << "\t max=" << peak.maxpos << ", maxmz=" << peak.mzmax << ", rtmax=" << peak.rtmax << endl;
+            cout << "PEAK: pos=" << peak.pos << ", mz=" << peak.peakMz << ", rt=" << peak.rt << "\n";
+            cout << "\t min=" << peak.minpos << ", minmz=" << peak.mzmin << ", rtmin=" << peak.rtmin << "\n";
+            cout << "\t max=" << peak.maxpos << ", maxmz=" << peak.mzmax << ", rtmax=" << peak.rtmax << "\n";
 
-            cout << "\nFWHM stats:\n";
-            cout << "\t min FWHM scan=" << peak.minScanFWHM << ", rtmin FWHM =" << peak.rtminFWHM << endl;
-            cout << "\t max FWHM scan=" << peak.maxScanFWHM << ", rtmax FWHM =" << peak.rtmaxFWHM << endl;
+            cout << "FWHM stats:\n";
+            cout << "\t min FWHM scan=" << peak.minScanFWHM << ", rtmin FWHM =" << peak.rtminFWHM << "\n";
+            cout << "\t max FWHM scan=" << peak.maxScanFWHM << ", rtmax FWHM =" << peak.rtmaxFWHM << "\n";
 
-            cout << "\nQuant Stats:\n";
-            cout << "\t SN=" << peak.signalBaselineRatio << ", (" << peak.peakIntensity << "/" << peak.peakBaseLineLevel << ")" << endl;
-            cout << "\t Smoothed SN=" << peak.smoothedSignalBaselineRatio << ", (" << peak.smoothedIntensity << "/" << peak.peakBaseLineLevel << ")" << endl;
-            cout << "\t peakArea=" << peak.peakArea << ", smoothedPeakArea=" << peak.smoothedPeakArea << endl;
-            cout << "\t FWHM peakArea=" << peak.peakAreaFWHM << ", smoothedPeakAreaFWHM=" << peak.smoothedPeakAreaFWHM << endl;
+            cout << "Quant Stats:\n";
+            cout << "\t SN=" << peak.signalBaselineRatio << ", (" << peak.peakIntensity << "/" << peak.peakBaseLineLevel << ")" << "\n";
+            cout << "\t Smoothed SN=" << peak.smoothedSignalBaselineRatio << ", (" << peak.smoothedIntensity << "/" << peak.peakBaseLineLevel << ")" << "\n";
+            cout << "\t peakArea=" << peak.peakArea << ", smoothedPeakArea=" << peak.smoothedPeakArea << "\n";
+            cout << "\t FWHM peakArea=" << peak.peakAreaFWHM << ", smoothedPeakAreaFWHM=" << peak.smoothedPeakAreaFWHM << "\n" << endl;
         }
     }
 }
