@@ -1016,9 +1016,11 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
 
             if (reachedLeftHalfMax && reachedRightHalfMax) {
 
+                peak->minPosFWHM = leftHalfMaxIntensityIndex;
                 peak->rtminFWHM = rt[leftHalfMaxIntensityIndex];
                 peak->minScanFWHM = static_cast<unsigned int>(scannum[leftHalfMaxIntensityIndex]);
 
+                peak->maxPosFWHM = rightHalfMaxIntensityIndex;
                 peak->rtmaxFWHM = rt[rightHalfMaxIntensityIndex];
                 peak->maxScanFWHM = static_cast<unsigned int>(scannum[rightHalfMaxIntensityIndex]);
             }
@@ -1048,14 +1050,14 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
             cout << "\t max=" << peak.maxpos << ", maxmz=" << peak.mzmax << ", rtmax=" << peak.rtmax << "\n";
 
             cout << "FWHM stats:\n";
-            cout << "\t min FWHM scan=" << peak.minScanFWHM << ", rtmin FWHM =" << peak.rtminFWHM << "\n";
-            cout << "\t max FWHM scan=" << peak.maxScanFWHM << ", rtmax FWHM =" << peak.rtmaxFWHM << "\n";
+            cout << "\t min FWHM scan=" << peak.minScanFWHM << ", FWHM rtmin=" << peak.rtminFWHM << "\n";
+            cout << "\t max FWHM scan=" << peak.maxScanFWHM << ", FWHM rtmax=" << peak.rtmaxFWHM << "\n";
 
             cout << "Quant Stats:\n";
             cout << "\t SN=" << peak.signalBaselineRatio << ", (" << peak.peakIntensity << "/" << peak.peakBaseLineLevel << ")" << "\n";
             cout << "\t Smoothed SN=" << peak.smoothedSignalBaselineRatio << ", (" << peak.smoothedIntensity << "/" << peak.peakBaseLineLevel << ")" << "\n";
             cout << "\t peakArea=" << peak.peakArea << ", smoothedPeakArea=" << peak.smoothedPeakArea << "\n";
-            cout << "\t FWHM peakArea=" << peak.peakAreaFWHM << ", smoothedPeakAreaFWHM=" << peak.smoothedPeakAreaFWHM << "\n" << endl;
+            cout << "\t FWHM peakArea=" << peak.peakAreaFWHM << ", FWHM smoothedPeakArea=" << peak.smoothedPeakAreaFWHM << "\n" << endl;
         }
     }
 }
