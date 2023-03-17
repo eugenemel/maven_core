@@ -818,10 +818,7 @@ class Peak {
                 float peakAreaFWHM;
                 float smoothedPeakAreaFWHM;
 
-                EICBaselineEstimationType baselineEstimationType;
-
-
-        mzSample *sample;  //pointer to sample
+                mzSample *sample;  //pointer to sample
 
     private:
 		EIC* eic; 		//pointer to eic 

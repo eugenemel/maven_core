@@ -7,7 +7,7 @@ Peak::Peak() {
 }
 
 Peak::Peak(EIC* e, int p) { 
-		pos=p; 
+        pos = static_cast<unsigned int>(p);
 		eic = e;
 		baseMz=0;
 		fromBlankSample=false;
@@ -65,8 +65,6 @@ Peak::Peak(EIC* e, int p) {
         rtmaxFWHM = 0.0f;
         peakAreaFWHM = 0.0f;
         smoothedPeakAreaFWHM = 0.0f;
-
-        baselineEstimationType = EICBaselineEstimationType::DROP_TOP_X;
 }
 
 
@@ -127,8 +125,6 @@ void Peak::copyObj(const Peak& o ) {
         rtmaxFWHM = o.rtmaxFWHM;
         peakAreaFWHM = o.peakAreaFWHM;
         smoothedPeakAreaFWHM = o.smoothedPeakAreaFWHM;
-
-        baselineEstimationType = o.baselineEstimationType;
 }
 
 Peak& Peak::operator=(const Peak& o)  {
