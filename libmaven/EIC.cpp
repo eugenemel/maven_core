@@ -945,7 +945,7 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
                 }
 
                 if (!reachedRightHalfMax) {
-                    rightHalfMaxIntensityIndex = leftIndex;
+                    rightHalfMaxIntensityIndex = rightIndex;
                 }
 
                 //this point is valid, compare for minimum intensity
