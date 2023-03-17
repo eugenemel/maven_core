@@ -818,6 +818,7 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
             }
 
             float smoothedPeakIntensity = spline[i];
+            float halfMaxIntensity = 0.5f * smoothedPeakIntensity;
             float intensityThreshold = baselineQCutVal;
 
             //Issue 569: Use rtBoundsMaxIntensityFraction instead of intensity value
@@ -838,6 +839,9 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
             unsigned int leftIndex = i-1;
             unsigned int leftNextIndex = i-2;
 
+            bool reachedLeftHalfMax = false;
+            unsigned int leftHalfMaxIntensityIndex = 0;
+
             while(true) {
 
                 //if this point is below the baseline, it is invalid, stop immediately
@@ -848,6 +852,15 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
                 //if this point is another maximum, it is invalid, stop immediately
                 if (splineAnnotation[leftIndex] == SplineAnnotation::MAX) {
                     break;
+                }
+
+                //Issue 603: half-max quant metrics
+                if (!reachedLeftHalfMax && spline[leftIndex] < halfMaxIntensity) {
+                    reachedLeftHalfMax = true;
+                }
+
+                if (!reachedLeftHalfMax) {
+                    leftHalfMaxIntensityIndex = leftIndex;
                 }
 
                 //this point is valid, compare for minimum intensity
@@ -911,6 +924,9 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
             unsigned int rightIndex = i+1;
             unsigned int rightNextIndex = i+2;
 
+            bool reachedRightHalfMax = false;
+            unsigned int rightHalfMaxIntensityIndex = 0;
+
             while(true) {
 
                 //if this point is below the baseline, it is invalid, stop immediately
@@ -921,6 +937,15 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
                 //if this point is another maximum, it is invalid, stop immediately
                 if (splineAnnotation[rightIndex] == SplineAnnotation::MAX) {
                     break;
+                }
+
+                //Issue 603: half-max quant metrics
+                if (!reachedRightHalfMax && spline[rightHalfMaxIntensityIndex] < halfMaxIntensity) {
+                    reachedRightHalfMax = true;
+                }
+
+                if (!reachedRightHalfMax) {
+                    rightHalfMaxIntensityIndex = leftIndex;
                 }
 
                 //this point is valid, compare for minimum intensity
@@ -988,6 +1013,15 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
             peak->rtmax = rt[rightMinimumIntensityIndex];
             peak->mzmax = mz[rightMinimumIntensityIndex];
             peak->maxscan = static_cast<unsigned int>(scannum[rightMinimumIntensityIndex]);
+
+            if (reachedLeftHalfMax && reachedRightHalfMax) {
+
+                peak->rtminFWHM = rt[leftHalfMaxIntensityIndex];
+                peak->minScanFWHM = static_cast<unsigned int>(scannum[leftHalfMaxIntensityIndex]);
+
+                peak->rtmaxFWHM = rt[rightHalfMaxIntensityIndex];
+                peak->maxScanFWHM = static_cast<unsigned int>(scannum[rightHalfMaxIntensityIndex]);
+            }
         }
     }
 
@@ -1012,7 +1046,16 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
             cout << "PEAK: pos=" << peak.pos << ", mz=" << peak.peakMz << ", rt=" << peak.rt << endl;
             cout << "\t min=" << peak.minpos << ", minmz=" << peak.mzmin << ", rtmin=" << peak.rtmin << endl;
             cout << "\t max=" << peak.maxpos << ", maxmz=" << peak.mzmax << ", rtmax=" << peak.rtmax << endl;
+
+            cout << "\nFWHM stats:\n";
+            cout << "\t min FWHM scan=" << peak.minScanFWHM << ", rtmin FWHM =" << peak.rtminFWHM << endl;
+            cout << "\t max FWHM scan=" << peak.maxScanFWHM << ", rtmax FWHM =" << peak.rtmaxFWHM << endl;
+
+            cout << "\nQuant Stats:\n";
             cout << "\t SN=" << peak.signalBaselineRatio << ", (" << peak.peakIntensity << "/" << peak.peakBaseLineLevel << ")" << endl;
+            cout << "\t Smoothed SN=" << peak.smoothedSignalBaselineRatio << ", (" << peak.smoothedIntensity << "/" << peak.peakBaseLineLevel << ")" << endl;
+            cout << "\t peakArea=" << peak.peakArea << ", smoothedPeakArea=" << peak.smoothedPeakArea << endl;
+            cout << "\t FWHM peakArea=" << peak.peakAreaFWHM << ", smoothedPeakAreaFWHM=" << peak.smoothedPeakAreaFWHM << endl;
         }
     }
 }
