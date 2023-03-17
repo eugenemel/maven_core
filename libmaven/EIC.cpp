@@ -1205,6 +1205,13 @@ void EIC::getPeakDetails(Peak& peak, bool isCorrectPeakByMaxIntensity) {
         lastValue = intensity[j];
     }
 
+    if (peak.minPosFWHM > 0 && peak.maxPosFWHM > 0) {
+        for (unsigned int j = peak.minPosFWHM; j<= peak.maxPosFWHM; j++ ){
+            peak.peakAreaFWHM += intensity[j];
+            peak.smoothedPeakAreaFWHM += spline[j];
+        }
+    }
+
     getPeakWidth(peak);
 
     if (rt.size() > 0 && rt.size() == N ) {
