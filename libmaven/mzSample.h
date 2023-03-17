@@ -809,6 +809,7 @@ class Peak {
                 float smoothedPeakArea;
                 float smoothedPeakAreaCorrected;
                 float smoothedPeakAreaTop;
+                float smoothedSignalBaselineRatio;
 
                 unsigned int minScanFWHM;
                 unsigned int maxScanFWHM;

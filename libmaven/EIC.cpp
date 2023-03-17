@@ -1200,6 +1200,7 @@ void EIC::getPeakDetails(Peak& peak, bool isCorrectPeakByMaxIntensity) {
     peak.signalBaselineRatio = peak.peakIntensity/maxBaseLine;
 
     peak.smoothedPeakAreaCorrected = peak.smoothedPeakArea-baselineArea;
+    peak.smoothedSignalBaselineRatio = peak.smoothedIntensity/maxBaseLine;
 
     if (allmzs.size()> 0 ) {
         peak.medianMz = allmzs.median();

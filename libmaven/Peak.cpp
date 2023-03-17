@@ -57,6 +57,7 @@ Peak::Peak(EIC* e, int p) {
         smoothedPeakArea = 0.0f;
         smoothedPeakAreaCorrected = 0.0f;
         smoothedPeakAreaTop = 0.0f;
+        smoothedSignalBaselineRatio = 0.0f;
 
         minScanFWHM = 0;
         maxScanFWHM = 0;
@@ -118,6 +119,7 @@ void Peak::copyObj(const Peak& o ) {
         smoothedPeakArea = o.smoothedPeakArea;
         smoothedPeakAreaCorrected = o.smoothedPeakAreaCorrected;
         smoothedPeakAreaTop = o.smoothedPeakAreaTop;
+        smoothedSignalBaselineRatio = o.smoothedSignalBaselineRatio;
 
         minScanFWHM = o.minScanFWHM;
         maxScanFWHM = o.maxScanFWHM;
