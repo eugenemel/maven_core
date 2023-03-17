@@ -1112,6 +1112,8 @@ void EIC::getPeakDetails(Peak& peak, bool isCorrectPeakByMaxIntensity) {
 
     //intensity and mz at the apex of the peaks
     peak.peakIntensity = intensity[peak.pos];
+    peak.smoothedIntensity = spline[peak.pos];
+
     peak.noNoiseObs = 0;
     peak.peakAreaCorrected  = 0;
     peak.peakArea=0;
@@ -1131,6 +1133,7 @@ void EIC::getPeakDetails(Peak& peak, bool isCorrectPeakByMaxIntensity) {
     for(unsigned int j=peak.minpos; j<= peak.maxpos;j++ ){
 
         peak.peakArea += intensity[j];
+        peak.smoothedPeakArea += spline[j];
         baselineArea +=   baseline[j];
 
         if (intensity[j] > baseline[j]) peak.noNoiseObs++;
@@ -1159,7 +1162,7 @@ void EIC::getPeakDetails(Peak& peak, bool isCorrectPeakByMaxIntensity) {
 
     getPeakWidth(peak);
 
-    if (rt.size()>0 && rt.size() == N ) {
+    if (rt.size() > 0 && rt.size() == N ) {
         peak.rt =    rt[ peak.pos ];
         peak.rtmin = rt[ peak.minpos ];
         peak.rtmax = rt[ peak.maxpos ];
@@ -1173,8 +1176,19 @@ void EIC::getPeakDetails(Peak& peak, bool isCorrectPeakByMaxIntensity) {
 
     int n =1;
     peak.peakAreaTop = intensity[peak.pos];
-    if (peak.pos-1 < N)   { peak.peakAreaTop += intensity[peak.pos-1]; n++; }
-    if (peak.pos+1 < N)   { peak.peakAreaTop += intensity[peak.pos+1]; n++; }
+    peak.smoothedPeakAreaTop = spline[peak.pos];
+
+    if (peak.pos-1 < N){
+        peak.peakAreaTop += intensity[peak.pos-1];
+        peak.smoothedPeakAreaTop += spline[peak.pos-1];
+        n++;
+    }
+
+    if (peak.pos+1 < N){
+        peak.peakAreaTop += intensity[peak.pos+1];
+        peak.smoothedPeakAreaTop += spline[peak.pos+1];
+        n++;
+    }
 	
     float maxBaseLine = MAX(MAX(baseline[peak.pos],10), MAX(intensity[peak.minpos], intensity[peak.maxpos]));
     peak.peakMz = mz[ peak.pos ];
@@ -1184,6 +1198,8 @@ void EIC::getPeakDetails(Peak& peak, bool isCorrectPeakByMaxIntensity) {
     peak.peakAreaCorrected = peak.peakArea-baselineArea;
     peak.peakAreaFractional = peak.peakAreaCorrected/(totalIntensity+1);
     peak.signalBaselineRatio = peak.peakIntensity/maxBaseLine;
+
+    peak.smoothedPeakAreaCorrected = peak.smoothedPeakArea-baselineArea;
 
     if (allmzs.size()> 0 ) {
         peak.medianMz = allmzs.median();

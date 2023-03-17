@@ -63,7 +63,7 @@ Peak::Peak(EIC* e, int p) {
         rtminFWHM = 0.0f;
         rtmaxFWHM = 0.0f;
         peakAreaFWHM = 0.0f;
-        smoothedpeakAreaFWHM = 0.0f;
+        smoothedPeakAreaFWHM = 0.0f;
 
         baselineEstimationType = EICBaselineEstimationType::DROP_TOP_X;
 }
@@ -124,7 +124,7 @@ void Peak::copyObj(const Peak& o ) {
         rtminFWHM = o.rtminFWHM;
         rtmaxFWHM = o.rtmaxFWHM;
         peakAreaFWHM = o.peakAreaFWHM;
-        smoothedpeakAreaFWHM = o.smoothedpeakAreaFWHM;
+        smoothedPeakAreaFWHM = o.smoothedPeakAreaFWHM;
 
         baselineEstimationType = o.baselineEstimationType;
 }

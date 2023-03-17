@@ -815,7 +815,7 @@ class Peak {
                 float rtminFWHM;
                 float rtmaxFWHM;
                 float peakAreaFWHM;
-                float smoothedpeakAreaFWHM;
+                float smoothedPeakAreaFWHM;
 
                 EICBaselineEstimationType baselineEstimationType;
 
