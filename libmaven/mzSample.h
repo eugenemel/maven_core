@@ -804,23 +804,23 @@ class Peak {
 
 		char label;		//classification label
 
-                //Issue 549: new fields
-                float smoothedIntensity;
-                float smoothedPeakArea;
-                float smoothedPeakAreaCorrected;
-                float smoothedPeakAreaTop;
-                float smoothedSignalBaselineRatio;
+        //Issue 549: new fields
+        float smoothedIntensity;
+        float smoothedPeakArea;
+        float smoothedPeakAreaCorrected;
+        float smoothedPeakAreaTop;
+        float smoothedSignalBaselineRatio;
 
-                unsigned int minPosFWHM;
-                unsigned int maxPosFWHM;
-                unsigned int minScanFWHM;
-                unsigned int maxScanFWHM;
-                float rtminFWHM;
-                float rtmaxFWHM;
-                float peakAreaFWHM;
-                float smoothedPeakAreaFWHM;
+        unsigned int minPosFWHM;
+        unsigned int maxPosFWHM;
+        unsigned int minScanFWHM;
+        unsigned int maxScanFWHM;
+        float rtminFWHM;
+        float rtmaxFWHM;
+        float peakAreaFWHM;
+        float smoothedPeakAreaFWHM;
 
-                mzSample *sample;  //pointer to sample
+        mzSample *sample;  //pointer to sample
 
     private:
 		EIC* eic; 		//pointer to eic 
@@ -935,7 +935,26 @@ class PeakGroup {
 
 	public:
         enum GroupType {None=0, C13Type=1, AdductType=2, CovariantType=3, IsotopeType=4, SRMTransitionType=5, DIMSType=6 };     //group types
-        enum QType	   {AreaTop=0, Area=1, Height=2, AreaNotCorrected=3, RetentionTime=4, Quality=5, SNRatio=6, MS2Count=7, AreaFractional=8 };
+
+        enum QType {
+            AreaTop=0,
+            Area=1,
+            Height=2,
+            AreaNotCorrected=3,
+            RetentionTime=4,
+            Quality=5,
+            SNRatio=6,
+            MS2Count=7,
+            AreaFractional=8,
+            SmoothedHeight=9, // Peak.smoothedIntensity
+            SmoothedAreaNotCorrected=10, //Peak.smoothedPeakArea
+            SmoothedArea=11, //Peak.smoothedPeakAreaCorrected
+            SmoothedAreaTop=12, //Peak.smoothedPeakAreaTop
+            SmoothedSNRatio=13, //Peak.smoothedSignalBaselineRatio
+            AreaFWHM=14, //Peak.peakAreaFWHM
+            SmoothedAreaFWHM=15 //Peak.smoothedPeakAreaFWHM
+        };
+
         enum ReservedLabel {GOOD='g', BAD='b', DELETED='x', COMPOUND_MANUALLY_CHANGED='@'}; //Issue 429
 
 		PeakGroup();
