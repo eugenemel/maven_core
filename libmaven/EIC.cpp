@@ -237,6 +237,8 @@ void EIC::computeBaselineByNonPeakIntensity(shared_ptr<PeakPickingAndGroupingPar
                 cout << "i=" << i << ": " << baseline[i] << endl;
             }
         }
+    } else if (debug) {
+        cout << "EIC::computeBaselineByNonPeakIntensity(): nonPeakIntensities was empty, baseline will not be recomputed." << endl;
     }
 }
 
@@ -1050,8 +1052,8 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
             cout << "\t max=" << peak.maxpos << ", maxmz=" << peak.mzmax << ", rtmax=" << peak.rtmax << "\n";
 
             cout << "FWHM stats:\n";
-            cout << "\t min FWHM scan=" << peak.minScanFWHM << ", FWHM rtmin=" << peak.rtminFWHM << "\n";
-            cout << "\t max FWHM scan=" << peak.maxScanFWHM << ", FWHM rtmax=" << peak.rtmaxFWHM << "\n";
+            cout << "\tFWHM min=" << peak.minPosFWHM << ", FWHM rtmin=" << peak.rtminFWHM << "\n";
+            cout << "\tFWHM max=" << peak.maxPosFWHM << ", FWHM rtmax=" << peak.rtmaxFWHM << "\n";
 
             cout << "Quant Stats:\n";
             cout << "\t SN=" << peak.signalBaselineRatio << ", (" << peak.peakIntensity << "/" << peak.peakBaseLineLevel << ")" << "\n";
