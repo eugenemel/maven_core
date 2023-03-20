@@ -458,6 +458,10 @@ string LCLipidSearchParameters::encodeParams() {
 
     encodedParams = encodedParams + "};";
 
+    string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
+
+    encodedParams = encodedParams + peakPickingEncodedParams;
+
     //Issue 586
     encodedParams = encodedParams + getEncodedLipidParameters(TUPLE_MAP_KEY_DELIMITER, INTERNAL_MAP_DELIMITER);
 
@@ -470,6 +474,10 @@ shared_ptr<LCLipidSearchParameters> LCLipidSearchParameters::decode(string encod
     unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams); //use semicolon (default)
 
     lipidSearchParameters->fillInBaseParams(decodedMap);
+
+    lipidSearchParameters->peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
+    lipidSearchParameters->peakPickingAndGroupingParameters->fillInPeakParameters(decodedMap);
+
     lipidSearchParameters->fillInLipidParameters(decodedMap, TUPLE_MAP_KEY_DELIMITER, INTERNAL_MAP_DELIMITER);
 
     // START LCLipidSearchParameters
@@ -542,6 +550,10 @@ string MzkitchenMetaboliteSearchParameters::encodeParams() {
     encodedParams = encodedParams + "matchingPolicy" + "=" + matchingPolicyStr + ";";
     encodedParams = encodedParams + "isComputeAllFragScores" + "=" + to_string(isComputeAllFragScores) + ";";
 
+    string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
+
+    encodedParams = encodedParams + peakPickingEncodedParams;
+
     return encodedParams;
 }
 
@@ -552,6 +564,9 @@ shared_ptr<MzkitchenMetaboliteSearchParameters> MzkitchenMetaboliteSearchParamet
     unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams); //use semicolon (default)
 
     metaboliteSearchParameters->fillInBaseParams(decodedMap);
+
+    metaboliteSearchParameters->peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
+    metaboliteSearchParameters->peakPickingAndGroupingParameters->fillInPeakParameters(decodedMap);
 
     // START MzkitchenMetaboliteSearchParameters
 

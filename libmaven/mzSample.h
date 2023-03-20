@@ -2009,6 +2009,7 @@ public:
 
     //fields
     string mspFilePath = "";
+    shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
 
     virtual string getMzKitchenSearchType() = 0;
     virtual ~MzkitchenMspSearchParameters();
