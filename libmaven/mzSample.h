@@ -2354,6 +2354,8 @@ public:
 
     float amuQ1 = 0.5f;
     float amuQ3 = 0.5f;
+
+    shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters;
 };
 
 class QQQProcessor{

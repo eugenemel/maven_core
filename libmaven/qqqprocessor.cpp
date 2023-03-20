@@ -289,6 +289,10 @@ string QQQSearchParameters::encodeParams(){
     }
     encodedParams = encodedParams + ";";
 
+    string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
+
+    encodedParams = encodedParams + peakPickingEncodedParams;
+
     return encodedParams;
 }
 
@@ -370,6 +374,9 @@ shared_ptr<QQQSearchParameters> QQQSearchParameters::decode(string encodedParams
     unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams); //use semicolon (default)
 
     qqqSearchParameters->fillInBaseParams(decodedMap);
+
+    qqqSearchParameters->peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
+    qqqSearchParameters->peakPickingAndGroupingParameters->fillInPeakParameters(decodedMap);
 
     // START QQQSearchParameters
 
