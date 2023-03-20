@@ -266,7 +266,7 @@ vector<float> PeakGroup::getOrderedIntensityVector(vector<mzSample*>& samples, Q
         mzSample* sample = peak.getSample();
 
         if ( sampleOrder.count(sample) > 0 ) {
-            int s  = sampleOrder[ sample ];
+            int s  = static_cast<int>(sampleOrder[ sample ]);
             float y = 0;
             switch (type)  {
             case AreaTop: y = peak.peakAreaTop; break;
@@ -278,6 +278,13 @@ vector<float> PeakGroup::getOrderedIntensityVector(vector<mzSample*>& samples, Q
             case Quality: y = peak.quality; break;
             case SNRatio: y = peak.signalBaselineRatio; break;
             case MS2Count: y = peak.ms2EventCount; break;
+            case SmoothedHeight: y = peak.smoothedIntensity; break;
+            case SmoothedAreaNotCorrected: y = peak.smoothedPeakArea; break;
+            case SmoothedArea: y = peak.smoothedPeakAreaCorrected; break;
+            case SmoothedAreaTop: y = peak.smoothedPeakAreaTop; break;
+            case SmoothedSNRatio: y = peak.smoothedSignalBaselineRatio; break;
+            case AreaFWHM: y = peak.peakAreaFWHM; break;
+            case SmoothedAreaFWHM: y = peak.smoothedPeakAreaFWHM; break;
             default: y = peak.peakAreaTop; break;
             }
 
