@@ -1244,18 +1244,20 @@ void EIC::getPeakDetails(Peak& peak, bool isCorrectPeakByMaxIntensity) {
         peak.smoothedPeakAreaTop += spline[peak.pos+1];
         n++;
     }
-	
+
+    //Issue 603: Previously, used this value instead of peak.peakBaseLineLevel for SN computations
     float maxBaseLine = MAX(MAX(baseline[peak.pos],10), MAX(intensity[peak.minpos], intensity[peak.maxpos]));
+
     peak.peakMz = mz[ peak.pos ];
     peak.peakAreaTop /= n;
     peak.peakBaseLineLevel = baseline[peak.pos];
     peak.noNoiseFraction = (float) peak.noNoiseObs/(this->eic_noNoiseObs+1);
     peak.peakAreaCorrected = peak.peakArea-baselineArea;
     peak.peakAreaFractional = peak.peakAreaCorrected/(totalIntensity+1);
-    peak.signalBaselineRatio = peak.peakIntensity/maxBaseLine;
+    peak.signalBaselineRatio = peak.peakIntensity/peak.peakBaseLineLevel; //Issue 603: was maxBaseLine
 
     peak.smoothedPeakAreaCorrected = peak.smoothedPeakArea-baselineArea;
-    peak.smoothedSignalBaselineRatio = peak.smoothedIntensity/maxBaseLine;
+    peak.smoothedSignalBaselineRatio = peak.smoothedIntensity/peak.peakBaseLineLevel; //Issue 603: was maxBaseline
 
     if (allmzs.size()> 0 ) {
         peak.medianMz = allmzs.median();
