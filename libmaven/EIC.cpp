@@ -1035,7 +1035,7 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
     }
 
     for (auto& peak : peaks) {
-        getPeakDetails(peak, false);
+        getPeakDetails(peak, params->peakIsReassignPosToUnsmoothedMax);
     }
 
     //assign peak ranks based on total area of the peak
@@ -1188,6 +1188,7 @@ void EIC::getPeakDetails(Peak& peak, bool isCorrectPeakByMaxIntensity) {
         if (isCorrectPeakByMaxIntensity) {
             if(peak.peakIntensity < intensity[j]) {
                 peak.peakIntensity = intensity[j];
+                peak.smoothedIntensity = spline[j];
                 peak.pos = j;
             }
         }

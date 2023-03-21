@@ -1875,6 +1875,7 @@ public:
     int peakBaselineSmoothingWindow = 5;
     int peakBaselineDropTopX = 60;
     bool peakIsComputeBounds = true;
+    bool peakIsReassignPosToUnsmoothedMax = false;
 
     //eic
     EICBaselineEstimationType eicBaselineEstimationType = EICBaselineEstimationType::DROP_TOP_X;
