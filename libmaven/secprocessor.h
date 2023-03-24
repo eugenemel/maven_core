@@ -112,6 +112,9 @@ public:
 
     Fragment *fragment = nullptr;
 
+    //default constructor
+    SECTrace(){}
+
     /**
      * @brief SECTrace
      * @param id
@@ -142,7 +145,25 @@ public:
                           vector<float> rawIntensities,
                           shared_ptr<SECSearchParameters> params,
                           bool debug = false);
+
     void pickPeaks(bool debug);
+};
+
+//Introduced in 622
+class SECTraceDiff : public SECTrace {
+
+public:
+    //Additional fields
+    SECTrace *compare;
+    SECTrace *reference;
+
+    //compare - reference intensities
+    vector<float> diffRawIntensities{};
+    vector<float> diffSmoothedIntensities{};
+
+    //peaks, fragment, and absolute intensities are fields inherited by SECTrace
+
+    SECTraceDiff(SECTrace *compare, SECTrace *reference, bool debug=false);
 };
 
 class SECTraceSimilarity {

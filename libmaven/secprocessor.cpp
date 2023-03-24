@@ -184,6 +184,75 @@ SECTrace::SECTrace(string id,
     this->pickPeaks(debug);
 }
 
+SECTraceDiff::SECTraceDiff(SECTrace *compare, SECTrace *reference, bool debug) {
+
+    if (!compare || !reference) {
+        cerr << "SECTraceDiff must intake two non-null SECTrace*. Exiting." << endl;
+        abort();
+    }
+
+    if (compare->fractionNums.empty() || reference->fractionNums.empty()) {
+        cerr << "input SECTrace objects contain no fractionNums. Exiting." << endl;
+        abort();
+    }
+
+    if (compare->fractionNums.size() != reference->fractionNums.size()) {
+        cerr << "compare and reference must have a fractionNums vector of the same size. Exiting." << endl;
+        abort();
+    }
+
+    for (unsigned int i = 0; i < reference->fractionNums.size(); i++) {
+        if (reference->fractionNums[i] != compare->fractionNums[i]) {
+            cerr << "reference->fractionNums[" << i << "]="
+                 << reference->fractionNums[i]
+                 << " != "
+                 << "compare->fractionNums[" << i << "]="
+                 << compare->fractionNums[i]
+                 << "."
+                 << endl;
+            cerr << "compare and reference must have identical fractionNums vectors. Exiting." << endl;
+            abort();
+        }
+    }
+
+    if (compare->smoothedIntensities.size() != compare->rawIntensities.size()) {
+        cerr << "compare has not undergone peak-picking. Exiting." << endl;
+        abort();
+    }
+    if (reference->smoothedIntensities.size() != reference->rawIntensities.size()) {
+        cerr << "reference has not undergone peak-picking. Exiting." << endl;
+        abort();
+    }
+
+    string id = reference->id;
+    if (reference->id != compare->id) {
+        id = "ref=" + reference->id + "_vs_comp=" + compare->id;
+    }
+
+    this->id = id;
+    this->type = reference->type;
+    this->params = reference->params;
+    this->fractionNums = reference->fractionNums;
+
+    unsigned long N = reference->fractionNums.size();
+
+    this->diffRawIntensities = vector<float>(N);
+    this->diffSmoothedIntensities = vector<float>(N);
+    this->rawIntensities = vector<float>(N); //absolute difference between traces
+
+    for (unsigned int i = 0; i < N; i++) {
+
+        float rawDiff = compare->rawIntensities[i] - reference->rawIntensities[i];
+
+        this->diffRawIntensities[i] = rawDiff;
+        this->rawIntensities[i] = abs(rawDiff);
+
+        this->diffSmoothedIntensities[i] = compare->smoothedIntensities[i] - reference->rawIntensities[i];
+    }
+
+    this->pickPeaks(debug);
+}
+
 void SECTrace::computeTraceData(
         vector<int> fractionNums,
         vector<float> rawIntensities,
@@ -206,11 +275,8 @@ void SECTrace::computeTraceData(
 
     int fracNum = params->traceMinFractionNumber;
 
-    vector<float> pseudoRt(static_cast<unsigned long>(N));
-
     while (fracNum <= params->traceMaxFractionNumber) {
         this->fractionNums[counter] = fracNum;
-        pseudoRt[counter] = static_cast<float>(fracNum);
 
         float intensityVal = params->traceMissingIntensityFill;
 
