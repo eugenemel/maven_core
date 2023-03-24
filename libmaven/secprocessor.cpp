@@ -842,6 +842,7 @@ vector<SECTraceDiff*> SECTraceDiffGenerator::generateSECTraceDiffs(
             cerr << "Duplicate ID: " << id << "in compareTraces. This is illegal, exiting." << endl;
             abort();
         }
+        compareTracesMap.insert(make_pair(id, compareTrace));
     }
 
     //Ensure that each SECTrace ID is seen only once in the vector of reference traces
