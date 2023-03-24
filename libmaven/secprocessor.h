@@ -137,6 +137,12 @@ public:
     Fragment* getFragment(
             shared_ptr<SECSearchParameters> params,
             bool debug = false);
+
+    void computeTraceData(vector<int> fractionNums,
+                          vector<float> rawIntensities,
+                          shared_ptr<SECSearchParameters> params,
+                          bool debug = false);
+    void pickPeaks(bool debug);
 };
 
 class SECTraceSimilarity {

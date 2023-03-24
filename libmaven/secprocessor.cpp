@@ -227,7 +227,71 @@ SECTrace::SECTrace(string id,
         }
     }
 
+    this->pickPeaks(debug);
+
+//    EIC *eic = new EIC();
+
+//    eic->intensity = this->rawIntensities;
+//    eic->rt = pseudoRt; // x axis: fractions
+//    eic->mz = pseudoRt; // x axis: fractions
+//    eic->scannum = this->fractionNums;
+
+//    eic->setSmootherType(params->traceSmoothingType);
+//    eic->setBaselineSmoothingWindow(params->traceWindowSize);
+//    eic->setBaselineDropTopX(params->traceBaselineDropTopX);
+
+//    eic->getPeakPositionsC(
+//                params->traceWindowSize,
+//                debug,
+//                true,
+//                params->tracePeakBoundsMaxIntensityFraction,
+//                params->traceRtBoundsSlopeThreshold);
+
+//    this->smoothedIntensities = eic->spline;
+
+//    float maxRawIntensity = *max_element(this->rawIntensities.begin(), this->rawIntensities.end());
+//    float maxSmoothedIntensity = *max_element(this->smoothedIntensities.begin(), this->smoothedIntensities.end());
+
+//    float rawIntensityThreshold = max(params->traceMinFracTopPeakIntensity * maxRawIntensity, params->traceMinPeakIntensity);
+//    float smoothedIntensityThreshold = max(params->traceMinFracTopSmoothedIntensity * maxSmoothedIntensity, params->traceMinSmoothedIntensity);
+
+//    //float minPeakIntensity = maxRawIntensity * params->trace
+//    for (auto p : eic->peaks) {
+
+//        //Issue 598: peak width has a different meaning for LC data, involving noise estimates
+//        //here, it simply means the total # of fractions the peak spans
+//        //fractions are numbered as integers, so position difference can be used.
+//        p.width = p.maxpos - p.minpos;
+
+//        float peakRawIntensity = this->rawIntensities[p.pos];
+//        float peakSmoothedIntensity = this->smoothedIntensities[p.pos];
+
+//        if (peakRawIntensity >= rawIntensityThreshold
+//                && peakSmoothedIntensity >= smoothedIntensityThreshold
+//                && p.signalBaselineRatio >= params->traceMinPeakSN
+//                && p.width >= static_cast<unsigned int>(params->traceMinPeakWidth)) {
+//            this->peaks.push_back(p);
+//        }
+//    }
+
+//    delete(eic);
+}
+
+void SECTrace::computeTraceData(
+        vector<int> fractionNums,
+        vector<float> rawIntensities,
+        shared_ptr<SECSearchParameters> params,
+        bool debug){
+    //TODO
+}
+
+void SECTrace::pickPeaks(bool debug) {
     EIC *eic = new EIC();
+
+    vector<float> pseudoRt(fractionNums.size());
+    for (unsigned int i = 0; i < fractionNums.size(); i++) {
+        pseudoRt[i] = static_cast<float>(fractionNums[i]);
+    }
 
     eic->intensity = this->rawIntensities;
     eic->rt = pseudoRt; // x axis: fractions
