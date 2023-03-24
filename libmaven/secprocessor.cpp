@@ -458,9 +458,9 @@ float SECTraceSimilarityCosine::getSimilarity(bool debug) {
     Fragment *f1 = first->getFragment(params, debug);
     Fragment *f2 = second->getFragment(params, debug);
 
-    float productPpmTolr = params->similarityFractionDiffTol + 0.001f; // avoid rounding errors
+    float maxMzDiff = params->similarityFractionDiffTol + 0.001f; // avoid rounding errors
 
-    this->ranks = Fragment::compareRanks(f1, f2, productPpmTolr);
+    this->ranks = Fragment::findFragPairsGreedyMz(f1, f2, maxMzDiff);
 
     //all scores
     for(int rank: ranks){
