@@ -209,8 +209,6 @@ public:
                                                         bool debug = false);
 };
 
-#endif // SECPROCESSOR_H
-
 class SECTracePeak {
 public:
     SECTrace *trace=nullptr;
@@ -273,7 +271,6 @@ private:
 
 };
 
-
 class SECTracePeakScorer {
 public:
     static vector<SECTracePeakComparison> scorePeaks(
@@ -281,3 +278,13 @@ public:
             shared_ptr<SECSearchParameters> params,
             bool debug);
 };
+
+class SECTraceDiffGenerator {
+public:
+    static vector<SECTraceDiff*> generateSECTraceDiffs(
+            vector<SECTrace*> referenceTraces,
+            vector<SECTrace*> compareTraces,
+            bool debug);
+};
+
+#endif // SECPROCESSOR_H

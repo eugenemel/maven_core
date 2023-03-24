@@ -815,3 +815,50 @@ vector<SECTracePeakComparison> SECTracePeakScorer::scorePeaks(
 
     return peakComparisons;
 }
+
+/**
+ * @brief SECTraceDiffGenerator::generateSECTraceDiffs
+ * The SECTrace.id field is used to map reference traces to compare traces.
+ *
+ * @param referenceTraces
+ * @param compareTraces
+ * @param debug
+ * @return
+ */
+vector<SECTraceDiff*> SECTraceDiffGenerator::generateSECTraceDiffs(
+        vector<SECTrace*> referenceTraces,
+        vector<SECTrace*> compareTraces,
+        bool debug) {
+
+    vector<SECTraceDiff*> secTraceDiffs{};
+
+    set<string> referenceTraceIds{};
+    map<string, SECTrace*> compareTracesMap{};
+
+    //Ensure that each SECTrace ID is seen only once in the vector of compare traces
+    for (auto compareTrace : compareTraces) {
+        string id = compareTrace->id;
+        if (compareTracesMap.find(id) != compareTracesMap.end()) {
+            cerr << "Duplicate ID: " << id << "in compareTraces. This is illegal, exiting." << endl;
+            abort();
+        }
+    }
+
+    //Ensure that each SECTrace ID is seen only once in the vector of reference traces
+    for (auto refTrace : referenceTraces) {
+        string id = refTrace->id;
+        if (referenceTraceIds.find(id) != referenceTraceIds.end()) {
+            cerr << "Duplicate ID: " << id << "in referenceTraces. This is illegal, exiting." << endl;
+            abort();
+        }
+        referenceTraceIds.insert(id);
+
+        if (compareTracesMap.find(id) != compareTracesMap.end()) {
+            SECTrace *compareTrace = compareTracesMap[id];
+            SECTraceDiff *diff = new SECTraceDiff(refTrace, compareTrace, debug);
+            secTraceDiffs.push_back(diff);
+        }
+    }
+
+    return secTraceDiffs;
+}
