@@ -6,6 +6,8 @@
 #include "mzUtils.h"
 #include "mzSample.h"
 
+class SECTraceSimilarityCosine;
+
 class SECSearchParameters {
 
     public:
@@ -155,6 +157,7 @@ public:
 class SECTraceDiff : public SECTrace {
 
 public:
+
     //Additional fields
     SECTrace *compare;
     SECTrace *reference;
@@ -162,6 +165,9 @@ public:
     //compare - reference intensities
     vector<float> diffRawIntensities{};
     vector<float> diffSmoothedIntensities{};
+
+    //additional comparisons
+    SECTraceSimilarityCosine *similarityScore;
 
     //peaks, fragment, and absolute intensities are fields inherited by SECTrace
 

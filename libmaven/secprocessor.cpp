@@ -251,6 +251,9 @@ SECTraceDiff::SECTraceDiff(SECTrace *compare, SECTrace *reference, bool debug) {
     }
 
     this->pickPeaks(debug);
+
+    this->similarityScore = new SECTraceSimilarityCosine(compare, reference, params);
+    this->similarityScore->getSimilarity(debug); //side effects: fill out fields
 }
 
 void SECTrace::computeTraceData(
