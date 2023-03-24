@@ -180,6 +180,63 @@ SECTrace::SECTrace(string id,
     this->params = params;
     this->type = type;
 
+//    int N = params->traceMaxFractionNumber - params->traceMinFractionNumber + 1;
+
+//    this->fractionNums = vector<int>(static_cast<unsigned long>(N));
+//    this->rawIntensities = vector<float>(static_cast<unsigned long>(N));
+
+//    map<int, float> rawDataMap{};
+//    for (unsigned int i = 0; i < fractionNums.size(); i++) {
+//        int fracNum = fractionNums[i];
+//        float rawIntensity = rawIntensities[i];
+//        rawDataMap.insert(make_pair(fracNum, rawIntensity));
+//    }
+
+//    unsigned int counter = 0;
+
+//    int fracNum = params->traceMinFractionNumber;
+
+//    vector<float> pseudoRt(static_cast<unsigned long>(N));
+
+//    while (fracNum <= params->traceMaxFractionNumber) {
+//        this->fractionNums[counter] = fracNum;
+//        pseudoRt[counter] = static_cast<float>(fracNum);
+
+//        float intensityVal = params->traceMissingIntensityFill;
+
+//        if (rawDataMap.find(fracNum) != rawDataMap.end()) {
+//            intensityVal = rawDataMap.at(fracNum);
+//        }
+
+//        this->rawIntensities[counter] = intensityVal;
+
+//        counter++;
+//        fracNum++;
+//    }
+
+//    if (params->traceNormalizeToSumIntensity) {
+//        float intensitySum = accumulate(this->rawIntensities.begin(), this->rawIntensities.end(), 0.0f);
+
+//        //guard against divide by 0
+//        if (intensitySum == 0.0f) {
+//            intensitySum = 1.0f;
+//        }
+
+//        for (unsigned int i = 0; i < this->rawIntensities.size(); i++) {
+//            this->rawIntensities[i] = this->rawIntensities[i]/intensitySum;
+//        }
+//    }
+
+    this->computeTraceData(fractionNums, rawIntensities, params, debug);
+    this->pickPeaks(debug);
+}
+
+void SECTrace::computeTraceData(
+        vector<int> fractionNums,
+        vector<float> rawIntensities,
+        shared_ptr<SECSearchParameters> params,
+        bool debug){
+
     int N = params->traceMaxFractionNumber - params->traceMinFractionNumber + 1;
 
     this->fractionNums = vector<int>(static_cast<unsigned long>(N));
@@ -226,16 +283,6 @@ SECTrace::SECTrace(string id,
             this->rawIntensities[i] = this->rawIntensities[i]/intensitySum;
         }
     }
-
-    this->pickPeaks(debug);
-}
-
-void SECTrace::computeTraceData(
-        vector<int> fractionNums,
-        vector<float> rawIntensities,
-        shared_ptr<SECSearchParameters> params,
-        bool debug){
-    //TODO
 }
 
 void SECTrace::pickPeaks(bool debug) {
