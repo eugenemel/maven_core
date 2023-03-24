@@ -147,6 +147,8 @@ public:
                           bool debug = false);
 
     void pickPeaks(bool debug);
+
+    string getPeakPositionsString();
 };
 
 //Introduced in 622

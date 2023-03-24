@@ -401,6 +401,19 @@ vector<string> SECTrace::getPeakSummaryString(
     return summaryString;
 }
 
+string SECTrace::getPeakPositionsString(){
+    string peakStr = "";
+
+    for (unsigned int i = 0; i < peaks.size(); i++) {
+        if (i>0) {
+            peakStr = peakStr + ", ";
+        }
+        peakStr = peakStr + to_string(peaks[i].pos);
+    }
+
+    return peakStr;
+}
+
 Fragment* SECTrace::getFragment(shared_ptr<SECSearchParameters> params, bool debug) {
 
     if (fragment) return fragment;
