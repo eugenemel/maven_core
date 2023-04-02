@@ -565,6 +565,8 @@ public:
     //Instrument PPM Calibration
     vector<double> ppmCorrectionCoef;
 
+    bool isAnchorPointSample;
+
     void saveOriginalRetentionTimes();
     void restoreOriginalRetentionTimes();       
 	void applyPolynomialTransform();

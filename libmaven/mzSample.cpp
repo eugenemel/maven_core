@@ -28,6 +28,7 @@ mzSample::mzSample() {
     color[0]=color[1]=color[2]=0;
     color[3]=1.0;
     _averageFullScanTime = -1.0f; //initial value of -1 indicates that computation not yet performed from mzSample::getAverageFullScanTime()
+    isAnchorPointSample = true; //Issue 624: by default, all samples are anchor point samples.
 }
 
 mzSample::~mzSample() { 
