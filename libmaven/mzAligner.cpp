@@ -486,6 +486,11 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples){
 
         }
 
+        //Issue 624: Only samples that contain anchor points should be use for alignment.
+        if (!x->isAnchorPointSample) {
+            isComputeEIC = false;
+        }
+
 //        //debugging
 //        cout << "isComputeEIC? " << (isComputeEIC ? "true" : "false") << endl;
 
