@@ -415,7 +415,7 @@ void QQQProcessor::rollUpToCompoundQuant(vector<PeakGroup>& peakgroups, shared_p
 void QQQProcessor::labelInternalStandards(vector<PeakGroup>& peakgroups, shared_ptr<QQQSearchParameters> params, bool debug){
     if (debug) cout << "Start QQQProcessor::labelInternalStandards()" << endl;
 
-    for (auto && pg : peakgroups) {
+    for (auto & pg : peakgroups) {
         if (pg.compound && pg.compound->metaDataMap.find(QQQProcessor::getTransitionIsInternalStandardStringKey()) != pg.compound->metaDataMap.end()){
             if (pg.compound->metaDataMap.at(QQQProcessor::getTransitionIsInternalStandardStringKey()) == "TRUE") {
                 pg.addLabel('i');
