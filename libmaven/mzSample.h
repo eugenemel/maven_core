@@ -2422,6 +2422,43 @@ class QQQProcessor{
 
     static set<string> getSRMIds(vector<SRMTransition*>& transitions);
 
+    /**
+     * @brief rollUpToCompoundQuant()
+     *
+     * Given a set of measurements of multiple peakgroups with multiple transitions,
+     * determine an overall quant measurement for each compound.
+     *
+     * This is communicated in two ways:
+     *
+     * (1) The PeakGroup that is the quant representative for the Category is labeled with a 'q'
+     * (2) The quant value for the peak is copied into the 'peakRank' field (which is otherwise not used for QQQ data).
+     *
+     * @param peakgroups
+     * @param params
+     * @param debug
+     */
+    static void rollUpToCompoundQuant(
+            vector<PeakGroup>& peakgroups,
+            shared_ptr<QQQSearchParameters> params,
+            bool debug = false);
+
+    /**
+     * @brief labelInternalStandards
+     *
+     * Label all peak groups if they are associated with a compound that has metadata value for
+     * getTransitionIsInternalStandardStringKey() == "TRUE"
+     *
+     * peakgroups that are labeled this way are designated with an 'i'
+     *
+     * @param peakgroups
+     * @param params
+     * @param debug
+     */
+    static void labelInternalStandards(
+            vector<PeakGroup>& peakgroups,
+            shared_ptr<QQQSearchParameters> params,
+            bool debug = false);
+
     //reserved constants - do not change!
     static string getTransitionIdFilterStringKey(){return "TRANSITION_ID_FILTER_STRING";}
     static string getTransitionIonTypeFilterStringKey(){return "TRANSITION_ION_TYPE";}
