@@ -408,17 +408,22 @@ shared_ptr<QQQSearchParameters> QQQSearchParameters::decode(string encodedParams
     return qqqSearchParameters;
 }
 
-void QQQProcessor::rollUpToCompoundQuant(vector<PeakGroup> &peakgroups, shared_ptr<QQQSearchParameters> params, bool debug){
+void QQQProcessor::rollUpToCompoundQuant(vector<PeakGroup>& peakgroups, shared_ptr<QQQSearchParameters> params, bool debug){
     //TODO
 }
 
-void QQQProcessor::labelInternalStandards(vector<PeakGroup> &peakgroups, shared_ptr<QQQSearchParameters> params, bool debug){
+void QQQProcessor::labelInternalStandards(vector<PeakGroup>& peakgroups, shared_ptr<QQQSearchParameters> params, bool debug){
+    if (debug) cout << "Start QQQProcessor::labelInternalStandards()" << endl;
+
     for (auto& pg : peakgroups) {
         if (pg.compound && pg.compound->metaDataMap.find(QQQProcessor::getTransitionIsInternalStandardStringKey()) != pg.compound->metaDataMap.end()){
             if (pg.compound->metaDataMap.at(QQQProcessor::getTransitionIsInternalStandardStringKey()) == "TRUE") {
                 pg.addLabel('i');
+                if (debug) cout << pg.compound->name << " is an internal standard." << endl;
             }
         }
 
     }
+
+    if (debug) cout << "End QQQProcessor::labelInternalStandards()" << endl;
 }
