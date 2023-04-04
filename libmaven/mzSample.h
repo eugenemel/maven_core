@@ -2425,7 +2425,8 @@ class QQQProcessor{
     //reserved constants - do not change!
     static string getTransitionIdFilterStringKey(){return "TRANSITION_ID_FILTER_STRING";}
     static string getTransitionIonTypeFilterStringKey(){return "TRANSITION_ION_TYPE";}
-
+    static string getTransitionIsInternalStandardStringKey(){return "TRANSITION_IS_INTERNAL_STANDARD";}
+    static string getTransitionPreferredQuantTypeStringKey(){return "TRANSITION_PREFERRED_QUANT_TYPE";}
 };
 
 
