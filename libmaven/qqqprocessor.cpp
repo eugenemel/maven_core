@@ -467,9 +467,16 @@ void QQQProcessor::rollUpToCompoundQuant(vector<PeakGroup>& peakgroups, shared_p
                 quantType = representativeCompound->metaDataMap.at(QQQProcessor::getTransitionPreferredQuantTypeStringKey());
             }
 
+            float maxPeakRank = 0.0f;
             for (auto & p : representative->peaks) {
                 p.peakRank = p.getQuantByName(quantType);
+                if (p.peakRank > maxPeakRank) {
+                    maxPeakRank = p.peakRank;
+                }
             }
+
+            representative->groupRank = maxPeakRank;
+
         }
     }
 
