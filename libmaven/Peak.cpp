@@ -283,3 +283,36 @@ vector<mzLink> Peak::findCovariants() {
 		}
 		return covariants;
 }
+
+float Peak::getQuantByName(string name){
+
+    if (name == "peakArea") {
+        return peakArea;
+    } else if (name == "peakAreaCorrected") {
+        return peakAreaCorrected;
+    } else if (name == "peakAreaTop") {
+        return peakAreaTop;
+    } else if (name == "peakAreaFractional") {
+        return peakAreaFractional;
+    } else if (name == "peakIntensity") {
+        return peakIntensity;
+    } else if (name == "signalBaselineRatio") {
+        return signalBaselineRatio;
+    } else if (name == "smoothedIntensity") {
+        return smoothedIntensity;
+    } else if (name == "smoothedPeakArea") {
+        return smoothedPeakArea;
+    } else if (name == "smoothedPeakAreaCorrected") {
+        return smoothedPeakAreaCorrected;
+    } else if (name == "smoothedPeakAreaTop") {
+        return smoothedPeakAreaTop;
+    } else if (name == "smoothedSignalBaselineRatio") {
+        return smoothedSignalBaselineRatio;
+    } else if (name == "peakAreaFWHM") {
+        return peakAreaFWHM;
+    } else if (name == "smoothedPeakAreaFWHM") {
+        return smoothedPeakAreaFWHM;
+    }
+
+    return -1.0f;
+}

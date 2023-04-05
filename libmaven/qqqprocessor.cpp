@@ -445,6 +445,7 @@ void QQQProcessor::rollUpToCompoundQuant(vector<PeakGroup>& peakgroups, shared_p
 
         bool isCheckRt = params->rollUpRtTolerance > 0 && peakGroups.at(0)->compound->expectedRt > 0;
 
+        Compound* representativeCompound = nullptr;
         PeakGroup* representative = nullptr;
         for (auto pg : peakGroups) {
            if (isCheckRt && abs(pg->maxPeakRt() - pg->compound->expectedRt) > params->rollUpRtTolerance) {
@@ -453,15 +454,21 @@ void QQQProcessor::rollUpToCompoundQuant(vector<PeakGroup>& peakgroups, shared_p
 
            if (!representative || pg->maxIntensity > representative->maxIntensity) {
                representative = pg;
+               representativeCompound = pg->compound;
            }
 
         }
 
         if (representative) {
             representative->addLabel('q');
+
+            string quantType = "smoothedPeakAreaCorrected";
+            if (representativeCompound->metaDataMap.find(QQQProcessor::getTransitionPreferredQuantTypeStringKey()) != representativeCompound->metaDataMap.end()) {
+                quantType = representativeCompound->metaDataMap.at(QQQProcessor::getTransitionPreferredQuantTypeStringKey());
+            }
+
             for (auto & p : representative->peaks) {
-                //TODO: new quant
-                //p.peakRank;
+                p.peakRank = p.getQuantByName(quantType);
             }
         }
     }

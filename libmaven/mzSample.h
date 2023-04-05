@@ -843,6 +843,7 @@ class Peak {
 		
 		void setLabel(char label) { this->label=label;}
 		inline char getLabel() { return label;}
+        float getQuantByName(string name);
 		
         static bool compRtMin(const Peak& a, const Peak& b ) { return a.rtmin < b.rtmin; }
 		static bool compRt(const Peak& a, const Peak& b ) { return a.rt < b.rt; }
