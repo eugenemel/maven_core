@@ -491,6 +491,18 @@ void QQQProcessor::labelInternalStandards(vector<PeakGroup>& peakgroups, shared_
             if (pg.compound->metaDataMap.at(QQQProcessor::getTransitionIsInternalStandardStringKey()) == "TRUE") {
                 pg.addLabel('i');
                 if (debug) cout << pg.compound->name << " is an internal standard." << endl;
+
+                bool isBothRepresentativeAndIS = false;
+                for (auto label : pg.labels) {
+                    if (label == 'q') {
+                        isBothRepresentativeAndIS = true;
+                        break;
+                    }
+                }
+
+                if (isBothRepresentativeAndIS) {
+                    pg.addLabel('l');
+                }
             }
         }
 
