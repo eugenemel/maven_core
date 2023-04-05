@@ -289,6 +289,8 @@ string QQQSearchParameters::encodeParams(){
     }
     encodedParams = encodedParams + ";";
 
+    encodedParams = encodedParams + "rollUpRtTolerance" + "=" + to_string(rollUpRtTolerance) + ";";
+
     string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
 
     encodedParams = encodedParams + peakPickingEncodedParams;
@@ -403,13 +405,65 @@ shared_ptr<QQQSearchParameters> QQQSearchParameters::decode(string encodedParams
             qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::RETAIN_ALL_TRANSITIONS;
         }
     }
+    if (decodedMap.find("rollUpRtTolerance") != decodedMap.end()) {
+        qqqSearchParameters->rollUpRtTolerance = stof(decodedMap["rollUpRtTolerance"]);
+    }
+
     // END QQQSearchParameters
 
     return qqqSearchParameters;
 }
 
 void QQQProcessor::rollUpToCompoundQuant(vector<PeakGroup>& peakgroups, shared_ptr<QQQSearchParameters> params, bool debug){
-    //TODO
+    if (debug) cout << "Start QQQProcessor::rollUpToCompoundQuant()" << endl;
+
+    map<string, vector<PeakGroup&>> groupsByCategory{};
+    for (auto & pg : peakgroups) {
+        if (pg.compound && !pg.compound->category.empty()) {
+            string category = pg.compound->category.at(0);
+
+            //compounds are used for quant only if they are explicitly designated as such
+            if (pg.compound->metaDataMap.find(QQQProcessor::getTransitionIonTypeFilterStringKey()) != pg.compound->metaDataMap.end()) {
+                string quantType = pg.compound->metaDataMap.at(QQQProcessor::getTransitionIonTypeFilterStringKey());
+                if (quantType == "qq" || quantType == "quant") {
+                    if (groupsByCategory.find(category) == groupsByCategory.end()) {
+                        groupsByCategory.insert(make_pair(category, vector<PeakGroup&>{}));
+                    }
+                    groupsByCategory[category].push_back(pg);
+                }
+            }
+        }
+    }
+
+    //Take the PG with the highest maxSmoothedIntensity that is within tolerance
+
+    for (auto it = groupsByCategory.begin(); it != groupsByCategory.end(); ++it) {
+        vector<PeakGroup&> peakGroups = it->second;
+
+        bool isCheckRt = params->rollUpRtTolerance > 0 && peakGroups.at(0).compound->expectedRt > 0;
+
+        PeakGroup* representative = nullptr;
+        for (auto & pg : peakGroups) {
+           if (isCheckRt && abs(pg.maxPeakRt() - pg.compound->expectedRt) > params->rollUpRtTolerance) {
+                continue;
+           }
+
+           if (!representative || pg.maxIntensity > representative->maxIntensity) {
+               representative = pg;
+           }
+
+        }
+
+        if (representative) {
+            representative->addLabel('q');
+            for (auto & p : representative->peaks) {
+                //TODO: new quant
+                //p.peakRank;
+            }
+        }
+    }
+
+    if (debug) cout << "End QQQProcessor::rollUpToCompoundQuant()" << endl;
 }
 
 void QQQProcessor::labelInternalStandards(vector<PeakGroup>& peakgroups, shared_ptr<QQQSearchParameters> params, bool debug){
