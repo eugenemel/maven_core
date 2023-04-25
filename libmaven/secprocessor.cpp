@@ -247,7 +247,7 @@ SECTraceDiff::SECTraceDiff(SECTrace *compare, SECTrace *reference, bool debug) {
         this->diffRawIntensities[i] = rawDiff;
         this->rawIntensities[i] = abs(rawDiff);
 
-        this->diffSmoothedIntensities[i] = compare->smoothedIntensities[i] - reference->rawIntensities[i];
+        this->diffSmoothedIntensities[i] = compare->smoothedIntensities[i] - reference->smoothedIntensities[i];
     }
 
     this->pickPeaks(debug);

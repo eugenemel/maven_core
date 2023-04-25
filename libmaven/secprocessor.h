@@ -61,7 +61,7 @@ class SECSearchParameters {
       * comments:
       * parameters specific to similarity scoring computations.
       * @param similarityMinNumPeaks: minimum number of peaks required in each SECTrace to perform comparison.
-      * @param csimilarityFractionDiffTol: maximum number of fractions off where peaks can be matched.
+      * @param similarityFractionDiffTol: maximum number of fractions off where peaks can be matched.
       * ========================*/
      int similarityMinNumPeaks = 2;
      int similarityFractionDiffTol = 1;
