@@ -1245,12 +1245,25 @@ void EIC::getPeakDetails(Peak& peak, bool isCorrectPeakByMaxIntensity) {
         n++;
     }
 
-    //Issue 603: Previously, used this value instead of peak.peakBaseLineLevel for SN computations
-    float maxBaseLine = MAX(MAX(baseline[peak.pos],10), MAX(intensity[peak.minpos], intensity[peak.maxpos]));
+    //Issue 603, 632: peakBaselineLevel cannot be 0, causes problems with computing S:N ratios
+    float peakEdgeMaxIntensity = MAX(intensity[peak.minpos], intensity[peak.maxpos]);
+    float peakEdgeMinIntensity = MIN(intensity[peak.minpos], intensity[peak.maxpos]);
+    float peakBaselineLevel = 0;
+
+    if (baseline[peak.pos] > 0) {
+        peakBaselineLevel = baseline[peak.pos];
+    } else if (peakEdgeMinIntensity > 0) {
+        peakBaselineLevel = peakEdgeMinIntensity;
+    } else if (peakEdgeMaxIntensity > 0) {
+        peakBaselineLevel = peakEdgeMaxIntensity;
+    } else {
+        peakBaselineLevel = 10; // last resort
+    }
+
 
     peak.peakMz = mz[ peak.pos ];
     peak.peakAreaTop /= n;
-    peak.peakBaseLineLevel = baseline[peak.pos];
+    peak.peakBaseLineLevel = peakBaselineLevel;
     peak.noNoiseFraction = (float) peak.noNoiseObs/(this->eic_noNoiseObs+1);
     peak.peakAreaCorrected = peak.peakArea-baselineArea;
     peak.peakAreaFractional = peak.peakAreaCorrected/(totalIntensity+1);
