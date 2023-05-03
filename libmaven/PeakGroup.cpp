@@ -449,8 +449,8 @@ void PeakGroup::groupStatistics(bool isForceRecomputation) {
     //Issue 380: Avoid unnecessary recomputations
     if (!isForceRecomputation && isComputedGroupStatistics) return;
 
-    float rtSum = 0;
-    float mzSum = 0;
+    double rtSum = 0;
+    double mzSum = 0;
     maxIntensity = 0;
 
     blankMax =0;
@@ -473,7 +473,11 @@ void PeakGroup::groupStatistics(bool isForceRecomputation) {
     int nonZeroCount=0;
 
     for(unsigned int i=0; i< peaks.size(); i++) {
-        if(peaks[i].pos != 0) { rtSum += peaks[i].rt; mzSum += peaks[i].baseMz; nonZeroCount++; }
+        if(peaks[i].pos != 0) {
+            rtSum += static_cast<double>(peaks[i].rt);
+            mzSum += static_cast<double>(peaks[i].baseMz);
+            nonZeroCount++;
+        }
 
         if(peaks[i].peakIntensity>maxIntensity) {
             maxIntensity = peaks[i].peakIntensity;
@@ -505,8 +509,8 @@ void PeakGroup::groupStatistics(bool isForceRecomputation) {
     if (sampleCount>0) sampleMean = sampleMean/sampleCount;
 
     if ( nonZeroCount ) {
-        meanRt = rtSum/nonZeroCount;
-        meanMz = mzSum/nonZeroCount;
+        meanRt = static_cast<float>(rtSum/nonZeroCount);
+        meanMz = static_cast<float>(mzSum/nonZeroCount);
     }
 
     groupOverlapMatrix();
