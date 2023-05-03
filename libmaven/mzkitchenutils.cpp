@@ -318,6 +318,10 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
     float minMz = g->meanMz - (g->meanMz*params->ms1PpmTolr/1000000);
     float maxMz = g->meanMz + (g->meanMz*params->ms1PpmTolr/1000000);
 
+    if (debug) {
+        cout << "[minMz, maxMz] = [" << minMz << ", " << maxMz << "]" << endl;
+    }
+
     auto lb = lower_bound(compounds.begin(), compounds.end(), minMz, [](const CompoundIon& lhs, const float& rhs){
         return lhs.precursorMz < rhs;
     });
@@ -330,11 +334,15 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
 
     for (long pos = lb - compounds.begin(); pos < static_cast<long>(compounds.size()); pos++){
 
+        if (debug) cout << "pos=" << pos << endl;
+
         CompoundIon ion = compounds[static_cast<unsigned long>(pos)];
         Compound* compound = ion.compound;
         Adduct *adduct = ion.adduct;
 
         if (!compound) continue;
+
+        if (debug) cout << "compound: " << compound->name << endl;
 
         bool isMatchingAdduct = adduct && compound->adductString == adduct->name;
         if (params->IDisRequireMatchingAdduct && !isMatchingAdduct) {
