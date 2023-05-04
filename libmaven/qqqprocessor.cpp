@@ -421,9 +421,33 @@ void QQQProcessor::rollUpToCompoundQuant(vector<PeakGroup>& peakgroups, shared_p
     transform(peakgroups.begin(), peakgroups.end(), references.begin(), [](PeakGroup& pg){return &pg;});
 
     map<string, vector<PeakGroup*>> groupsByCategory{};
+    map<string, vector<PeakGroup*>> allGroupsByCategory{};
+
     for (auto pg : references) {
         if (pg->compound && !pg->compound->category.empty()) {
+
+            //Issue 635: All peakgroups shoudl transfer over the peakRank quant, for possible manual reassignments.
+            string quantType = "smoothedPeakAreaCorrected";
+            if (pg->compound->metaDataMap.find(QQQProcessor::getTransitionPreferredQuantTypeStringKey()) != pg->compound->metaDataMap.end()) {
+                quantType = pg->compound->metaDataMap.at(QQQProcessor::getTransitionPreferredQuantTypeStringKey());
+            }
+
+            float maxPeakRank = 0.0f;
+            for (auto & p : pg->peaks) {
+                p.peakRank = p.getQuantByName(quantType);
+                if (p.peakRank > maxPeakRank) {
+                    maxPeakRank = p.peakRank;
+                }
+            }
+
+            pg->groupRank = maxPeakRank;
+
             string category = pg->compound->category.at(0);
+
+            if (allGroupsByCategory.find(category) == allGroupsByCategory.end()) {
+                allGroupsByCategory.insert(make_pair(category, vector<PeakGroup*>{}));
+            }
+            allGroupsByCategory[category].push_back(pg);
 
             //compounds are used for quant only if they are explicitly designated as such
             if (pg->compound->metaDataMap.find(QQQProcessor::getTransitionIonTypeFilterStringKey()) != pg->compound->metaDataMap.end()) {
@@ -441,6 +465,7 @@ void QQQProcessor::rollUpToCompoundQuant(vector<PeakGroup>& peakgroups, shared_p
     //Take the PG with the highest maxSmoothedIntensity that is within tolerance
 
     for (auto it = groupsByCategory.begin(); it != groupsByCategory.end(); ++it) {
+        string category = it->first;
         vector<PeakGroup*> peakGroups = it->second;
 
         bool isCheckRt = params->rollUpRtTolerance > 0 && peakGroups.at(0)->compound->expectedRt > 0;
@@ -462,20 +487,16 @@ void QQQProcessor::rollUpToCompoundQuant(vector<PeakGroup>& peakgroups, shared_p
         if (representative) {
             representative->addLabel('q');
 
-            string quantType = "smoothedPeakAreaCorrected";
-            if (representativeCompound->metaDataMap.find(QQQProcessor::getTransitionPreferredQuantTypeStringKey()) != representativeCompound->metaDataMap.end()) {
-                quantType = representativeCompound->metaDataMap.at(QQQProcessor::getTransitionPreferredQuantTypeStringKey());
-            }
-
-            float maxPeakRank = 0.0f;
-            for (auto & p : representative->peaks) {
-                p.peakRank = p.getQuantByName(quantType);
-                if (p.peakRank > maxPeakRank) {
-                    maxPeakRank = p.peakRank;
+            //Issue 635: Organize non-representative peakgroups as children of representatives.
+            if (allGroupsByCategory.find(category) != allGroupsByCategory.end()) {
+                vector<PeakGroup*> allPeakGroups = allGroupsByCategory[category];
+                for (auto pg : allPeakGroups){
+                    if (pg != representative) {
+                        representative->addChild(*pg);
+                        pg->deletedFlag = true;
+                    }
                 }
             }
-
-            representative->groupRank = maxPeakRank;
 
         }
     }
