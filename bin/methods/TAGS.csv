@@ -1,7 +1,14 @@
-#tag_name,label,hotkey,icon,description
-isomers,i,1,blue_star.png,"Peak Group is chimeric, contains multiple structural isomers"
-mixture,m,2,black_circle.png,Peak Group spectrum is a mixture of multiple MS2s from non-isomeric species.
-library,l,3,pink_star.png,Peak Group spectrum is high quality enough to be reviewed to become a library spectrum for future matching.
-revisit,r,4,daffodil_triangle.png,Revisit this Peak Group later.
-coelution problem,q,5,orange_circle.png,The Coelution group of this Peak Group is incorrect.
-minor adduct,a,6,green_triangle.png,Peak Group has an unusual adduct form.
+tag_name,label,hotkey,icon,description,displayOrder
+revisit,r,1,daffodil_triangle.png,Revisit this Peak Group later.,0
+QQQ compound,q,2,orange_circle.png,QQQ: This transition is the representative for the compound.,1
+QQQ IS,i,3,blue_star.png,QQQ: The transition is an internal standard.,2
+QQQ IS + compound,l,4,pink_star.png,QQQ: The transition is both an internal standard and representative for the compound.,3
+open slot 1,m,5,daffodil_circle.png,Open slot,4
+open slot 2,a,6,pink_circle.png,Open slot,5
+open slot 3,v,7,blue_circle.png,Open slot,6
+open slot 4,w,8,green_circle.png,Open slot,7
+open slot 5,z,9,black_circle.png,Open slot,8
+open slot 6,y,0,daffodil_star.png,Open slot,9
+open slot 7,e,e,orange_star.png,Open slot,10
+open slot 8,j,j,green_star.png,Open slot,11
+open slot 9,n,n,black_star.png,Open slot,12
