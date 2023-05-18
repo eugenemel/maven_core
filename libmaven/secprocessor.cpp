@@ -855,7 +855,7 @@ vector<SECTraceDiff*> SECTraceDiffGenerator::generateSECTraceDiffs(
     for (auto compareTrace : compareTraces) {
         string id = compareTrace->id;
         if (compareTracesMap.find(id) != compareTracesMap.end()) {
-            cerr << "Duplicate ID: " << id << "in compareTraces. This is illegal, exiting." << endl;
+            cerr << "Duplicate ID: '" << id << "' in compareTraces. This is illegal, exiting." << endl;
             abort();
         }
         compareTracesMap.insert(make_pair(id, compareTrace));

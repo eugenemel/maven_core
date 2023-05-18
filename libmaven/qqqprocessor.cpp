@@ -426,7 +426,7 @@ void QQQProcessor::rollUpToCompoundQuant(vector<PeakGroup>& peakgroups, shared_p
     for (auto pg : references) {
         if (pg->compound && !pg->compound->category.empty()) {
 
-            //Issue 635: All peakgroups shoudl transfer over the peakRank quant, for possible manual reassignments.
+            //Issue 635: All peakgroups should transfer over the peakRank quant, for possible manual reassignments.
             string quantType = "smoothedPeakAreaCorrected";
             if (pg->compound->metaDataMap.find(QQQProcessor::getTransitionPreferredQuantTypeStringKey()) != pg->compound->metaDataMap.end()) {
                 quantType = pg->compound->metaDataMap.at(QQQProcessor::getTransitionPreferredQuantTypeStringKey());
