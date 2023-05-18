@@ -856,7 +856,8 @@ vector<SECTraceDiff*> SECTraceDiffGenerator::generateSECTraceDiffs(
         string id = compareTrace->id;
         if (compareTracesMap.find(id) != compareTracesMap.end()) {
             cerr << "Duplicate ID: '" << id << "' in compareTraces. This is illegal, exiting." << endl;
-            abort();
+            //Issue 643: avoid aborting for debugging
+            //abort();
         }
         compareTracesMap.insert(make_pair(id, compareTrace));
     }
@@ -866,7 +867,8 @@ vector<SECTraceDiff*> SECTraceDiffGenerator::generateSECTraceDiffs(
         string id = refTrace->id;
         if (referenceTraceIds.find(id) != referenceTraceIds.end()) {
             cerr << "Duplicate ID: " << id << "in referenceTraces. This is illegal, exiting." << endl;
-            abort();
+            //Issue 643: avoid aborting for debugging
+            //abort();
         }
         referenceTraceIds.insert(id);
 
