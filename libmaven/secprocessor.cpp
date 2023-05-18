@@ -866,7 +866,7 @@ vector<SECTraceDiff*> SECTraceDiffGenerator::generateSECTraceDiffs(
     for (auto refTrace : referenceTraces) {
         string id = refTrace->id;
         if (referenceTraceIds.find(id) != referenceTraceIds.end()) {
-            cerr << "Duplicate ID: " << id << "in referenceTraces. This is illegal, exiting." << endl;
+            cerr << "Duplicate ID: '" << id << "' in referenceTraces. This is illegal, exiting." << endl;
             //Issue 643: avoid aborting for debugging
             //abort();
         }
