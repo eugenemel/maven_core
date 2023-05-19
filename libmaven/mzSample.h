@@ -1264,6 +1264,8 @@ class Compound {
 
             virtual vector<Compound*> getChildren();
             virtual vector<int> getConstituentMzs();
+
+            static void traverseAndAdd(PeakGroup& group, set<Compound*>& compoundSet);
 };
 
 //Issue 416

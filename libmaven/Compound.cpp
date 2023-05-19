@@ -484,3 +484,10 @@ string CompoundUtils::getIdentifierKey(IdentifierType identifierType){
 
     return "Unknown_Identifier";
 }
+
+void Compound::traverseAndAdd(PeakGroup& group, set<Compound*>& compoundSet) {
+    if (group.compound) compoundSet.insert(group.compound);
+    for (auto& child : group.children) {
+       Compound::traverseAndAdd(child, compoundSet);
+    }
+}
