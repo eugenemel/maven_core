@@ -7,3 +7,9 @@ IsotopeProcessorOptions& IsotopeProcessorOptions::instance() {
     static IsotopeProcessorOptions options;
     return options;
 }
+
+void IsotopeProcessorOptions::setOptions(string config_file) {
+    this->config_file = config_file;
+
+    //TODO: import config file
+}

@@ -10,9 +10,12 @@ class IsotopeProcessorOptions {
 public:
     static IsotopeProcessorOptions& instance();
 
-    void setOption(string key, string value);
+    void setOptions(string config_file);
 
     void printOptions();
+
+    //fields below this point
+    string config_file = "";
 
 private:
     //Singleton: constructor is private
