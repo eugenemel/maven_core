@@ -465,6 +465,15 @@ vector<Isotope> MassCalculator::computeIsotopes(string compoundFormula, Adduct* 
     return isotopes;
 }
 
+/**
+ * @brief MassCalculator::enumerateMasses
+ * @param inputMass
+ * @param charge
+ * @param maxdiff
+ * @return
+ *
+ * @deprecated This does not appear to have any active uses in maven_core or maven.
+ */
 vector<MassCalculator::Match> MassCalculator::enumerateMasses(double inputMass, double charge, double maxdiff) {
 
     vector<MassCalculator::Match>matches;
