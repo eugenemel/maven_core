@@ -89,6 +89,7 @@ class MassCalculator {
     double adjustMass(double mass,int charge);
 
     static vector<Isotope> computeIsotopes(string compoundFormula, Adduct* adduct, int maxNumProtons=INT_MAX, bool isUse13C=true, bool isUse15N=true, bool isUse34S=true, bool isUse2H=true);
+
     map<string,int> getPeptideComposition(const string& peptideSeq);
 
     static bool compDiff(const Match& a, const Match& b ) { return a.diff < b.diff; }
