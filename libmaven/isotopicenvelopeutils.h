@@ -4,6 +4,7 @@
 #define ISOTOPICENVELOPEUTILS_H
 
 #include "mzSample.h"
+#include <numeric>
 
 class IsotopeProcessorOptions {
 
@@ -26,6 +27,20 @@ private:
 
     //Singleton: Disable assignment operator
     IsotopeProcessorOptions& operator= (const IsotopeProcessorOptions&) = delete;
+};
+
+class IsotopicEnvelope {
+public:
+
+    string source = "unknown";
+    vector<Isotope> isotopes{};
+    PeakGroup *group = nullptr;
+
+    double totalIntensity = -1.0;
+    vector<double> isotopeIntensity;
+
+    double getIntensity();
+    void print();
 };
 
 #endif // ISOTOPICENVELOPEUTILS_H
