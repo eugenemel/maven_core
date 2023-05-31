@@ -1359,8 +1359,8 @@ public:
 class Isotope {
 public:
     string name;
-    double mz;
-    double abundance;
+    double mz; //monoisotopic mz + isotopic offset
+    double abundance; // theoretical
     int charge;
     int N15;
     int C13;
@@ -1368,7 +1368,7 @@ public:
     int H2;
 
     Isotope(string name, float mass, int c=0, int n=0, int s=0, int h=0) {
-        this->mz=mass; this->name=name; charge=0;
+        this->mz=static_cast<double>(mass); this->name=name; charge=0;
         C13=c; N15=n; S34=s; H2=h;
     }
 
