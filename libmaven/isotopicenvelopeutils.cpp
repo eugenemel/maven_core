@@ -14,14 +14,14 @@ void IsotopeProcessorOptions::setOptions(string config_file) {
     //TODO: import config file
 }
 
-double IsotopicEnvelope::getIntensity() {
+double IsotopicEnvelope::getTotalIntensity() {
     if (totalIntensity < 0) {
-        totalIntensity = std::accumulate(isotopeIntensity.begin(), isotopeIntensity.end(), 0.0);
+        totalIntensity = std::accumulate(intensities.begin(), intensities.end(), 0.0);
     }
     return totalIntensity;
 }
 
-void IsotopicEnvelope::print() {
+void IsotopicEnvelopeGroup::print() {
     if (!group) {
         cout << "Peak group is null." << endl;
         return;
@@ -39,19 +39,36 @@ void IsotopicEnvelope::print() {
 
     cout << group->compound->name << " "
          << group->adduct->name << "@ rt="
-         << group->medianRt() << ", totalIntensity="
-         << getIntensity()
-         << ":\n";
+         << group->medianRt()
+         << endl;
 
-    for (unsigned int i = 0; i < isotopes.size(); i++) {
-        Isotope isotope = isotopes.at(i);
-        double intensity = isotopeIntensity.at(i);
-
-        cout << "\t" << isotope.name << ": "
-             << intensity << " "
-             << "frac=" << (intensity/totalIntensity) << " "
-             << "\n";
+    cout << "Isotopes:\n";
+    cout << "{";
+    for (auto isotope : isotopes) {
+        cout << isotope.name << endl;
     }
+    cout << "}\n";
 
-    cout << endl;
+    for (auto it = envelopeBySample.begin(); it != envelopeBySample.end(); ++it) {
+        mzSample *sample = it->first;
+        IsotopicEnvelope envelope = it->second;
+        cout << sample->sampleName << ": ";
+        envelope.print();
+        cout << endl;
+    }
+}
+
+void IsotopicEnvelope::print() {
+
+    stringstream ss;
+    ss << std::fixed << setprecision(4);
+
+    ss << "{";
+    for (unsigned int i = 0; i < intensities.size(); i++) {
+        if (i > 0) ss << ",";
+        ss << intensities.at(i);
+    }
+    ss << "}";
+
+    cout << ss.str();
 }
