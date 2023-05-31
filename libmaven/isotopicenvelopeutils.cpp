@@ -42,10 +42,12 @@ void IsotopicEnvelopeGroup::print() {
          << group->medianRt()
          << endl;
 
-    cout << "Isotopes:\n";
+    cout << "Isotopes: ";
     cout << "{";
-    for (auto isotope : isotopes) {
-        cout << isotope.name << endl;
+    for (unsigned int i = 0; i < isotopes.size(); i++) {
+        Isotope isotope = isotopes.at(i);
+        if (i > 0) cout << ", ";
+        cout << isotope.name;
     }
     cout << "}\n";
 
@@ -54,8 +56,10 @@ void IsotopicEnvelopeGroup::print() {
         IsotopicEnvelope envelope = it->second;
         cout << sample->sampleName << ": ";
         envelope.print();
-        cout << endl;
+        cout << "\n";
     }
+
+    cout << endl;
 }
 
 void IsotopicEnvelope::print() {
@@ -65,10 +69,11 @@ void IsotopicEnvelope::print() {
 
     ss << "{";
     for (unsigned int i = 0; i < intensities.size(); i++) {
-        if (i > 0) ss << ",";
+        if (i > 0) ss << ", ";
         ss << intensities.at(i);
     }
-    ss << "}";
+    ss << "}; Total=";
+    ss << getTotalIntensity();
 
     cout << ss.str();
 }
