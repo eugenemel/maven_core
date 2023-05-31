@@ -38,8 +38,10 @@ void IsotopicEnvelopeGroup::print() {
     }
 
     cout << group->compound->name << " "
-         << group->adduct->name << "@ rt="
+         << group->adduct->name << " (m/z, rt) = ("
+         << group->compound->precursorMz << ", "
          << group->medianRt()
+         << ")"
          << endl;
 
     cout << "Isotopes: ";
