@@ -6,6 +6,8 @@
 #include "mzSample.h"
 #include <numeric>
 
+class IsotopicExtractionParameters;
+
 class IsotopeProcessorOptions {
 
 public:
@@ -14,6 +16,8 @@ public:
     void setOptions(string config_file);
 
     void printOptions();
+
+    shared_ptr<IsotopicExtractionParameters> getExtractionParameters();
 
     //fields below this point
     string config_file = "";
@@ -37,6 +41,8 @@ private:
  */
 class IsotopicEnvelope {
 public:
+
+    static IsotopicEnvelope& none();
 
     string source = "unknown";
     double totalIntensity = -1.0;
@@ -81,9 +87,34 @@ public:
 };
 
 
+enum IsotopicExtractionAlgorithm{PEAK_FULL_RT_BOUNDS};
+
+/**
+ * @brief The IsotopicExtractionParameters class
+ * Container class to hold all parameters associated with isotopic extraction.
+ * Distinct from IsotopeProcessorOptions, which is specific to isotopeprocessor.
+ * This set of parameters is also applicable to the MAVEN GUI.
+ */
+class IsotopicExtractionParameters {
+public:
+
+    IsotopicExtractionAlgorithm algorithm = IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS;
+
+    double mzTol = 0.01;
+
+    string encodeParams();
+    static shared_ptr<IsotopicExtractionParameters> decode(string encodedIsotopicExtractionParameters);
+    static string getAlgorithmName(IsotopicExtractionAlgorithm algorithm);
+};
+
 class IsotopicEnvelopeExtractor {
 public:
-    static IsotopicEnvelope extractEnvelope(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, IsotopeProcessorOptions& options);
+
+    //most common entrypoint
+    static IsotopicEnvelope extractEnvelope(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, shared_ptr<IsotopicExtractionParameters> params);
+
+    //usually called from IsotopicEnvelopeExtractor::extractEnvelope()
+    static IsotopicEnvelope extractEnvelopePeakFullRtBounds(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, shared_ptr<IsotopicExtractionParameters> params);
 
 };
 

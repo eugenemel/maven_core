@@ -14,6 +14,14 @@ void IsotopeProcessorOptions::setOptions(string config_file) {
     //TODO: import config file
 }
 
+shared_ptr<IsotopicExtractionParameters> IsotopeProcessorOptions::getExtractionParameters() {
+    shared_ptr<IsotopicExtractionParameters> params = shared_ptr<IsotopicExtractionParameters>(new IsotopicExtractionParameters());
+
+    //TODO: fill in params
+
+    return params;
+}
+
 double IsotopicEnvelope::getTotalIntensity() {
     if (totalIntensity < 0) {
         totalIntensity = std::accumulate(intensities.begin(), intensities.end(), 0.0);
@@ -64,6 +72,12 @@ void IsotopicEnvelopeGroup::print() {
     cout << endl;
 }
 
+IsotopicEnvelope& IsotopicEnvelope::none() {
+    static IsotopicEnvelope none;
+    none.source = "NONE";
+    return none;
+}
+
 void IsotopicEnvelope::print() {
 
     stringstream ss;
@@ -80,14 +94,25 @@ void IsotopicEnvelope::print() {
     cout << ss.str();
 }
 
-IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelope(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, IsotopeProcessorOptions& options){
+string IsotopicExtractionParameters::getAlgorithmName(IsotopicExtractionAlgorithm algorithm) {
+    if (algorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS) {
+        return "peak-full-rt-bounds";
+    }
+    return "unknown";
+}
+
+IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelope(mzSample *sample, Peak *peak, vector<Isotope> &isotopes, shared_ptr<IsotopicExtractionParameters> params) {
+    if (params->algorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS) {
+        return extractEnvelopePeakFullRtBounds(sample, peak, isotopes, params);
+    }
+
+   return IsotopicEnvelope::none();
+}
+
+IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelopePeakFullRtBounds(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, shared_ptr<IsotopicExtractionParameters> params){
 
     IsotopicEnvelope envelope;
-
-    //TODO: think about how to square this away with IsotopeParameters, backwards compatibility.
-
-    envelope.source = "all-bounds"; //should be from options
-    double mzTol = 0.01; // should be from options
+    envelope.source = IsotopicExtractionParameters::getAlgorithmName(params->algorithm);
 
     vector<double> intensities(isotopes.size());
 
@@ -97,8 +122,8 @@ IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelope(mzSample* sample, Pe
             Isotope isotope = isotopes.at(i);
 
             EIC *eic = sample->getEIC(
-                        static_cast<float>(isotope.mz - mzTol),
-                        static_cast<float>(isotope.mz + mzTol),
+                        static_cast<float>(isotope.mz - params->mzTol),
+                        static_cast<float>(isotope.mz + params->mzTol),
                         peak->rtmin,
                         peak->rtmax,
                         1);
