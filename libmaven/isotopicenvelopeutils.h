@@ -87,7 +87,7 @@ public:
 };
 
 
-enum IsotopicExtractionAlgorithm{PEAK_FULL_RT_BOUNDS};
+enum IsotopicExtractionAlgorithm{PEAK_FULL_RT_BOUNDS, PEAK_SHRINKING_RT_BOUNDS};
 
 /**
  * @brief The IsotopicExtractionParameters class
@@ -115,7 +115,7 @@ public:
 
     //usually called from IsotopicEnvelopeExtractor::extractEnvelope()
     static IsotopicEnvelope extractEnvelopePeakFullRtBounds(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, shared_ptr<IsotopicExtractionParameters> params);
-
+    static IsotopicEnvelope extractEnvelopePeakShrinkingRtBounds(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, shared_ptr<IsotopicExtractionParameters> params);
 };
 
 

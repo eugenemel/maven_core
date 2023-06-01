@@ -95,25 +95,32 @@ void IsotopicEnvelope::print() {
 }
 
 string IsotopicExtractionParameters::getAlgorithmName(IsotopicExtractionAlgorithm algorithm) {
+
     if (algorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS) {
         return "peak-full-rt-bounds";
+    } else if (algorithm == IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS) {
+        return "peak-shrinking-rt-bounds";
     }
+
     return "unknown";
 }
 
 IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelope(mzSample *sample, Peak *peak, vector<Isotope> &isotopes, shared_ptr<IsotopicExtractionParameters> params) {
+    IsotopicEnvelope envelope;
+
     if (params->algorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS) {
-        return extractEnvelopePeakFullRtBounds(sample, peak, isotopes, params);
+        envelope = extractEnvelopePeakFullRtBounds(sample, peak, isotopes, params);
+    } else if (params->algorithm == IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS) {
+        envelope = extractEnvelopePeakShrinkingRtBounds(sample, peak, isotopes, params);
     }
 
-   return IsotopicEnvelope::none();
+    envelope.source = IsotopicExtractionParameters::getAlgorithmName(params->algorithm);
+    return envelope;
 }
 
 IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelopePeakFullRtBounds(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, shared_ptr<IsotopicExtractionParameters> params){
 
     IsotopicEnvelope envelope;
-    envelope.source = IsotopicExtractionParameters::getAlgorithmName(params->algorithm);
-
     vector<double> intensities(isotopes.size());
 
     if (peak) {
@@ -135,6 +142,14 @@ IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelopePeakFullRtBounds(mzSa
        envelope.getTotalIntensity();
 
     }
+
+    return envelope;
+}
+
+IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelopePeakShrinkingRtBounds(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, shared_ptr<IsotopicExtractionParameters> params){
+    IsotopicEnvelope envelope;
+
+    //TODO
 
     return envelope;
 }
