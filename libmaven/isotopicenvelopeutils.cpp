@@ -84,6 +84,8 @@ IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelope(mzSample* sample, Pe
 
     IsotopicEnvelope envelope;
 
+    //TODO: think about how to square this away with IsotopeParameters, backwards compatibility.
+
     envelope.source = "all-bounds"; //should be from options
     double mzTol = 0.01; // should be from options
 
