@@ -79,3 +79,35 @@ void IsotopicEnvelope::print() {
 
     cout << ss.str();
 }
+
+IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelope(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, IsotopeProcessorOptions& options){
+
+    IsotopicEnvelope envelope;
+
+    envelope.source = "all-bounds"; //should be from options
+    double mzTol = 0.01; // should be from options
+
+    vector<double> intensities(isotopes.size());
+
+    if (peak) {
+        for (unsigned int i = 0; i < isotopes.size(); i++) {
+
+            Isotope isotope = isotopes.at(i);
+
+            EIC *eic = sample->getEIC(
+                        static_cast<float>(isotope.mz - mzTol),
+                        static_cast<float>(isotope.mz + mzTol),
+                        peak->rtmin,
+                        peak->rtmax,
+                        1);
+
+            intensities.at(i) = std::accumulate(eic->intensity.begin(), eic->intensity.end(), 0.0);
+        }
+
+       envelope.intensities = intensities;
+       envelope.getTotalIntensity();
+
+    }
+
+    return envelope;
+}

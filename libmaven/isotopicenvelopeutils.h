@@ -80,4 +80,12 @@ public:
     void print();
 };
 
+
+class IsotopicEnvelopeExtractor {
+public:
+    static IsotopicEnvelope extractEnvelope(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, IsotopeProcessorOptions& options);
+
+};
+
+
 #endif // ISOTOPICENVELOPEUTILS_H
