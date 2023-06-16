@@ -1191,14 +1191,26 @@ string PeakGroup::getPeakGroupLabel() {
  * pullIsotopes(), refactoring to PeakGroup-specific method
  *
  * Issue 615: Add option to retain empty isotopes, use for bookmarking
+ *
+ * Issue 654: Add debug flag
  */
-void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmptyIsotopes) {
+void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmptyIsotopes, bool debug) {
 
     if (_type == PeakGroup::SRMTransitionType) return; //isotopes are not available for SRM types
     if (!isotopeParameters.isIsotopes()) return;
-    if (!compound) return;
-    if (compound->formula.empty()) return;
-    if (peakCount() == 0) return;
+    if (!compound){
+        if (debug) cout << "PeakGroup::pullIsotopes(): no compound associated with peakgroup." << endl;
+        return;
+    }
+    if (compound->formula.empty()){
+        if (debug) cout << "PeakGroup::pullIsotopes(): no formula associated with peakgroup compound." << endl;
+        return;
+    }
+
+    if (peakCount() == 0){
+        if (debug) cout << "PeakGroup::pullIsotopes(): no peaks." << endl;
+        return;
+    }
 
     Adduct *groupAdduct = nullptr;
 
@@ -1208,7 +1220,10 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmp
         groupAdduct = adduct;
     }
 
-    if (!groupAdduct) return;
+    if (!groupAdduct){
+        if (debug) cout << "Peakgroup::pullIsotopes(): no adduct." << endl;
+        return;
+    }
 
     map<mzSample*, double, mzSample_name_less> sampleToPeakMz{};
     for (Peak& p : peaks) {
@@ -1229,6 +1244,14 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmp
                 isotopeParameters.isN15Labeled,
                 isotopeParameters.isS34Labeled,
                 isotopeParameters.isD2Labeled);
+
+    if (debug) {
+        cout << "Peakgroup::pullIsotopes(): # protons="
+             << maxNumProtons
+             << ", #isotopes="
+             << massList.size()
+             << endl;
+    }
 
     //sort by increasing m/z to number appropriately
     sort(massList.begin(), massList.end(), [](Isotope& lhs, Isotope& rhs){
@@ -1307,10 +1330,13 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmp
                 float observedAbundance = isotopePeakIntensity/(parentPeakIntensity+isotopePeakIntensity);
                 float naturalAbundanceError = abs(observedAbundance-expectedAbundance)/expectedAbundance*100.0f;
 
-                cerr << isotopeName << ": "
-                     << "Expected abundance= " << expectedAbundance << " "
-                     << "Observed abundance= " << observedAbundance << " "
-                     << "Error= "     << naturalAbundanceError << endl;
+                if (debug) {
+                    cout << sample->sampleName << ", "
+                         << isotopeName << ": "
+                         << "Expected abundance= " << expectedAbundance << " "
+                         << "Observed abundance= " << observedAbundance << " "
+                         << "Error= "     << naturalAbundanceError << endl;
+                }
 
                 //C12 parent peak is always OK, cannot be disqualified on account of observed/expected abundance issues
                 if (naturalAbundanceError > static_cast<float>(isotopeParameters.maxNaturalAbundanceErr) && !isotope.isParent())  continue;
@@ -1323,7 +1349,7 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmp
 
             double c = static_cast<double>(sample->correlation(isotopeMass, static_cast<float>(corrMz), isotopeParameters.ppm, rtmin-w,rtmax+w, false));
 
-            if (c < isotopeParameters.minIsotopicCorrelation)  continue;
+            if (c < isotopeParameters.minIsotopicCorrelation) continue;
 
             //cerr << "pullIsotopes: " << isotopeMass << " " << rtmin-w << " " <<  rtmin+w << " c=" << c << endl;
 
@@ -1375,6 +1401,10 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmp
         }
     }
 
+    if (debug) {
+        cout << "Peakgroup::pullIsotopes(): Completed extraction of isotopes." << endl;
+    }
+
     children.clear();
     for(itr2 = isotopes.begin(); itr2 != isotopes.end(); itr2++ ) {
         string isotopeName = (*itr2).first;
@@ -1396,5 +1426,11 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmp
             child.groupStatistics();
         }
         addChild(child);
+    }
+
+    if (debug) {
+        cout << "Peakgroup::pullIsotopes(): # isotope children="
+             << children.size()
+             << endl;
     }
 }

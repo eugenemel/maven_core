@@ -1135,7 +1135,7 @@ class PeakGroup {
 
         //Issue 371: refactor to dedicated method
         //Issue 615: Option to create empty Isotopic Peak Groups
-        void pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmptyIsotopes=false);
+        void pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmptyIsotopes=false, bool debug=false);
 
         bool isGroupGood();
         bool isGroupBad();
