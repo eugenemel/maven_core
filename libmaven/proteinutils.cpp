@@ -53,7 +53,7 @@ vector<Protein*> Protein::loadFastaFile(string filename) {
 }
 
 void Protein::printSummary() {
-    cout << header << " [MW: " << mw << " Da]" << endl;
+    cout << header << " [len: " << seq.size() << " AA, MW: " << mw << " Da]" << endl;
 }
 
 void Protein::writeFastaFile(vector<Protein *> proteins) {
