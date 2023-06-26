@@ -68,7 +68,7 @@ string ProteinFragment::getHeader() {
     stringstream s;
     s << std::fixed << setprecision(3)
       << protein->header
-      << "["
+      << " FRAGMENT["
       << "seq: " << (start+1) << " - " << (end+1)
       << ", deltaMz: " << deltaMw << " Da"
       << "]";
