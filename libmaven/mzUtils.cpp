@@ -589,14 +589,14 @@ tuple<double, double, string> parseMspFragLine(string line){
     double fragIntensity(-1);
 
     if (isHasNonWhiteSpace && space1 != -1) { //avoid exception on bad formatting
-        fragMz = stod(line.substr(0, static_cast<unsigned long>(space1)));
+        fragMz = stod(line.substr(0, static_cast<string::size_type>(space1)));
 
         if (space2 == -1) {
             //no label
-            fragIntensity = stod(line.substr(static_cast<unsigned long>(space1+1), (line.size()-static_cast<unsigned long>(space1))));
+            fragIntensity = stod(line.substr(static_cast<string::size_type>(space1+1), (line.size()-static_cast<string::size_type>(space1))));
         } else {
-            fragIntensity = stod(line.substr(static_cast<unsigned long>(space1+1), static_cast<unsigned long>(space2-space1)));
-            fragLabel = line.substr(static_cast<unsigned long>(space2+1), (line.size()-static_cast<unsigned long>(space2)));
+            fragIntensity = stod(line.substr(static_cast<string::size_type>(space1+1), static_cast<string::size_type>(space2-space1)));
+            fragLabel = line.substr(static_cast<string::size_type>(space2+1), (line.size()-static_cast<string::size_type>(space2)));
         }
     } else {
         //cerr << "Fragment label \"" << line << "\"" << " could not be parsed! Returning (0, 0, \"\")" << endl;
@@ -1196,15 +1196,15 @@ unordered_map<string, string> decodeParameterMap(string encodedParams, string de
         encodedParams.erase(encodedParams.size()-1);
     }
 
-    unsigned long posPrevious = 0;
-    unsigned long posCurrent = 0;
+    string::size_type posPrevious = 0;
+    string::size_type posCurrent = 0;
 
     while ((posCurrent = encodedParams.find(delimiter, posPrevious)) != string::npos) {
 
         string encodedParam = encodedParams.substr(posPrevious, posCurrent-posPrevious);
         posPrevious = posCurrent + delimiter.length();
 
-        unsigned long equalCoord = encodedParam.find("=");
+        string::size_type equalCoord = encodedParam.find("=");
 
         string paramKey = encodedParam.substr(0, equalCoord);
         string paramVal = encodedParam.substr(equalCoord + 1, encodedParam.size());
@@ -1229,8 +1229,8 @@ vector<string> decodeParameterVector(string encodedParams, string delimiter) {
         encodedParams.erase(encodedParams.size()-1);
     }
 
-    unsigned long posPrevious = 0;
-    unsigned long posCurrent = 0;
+    string::size_type posPrevious = 0;
+    string::size_type posCurrent = 0;
 
     while ((posCurrent = encodedParams.find(delimiter, posPrevious)) != string::npos) {
 
