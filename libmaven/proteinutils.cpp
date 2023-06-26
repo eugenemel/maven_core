@@ -70,7 +70,9 @@ string ProteinFragment::getHeader() {
       << protein->header
       << " FRAGMENT["
       << "seq: " << (start+1) << " - " << (end+1)
-      << ", deltaMz: " << deltaMw << " Da"
+      << ", theo mw:" << theoreticalMw << " Da"
+      << ", observed mw: " << observedMw << " Da"
+      << ", delta mw: " << deltaMw << " Da"
       << "]";
     return s.str();
 }
