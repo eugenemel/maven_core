@@ -56,6 +56,6 @@ void Protein::printSummary() {
     cout << header << " [length: " << seq.size() << " AA, MW: " << mw << " Da]" << endl;
 }
 
-void Protein::writeFastaFile(vector<Protein *> proteins) {
+void Protein::writeFastaFile(vector<Protein *> proteins, string outputFile) {
     //TODO
 }
