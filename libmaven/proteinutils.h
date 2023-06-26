@@ -27,7 +27,17 @@ static map<char, double> aaMasses = {
     {'U', 150.95363},
 };
 
-class Protein {
+class FastaWritable {
+public:
+    virtual string getHeader() const = 0;
+    virtual string getSequence() const = 0;
+
+    virtual ~FastaWritable() = 0;
+
+    static void writeFastaFile(vector<FastaWritable*>, string outputFile, unsigned int seqLineMax = 87);
+};
+
+class Protein : public FastaWritable{
 public:
         string header;
         string seq;
@@ -38,10 +48,13 @@ public:
         static vector<Protein*> loadFastaFile(string fastaFile);
         static void writeFastaFile(vector<Protein*> proteins, string outputFile);
         void printSummary();
+
+        string getHeader() const {return header;}
+        string getSequence() const {return seq;}
 };
 
 //Use composition instead of inheritance here
-class ProteinFragment {
+class ProteinFragment : public FastaWritable {
 public:
     Protein *protein;
     unsigned long start; // 0-indexed
@@ -54,8 +67,8 @@ public:
 
     double deltaMw;
 
-    string getHeader();
-    string getSequence();
+    string getHeader() const;
+    string getSequence() const;
 };
 
 #endif // PROTEINUTILS_H

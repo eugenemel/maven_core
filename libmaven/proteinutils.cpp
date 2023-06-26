@@ -56,15 +56,40 @@ void Protein::printSummary() {
     cout << header << " [length: " << seq.size() << " AA, MW: " << mw << " Da]" << endl;
 }
 
-void Protein::writeFastaFile(vector<Protein *> proteins, string outputFile) {
-    //TODO
+//TODO: need to test this out
+void FastaWritable::writeFastaFile(vector<FastaWritable*> entries, string outputFile, unsigned int seqLineMax) {
+    ofstream outputFileStream;
+    outputFileStream.open(outputFile);
+
+    for (FastaWritable *entry : entries) {
+        outputFileStream << ">" << entry->getHeader() << "\n";
+
+        string::size_type N = entry->getSequence().size();
+        string::size_type currentPos = 0;
+        while (currentPos != string::npos) {
+
+            if (currentPos+seqLineMax < N) {
+
+                outputFileStream << entry->getSequence().substr(currentPos, currentPos+seqLineMax)
+                                 << "\n";
+
+                currentPos = currentPos + seqLineMax + 1;
+            } else {
+                string::size_type remainder = N-currentPos;
+                outputFileStream << entry->getSequence().substr(currentPos, remainder);
+                break;
+            }
+        }
+    }
+
+    outputFileStream.close();
 }
 
-string ProteinFragment::getSequence() {
+string ProteinFragment::getSequence() const {
     return protein->seq.substr(start, end);
 }
 
-string ProteinFragment::getHeader() {
+string ProteinFragment::getHeader() const {
     stringstream s;
     s << std::fixed << setprecision(3)
       << protein->header
