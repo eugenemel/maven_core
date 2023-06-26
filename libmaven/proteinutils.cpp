@@ -37,7 +37,7 @@ vector<Protein*> Protein::loadFastaFile(string filename) {
                 proteins.push_back( new Protein(header,sequence));
             }
 
-            header = line;
+            header = line.substr(1); // remove starting '>' character
             sequence=string();
         } else {
             sequence += line;
