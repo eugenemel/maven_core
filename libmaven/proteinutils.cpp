@@ -3,6 +3,18 @@
 Protein::Protein(string header, string seq){
     this->header = header;
     this->seq = seq;
+
+    double mw = 0.0;
+
+    for (char aa : seq) {
+
+        //ignore any weird characters in the sequence, e.g. 'X' or 'N'.
+        if (aaMasses.find(aa) != aaMasses.end()) {
+            mw += aaMasses[aa];
+        }
+    }
+
+    this->mw = mw;
 }
 
 vector<Protein*> Protein::loadFastaFile(string filename) {
@@ -38,6 +50,10 @@ vector<Protein*> Protein::loadFastaFile(string filename) {
     }
 
     return proteins;
+}
+
+void Protein::printSummary() {
+    cout << header << "(MW: " << mw << "Da )" << endl;
 }
 
 void Protein::writeFastaFile(vector<Protein *> proteins) {
