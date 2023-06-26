@@ -40,4 +40,22 @@ public:
         void printSummary();
 };
 
+//Use composition instead of inheritance here
+class ProteinFragment {
+public:
+    Protein *protein;
+    unsigned long start; // 0-indexed
+    unsigned long end; // 0-indexed
+
+    double theoreticalMw;
+    double observedMw;
+
+    ProteinFragment(Protein* protein, double theoreticalMw, double observedMw, unsigned long start, unsigned long end);
+
+    double deltaMw;
+
+    string getHeader();
+    string getSequence();
+};
+
 #endif // PROTEINUTILS_H

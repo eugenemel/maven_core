@@ -59,3 +59,27 @@ void Protein::printSummary() {
 void Protein::writeFastaFile(vector<Protein *> proteins, string outputFile) {
     //TODO
 }
+
+string ProteinFragment::getSequence() {
+    return protein->seq.substr(start, end);
+}
+
+string ProteinFragment::getHeader() {
+    stringstream s;
+    s << std::fixed << setprecision(3)
+      << protein->header
+      << "["
+      << "seq: " << (start+1) << " - " << (end+1)
+      << ", deltaMz: " << deltaMw << " Da"
+      << "]";
+    return s.str();
+}
+
+ProteinFragment::ProteinFragment(Protein* protein, double theoreticalMw, double observedMw, unsigned long start, unsigned long end){
+    this->protein = protein;
+    this->theoreticalMw = theoreticalMw;
+    this->observedMw = observedMw;
+    this->start = start;
+    this->end = end;
+    this->deltaMw = abs(theoreticalMw-observedMw);
+}
