@@ -36,7 +36,7 @@ public:
         Protein(string header, string seq);
 
         static vector<Protein*> loadFastaFile(string fastaFile);
-        void writeFastaFile(vector<Protein*> proteins);
+        static void writeFastaFile(vector<Protein*> proteins, string outputFile);
         void printSummary();
 };
 
