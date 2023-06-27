@@ -111,5 +111,6 @@ ProteinFragment::ProteinFragment(Protein* protein, double theoreticalMw, double 
     this->deltaMw = abs(theoreticalMw-observedMw);
 }
 
+FastaWritable::~FastaWritable(){}
 Protein::~Protein(){}
 ProteinFragment::~ProteinFragment(){}
