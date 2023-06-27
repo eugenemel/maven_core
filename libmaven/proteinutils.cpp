@@ -18,6 +18,91 @@ void Protein::printSummary() {
     cout << header << " [length: " << seq.size() << " AA, MW: " << mw << " Da]" << endl;
 }
 
+/**
+ * @brief Protein::fragmentProtein
+ *
+ * Progressively examine the pieces of a protein made by cutting at two places,
+ * 'cut1', from the C terminus, and 'cut2', from the N terminus.
+ *
+ *
+ *       M1     M2   M3
+ *  N ------|------|------------ C
+ *          cut1   cut2
+ *
+ * Return sorted vector of ProteinFragment*, in order by observed mass, then descending on
+ * delta in mw from theoretical to observed.
+ *
+ * @param fragMasses
+ * @param tolerance
+ * @param debug
+ * @return
+ */
+vector<ProteinFragment*> Protein::fragmentProtein(vector<double>& fragMasses, double tolerance, bool debug) {
+
+    sort(fragMasses.begin(), fragMasses.end(), [](const double& lhs, const double& rhs){
+        return lhs < rhs;
+    });
+
+    //initialize output
+    vector<ProteinFragment*> fragmentProteins{};
+
+    //initial state
+    double m1 = 0.0;
+    double m2 = this->mw;
+    double m2Cut2 = m2;
+    double m3 = 0.0;
+
+    for (unsigned long i = 0; i < this->seq.length(); i++) {
+
+        //update temp variables in preparation for iteration
+        m2Cut2 = m2;
+
+        for (unsigned long j = this->seq.length()-1; j > i; j--) {
+
+            //second cut affects m2 and m3 values
+            m2Cut2 -= aaMasses.at(this->seq[j]);
+            m3 += aaMasses.at(this->seq[j]);
+
+            for (double mass : fragMasses) {
+
+                if (abs(m1-mass) < tolerance && i == 0) {
+                    ProteinFragment *fragment = new ProteinFragment(this, mass, m1, 0, (i-1));
+                    fragmentProteins.push_back(fragment);
+                    if (debug) cout << "(" << (i-1) << ", " << 0 << "): mass=" << mass << ", M1=" << m1 << "Da, delta=" << abs(m1-mass) << endl;
+                }
+
+                if (abs(m2Cut2-mass) < tolerance) {
+                    ProteinFragment *fragment = new ProteinFragment(this, mass, m2Cut2, i, (j-1));
+                    fragmentProteins.push_back(fragment);
+                    if (debug) cout << "(" << i << ", " << (j-1) << "): mass="<< mass << ", M2=" << m2Cut2 << " Da, delta=" << abs(m2Cut2-mass) << endl;
+                }
+
+                if (abs(m3-mass) < tolerance && i == 0) {
+                    ProteinFragment *fragment = new ProteinFragment(this, mass, m3, j, this->seq.length()-1);
+                    fragmentProteins.push_back(fragment);
+                    if (debug) cout << "(" << i << ", " << (this->seq.length()-1) << "): mass="<< mass << ", M3=" << m3 << " Da, delta=" << abs(m3-mass) << endl;
+                }
+            }
+        }
+
+        //first cut affects m1 and m2 values
+        m1 += aaMasses.at(this->seq[i]);
+        m2 -= aaMasses.at(this->seq[i]);
+        m3 = 0.0;
+    }
+
+    sort(fragmentProteins.begin(), fragmentProteins.end(), [](ProteinFragment* lhs, ProteinFragment* rhs){
+        if (lhs->theoreticalMw == rhs->theoreticalMw) {
+            return lhs->deltaMw < rhs->deltaMw;
+        } else {
+            return lhs->theoreticalMw < rhs->theoreticalMw;
+        }
+    });
+
+    return fragmentProteins;
+
+}
+
 Protein::~Protein(){}
 
 /**

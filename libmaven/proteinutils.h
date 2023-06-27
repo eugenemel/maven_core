@@ -48,7 +48,7 @@ public:
         Protein(string header, string seq);
 
         void printSummary();
-        //vector<ProteinFragment*> fragmentProtein(vector<double>& fragMasses, double tolerance, bool debug);
+        vector<ProteinFragment*> fragmentProtein(vector<double>& fragMasses, double tolerance, bool debug);
 
         string getHeader() const {return header;}
         string getSequence() const {return seq;}
