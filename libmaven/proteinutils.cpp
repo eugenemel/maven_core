@@ -66,11 +66,12 @@ void FastaWritable::writeFastaFile(vector<FastaWritable*> entries, string output
 
         string::size_type N = entry->getSequence().size();
         string::size_type currentPos = 0;
+
         while (currentPos != string::npos) {
 
             if (currentPos+seqLineMax < N) {
 
-                outputFileStream << entry->getSequence().substr(currentPos, currentPos+seqLineMax)
+                outputFileStream << entry->getSequence().substr(currentPos, seqLineMax)
                                  << "\n";
 
                 currentPos = currentPos + seqLineMax + 1;
@@ -88,7 +89,7 @@ void FastaWritable::writeFastaFile(vector<FastaWritable*> entries, string output
 }
 
 string ProteinFragment::getSequence() const {
-    return protein->seq.substr(start, end);
+    return protein->seq.substr(start, (end-start+1));
 }
 
 string ProteinFragment::getHeader() const {
