@@ -158,6 +158,9 @@ double ProteinUtils::getProteinMass(string seq) {
         }
     }
 
+    //add water
+    proteinMass += 18.0105; // adds to the C terminus end
+
     return proteinMass;
 }
 
