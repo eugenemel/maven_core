@@ -74,7 +74,7 @@ void FastaWritable::writeFastaFile(vector<FastaWritable*> entries, string output
                 outputFileStream << entry->getSequence().substr(currentPos, seqLineMax)
                                  << "\n";
 
-                currentPos = currentPos + seqLineMax + 1;
+                currentPos = currentPos + seqLineMax;
             } else {
                 string::size_type remainder = N-currentPos;
                 outputFileStream << entry->getSequence().substr(currentPos, remainder) << "\n";
