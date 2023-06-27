@@ -46,7 +46,6 @@ public:
         Protein(string header, string seq);
 
         static vector<Protein*> loadFastaFile(string fastaFile);
-        static void writeFastaFile(vector<Protein*> proteins, string outputFile);
         void printSummary();
 
         string getHeader() const {return header;}
