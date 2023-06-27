@@ -51,6 +51,9 @@ public:
 
         string getHeader() const {return header;}
         string getSequence() const {return seq;}
+
+        ~Protein();
+
 };
 
 //Use composition instead of inheritance here
@@ -69,6 +72,8 @@ public:
 
     string getHeader() const;
     string getSequence() const;
+
+    ~ProteinFragment();
 };
 
 #endif // PROTEINUTILS_H

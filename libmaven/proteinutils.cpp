@@ -110,3 +110,6 @@ ProteinFragment::ProteinFragment(Protein* protein, double theoreticalMw, double 
     this->end = end;
     this->deltaMw = abs(theoreticalMw-observedMw);
 }
+
+Protein::~Protein(){}
+ProteinFragment::~ProteinFragment(){}
