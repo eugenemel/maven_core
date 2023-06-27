@@ -27,14 +27,16 @@ static map<char, double> aaMasses = {
     {'U', 150.95363},
 };
 
+class FastaWritable;
+class Protein;
+class ProteinFragment;
+
 class FastaWritable {
 public:
     virtual string getHeader() const = 0;
     virtual string getSequence() const = 0;
 
     virtual ~FastaWritable() = 0;
-
-    static void writeFastaFile(vector<FastaWritable*>, string outputFile, unsigned int seqLineMax = 87);
 };
 
 class Protein : public FastaWritable{
@@ -46,6 +48,7 @@ public:
         Protein(string header, string seq);
 
         void printSummary();
+        //vector<ProteinFragment*> fragmentProtein(vector<double>& fragMasses, double tolerance, bool debug);
 
         string getHeader() const {return header;}
         string getSequence() const {return seq;}

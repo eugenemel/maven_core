@@ -1,10 +1,79 @@
 #include "proteinutils.h"
 
+FastaWritable::~FastaWritable(){}
+
+/**
+ * @brief Protein::Protein constructor
+ * @param header
+ * @param seq
+ */
 Protein::Protein(string header, string seq){
     this->header = header;
     this->seq = seq;
 
     this->mw = ProteinUtils::getProteinMass(seq);
+}
+
+void Protein::printSummary() {
+    cout << header << " [length: " << seq.size() << " AA, MW: " << mw << " Da]" << endl;
+}
+
+Protein::~Protein(){}
+
+/**
+ * @brief ProteinFragment::ProteinFragment constructor
+ * @param protein
+ * @param theoreticalMw
+ * @param observedMw
+ * @param start
+ * @param end
+ */
+ProteinFragment::ProteinFragment(Protein* protein, double theoreticalMw, double observedMw, unsigned long start, unsigned long end){
+    this->protein = protein;
+    this->theoreticalMw = theoreticalMw;
+    this->observedMw = observedMw;
+    this->start = start;
+    this->end = end;
+    this->deltaMw = abs(theoreticalMw-observedMw);
+}
+
+string ProteinFragment::getSequence() const {
+    return protein->seq.substr(start, (end-start+1));
+}
+
+string ProteinFragment::getHeader() const {
+    stringstream s;
+    s << std::fixed << setprecision(3)
+      << protein->header
+      << " FRAGMENT ["
+      << "seq: " << (start+1) << " - " << (end+1)
+      << ", theo mw: " << theoreticalMw << " Da"
+      << ", observed mw: " << observedMw << " Da"
+      << ", delta mw: " << deltaMw << " Da"
+      << "]";
+    return s.str();
+}
+
+ProteinFragment::~ProteinFragment(){}
+
+/**
+ * @brief ProteinUtils
+ *
+ * all static methods
+ */
+
+double ProteinUtils::getProteinMass(string seq) {
+    double proteinMass = 0.0;
+
+    for (char aa : seq) {
+
+        //silently ignore any weird characters in the sequence, e.g. 'X' or 'N'.
+        if (aaMasses.find(aa) != aaMasses.end()) {
+            proteinMass += aaMasses[aa];
+        }
+    }
+
+    return proteinMass;
 }
 
 vector<Protein*> ProteinUtils::loadFastaFile(string filename) {
@@ -42,10 +111,6 @@ vector<Protein*> ProteinUtils::loadFastaFile(string filename) {
     return proteins;
 }
 
-void Protein::printSummary() {
-    cout << header << " [length: " << seq.size() << " AA, MW: " << mw << " Da]" << endl;
-}
-
 void ProteinUtils::writeFastaFile(vector<FastaWritable*> entries, string outputFile, unsigned int seqLineMax) {
     ofstream outputFileStream;
     outputFileStream.open(outputFile);
@@ -75,48 +140,4 @@ void ProteinUtils::writeFastaFile(vector<FastaWritable*> entries, string outputF
     }
 
     outputFileStream.close();
-}
-
-string ProteinFragment::getSequence() const {
-    return protein->seq.substr(start, (end-start+1));
-}
-
-string ProteinFragment::getHeader() const {
-    stringstream s;
-    s << std::fixed << setprecision(3)
-      << protein->header
-      << " FRAGMENT ["
-      << "seq: " << (start+1) << " - " << (end+1)
-      << ", theo mw: " << theoreticalMw << " Da"
-      << ", observed mw: " << observedMw << " Da"
-      << ", delta mw: " << deltaMw << " Da"
-      << "]";
-    return s.str();
-}
-
-ProteinFragment::ProteinFragment(Protein* protein, double theoreticalMw, double observedMw, unsigned long start, unsigned long end){
-    this->protein = protein;
-    this->theoreticalMw = theoreticalMw;
-    this->observedMw = observedMw;
-    this->start = start;
-    this->end = end;
-    this->deltaMw = abs(theoreticalMw-observedMw);
-}
-
-FastaWritable::~FastaWritable(){}
-Protein::~Protein(){}
-ProteinFragment::~ProteinFragment(){}
-
-double ProteinUtils::getProteinMass(string seq) {
-    double proteinMass = 0.0;
-
-    for (char aa : seq) {
-
-        //silently ignore any weird characters in the sequence, e.g. 'X' or 'N'.
-        if (aaMasses.find(aa) != aaMasses.end()) {
-            proteinMass += aaMasses[aa];
-        }
-    }
-
-    return proteinMass;
 }
