@@ -7,7 +7,7 @@ Protein::Protein(string header, string seq){
     this->mw = ProteinUtils::getProteinMass(seq);
 }
 
-vector<Protein*> Protein::loadFastaFile(string filename) {
+vector<Protein*> ProteinUtils::loadFastaFile(string filename) {
 
     vector<Protein*> proteins{};
 

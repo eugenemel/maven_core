@@ -45,7 +45,6 @@ public:
 
         Protein(string header, string seq);
 
-        static vector<Protein*> loadFastaFile(string fastaFile);
         void printSummary();
 
         string getHeader() const {return header;}
@@ -79,6 +78,7 @@ class ProteinUtils {
 public:
     static double getProteinMass(string seq);
     static void writeFastaFile(vector<FastaWritable*>, string outputFile, unsigned int seqLineMax = 87);
+    static vector<Protein*> loadFastaFile(string fastaFile);
 };
 
 #endif // PROTEINUTILS_H
