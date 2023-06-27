@@ -93,9 +93,9 @@ string ProteinFragment::getHeader() const {
     stringstream s;
     s << std::fixed << setprecision(3)
       << protein->header
-      << " FRAGMENT["
+      << " FRAGMENT ["
       << "seq: " << (start+1) << " - " << (end+1)
-      << ", theo mw:" << theoreticalMw << " Da"
+      << ", theo mw: " << theoreticalMw << " Da"
       << ", observed mw: " << observedMw << " Da"
       << ", delta mw: " << deltaMw << " Da"
       << "]";
