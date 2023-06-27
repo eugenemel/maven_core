@@ -75,4 +75,10 @@ public:
     ~ProteinFragment();
 };
 
+class ProteinUtils {
+public:
+    static double getProteinMass(string seq);
+    static void writeFastaFile(vector<FastaWritable*>, string outputFile, unsigned int seqLineMax = 87);
+};
+
 #endif // PROTEINUTILS_H

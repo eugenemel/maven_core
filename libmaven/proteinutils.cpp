@@ -4,17 +4,7 @@ Protein::Protein(string header, string seq){
     this->header = header;
     this->seq = seq;
 
-    double mw = 0.0;
-
-    for (char aa : seq) {
-
-        //ignore any weird characters in the sequence, e.g. 'X' or 'N'.
-        if (aaMasses.find(aa) != aaMasses.end()) {
-            mw += aaMasses[aa];
-        }
-    }
-
-    this->mw = mw;
+    this->mw = ProteinUtils::getProteinMass(seq);
 }
 
 vector<Protein*> Protein::loadFastaFile(string filename) {
@@ -56,8 +46,7 @@ void Protein::printSummary() {
     cout << header << " [length: " << seq.size() << " AA, MW: " << mw << " Da]" << endl;
 }
 
-//TODO: need to test this out
-void FastaWritable::writeFastaFile(vector<FastaWritable*> entries, string outputFile, unsigned int seqLineMax) {
+void ProteinUtils::writeFastaFile(vector<FastaWritable*> entries, string outputFile, unsigned int seqLineMax) {
     ofstream outputFileStream;
     outputFileStream.open(outputFile);
 
@@ -117,3 +106,17 @@ ProteinFragment::ProteinFragment(Protein* protein, double theoreticalMw, double 
 FastaWritable::~FastaWritable(){}
 Protein::~Protein(){}
 ProteinFragment::~ProteinFragment(){}
+
+double ProteinUtils::getProteinMass(string seq) {
+    double proteinMass = 0.0;
+
+    for (char aa : seq) {
+
+        //silently ignore any weird characters in the sequence, e.g. 'X' or 'N'.
+        if (aaMasses.find(aa) != aaMasses.end()) {
+            proteinMass += aaMasses[aa];
+        }
+    }
+
+    return proteinMass;
+}
