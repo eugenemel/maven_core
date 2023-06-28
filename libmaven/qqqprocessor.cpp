@@ -30,7 +30,7 @@ vector<SRMTransition*> QQQProcessor::getSRMTransitions(
     float amuQ3 = params->amuQ3;
 
     //Issue 563: SRM transitions now include a transition ID string to distinguish data
-    map<tuple<float, float, string>, SRMTransition*> srmTransitions{};
+    map<tuple<long, long, string>, SRMTransition*> srmTransitions{};
 
     for(unsigned int i=0; i < samples.size(); i++ ) {
         mzSample* sample = samples[i];
@@ -103,7 +103,10 @@ vector<SRMTransition*> QQQProcessor::getSRMTransitions(
             // Issue 578: silently ignore any SRM scans where the precursorMz, productMz are invalid.
             if (precursorMz <= 0 || productMz <= 0) continue;
 
-            tuple<float, float, string> srmKey = make_tuple(precursorMz, productMz, transitionName);
+            tuple<long, long, string> srmKey = make_tuple(
+                        mzUtils::mzToIntKey(static_cast<double>(precursorMz)),
+                        mzUtils::mzToIntKey(static_cast<double>(productMz)),
+                        transitionName);
 
             SRMTransition *srmTransition;
             if (srmTransitions.find(srmKey) != srmTransitions.end()) {
