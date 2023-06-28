@@ -9,7 +9,6 @@ vector<SRMTransition*> QQQProcessor::getSRMTransitions(
         vector<Adduct*>& adducts,
         bool debug) {
 
-    set<string> srms;
     //+118.001@cid34.00 [57.500-58.500]
     //+ c ESI SRM ms2 102.000@cid19.00 [57.500-58.500]
     //-87.000 [42.500-43.500]
@@ -34,6 +33,12 @@ vector<SRMTransition*> QQQProcessor::getSRMTransitions(
 
     for(unsigned int i=0; i < samples.size(); i++ ) {
         mzSample* sample = samples[i];
+
+        //Issue 658: Within a sample, only need to detect a single SRM ID string.
+        //However, this should not be used across samples, as samples in different
+        //plates may have identical SRM ID strings.
+        set<string> srms{};
+
         for(unsigned int j=0; j < sample->scans.size(); j++ ) {
             Scan* scan = sample->getScan(j);
             if (!scan) continue;
