@@ -592,7 +592,7 @@ public:
     static mzSlice getMinMaxDimentions(const vector<mzSample*>& samples);
 
     //Issue 659: utility for use in test context.
-    vector<mzSample*> getSamples(string sampleDir, bool isQQQSample);
+    static vector<mzSample*> getSamples(string sampleDir, bool isQQQSample);
 
     static void setFilter_minIntensity(int x ) { filter_minIntensity=x; }
     static void setFilter_centroidScans( bool x) { filter_centroidScans=x; }
