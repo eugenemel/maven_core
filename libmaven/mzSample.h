@@ -507,7 +507,6 @@ public:
     float getAverageFullScanTime();			// average time difference between scans
     void enumerateSRMScans();			//srm->scan mapping for QQQ
 
-
     float correlation(float mz1,  float mz2, float ppm, float rt1, float rt2, bool debug=false); //correlation in EIC space
     float getNormalizationConstant() { return _normalizationConstant; }
     void  setNormalizationConstant(float x) { _normalizationConstant = x; }
@@ -592,6 +591,8 @@ public:
     static bool compSampleName(const mzSample* a, const mzSample* b ) { return a->sampleName < b->sampleName; }
     static mzSlice getMinMaxDimentions(const vector<mzSample*>& samples);
 
+    //Issue 659: utility for use in test context.
+    vector<mzSample*> getSamples(string sampleDir, bool isQQQSample);
 
     static void setFilter_minIntensity(int x ) { filter_minIntensity=x; }
     static void setFilter_centroidScans( bool x) { filter_centroidScans=x; }

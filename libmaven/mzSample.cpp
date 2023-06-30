@@ -3590,3 +3590,34 @@ void PeakPickingAndGroupingParameters::fillInPeakParameters(unordered_map<string
         filterMinPrecursorCharge = stoi(decodedMap["filterMinPrecursorCharge"]);
     }
 }
+
+//Issue 659: utility function used in test methods.
+vector<mzSample*> mzSample::getSamples(string sampleDir, bool isQQQSample) {
+
+    vector<mzSample*> samples{};
+
+    vector<string> dirFileNames = mzUtils::getMzSampleFilesFromDirectory(sampleDir.c_str());
+    for (auto dirFileName : dirFileNames) {
+        mzSample* sample = new mzSample();
+        sample->loadSample(dirFileName.c_str());
+        if (isQQQSample) {
+            sample->enumerateSRMScans();
+        }
+        samples.push_back(sample);
+    }
+
+    //sort using name
+    //TODO: strnatcmp
+    sort(samples.begin(), samples.end(), [](const mzSample* lhs, const mzSample* rhs){
+        return lhs->sampleName < rhs->sampleName;
+        //return strnatcmp(lhs->sampleName.c_str(), rhs->sampleName.c_str()) < 0;
+    });
+
+    //ids match natural order
+    for (unsigned int i = 0; i < samples.size(); i++){
+        samples.at(i)->setSampleId(static_cast<int>(i));
+        samples.at(i)->setSampleOrder(static_cast<int>(i));
+    }
+
+    return samples;
+}
