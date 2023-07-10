@@ -2472,5 +2472,42 @@ class QQQProcessor{
     static string getTransitionPreferredQuantTypeStringKey(){return "TRANSITION_PREFERRED_QUANT_TYPE";}
 };
 
+class ExperimentAnchorPoints {
+public:
+
+    //constructor fields
+    vector<mzSample*> samples{};
+    string anchorPointsFile;
+    float standardsAlignment_precursorPPM;
+    float standardsAlignment_maxRtWindow;
+    int eic_smoothingWindow;
+    float standardsAlignment_minPeakIntensity;
+
+    //computed fields
+    mzSample *referenceSample = nullptr;
+    vector<AnchorPointSet> anchorPointSets{};
+
+    //                      observedRt  referenceRt
+    //                          rt      rt_update
+    map<mzSample*, vector<pair<float, float>>> sampleToUpdatedRts{};
+
+    Aligner rtAligner;
+
+    ExperimentAnchorPoints(vector<mzSample*> samples,
+                           string anchorPointsFile,
+                           float standardsAlignment_precursorPPM,
+                           float standardsAlignment_maxRtWindow,
+                           int eic_smoothingWindow,
+                           float standardsAlignment_minPeakIntensity);
+
+    void compute(bool debug);
+
+private:
+    void determineReferenceSample(bool debug);
+    void computeAnchorPointSetFromFile(bool debug);
+    void computeSampleToRtMap(bool debug);
+    void cleanSampleToRtMap(bool debug);
+    void doSegmentedAlignment(bool debug);
+};
 
 #endif

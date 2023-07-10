@@ -728,3 +728,236 @@ AnchorPointSet AnchorPointSet::lastRt(vector<mzSample*>& allSamples) {
 
     return lastAnchorPoint;
 }
+
+ExperimentAnchorPoints::ExperimentAnchorPoints(
+        vector<mzSample*> samples,
+        string anchorPointsFile,
+        float standardsAlignment_precursorPPM,
+        float standardsAlignment_maxRtWindow,
+        int eic_smoothingWindow,
+        float standardsAlignment_minPeakIntensity){
+    this->samples = samples;
+    this->anchorPointsFile = anchorPointsFile;
+    this->standardsAlignment_precursorPPM = standardsAlignment_precursorPPM;
+    this->standardsAlignment_maxRtWindow = standardsAlignment_maxRtWindow;
+    this->eic_smoothingWindow = eic_smoothingWindow;
+    this->standardsAlignment_minPeakIntensity = standardsAlignment_minPeakIntensity;
+}
+
+void ExperimentAnchorPoints::compute(bool debug) {
+    determineReferenceSample(debug);
+    computeAnchorPointSetFromFile(debug);
+    computeSampleToRtMap(debug);
+    cleanSampleToRtMap(debug);
+    doSegmentedAlignment(debug);
+}
+
+void ExperimentAnchorPoints::determineReferenceSample(bool debug){
+    for (auto sample : samples) {
+        if (sample->isAnchorPointSample){
+            referenceSample = sample;
+            if (debug) cout << "reference sample: " << sample->sampleName << endl;
+            break;
+        }
+    }
+    if (!referenceSample) {
+        cerr << "No samples were designated as containing anchor points - unable to perform anchor point based alignment. Exiting." << endl;
+        abort();
+    }
+}
+
+void ExperimentAnchorPoints::computeAnchorPointSetFromFile(bool debug){
+
+    string line;
+    ifstream anchorPointsFileStream(anchorPointsFile);
+
+    while ( getline(anchorPointsFileStream, line)) {
+        if (line.empty()) continue;
+         if (line[0] == '#') continue; //comments
+
+        vector<string>fields;
+        mzUtils::split(line, ',', fields);
+
+        if (fields.size() < 2) continue;
+
+        double mz = stod(fields[0]);
+        double rt = stod(fields[1]);
+
+        string stringFilter;
+        if (fields.size() >= 3) {
+            stringFilter = fields[2];
+            stringFilter.erase(remove(stringFilter.begin(), stringFilter.end(), '\r'), stringFilter.end());
+        }
+
+        double mzmin = mz - mz * static_cast<double>(standardsAlignment_precursorPPM)/1e6;
+        double mzmax = mz + mz * static_cast<double>(standardsAlignment_precursorPPM)/1e6;
+        double rtmin = rt - static_cast<double>(standardsAlignment_maxRtWindow);
+        double rtmax = rt + static_cast<double>(standardsAlignment_maxRtWindow);
+
+        AnchorPointSet anchorPointSet(mzmin, mzmax, rtmin, rtmax, eic_smoothingWindow, standardsAlignment_minPeakIntensity);
+
+        if (!stringFilter.empty()){
+            anchorPointSet.setEICSamplesByFilter(samples, stringFilter);
+        }
+
+        anchorPointSet.compute(samples);
+
+        if (debug) {
+            for (auto it = anchorPointSet.sampleToPoints.begin(); it != anchorPointSet.sampleToPoints.end(); ++it){
+                cout << it->first->sampleName << " " << it->second->rt << endl;
+            }
+            cout << endl;
+        }
+
+        anchorPointSets.push_back(anchorPointSet);
+
+    }
+    anchorPointsFileStream.close();
+
+    AnchorPointSet lastAnchorPointSet = AnchorPointSet::lastRt(samples);
+    anchorPointSets.push_back(lastAnchorPointSet);
+
+    if (debug) cout << "anchorPointsBasedAlignment(): Using " << anchorPointSets.size() << " anchor points." << endl;
+}
+
+void ExperimentAnchorPoints::computeSampleToRtMap(bool debug){
+
+    mzSample *referenceSample = this->referenceSample;
+    sort(anchorPointSets.begin(), anchorPointSets.end(), [referenceSample](const AnchorPointSet& lhs, const AnchorPointSet& rhs){
+        if (lhs.isValid && rhs.isValid) {
+            return lhs.sampleToPoints.at(referenceSample)->rt < rhs.sampleToPoints.at(referenceSample)->rt;
+        } else {
+            return lhs.slice->rtmax < rhs.slice->rtmax;
+        }
+    });
+
+    //                      observedRt  referenceRt
+    //                          rt      rt_update
+    //map<mzSample*, vector<pair<float, float>>> sampleToUpdatedRts{};
+
+    for (auto &pt : anchorPointSets) {
+
+        //invalid anchor point sets are skipped.
+        if (!pt.isValid) continue;
+
+        for (auto it = pt.sampleToPoints.begin(); it != pt.sampleToPoints.end(); ++it) {
+
+            mzSample* sample = it->first;
+            AnchorPoint* point = it->second;
+
+            float observedRt = point->rt;
+            float referenceRt = pt.sampleToPoints[referenceSample]->rt;
+
+            if (sampleToUpdatedRts.find(sample) != sampleToUpdatedRts.end()) {
+
+                //simplest check for monotonicity
+                pair<float, float> lastPair = sampleToUpdatedRts[sample].at(sampleToUpdatedRts[sample].size()-1);
+                float lastObserved = lastPair.first;
+                float lastReference = lastPair.second;
+
+                if (observedRt >= lastObserved && lastReference >= lastReference) {
+                    sampleToUpdatedRts[sample].push_back(make_pair(observedRt, referenceRt));
+                }
+
+            } else {
+
+                pair<float, float> rtPair = make_pair(observedRt, referenceRt);
+                vector<pair<float, float>> rtInfo = vector<pair<float, float>>{};
+                rtInfo.push_back(rtPair);
+
+                sampleToUpdatedRts.insert(make_pair(sample, rtInfo));
+            }
+
+        }
+    }
+}
+
+void ExperimentAnchorPoints::cleanSampleToRtMap(bool debug) {
+
+    //                      observedRt  referenceRt
+    //                          rt      rt_update
+    map<mzSample*, vector<pair<float, float>>> cleanedSampleToUpdatedRts{};
+
+    for (auto it = sampleToUpdatedRts.begin(); it != sampleToUpdatedRts.end(); ++it) {
+
+        mzSample *sample = it->first;
+        vector<pair<float, float>> rtMappings = it->second;
+
+        if (rtMappings.size() < 2) continue;
+
+        int skipI = -1;
+        for (int i = 0 ; i < rtMappings.size()-1; i++) {
+
+            if (skipI == i) {
+                skipI = -1;
+                continue;
+            }
+
+            auto pair1 = rtMappings[static_cast<unsigned int>(i)];
+            auto pair2 = rtMappings[static_cast<unsigned int>(i+1)];
+
+            if (cleanedSampleToUpdatedRts.find(sample) == cleanedSampleToUpdatedRts.end()) {
+                cleanedSampleToUpdatedRts.insert(make_pair(sample, vector<pair<float, float>>{}));
+            }
+
+            cleanedSampleToUpdatedRts.at(sample).push_back(pair1);
+            if (debug) cout << sample->sampleName << ": " << pair1.first << " " << pair1.second << endl;
+
+            if (abs(pair1.first - pair2.first) < 1e-6f or abs(pair1.second - pair2.second) < 1e-6f) {
+                if (debug) cerr << sample->sampleName << ": SKIP " << pair2.first << " " << pair2.second << endl;
+                skipI = static_cast<int>(i+1);
+            }
+
+            if (i == static_cast<int>(rtMappings.size()-2)) {
+                cleanedSampleToUpdatedRts.at(sample).push_back(pair2);
+                if (debug) cout << sample->sampleName << ": " << pair2.first << " " << pair2.second << endl;
+            }
+        }
+    }
+
+    this->sampleToUpdatedRts = cleanedSampleToUpdatedRts;
+
+}
+
+void ExperimentAnchorPoints::doSegmentedAlignment(bool debug) {
+    Aligner rtAligner;
+    rtAligner.setSamples(samples);
+
+    //debugging
+    if (debug) cout << "Anchor point alignments:" << endl;
+
+    for (auto sample : samples) {
+        if (sampleToUpdatedRts.find(sample) != sampleToUpdatedRts.end()) {
+              vector<pair<float, float>> anchorPointData = sampleToUpdatedRts.at(sample);
+
+              float observedRtStart = 0.0f;
+              float referenceRtStart = 0.0f;
+
+              for (auto &pt : anchorPointData) {
+
+                  float observedRt = pt.first;
+                  float referenceRt = pt.second;
+
+                  AlignmentSegment *alignmentSegment = new AlignmentSegment();
+                  alignmentSegment->sampleName = sample->sampleName;
+                  alignmentSegment->seg_start = observedRtStart;
+                  alignmentSegment->seg_end = observedRt;
+                  alignmentSegment->new_start = referenceRtStart;
+                  alignmentSegment->new_end = referenceRt;
+
+                  rtAligner.addSegment(sample->sampleName, alignmentSegment);
+
+                  //debugging
+                  if (debug) cout << sample->sampleName << "\t" << observedRt << "\t" << referenceRt << endl;
+
+                  observedRtStart = observedRt;
+                  referenceRtStart = referenceRt;
+              }
+
+              //debugging
+              if (debug) cout << endl;
+        }
+    }
+
+    rtAligner.doSegmentedAligment();
+}
