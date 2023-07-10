@@ -744,11 +744,17 @@ ExperimentAnchorPoints::ExperimentAnchorPoints(
     this->standardsAlignment_minPeakIntensity = standardsAlignment_minPeakIntensity;
 }
 
-void ExperimentAnchorPoints::compute(bool debug) {
+void ExperimentAnchorPoints::compute(bool debug, bool isClean) {
     determineReferenceSample(debug);
     computeAnchorPointSetFromFile(debug);
     computeSampleToRtMap(debug);
-    cleanSampleToRtMap(debug);
+
+    if (isClean) {
+        cleanSampleToRtMap(debug);
+    } else if (debug) {
+        cout << "ExperimentAnchorPoints::compute(): skipping cleaning step." << endl;
+    }
+
     doSegmentedAlignment(debug);
 }
 

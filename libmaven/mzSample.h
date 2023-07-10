@@ -2500,7 +2500,7 @@ public:
                            int eic_smoothingWindow,
                            float standardsAlignment_minPeakIntensity);
 
-    void compute(bool debug);
+    void compute(bool debug, bool isClean=true);
 
 private:
     void determineReferenceSample(bool debug);
