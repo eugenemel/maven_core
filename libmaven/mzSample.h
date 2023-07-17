@@ -1911,6 +1911,7 @@ public:
     float filterMinSignalBaselineRatio = 0;
     float filterMinGroupIntensity = 0;
     int filterMinPrecursorCharge = 0;
+    float filterMinSignalBlankRatio = -1.0f;
 
     string getEncodedPeakParameters(string tupleMapDelimiter="&", string internalMapDelimiter="|,|");
     void fillInPeakParameters(unordered_map<string, string> decodedMap, string tupleMapDelimiter="&", string internalMapDelimiter="|,|");

@@ -3488,6 +3488,7 @@ string PeakPickingAndGroupingParameters::getEncodedPeakParameters(string tupleMa
     encodedParams = encodedParams + "filterMinSignalBaselineRatio" + "=" + to_string(filterMinSignalBaselineRatio) + ";";
     encodedParams = encodedParams + "filterMinGroupIntensity" + "=" + to_string(filterMinGroupIntensity) + ";";
     encodedParams = encodedParams + "filterMinPrecursorCharge" + "=" + to_string(filterMinPrecursorCharge) + ";";
+    encodedParams = encodedParams + "filterMinSignalBlankRatio" + "=" + to_string(filterMinSignalBlankRatio) + ";";
 
     return encodedParams;
 }
@@ -3588,6 +3589,9 @@ void PeakPickingAndGroupingParameters::fillInPeakParameters(unordered_map<string
     }
     if (decodedMap.find("filterMinPrecursorCharge") != decodedMap.end()) {
         filterMinPrecursorCharge = stoi(decodedMap["filterMinPrecursorCharge"]);
+    }
+    if (decodedMap.find("filterMinSignalBlankRatio") != decodedMap.end()) {
+        filterMinSignalBlankRatio = stof(decodedMap["filterMinSignalBlankRatio"]);
     }
 }
 
