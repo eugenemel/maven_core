@@ -545,11 +545,50 @@ void QQQProcessor::labelInternalStandards(vector<PeakGroup>& peakgroups, shared_
     if (debug) cout << "End QQQProcessor::labelInternalStandards()" << endl;
 }
 
+//DOES NOT apply to children peak groups.
 vector<PeakGroup> QQQProcessor::filterPeakGroups(vector<PeakGroup>& peakgroups, shared_ptr<QQQSearchParameters> params, bool debug){
     if (debug) cout << "Start QQQProcessor::labelInternalStandards()" << endl;
     vector<PeakGroup> filteredGroups{};
 
-    //TODO: implement
+    for (auto & pg : peakgroups) {
+        if (pg.compound && pg.compound->metaDataMap.find(QQQProcessor::getTransitionIsInternalStandardStringKey()) != pg.compound->metaDataMap.end()){
+            if (pg.compound->metaDataMap.at(QQQProcessor::getTransitionIsInternalStandardStringKey()) == "TRUE") {
+                filteredGroups.push_back(pg);
+                if (debug) cout << "( " << pg.meanMz << ", " << pg.medianRt() << "): " << pg.compound->name << " is IS" << endl;
+
+                continue;
+            }
+        }
+
+        string quantType = "smoothedPeakAreaCorrected";
+        if (pg.compound->metaDataMap.find(QQQProcessor::getTransitionPreferredQuantTypeStringKey()) != pg.compound->metaDataMap.end()) {
+            quantType = pg.compound->metaDataMap.at(QQQProcessor::getTransitionPreferredQuantTypeStringKey());
+        }
+
+        float maxBlankQuant = 0.0f;
+        float maxSampleQuant = 0.0f;
+
+        for (auto & p : pg.peaks) {
+            float peakQuant = p.getQuantByName(quantType);
+            if (p.fromBlankSample && peakQuant > maxBlankQuant) {
+                maxBlankQuant = peakQuant;
+            } else if (!p.fromBlankSample && peakQuant > maxSampleQuant) {
+                maxSampleQuant = peakQuant;
+            }
+            if (debug) cout << p.sample->sampleName.c_str() << ": (blank=" << (p.fromBlankSample ? "yes" : "no") << ") " << peakQuant << endl;
+        }
+
+        if (debug) cout << "( " << pg.meanMz << ", " << pg.medianRt() << "): "
+                        << "quantType = " << quantType << ", "
+                        << "(maxSampleQuant/maxBlankQuant) = (" << maxSampleQuant << "/" << maxBlankQuant << ") = "
+                        << (maxSampleQuant/maxBlankQuant)  << " "
+                        << (maxBlankQuant * params->qqqFilterMinSignalBlankRatio <= maxSampleQuant ? "keep" : "skip")
+                        << endl;
+
+        if (maxBlankQuant * params->qqqFilterMinSignalBlankRatio <= maxSampleQuant) {
+            filteredGroups.push_back(pg);
+        }
+    }
 
     if (debug) cout << "End QQQProcessor::filterPeakGroups()" << endl;
     return filteredGroups;
