@@ -2386,6 +2386,9 @@ public:
 
     float rollUpRtTolerance = 0.5f;
 
+    //Issue 660
+    float qqqFilterMinSignalBlankRatio = 0.0f; // (maxNonBlank / maxBlank), quant type matches transition
+
     shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters;
 };
 
@@ -2463,6 +2466,22 @@ class QQQProcessor{
      * @param debug
      */
     static void labelInternalStandards(
+            vector<PeakGroup>& peakgroups,
+            shared_ptr<QQQSearchParameters> params,
+            bool debug = false);
+
+    /**
+     * @brief filterPeakGroups
+     *
+     * Filter peakgroups for qqq-specific search criteria.
+     * IS are skipped from the filtering.
+     *
+     * @param peakgroups
+     * @param params
+     * @param debug
+     * @return
+     */
+    static vector<PeakGroup> filterPeakGroups(
             vector<PeakGroup>& peakgroups,
             shared_ptr<QQQSearchParameters> params,
             bool debug = false);

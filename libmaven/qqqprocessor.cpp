@@ -299,6 +299,8 @@ string QQQSearchParameters::encodeParams(){
 
     encodedParams = encodedParams + "rollUpRtTolerance" + "=" + to_string(rollUpRtTolerance) + ";";
 
+    encodedParams = encodedParams + "qqqFilterMinSignalBlankRatio" + "=" + to_string(qqqFilterMinSignalBlankRatio) + ";";
+
     string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
 
     encodedParams = encodedParams + peakPickingEncodedParams;
@@ -415,6 +417,9 @@ shared_ptr<QQQSearchParameters> QQQSearchParameters::decode(string encodedParams
     }
     if (decodedMap.find("rollUpRtTolerance") != decodedMap.end()) {
         qqqSearchParameters->rollUpRtTolerance = stof(decodedMap["rollUpRtTolerance"]);
+    }
+    if (decodedMap.find("qqqFilterMinSignalBlankRatio") != decodedMap.end()) {
+        qqqSearchParameters->qqqFilterMinSignalBlankRatio = stof(decodedMap["qqqFilterMinSignalBlankRatio"]);
     }
 
     // END QQQSearchParameters
@@ -538,4 +543,14 @@ void QQQProcessor::labelInternalStandards(vector<PeakGroup>& peakgroups, shared_
     }
 
     if (debug) cout << "End QQQProcessor::labelInternalStandards()" << endl;
+}
+
+vector<PeakGroup> QQQProcessor::filterPeakGroups(vector<PeakGroup>& peakgroups, shared_ptr<QQQSearchParameters> params, bool debug){
+    if (debug) cout << "Start QQQProcessor::labelInternalStandards()" << endl;
+    vector<PeakGroup> filteredGroups{};
+
+    //TODO: implement
+
+    if (debug) cout << "End QQQProcessor::filterPeakGroups()" << endl;
+    return filteredGroups;
 }
