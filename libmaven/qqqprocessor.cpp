@@ -578,6 +578,7 @@ vector<PeakGroup> QQQProcessor::filterPeakGroups(vector<PeakGroup>& peakgroups, 
             if (debug) cout << p.sample->sampleName.c_str() << ": (blank=" << (p.fromBlankSample ? "yes" : "no") << ") " << peakQuant << endl;
         }
 
+        if (debug && pg.compound) cout << pg.compound->name << " ";
         if (debug) cout << "( " << pg.meanMz << ", " << pg.medianRt() << "): "
                         << "quantType = " << quantType << ", "
                         << "(maxSampleQuant/maxBlankQuant) = (" << maxSampleQuant << "/" << maxBlankQuant << ") = "
