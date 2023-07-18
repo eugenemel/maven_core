@@ -215,7 +215,8 @@ using namespace MSToolkit;
         }
     }
 
-    if (mystrcasestr(filename,"blan") != NULL) {
+    //Issue 660: Determine if a sample is blank or not only based on the filename, not enclosing folder
+    if (mystrcasestr(this->sampleName.c_str(),"blank")) {
         this->isBlank = true;
         cerr << "Found Blank: " << filename << endl;
     }
