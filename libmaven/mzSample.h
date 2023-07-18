@@ -1905,13 +1905,14 @@ public:
     // END EIC::groupPeaksE()
 
     //post-grouping filters
+    //a peak group passes a filter if the assessed value is greater than or equal to the filter value.
     int filterMinGoodGroupCount = 0;
     float filterMinQuality = 0;
     int filterMinNoNoiseObs = 0;
     float filterMinSignalBaselineRatio = 0;
     float filterMinGroupIntensity = 0;
     int filterMinPrecursorCharge = 0;
-    float filterMinSignalBlankRatio = -1.0f;
+    float filterMinSignalBlankRatio = 0;
 
     string getEncodedPeakParameters(string tupleMapDelimiter="&", string internalMapDelimiter="|,|");
     void fillInPeakParameters(unordered_map<string, string> decodedMap, string tupleMapDelimiter="&", string internalMapDelimiter="|,|");
