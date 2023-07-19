@@ -1434,3 +1434,16 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmp
              << endl;
     }
 }
+
+
+void PeakGroup::applyLabelsFromCompoundMetadata() {
+    if (compound && compound->metaDataMap.find(Compound::getCompoundLabelsStringKey()) != compound->metaDataMap.end()){
+        string labels = compound->metaDataMap.at(Compound::getCompoundLabelsStringKey());
+        for (char c : labels) {
+            addLabel(c);
+        }
+    }
+    for (auto& child : children) {
+        child.applyLabelsFromCompoundMetadata();
+    }
+}

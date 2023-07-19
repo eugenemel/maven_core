@@ -1145,6 +1145,7 @@ class PeakGroup {
         void markGroupBad();
         void addLabel(char label);
         void toggleLabel(char label);
+        void applyLabelsFromCompoundMetadata(); //Issue 662
         string getPeakGroupLabel();
 
 		void reduce();
@@ -1267,6 +1268,9 @@ class Compound {
             virtual vector<int> getConstituentMzs();
 
             static void traverseAndAdd(PeakGroup& group, set<Compound*>& compoundSet);
+
+            //reserved constants - do not change!
+            static string getCompoundLabelsStringKey(){return "COMPOUND_LABELS";}
 };
 
 //Issue 416
