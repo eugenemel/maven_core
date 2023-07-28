@@ -1920,6 +1920,9 @@ public:
     float groupMergeOverlap = 0.8f;
     // END EIC::groupPeaksE()
 
+    //computed properties
+    PeakGroupBackgroundType groupBackgroundType = PeakGroupBackgroundType::NONE;
+
     //post-grouping filters
     //a peak group passes a filter if the assessed value is greater than or equal to the filter value.
     int filterMinGoodGroupCount = 0;

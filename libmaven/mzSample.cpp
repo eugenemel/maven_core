@@ -3483,7 +3483,19 @@ string PeakPickingAndGroupingParameters::getEncodedPeakParameters(string tupleMa
     encodedParams = encodedParams + "groupMaxRtDiff" + "=" + to_string(groupMaxRtDiff) + ";";
     encodedParams = encodedParams + "groupMergeOverlap" + "=" + to_string(groupMergeOverlap) + ";";
 
-    //post-grouping filters
+    //computed properties
+    string groupBackgroundTypeStr = "groupBackgroundType=";
+    if (groupBackgroundType == PeakGroupBackgroundType::NONE) {
+        groupBackgroundTypeStr = groupBackgroundTypeStr + "NONE";
+    } else if (groupBackgroundType == PeakGroupBackgroundType::MAX_BLANK_INTENSITY) {
+        groupBackgroundTypeStr = groupBackgroundTypeStr + "MAX_BLANK_INTENSITY";
+    } else {
+        groupBackgroundTypeStr = groupBackgroundTypeStr + "UNKNOWN";
+    }
+    groupBackgroundTypeStr = groupBackgroundTypeStr + ";";
+    encodedParams = encodedParams + groupBackgroundTypeStr;
+
+    //post-grouping filters (entire groups kicked out based on these filters)
     encodedParams = encodedParams + "filterMinGoodGroupCount" + "=" + to_string(filterMinGoodGroupCount) + ";";
     encodedParams = encodedParams + "filterMinQuality" + "=" + to_string(filterMinQuality) + ";";
     encodedParams = encodedParams + "filterMinNoNoiseObs" + "=" + to_string(filterMinNoNoiseObs) + ";";
@@ -3571,6 +3583,16 @@ void PeakPickingAndGroupingParameters::fillInPeakParameters(unordered_map<string
     }
     if (decodedMap.find("groupMergeOverlap") != decodedMap.end()) {
         groupMergeOverlap = stof(decodedMap["groupMergeOverlap"]);
+    }
+
+    //computed properties
+    if (decodedMap.find("groupBackgroundType") != decodedMap.end()) {
+        string groupBackgroundTypeStr = decodedMap["groupBackgroundType"];
+        if (groupBackgroundTypeStr == "NONE") {
+            groupBackgroundType = PeakGroupBackgroundType::NONE;
+        } else if (groupBackgroundTypeStr == "MAX_BLANK_INTENSITY") {
+            groupBackgroundType = PeakGroupBackgroundType::MAX_BLANK_INTENSITY;
+        }
     }
 
     //post-grouping filters
