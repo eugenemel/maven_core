@@ -1089,7 +1089,6 @@ class PeakGroup {
         float srmProductMz;
 
         //Issue 665: retain computed background values, code for algorithm used to compute group background
-        PeakGroupBackgroundType groupBackgroundType;
         float groupBackground;
 
         bool isPrimaryGroup();
