@@ -2204,7 +2204,15 @@ vector<PeakGroup> EIC::groupPeaksE(vector<EIC*>& eics, shared_ptr<PeakPickingAnd
         }
     }
 
+    //calls PeakGroups::groupStatistics()
     pgroups = mergedEICToGroups(eics, m, params->groupMaxRtDiff, params->groupMergeOverlap, debug);
+
+    //Issue 665: compute background, save in PeakGroup field.
+    if (params->groupBackgroundType == PeakGroupBackgroundType::MAX_BLANK_INTENSITY) {
+        for (auto& pg : pgroups) {
+            pg.groupBackground = EIC::calculateBlankBackground(eics, pg.minRt, pg.maxRt, params, debug);
+        }
+    }
 
     if (m) delete(m);
     return pgroups;
