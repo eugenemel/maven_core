@@ -64,6 +64,9 @@ PeakGroup::PeakGroup()  {
 
     isComputedGroupStatistics = false;
 
+    groupBackgroundType = PeakGroupBackgroundType::NONE;
+    groupBackground = 0.0f;
+
 }      
 
 void PeakGroup::copyObj(const PeakGroup& o)  { 
@@ -138,6 +141,9 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     isotopeParameters = o.isotopeParameters; //Issue 402
 
     compounds = o.compounds;
+
+    groupBackgroundType = o.groupBackgroundType;
+    groupBackground = o.groupBackground;
 
     copyChildren(o);
 }
