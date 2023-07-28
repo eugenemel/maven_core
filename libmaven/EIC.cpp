@@ -2554,3 +2554,23 @@ void EIC::removeOverlapingPeaks() {
 	peaks = reduced;
 }
 
+
+float EIC::calculateBlankBackground(vector<EIC *>& eics, float rtMin, float rtMax, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug){
+
+    //TODO: based on parameters, compute EIC::calculateBlankBackground() in different ways.
+    float maxBlankIntensity = 0;
+
+    for (auto eic : eics) {
+        if (eic->sample->isBlank) {
+            for (unsigned int i = 0; i < eic->size(); i++) {
+                if (eic->rt[i] >= rtMin && eic->rt[i] <= rtMax) {
+                    if (eic->intensity[i] > maxBlankIntensity) {
+                        maxBlankIntensity = eic->intensity[i];
+                    }
+                }
+            }
+        }
+    }
+
+    return maxBlankIntensity;
+}

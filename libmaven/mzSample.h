@@ -712,6 +712,9 @@ class EIC {
     static void removeLowRankGroups(vector<PeakGroup>&groups, unsigned int rankLimit );
     static bool compMaxIntensity(EIC* a, EIC* b ) { return a->maxIntensity > b->maxIntensity; }
 
+    //Issue 665: compute blank-specific background
+    static float calculateBlankBackground(vector<EIC*>& eics, float rtMin, float rtMax, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug=false);
+
 private:
     SmootherType smootherType;
     int baselineSmoothingWindow;
@@ -933,6 +936,12 @@ struct IsotopeParameters {
     string encodeParams();
     static IsotopeParameters decode(string encodedIsotopeParameters);
 
+};
+
+//Issue 665
+enum PeakGroupBackgroundType{
+    NONE=0, // background not computed - value is 0
+    MAX_BLANK_INTENSITY=1 // max raw intensity from any blank sample identified within RT bounds of peak group.
 };
 
 class PeakGroup {
