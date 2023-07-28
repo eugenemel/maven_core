@@ -2393,6 +2393,8 @@ public:
     //Issue 660
     float qqqFilterMinSignalBlankRatio = 0.0f; // (maxNonBlank / maxBlank), quant type matches transition
 
+    bool qqqFilterIsRetainOnlyPassingPeaks = false; // Issue 664
+
     shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters;
 };
 

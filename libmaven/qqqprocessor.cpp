@@ -300,6 +300,7 @@ string QQQSearchParameters::encodeParams(){
     encodedParams = encodedParams + "rollUpRtTolerance" + "=" + to_string(rollUpRtTolerance) + ";";
 
     encodedParams = encodedParams + "qqqFilterMinSignalBlankRatio" + "=" + to_string(qqqFilterMinSignalBlankRatio) + ";";
+    encodedParams = encodedParams + "qqqFilterIsRetainOnlyPassingPeaks" + "=" + to_string(qqqFilterIsRetainOnlyPassingPeaks) + ";";
 
     string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
 
@@ -420,6 +421,9 @@ shared_ptr<QQQSearchParameters> QQQSearchParameters::decode(string encodedParams
     }
     if (decodedMap.find("qqqFilterMinSignalBlankRatio") != decodedMap.end()) {
         qqqSearchParameters->qqqFilterMinSignalBlankRatio = stof(decodedMap["qqqFilterMinSignalBlankRatio"]);
+    }
+    if (decodedMap.find("qqqFilterIsRetainOnlyPassingPeaks") != decodedMap.end()) {
+        qqqSearchParameters->qqqFilterIsRetainOnlyPassingPeaks = decodedMap["qqqFilterIsRetainOnlyPassingPeaks"] == "1";
     }
 
     // END QQQSearchParameters
