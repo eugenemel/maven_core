@@ -597,7 +597,7 @@ vector<PeakGroup> QQQProcessor::filterPeakGroups(vector<PeakGroup>& peakgroups, 
 
             for (auto p : pg.peaks) {
                 float peakQuant = p.getQuantByName(quantType);
-                if (!p.fromBlankSample && peakQuant >= maxBlankQuant * params->qqqFilterMinSignalBlankRatio) {
+                if (p.fromBlankSample || peakQuant >= maxBlankQuant * params->qqqFilterMinSignalBlankRatio) {
                     passingPeaks.push_back(p);
                 }
             }
