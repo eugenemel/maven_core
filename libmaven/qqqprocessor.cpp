@@ -300,6 +300,7 @@ string QQQSearchParameters::encodeParams(){
     encodedParams = encodedParams + "rollUpRtTolerance" + "=" + to_string(rollUpRtTolerance) + ";";
 
     encodedParams = encodedParams + "qqqFilterMinSignalBlankRatio" + "=" + to_string(qqqFilterMinSignalBlankRatio) + ";";
+    encodedParams = encodedParams + "qqqFilterMinPeakIntensityGroupBackgroundRatio " + "=" + to_string(qqqFilterMinPeakIntensityGroupBackgroundRatio) + ";";
     encodedParams = encodedParams + "qqqFilterIsRetainOnlyPassingPeaks" + "=" + to_string(qqqFilterIsRetainOnlyPassingPeaks) + ";";
 
     string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
@@ -308,6 +309,61 @@ string QQQSearchParameters::encodeParams(){
 
     return encodedParams;
 }
+
+shared_ptr<QQQSearchParameters> QQQSearchParameters::decode(string encodedParams) {
+
+    shared_ptr<QQQSearchParameters> qqqSearchParameters = shared_ptr<QQQSearchParameters>(new QQQSearchParameters());
+
+    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams); //use semicolon (default)
+
+    qqqSearchParameters->fillInBaseParams(decodedMap);
+
+    qqqSearchParameters->peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
+    qqqSearchParameters->peakPickingAndGroupingParameters->fillInPeakParameters(decodedMap);
+
+    // START QQQSearchParameters
+
+    if (decodedMap.find("amuQ1") != decodedMap.end()) {
+        qqqSearchParameters->amuQ1 = stof(decodedMap["amuQ1"]);
+    }
+    if (decodedMap.find("amuQ3") != decodedMap.end()) {
+        qqqSearchParameters->amuQ3 = stof(decodedMap["amuQ3"]);
+    }
+    if (decodedMap.find("transitionListFilePath") != decodedMap.end()) {
+        qqqSearchParameters->transitionListFilePath = decodedMap["transitionListFilePath"];
+    }
+    if (decodedMap.find("transitionCompoundMappingPolicy") != decodedMap.end()) {
+        string transitionCompoundMappingPolicyStr = decodedMap["transitionCompoundMappingPolicy"];
+        if (transitionCompoundMappingPolicyStr == "REQUIRE_ALL_TRANSITIONS_EXACTLY_ONE_COMPOUND") {
+            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::REQUIRE_ALL_TRANSITIONS_EXACTLY_ONE_COMPOUND;
+        } else if (transitionCompoundMappingPolicyStr == "REQUIRE_ALL_TRANSITIONS_TO_ONE_OR_MORE_COMPOUNDS") {
+            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::REQUIRE_ALL_TRANSITIONS_TO_ONE_OR_MORE_COMPOUNDS;
+        } else if (transitionCompoundMappingPolicyStr == "RETAIN_TRANSITIONS_ONE_OR_MORE_COMPOUNDS") {
+            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::RETAIN_TRANSITIONS_ONE_OR_MORE_COMPOUNDS;
+        } else if (transitionCompoundMappingPolicyStr == "RETAIN_TRANSITIONS_EXACTLY_ONE_COMPOUND") {
+            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::RETAIN_TRANSITIONS_EXACTLY_ONE_COMPOUND;
+        } else if (transitionCompoundMappingPolicyStr == "RETAIN_ALL_TRANSITIONS") {
+            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::RETAIN_ALL_TRANSITIONS;
+        }
+    }
+    if (decodedMap.find("rollUpRtTolerance") != decodedMap.end()) {
+        qqqSearchParameters->rollUpRtTolerance = stof(decodedMap["rollUpRtTolerance"]);
+    }
+    if (decodedMap.find("qqqFilterMinSignalBlankRatio") != decodedMap.end()) {
+        qqqSearchParameters->qqqFilterMinSignalBlankRatio = stof(decodedMap["qqqFilterMinSignalBlankRatio"]);
+    }
+    if (decodedMap.find("qqqFilterMinPeakIntensityGroupBackgroundRatio") != decodedMap.end()) {
+        qqqSearchParameters->qqqFilterMinPeakIntensityGroupBackgroundRatio = stof(decodedMap["qqqFilterMinPeakIntensityGroupBackgroundRatio"]);
+    }
+    if (decodedMap.find("qqqFilterIsRetainOnlyPassingPeaks") != decodedMap.end()) {
+        qqqSearchParameters->qqqFilterIsRetainOnlyPassingPeaks = decodedMap["qqqFilterIsRetainOnlyPassingPeaks"] == "1";
+    }
+
+    // END QQQSearchParameters
+
+    return qqqSearchParameters;
+}
+
 
 //Issue 568: Create dedicated method to convert SRMTransitions to mzSlice
 vector<mzSlice*> QQQProcessor::getMzSlices(
@@ -378,57 +434,6 @@ set<string> QQQProcessor::getSRMIds(vector<SRMTransition*>& transitions) {
         }
     }
     return srmIds;
-}
-
-shared_ptr<QQQSearchParameters> QQQSearchParameters::decode(string encodedParams) {
-
-    shared_ptr<QQQSearchParameters> qqqSearchParameters = shared_ptr<QQQSearchParameters>(new QQQSearchParameters());
-
-    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams); //use semicolon (default)
-
-    qqqSearchParameters->fillInBaseParams(decodedMap);
-
-    qqqSearchParameters->peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
-    qqqSearchParameters->peakPickingAndGroupingParameters->fillInPeakParameters(decodedMap);
-
-    // START QQQSearchParameters
-
-    if (decodedMap.find("amuQ1") != decodedMap.end()) {
-        qqqSearchParameters->amuQ1 = stof(decodedMap["amuQ1"]);
-    }
-    if (decodedMap.find("amuQ3") != decodedMap.end()) {
-        qqqSearchParameters->amuQ3 = stof(decodedMap["amuQ3"]);
-    }
-    if (decodedMap.find("transitionListFilePath") != decodedMap.end()) {
-        qqqSearchParameters->transitionListFilePath = decodedMap["transitionListFilePath"];
-    }
-    if (decodedMap.find("transitionCompoundMappingPolicy") != decodedMap.end()) {
-        string transitionCompoundMappingPolicyStr = decodedMap["transitionCompoundMappingPolicy"];
-        if (transitionCompoundMappingPolicyStr == "REQUIRE_ALL_TRANSITIONS_EXACTLY_ONE_COMPOUND") {
-            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::REQUIRE_ALL_TRANSITIONS_EXACTLY_ONE_COMPOUND;
-        } else if (transitionCompoundMappingPolicyStr == "REQUIRE_ALL_TRANSITIONS_TO_ONE_OR_MORE_COMPOUNDS") {
-            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::REQUIRE_ALL_TRANSITIONS_TO_ONE_OR_MORE_COMPOUNDS;
-        } else if (transitionCompoundMappingPolicyStr == "RETAIN_TRANSITIONS_ONE_OR_MORE_COMPOUNDS") {
-            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::RETAIN_TRANSITIONS_ONE_OR_MORE_COMPOUNDS;
-        } else if (transitionCompoundMappingPolicyStr == "RETAIN_TRANSITIONS_EXACTLY_ONE_COMPOUND") {
-            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::RETAIN_TRANSITIONS_EXACTLY_ONE_COMPOUND;
-        } else if (transitionCompoundMappingPolicyStr == "RETAIN_ALL_TRANSITIONS") {
-            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::RETAIN_ALL_TRANSITIONS;
-        }
-    }
-    if (decodedMap.find("rollUpRtTolerance") != decodedMap.end()) {
-        qqqSearchParameters->rollUpRtTolerance = stof(decodedMap["rollUpRtTolerance"]);
-    }
-    if (decodedMap.find("qqqFilterMinSignalBlankRatio") != decodedMap.end()) {
-        qqqSearchParameters->qqqFilterMinSignalBlankRatio = stof(decodedMap["qqqFilterMinSignalBlankRatio"]);
-    }
-    if (decodedMap.find("qqqFilterIsRetainOnlyPassingPeaks") != decodedMap.end()) {
-        qqqSearchParameters->qqqFilterIsRetainOnlyPassingPeaks = decodedMap["qqqFilterIsRetainOnlyPassingPeaks"] == "1";
-    }
-
-    // END QQQSearchParameters
-
-    return qqqSearchParameters;
 }
 
 void QQQProcessor::rollUpToCompoundQuant(vector<PeakGroup>& peakgroups, shared_ptr<QQQSearchParameters> params, bool debug){

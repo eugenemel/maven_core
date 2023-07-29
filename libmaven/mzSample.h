@@ -2408,6 +2408,9 @@ public:
     //Issue 660
     float qqqFilterMinSignalBlankRatio = 0.0f; // (maxNonBlank / maxBlank), quant type matches transition
 
+    //Issue 665
+    float qqqFilterMinPeakIntensityGroupBackgroundRatio = 0.0f; // (non-blank peakIntensity / PeakGroup.groupBackground), PeakGroup.groupBackground managed by PeakGroupBackgroundType
+
     bool qqqFilterIsRetainOnlyPassingPeaks = false; // Issue 664
 
     shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters;
