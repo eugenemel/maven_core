@@ -300,7 +300,7 @@ string QQQSearchParameters::encodeParams(){
     encodedParams = encodedParams + "rollUpRtTolerance" + "=" + to_string(rollUpRtTolerance) + ";";
 
     encodedParams = encodedParams + "qqqFilterMinSignalBlankRatio" + "=" + to_string(qqqFilterMinSignalBlankRatio) + ";";
-    encodedParams = encodedParams + "qqqFilterMinPeakIntensityGroupBackgroundRatio " + "=" + to_string(qqqFilterMinPeakIntensityGroupBackgroundRatio) + ";";
+    encodedParams = encodedParams + "qqqFilterMinPeakIntensityGroupBackgroundRatio" + "=" + to_string(qqqFilterMinPeakIntensityGroupBackgroundRatio) + ";";
     encodedParams = encodedParams + "qqqFilterIsRetainOnlyPassingPeaks" + "=" + to_string(qqqFilterIsRetainOnlyPassingPeaks) + ";";
 
     string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
