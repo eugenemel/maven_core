@@ -576,13 +576,21 @@ vector<PeakGroup> QQQProcessor::filterPeakGroups(vector<PeakGroup>& peakgroups, 
 
         float maxBlankQuant = 0.0f;
         float maxSampleQuant = 0.0f;
+        float maxPeakIntensity = 0.0f;
 
         for (auto & p : pg.peaks) {
+
             float peakQuant = p.getQuantByName(quantType);
+
             if (p.fromBlankSample && peakQuant > maxBlankQuant) {
                 maxBlankQuant = peakQuant;
-            } else if (!p.fromBlankSample && peakQuant > maxSampleQuant) {
-                maxSampleQuant = peakQuant;
+            } else if (!p.fromBlankSample) {
+                if (peakQuant > maxSampleQuant) {
+                    maxSampleQuant = peakQuant;
+                }
+                if (p.peakIntensity > maxPeakIntensity) {
+                    maxPeakIntensity = p.peakIntensity;
+                }
             }
             if (debug) cout << p.sample->sampleName.c_str() << ": (blank=" << (p.fromBlankSample ? "yes" : "no") << ") " << peakQuant << endl;
         }
@@ -598,6 +606,8 @@ vector<PeakGroup> QQQProcessor::filterPeakGroups(vector<PeakGroup>& peakgroups, 
         //Issue 664
         if (params->qqqFilterIsRetainOnlyPassingPeaks) {
 
+            bool isKeepPeakGroup = false;
+
             vector<Peak> passingPeaks{};
 
             for (auto p : pg.peaks) {
@@ -609,23 +619,26 @@ vector<PeakGroup> QQQProcessor::filterPeakGroups(vector<PeakGroup>& peakgroups, 
                         )
                     ) {
                     passingPeaks.push_back(p);
+
+                    if (!p.fromBlankSample) isKeepPeakGroup = true;
                 }
             }
 
-            pg.peaks.clear();
-            for (auto p : passingPeaks) {
-                pg.addPeak(p);
-            }
+            if (isKeepPeakGroup) {
 
-            pg.groupStatistics(true); // force recomputation
+                pg.peaks.clear();
+                for (auto p : passingPeaks) {
+                    pg.addPeak(p);
+                }
 
-            if (!pg.peaks.empty()) {
+                pg.groupStatistics(true); // force recomputation
+
                 filteredGroups.push_back(pg);
             }
 
         } else if (
            maxSampleQuant >= maxBlankQuant * params->qqqFilterMinSignalBlankRatio &&
-           maxSampleQuant >= pg.groupBackground * params->qqqFilterMinPeakIntensityGroupBackgroundRatio) {
+           maxPeakIntensity >= pg.groupBackground * params->qqqFilterMinPeakIntensityGroupBackgroundRatio) {
             filteredGroups.push_back(pg);
         }
     }
