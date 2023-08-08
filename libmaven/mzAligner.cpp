@@ -301,7 +301,7 @@ void Aligner::Fit(int ideg) {
 	delete[] d;
 }
 
-void Aligner::loadAlignmentFile(string alignmentFile) { 
+map<mzSample*, vector<pair<float, float>>> Aligner::loadAlignmentFile(string alignmentFile) {
 
 	//aligment file format
 	//sample  rt      rt_update
@@ -310,8 +310,14 @@ void Aligner::loadAlignmentFile(string alignmentFile) {
     //
     //Note that this expects a block of all the same samples, then the next set of samples, etc
 
+	map<string, mzSample*> nameToSample{};
+	map<mzSample*, vector<pair<float, float>>> sampleToUpdatedRts{};
+
 	ifstream myfile(alignmentFile);
-	if (!myfile.is_open()) { cerr << "Can't open file " << alignmentFile; return; }
+	if (!myfile.is_open()) {
+		cerr << "Can't open file " << alignmentFile;
+		return sampleToUpdatedRts;
+	}
 
 	std::string line;
 	int lineNum=0;
@@ -326,12 +332,34 @@ void Aligner::loadAlignmentFile(string alignmentFile) {
 		if (fields.size() >= 3 && lineNum > 1) {
             AlignmentSegment* seg = new AlignmentSegment();
 
-			seg->sampleName   = fields[0];
+			string sampleName = fields[0];
+			float rt = stof(fields[1]);
+			float rt_update = stof(fields[2]);
+			
+			if (nameToSample.find(sampleName) == nameToSample.end()) {
+				for (auto mzSample : samples) {
+					if (mzSample->sampleName == sampleName) {
+						nameToSample.insert(make_pair(sampleName, mzSample));
+						break;
+					}
+				}
+			}
+			
+			mzSample *sample = nullptr;
+			if (nameToSample.find(sampleName) != nameToSample.end()) {
+				sample = nameToSample[sampleName];
+				if (sampleToUpdatedRts.find(sample) == sampleToUpdatedRts.end()) {
+					sampleToUpdatedRts.insert(make_pair(sample, vector<pair<float, float>>{}));
+				}
+				sampleToUpdatedRts[sample].push_back(make_pair(rt, rt_update));
+			}
+
+			seg->sampleName = sampleName;
 			seg->seg_start = 0;
-			seg->seg_end =  string2float(fields[1]);
+			seg->seg_end =  rt;
 
 			seg->new_start = 0;
-			seg->new_end =  string2float(fields[2]);
+			seg->new_end = rt_update;
 
 			if (lastSegment and lastSegment->sampleName == seg->sampleName) { 
 				seg->seg_start = lastSegment->seg_end;
@@ -344,6 +372,8 @@ void Aligner::loadAlignmentFile(string alignmentFile) {
 	}
 
 	cerr << "Aligner::loadAlignmentFile() " << alignmentSegments.size() << "\t" << lineNum << endl;
+
+	return sampleToUpdatedRts;
 }
 
 float AlignmentSegment::updateRt(float oldRt) {

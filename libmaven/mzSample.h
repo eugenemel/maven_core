@@ -1551,7 +1551,7 @@ class Aligner {
 		void setPolymialDegree(int x) { polynomialDegree=x; }
 		void setSamples(vector<mzSample*>set) { samples=set; }
 
-		void loadAlignmentFile(string alignmentFile); //load alignment information from a file
+		map<mzSample*, vector<pair<float, float>>> loadAlignmentFile(string alignmentFile); //load alignment information from a file
 		void doSegmentedAligment();	 //ralign scans using guided alignment
 
         inline void addSegment(string sampleName, AlignmentSegment* s) {
