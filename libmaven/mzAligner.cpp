@@ -340,6 +340,10 @@ map<mzSample*, vector<pair<float, float>>> Aligner::loadAlignmentFile(string ali
 				for (auto mzSample : samples) {
 					if (mzSample->sampleName == sampleName) {
 						nameToSample.insert(make_pair(sampleName, mzSample));
+						
+						//debugging
+						// cout << "Found sample for '" << sampleName << "'" << endl;
+						
 						break;
 					}
 				}
@@ -352,6 +356,9 @@ map<mzSample*, vector<pair<float, float>>> Aligner::loadAlignmentFile(string ali
 					sampleToUpdatedRts.insert(make_pair(sample, vector<pair<float, float>>{}));
 				}
 				sampleToUpdatedRts[sample].push_back(make_pair(rt, rt_update));
+				
+				//debugging
+				// cout << "Wrote value: (" << sample->sampleName << ", " << rt << ", " << rt_update << ")" << endl;
 			}
 
 			seg->sampleName = sampleName;
