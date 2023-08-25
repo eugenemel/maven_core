@@ -2126,24 +2126,14 @@ vector<PeakGroup> EIC::groupPeaksE(vector<EIC*>& eics, shared_ptr<PeakPickingAnd
     EIC* m = EIC::eicMerge(eics);
     if (!m) return pgroups;
 
-   //TODO: want to use getPeakPositionsD() for merged EIC
-
-
-
-
-
+    shared_ptr<PeakPickingAndGroupingParameters> mergedEICParams =
+        PeakPickingAndGroupingParameters::getMergedAsPeakParams(params);
 
     m->setBaselineSmoothingWindow(params->mergedBaselineSmoothingWindow);
     m->setBaselineDropTopX(params->mergedBaselineDropTopX);
 
     //find peaks in merged eic
-    m->getPeakPositionsC(
-                params->mergedSmoothingWindow,
-                debug,
-                params->mergedIsComputeBounds,
-                params->mergedPeakRtBoundsMaxIntensityFraction,
-                params->mergedPeakRtBoundsSlopeThreshold
-    );
+    m->getPeakPositionsD(mergedEICParams, debug);
 
     //Issue 597: Remove peaks with insufficient ratios
     if (params->mergedSmoothedMaxToBoundsMinRatio > 0) {
