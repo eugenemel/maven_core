@@ -2126,6 +2126,13 @@ vector<PeakGroup> EIC::groupPeaksE(vector<EIC*>& eics, shared_ptr<PeakPickingAnd
     EIC* m = EIC::eicMerge(eics);
     if (!m) return pgroups;
 
+   //TODO: want to use getPeakPositionsD() for merged EIC
+
+
+
+
+
+
     m->setBaselineSmoothingWindow(params->mergedBaselineSmoothingWindow);
     m->setBaselineDropTopX(params->mergedBaselineDropTopX);
 
@@ -2592,8 +2599,38 @@ MergedEICSummaryData EIC::calculateMergedEICSummaryData(EIC* mergedEIC, set<int>
 
     if (mergedEIC) {
 
-        //TODO: implement logic
+        //Find representative index
+        int representativeIndex = -1;
+        float representativeIntensity = -1.0f;
 
+        for (auto peakIndex : mergedEICPeakIndexes) {
+            if (mergedEIC->spline[peakIndex] < representativeIntensity) {
+                representativeIntensity = mergedEIC->spline[peakIndex];
+                representativeIndex = peakIndex;
+            }
+        }
+
+        if (representativeIndex != -1) {
+            // compute values based on representative index
+            Peak p = mergedEIC->peaks.at(representativeIndex);
+
+            for (auto i = p.minpos; i <= p.maxpos; i++) {
+
+                mergedEICSummaryData.FullRangeBaseline += mergedEIC->baseline[i];
+
+                if (i >= p.minPosFWHM && i <= p.maxPosFWHM) {
+                    mergedEICSummaryData.FWHMBaseline += mergedEIC->baseline[i];
+                }
+
+                if (i >= p.pos-1 && i <= p.pos+1) {
+                    mergedEICSummaryData.ThreePointBaseline += mergedEIC->baseline[i];
+                }
+
+                if (i == p.pos) {
+                    mergedEICSummaryData.pickedPeakBaseline = mergedEIC->baseline[i];
+                }
+            }
+        }
     }
 
     return mergedEICSummaryData;

@@ -964,21 +964,10 @@ enum PeakGroupBackgroundType{
 //Issue 668: Retain some summary-level information from merged EIC (part of peak grouping)
 struct MergedEICSummaryData{
 
-    //quant types that consider the full RT range
-    float smoothedFullBaseline = 0;
-    float rawFullBaseline = 0;
-
-    //quant types that use the FWHM RT range
-    float smoothedFWHMBaseline = 0;
-    float rawFWHMBaseline = 0;
-
-    //quant types that use the max, and one point adjacent (areaTop)
-    float smoothedThreePointBaseline = 0;
-    float rawThreePointBaseline = 0;
-
-    //quant types that use the max
-    float smoothedMaxBaseline = 0;
-    float rawMaxBaseline = 0;
+    float FullRangeBaseline = 0; //quant types that consider the full RT range
+    float FWHMBaseline = 0; //quant types that use the FWHM RT range
+    float ThreePointBaseline = 0; // quant types that use the 3-point baseline (peakAreaTop)
+    float pickedPeakBaseline = 0; // quant types that use a single point
 };
 
 class PeakGroup {
