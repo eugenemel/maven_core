@@ -2336,6 +2336,7 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
     }
 
     for (auto& it : peakGroupData) {
+        it.second.mergedEICPeakIndexes.insert(it.first);
         it.second.recomputeProperties();
     }
 
@@ -2444,7 +2445,7 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
 
         PeakGroup grp;
         grp.groupId = groupIndex;
-        for (auto peak : peaks) {
+        for (auto& peak : peaks) {
             grp.addPeak(peak.second);
         }
         sort(grp.peaks.begin(), grp.peaks.end(), Peak::compSampleName);
@@ -2584,7 +2585,7 @@ float EIC::calculateBlankBackground(vector<EIC *>& eics, float rtMin, float rtMa
     return maxBlankIntensity;
 }
 
-MergedEICSummaryData EIC::calculateMergedEICSummaryData(EIC* mergedEIC, float rtMin, float rtMax, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug) {
+MergedEICSummaryData EIC::calculateMergedEICSummaryData(EIC* mergedEIC, set<int> mergedEICPeakIndexes, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug) {
     MergedEICSummaryData mergedEICSummaryData;
 
     if (mergedEIC) {

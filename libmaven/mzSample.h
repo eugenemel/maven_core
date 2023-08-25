@@ -717,7 +717,7 @@ class EIC {
     static float calculateBlankBackground(vector<EIC*>& eics, float rtMin, float rtMax, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug=false);
 
     //Issue 668: capture, summarize some information about merged EICs
-    static MergedEICSummaryData calculateMergedEICSummaryData(EIC* mergedEIC, float rtMin, float rtMax, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug=false);
+    static MergedEICSummaryData calculateMergedEICSummaryData(EIC* mergedEIC, set<int> mergedEICPeakIndexes, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug=false);
 
 private:
     SmootherType smootherType;
@@ -2329,6 +2329,10 @@ struct PeakContainer {
     float maxPeakRt = -1.0f;
     float meanMz = 0.0f;
 
+    //Issue 668: Keep track of all of the original EIC peak indexes associated with a PeakContainer.
+    //As PeakContainers are merged together, this will accumulate to contain the set of all merged EIC peaks.
+    set<int> mergedEICPeakIndexes{};
+
     //replace less intense peaks with more intense peaks,
     void mergePeakContainer(PeakContainer container) {
 
@@ -2343,6 +2347,8 @@ struct PeakContainer {
                 peaks.insert(make_pair(p.getSample(), p));
             }
         }
+
+        mergedEICPeakIndexes.insert(container.mergedEICPeakIndexes.begin(), container.mergedEICPeakIndexes.end());
     }
 
     //update mz, rt computations based on peaks included in peak group.
