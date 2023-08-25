@@ -57,6 +57,7 @@ class Fragment;
 class Isotope;
 struct FragmentationMatchScore;
 class CompoundIon;
+struct MergedEICSummaryData;
 
 class LibraryMs2SpectrumParameters;
 class LoopInjectionMs2SpectrumParameters;
@@ -714,6 +715,9 @@ class EIC {
 
     //Issue 665: compute blank-specific background
     static float calculateBlankBackground(vector<EIC*>& eics, float rtMin, float rtMax, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug=false);
+
+    //Issue 668: capture, summarize some information about merged EICs
+    static MergedEICSummaryData calculateMergedEICSummaryData(EIC* mergedEIC, float rtMin, float rtMax, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug=false);
 
 private:
     SmootherType smootherType;

@@ -2583,3 +2583,15 @@ float EIC::calculateBlankBackground(vector<EIC *>& eics, float rtMin, float rtMa
 
     return maxBlankIntensity;
 }
+
+MergedEICSummaryData EIC::calculateMergedEICSummaryData(EIC* mergedEIC, float rtMin, float rtMax, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug) {
+    MergedEICSummaryData mergedEICSummaryData;
+
+    if (mergedEIC) {
+
+        //TODO: implement logic
+
+    }
+
+    return mergedEICSummaryData;
+}
