@@ -2448,7 +2448,7 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
 
         grp.groupStatistics();
 
-        grp.mergedEICSummaryData = EIC::calculateMergedEICSummaryData(m, it->second.mergedEICPeakIndexes, false);
+        grp.mergedEICSummaryData = EIC::calculateMergedEICSummaryData(m, it->second.mergedEICPeakIndexes, debug);
 
         pgroups.push_back(grp);
     }
@@ -2593,15 +2593,25 @@ MergedEICSummaryData EIC::calculateMergedEICSummaryData(EIC* mergedEIC, set<int>
         float representativeIntensity = -1.0f;
 
         for (auto peakIndex : mergedEICPeakIndexes) {
-            if (mergedEIC->spline[peakIndex] < representativeIntensity) {
+            if (mergedEIC->spline[peakIndex] > representativeIntensity) {
                 representativeIntensity = mergedEIC->spline[peakIndex];
                 representativeIndex = peakIndex;
             }
         }
 
+        if (debug) cout << "EIC::calculateMergedEICSummaryData(): peakIndex=" << representativeIndex << endl;
+
         if (representativeIndex != -1) {
             // compute values based on representative index
             Peak p = mergedEIC->peaks.at(representativeIndex);
+
+            if (debug) {
+                cout << "EIC::calculateMergedEICSummaryData(): "
+                     << "( " << p.minpos << " - ["
+                     << p.minPosFWHM << " - {" << (p.pos-1) << " " << p.pos << " " << (p.pos+1) << "} - "
+                     << p.maxPosFWHM << " ] - " << p.maxpos << " )"
+                     << endl;
+            }
 
             for (auto i = p.minpos; i <= p.maxpos; i++) {
 
@@ -2618,6 +2628,15 @@ MergedEICSummaryData EIC::calculateMergedEICSummaryData(EIC* mergedEIC, set<int>
                 if (i == p.pos) {
                     mergedEICSummaryData.pickedPeakBaseline = mergedEIC->baseline[i];
                 }
+            }
+
+            if (debug) {
+                cout << "EIC::calculateMergedEICSummaryData(): "
+                     << " FULL=" << mergedEICSummaryData.fullRangeBaseline
+                     << " FWHM=" << mergedEICSummaryData.FWHMBaseline
+                     << " THREE=" << mergedEICSummaryData.threePointBaseline
+                     << " ONE=" << mergedEICSummaryData.pickedPeakBaseline
+                     << endl;
             }
         }
     }
