@@ -627,7 +627,7 @@ vector<PeakGroup> QQQProcessor::filterPeakGroups(vector<PeakGroup>& peakgroups, 
             if (isKeepPeakGroup) {
 
                 pg.peaks.clear();
-                for (auto p : passingPeaks) {
+                for (auto& p : passingPeaks) {
                     pg.addPeak(p);
                 }
 
@@ -645,4 +645,18 @@ vector<PeakGroup> QQQProcessor::filterPeakGroups(vector<PeakGroup>& peakgroups, 
 
     if (debug) cout << "End QQQProcessor::filterPeakGroups()" << endl;
     return filteredGroups;
+}
+
+void QQQProcessor::assignTransitionSpecificGroupBackground(
+    vector<PeakGroup>& peakgroups,
+    bool debug
+    ) {
+    for (auto & pg : peakgroups) {
+        string quantType = "smoothedPeakAreaCorrected";
+        if (pg.compound->metaDataMap.find(QQQProcessor::getTransitionPreferredQuantTypeStringKey()) != pg.compound->metaDataMap.end()) {
+            quantType = pg.compound->metaDataMap.at(QQQProcessor::getTransitionPreferredQuantTypeStringKey());
+
+            pg.groupBackground = pg.mergedEICSummaryData.getCorrespondingBaseline(quantType);
+        }
+    }
 }
