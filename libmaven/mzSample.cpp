@@ -3489,6 +3489,8 @@ string PeakPickingAndGroupingParameters::getEncodedPeakParameters(string tupleMa
         groupBackgroundTypeStr = groupBackgroundTypeStr + "NONE";
     } else if (groupBackgroundType == PeakGroupBackgroundType::MAX_BLANK_INTENSITY) {
         groupBackgroundTypeStr = groupBackgroundTypeStr + "MAX_BLANK_INTENSITY";
+    } else if (groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_BASELINE) {
+        groupBackgroundTypeStr = groupBackgroundTypeStr + "PREFERRED_QUANT_TYPE_BASELINE";
     } else {
         groupBackgroundTypeStr = groupBackgroundTypeStr + "UNKNOWN";
     }
@@ -3592,6 +3594,8 @@ void PeakPickingAndGroupingParameters::fillInPeakParameters(unordered_map<string
             groupBackgroundType = PeakGroupBackgroundType::NONE;
         } else if (groupBackgroundTypeStr == "MAX_BLANK_INTENSITY") {
             groupBackgroundType = PeakGroupBackgroundType::MAX_BLANK_INTENSITY;
+        } else if (groupBackgroundTypeStr == "PREFERRED_QUANT_TYPE_BASELINE") {
+            groupBackgroundType = PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_BASELINE;
         }
     }
 
