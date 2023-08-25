@@ -2210,7 +2210,6 @@ vector<PeakGroup> EIC::groupPeaksE(vector<EIC*>& eics, shared_ptr<PeakPickingAnd
         if (params->groupBackgroundType == PeakGroupBackgroundType::MAX_BLANK_INTENSITY) {
             pg.groupBackground = pg.blankMaxHeight;
         }
-        //TODO: add other options
     }
 
     if (m) delete(m);
@@ -2606,14 +2605,14 @@ MergedEICSummaryData EIC::calculateMergedEICSummaryData(EIC* mergedEIC, set<int>
 
             for (auto i = p.minpos; i <= p.maxpos; i++) {
 
-                mergedEICSummaryData.FullRangeBaseline += mergedEIC->baseline[i];
+                mergedEICSummaryData.fullRangeBaseline += mergedEIC->baseline[i];
 
                 if (i >= p.minPosFWHM && i <= p.maxPosFWHM) {
                     mergedEICSummaryData.FWHMBaseline += mergedEIC->baseline[i];
                 }
 
                 if (i >= p.pos-1 && i <= p.pos+1) {
-                    mergedEICSummaryData.ThreePointBaseline += mergedEIC->baseline[i];
+                    mergedEICSummaryData.threePointBaseline += mergedEIC->baseline[i];
                 }
 
                 if (i == p.pos) {
