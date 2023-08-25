@@ -652,11 +652,20 @@ void QQQProcessor::assignTransitionSpecificGroupBackground(
     bool debug
     ) {
     for (auto & pg : peakgroups) {
+        if (!pg.compound) continue;
+
         string quantType = "smoothedPeakAreaCorrected";
         if (pg.compound->metaDataMap.find(QQQProcessor::getTransitionPreferredQuantTypeStringKey()) != pg.compound->metaDataMap.end()) {
             quantType = pg.compound->metaDataMap.at(QQQProcessor::getTransitionPreferredQuantTypeStringKey());
 
             pg.groupBackground = pg.mergedEICSummaryData.getCorrespondingBaseline(quantType);
+
+            if (debug) {
+                cout << pg.compound->name << "@ "<< pg.medianRt()
+                     << " min: quantType=" << quantType
+                     << ", groupBackground=" << pg.groupBackground
+                     << endl;
+            }
         }
     }
 }
