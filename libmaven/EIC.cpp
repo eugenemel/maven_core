@@ -2452,6 +2452,8 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
 
         grp.groupStatistics();
 
+        grp.mergedEICSummaryData = EIC::calculateMergedEICSummaryData(m, it->second.mergedEICPeakIndexes, false);
+
         pgroups.push_back(grp);
     }
 
@@ -2585,7 +2587,7 @@ float EIC::calculateBlankBackground(vector<EIC *>& eics, float rtMin, float rtMa
     return maxBlankIntensity;
 }
 
-MergedEICSummaryData EIC::calculateMergedEICSummaryData(EIC* mergedEIC, set<int> mergedEICPeakIndexes, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug) {
+MergedEICSummaryData EIC::calculateMergedEICSummaryData(EIC* mergedEIC, set<int> mergedEICPeakIndexes, bool debug) {
     MergedEICSummaryData mergedEICSummaryData;
 
     if (mergedEIC) {

@@ -717,7 +717,7 @@ class EIC {
     static float calculateBlankBackground(vector<EIC*>& eics, float rtMin, float rtMax, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug=false);
 
     //Issue 668: capture, summarize some information about merged EICs
-    static MergedEICSummaryData calculateMergedEICSummaryData(EIC* mergedEIC, set<int> mergedEICPeakIndexes, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug=false);
+    static MergedEICSummaryData calculateMergedEICSummaryData(EIC* mergedEIC, set<int> mergedEICPeakIndexes, bool debug=false);
 
 private:
     SmootherType smootherType;
