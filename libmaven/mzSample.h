@@ -938,10 +938,23 @@ struct IsotopeParameters {
 
 };
 
-//Issue 665
 enum PeakGroupBackgroundType{
     NONE=0, // background not computed - value is 0
-    MAX_BLANK_INTENSITY=1 // max raw intensity from any blank sample identified within RT bounds of peak group.
+
+    //Issue 665
+    // max raw intensity from any blank sample identified within RT bounds of peak group.
+    MAX_BLANK_INTENSITY=1,
+
+    //Issue 668
+    //(Primarily for QQQ data)
+    // based on preferred transition quant type, compute a baseline type.
+    // This value will either refer to smoothed or not, and will consist of
+    // intensity from either
+    // (1) The entire RT range,
+    // (2) Only point associated the RT of the peak,
+    // or
+    // (3) The peak RT and its neighbors (for peakAreaTop).
+    PREFERRED_QUANT_TYPE_BASELINE=2
 };
 
 class PeakGroup {
