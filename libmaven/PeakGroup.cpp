@@ -65,6 +65,7 @@ PeakGroup::PeakGroup()  {
     isComputedGroupStatistics = false;
 
     groupBackground = 0.0f;
+    blankMaxHeight = 0.0f;
 
 }      
 
@@ -142,6 +143,7 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     compounds = o.compounds;
 
     groupBackground = o.groupBackground;
+    blankMaxHeight = o.blankMaxHeight;
 
     copyChildren(o);
 }

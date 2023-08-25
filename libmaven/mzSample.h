@@ -1091,6 +1091,9 @@ class PeakGroup {
         //Issue 665: retain computed background values, code for algorithm used to compute group background
         float groupBackground;
 
+        //Issue 668: Always compute this value.
+        float blankMaxHeight;
+
         bool isPrimaryGroup();
         inline bool hasCompoundLink()  { if(compound != NULL) return true ; return false; }
         inline bool isEmpty()   { if(peaks.size() == 0) return true; return false; }
