@@ -57,7 +57,7 @@ class Fragment;
 class Isotope;
 struct FragmentationMatchScore;
 class CompoundIon;
-struct MergedEICSummaryData;
+class MergedEICSummaryData;
 
 class LibraryMs2SpectrumParameters;
 class LoopInjectionMs2SpectrumParameters;
@@ -962,12 +962,15 @@ enum PeakGroupBackgroundType{
 };
 
 //Issue 668: Retain some summary-level information from merged EIC (part of peak grouping)
-struct MergedEICSummaryData{
+class MergedEICSummaryData{
+public:
 
-    float FullRangeBaseline = 0; //quant types that consider the full RT range
+    float fullRangeBaseline = 0; //quant types that consider the full RT range
     float FWHMBaseline = 0; //quant types that use the FWHM RT range
-    float ThreePointBaseline = 0; // quant types that use the 3-point baseline (peakAreaTop)
+    float threePointBaseline = 0; // quant types that use the 3-point baseline (peakAreaTop)
     float pickedPeakBaseline = 0; // quant types that use a single point
+
+    float getCorrespondingBaseline(string quantType);
 };
 
 class PeakGroup {
@@ -2547,6 +2550,11 @@ class QQQProcessor{
             vector<PeakGroup>& peakgroups,
             shared_ptr<QQQSearchParameters> params,
             bool debug = false);
+
+    static void assignTransitionSpecificGroupBackground(
+            vector<PeakGroup>& peakgroups,
+            bool debug = false
+        );
 
     //reserved constants - do not change!
     static string getTransitionIdFilterStringKey(){return "TRANSITION_ID_FILTER_STRING";}

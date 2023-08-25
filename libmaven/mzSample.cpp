@@ -3669,3 +3669,36 @@ shared_ptr<PeakPickingAndGroupingParameters> PeakPickingAndGroupingParameters::g
 
     return mergedEICParams;
 }
+
+float MergedEICSummaryData::getCorrespondingBaseline(string name){
+
+    if (name == "peakArea") {
+        return fullRangeBaseline;
+    } else if (name == "peakAreaCorrected") {
+        return fullRangeBaseline;
+    } else if (name == "peakAreaTop") {
+        return threePointBaseline;
+    } else if (name == "peakAreaFractional") {
+        return -1.0; // TODO: not implemented
+    } else if (name == "peakIntensity") {
+        return pickedPeakBaseline;
+    } else if (name == "signalBaselineRatio") {
+        return -1.0; // TODO: not implemented
+    } else if (name == "smoothedIntensity") {
+        return pickedPeakBaseline;
+    } else if (name == "smoothedPeakArea") {
+        return fullRangeBaseline;
+    } else if (name == "smoothedPeakAreaCorrected") {
+        return fullRangeBaseline;
+    } else if (name == "smoothedPeakAreaTop") {
+        return threePointBaseline;
+    } else if (name == "smoothedSignalBaselineRatio") {
+        return -1.0; // TODO: not implemented
+    } else if (name == "peakAreaFWHM") {
+        return FWHMBaseline;
+    } else if (name == "smoothedPeakAreaFWHM") {
+        return FWHMBaseline;
+    }
+
+    return -1.0f;
+}
