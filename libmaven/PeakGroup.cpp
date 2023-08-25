@@ -144,6 +144,7 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
 
     groupBackground = o.groupBackground;
     blankMaxHeight = o.blankMaxHeight;
+    mergedEICSummaryData = o.mergedEICSummaryData;
 
     copyChildren(o);
 }

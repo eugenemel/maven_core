@@ -957,6 +957,26 @@ enum PeakGroupBackgroundType{
     PREFERRED_QUANT_TYPE_BASELINE=2
 };
 
+//Issue 668: Retain some summary-level information from merged EIC (part of peak grouping)
+struct MergedEICSummaryData{
+
+    //quant types that consider the full RT range
+    float smoothedFullBaseline = 0;
+    float rawFullBaseline = 0;
+
+    //quant types that use the FWHM RT range
+    float smoothedFWHMBaseline = 0;
+    float rawFWHMBaseline = 0;
+
+    //quant types that use the max, and one point adjacent (areaTop)
+    float smoothedThreePointBaseline = 0;
+    float rawThreePointBaseline = 0;
+
+    //quant types that use the max
+    float smoothedMaxBaseline = 0;
+    float rawMaxBaseline = 0;
+};
+
 class PeakGroup {
 
 	public:
@@ -1103,6 +1123,7 @@ class PeakGroup {
 
         //Issue 665: retain computed background values, code for algorithm used to compute group background
         float groupBackground;
+        MergedEICSummaryData mergedEICSummaryData;
 
         //Issue 668: Always compute this value.
         float blankMaxHeight;
