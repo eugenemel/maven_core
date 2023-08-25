@@ -26,6 +26,7 @@ peakdetector.pro.user
 libmaven/ThreadSafeSmoother
 *.o.tmp
 maven_core.pro.user**
+.qtc_clangd/
 
 **/.DS_Store
 mzDeltas/.DS_Store
