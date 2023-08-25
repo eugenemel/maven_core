@@ -1966,7 +1966,7 @@ public:
     string getEncodedPeakParameters(string tupleMapDelimiter="&", string internalMapDelimiter="|,|");
     void fillInPeakParameters(unordered_map<string, string> decodedMap, string tupleMapDelimiter="&", string internalMapDelimiter="|,|");
 
-    shared_ptr<PeakPickingAndGroupingParameters> getMergedAsPeakParams();
+    static shared_ptr<PeakPickingAndGroupingParameters> getMergedAsPeakParams(shared_ptr<PeakPickingAndGroupingParameters> params);
 };
 
 /**

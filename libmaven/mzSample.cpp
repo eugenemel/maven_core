@@ -3654,16 +3654,18 @@ vector<mzSample*> mzSample::getSamples(string sampleDir, bool isQQQSample) {
     return samples;
 }
 
-shared_ptr<PeakPickingAndGroupingParameters> PeakPickingAndGroupingParameters::getMergedAsPeakParams() {
-    shared_ptr<PeakPickingAndGroupingParameters> mergedEICParams =
-        std::make_shared<PeakPickingAndGroupingParameters>(this);
+shared_ptr<PeakPickingAndGroupingParameters> PeakPickingAndGroupingParameters::getMergedAsPeakParams(
+    shared_ptr<PeakPickingAndGroupingParameters> params) {
 
-    mergedEICParams->peakSmoothingWindow = mergedSmoothingWindow;
-    mergedEICParams->peakRtBoundsMaxIntensityFraction = mergedPeakRtBoundsMaxIntensityFraction;
-    mergedEICParams->peakRtBoundsSlopeThreshold = mergedPeakRtBoundsSlopeThreshold;
-    mergedEICParams->peakBaselineSmoothingWindow = mergedBaselineSmoothingWindow;
-    mergedEICParams->peakBaselineDropTopX = mergedBaselineDropTopX;
-    mergedEICParams->peakIsComputeBounds = mergedIsComputeBounds;
+    shared_ptr<PeakPickingAndGroupingParameters> mergedEICParams =
+        std::make_shared<PeakPickingAndGroupingParameters>(*params);
+
+    mergedEICParams->peakSmoothingWindow = params->mergedSmoothingWindow;
+    mergedEICParams->peakRtBoundsMaxIntensityFraction = params->mergedPeakRtBoundsMaxIntensityFraction;
+    mergedEICParams->peakRtBoundsSlopeThreshold = params->mergedPeakRtBoundsSlopeThreshold;
+    mergedEICParams->peakBaselineSmoothingWindow = params->mergedBaselineSmoothingWindow;
+    mergedEICParams->peakBaselineDropTopX = params->mergedBaselineDropTopX;
+    mergedEICParams->peakIsComputeBounds = params->mergedIsComputeBounds;
 
     return mergedEICParams;
 }
