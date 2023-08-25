@@ -3653,3 +3653,17 @@ vector<mzSample*> mzSample::getSamples(string sampleDir, bool isQQQSample) {
 
     return samples;
 }
+
+shared_ptr<PeakPickingAndGroupingParameters> PeakPickingAndGroupingParameters::getMergedAsPeakParams() {
+    shared_ptr<PeakPickingAndGroupingParameters> mergedEICParams =
+        std::make_shared<PeakPickingAndGroupingParameters>(this);
+
+    mergedEICParams->peakSmoothingWindow = mergedSmoothingWindow;
+    mergedEICParams->peakRtBoundsMaxIntensityFraction = mergedPeakRtBoundsMaxIntensityFraction;
+    mergedEICParams->peakRtBoundsSlopeThreshold = mergedPeakRtBoundsSlopeThreshold;
+    mergedEICParams->peakBaselineSmoothingWindow = mergedBaselineSmoothingWindow;
+    mergedEICParams->peakBaselineDropTopX = mergedBaselineDropTopX;
+    mergedEICParams->peakIsComputeBounds = mergedIsComputeBounds;
+
+    return mergedEICParams;
+}
