@@ -3598,7 +3598,7 @@ void PeakPickingAndGroupingParameters::fillInPeakParameters(unordered_map<string
             groupBackgroundType = PeakGroupBackgroundType::MAX_BLANK_INTENSITY;
         } else if (groupBackgroundTypeStr == "PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE") {
             groupBackgroundType = PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE;
-        } else if (groupBackgroundTypeStr == "PREFERRED_QUANT_TYPE_MAX_BLANK_SMOOTHED_SIGNAL") {
+        } else if (groupBackgroundTypeStr == "PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL") {
             groupBackgroundType = PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL;
         }
     }
