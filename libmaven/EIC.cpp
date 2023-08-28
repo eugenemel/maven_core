@@ -2442,6 +2442,8 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
 
         grp.blankMaxHeight = EIC::calculateBlankBackground(eics, grp.minRt, grp.maxRt, debug);
         grp.mergedEICSummaryData = EIC::calculateMergedEICSummaryData(m, it->second.mergedEICPeakIndexes, debug);
+        grp.maxBlankRawSignal = EIC::calculateMaxBlankSignalBackground(m, eics, it->second.mergedEICPeakIndexes, false, debug);
+        grp.maxBlankSmoothedSignal = EIC::calculateMaxBlankSignalBackground(m, eics, it->second.mergedEICPeakIndexes, true, debug);
 
         pgroups.push_back(grp);
     }
