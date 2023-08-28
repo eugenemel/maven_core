@@ -949,18 +949,28 @@ enum PeakGroupBackgroundType{
 
     //Issue 665
     // max raw intensity from any blank sample identified within RT bounds of peak group.
+    // This type is always compared to the peak height.
     MAX_BLANK_INTENSITY=1,
 
     //Issue 668
     //(Primarily for QQQ data)
+    // PREFERRED_QUANT_TYPE_* Series
+    //
     // based on preferred transition quant type, compute a baseline type.
     // This value will either refer to smoothed or not, and will consist of
     // intensity from either
     // (1) The entire RT range,
-    // (2) Only point associated the RT of the peak,
+    // (2) The FWHM RT range,
+    // (3) The peak RT and its neighbors (for peakAreaTop),
     // or
-    // (3) The peak RT and its neighbors (for peakAreaTop).
-    PREFERRED_QUANT_TYPE_BASELINE=2
+    // (3) The peak RT only (peakHeight).
+
+    // Use Baseline determined from merged EIC
+    PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE=2,
+
+    //Uses readout type from the blank samples, max for each corresponding readout.
+    PREFERRED_QUANT_TYPE_MAX_BLANK_SMOOTHED_SIGNAL=3,
+    PREFERRED_QUANT_TYPE_MAX_BLANK_RAW_SIGNAL=4
 };
 
 //Issue 668: Retain some summary-level information from merged EIC (part of peak grouping)

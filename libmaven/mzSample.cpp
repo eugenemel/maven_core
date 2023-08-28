@@ -3489,8 +3489,12 @@ string PeakPickingAndGroupingParameters::getEncodedPeakParameters(string tupleMa
         groupBackgroundTypeStr = groupBackgroundTypeStr + "NONE";
     } else if (groupBackgroundType == PeakGroupBackgroundType::MAX_BLANK_INTENSITY) {
         groupBackgroundTypeStr = groupBackgroundTypeStr + "MAX_BLANK_INTENSITY";
-    } else if (groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_BASELINE) {
-        groupBackgroundTypeStr = groupBackgroundTypeStr + "PREFERRED_QUANT_TYPE_BASELINE";
+    } else if (groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE) {
+        groupBackgroundTypeStr = groupBackgroundTypeStr + "PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE";
+    } else if (groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MAX_BLANK_SMOOTHED_SIGNAL) {
+        groupBackgroundTypeStr = groupBackgroundTypeStr + "PREFERRED_QUANT_TYPE_MAX_BLANK_SMOOTHED_SIGNAL";
+    } else if (groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MAX_BLANK_RAW_SIGNAL) {
+        groupBackgroundTypeStr = groupBackgroundTypeStr + "PREFERRED_QUANT_TYPE_MAX_BLANK_RAW_SIGNAL";
     } else {
         groupBackgroundTypeStr = groupBackgroundTypeStr + "UNKNOWN";
     }
@@ -3594,8 +3598,12 @@ void PeakPickingAndGroupingParameters::fillInPeakParameters(unordered_map<string
             groupBackgroundType = PeakGroupBackgroundType::NONE;
         } else if (groupBackgroundTypeStr == "MAX_BLANK_INTENSITY") {
             groupBackgroundType = PeakGroupBackgroundType::MAX_BLANK_INTENSITY;
-        } else if (groupBackgroundTypeStr == "PREFERRED_QUANT_TYPE_BASELINE") {
-            groupBackgroundType = PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_BASELINE;
+        } else if (groupBackgroundTypeStr == "PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE") {
+            groupBackgroundType = PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE;
+        } else if (groupBackgroundTypeStr == "PREFERRED_QUANT_TYPE_MAX_BLANK_SMOOTHED_SIGNAL") {
+            groupBackgroundType = PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MAX_BLANK_SMOOTHED_SIGNAL;
+        } else if (groupBackgroundTypeStr == "PREFERRED_QUANT_TYPE_MAX_BLANK_RAW_SIGNAL") {
+            groupBackgroundType = PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MAX_BLANK_RAW_SIGNAL;
         }
     }
 
