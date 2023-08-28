@@ -2644,3 +2644,11 @@ PeakGroupBaseline EIC::calculateMergedEICSummaryData(EIC* mergedEIC, set<int> me
     return mergedEICSummaryData;
 }
 
+PeakGroupBaseline EIC::calculateMaxBlankSignalBackground(EIC* mergedEIC, vector<EIC *>& eics, set<int> mergedEICPeakIndexes, bool debug) {
+    PeakGroupBaseline maxBlankSignalBackground;
+
+    //TODO: implement
+
+    return maxBlankSignalBackground;
+}
+

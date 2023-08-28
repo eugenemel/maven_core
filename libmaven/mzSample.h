@@ -718,6 +718,7 @@ class EIC {
 
     //Issue 668: capture, summarize some information about merged EICs
     static PeakGroupBaseline calculateMergedEICSummaryData(EIC* mergedEIC, set<int> mergedEICPeakIndexes, bool debug=false);
+    static PeakGroupBaseline calculateMaxBlankSignalBackground(EIC* mergedEIC, vector<EIC *>& eics, set<int> mergedEICPeakIndexes, bool debug=false);
 
 private:
     SmootherType smootherType;
@@ -1120,6 +1121,7 @@ class PeakGroup {
         //Issue 665: retain computed background values, code for algorithm used to compute group background
         float groupBackground;
         PeakGroupBaseline mergedEICSummaryData;
+        PeakGroupBaseline maxBlankSignalBackground;
 
         //Issue 668: Always compute this value.
         float blankMaxHeight;
