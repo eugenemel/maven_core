@@ -2204,14 +2204,6 @@ vector<PeakGroup> EIC::groupPeaksE(vector<EIC*>& eics, shared_ptr<PeakPickingAnd
     //calls PeakGroups::groupStatistics()
     pgroups = mergedEICToGroups(eics, m, params->groupMaxRtDiff, params->groupMergeOverlap, debug);
 
-    //Issue 665: compute background, save in PeakGroup field.
-    for (auto& pg : pgroups) {
-        pg.blankMaxHeight = EIC::calculateBlankBackground(eics, pg.minRt, pg.maxRt, params, debug);
-        if (params->groupBackgroundType == PeakGroupBackgroundType::MAX_BLANK_INTENSITY) {
-            pg.groupBackground = pg.blankMaxHeight;
-        }
-    }
-
     if (m) delete(m);
     return pgroups;
 }
@@ -2448,6 +2440,7 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
 
         grp.groupStatistics();
 
+        grp.blankMaxHeight = EIC::calculateBlankBackground(eics, grp.minRt, grp.maxRt, debug);
         grp.mergedEICSummaryData = EIC::calculateMergedEICSummaryData(m, it->second.mergedEICPeakIndexes, debug);
 
         pgroups.push_back(grp);
@@ -2624,7 +2617,7 @@ PeakGroupBaseline EIC::calculateMergedEICSummaryData(EIC* mergedEIC, set<int> me
     return mergedEICSummaryData;
 }
 
-float EIC::calculateBlankBackground(vector<EIC *>& eics, float rtMin, float rtMax, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug){
+float EIC::calculateBlankBackground(vector<EIC *>& eics, float rtMin, float rtMax, bool debug){
 
     float maxBlankIntensity = 0;
 

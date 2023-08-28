@@ -714,7 +714,7 @@ class EIC {
     static bool compMaxIntensity(EIC* a, EIC* b ) { return a->maxIntensity > b->maxIntensity; }
 
     //Issue 665: compute blank-specific background
-    static float calculateBlankBackground(vector<EIC*>& eics, float rtMin, float rtMax, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug=false);
+    static float calculateBlankBackground(vector<EIC*>& eics, float rtMin, float rtMax, bool debug=false);
 
     //Issue 668: capture, summarize some information about merged EICs
     static PeakGroupBaseline calculateMergedEICSummaryData(EIC* mergedEIC, set<int> mergedEICPeakIndexes, bool debug=false);
