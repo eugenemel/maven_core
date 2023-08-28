@@ -57,7 +57,7 @@ class Fragment;
 class Isotope;
 struct FragmentationMatchScore;
 class CompoundIon;
-class MergedEICSummaryData;
+class PeakGroupBaseline;
 
 class LibraryMs2SpectrumParameters;
 class LoopInjectionMs2SpectrumParameters;
@@ -717,7 +717,7 @@ class EIC {
     static float calculateBlankBackground(vector<EIC*>& eics, float rtMin, float rtMax, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug=false);
 
     //Issue 668: capture, summarize some information about merged EICs
-    static MergedEICSummaryData calculateMergedEICSummaryData(EIC* mergedEIC, set<int> mergedEICPeakIndexes, bool debug=false);
+    static PeakGroupBaseline calculateMergedEICSummaryData(EIC* mergedEIC, set<int> mergedEICPeakIndexes, bool debug=false);
 
 private:
     SmootherType smootherType;
@@ -962,7 +962,7 @@ enum PeakGroupBackgroundType{
 };
 
 //Issue 668: Retain some summary-level information from merged EIC (part of peak grouping)
-class MergedEICSummaryData{
+class PeakGroupBaseline {
 public:
 
     float fullRangeBaseline = 0; //quant types that consider the full RT range
@@ -1119,7 +1119,7 @@ class PeakGroup {
 
         //Issue 665: retain computed background values, code for algorithm used to compute group background
         float groupBackground;
-        MergedEICSummaryData mergedEICSummaryData;
+        PeakGroupBaseline mergedEICSummaryData;
 
         //Issue 668: Always compute this value.
         float blankMaxHeight;
@@ -2551,6 +2551,11 @@ class QQQProcessor{
             shared_ptr<QQQSearchParameters> params,
             bool debug = false);
 
+    /**
+     * @brief assignTransitionSpecificGroupBackground
+     * @param peakgroups
+     * @param debug
+     */
     static void assignTransitionSpecificGroupBackground(
             vector<PeakGroup>& peakgroups,
             bool debug = false

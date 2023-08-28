@@ -3670,7 +3670,7 @@ shared_ptr<PeakPickingAndGroupingParameters> PeakPickingAndGroupingParameters::g
     return mergedEICParams;
 }
 
-float MergedEICSummaryData::getCorrespondingBaseline(string name){
+float PeakGroupBaseline::getCorrespondingBaseline(string name){
 
     if (name == "peakArea") {
         return fullRangeBaseline;

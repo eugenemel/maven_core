@@ -2583,8 +2583,8 @@ float EIC::calculateBlankBackground(vector<EIC *>& eics, float rtMin, float rtMa
     return maxBlankIntensity;
 }
 
-MergedEICSummaryData EIC::calculateMergedEICSummaryData(EIC* mergedEIC, set<int> mergedEICPeakIndexes, bool debug) {
-    MergedEICSummaryData mergedEICSummaryData;
+PeakGroupBaseline EIC::calculateMergedEICSummaryData(EIC* mergedEIC, set<int> mergedEICPeakIndexes, bool debug) {
+    PeakGroupBaseline mergedEICSummaryData;
 
     if (mergedEIC) {
 
@@ -2643,3 +2643,4 @@ MergedEICSummaryData EIC::calculateMergedEICSummaryData(EIC* mergedEIC, set<int>
 
     return mergedEICSummaryData;
 }
+
