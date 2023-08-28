@@ -718,7 +718,8 @@ class EIC {
 
     //Issue 668: capture, summarize some information about merged EICs
     static PeakGroupBaseline calculateMergedEICSummaryData(EIC* mergedEIC, set<int> mergedEICPeakIndexes, bool debug=false);
-    static PeakGroupBaseline calculateMaxBlankSignalBackground(EIC* mergedEIC, vector<EIC *>& eics, set<int> mergedEICPeakIndexes, bool debug=false);
+    static PeakGroupBaseline calculateMaxBlankSignalBackground(EIC* mergedEIC, vector<EIC *>& eics, set<int> mergedEICPeakIndexes, bool isUseSmoothedIntensity, bool debug=false);
+    static float getAnalogousIntensitySum(EIC* eic, float rtAnchor, unsigned int numPoints, bool isUseSmoothedIntensity, bool debug=false);
 
 private:
     SmootherType smootherType;

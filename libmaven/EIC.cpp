@@ -2563,26 +2563,6 @@ void EIC::removeOverlapingPeaks() {
 	peaks = reduced;
 }
 
-
-float EIC::calculateBlankBackground(vector<EIC *>& eics, float rtMin, float rtMax, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug){
-
-    float maxBlankIntensity = 0;
-
-    for (auto eic : eics) {
-        if (eic->sample->isBlank) {
-            for (unsigned int i = 0; i < eic->size(); i++) {
-                if (eic->rt[i] >= rtMin && eic->rt[i] <= rtMax) {
-                    if (eic->intensity[i] > maxBlankIntensity) {
-                        maxBlankIntensity = eic->intensity[i];
-                    }
-                }
-            }
-        }
-    }
-
-    return maxBlankIntensity;
-}
-
 PeakGroupBaseline EIC::calculateMergedEICSummaryData(EIC* mergedEIC, set<int> mergedEICPeakIndexes, bool debug) {
     PeakGroupBaseline mergedEICSummaryData;
 
@@ -2644,10 +2624,154 @@ PeakGroupBaseline EIC::calculateMergedEICSummaryData(EIC* mergedEIC, set<int> me
     return mergedEICSummaryData;
 }
 
-PeakGroupBaseline EIC::calculateMaxBlankSignalBackground(EIC* mergedEIC, vector<EIC *>& eics, set<int> mergedEICPeakIndexes, bool debug) {
+float EIC::calculateBlankBackground(vector<EIC *>& eics, float rtMin, float rtMax, shared_ptr<PeakPickingAndGroupingParameters> params, bool debug){
+
+    float maxBlankIntensity = 0;
+
+    for (auto eic : eics) {
+        if (eic->sample->isBlank) {
+            for (unsigned int i = 0; i < eic->size(); i++) {
+                if (eic->rt[i] >= rtMin && eic->rt[i] <= rtMax) {
+                    if (eic->intensity[i] > maxBlankIntensity) {
+                        maxBlankIntensity = eic->intensity[i];
+                    }
+                }
+            }
+        }
+    }
+
+    return maxBlankIntensity;
+}
+
+float EIC::getAnalogousIntensitySum(EIC* eic, float rtAnchor, unsigned int numPoints, bool isUseSmoothedIntensity, bool debug) {
+    float intensitySum = 0.0f;
+
+    if (!eic) return intensitySum;
+
+    //find closest point in rt to rtAnchor
+    auto lb = lower_bound(eic->rt.begin(), eic->rt.end(), rtAnchor);
+    auto pos = lb - eic->rt.begin();
+
+    //lower_bound returns first value not less than the rtAnchor,
+    //check the position before the lower_bound is closer in RT to rtAnchor than the lower_bound.
+    auto rtPos = (pos > 0 && abs(rtAnchor - eic->rt[pos-1]) < abs(rtAnchor - eic->rt[pos])) ? (pos-1) : pos;
+
+    intensitySum += isUseSmoothedIntensity ? eic->spline[rtPos] : eic->intensity[rtPos];
+
+    unsigned int pointsAroundMax = numPoints-1;
+
+    if (pointsAroundMax % 2 == 1){
+        pointsAroundMax = pointsAroundMax + 1;
+    }
+
+    pointsAroundMax /= 2;
+
+    if (debug) {
+        cout << "EIC::getAnalogousIntensitySum(RT = " << rtAnchor << ", " << numPoints << " points):"
+             << " pointsAroundMax= " << pointsAroundMax << "\n"
+             << "rt[i-2]: " << eic->rt[rtPos-2] << ", diff = " << abs(eic->rt[rtPos-2]-rtAnchor) << "\n"
+             << "rt[i-1]: " << eic->rt[rtPos-1] << ", diff = " << abs(eic->rt[rtPos-1]-rtAnchor) << "\n"
+             << "** rt[i]: " <<  eic->rt[rtPos] << ", diff = " << abs(eic->rt[rtPos]-rtAnchor) << " **\n"
+             << "rt[i+1]: " <<  eic->rt[rtPos+1] << ", diff = " << abs(eic->rt[rtPos+1]-rtAnchor) << "\n"
+             << "rt[i+2]: " <<  eic->rt[rtPos+2] << ", diff = " << abs(eic->rt[rtPos+2]-rtAnchor) << "\n"
+             << endl;
+    }
+
+    unsigned int pointsLeft = 0;
+    while (pointsLeft < pointsAroundMax) {
+        pointsLeft++;
+        if (rtPos-pointsLeft < 0) break;
+        intensitySum += isUseSmoothedIntensity ? eic->spline[rtPos-pointsLeft] : eic->intensity[rtPos-pointsLeft];
+
+        if (debug) {
+            cout << "EIC::getAnalogousIntensitySum() left: pointsLeft=" << pointsLeft << ", pointsAroundMax=" << pointsAroundMax << endl;
+        }
+    }
+
+    unsigned int pointsRight = 0;
+    while (pointsRight < pointsAroundMax) {
+        pointsRight++;
+        if (rtPos+pointsRight > eic->size()-1) break;
+        intensitySum += isUseSmoothedIntensity ? eic->spline[rtPos+pointsRight] : eic->intensity[rtPos+pointsRight];
+
+        if (debug) {
+            cout << "EIC::getAnalogousIntensitySum() left: pointsRight=" << pointsRight << ", pointsAroundMax=" << pointsAroundMax << endl;
+        }
+    }
+
+    return intensitySum;
+}
+
+PeakGroupBaseline EIC::calculateMaxBlankSignalBackground(
+    EIC* mergedEIC,
+    vector<EIC *>& eics,
+    set<int> mergedEICPeakIndexes,
+    bool isUseSmoothedIntensity,
+    bool debug) {
+
     PeakGroupBaseline maxBlankSignalBackground;
 
-    //TODO: implement
+    if (mergedEIC) {
+
+        //Find representative index
+        int representativeIndex = -1;
+        float representativeIntensity = -1.0f;
+
+        for (auto peakIndex : mergedEICPeakIndexes) {
+            if (mergedEIC->spline[peakIndex] > representativeIntensity) {
+                representativeIntensity = mergedEIC->spline[peakIndex];
+                representativeIndex = peakIndex;
+            }
+        }
+
+        if (debug) cout << "EIC::calculateMaxBlankSignalBackground(): peakIndex=" << representativeIndex << endl;
+
+        if (representativeIndex != -1) {
+            // compute values based on representative index
+            Peak p = mergedEIC->peaks.at(representativeIndex);
+
+            if (debug) {
+                cout << "EIC::calculateMaxBlankSignalBackground(): "
+                     << "( " << p.minpos << " - ["
+                     << p.minPosFWHM << " - {" << (p.pos-1) << " " << p.pos << " " << (p.pos+1) << "} - "
+                     << p.maxPosFWHM << " ] - " << p.maxpos << " )"
+                     << endl;
+            }
+
+            float maxFullRangeBaseline = 0.0f;
+            float maxFWHMBaseline = 0.0f;
+            float maxThreePointBaseline = 0.0f;
+            float maxOnePointBaseline = 0.0f;
+
+            for (auto eic : eics) {
+                if (eic->sample->isBlank) {
+                    float fullRangeBaseline = EIC::getAnalogousIntensitySum(eic, p.rt, (p.maxpos-p.minpos+1), isUseSmoothedIntensity, debug);
+                    float fwhmBaseline = EIC::getAnalogousIntensitySum(eic, p.rt, (p.maxPosFWHM-p.minPosFWHM+1), isUseSmoothedIntensity, debug);
+                    float threePointBaseline = EIC::getAnalogousIntensitySum(eic, p.rt, 3, isUseSmoothedIntensity, debug);
+                    float onePointBaseline = EIC::getAnalogousIntensitySum(eic, p.rt, 1, isUseSmoothedIntensity, debug);
+
+                    if (fullRangeBaseline > maxFullRangeBaseline) maxFullRangeBaseline = fullRangeBaseline;
+                    if (fwhmBaseline > maxFWHMBaseline) maxFWHMBaseline = fwhmBaseline;
+                    if (threePointBaseline > maxThreePointBaseline) maxThreePointBaseline = threePointBaseline;
+                    if (onePointBaseline > maxOnePointBaseline) maxOnePointBaseline = onePointBaseline;
+                }
+            }
+
+            maxBlankSignalBackground.fullRangeBaseline = maxFullRangeBaseline;
+            maxBlankSignalBackground.FWHMBaseline = maxFWHMBaseline;
+            maxBlankSignalBackground.threePointBaseline = maxThreePointBaseline;
+            maxBlankSignalBackground.pickedPeakBaseline = maxOnePointBaseline;
+
+            if (debug) {
+                cout << "EIC::calculateMaxBlankSignalBackground(): "
+                     << " FULL=" << maxBlankSignalBackground.fullRangeBaseline
+                     << " FWHM=" << maxBlankSignalBackground.FWHMBaseline
+                     << " THREE=" << maxBlankSignalBackground.threePointBaseline
+                     << " ONE=" << maxBlankSignalBackground.pickedPeakBaseline
+                     << endl;
+            }
+        }
+    }
 
     return maxBlankSignalBackground;
 }
