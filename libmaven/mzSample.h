@@ -1129,13 +1129,14 @@ class PeakGroup {
          */
         float srmProductMz;
 
-        //Issue 665: retain computed background values, code for algorithm used to compute group background
-        float groupBackground;
+        //Issue 665/668: Various ways to compute peak background.
         PeakGroupBaseline mergedEICSummaryData;
-        PeakGroupBaseline maxBlankSignalBackground;
-
-        //Issue 668: Always compute this value.
+        PeakGroupBaseline maxBlankRawSignal;
+        PeakGroupBaseline maxBlankSmoothedSignal;
         float blankMaxHeight;
+
+        //This value takes on one of the above varlues based on setting in PeakGroupBackgroundType.
+        float groupBackground;
 
         bool isPrimaryGroup();
         inline bool hasCompoundLink()  { if(compound != NULL) return true ; return false; }
