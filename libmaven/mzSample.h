@@ -2568,12 +2568,18 @@ class QQQProcessor{
             bool debug = false);
 
     /**
-     * @brief assignTransitionSpecificGroupBackground
+     * @brief setPeakGroupBackground
+     *
+     * Based on PeakGroupBackgroundType, assign PeakGroup.groupBackground.
+     * Used downstream in Peak Group filtering steps.
+     *
      * @param peakgroups
+     * @param params
      * @param debug
      */
-    static void assignTransitionSpecificGroupBackground(
+    static void setPeakGroupBackground(
             vector<PeakGroup>& peakgroups,
+            shared_ptr<QQQSearchParameters> params,
             bool debug = false
         );
 

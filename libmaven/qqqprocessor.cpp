@@ -647,18 +647,29 @@ vector<PeakGroup> QQQProcessor::filterPeakGroups(vector<PeakGroup>& peakgroups, 
     return filteredGroups;
 }
 
-void QQQProcessor::assignTransitionSpecificGroupBackground(
+void QQQProcessor::setPeakGroupBackground(
     vector<PeakGroup>& peakgroups,
+    shared_ptr<QQQSearchParameters> params,
     bool debug
     ) {
+
     for (auto & pg : peakgroups) {
+
+        if (params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::MAX_BLANK_INTENSITY) {
+            pg.groupBackground = pg.blankMaxHeight;
+        }
+
         if (!pg.compound) continue;
 
         string quantType = "smoothedPeakAreaCorrected";
         if (pg.compound->metaDataMap.find(QQQProcessor::getTransitionPreferredQuantTypeStringKey()) != pg.compound->metaDataMap.end()) {
             quantType = pg.compound->metaDataMap.at(QQQProcessor::getTransitionPreferredQuantTypeStringKey());
 
-            pg.groupBackground = pg.mergedEICSummaryData.getCorrespondingBaseline(quantType);
+            if (params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE) {
+                pg.groupBackground = pg.mergedEICSummaryData.getCorrespondingBaseline(quantType);
+            } else if (params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL) {
+                pg.groupBackground = pg.getBlankSignalByQuantType(quantType);
+            }
 
             if (debug) {
                 cout << pg.compound->name << "@ "<< pg.medianRt()
