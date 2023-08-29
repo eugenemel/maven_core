@@ -1457,3 +1457,8 @@ void PeakGroup::applyLabelsFromCompoundMetadata() {
         child.applyLabelsFromCompoundMetadata();
     }
 }
+
+float PeakGroup::getBlankSignalByQuantType(string quantType){
+    PeakGroupBaseline baseline = quantType.find("smoothed") != std::string::npos ? maxBlankSmoothedSignal : maxBlankRawSignal;
+    return baseline.getCorrespondingBaseline(quantType);
+}

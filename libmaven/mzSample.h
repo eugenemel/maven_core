@@ -1135,6 +1135,7 @@ class PeakGroup {
         PeakGroupBaseline maxBlankRawSignal;
         PeakGroupBaseline maxBlankSmoothedSignal;
         float blankMaxHeight;
+        float getBlankSignalByQuantType(string quantType);
 
         //This value takes on one of the above varlues based on setting in PeakGroupBackgroundType.
         float groupBackground;
