@@ -2663,12 +2663,12 @@ float EIC::getAnalogousIntensitySum(EIC* eic, float rtAnchor, unsigned int numPo
 
     if (debug) {
         cout << "EIC::getAnalogousIntensitySum(RT = " << rtAnchor << ", " << numPoints << " points):"
-             << " pointsAroundMax= " << pointsAroundMax << "\n"
-             << "rt[i-2]: " << eic->rt[rtPos-2] << ", diff = " << abs(eic->rt[rtPos-2]-rtAnchor) << "\n"
-             << "rt[i-1]: " << eic->rt[rtPos-1] << ", diff = " << abs(eic->rt[rtPos-1]-rtAnchor) << "\n"
-             << "** rt[i]: " <<  eic->rt[rtPos] << ", diff = " << abs(eic->rt[rtPos]-rtAnchor) << " **\n"
-             << "rt[i+1]: " <<  eic->rt[rtPos+1] << ", diff = " << abs(eic->rt[rtPos+1]-rtAnchor) << "\n"
-             << "rt[i+2]: " <<  eic->rt[rtPos+2] << ", diff = " << abs(eic->rt[rtPos+2]-rtAnchor) << "\n"
+             << " pointsAroundMax= " << pointsAroundMax << ", eic->size()=" << eic->size() << "\n"
+             << "rt[i-2]: " << "rt[" << (rtPos-2) << "]: " << eic->rt[rtPos-2] << ", diff = " << abs(eic->rt[rtPos-2]-rtAnchor) << "\n"
+             << "rt[i-1]: " << "rt[" << (rtPos-1) << "]: " << eic->rt[rtPos-1] << ", diff = " << abs(eic->rt[rtPos-1]-rtAnchor) << "\n"
+             << "** rt[i]: " << "rt[" << (rtPos) << "]: " <<  eic->rt[rtPos] << ", diff = " << abs(eic->rt[rtPos]-rtAnchor) << " **\n"
+             << "rt[i+1]: " << "rt[" << (rtPos+1) << "]: " <<  eic->rt[rtPos+1] << ", diff = " << abs(eic->rt[rtPos+1]-rtAnchor) << "\n"
+             << "rt[i+2]: " << "rt[" << (rtPos+2) << "]: " <<  eic->rt[rtPos+2] << ", diff = " << abs(eic->rt[rtPos+2]-rtAnchor) << "\n"
              << endl;
     }
 
