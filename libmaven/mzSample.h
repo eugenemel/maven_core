@@ -2583,6 +2583,26 @@ class QQQProcessor{
             bool debug = false
         );
 
+    /**
+     * @brief isPassGroupBackground
+     *
+     * Based on PeakGroupBackgroundType, perform a different comparison.
+     * Note that the PeakGroup's background type should already be computed by now.
+     *
+     * @param p
+     * @param pg
+     * @param params
+     * @param debug
+     * @return
+     */
+    static bool isPassPeakGroupBackground(
+        Peak& p,
+        PeakGroup& pg,
+        shared_ptr<QQQSearchParameters> params,
+        float peakQuant,
+        bool debug = false
+        );
+
     //reserved constants - do not change!
     static string getTransitionIdFilterStringKey(){return "TRANSITION_ID_FILTER_STRING";}
     static string getTransitionIonTypeFilterStringKey(){return "TRANSITION_ION_TYPE";}

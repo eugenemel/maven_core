@@ -554,6 +554,24 @@ void QQQProcessor::labelInternalStandards(vector<PeakGroup>& peakgroups, shared_
     if (debug) cout << "End QQQProcessor::labelInternalStandards()" << endl;
 }
 
+bool QQQProcessor::isPassPeakGroupBackground(
+    Peak& p,
+    PeakGroup& pg,
+    shared_ptr<QQQSearchParameters> params,
+    float peakQuant,
+    bool debug
+    ) {
+
+    if (params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::MAX_BLANK_INTENSITY) {
+        return p.peakIntensity >= pg.groupBackground * params->qqqFilterMinPeakIntensityGroupBackgroundRatio;
+    } else if (params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE ||
+               params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL) {
+        return peakQuant >= pg.groupBackground * params->qqqFilterMinPeakIntensityGroupBackgroundRatio;
+    }
+
+    return true;
+}
+
 //DOES NOT apply to children peak groups.
 vector<PeakGroup> QQQProcessor::filterPeakGroups(vector<PeakGroup>& peakgroups, shared_ptr<QQQSearchParameters> params, bool debug){
     if (debug) cout << "Start QQQProcessor::labelInternalStandards()" << endl;
@@ -577,6 +595,7 @@ vector<PeakGroup> QQQProcessor::filterPeakGroups(vector<PeakGroup>& peakgroups, 
         float maxBlankQuant = 0.0f;
         float maxSampleQuant = 0.0f;
         float maxPeakIntensity = 0.0f;
+        Peak maxPeak;
 
         for (auto & p : pg.peaks) {
 
@@ -590,10 +609,13 @@ vector<PeakGroup> QQQProcessor::filterPeakGroups(vector<PeakGroup>& peakgroups, 
                 }
                 if (p.peakIntensity > maxPeakIntensity) {
                     maxPeakIntensity = p.peakIntensity;
+                    maxPeak = p;
                 }
             }
             if (debug) cout << p.sample->sampleName.c_str() << ": (blank=" << (p.fromBlankSample ? "yes" : "no") << ") " << peakQuant << endl;
         }
+
+        float maxPeakQuant = maxPeak.getQuantByName(quantType);
 
         if (debug && pg.compound) cout << pg.compound->name << " ";
         if (debug) cout << "( " << pg.meanMz << ", " << pg.medianRt() << "): "
@@ -615,7 +637,7 @@ vector<PeakGroup> QQQProcessor::filterPeakGroups(vector<PeakGroup>& peakgroups, 
                 if (p.fromBlankSample ||
                         (
                             peakQuant >= maxBlankQuant * params->qqqFilterMinSignalBlankRatio &&
-                            p.peakIntensity >= pg.groupBackground * params->qqqFilterMinPeakIntensityGroupBackgroundRatio
+                            isPassPeakGroupBackground(p, pg, params, peakQuant, debug)
                         )
                     ) {
                     passingPeaks.push_back(p);
@@ -638,7 +660,7 @@ vector<PeakGroup> QQQProcessor::filterPeakGroups(vector<PeakGroup>& peakgroups, 
 
         } else if (
            maxSampleQuant >= maxBlankQuant * params->qqqFilterMinSignalBlankRatio &&
-           maxPeakIntensity >= pg.groupBackground * params->qqqFilterMinPeakIntensityGroupBackgroundRatio) {
+            isPassPeakGroupBackground(maxPeak, pg, params, maxPeakQuant, debug) ){
             filteredGroups.push_back(pg);
         }
     }
