@@ -685,6 +685,12 @@ void QQQProcessor::setPeakGroupBackground(
 
         if (params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::MAX_BLANK_INTENSITY) {
             pg.groupBackground = pg.blankMaxHeight;
+            if (debug) {
+                cout << "QQQProcessor::setPeakGroupBackground(): "
+                     << " set to max height: " << pg.blankMaxHeight
+                     << " group background=" << pg.groupBackground
+                     << endl;
+            }
         }
 
         if (!pg.compound) continue;
