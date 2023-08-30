@@ -2630,7 +2630,8 @@ PeakGroupBaseline EIC::calculateMergedEICSummaryData(EIC* mergedEIC, set<int> me
 
                 mergedEICSummaryData.fullRangeBaseline += mergedEIC->baseline[i];
 
-                if (i >= p.minPosFWHM && i <= p.maxPosFWHM) {
+                //Only compute FWHM baseline if the FWHM could be computed.
+                if (p.maxPosFWHM > p.minPosFWHM && i >= p.minPosFWHM && i <= p.maxPosFWHM) {
                     mergedEICSummaryData.FWHMBaseline += mergedEIC->baseline[i];
                 }
 
@@ -2807,7 +2808,13 @@ PeakGroupBaseline EIC::calculateMaxBlankSignalBackground(
             for (auto eic : eics) {
                 if (eic->sample->isBlank) {
                     float fullRangeBaseline = EIC::getAnalogousIntensitySum(eic, p.rt, (p.maxpos-p.minpos+1), isUseSmoothedIntensity, debug);
-                    float fwhmBaseline = EIC::getAnalogousIntensitySum(eic, p.rt, (p.maxPosFWHM-p.minPosFWHM+1), isUseSmoothedIntensity, debug);
+
+                    //Issue 668: Only try to compute a FWHM baseline if the FWHM could be computed for the merged EIC
+                    float fwhmBaseline = 0.0f;
+                    if (p.maxPosFWHM > p.minPosFWHM) {
+                        fwhmBaseline = EIC::getAnalogousIntensitySum(eic, p.rt, (p.maxPosFWHM-p.minPosFWHM+1), isUseSmoothedIntensity, debug);
+                    }
+
                     float threePointBaseline = EIC::getAnalogousIntensitySum(eic, p.rt, 3, isUseSmoothedIntensity, debug);
                     float onePointBaseline = EIC::getAnalogousIntensitySum(eic, p.rt, 1, isUseSmoothedIntensity, debug);
 
