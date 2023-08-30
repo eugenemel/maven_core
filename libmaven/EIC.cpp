@@ -2712,6 +2712,16 @@ PeakGroupBaseline EIC::calculateMaxBlankSignalBackground(
         int representativeIndex = -1;
         float representativeIntensity = -1.0f;
 
+        if (debug) {
+            cout << "EIC::calculateMaxBlankSignalBackground():"
+                 << " Peaks: (";
+            for (unsigned int i = 0; i < mergedEIC->peaks.size(); i++) {
+                if (i > 0) cout << ", ";
+                cout << mergedEIC->peaks[i].pos;
+            }
+            cout << endl;
+        }
+
         for (auto peakIndex : mergedEICPeakIndexes) {
             if (debug) {
                 cout << "EIC::calculateMaxBlankSignalBackground():"
