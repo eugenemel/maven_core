@@ -2713,7 +2713,13 @@ PeakGroupBaseline EIC::calculateMaxBlankSignalBackground(
         float representativeIntensity = -1.0f;
 
         for (auto peakIndex : mergedEICPeakIndexes) {
-            if (peakIndex < 0 || peakIndex < mergedEIC->size()) continue;
+            if (debug) {
+                cout << "EIC::calculateMaxBlankSignalBackground():"
+                     << " mergedEICPeakIndex=" << peakIndex
+                     << " (max = " << (mergedEIC->size()-1) << ")"
+                     << endl;
+            }
+            if (peakIndex < 0 || peakIndex > (mergedEIC->size()-1)) continue;
             if (mergedEIC->spline[peakIndex] > representativeIntensity) {
                 representativeIntensity = mergedEIC->spline[peakIndex];
                 representativeIndex = peakIndex;
