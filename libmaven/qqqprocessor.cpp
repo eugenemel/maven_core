@@ -675,6 +675,12 @@ void QQQProcessor::setPeakGroupBackground(
     bool debug
     ) {
 
+    if (debug) {
+        cout << "QQQProcessor::setPeakGroupBackground(): "
+             << peakgroups.size() << " peakgroups."
+             << endl;
+    }
+
     for (auto & pg : peakgroups) {
 
         if (params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::MAX_BLANK_INTENSITY) {
