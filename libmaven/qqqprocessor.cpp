@@ -637,7 +637,7 @@ vector<PeakGroup> QQQProcessor::filterPeakGroups(vector<PeakGroup>& peakgroups, 
                 if (p.fromBlankSample ||
                         (
                             peakQuant >= maxBlankQuant * params->qqqFilterMinSignalBlankRatio &&
-                            isPassPeakGroupBackground(p, pg, params, peakQuant, debug)
+                            QQQProcessor::isPassPeakGroupBackground(p, pg, params, peakQuant, debug)
                         )
                     ) {
                     passingPeaks.push_back(p);
@@ -660,7 +660,7 @@ vector<PeakGroup> QQQProcessor::filterPeakGroups(vector<PeakGroup>& peakgroups, 
 
         } else if (
            maxSampleQuant >= maxBlankQuant * params->qqqFilterMinSignalBlankRatio &&
-            isPassPeakGroupBackground(maxPeak, pg, params, maxPeakQuant, debug) ){
+            QQQProcessor::isPassPeakGroupBackground(maxPeak, pg, params, maxPeakQuant, debug) ){
             filteredGroups.push_back(pg);
         }
     }
