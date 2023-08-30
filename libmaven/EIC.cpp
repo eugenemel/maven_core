@@ -2568,8 +2568,9 @@ PeakGroupBaseline EIC::calculateMergedEICSummaryData(EIC* mergedEIC, set<int> me
         float representativeIntensity = -1.0f;
 
         for (auto peakIndex : mergedEICPeakIndexes) {
-            if (mergedEIC->spline[peakIndex] > representativeIntensity) {
-                representativeIntensity = mergedEIC->spline[peakIndex];
+            Peak p = mergedEIC->peaks.at(peakIndex);
+            if (mergedEIC->spline[p.pos] > representativeIntensity) {
+                representativeIntensity = mergedEIC->spline[p.pos];
                 representativeIndex = peakIndex;
             }
         }
@@ -2723,15 +2724,16 @@ PeakGroupBaseline EIC::calculateMaxBlankSignalBackground(
         }
 
         for (auto peakIndex : mergedEICPeakIndexes) {
+            Peak p = mergedEIC->peaks.at(peakIndex);
             if (debug) {
                 cout << "EIC::calculateMaxBlankSignalBackground():"
-                     << " mergedEICPeakIndex=" << peakIndex
+                     << " mergedEICPeakIndex=" << p.pos
                      << " (max = " << (mergedEIC->size()-1) << ")"
                      << endl;
             }
-            if (peakIndex < 0 || peakIndex > (mergedEIC->size()-1)) continue;
-            if (mergedEIC->spline[peakIndex] > representativeIntensity) {
-                representativeIntensity = mergedEIC->spline[peakIndex];
+            if (p.pos < 0 || p.pos > (mergedEIC->size()-1)) continue;
+            if (mergedEIC->spline[p.pos] > representativeIntensity) {
+                representativeIntensity = mergedEIC->spline[p.pos];
                 representativeIndex = peakIndex;
             }
         }
