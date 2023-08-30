@@ -859,6 +859,11 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
 
                 //Issue 603: half-max quant metrics
                 if (!reachedLeftHalfMax && spline[leftIndex] < halfMaxIntensity) {
+                    if (debug) {
+                        cout << "FWHM Left: " << leftIndex
+                             << ", spline=" << spline[leftIndex]
+                             << endl;
+                    }
                     reachedLeftHalfMax = true;
                 }
 
@@ -944,6 +949,11 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
 
                 //Issue 603: half-max quant metrics
                 if (!reachedRightHalfMax && spline[rightHalfMaxIntensityIndex] < halfMaxIntensity) {
+                    if (debug) {
+                        cout << "FWHM Right: " << rightIndex
+                             << ", spline=" << spline[rightIndex]
+                             << endl;
+                    }
                     reachedRightHalfMax = true;
                 }
 
