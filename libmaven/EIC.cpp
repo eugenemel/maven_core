@@ -845,6 +845,10 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
             bool reachedLeftHalfMax = false;
             unsigned int leftHalfMaxIntensityIndex = leftIndex; //initialization
 
+            if (debug) {
+                cout << "\nSTART LEFT DESCENT" << endl;
+            }
+
             while(true) {
 
                 if (debug) {
@@ -943,6 +947,10 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
 
             bool reachedRightHalfMax = false;
             unsigned int rightHalfMaxIntensityIndex = rightIndex; //initialization
+
+            if (debug) {
+                cout << "\nSTART RIGHT DESCENT" << endl;
+            }
 
             while(true) {
 
