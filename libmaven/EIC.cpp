@@ -2714,12 +2714,12 @@ PeakGroupBaseline EIC::calculateMaxBlankSignalBackground(
 
         if (debug) {
             cout << "EIC::calculateMaxBlankSignalBackground():"
-                 << " Peaks: (";
+                 << " Peaks: {";
             for (unsigned int i = 0; i < mergedEIC->peaks.size(); i++) {
                 if (i > 0) cout << ", ";
                 cout << mergedEIC->peaks[i].pos;
             }
-            cout << endl;
+            cout << "}" << endl;
         }
 
         for (auto peakIndex : mergedEICPeakIndexes) {
