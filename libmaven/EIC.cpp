@@ -847,6 +847,15 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
 
             while(true) {
 
+                if (debug) {
+                    cout << "Evaluating " << leftIndex << ": "
+                         << "rt=" << rt[leftIndex]
+                         << ", intensity=" << intensity[leftIndex]
+                         << ", intensityThreshold=" << intensityThreshold
+                         << ", reachedLeftHalfMax? " << (reachedLeftHalfMax ? "yes" : "no")
+                         << endl;
+                }
+
                 //if this point is below the baseline, it is invalid, stop immediately
                 if (intensity[leftIndex] < intensityThreshold) {
                     break;
@@ -936,6 +945,15 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
             unsigned int rightHalfMaxIntensityIndex = rightIndex; //initialization
 
             while(true) {
+
+                if (debug) {
+                    cout << "Evaluating " << rightIndex << ": "
+                         << "rt=" << rt[rightIndex]
+                         << ", intensity=" << intensity[rightIndex]
+                         << ", intensityThreshold=" << intensityThreshold
+                         << ", reachedRightHalfMax? " << (reachedRightHalfMax ? "yes" : "no")
+                         << endl;
+                }
 
                 //if this point is below the baseline, it is invalid, stop immediately
                 if (intensity[rightIndex] < intensityThreshold) {
