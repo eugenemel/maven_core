@@ -2680,7 +2680,11 @@ float EIC::getAnalogousIntensitySum(EIC* eic, float rtAnchor, unsigned int numPo
         intensitySum += isUseSmoothedIntensity ? eic->spline[rtPos-pointsLeft] : eic->intensity[rtPos-pointsLeft];
 
         if (debug) {
-            cout << "EIC::getAnalogousIntensitySum() left: pointsLeft=" << pointsLeft << ", pointsAroundMax=" << pointsAroundMax << endl;
+            cout << "EIC::getAnalogousIntensitySum() left:"
+                 <<" pointsLeft=" << pointsLeft
+                 << ", pointsAroundMax=" << pointsAroundMax
+                 << ", intensitySum=" << intensitySum
+                 << endl;
         }
     }
 
@@ -2691,9 +2695,15 @@ float EIC::getAnalogousIntensitySum(EIC* eic, float rtAnchor, unsigned int numPo
         intensitySum += isUseSmoothedIntensity ? eic->spline[rtPos+pointsRight] : eic->intensity[rtPos+pointsRight];
 
         if (debug) {
-            cout << "EIC::getAnalogousIntensitySum() left: pointsRight=" << pointsRight << ", pointsAroundMax=" << pointsAroundMax << endl;
+            cout << "EIC::getAnalogousIntensitySum() left:"
+                 <<" pointsLeft=" << pointsRight
+                 << ", pointsAroundMax=" << pointsAroundMax
+                 << ", intensitySum=" << intensitySum
+                 << endl;
         }
     }
+
+    if (debug) cout << "EIC::getAnalogousIntensitySum(): final intensitySum=" << intensitySum << endl;
 
     return intensitySum;
 }
@@ -2727,8 +2737,8 @@ PeakGroupBaseline EIC::calculateMaxBlankSignalBackground(
             Peak p = mergedEIC->peaks.at(peakIndex);
             if (debug) {
                 cout << "EIC::calculateMaxBlankSignalBackground():"
-                     << " mergedEICPeakIndex=" << p.pos
-                     << " (max = " << (mergedEIC->size()-1) << ")"
+                     << " mergedEICPeakIndex=" << peakIndex << ", pos=" << p.pos
+                     << " (max pos = " << (mergedEIC->size()-1) << ")"
                      << endl;
             }
             if (p.pos < 0 || p.pos > (mergedEIC->size()-1)) continue;
@@ -2748,7 +2758,7 @@ PeakGroupBaseline EIC::calculateMaxBlankSignalBackground(
                 cout << "EIC::calculateMaxBlankSignalBackground(): "
                      << "( " << p.minpos << " - ["
                      << p.minPosFWHM << " - {" << (p.pos-1) << " " << p.pos << " " << (p.pos+1) << "} - "
-                     << p.maxPosFWHM << " ] - " << p.maxpos << " )"
+                     << p.maxPosFWHM << "] - " << p.maxpos << " )"
                      << endl;
             }
 
