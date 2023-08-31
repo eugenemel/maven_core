@@ -2681,7 +2681,7 @@ float EIC::getAnalogousIntensitySum(EIC* eic, float rtAnchor, unsigned int numPo
 
     float intensitySum = 0.0f;
 
-    if (!eic) return intensitySum;
+    if (!eic || eic->size() == 0) return intensitySum;
 
     if (debug){
         cout << "EIC::getAnalogousIntensitySum(): "
