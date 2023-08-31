@@ -2678,10 +2678,18 @@ float EIC::calculateBlankBackground(vector<EIC *>& eics, float rtMin, float rtMa
 }
 
 float EIC::getAnalogousIntensitySum(EIC* eic, float rtAnchor, unsigned int numPoints, bool isUseSmoothedIntensity, bool debug) {
+
     float intensitySum = 0.0f;
 
     if (!eic) return intensitySum;
 
+    if (debug){
+        cout << "EIC::getAnalogousIntensitySum(): "
+             << " eic->size()=" << eic->size()
+             << " spline.size()=" << eic->spline.size()
+             << " rt.size()=" << eic->rt.size()
+             << endl;
+    }
     //find closest point in rt to rtAnchor
     auto lb = lower_bound(eic->rt.begin(), eic->rt.end(), rtAnchor);
     auto pos = lb - eic->rt.begin();
@@ -2690,7 +2698,20 @@ float EIC::getAnalogousIntensitySum(EIC* eic, float rtAnchor, unsigned int numPo
     //check the position before the lower_bound is closer in RT to rtAnchor than the lower_bound.
     auto rtPos = (pos > 0 && abs(rtAnchor - eic->rt[pos-1]) < abs(rtAnchor - eic->rt[pos])) ? (pos-1) : pos;
 
+    if (debug) {
+        cout << "EIC::getAnalogousIntensitySum(): "
+             << "rtPos=" << rtPos
+             << ", eic->rt[rtPos]=" << eic->rt[rtPos]
+             << endl;
+    }
+
     intensitySum += isUseSmoothedIntensity ? eic->spline[rtPos] : eic->intensity[rtPos];
+
+    if (debug) {
+        cout << "EIC::getAnalogousIntensitySum(): "
+             << "Initial intensitySum=" << intensitySum
+             << endl;
+    }
 
     unsigned int pointsAroundMax = numPoints-1;
 
