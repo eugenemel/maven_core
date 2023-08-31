@@ -2806,7 +2806,7 @@ PeakGroupBaseline EIC::calculateMaxBlankSignalBackground(
             float maxOnePointBaseline = 0.0f;
 
             for (auto eic : eics) {
-                if (eic->sample->isBlank) {
+                if (eic->sample && eic->sample->isBlank) {
                     float fullRangeBaseline = EIC::getAnalogousIntensitySum(eic, p.rt, (p.maxpos-p.minpos+1), isUseSmoothedIntensity, debug);
 
                     //Issue 668: Only try to compute a FWHM baseline if the FWHM could be computed for the merged EIC
