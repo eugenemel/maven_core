@@ -129,8 +129,8 @@ IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelopePeakFullRtBounds(mzSa
             Isotope isotope = isotopes.at(i);
 
             EIC *eic = sample->getEIC(
-                        static_cast<float>(isotope.mz - params->mzTol),
-                        static_cast<float>(isotope.mz + params->mzTol),
+                static_cast<float>(isotope.mz - params->isotopicTheoreticalMzTolerance),
+                static_cast<float>(isotope.mz + params->isotopicTheoreticalMzTolerance),
                         peak->rtmin,
                         peak->rtmax,
                         1);
@@ -155,12 +155,57 @@ IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelopePeakShrinkingRtBounds
 }
 
 string IsotopicExtractionParameters::encodeParams() {
-    // TODO
-    return "";
+    string encodedParams;
+
+    //extraction algorithm
+    string algorithmStr = "UNKNOWN";
+    if (algorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS) {
+       algorithmStr = "PEAK_FULL_RT_BOUNDS";
+    } else if (algorithm == IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS) {
+       algorithmStr = "PEAK_SHRINKING_RT_BOUNDS";
+    }
+    encodedParams = encodedParams + "algorithm" + "=" + algorithmStr + ";";
+
+    //theoretical isotope handling
+    encodedParams = encodedParams + "isotopicTheoreticalMzTolerance" + "="+ to_string(isotopicTheoreticalMzTolerance) + ";";
+    string isotopicTheoreticalMzToleranceTypeStr = "UNKNOWN";
+    if (isotopicTheoreticalMzToleranceType == IsotopicTheoreticalMzToleranceType::Da) {
+       isotopicTheoreticalMzToleranceTypeStr = "Da";
+    } else if (isotopicTheoreticalMzToleranceType == IsotopicTheoreticalMzToleranceType::ppm) {
+       isotopicTheoreticalMzToleranceTypeStr = "ppm";
+    }
+    encodedParams = encodedParams + "isotopicTheoreticalMzToleranceType" + "=" + isotopicTheoreticalMzToleranceTypeStr + ";";
+
+    return encodedParams;
 }
 
-shared_ptr<IsotopicExtractionParameters> IsotopicExtractionParameters::decode(string encodedIsotopicExtractionParameters){
+shared_ptr<IsotopicExtractionParameters> IsotopicExtractionParameters::decode(string encodedParams){
     shared_ptr<IsotopicExtractionParameters> params = shared_ptr<IsotopicExtractionParameters>(new IsotopicExtractionParameters());
-    //TODO
+
+    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams);
+
+    //extraction algorithm
+    if (decodedMap.find("algorithm") != decodedMap.end()) {
+       string algorithmStr = decodedMap["algorithm"];
+       if (algorithmStr == "PEAK_FULL_RT_BOUNDS") {
+            params->algorithm = IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS;
+       } else if (algorithmStr == "PEAK_SHRINKING_RT_BOUNDS") {
+            params->algorithm = IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS;
+       }
+    }
+
+    //theoretical isotope handling
+    if (decodedMap.find("isotopicTheoreticalMzTolerance") != decodedMap.end()) {
+       params->isotopicTheoreticalMzTolerance = stod(decodedMap["isotopicTheoreticalMzTolerance"]);
+    }
+    if (decodedMap.find("isotopicTheoreticalMzToleranceType") != decodedMap.end()) {
+       string isotopicTheoreticalMzToleranceTypeStr = decodedMap["isotopicTheoreticalMzToleranceType"];
+       if (isotopicTheoreticalMzToleranceTypeStr == "Da") {
+            params->isotopicTheoreticalMzToleranceType = IsotopicTheoreticalMzToleranceType::Da;
+       } else if (isotopicTheoreticalMzToleranceTypeStr == "ppm") {
+            params->isotopicTheoreticalMzToleranceType = IsotopicTheoreticalMzToleranceType::ppm;
+       }
+    }
+
     return params;
 }

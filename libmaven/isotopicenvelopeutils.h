@@ -87,6 +87,7 @@ public:
 };
 
 
+enum IsotopicTheoreticalMzToleranceType{Da, ppm};
 enum IsotopicExtractionAlgorithm{PEAK_FULL_RT_BOUNDS, PEAK_SHRINKING_RT_BOUNDS};
 
 /**
@@ -100,7 +101,8 @@ public:
 
     IsotopicExtractionAlgorithm algorithm = IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS;
 
-    double mzTol = 0.01;
+    double isotopicTheoreticalMzTolerance = 0.01;
+    IsotopicTheoreticalMzToleranceType isotopicTheoreticalMzToleranceType = IsotopicTheoreticalMzToleranceType::Da;
 
     string encodeParams();
     static shared_ptr<IsotopicExtractionParameters> decode(string encodedIsotopicExtractionParameters);
