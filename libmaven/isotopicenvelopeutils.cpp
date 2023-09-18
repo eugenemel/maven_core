@@ -153,3 +153,14 @@ IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelopePeakShrinkingRtBounds
 
     return envelope;
 }
+
+string IsotopicExtractionParameters::encodeParams() {
+    // TODO
+    return "";
+}
+
+shared_ptr<IsotopicExtractionParameters> IsotopicExtractionParameters::decode(string encodedIsotopicExtractionParameters){
+    shared_ptr<IsotopicExtractionParameters> params = shared_ptr<IsotopicExtractionParameters>(new IsotopicExtractionParameters());
+    //TODO
+    return params;
+}
