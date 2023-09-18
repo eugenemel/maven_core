@@ -122,7 +122,8 @@ void mzSample::loadSample(const char* filename, bool isCorrectPrecursor) {
         }
     }
 
-    if (mystrcasestr(filename,"blan") != NULL) {
+    //Issue 660: Determine if a sample is blank or not only based on the filename, not enclosing folder
+    if (mystrcasestr(this->sampleName.c_str(),"blank")) {
         this->isBlank = true;
         cerr << "Found Blank: " << filename << endl;
     }
@@ -214,7 +215,8 @@ using namespace MSToolkit;
         }
     }
 
-    if (mystrcasestr(filename,"blan") != NULL) {
+    //Issue 660: Determine if a sample is blank or not only based on the filename, not enclosing folder
+    if (mystrcasestr(this->sampleName.c_str(),"blank")) {
         this->isBlank = true;
         cerr << "Found Blank: " << filename << endl;
     }
@@ -3481,13 +3483,30 @@ string PeakPickingAndGroupingParameters::getEncodedPeakParameters(string tupleMa
     encodedParams = encodedParams + "groupMaxRtDiff" + "=" + to_string(groupMaxRtDiff) + ";";
     encodedParams = encodedParams + "groupMergeOverlap" + "=" + to_string(groupMergeOverlap) + ";";
 
-    //post-grouping filters
+    //computed properties
+    string groupBackgroundTypeStr = "groupBackgroundType=";
+    if (groupBackgroundType == PeakGroupBackgroundType::NONE) {
+        groupBackgroundTypeStr = groupBackgroundTypeStr + "NONE";
+    } else if (groupBackgroundType == PeakGroupBackgroundType::MAX_BLANK_INTENSITY) {
+        groupBackgroundTypeStr = groupBackgroundTypeStr + "MAX_BLANK_INTENSITY";
+    } else if (groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE) {
+        groupBackgroundTypeStr = groupBackgroundTypeStr + "PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE";
+    } else if (groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL) {
+        groupBackgroundTypeStr = groupBackgroundTypeStr + "PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL";
+    } else {
+        groupBackgroundTypeStr = groupBackgroundTypeStr + "UNKNOWN";
+    }
+    groupBackgroundTypeStr = groupBackgroundTypeStr + ";";
+    encodedParams = encodedParams + groupBackgroundTypeStr;
+
+    //post-grouping filters (entire groups kicked out based on these filters)
     encodedParams = encodedParams + "filterMinGoodGroupCount" + "=" + to_string(filterMinGoodGroupCount) + ";";
     encodedParams = encodedParams + "filterMinQuality" + "=" + to_string(filterMinQuality) + ";";
     encodedParams = encodedParams + "filterMinNoNoiseObs" + "=" + to_string(filterMinNoNoiseObs) + ";";
     encodedParams = encodedParams + "filterMinSignalBaselineRatio" + "=" + to_string(filterMinSignalBaselineRatio) + ";";
     encodedParams = encodedParams + "filterMinGroupIntensity" + "=" + to_string(filterMinGroupIntensity) + ";";
     encodedParams = encodedParams + "filterMinPrecursorCharge" + "=" + to_string(filterMinPrecursorCharge) + ";";
+    encodedParams = encodedParams + "filterMinSignalBlankRatio" + "=" + to_string(filterMinSignalBlankRatio) + ";";
 
     return encodedParams;
 }
@@ -3570,6 +3589,20 @@ void PeakPickingAndGroupingParameters::fillInPeakParameters(unordered_map<string
         groupMergeOverlap = stof(decodedMap["groupMergeOverlap"]);
     }
 
+    //computed properties
+    if (decodedMap.find("groupBackgroundType") != decodedMap.end()) {
+        string groupBackgroundTypeStr = decodedMap["groupBackgroundType"];
+        if (groupBackgroundTypeStr == "NONE") {
+            groupBackgroundType = PeakGroupBackgroundType::NONE;
+        } else if (groupBackgroundTypeStr == "MAX_BLANK_INTENSITY") {
+            groupBackgroundType = PeakGroupBackgroundType::MAX_BLANK_INTENSITY;
+        } else if (groupBackgroundTypeStr == "PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE") {
+            groupBackgroundType = PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE;
+        } else if (groupBackgroundTypeStr == "PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL") {
+            groupBackgroundType = PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL;
+        }
+    }
+
     //post-grouping filters
     if (decodedMap.find("filterMinGoodGroupCount") != decodedMap.end()) {
         filterMinGoodGroupCount = stoi(decodedMap["filterMinGoodGroupCount"]);
@@ -3589,4 +3622,87 @@ void PeakPickingAndGroupingParameters::fillInPeakParameters(unordered_map<string
     if (decodedMap.find("filterMinPrecursorCharge") != decodedMap.end()) {
         filterMinPrecursorCharge = stoi(decodedMap["filterMinPrecursorCharge"]);
     }
+    if (decodedMap.find("filterMinSignalBlankRatio") != decodedMap.end()) {
+        filterMinSignalBlankRatio = stof(decodedMap["filterMinSignalBlankRatio"]);
+    }
+}
+
+//Issue 659: utility function used in test methods.
+vector<mzSample*> mzSample::getSamples(string sampleDir, bool isQQQSample) {
+
+    vector<mzSample*> samples{};
+
+    vector<string> dirFileNames = mzUtils::getMzSampleFilesFromDirectory(sampleDir.c_str());
+    for (auto dirFileName : dirFileNames) {
+        mzSample* sample = new mzSample();
+        sample->loadSample(dirFileName.c_str());
+        if (isQQQSample) {
+            sample->enumerateSRMScans();
+        }
+        samples.push_back(sample);
+    }
+
+    //sort using name
+    //TODO: strnatcmp
+    sort(samples.begin(), samples.end(), [](const mzSample* lhs, const mzSample* rhs){
+        return lhs->sampleName < rhs->sampleName;
+        //return strnatcmp(lhs->sampleName.c_str(), rhs->sampleName.c_str()) < 0;
+    });
+
+    //ids match natural order
+    for (unsigned int i = 0; i < samples.size(); i++){
+        samples.at(i)->setSampleId(static_cast<int>(i));
+        samples.at(i)->setSampleOrder(static_cast<int>(i));
+    }
+
+    return samples;
+}
+
+shared_ptr<PeakPickingAndGroupingParameters> PeakPickingAndGroupingParameters::getMergedAsPeakParams(
+    shared_ptr<PeakPickingAndGroupingParameters> params) {
+
+    shared_ptr<PeakPickingAndGroupingParameters> mergedEICParams =
+        std::make_shared<PeakPickingAndGroupingParameters>(*params);
+
+    mergedEICParams->peakSmoothingWindow = params->mergedSmoothingWindow;
+    mergedEICParams->peakRtBoundsMaxIntensityFraction = params->mergedPeakRtBoundsMaxIntensityFraction;
+    mergedEICParams->peakRtBoundsSlopeThreshold = params->mergedPeakRtBoundsSlopeThreshold;
+    mergedEICParams->peakBaselineSmoothingWindow = params->mergedBaselineSmoothingWindow;
+    mergedEICParams->peakBaselineDropTopX = params->mergedBaselineDropTopX;
+    mergedEICParams->peakIsComputeBounds = params->mergedIsComputeBounds;
+
+    return mergedEICParams;
+}
+
+float PeakGroupBaseline::getCorrespondingBaseline(string name){
+
+    if (name == "peakArea") {
+        return fullRangeBaseline;
+    } else if (name == "peakAreaCorrected") {
+        return fullRangeBaseline;
+    } else if (name == "peakAreaTop") {
+        return threePointBaseline;
+    } else if (name == "peakAreaFractional") {
+        return -1.0; // TODO: not implemented
+    } else if (name == "peakIntensity") {
+        return pickedPeakBaseline;
+    } else if (name == "signalBaselineRatio") {
+        return -1.0; // TODO: not implemented
+    } else if (name == "smoothedIntensity") {
+        return pickedPeakBaseline;
+    } else if (name == "smoothedPeakArea") {
+        return fullRangeBaseline;
+    } else if (name == "smoothedPeakAreaCorrected") {
+        return fullRangeBaseline;
+    } else if (name == "smoothedPeakAreaTop") {
+        return threePointBaseline;
+    } else if (name == "smoothedSignalBaselineRatio") {
+        return -1.0; // TODO: not implemented
+    } else if (name == "peakAreaFWHM") {
+        return FWHMBaseline;
+    } else if (name == "smoothedPeakAreaFWHM") {
+        return FWHMBaseline;
+    }
+
+    return -1.0f;
 }

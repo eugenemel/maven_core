@@ -64,6 +64,9 @@ PeakGroup::PeakGroup()  {
 
     isComputedGroupStatistics = false;
 
+    blankMaxHeight = 0.0f;
+    groupBackground = 0.0f;
+
 }      
 
 void PeakGroup::copyObj(const PeakGroup& o)  { 
@@ -138,6 +141,13 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     isotopeParameters = o.isotopeParameters; //Issue 402
 
     compounds = o.compounds;
+
+    blankMaxHeight = o.blankMaxHeight;
+    mergedEICSummaryData = o.mergedEICSummaryData;
+    maxBlankRawSignal = o.maxBlankRawSignal;
+    maxBlankSmoothedSignal = o.maxBlankSmoothedSignal;
+
+    groupBackground = o.groupBackground;
 
     copyChildren(o);
 }
@@ -1433,4 +1443,22 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmp
              << children.size()
              << endl;
     }
+}
+
+
+void PeakGroup::applyLabelsFromCompoundMetadata() {
+    if (compound && compound->metaDataMap.find(Compound::getCompoundLabelsStringKey()) != compound->metaDataMap.end()){
+        string labels = compound->metaDataMap.at(Compound::getCompoundLabelsStringKey());
+        for (char c : labels) {
+            addLabel(c);
+        }
+    }
+    for (auto& child : children) {
+        child.applyLabelsFromCompoundMetadata();
+    }
+}
+
+float PeakGroup::getBlankSignalByQuantType(string quantType){
+    PeakGroupBaseline baseline = quantType.find("smoothed") != std::string::npos ? maxBlankSmoothedSignal : maxBlankRawSignal;
+    return baseline.getCorrespondingBaseline(quantType);
 }

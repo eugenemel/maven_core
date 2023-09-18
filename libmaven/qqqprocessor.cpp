@@ -9,7 +9,6 @@ vector<SRMTransition*> QQQProcessor::getSRMTransitions(
         vector<Adduct*>& adducts,
         bool debug) {
 
-    set<string> srms;
     //+118.001@cid34.00 [57.500-58.500]
     //+ c ESI SRM ms2 102.000@cid19.00 [57.500-58.500]
     //-87.000 [42.500-43.500]
@@ -30,10 +29,16 @@ vector<SRMTransition*> QQQProcessor::getSRMTransitions(
     float amuQ3 = params->amuQ3;
 
     //Issue 563: SRM transitions now include a transition ID string to distinguish data
-    map<tuple<float, float, string>, SRMTransition*> srmTransitions{};
+    map<tuple<long, long, string>, SRMTransition*> srmTransitions{};
 
     for(unsigned int i=0; i < samples.size(); i++ ) {
         mzSample* sample = samples[i];
+
+        //Issue 658: Within a sample, only need to detect a single SRM ID string.
+        //However, this should not be used across samples, as samples in different
+        //plates may have identical SRM ID strings.
+        set<string> srms{};
+
         for(unsigned int j=0; j < sample->scans.size(); j++ ) {
             Scan* scan = sample->getScan(j);
             if (!scan) continue;
@@ -103,7 +108,10 @@ vector<SRMTransition*> QQQProcessor::getSRMTransitions(
             // Issue 578: silently ignore any SRM scans where the precursorMz, productMz are invalid.
             if (precursorMz <= 0 || productMz <= 0) continue;
 
-            tuple<float, float, string> srmKey = make_tuple(precursorMz, productMz, transitionName);
+            tuple<long, long, string> srmKey = make_tuple(
+                        mzUtils::mzToIntKey(static_cast<double>(precursorMz)),
+                        mzUtils::mzToIntKey(static_cast<double>(productMz)),
+                        transitionName);
 
             SRMTransition *srmTransition;
             if (srmTransitions.find(srmKey) != srmTransitions.end()) {
@@ -291,12 +299,71 @@ string QQQSearchParameters::encodeParams(){
 
     encodedParams = encodedParams + "rollUpRtTolerance" + "=" + to_string(rollUpRtTolerance) + ";";
 
+    encodedParams = encodedParams + "qqqFilterMinSignalBlankRatio" + "=" + to_string(qqqFilterMinSignalBlankRatio) + ";";
+    encodedParams = encodedParams + "qqqFilterMinPeakIntensityGroupBackgroundRatio" + "=" + to_string(qqqFilterMinPeakIntensityGroupBackgroundRatio) + ";";
+    encodedParams = encodedParams + "qqqFilterIsRetainOnlyPassingPeaks" + "=" + to_string(qqqFilterIsRetainOnlyPassingPeaks) + ";";
+
     string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
 
     encodedParams = encodedParams + peakPickingEncodedParams;
 
     return encodedParams;
 }
+
+shared_ptr<QQQSearchParameters> QQQSearchParameters::decode(string encodedParams) {
+
+    shared_ptr<QQQSearchParameters> qqqSearchParameters = shared_ptr<QQQSearchParameters>(new QQQSearchParameters());
+
+    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams); //use semicolon (default)
+
+    qqqSearchParameters->fillInBaseParams(decodedMap);
+
+    qqqSearchParameters->peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
+    qqqSearchParameters->peakPickingAndGroupingParameters->fillInPeakParameters(decodedMap);
+
+    // START QQQSearchParameters
+
+    if (decodedMap.find("amuQ1") != decodedMap.end()) {
+        qqqSearchParameters->amuQ1 = stof(decodedMap["amuQ1"]);
+    }
+    if (decodedMap.find("amuQ3") != decodedMap.end()) {
+        qqqSearchParameters->amuQ3 = stof(decodedMap["amuQ3"]);
+    }
+    if (decodedMap.find("transitionListFilePath") != decodedMap.end()) {
+        qqqSearchParameters->transitionListFilePath = decodedMap["transitionListFilePath"];
+    }
+    if (decodedMap.find("transitionCompoundMappingPolicy") != decodedMap.end()) {
+        string transitionCompoundMappingPolicyStr = decodedMap["transitionCompoundMappingPolicy"];
+        if (transitionCompoundMappingPolicyStr == "REQUIRE_ALL_TRANSITIONS_EXACTLY_ONE_COMPOUND") {
+            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::REQUIRE_ALL_TRANSITIONS_EXACTLY_ONE_COMPOUND;
+        } else if (transitionCompoundMappingPolicyStr == "REQUIRE_ALL_TRANSITIONS_TO_ONE_OR_MORE_COMPOUNDS") {
+            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::REQUIRE_ALL_TRANSITIONS_TO_ONE_OR_MORE_COMPOUNDS;
+        } else if (transitionCompoundMappingPolicyStr == "RETAIN_TRANSITIONS_ONE_OR_MORE_COMPOUNDS") {
+            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::RETAIN_TRANSITIONS_ONE_OR_MORE_COMPOUNDS;
+        } else if (transitionCompoundMappingPolicyStr == "RETAIN_TRANSITIONS_EXACTLY_ONE_COMPOUND") {
+            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::RETAIN_TRANSITIONS_EXACTLY_ONE_COMPOUND;
+        } else if (transitionCompoundMappingPolicyStr == "RETAIN_ALL_TRANSITIONS") {
+            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::RETAIN_ALL_TRANSITIONS;
+        }
+    }
+    if (decodedMap.find("rollUpRtTolerance") != decodedMap.end()) {
+        qqqSearchParameters->rollUpRtTolerance = stof(decodedMap["rollUpRtTolerance"]);
+    }
+    if (decodedMap.find("qqqFilterMinSignalBlankRatio") != decodedMap.end()) {
+        qqqSearchParameters->qqqFilterMinSignalBlankRatio = stof(decodedMap["qqqFilterMinSignalBlankRatio"]);
+    }
+    if (decodedMap.find("qqqFilterMinPeakIntensityGroupBackgroundRatio") != decodedMap.end()) {
+        qqqSearchParameters->qqqFilterMinPeakIntensityGroupBackgroundRatio = stof(decodedMap["qqqFilterMinPeakIntensityGroupBackgroundRatio"]);
+    }
+    if (decodedMap.find("qqqFilterIsRetainOnlyPassingPeaks") != decodedMap.end()) {
+        qqqSearchParameters->qqqFilterIsRetainOnlyPassingPeaks = decodedMap["qqqFilterIsRetainOnlyPassingPeaks"] == "1";
+    }
+
+    // END QQQSearchParameters
+
+    return qqqSearchParameters;
+}
+
 
 //Issue 568: Create dedicated method to convert SRMTransitions to mzSlice
 vector<mzSlice*> QQQProcessor::getMzSlices(
@@ -367,51 +434,6 @@ set<string> QQQProcessor::getSRMIds(vector<SRMTransition*>& transitions) {
         }
     }
     return srmIds;
-}
-
-shared_ptr<QQQSearchParameters> QQQSearchParameters::decode(string encodedParams) {
-
-    shared_ptr<QQQSearchParameters> qqqSearchParameters = shared_ptr<QQQSearchParameters>(new QQQSearchParameters());
-
-    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams); //use semicolon (default)
-
-    qqqSearchParameters->fillInBaseParams(decodedMap);
-
-    qqqSearchParameters->peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
-    qqqSearchParameters->peakPickingAndGroupingParameters->fillInPeakParameters(decodedMap);
-
-    // START QQQSearchParameters
-
-    if (decodedMap.find("amuQ1") != decodedMap.end()) {
-        qqqSearchParameters->amuQ1 = stof(decodedMap["amuQ1"]);
-    }
-    if (decodedMap.find("amuQ3") != decodedMap.end()) {
-        qqqSearchParameters->amuQ3 = stof(decodedMap["amuQ3"]);
-    }
-    if (decodedMap.find("transitionListFilePath") != decodedMap.end()) {
-        qqqSearchParameters->transitionListFilePath = decodedMap["transitionListFilePath"];
-    }
-    if (decodedMap.find("transitionCompoundMappingPolicy") != decodedMap.end()) {
-        string transitionCompoundMappingPolicyStr = decodedMap["transitionCompoundMappingPolicy"];
-        if (transitionCompoundMappingPolicyStr == "REQUIRE_ALL_TRANSITIONS_EXACTLY_ONE_COMPOUND") {
-            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::REQUIRE_ALL_TRANSITIONS_EXACTLY_ONE_COMPOUND;
-        } else if (transitionCompoundMappingPolicyStr == "REQUIRE_ALL_TRANSITIONS_TO_ONE_OR_MORE_COMPOUNDS") {
-            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::REQUIRE_ALL_TRANSITIONS_TO_ONE_OR_MORE_COMPOUNDS;
-        } else if (transitionCompoundMappingPolicyStr == "RETAIN_TRANSITIONS_ONE_OR_MORE_COMPOUNDS") {
-            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::RETAIN_TRANSITIONS_ONE_OR_MORE_COMPOUNDS;
-        } else if (transitionCompoundMappingPolicyStr == "RETAIN_TRANSITIONS_EXACTLY_ONE_COMPOUND") {
-            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::RETAIN_TRANSITIONS_EXACTLY_ONE_COMPOUND;
-        } else if (transitionCompoundMappingPolicyStr == "RETAIN_ALL_TRANSITIONS") {
-            qqqSearchParameters->transitionCompoundMappingPolicy = QQQTransitionCompoundMappingPolicy::RETAIN_ALL_TRANSITIONS;
-        }
-    }
-    if (decodedMap.find("rollUpRtTolerance") != decodedMap.end()) {
-        qqqSearchParameters->rollUpRtTolerance = stof(decodedMap["rollUpRtTolerance"]);
-    }
-
-    // END QQQSearchParameters
-
-    return qqqSearchParameters;
 }
 
 void QQQProcessor::rollUpToCompoundQuant(vector<PeakGroup>& peakgroups, shared_ptr<QQQSearchParameters> params, bool debug){
@@ -530,4 +552,165 @@ void QQQProcessor::labelInternalStandards(vector<PeakGroup>& peakgroups, shared_
     }
 
     if (debug) cout << "End QQQProcessor::labelInternalStandards()" << endl;
+}
+
+bool QQQProcessor::isPassPeakGroupBackground(
+    Peak& p,
+    PeakGroup& pg,
+    shared_ptr<QQQSearchParameters> params,
+    float peakQuant,
+    bool debug
+    ) {
+
+    if (params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::MAX_BLANK_INTENSITY) {
+        return p.peakIntensity >= pg.groupBackground * params->qqqFilterMinPeakIntensityGroupBackgroundRatio;
+    } else if (params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE ||
+               params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL) {
+        return peakQuant >= pg.groupBackground * params->qqqFilterMinPeakIntensityGroupBackgroundRatio;
+    }
+
+    return true;
+}
+
+//DOES NOT apply to children peak groups.
+vector<PeakGroup> QQQProcessor::filterPeakGroups(vector<PeakGroup>& peakgroups, shared_ptr<QQQSearchParameters> params, bool debug){
+    if (debug) cout << "Start QQQProcessor::labelInternalStandards()" << endl;
+    vector<PeakGroup> filteredGroups{};
+
+    for (auto & pg : peakgroups) {
+        if (pg.compound && pg.compound->metaDataMap.find(QQQProcessor::getTransitionIsInternalStandardStringKey()) != pg.compound->metaDataMap.end()){
+            if (pg.compound->metaDataMap.at(QQQProcessor::getTransitionIsInternalStandardStringKey()) == "TRUE") {
+                filteredGroups.push_back(pg);
+                if (debug) cout << "( " << pg.meanMz << ", " << pg.medianRt() << "): " << pg.compound->name << " is IS" << endl;
+
+                continue;
+            }
+        }
+
+        string quantType = "smoothedPeakAreaCorrected";
+        if (pg.compound->metaDataMap.find(QQQProcessor::getTransitionPreferredQuantTypeStringKey()) != pg.compound->metaDataMap.end()) {
+            quantType = pg.compound->metaDataMap.at(QQQProcessor::getTransitionPreferredQuantTypeStringKey());
+        }
+
+        float maxBlankQuant = 0.0f;
+        float maxSampleQuant = 0.0f;
+        float maxPeakIntensity = 0.0f;
+        Peak maxPeak;
+
+        for (auto & p : pg.peaks) {
+
+            float peakQuant = p.getQuantByName(quantType);
+
+            if (p.fromBlankSample && peakQuant > maxBlankQuant) {
+                maxBlankQuant = peakQuant;
+            } else if (!p.fromBlankSample) {
+                if (peakQuant > maxSampleQuant) {
+                    maxSampleQuant = peakQuant;
+                }
+                if (p.peakIntensity > maxPeakIntensity) {
+                    maxPeakIntensity = p.peakIntensity;
+                    maxPeak = p;
+                }
+            }
+            if (debug) cout << p.sample->sampleName.c_str() << ": (blank=" << (p.fromBlankSample ? "yes" : "no") << ") " << peakQuant << endl;
+        }
+
+        float maxPeakQuant = maxPeak.getQuantByName(quantType);
+
+        if (debug && pg.compound) cout << pg.compound->name << " ";
+        if (debug) cout << "( " << pg.meanMz << ", " << pg.medianRt() << "): "
+                        << "quantType = " << quantType << ", "
+                        << "(maxSampleQuant/maxBlankQuant) = (" << maxSampleQuant << "/" << maxBlankQuant << ") = "
+                        << (maxSampleQuant/maxBlankQuant)  << " "
+                        << (maxBlankQuant * params->qqqFilterMinSignalBlankRatio <= maxSampleQuant ? "keep" : "skip")
+                        << endl;
+
+        //Issue 664
+        if (params->qqqFilterIsRetainOnlyPassingPeaks) {
+
+            bool isKeepPeakGroup = false;
+
+            vector<Peak> passingPeaks{};
+
+            for (auto p : pg.peaks) {
+                float peakQuant = p.getQuantByName(quantType);
+                if (p.fromBlankSample ||
+                        (
+                            peakQuant >= maxBlankQuant * params->qqqFilterMinSignalBlankRatio &&
+                            QQQProcessor::isPassPeakGroupBackground(p, pg, params, peakQuant, debug)
+                        )
+                    ) {
+                    passingPeaks.push_back(p);
+
+                    if (!p.fromBlankSample) isKeepPeakGroup = true;
+                }
+            }
+
+            if (isKeepPeakGroup) {
+
+                pg.peaks.clear();
+                for (auto& p : passingPeaks) {
+                    pg.addPeak(p);
+                }
+
+                pg.groupStatistics(true); // force recomputation
+
+                filteredGroups.push_back(pg);
+            }
+
+        } else if (
+           maxSampleQuant >= maxBlankQuant * params->qqqFilterMinSignalBlankRatio &&
+            QQQProcessor::isPassPeakGroupBackground(maxPeak, pg, params, maxPeakQuant, debug) ){
+            filteredGroups.push_back(pg);
+        }
+    }
+
+    if (debug) cout << "End QQQProcessor::filterPeakGroups()" << endl;
+    return filteredGroups;
+}
+
+void QQQProcessor::setPeakGroupBackground(
+    vector<PeakGroup>& peakgroups,
+    shared_ptr<QQQSearchParameters> params,
+    bool debug
+    ) {
+
+    if (debug) {
+        cout << "QQQProcessor::setPeakGroupBackground(): "
+             << peakgroups.size() << " peakgroups."
+             << endl;
+    }
+
+    for (auto & pg : peakgroups) {
+
+        if (params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::MAX_BLANK_INTENSITY) {
+            pg.groupBackground = pg.blankMaxHeight;
+            if (debug) {
+                cout << "QQQProcessor::setPeakGroupBackground(): "
+                     << " set to max height: " << pg.blankMaxHeight
+                     << " group background=" << pg.groupBackground
+                     << endl;
+            }
+        }
+
+        if (!pg.compound) continue;
+
+        string quantType = "smoothedPeakAreaCorrected";
+        if (pg.compound->metaDataMap.find(QQQProcessor::getTransitionPreferredQuantTypeStringKey()) != pg.compound->metaDataMap.end()) {
+            quantType = pg.compound->metaDataMap.at(QQQProcessor::getTransitionPreferredQuantTypeStringKey());
+
+            if (params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE) {
+                pg.groupBackground = pg.mergedEICSummaryData.getCorrespondingBaseline(quantType);
+            } else if (params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL) {
+                pg.groupBackground = pg.getBlankSignalByQuantType(quantType);
+            }
+
+            if (debug) {
+                cout << pg.compound->name << "@ "<< pg.medianRt()
+                     << " min: quantType=" << quantType
+                     << ", groupBackground=" << pg.groupBackground
+                     << endl;
+            }
+        }
+    }
 }

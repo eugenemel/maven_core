@@ -57,6 +57,7 @@ class Fragment;
 class Isotope;
 struct FragmentationMatchScore;
 class CompoundIon;
+class PeakGroupBaseline;
 
 class LibraryMs2SpectrumParameters;
 class LoopInjectionMs2SpectrumParameters;
@@ -507,7 +508,6 @@ public:
     float getAverageFullScanTime();			// average time difference between scans
     void enumerateSRMScans();			//srm->scan mapping for QQQ
 
-
     float correlation(float mz1,  float mz2, float ppm, float rt1, float rt2, bool debug=false); //correlation in EIC space
     float getNormalizationConstant() { return _normalizationConstant; }
     void  setNormalizationConstant(float x) { _normalizationConstant = x; }
@@ -592,6 +592,8 @@ public:
     static bool compSampleName(const mzSample* a, const mzSample* b ) { return a->sampleName < b->sampleName; }
     static mzSlice getMinMaxDimentions(const vector<mzSample*>& samples);
 
+    //Issue 659: utility for use in test context.
+    static vector<mzSample*> getSamples(string sampleDir, bool isQQQSample);
 
     static void setFilter_minIntensity(int x ) { filter_minIntensity=x; }
     static void setFilter_centroidScans( bool x) { filter_centroidScans=x; }
@@ -710,6 +712,14 @@ class EIC {
 
     static void removeLowRankGroups(vector<PeakGroup>&groups, unsigned int rankLimit );
     static bool compMaxIntensity(EIC* a, EIC* b ) { return a->maxIntensity > b->maxIntensity; }
+
+    //Issue 665: compute blank-specific background
+    static float calculateBlankBackground(vector<EIC*>& eics, float rtMin, float rtMax, bool debug=false);
+
+    //Issue 668: capture, summarize some information about merged EICs
+    static PeakGroupBaseline calculateMergedEICSummaryData(EIC* mergedEIC, set<int> mergedEICPeakIndexes, bool debug=false);
+    static PeakGroupBaseline calculateMaxBlankSignalBackground(EIC* mergedEIC, vector<EIC *>& eics, set<int> mergedEICPeakIndexes, bool isUseSmoothedIntensity, bool debug=false);
+    static float getAnalogousIntensitySum(EIC* eic, float rtAnchor, unsigned int numPoints, bool isUseSmoothedIntensity, bool debug=false);
 
 private:
     SmootherType smootherType;
@@ -934,6 +944,48 @@ struct IsotopeParameters {
 
 };
 
+enum PeakGroupBackgroundType{
+    NONE=0, // background not computed - value is 0
+
+    //Issue 665
+    // max raw intensity from any blank sample identified within RT bounds of peak group.
+    // This type is always compared to the peak height.
+    MAX_BLANK_INTENSITY=1,
+
+    //Issue 668
+    //(Primarily for QQQ data)
+    // PREFERRED_QUANT_TYPE_* Series
+    //
+    // based on preferred transition quant type, compute a baseline type.
+    // This value will either refer to smoothed or not, and will consist of
+    // intensity from either
+    // (1) The entire RT range,
+    // (2) The FWHM RT range,
+    // (3) The peak RT and its neighbors (for peakAreaTop),
+    // or
+    // (3) The peak RT only (peakHeight).
+
+    // Use Baseline determined from merged EIC
+    PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE=2,
+
+    //Uses readout type from the blank samples, max for each corresponding readout.
+    //Note that smoothed types should be matched up with other smoothed types,
+    //and raw types with raw types - there shouldn't be any mixing.
+    PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL=3
+};
+
+//Issue 668: Retain some summary-level information from merged EIC (part of peak grouping)
+class PeakGroupBaseline {
+public:
+
+    float fullRangeBaseline = 0; //quant types that consider the full RT range
+    float FWHMBaseline = 0; //quant types that use the FWHM RT range
+    float threePointBaseline = 0; // quant types that use the 3-point baseline (peakAreaTop)
+    float pickedPeakBaseline = 0; // quant types that use a single point
+
+    float getCorrespondingBaseline(string quantType);
+};
+
 class PeakGroup {
 
 	public:
@@ -1078,6 +1130,16 @@ class PeakGroup {
          */
         float srmProductMz;
 
+        //Issue 665/668: Various ways to compute peak background.
+        PeakGroupBaseline mergedEICSummaryData;
+        PeakGroupBaseline maxBlankRawSignal;
+        PeakGroupBaseline maxBlankSmoothedSignal;
+        float blankMaxHeight;
+        float getBlankSignalByQuantType(string quantType);
+
+        //This value takes on one of the above varlues based on setting in PeakGroupBackgroundType.
+        float groupBackground;
+
         bool isPrimaryGroup();
         inline bool hasCompoundLink()  { if(compound != NULL) return true ; return false; }
         inline bool isEmpty()   { if(peaks.size() == 0) return true; return false; }
@@ -1144,6 +1206,7 @@ class PeakGroup {
         void markGroupBad();
         void addLabel(char label);
         void toggleLabel(char label);
+        void applyLabelsFromCompoundMetadata(); //Issue 662
         string getPeakGroupLabel();
 
 		void reduce();
@@ -1266,6 +1329,9 @@ class Compound {
             virtual vector<int> getConstituentMzs();
 
             static void traverseAndAdd(PeakGroup& group, set<Compound*>& compoundSet);
+
+            //reserved constants - do not change!
+            static string getCompoundLabelsStringKey(){return "COMPOUND_LABELS";}
 };
 
 //Issue 416
@@ -1534,7 +1600,7 @@ class Aligner {
 		void setPolymialDegree(int x) { polynomialDegree=x; }
 		void setSamples(vector<mzSample*>set) { samples=set; }
 
-		void loadAlignmentFile(string alignmentFile); //load alignment information from a file
+		map<mzSample*, vector<pair<float, float>>> loadAlignmentFile(string alignmentFile); //load alignment information from a file
 		void doSegmentedAligment();	 //ralign scans using guided alignment
 
         inline void addSegment(string sampleName, AlignmentSegment* s) {
@@ -1903,16 +1969,23 @@ public:
     float groupMergeOverlap = 0.8f;
     // END EIC::groupPeaksE()
 
+    //computed properties
+    PeakGroupBackgroundType groupBackgroundType = PeakGroupBackgroundType::NONE;
+
     //post-grouping filters
+    //a peak group passes a filter if the assessed value is greater than or equal to the filter value.
     int filterMinGoodGroupCount = 0;
     float filterMinQuality = 0;
     int filterMinNoNoiseObs = 0;
     float filterMinSignalBaselineRatio = 0;
     float filterMinGroupIntensity = 0;
     int filterMinPrecursorCharge = 0;
+    float filterMinSignalBlankRatio = 0;
 
     string getEncodedPeakParameters(string tupleMapDelimiter="&", string internalMapDelimiter="|,|");
     void fillInPeakParameters(unordered_map<string, string> decodedMap, string tupleMapDelimiter="&", string internalMapDelimiter="|,|");
+
+    static shared_ptr<PeakPickingAndGroupingParameters> getMergedAsPeakParams(shared_ptr<PeakPickingAndGroupingParameters> params);
 };
 
 /**
@@ -2266,6 +2339,10 @@ struct PeakContainer {
     float maxPeakRt = -1.0f;
     float meanMz = 0.0f;
 
+    //Issue 668: Keep track of all of the original EIC peak indexes associated with a PeakContainer.
+    //As PeakContainers are merged together, this will accumulate to contain the set of all merged EIC peaks.
+    set<int> mergedEICPeakIndexes{};
+
     //replace less intense peaks with more intense peaks,
     void mergePeakContainer(PeakContainer container) {
 
@@ -2280,6 +2357,8 @@ struct PeakContainer {
                 peaks.insert(make_pair(p.getSample(), p));
             }
         }
+
+        mergedEICPeakIndexes.insert(container.mergedEICPeakIndexes.begin(), container.mergedEICPeakIndexes.end());
     }
 
     //update mz, rt computations based on peaks included in peak group.
@@ -2383,6 +2462,14 @@ public:
 
     float rollUpRtTolerance = 0.5f;
 
+    //Issue 660
+    float qqqFilterMinSignalBlankRatio = 0.0f; // (maxNonBlank / maxBlank), quant type matches transition
+
+    //Issue 665
+    float qqqFilterMinPeakIntensityGroupBackgroundRatio = 0.0f; // (non-blank peakIntensity / PeakGroup.groupBackground), PeakGroup.groupBackground managed by PeakGroupBackgroundType
+
+    bool qqqFilterIsRetainOnlyPassingPeaks = false; // Issue 664
+
     shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters;
 };
 
@@ -2464,6 +2551,58 @@ class QQQProcessor{
             shared_ptr<QQQSearchParameters> params,
             bool debug = false);
 
+    /**
+     * @brief filterPeakGroups
+     *
+     * Filter peakgroups for qqq-specific search criteria.
+     * IS are skipped from the filtering.
+     *
+     * @param peakgroups
+     * @param params
+     * @param debug
+     * @return
+     */
+    static vector<PeakGroup> filterPeakGroups(
+            vector<PeakGroup>& peakgroups,
+            shared_ptr<QQQSearchParameters> params,
+            bool debug = false);
+
+    /**
+     * @brief setPeakGroupBackground
+     *
+     * Based on PeakGroupBackgroundType, assign PeakGroup.groupBackground.
+     * Used downstream in Peak Group filtering steps.
+     *
+     * @param peakgroups
+     * @param params
+     * @param debug
+     */
+    static void setPeakGroupBackground(
+            vector<PeakGroup>& peakgroups,
+            shared_ptr<QQQSearchParameters> params,
+            bool debug = false
+        );
+
+    /**
+     * @brief isPassGroupBackground
+     *
+     * Based on PeakGroupBackgroundType, perform a different comparison.
+     * Note that the PeakGroup's background type should already be computed by now.
+     *
+     * @param p
+     * @param pg
+     * @param params
+     * @param debug
+     * @return
+     */
+    static bool isPassPeakGroupBackground(
+        Peak& p,
+        PeakGroup& pg,
+        shared_ptr<QQQSearchParameters> params,
+        float peakQuant,
+        bool debug = false
+        );
+
     //reserved constants - do not change!
     static string getTransitionIdFilterStringKey(){return "TRANSITION_ID_FILTER_STRING";}
     static string getTransitionIonTypeFilterStringKey(){return "TRANSITION_ION_TYPE";}
@@ -2471,5 +2610,42 @@ class QQQProcessor{
     static string getTransitionPreferredQuantTypeStringKey(){return "TRANSITION_PREFERRED_QUANT_TYPE";}
 };
 
+class ExperimentAnchorPoints {
+public:
+
+    //constructor fields
+    vector<mzSample*> samples{};
+    string anchorPointsFile;
+    float standardsAlignment_precursorPPM;
+    float standardsAlignment_maxRtWindow;
+    int eic_smoothingWindow;
+    float standardsAlignment_minPeakIntensity;
+
+    //computed fields
+    mzSample *referenceSample = nullptr;
+    vector<AnchorPointSet> anchorPointSets{};
+
+    //                      observedRt  referenceRt
+    //                          rt      rt_update
+    map<mzSample*, vector<pair<float, float>>> sampleToUpdatedRts{};
+
+    Aligner rtAligner;
+
+    ExperimentAnchorPoints(vector<mzSample*> samples,
+                           string anchorPointsFile,
+                           float standardsAlignment_precursorPPM,
+                           float standardsAlignment_maxRtWindow,
+                           int eic_smoothingWindow,
+                           float standardsAlignment_minPeakIntensity);
+
+    void compute(bool debug, bool isClean=true);
+
+private:
+    void determineReferenceSample(bool debug);
+    void computeAnchorPointSetFromFile(bool debug);
+    void computeSampleToRtMap(bool debug);
+    void cleanSampleToRtMap(bool debug);
+    void doSegmentedAlignment(bool debug);
+};
 
 #endif

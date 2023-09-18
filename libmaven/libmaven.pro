@@ -19,6 +19,7 @@ SOURCES=base64.cpp mzMassCalculator.cpp mzSample.cpp  mzUtils.cpp statistics.cpp
        Compound.cpp \
        isotopicenvelopeutils.cpp \
        mzkitchenutils.cpp \
+       proteinutils.cpp \
        qqqprocessor.cpp \
        savgol.cpp \
        SavGolSmoother.cpp \
@@ -39,6 +40,7 @@ HEADERS += base64.h mzFit.h mzMassCalculator.h mzSample.h mzPatterns.h mzUtils.h
     directinfusionprocessor.h \
     isotopicenvelopeutils.h \
     lipidsummarizationutils.h \
+    proteinutils.h \
     secprocessor.h
 
 message($$LIBS)
