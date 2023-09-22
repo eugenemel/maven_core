@@ -1,27 +1,5 @@
 #include "isotopicenvelopeutils.h"
 
-//private constructor: this is a singleton
-IsotopeProcessorOptions::IsotopeProcessorOptions(){}
-
-IsotopeProcessorOptions& IsotopeProcessorOptions::instance() {
-    static IsotopeProcessorOptions options;
-    return options;
-}
-
-void IsotopeProcessorOptions::setOptions(string config_file) {
-    this->config_file = config_file;
-
-    //TODO: import config file
-}
-
-shared_ptr<IsotopicExtractionParameters> IsotopeProcessorOptions::getExtractionParameters() {
-    shared_ptr<IsotopicExtractionParameters> params = shared_ptr<IsotopicExtractionParameters>(new IsotopicExtractionParameters());
-
-    //TODO: fill in params
-
-    return params;
-}
-
 double IsotopicEnvelope::getTotalIntensity() {
     if (totalIntensity < 0) {
         totalIntensity = std::accumulate(intensities.begin(), intensities.end(), 0.0);

@@ -6,33 +6,6 @@
 #include "mzSample.h"
 #include <numeric>
 
-class IsotopicExtractionParameters;
-
-class IsotopeProcessorOptions {
-
-public:
-    static IsotopeProcessorOptions& instance();
-
-    void setOptions(string config_file);
-
-    void printOptions();
-
-    shared_ptr<IsotopicExtractionParameters> getExtractionParameters();
-
-    //fields below this point
-    string config_file = "";
-
-private:
-    //Singleton: constructor is private
-    IsotopeProcessorOptions();
-
-    //Singleton: Disable copy constructor
-    IsotopeProcessorOptions(const IsotopeProcessorOptions&) = delete;
-
-    //Singleton: Disable assignment operator
-    IsotopeProcessorOptions& operator= (const IsotopeProcessorOptions&) = delete;
-};
-
 /**
  * @brief The IsotopicEnvelope class
  * Measurements for a set of isotopes in a single sample.
