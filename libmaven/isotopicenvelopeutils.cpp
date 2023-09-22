@@ -96,10 +96,10 @@ void IsotopicEnvelope::print() {
 
 string IsotopicExtractionParameters::getAlgorithmName(IsotopicExtractionAlgorithm algorithm) {
 
-    if (algorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS) {
-        return "peak-full-rt-bounds";
-    } else if (algorithm == IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS) {
-        return "peak-shrinking-rt-bounds";
+    if (algorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA) {
+        return "PEAK_FULL_RT_BOUNDS_AREA";
+    } else if (algorithm == IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS_AREA) {
+        return "PEAK_SHRINKING_RT_BOUNDS_AREA";
     }
 
     return "unknown";
@@ -108,9 +108,9 @@ string IsotopicExtractionParameters::getAlgorithmName(IsotopicExtractionAlgorith
 IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelope(mzSample *sample, Peak *peak, vector<Isotope> &isotopes, shared_ptr<IsotopicExtractionParameters> params) {
     IsotopicEnvelope envelope;
 
-    if (params->algorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS) {
+    if (params->algorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA) {
         envelope = extractEnvelopePeakFullRtBounds(sample, peak, isotopes, params);
-    } else if (params->algorithm == IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS) {
+    } else if (params->algorithm == IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS_AREA) {
         envelope = extractEnvelopePeakShrinkingRtBounds(sample, peak, isotopes, params);
     }
 
@@ -159,10 +159,10 @@ string IsotopicExtractionParameters::encodeParams() {
 
     //extraction algorithm
     string algorithmStr = "UNKNOWN";
-    if (algorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS) {
-       algorithmStr = "PEAK_FULL_RT_BOUNDS";
-    } else if (algorithm == IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS) {
-       algorithmStr = "PEAK_SHRINKING_RT_BOUNDS";
+    if (algorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA) {
+       algorithmStr = "PEAK_FULL_RT_BOUNDS_AREA";
+    } else if (algorithm == IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS_AREA) {
+       algorithmStr = "PEAK_SHRINKING_RT_BOUNDS_AREA";
     }
     encodedParams = encodedParams + "algorithm" + "=" + algorithmStr + ";";
 
@@ -187,10 +187,10 @@ shared_ptr<IsotopicExtractionParameters> IsotopicExtractionParameters::decode(st
     //extraction algorithm
     if (decodedMap.find("algorithm") != decodedMap.end()) {
        string algorithmStr = decodedMap["algorithm"];
-       if (algorithmStr == "PEAK_FULL_RT_BOUNDS") {
-            params->algorithm = IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS;
-       } else if (algorithmStr == "PEAK_SHRINKING_RT_BOUNDS") {
-            params->algorithm = IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS;
+       if (algorithmStr == "PEAK_FULL_RT_BOUNDS_AREA") {
+            params->algorithm = IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA;
+       } else if (algorithmStr == "PEAK_SHRINKING_RT_BOUNDS_AREA") {
+            params->algorithm = IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS_AREA;
        }
     }
 

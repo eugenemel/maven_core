@@ -88,7 +88,7 @@ public:
 
 
 enum IsotopicTheoreticalMzToleranceType{Da, ppm};
-enum IsotopicExtractionAlgorithm{PEAK_FULL_RT_BOUNDS, PEAK_SHRINKING_RT_BOUNDS};
+enum IsotopicExtractionAlgorithm{PEAK_FULL_RT_BOUNDS_AREA, PEAK_SHRINKING_RT_BOUNDS_AREA};
 
 /**
  * @brief The IsotopicExtractionParameters class
@@ -99,7 +99,7 @@ enum IsotopicExtractionAlgorithm{PEAK_FULL_RT_BOUNDS, PEAK_SHRINKING_RT_BOUNDS};
 class IsotopicExtractionParameters {
 public:
 
-    IsotopicExtractionAlgorithm algorithm = IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS;
+    IsotopicExtractionAlgorithm algorithm = IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA;
 
     double isotopicTheoreticalMzTolerance = 0.01;
     IsotopicTheoreticalMzToleranceType isotopicTheoreticalMzToleranceType = IsotopicTheoreticalMzToleranceType::Da;
