@@ -209,3 +209,12 @@ shared_ptr<IsotopicExtractionParameters> IsotopicExtractionParameters::decode(st
 
     return params;
 }
+
+vector<Isotope> IsotopicEnvelopeAdjuster::condenseTheoreticalIsotopes(
+    vector<Isotope> defaultIsotopes,
+    shared_ptr<IsotopicExtractionParameters> params,
+    bool debug){
+
+    //TODO: implement
+    return defaultIsotopes;
+}
