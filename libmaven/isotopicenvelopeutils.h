@@ -46,15 +46,18 @@ public:
 
     vector<Isotope> isotopes{};
 
+    //View cross-isotope measurements by sample
+    //Individual (Sample, Isotope) measurements are stored by elements
+    //in the IsotopicEnvelope.intensities vector (same indices as IsotopicEnvelopeGroup.isotopes).
     map<mzSample*, IsotopicEnvelope> envelopeBySample{};
 
-    //TODO: implement these as needed
+    //View cross-sample measurements by isotope
+    //Individual (Isotope, Sample) measurements are stored as peaks in the PeakGroup
+    map<Isotope, PeakGroup> peakGroupByIsotope{};
 
-//    double getQuant(mzSample* sample, Isotope isotope);
-//    double getQuant(mzSample* sample, int isotopeIndex);
-
-//    IsotopicEnvelope getEnvelope(mzSample* sample);
-//    map<mzSample*, double> getIsotopeQuant(Isotope isotope);
+    //convenience method that sets children of the IsotopicEnvelope.group field
+    //to the IsotopicEnvelopeGroup.children (same indices as IsotopicEnvelopeGroup.isotopes).
+    void setIsotopesToChildrenPeakGroups();
 
     void print();
 };
