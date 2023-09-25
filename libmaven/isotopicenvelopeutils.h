@@ -54,9 +54,9 @@ public:
     //in the IsotopicEnvelope.intensities vector (same indices as IsotopicEnvelopeGroup.isotopes).
     map<mzSample*, IsotopicEnvelope> envelopeBySample{};
 
-    //View cross-sample measurements by isotope
+    //View cross-sample measurements by isotope (key is index in IsotopicEnvelopeGroup.isotopes)
     //Individual (Isotope, Sample) measurements are stored as peaks in the PeakGroup
-    map<Isotope, PeakGroup> peakGroupByIsotope{};
+    map<int, PeakGroup> peakGroupByIsotope{};
 
     //Usually provided by IsotopicExtractionParameters
     string extractionAlgorithmName;
