@@ -130,6 +130,8 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesPeakFullRtBound
         g.expectedAbundance = isotope.abundance;
         g.isotopeC13count= isotope.C13;
         g.isotopicIndex = i;
+        g.compound = compound;
+        g.adduct = adduct;
 
         envelopeGroup.isotopePeakGroups[i] = g;
     }
