@@ -96,7 +96,13 @@ public:
     static IsotopicEnvelope extractEnvelopePeakShrinkingRtBounds(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, shared_ptr<IsotopicExtractionParameters> params);
 
     //The original approach implemented in MAVEN up through version 2.0 2023-09-25
-    static IsotopicEnvelope extractEnvelopeVersion1(mzSample* sample, Peak *peak, vector<Isotope>& isotopes);
+    static IsotopicEnvelopeGroup extractEnvelopeVersion1(
+        Compound *compound,
+        Adduct *adduct,
+        PeakGroup *group,
+        vector<Isotope>& isotopes,
+        shared_ptr<IsotopicExtractionParameters> params,
+        bool debug=false);
 };
 
 class IsotopicEnvelopeAdjuster {

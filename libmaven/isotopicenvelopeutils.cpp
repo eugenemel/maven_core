@@ -124,12 +124,19 @@ IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelopePeakFullRtBounds(mzSa
     return envelope;
 }
 
-IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelopeVersion1(mzSample* sample, Peak *peak, vector<Isotope>& isotopes) {
-    IsotopicEnvelope envelope;
+IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopeVersion1(
+        Compound *compound,
+        Adduct *adduct,
+        PeakGroup *group,
+        vector<Isotope>& isotopes,
+        shared_ptr<IsotopicExtractionParameters> params,
+        bool debug) {
+
+    IsotopicEnvelopeGroup envelopeGroup;
 
     //TODO
 
-    return envelope;
+    return envelopeGroup;
 }
 
 IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelopePeakShrinkingRtBounds(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, shared_ptr<IsotopicExtractionParameters> params){
