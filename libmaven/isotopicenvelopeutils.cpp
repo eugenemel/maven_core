@@ -132,6 +132,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesPeakFullRtBound
         g.isotopicIndex = i;
         g.compound = compound;
         g.adduct = adduct;
+        g.setType(PeakGroup::GroupType::IsotopeType);
 
         envelopeGroup.isotopePeakGroups[i] = g;
     }
@@ -165,6 +166,8 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesPeakFullRtBound
             envelope.intensities.at(i) = intensity;
 
             Peak p;
+
+            //RT related
             p.scan = peak.scan;
             p.minscan = peak.minscan;
             p.maxscan = peak.maxscan;
@@ -172,14 +175,20 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesPeakFullRtBound
             p.minpos = peak.minpos;
             p.maxpos = peak.maxpos;
             p.width = (peak.maxpos-peak.minpos);
-
             p.rtmin = peak.rtmin;
             p.rtmax = peak.rtmax;
             p.rt = peak.rt;
+
+            //m/z related
             p.mzmin = mzmin;
             p.mzmax = mzmax;
+            p.peakMz = isotope.mz;
+            p.baseMz = isotope.mz;
+            p.medianMz = isotope.mz;
 
+            //intensity related
             p.peakArea = intensity;
+            //TODO: use peakAreaCorrected as natural-abundance corrected abundance
 
             //avoid writing junk into mzrollDB
             p.gaussFitR2 = 0;
