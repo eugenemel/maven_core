@@ -161,6 +161,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesPeakFullRtBound
 
             Peak p;
             p.peakArea = intensity;
+            p.sample = sample;
 
             envelopeGroup.isotopePeakGroups[i].addPeak(p);
         }
