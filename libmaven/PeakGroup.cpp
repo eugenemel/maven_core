@@ -1268,8 +1268,7 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmp
             return lhs.mz < rhs.mz;
          });
 
-    map<string,PeakGroup>isotopes{};
-    map<string,PeakGroup>::iterator itr2;
+    map<string, PeakGroup>isotopes{};
 
     for (auto parentPeak : peaks ) {
         mzSample* sample = parentPeak.sample;
@@ -1416,6 +1415,8 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmp
     }
 
     children.clear();
+
+    map<string, PeakGroup>::iterator itr2;
     for(itr2 = isotopes.begin(); itr2 != isotopes.end(); itr2++ ) {
         string isotopeName = (*itr2).first;
         PeakGroup& child = (*itr2).second;

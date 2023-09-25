@@ -91,6 +91,9 @@ public:
     //usually called from IsotopicEnvelopeExtractor::extractEnvelope()
     static IsotopicEnvelope extractEnvelopePeakFullRtBounds(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, shared_ptr<IsotopicExtractionParameters> params);
     static IsotopicEnvelope extractEnvelopePeakShrinkingRtBounds(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, shared_ptr<IsotopicExtractionParameters> params);
+
+    //The original approach implemented in MAVEN up through version 2.0 2023-09-25
+    static IsotopicEnvelope extractEnvelopeVersion1(mzSample* sample, Peak *peak, vector<Isotope>& isotopes);
 };
 
 class IsotopicEnvelopeAdjuster {

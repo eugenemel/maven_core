@@ -124,6 +124,14 @@ IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelopePeakFullRtBounds(mzSa
     return envelope;
 }
 
+IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelopeVersion1(mzSample* sample, Peak *peak, vector<Isotope>& isotopes) {
+    IsotopicEnvelope envelope;
+
+    //TODO
+
+    return envelope;
+}
+
 IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelopePeakShrinkingRtBounds(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, shared_ptr<IsotopicExtractionParameters> params){
     IsotopicEnvelope envelope;
 
