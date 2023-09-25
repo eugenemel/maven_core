@@ -918,7 +918,7 @@ enum IsotopeParametersType{
 
 struct IsotopeParameters {
 
-    string searchVersion = "8.1.27.25";
+    string searchVersion = "2.10.8";
     IsotopeParametersType isotopeParametersType = IsotopeParametersType::INVALID;
 
     //Used to determine m/z bounds from theoretical isotope m/z
