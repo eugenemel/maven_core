@@ -119,6 +119,21 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesPeakFullRtBound
     envelopeGroup.group = group;
     envelopeGroup.isotopes = isotopes;
 
+    //initialize peak groups
+    envelopeGroup.isotopePeakGroups = vector<PeakGroup>(isotopes.size());
+    for (unsigned int i = 0; i < envelopeGroup.isotopePeakGroups.size(); i++) {
+        Isotope isotope = isotopes[i];
+
+        PeakGroup g;
+        g.meanMz = isotope.mz;
+        g.tagString = isotope.name;
+        g.expectedAbundance = isotope.abundance;
+        g.isotopeC13count= isotope.C13;
+        g.isotopicIndex = i;
+
+        envelopeGroup.isotopePeakGroups[i] = g;
+    }
+
     for (auto & peak : group->peaks) {
 
         IsotopicEnvelope envelope;
@@ -137,7 +152,17 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesPeakFullRtBound
                 peak.rtmax,
                 1);
 
-            envelope.intensities.at(i) = std::accumulate(eic->intensity.begin(), eic->intensity.end(), 0.0);
+            double intensity = std::accumulate(eic->intensity.begin(), eic->intensity.end(), 0.0);
+
+            delete(eic);
+            eic = nullptr;
+
+            envelope.intensities.at(i) = intensity;
+
+            Peak p;
+            p.peakArea = intensity;
+
+            envelopeGroup.isotopePeakGroups[i].addPeak(p);
         }
 
         envelope.getTotalIntensity();

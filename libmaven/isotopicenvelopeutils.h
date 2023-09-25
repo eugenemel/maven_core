@@ -54,16 +54,16 @@ public:
     //in the IsotopicEnvelope.intensities vector (same indices as IsotopicEnvelopeGroup.isotopes).
     map<mzSample*, IsotopicEnvelope> envelopeBySample{};
 
-    //View cross-sample measurements by isotope (key is index in IsotopicEnvelopeGroup.isotopes)
+    //View cross-sample measurements by isotope (index matches IsotopicEnvelopeGroup.isotopes)
     //Individual (Isotope, Sample) measurements are stored as peaks in the PeakGroup
-    map<int, PeakGroup> peakGroupByIsotope{};
+    vector<PeakGroup> isotopePeakGroups{};
 
     //Usually provided by IsotopicExtractionParameters
-    string extractionAlgorithmName;
+    string extractionAlgorithmName = "";
 
     //convenience method that sets children of the IsotopicEnvelope.group field
     //to the IsotopicEnvelopeGroup.children (same indices as IsotopicEnvelopeGroup.isotopes).
-    void setIsotopesToChildrenPeakGroups();
+    void setIsotopesToChildrenPeakGroups() {group->children = isotopePeakGroups;}
 
     void print();
 };
