@@ -175,10 +175,16 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesPeakFullRtBound
 
             p.rtmin = peak.rtmin;
             p.rtmax = peak.rtmax;
+            p.rt = peak.rt;
             p.mzmin = mzmin;
             p.mzmax = mzmax;
 
             p.peakArea = intensity;
+
+            //avoid writing junk into mzrollDB
+            p.gaussFitR2 = 0;
+            p.noNoiseObs = 0;
+            p.signalBaselineRatio = 0;
 
             p.sample = sample;
 
