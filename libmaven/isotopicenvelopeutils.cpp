@@ -89,7 +89,7 @@ IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelope(mzSample *sample, Pe
     if (params->algorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA) {
         envelope = extractEnvelopePeakFullRtBounds(sample, peak, isotopes, params);
     } else if (params->algorithm == IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS_AREA) {
-        envelope = extractEnvelopePeakShrinkingRtBounds(sample, peak, isotopes, params);
+        //TODO
     }
 
     envelope.source = IsotopicExtractionParameters::getAlgorithmName(params->algorithm);
@@ -139,12 +139,19 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopeVersion1(
     return envelopeGroup;
 }
 
-IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelopePeakShrinkingRtBounds(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, shared_ptr<IsotopicExtractionParameters> params){
-    IsotopicEnvelope envelope;
+IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopePeakShrinkingRtBounds(
+    Compound *compound,
+    Adduct *adduct,
+    PeakGroup *group,
+    vector<Isotope>& isotopes,
+    shared_ptr<IsotopicExtractionParameters> params,
+    bool debug){
+
+    IsotopicEnvelopeGroup envelopeGroup;
 
     //TODO
 
-    return envelope;
+    return envelopeGroup;
 }
 
 string IsotopicExtractionParameters::encodeParams() {

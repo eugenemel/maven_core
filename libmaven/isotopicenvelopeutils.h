@@ -40,11 +40,14 @@ public:
 class IsotopicEnvelopeGroup {
 public:
 
+    /** Input fields **/
+
     Compound *compound = nullptr;
     Adduct *adduct = nullptr;
     PeakGroup *group = nullptr;
-
     vector<Isotope> isotopes{};
+
+    /** Computed Values **/
 
     //View cross-isotope measurements by sample
     //Individual (Sample, Isotope) measurements are stored by elements
@@ -54,6 +57,9 @@ public:
     //View cross-sample measurements by isotope
     //Individual (Isotope, Sample) measurements are stored as peaks in the PeakGroup
     map<Isotope, PeakGroup> peakGroupByIsotope{};
+
+    //Usually provided by IsotopicExtractionParameters
+    string extractionAlgorithmName;
 
     //convenience method that sets children of the IsotopicEnvelope.group field
     //to the IsotopicEnvelopeGroup.children (same indices as IsotopicEnvelopeGroup.isotopes).
@@ -93,7 +99,14 @@ public:
 
     //usually called from IsotopicEnvelopeExtractor::extractEnvelope()
     static IsotopicEnvelope extractEnvelopePeakFullRtBounds(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, shared_ptr<IsotopicExtractionParameters> params);
-    static IsotopicEnvelope extractEnvelopePeakShrinkingRtBounds(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, shared_ptr<IsotopicExtractionParameters> params);
+
+    static IsotopicEnvelopeGroup extractEnvelopePeakShrinkingRtBounds(
+        Compound *compound,
+        Adduct *adduct,
+        PeakGroup *group,
+        vector<Isotope>& isotopes,
+        shared_ptr<IsotopicExtractionParameters> params,
+        bool debug=false);
 
     //The original approach implemented in MAVEN up through version 2.0 2023-09-25
     static IsotopicEnvelopeGroup extractEnvelopeVersion1(
