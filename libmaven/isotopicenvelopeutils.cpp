@@ -83,7 +83,7 @@ string IsotopicExtractionParameters::getAlgorithmName(IsotopicExtractionAlgorith
     return "unknown";
 }
 
-IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelope(
+IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
     Compound *compound,
     Adduct *adduct,
     PeakGroup *group,
@@ -95,7 +95,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelope(
     IsotopicEnvelopeGroup envelopeGroup;
 
     if (params->algorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA) {
-        envelopeGroup = extractEnvelopePeakFullRtBounds(compound, adduct, group, isotopes, params, debug);
+        envelopeGroup = extractEnvelopesPeakFullRtBounds(compound, adduct, group, isotopes, params, debug);
     } else if (params->algorithm == IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS_AREA) {
         //TODO
     }
@@ -104,7 +104,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelope(
     return envelopeGroup;
 }
 
-IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopePeakFullRtBounds(
+IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesPeakFullRtBounds(
     Compound *compound,
     Adduct *adduct,
     PeakGroup *group,
@@ -148,7 +148,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopePeakFullRtBounds
     return envelopeGroup;
 }
 
-IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopeVersion1(
+IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
         Compound *compound,
         Adduct *adduct,
         PeakGroup *group,
@@ -163,7 +163,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopeVersion1(
     return envelopeGroup;
 }
 
-IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopePeakShrinkingRtBounds(
+IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesPeakShrinkingRtBounds(
     Compound *compound,
     Adduct *adduct,
     PeakGroup *group,

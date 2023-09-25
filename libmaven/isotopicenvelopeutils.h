@@ -110,7 +110,7 @@ public:
      * @param debug
      * @return
      */
-    static IsotopicEnvelopeGroup extractEnvelope(
+    static IsotopicEnvelopeGroup extractEnvelopes(
         Compound *compound,
         Adduct *adduct,
         PeakGroup *group,
@@ -120,7 +120,7 @@ public:
         bool debug=false);
 
     //usually called from IsotopicEnvelopeExtractor::extractEnvelope()
-    static IsotopicEnvelopeGroup extractEnvelopePeakFullRtBounds(
+    static IsotopicEnvelopeGroup extractEnvelopesPeakFullRtBounds(
         Compound *compound,
         Adduct *adduct,
         PeakGroup *group,
@@ -129,7 +129,7 @@ public:
         bool debug=false);
 
     //TODO: not yet implemented
-    static IsotopicEnvelopeGroup extractEnvelopePeakShrinkingRtBounds(
+    static IsotopicEnvelopeGroup extractEnvelopesPeakShrinkingRtBounds(
         Compound *compound,
         Adduct *adduct,
         PeakGroup *group,
@@ -138,7 +138,7 @@ public:
         bool debug=false);
 
     //The original approach implemented in MAVEN up through version 2.0 2023-09-25
-    static IsotopicEnvelopeGroup extractEnvelopeVersion1(
+    static IsotopicEnvelopeGroup extractEnvelopesVersion1(
         Compound *compound,
         Adduct *adduct,
         PeakGroup *group,
