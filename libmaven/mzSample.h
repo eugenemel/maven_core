@@ -906,7 +906,15 @@ protected:
     vector<char>labels;
 };
 
-enum IsotopeParametersType{INVALID=0,SAVED=1,FROM_GUI=2};
+enum IsotopicExtractionAlgorithm{
+    MAVEN_GUI_VERSION_ONE,
+    PEAK_FULL_RT_BOUNDS_AREA,
+    PEAK_SHRINKING_RT_BOUNDS_AREA};
+
+enum IsotopeParametersType{
+    INVALID=0,
+    SAVED=1,
+    FROM_GUI=2};
 
 struct IsotopeParameters {
 
@@ -938,6 +946,9 @@ struct IsotopeParameters {
     string clsfFile = ""; //only exists to assist in encoding/decoding classifier
 
     inline bool isIsotopes() {return (isC13Labeled || isN15Labeled || isS34Labeled || isD2Labeled);}
+
+    //parameter added 2023-09-25
+    IsotopicExtractionAlgorithm isotopicExtractionAlgorithm = IsotopicExtractionAlgorithm::MAVEN_GUI_VERSION_ONE;
 
     string encodeParams();
     static IsotopeParameters decode(string encodedIsotopeParameters);

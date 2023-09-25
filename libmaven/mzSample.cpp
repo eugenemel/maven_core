@@ -2441,6 +2441,17 @@ string IsotopeParameters::encodeParams() {
         encodedParams = encodedParams + "clsfFile" + "=" + clsfFile + ";";     // use with Classifier* parameter
     }
 
+    //extraction algorithm
+    string algorithmStr = "UNKNOWN";
+    if (isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA) {
+        algorithmStr = "PEAK_FULL_RT_BOUNDS_AREA";
+    } else if (isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS_AREA) {
+        algorithmStr = "PEAK_SHRINKING_RT_BOUNDS_AREA";
+    } else if (isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::MAVEN_GUI_VERSION_ONE) {
+        algorithmStr = "MAVEN_GUI_VERSION_ONE";
+    }
+    encodedParams = encodedParams + "isotopicExtractionAlgorithm" + "=" + algorithmStr + ";";
+
     return encodedParams;
 }
 
@@ -2500,6 +2511,18 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     }
     if (decodedMap.find("clsfFile") != decodedMap.end()) {
         isotopeParameters.clsfFile = decodedMap["clsfFile"];
+    }
+
+    //extraction algorithm
+    if (decodedMap.find("isotopicExtractionAlgorith") != decodedMap.end()) {
+        string algorithmStr = decodedMap["algorithm"];
+        if (algorithmStr == "PEAK_FULL_RT_BOUNDS_AREA") {
+           isotopeParameters.isotopicExtractionAlgorithm = IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA;
+        } else if (algorithmStr == "PEAK_SHRINKING_RT_BOUNDS_AREA") {
+           isotopeParameters.isotopicExtractionAlgorithm = IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS_AREA;
+        } else if (algorithmStr == "MAVEN_GUI_VERSION_ONE") {
+           isotopeParameters.isotopicExtractionAlgorithm = IsotopicExtractionAlgorithm::MAVEN_GUI_VERSION_ONE;
+        }
     }
 
     isotopeParameters.isotopeParametersType = IsotopeParametersType::SAVED;
