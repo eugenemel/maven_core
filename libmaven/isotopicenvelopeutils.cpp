@@ -154,6 +154,9 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesPeakFullRtBound
                 peak.rtmax,
                 1);
 
+            float mzmin = eic->mzmin;
+            float mzmax = eic->mzmax;
+
             double intensity = std::accumulate(eic->intensity.begin(), eic->intensity.end(), 0.0);
 
             delete(eic);
@@ -162,7 +165,21 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesPeakFullRtBound
             envelope.intensities.at(i) = intensity;
 
             Peak p;
+            p.scan = peak.scan;
+            p.minscan = peak.minscan;
+            p.maxscan = peak.maxscan;
+            p.pos = peak.scan;
+            p.minpos = peak.minpos;
+            p.maxpos = peak.maxpos;
+            p.width = (peak.maxpos-peak.minpos);
+
+            p.rtmin = peak.rtmin;
+            p.rtmax = peak.rtmax;
+            p.mzmin = mzmin;
+            p.mzmax = mzmax;
+
             p.peakArea = intensity;
+
             p.sample = sample;
 
             envelopeGroup.isotopePeakGroups[i].addPeak(p);
