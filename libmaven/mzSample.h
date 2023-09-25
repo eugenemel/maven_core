@@ -921,7 +921,9 @@ struct IsotopeParameters {
     string searchVersion = "8.1.27.25";
     IsotopeParametersType isotopeParametersType = IsotopeParametersType::INVALID;
 
+    //Used to determine m/z bounds from theoretical isotope m/z
     float ppm = 20;
+
     double maxIsotopeScanDiff = 10;
     double maxNaturalAbundanceErr = 100;
     double minIsotopicCorrelation=0;
