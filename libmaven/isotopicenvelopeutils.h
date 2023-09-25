@@ -94,12 +94,41 @@ public:
 class IsotopicEnvelopeExtractor {
 public:
 
-    //most common entrypoint
-    static IsotopicEnvelope extractEnvelope(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, shared_ptr<IsotopicExtractionParameters> params);
+    /**
+     * @brief extractEnvelope
+     * Most common entry point. The specific extraction algorithm will be selected based on the input params.
+     *
+     * Note that sample information is passed in - this supports cases where a sample of interest has no Peak in
+     * inthe input PeakGroup.
+     *
+     * @param compound
+     * @param adduct
+     * @param group
+     * @param isotopes
+     * @param samples
+     * @param params
+     * @param debug
+     * @return
+     */
+    static IsotopicEnvelopeGroup extractEnvelope(
+        Compound *compound,
+        Adduct *adduct,
+        PeakGroup *group,
+        vector<Isotope>& isotopes,
+        vector<mzSample*> samples,
+        shared_ptr<IsotopicExtractionParameters> params,
+        bool debug=false);
 
     //usually called from IsotopicEnvelopeExtractor::extractEnvelope()
-    static IsotopicEnvelope extractEnvelopePeakFullRtBounds(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, shared_ptr<IsotopicExtractionParameters> params);
+    static IsotopicEnvelopeGroup extractEnvelopePeakFullRtBounds(
+        Compound *compound,
+        Adduct *adduct,
+        PeakGroup *group,
+        vector<Isotope>& isotopes,
+        shared_ptr<IsotopicExtractionParameters> params,
+        bool debug=false);
 
+    //TODO: not yet implemented
     static IsotopicEnvelopeGroup extractEnvelopePeakShrinkingRtBounds(
         Compound *compound,
         Adduct *adduct,

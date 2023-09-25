@@ -83,25 +83,49 @@ string IsotopicExtractionParameters::getAlgorithmName(IsotopicExtractionAlgorith
     return "unknown";
 }
 
-IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelope(mzSample *sample, Peak *peak, vector<Isotope> &isotopes, shared_ptr<IsotopicExtractionParameters> params) {
-    IsotopicEnvelope envelope;
+IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelope(
+    Compound *compound,
+    Adduct *adduct,
+    PeakGroup *group,
+    vector<Isotope>& isotopes,
+    vector<mzSample*> samples,
+    shared_ptr<IsotopicExtractionParameters> params,
+    bool debug){
+
+    IsotopicEnvelopeGroup envelopeGroup;
 
     if (params->algorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA) {
-        envelope = extractEnvelopePeakFullRtBounds(sample, peak, isotopes, params);
+        envelopeGroup = extractEnvelopePeakFullRtBounds(compound, adduct, group, isotopes, params, debug);
     } else if (params->algorithm == IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS_AREA) {
         //TODO
     }
 
-    envelope.source = IsotopicExtractionParameters::getAlgorithmName(params->algorithm);
-    return envelope;
+    envelopeGroup.extractionAlgorithmName = IsotopicExtractionParameters::getAlgorithmName(params->algorithm);
+    return envelopeGroup;
 }
 
-IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelopePeakFullRtBounds(mzSample* sample, Peak *peak, vector<Isotope>& isotopes, shared_ptr<IsotopicExtractionParameters> params){
+IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopePeakFullRtBounds(
+    Compound *compound,
+    Adduct *adduct,
+    PeakGroup *group,
+    vector<Isotope>& isotopes,
+    shared_ptr<IsotopicExtractionParameters> params,
+    bool debug) {
 
-    IsotopicEnvelope envelope;
-    vector<double> intensities(isotopes.size());
+    IsotopicEnvelopeGroup envelopeGroup;
 
-    if (peak) {
+    envelopeGroup.compound = compound;
+    envelopeGroup.adduct = adduct;
+    envelopeGroup.group = group;
+    envelopeGroup.isotopes = isotopes;
+
+    for (auto & peak : group->peaks) {
+
+        IsotopicEnvelope envelope;
+        envelope.intensities = vector<double>(isotopes.size());
+
+        auto sample = peak.sample;
+
         for (unsigned int i = 0; i < isotopes.size(); i++) {
 
             Isotope isotope = isotopes.at(i);
@@ -109,19 +133,19 @@ IsotopicEnvelope IsotopicEnvelopeExtractor::extractEnvelopePeakFullRtBounds(mzSa
             EIC *eic = sample->getEIC(
                 static_cast<float>(isotope.mz - params->isotopicTheoreticalMzTolerance),
                 static_cast<float>(isotope.mz + params->isotopicTheoreticalMzTolerance),
-                        peak->rtmin,
-                        peak->rtmax,
-                        1);
+                peak.rtmin,
+                peak.rtmax,
+                1);
 
-            intensities.at(i) = std::accumulate(eic->intensity.begin(), eic->intensity.end(), 0.0);
+            envelope.intensities.at(i) = std::accumulate(eic->intensity.begin(), eic->intensity.end(), 0.0);
         }
 
-       envelope.intensities = intensities;
-       envelope.getTotalIntensity();
+        envelope.getTotalIntensity();
 
+        envelopeGroup.envelopeBySample.insert(make_pair(sample, envelope));
     }
 
-    return envelope;
+    return envelopeGroup;
 }
 
 IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopeVersion1(
