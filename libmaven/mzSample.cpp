@@ -2530,6 +2530,18 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     return isotopeParameters;
 }
 
+string IsotopeParameters::getAlgorithmName(IsotopicExtractionAlgorithm algorithm) {
+
+    if (algorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA) {
+        return "PEAK_FULL_RT_BOUNDS_AREA";
+    } else if (algorithm == IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS_AREA) {
+        return "PEAK_SHRINKING_RT_BOUNDS_AREA";
+    } else if (algorithm == IsotopicExtractionAlgorithm::MAVEN_GUI_VERSION_ONE) {
+        return "MAVEN_GUI_VERSION_ONE";
+    }
+
+    return "unknown";
+}
 /**
   * Scans of the same collision energy look approximately the same,
   * so first build consensus spectra for all of the same collision energy.

@@ -68,28 +68,6 @@ public:
     void print();
 };
 
-
-enum IsotopicTheoreticalMzToleranceType{Da, ppm};
-
-/**
- * @brief The IsotopicExtractionParameters class
- * Container class to hold all parameters associated with isotopic extraction.
- * Distinct from IsotopeProcessorOptions, which is specific to isotopeprocessor.
- * This set of parameters is also applicable to the MAVEN GUI.
- */
-class IsotopicExtractionParameters {
-public:
-
-    IsotopicExtractionAlgorithm algorithm = IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA;
-
-    double isotopicTheoreticalMzTolerance = 0.01;
-    IsotopicTheoreticalMzToleranceType isotopicTheoreticalMzToleranceType = IsotopicTheoreticalMzToleranceType::Da;
-
-    string encodeParams();
-    static shared_ptr<IsotopicExtractionParameters> decode(string encodedIsotopicExtractionParameters);
-    static string getAlgorithmName(IsotopicExtractionAlgorithm algorithm);
-};
-
 class IsotopicEnvelopeExtractor {
 public:
 
@@ -115,7 +93,7 @@ public:
         PeakGroup *group,
         vector<Isotope>& isotopes,
         vector<mzSample*> samples,
-        shared_ptr<IsotopicExtractionParameters> params,
+        IsotopeParameters params,
         bool debug=false);
 
     //usually called from IsotopicEnvelopeExtractor::extractEnvelope()
@@ -124,7 +102,7 @@ public:
         Adduct *adduct,
         PeakGroup *group,
         vector<Isotope>& isotopes,
-        shared_ptr<IsotopicExtractionParameters> params,
+        IsotopeParameters params,
         bool debug=false);
 
     //TODO: not yet implemented
@@ -133,7 +111,7 @@ public:
         Adduct *adduct,
         PeakGroup *group,
         vector<Isotope>& isotopes,
-        shared_ptr<IsotopicExtractionParameters> params,
+        IsotopeParameters params,
         bool debug=false);
 
     //The original approach implemented in MAVEN up through version 2.0 2023-09-25
@@ -142,7 +120,7 @@ public:
         Adduct *adduct,
         PeakGroup *group,
         vector<Isotope>& isotopes,
-        shared_ptr<IsotopicExtractionParameters> params,
+        IsotopeParameters params,
         bool debug=false);
 };
 
@@ -163,7 +141,7 @@ public:
      */
     static vector<Isotope> condenseTheoreticalIsotopes(
         vector<Isotope> uncondensedIsotopes,
-        shared_ptr<IsotopicExtractionParameters> params,
+        IsotopeParameters params,
         bool debug
         );
 };
