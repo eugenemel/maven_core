@@ -2514,7 +2514,7 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     }
 
     //extraction algorithm
-    if (decodedMap.find("isotopicExtractionAlgorith") != decodedMap.end()) {
+    if (decodedMap.find("isotopicExtractionAlgorithm") != decodedMap.end()) {
         string algorithmStr = decodedMap["algorithm"];
         if (algorithmStr == "PEAK_FULL_RT_BOUNDS_AREA") {
            isotopeParameters.isotopicExtractionAlgorithm = IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA;
