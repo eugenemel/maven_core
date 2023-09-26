@@ -103,8 +103,8 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
 
     if (params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA) {
         envelopeGroup = extractEnvelopesPeakFullRtBounds(compound, adduct, group, isotopes, params, debug);
-    } else if (params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS_AREA) {
-        //TODO
+    } else if (params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::MAVEN_GUI_VERSION_ONE) {
+        envelopeGroup = extractEnvelopesVersion1(compound, adduct, group, isotopes, params, debug);
     }
 
     envelopeGroup.extractionAlgorithmName = IsotopeParameters::getAlgorithmName(params.isotopicExtractionAlgorithm);
