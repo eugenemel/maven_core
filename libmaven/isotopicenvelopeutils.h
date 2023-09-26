@@ -78,10 +78,11 @@ public:
      * Note that sample information is passed in - this supports cases where a sample of interest has no Peak in
      * inthe input PeakGroup.
      *
+     * Isotopes are computed based on the input parameters and compound information.
+     *
      * @param compound
      * @param adduct
      * @param group
-     * @param isotopes
      * @param samples
      * @param params
      * @param debug
@@ -91,7 +92,6 @@ public:
         Compound *compound,
         Adduct *adduct,
         PeakGroup *group,
-        vector<Isotope>& isotopes,
         vector<mzSample*> samples,
         IsotopeParameters params,
         bool debug=false);

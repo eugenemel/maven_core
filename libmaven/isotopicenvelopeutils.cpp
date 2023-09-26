@@ -76,10 +76,28 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
     Compound *compound,
     Adduct *adduct,
     PeakGroup *group,
-    vector<Isotope>& isotopes,
     vector<mzSample*> samples,
     IsotopeParameters params,
     bool debug){
+
+    vector<Isotope> theoreticalIsotopes = MassCalculator::computeIsotopes(
+        compound->formula,
+        adduct,
+        params.maxIsotopesToExtract,
+        params.isC13Labeled,
+        params.isN15Labeled,
+        params.isS34Labeled,
+        params.isD2Labeled
+        );
+
+    vector<Isotope> isotopes = theoreticalIsotopes;
+    if (params.isCondenseTheoreticalIsotopes) {
+        isotopes = IsotopicEnvelopeAdjuster::condenseTheoreticalIsotopes(
+            theoreticalIsotopes,
+            params,
+            false
+            );
+    }
 
     IsotopicEnvelopeGroup envelopeGroup;
 
