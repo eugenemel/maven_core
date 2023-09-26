@@ -932,12 +932,16 @@ struct IsotopeParameters {
     bool   isS34Labeled=false;
     bool   isD2Labeled=false;
 
+    bool isCondenseTheoreticalIsotopes = false;
+    double resolvingPower = 50000.0;
+
     EIC::SmootherType eic_smoothingAlgorithm = EIC::SmootherType::GAUSSIAN;
     float eic_smoothingWindow;
 
     bool isIgnoreNaturalAbundance = true;
     bool isExtractNIsotopes = false;
     int maxIsotopesToExtract = 5;
+    bool isKeepEmptyIsotopes = false;
 
     float avgScanTime = 0.1f; //TODO: must set this based on sample info!
 

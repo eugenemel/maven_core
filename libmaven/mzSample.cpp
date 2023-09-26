@@ -2416,10 +2416,13 @@ string IsotopeParameters::encodeParams() {
     encodedParams = encodedParams + "maxIsotopeScanDiff" + "=" + to_string(maxIsotopeScanDiff) + ";";
     encodedParams = encodedParams + "maxNaturalAbundanceErr" + "=" + to_string(maxNaturalAbundanceErr) + ";";
     encodedParams = encodedParams + "minIsotopicCorrelation" + "=" + to_string(minIsotopicCorrelation) + ";";
+
     encodedParams = encodedParams + "isC13Labeled" + "=" + to_string(isC13Labeled) + ";";
     encodedParams = encodedParams + "isN15Labeled" + "=" + to_string(isN15Labeled) + ";";
     encodedParams = encodedParams + "isS34Labeled" + "=" + to_string(isS34Labeled) + ";";
     encodedParams = encodedParams + "isD2Labeled" + "=" + to_string(isD2Labeled) + ";";
+    encodedParams = encodedParams + "isCondenseTheoreticalIsotopes" + "=" + to_string(isCondenseTheoreticalIsotopes) + ";";
+    encodedParams = encodedParams + "resolvingPower" + "=" + to_string(resolvingPower) + ";";
 
     encodedParams = encodedParams + "eic_smoothingAlgorithm" + "=" + to_string(eic_smoothingAlgorithm) + ";";
     encodedParams = encodedParams + "eic_smoothingWindow" + "=" + to_string(eic_smoothingWindow) + ";";
@@ -2427,6 +2430,8 @@ string IsotopeParameters::encodeParams() {
     encodedParams = encodedParams + "isIgnoreNaturalAbundance" + "=" + to_string(isIgnoreNaturalAbundance) + ";";
     encodedParams = encodedParams + "isExtractNIsotopes" + "=" + to_string(isExtractNIsotopes) + ";";
     encodedParams = encodedParams + "maxIsotopesToExtract" + "=" + to_string(maxIsotopesToExtract) + ";";
+    encodedParams = encodedParams + "isKeepEmptyIsotopes" + "=" + to_string(isKeepEmptyIsotopes) + ";";
+
     encodedParams = encodedParams + "avgScanTime" + "=" + to_string(avgScanTime) + ";";
 
     if (adduct) {
@@ -2476,6 +2481,8 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     if (decodedMap.find("minIsotopicCorrelation") != decodedMap.end()) {
         isotopeParameters.minIsotopicCorrelation = stod(decodedMap["minIsotopicCorrelation"]);
     }
+
+    //isotopic species
     if (decodedMap.find("isC13Labeled") != decodedMap.end()) {
         isotopeParameters.isC13Labeled = decodedMap["isC13Labeled"]=="1";
     }
@@ -2488,12 +2495,21 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     if (decodedMap.find("isD2Labeled") != decodedMap.end()) {
         isotopeParameters.isD2Labeled = decodedMap["isD2Labeled"]=="1";
     }
+    if (decodedMap.find("isCondenseTheoreticalIsotopes") != decodedMap.end()) {
+        isotopeParameters.isCondenseTheoreticalIsotopes = decodedMap["isCondenseTheoreticalIsotopes"] == "1";
+    }
+    if (decodedMap.find("resolvingPower") != decodedMap.end()) {
+        isotopeParameters.resolvingPower = stod(decodedMap["resolvingPower"]);
+    }
+
     if (decodedMap.find("eic_smoothingAlgorithm") != decodedMap.end()) {
         isotopeParameters.eic_smoothingAlgorithm = static_cast<EIC::SmootherType>(stoi(decodedMap["eic_smoothingAlgorithm"]));
     }
     if (decodedMap.find("eic_smoothingWindow") != decodedMap.end()) {
         isotopeParameters.eic_smoothingWindow = stof(decodedMap["eic_smoothingWindow"]);
     }
+
+    //isotopic extraction
     if (decodedMap.find("isIgnoreNaturalAbundance") != decodedMap.end()) {
         isotopeParameters.isIgnoreNaturalAbundance = decodedMap["isIgnoreNaturalAbundance"]=="1";
     }
@@ -2503,6 +2519,10 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     if (decodedMap.find("maxIsotopesToExtract") != decodedMap.end()) {
         isotopeParameters.maxIsotopesToExtract = stoi(decodedMap["maxIsotopesToExtract"]);
     }
+    if (decodedMap.find("isKeepEmptyIsotopes") != decodedMap.end()) {
+        isotopeParameters.isKeepEmptyIsotopes = decodedMap["isKeepEmptyIsotopes"] == "1";
+    }
+
     if (decodedMap.find("avgScanTime") != decodedMap.end()) {
         isotopeParameters.avgScanTime = stof(decodedMap["avgScanTime"]);
     }
