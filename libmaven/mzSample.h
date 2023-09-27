@@ -943,11 +943,12 @@ struct IsotopeParameters {
     int maxIsotopesToExtract = 5;
     bool isKeepEmptyIsotopes = false;
 
+    //TODO: delete this - always retrieved from the samples
     float avgScanTime = 0.1f; //TODO: must set this based on sample info!
 
+    //TODO: consider deleting/reworking these - very clunky
     Adduct *adduct = nullptr;
     Classifier *clsf = nullptr;
-
     string adductName = ""; // only exists to assist in encoding/decoding adduct
     string clsfFile = ""; //only exists to assist in encoding/decoding classifier
 
