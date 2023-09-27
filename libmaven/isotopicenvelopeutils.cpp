@@ -281,7 +281,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
 
             //TODO: not hard-coded number of scans value
             int minScan = max(0, (scannum - 3));
-            int maxScan = min(static_cast<int>(parentPeak.sample->scanCount()-1), (scannum + 3));
+            int maxScan = min(static_cast<int>(parentPeak.sample->scanCount()), (scannum + 3));
 
             float isotopePeakIntensity=0;
 
@@ -290,7 +290,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
             }
 
             //Refine RT of isotopic peak, determine corresponding intensity.
-            for (int i= minScan; i <= maxScan; i++) {
+            for (int i= minScan; i < maxScan; i++) {
 
                 Scan* s = sample->getScan(static_cast<unsigned int>(i));
 
@@ -385,8 +385,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
                 if (nearestPeak) {
                     candidateIsotopePeakGroups[i].addPeak(*nearestPeak);
 
-                    //TODO: think about different quant types here, however, this is what is used
-                    // for validation e.g. natural abundance correction.
+                    //quant type used for natural abundance correction, so used here
                     envelope.intensities.at(i) = nearestPeak->peakIntensity;
                 }
                 delete(eic);
