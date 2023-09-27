@@ -362,9 +362,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
 
                 if(!eic) continue;
 
-                //TODO: Update to use EIC::getPeakPositionsD()
-                eic->setSmootherType(params.eic_smoothingAlgorithm);
-                eic->getPeakPositions(static_cast<int>(params.eic_smoothingWindow));
+                eic->getPeakPositionsD(params.peakPickingAndGroupingParameters, debug);
 
                 //TODO: is this a good metric for stopping isotope extraction?
                 if (eic->peaks.size() >= 1 ) break;
