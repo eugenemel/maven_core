@@ -290,8 +290,18 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
                     if (s->intensity[static_cast<unsigned int>(pos)] > isotopePeakIntensity ) {
                         isotopePeakIntensity = s->intensity[static_cast<unsigned int>(pos)];
                         rt = s->rt;
+                        if (debug) {
+                            cout << compound->name << " " << adduct->name << " " << isotope.name << " " << sample->sampleName
+                                 << " Scan #" << s->scannum << ": m/z=" << s->mz.at(pos) << ", intensity=" << isotopePeakIntensity
+                                 << endl;
+                    }
                     }
                 }
+            }
+
+            if (debug && isotopePeakIntensity < 1e-6f) {
+                cout << compound->name << " " << adduct->name << " " << isotope.name << " " << sample->sampleName
+                     << " isotope not detected. "<< endl;
             }
 
             //natural abundance check
@@ -325,7 +335,10 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
 
             if (c < params.minIsotopicCorrelation) continue;
 
-            if (debug) cout << "pullIsotopes: " << isotope.mz << " [" << (rtmin-w) << " - " <<  (rtmax+w) << "] c=" << c << endl;
+            if (debug) {
+                cout << compound->name << " " << adduct->name << " " << isotope.name << " " << sample->sampleName
+                     << isotope.mz << " [" << (rtmin-w) << " - " <<  (rtmax+w) << "] correlation=" << c << endl;
+            }
 
             EIC* eic=nullptr;
 
