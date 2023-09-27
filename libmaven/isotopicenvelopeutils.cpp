@@ -269,7 +269,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
             }
 
             float mzmin = isotope.mz-isotope.mz/1e6f*params.ppm;
-            float mzmax = isotope.mz-isotope.mz/1e6f*params.ppm;
+            float mzmax = isotope.mz+isotope.mz/1e6f*params.ppm;
 
             float rt  =   parentPeak.rt;
             float rtmin = parentPeak.rtmin;
@@ -386,11 +386,19 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
 
                 if (nearestPeak) {
                     candidateIsotopePeakGroups[i].addPeak(*nearestPeak);
+
+                    //TODO: think about different quant types here, however, this is what is used
+                    // for validation e.g. natural abundance correction.
+                    envelope.intensities.at(i) = nearestPeak->peakIntensity;
                 }
                 delete(eic);
                 eic = nullptr;
             }
         }
+
+        envelope.getTotalIntensity();
+
+        envelopeGroup.envelopeBySample.insert(make_pair(sample, envelope));
     }
 
     //Issue 615: respect option to retain/exclude peak groups that have no peaks
