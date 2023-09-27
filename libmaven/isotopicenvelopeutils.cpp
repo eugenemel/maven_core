@@ -257,7 +257,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
         auto sample = parentPeak.sample;
 
         if (debug) {
-            cout << compound->name << " " << adduct->name << endl;
+            cout << "\n" << compound->name << " " << adduct->name << endl;
         }
 
         for (unsigned int i = 0; i < isotopes.size(); i++) {
@@ -265,8 +265,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
             Isotope isotope = isotopes.at(i);
 
             if (debug) {
-                cout << "Starting " << compound->name << " " << adduct->name << " "
-                     << isotope.name << " " << sample->sampleName << "..." << endl;
+                cout << "Starting " << isotope.name << " " << sample->sampleName << "..." << endl;
             }
 
             float mzmin = isotope.mz-isotope.mz/1e6f*params.ppm;
