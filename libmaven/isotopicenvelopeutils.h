@@ -63,7 +63,7 @@ public:
 
     //convenience method that sets children of the IsotopicEnvelope.group field
     //to the IsotopicEnvelopeGroup.children (same indices as IsotopicEnvelopeGroup.isotopes).
-    void setIsotopesToChildrenPeakGroups() {group->children = isotopePeakGroups;}
+    void setIsotopesToChildrenPeakGroups(Classifier *classifier = nullptr);
 
     void print();
 };

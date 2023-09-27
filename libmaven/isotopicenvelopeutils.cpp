@@ -438,3 +438,22 @@ vector<Isotope> IsotopicEnvelopeAdjuster::condenseTheoreticalIsotopes(
     //TODO: implement
     return defaultIsotopes;
 }
+
+void IsotopicEnvelopeGroup::setIsotopesToChildrenPeakGroups(Classifier *classifier){
+
+    for (auto & child : isotopePeakGroups) {
+
+        child.metaGroupId = this->group->metaGroupId;
+        child.compound = this->compound;
+        child.adduct= this->adduct;
+        child.parent = this->group;
+        child.setType(PeakGroup::IsotopeType);
+
+        child.groupStatistics();
+        if (classifier && classifier->hasModel()) {
+            classifier->classify(&child);
+            child.groupStatistics();
+        }
+        this->group->addChild(child);
+    }
+}
