@@ -1371,8 +1371,7 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmp
 
                 if(!eic) continue;
 
-                eic->setSmootherType(isotopeParameters.eic_smoothingAlgorithm);
-                eic->getPeakPositions(static_cast<int>(isotopeParameters.eic_smoothingWindow));
+                eic->getPeakPositionsD(isotopeParameters.peakPickingAndGroupingParameters, debug);
 
                 //TODO: is this a good metric for stopping isotope extraction?
                 if (eic->peaks.size() >= 1 ) break;
