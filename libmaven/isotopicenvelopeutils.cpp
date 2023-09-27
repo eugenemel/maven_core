@@ -233,7 +233,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
 
     vector<PeakGroup> candidateIsotopePeakGroups = vector<PeakGroup>(isotopes.size());
 
-    for (unsigned int i = 0; i < envelopeGroup.isotopePeakGroups.size(); i++) {
+    for (unsigned int i = 0; i < isotopes.size(); i++) {
         Isotope isotope = isotopes[i];
 
         PeakGroup g;
