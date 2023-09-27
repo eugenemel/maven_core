@@ -1351,7 +1351,7 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmp
                 if (naturalAbundanceError > static_cast<float>(isotopeParameters.maxNaturalAbundanceErr) && !isotope.isParent())  continue;
             }
 
-            float w = static_cast<float>(isotopeParameters.maxIsotopeScanDiff)*isotopeParameters.avgScanTime;
+            float w = static_cast<float>(isotopeParameters.maxIsotopeScanDiff)*sample->getAverageFullScanTime();
 
             //Issue 120: Use sample-specific mz value for peaks instead of average mz
             double corrMz = sampleToPeakMz[sample];
@@ -1364,7 +1364,7 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmp
 
             EIC* eic=nullptr;
             for( int i=0; i <= isotopeParameters.maxIsotopeScanDiff; i++ ) {
-                float window=i*isotopeParameters.avgScanTime;
+                float window=i*sample->getAverageFullScanTime();
 
                 //TODO: Issue 371: Handle SRMTransitionType isotopes
                 eic = sample->getEIC(mzmin,mzmax,rtmin-window,rtmax+window,1);
@@ -1387,7 +1387,7 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmp
                 for(unsigned int i=0; i < eic->peaks.size(); i++ ) {
                     Peak& x = eic->peaks[i];
                     float dist = abs(x.rt - rt);
-                    if ( dist > static_cast<float>(isotopeParameters.maxIsotopeScanDiff)*isotopeParameters.avgScanTime) continue;
+                    if ( dist > static_cast<float>(isotopeParameters.maxIsotopeScanDiff*sample->getAverageFullScanTime())) continue;
                     if ( dist < d ) { d=dist; nearestPeak = &x; }
                 }
 

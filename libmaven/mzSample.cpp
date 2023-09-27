@@ -2432,8 +2432,6 @@ string IsotopeParameters::encodeParams() {
     encodedParams = encodedParams + "maxIsotopesToExtract" + "=" + to_string(maxIsotopesToExtract) + ";";
     encodedParams = encodedParams + "isKeepEmptyIsotopes" + "=" + to_string(isKeepEmptyIsotopes) + ";";
 
-    encodedParams = encodedParams + "avgScanTime" + "=" + to_string(avgScanTime) + ";";
-
     if (adduct) {
         encodedParams = encodedParams + "adductName" + "=" + adduct->name + ";"; // use with Adduct* parameter
     } else {
@@ -2529,9 +2527,6 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
         isotopeParameters.isKeepEmptyIsotopes = decodedMap["isKeepEmptyIsotopes"] == "1";
     }
 
-    if (decodedMap.find("avgScanTime") != decodedMap.end()) {
-        isotopeParameters.avgScanTime = stof(decodedMap["avgScanTime"]);
-    }
     if (decodedMap.find("adductName") != decodedMap.end()) {
         isotopeParameters.adductName = decodedMap["adductName"];
     }
