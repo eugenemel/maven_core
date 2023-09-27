@@ -935,8 +935,11 @@ struct IsotopeParameters {
     bool isCondenseTheoreticalIsotopes = false;
     double resolvingPower = 50000.0;
 
+    //TODO: delete these in favor of peakPickingAndGroupingParameters.
     EIC::SmootherType eic_smoothingAlgorithm = EIC::SmootherType::GAUSSIAN;
     float eic_smoothingWindow;
+
+    shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters;
 
     bool isIgnoreNaturalAbundance = true;
     bool isExtractNIsotopes = false;

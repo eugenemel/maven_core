@@ -2457,6 +2457,9 @@ string IsotopeParameters::encodeParams() {
     }
     encodedParams = encodedParams + "isotopicExtractionAlgorithm" + "=" + algorithmStr + ";";
 
+    string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
+    encodedParams = encodedParams + peakPickingEncodedParams;
+
     return encodedParams;
 }
 
@@ -2465,6 +2468,9 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     IsotopeParameters isotopeParameters;
 
     unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams);
+
+    isotopeParameters.peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
+    isotopeParameters.peakPickingAndGroupingParameters->fillInPeakParameters(decodedMap);
 
     if (decodedMap.find("searchVersion") != decodedMap.end()) {
         isotopeParameters.searchVersion = decodedMap["searchVersion"];
