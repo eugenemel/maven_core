@@ -256,9 +256,18 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
 
         auto sample = parentPeak.sample;
 
+        if (debug) {
+            cout << compound->name << " " << adduct->name << endl;
+        }
+
         for (unsigned int i = 0; i < isotopes.size(); i++) {
 
             Isotope isotope = isotopes.at(i);
+
+            if (debug) {
+                cout << "Starting " << compound->name << " " << adduct->name << " "
+                     << isotope.name << " " << sample->sampleName << "..." << endl;
+            }
 
             float mzmin = isotope.mz-isotope.mz/1e6f*params.ppm;
             float mzmax = isotope.mz-isotope.mz/1e6f*params.ppm;
@@ -276,6 +285,10 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
             int maxScan = min(static_cast<int>(parentPeak.sample->scanCount()-1), (scannum + 3));
 
             float isotopePeakIntensity=0;
+
+            if (debug) {
+                cout << "Searching for scans in range [" << minScan << " - " << maxScan << "] ..." << endl;
+            }
 
             //Refine RT of isotopic peak, determine corresponding intensity.
             for (int i= minScan; i <= maxScan; i++) {
