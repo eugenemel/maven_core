@@ -2438,6 +2438,12 @@ string IsotopeParameters::encodeParams() {
         encodedParams = encodedParams + "clsfFile" + "=" + clsfFile + ";";     // use with Classifier* parameter
     }
 
+    if (adduct) {
+        encodedParams = encodedParams + "adductName" + "=" + adduct->name + ";"; // use with Adduct* parameter
+    } else {
+        encodedParams = encodedParams + "adductName" + "=" + adductName + ";"; // use with Adduct* parameter
+    }
+
     //extraction algorithm
     encodedParams = encodedParams + "isotopicExtractionAlgorithm" + "=" + IsotopeParameters::getAlgorithmName(isotopicExtractionAlgorithm) + ";";
 
@@ -2515,6 +2521,9 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
 
     if (decodedMap.find("clsfFile") != decodedMap.end()) {
         isotopeParameters.clsfFile = decodedMap["clsfFile"];
+    }
+    if (decodedMap.find("adductName") != decodedMap.end()) {
+        isotopeParameters.adductName = decodedMap["adductName"];
     }
 
     //extraction algorithm

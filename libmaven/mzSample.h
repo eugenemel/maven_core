@@ -951,6 +951,11 @@ struct IsotopeParameters {
     Classifier *clsf = nullptr;
     string clsfFile = "";
 
+    //Adduct parameters are useful for non-PeakGroup contexts, e.g. browsing in IsotopesWidget.
+    //the adductName only exists here to support encoding/decoding.
+    Adduct *adduct = nullptr;
+    string adductName = "";
+
     inline bool isIsotopes() {return (isC13Labeled || isN15Labeled || isS34Labeled || isD2Labeled);}
 
     //parameter added 2023-09-25
