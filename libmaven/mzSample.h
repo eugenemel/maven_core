@@ -959,6 +959,7 @@ struct IsotopeParameters {
     string encodeParams();
     static IsotopeParameters decode(string encodedIsotopeParameters);
     static string getAlgorithmName(IsotopicExtractionAlgorithm algorithm);
+    static IsotopicExtractionAlgorithm getExtractionAlgorithmFromName(string isotopicExtractionAlgorithm);
 
 };
 

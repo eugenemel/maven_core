@@ -2439,15 +2439,7 @@ string IsotopeParameters::encodeParams() {
     }
 
     //extraction algorithm
-    string algorithmStr = "UNKNOWN";
-    if (isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA) {
-        algorithmStr = "PEAK_FULL_RT_BOUNDS_AREA";
-    } else if (isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS_AREA) {
-        algorithmStr = "PEAK_SHRINKING_RT_BOUNDS_AREA";
-    } else if (isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::MAVEN_GUI_VERSION_ONE) {
-        algorithmStr = "MAVEN_GUI_VERSION_ONE";
-    }
-    encodedParams = encodedParams + "isotopicExtractionAlgorithm" + "=" + algorithmStr + ";";
+    encodedParams = encodedParams + "isotopicExtractionAlgorithm" + "=" + IsotopeParameters::getAlgorithmName(isotopicExtractionAlgorithm) + ";";
 
     string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
     encodedParams = encodedParams + peakPickingEncodedParams;
@@ -2528,13 +2520,7 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     //extraction algorithm
     if (decodedMap.find("isotopicExtractionAlgorithm") != decodedMap.end()) {
         string algorithmStr = decodedMap["isotopicExtractionAlgorithm"];
-        if (algorithmStr == "PEAK_FULL_RT_BOUNDS_AREA") {
-           isotopeParameters.isotopicExtractionAlgorithm = IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA;
-        } else if (algorithmStr == "PEAK_SHRINKING_RT_BOUNDS_AREA") {
-           isotopeParameters.isotopicExtractionAlgorithm = IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS_AREA;
-        } else if (algorithmStr == "MAVEN_GUI_VERSION_ONE") {
-           isotopeParameters.isotopicExtractionAlgorithm = IsotopicExtractionAlgorithm::MAVEN_GUI_VERSION_ONE;
-        }
+        isotopeParameters.isotopicExtractionAlgorithm = getExtractionAlgorithmFromName(algorithmStr);
     }
 
     isotopeParameters.isotopeParametersType = IsotopeParametersType::SAVED;
@@ -2552,7 +2538,20 @@ string IsotopeParameters::getAlgorithmName(IsotopicExtractionAlgorithm algorithm
         return "MAVEN_GUI_VERSION_ONE";
     }
 
-    return "unknown";
+    return "UNKNOWN";
+}
+
+IsotopicExtractionAlgorithm IsotopeParameters::getExtractionAlgorithmFromName(string isotopicExtractionAlgorithm) {
+    if (isotopicExtractionAlgorithm == "MAVEN_GUI_VERSION_ONE" || isotopicExtractionAlgorithm == "") {
+        return IsotopicExtractionAlgorithm::MAVEN_GUI_VERSION_ONE;
+    } else if (isotopicExtractionAlgorithm == "PEAK_SHRINKING_RT_BOUNDS_AREA" || isotopicExtractionAlgorithm == "") {
+        return IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS_AREA;
+    } else if (isotopicExtractionAlgorithm == "PEAK_FULL_RT_BOUNDS_AREA" || isotopicExtractionAlgorithm == "") {
+        return IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA;
+    }
+
+    //default
+    return IsotopicExtractionAlgorithm::MAVEN_GUI_VERSION_ONE;
 }
 /**
   * Scans of the same collision energy look approximately the same,
