@@ -76,7 +76,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
     Compound *compound,
     Adduct *adduct,
     PeakGroup *group,
-    vector<mzSample*> samples,
+    vector<mzSample*>& samples,
     IsotopeParameters params,
     bool debug){
 
