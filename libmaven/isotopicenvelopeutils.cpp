@@ -438,6 +438,8 @@ vector<Isotope> IsotopicEnvelopeAdjuster::condenseTheoreticalIsotopes(
 
 void IsotopicEnvelopeGroup::setIsotopesToChildrenPeakGroups(Classifier *classifier){
 
+    this->group->children.clear();
+
     for (auto & child : isotopePeakGroups) {
 
         child.metaGroupId = this->group->metaGroupId;
