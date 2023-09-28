@@ -2432,12 +2432,6 @@ string IsotopeParameters::encodeParams() {
     encodedParams = encodedParams + "maxIsotopesToExtract" + "=" + to_string(maxIsotopesToExtract) + ";";
     encodedParams = encodedParams + "isKeepEmptyIsotopes" + "=" + to_string(isKeepEmptyIsotopes) + ";";
 
-    if (adduct) {
-        encodedParams = encodedParams + "adductName" + "=" + adduct->name + ";"; // use with Adduct* parameter
-    } else {
-        encodedParams = encodedParams + "adductName" + "=" + adductName + ";"; // use with Adduct* parameter
-    }
-
     if (clsf) {
         encodedParams = encodedParams + "clsfFile" + "=" + clsf->getModelFilename() + ";"; // use with Classifier* parameter
     } else {
@@ -2527,9 +2521,6 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
         isotopeParameters.isKeepEmptyIsotopes = decodedMap["isKeepEmptyIsotopes"] == "1";
     }
 
-    if (decodedMap.find("adductName") != decodedMap.end()) {
-        isotopeParameters.adductName = decodedMap["adductName"];
-    }
     if (decodedMap.find("clsfFile") != decodedMap.end()) {
         isotopeParameters.clsfFile = decodedMap["clsfFile"];
     }

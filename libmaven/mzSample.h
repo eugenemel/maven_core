@@ -946,11 +946,10 @@ struct IsotopeParameters {
     int maxIsotopesToExtract = 5;
     bool isKeepEmptyIsotopes = false;
 
-    //TODO: consider deleting/reworking these - very clunky
-    Adduct *adduct = nullptr;
+    //clsf encodes itself as clsfFile.
+    //decoding only decodes clsfFile, it does not try to create the Classifier object.
     Classifier *clsf = nullptr;
-    string adductName = ""; // only exists to assist in encoding/decoding adduct
-    string clsfFile = ""; //only exists to assist in encoding/decoding classifier
+    string clsfFile = "";
 
     inline bool isIsotopes() {return (isC13Labeled || isN15Labeled || isS34Labeled || isD2Labeled);}
 
