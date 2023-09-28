@@ -1219,7 +1219,7 @@ class PeakGroup {
         void pullIsotopesOld(IsotopeParameters isotopeParameters, bool isKeepEmptyIsotopes=false, bool debug=false);
 
         //Issue 652: cleanup
-        void pullIsotopes(IsotopeParameters isotopeParameters, vector<mzSample*> samples, bool debug);
+        void pullIsotopes(IsotopeParameters isotopeParameters, vector<mzSample*> samples, bool debug=false);
 
         bool isGroupGood();
         bool isGroupBad();
