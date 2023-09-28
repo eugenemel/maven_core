@@ -1218,6 +1218,9 @@ class PeakGroup {
         //Issue 615: Option to create empty Isotopic Peak Groups
         void pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmptyIsotopes=false, bool debug=false);
 
+        //Issue 652: cleanup
+        void pullIsotopes(IsotopeParameters isotopeParameters, vector<mzSample*>& samples, bool debug);
+
         bool isGroupGood();
         bool isGroupBad();
         bool isGroupLabeled(char label);

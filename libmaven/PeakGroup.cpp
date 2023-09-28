@@ -1,5 +1,6 @@
 #include "mzSample.h"
 #include "directinfusionprocessor.h"
+#include "isotopicenvelopeutils.h"
 
 PeakGroup::PeakGroup()  { 
     groupId=0;
@@ -1445,6 +1446,49 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmp
     }
 }
 
+void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, vector<mzSample*>& samples, bool debug) {
+
+
+    if (!isotopeParameters.isIsotopes()) {
+        if (debug) cout << "PeakGroup::pullIsotopes(): Unable to pull isotopes: No isotopes specified in isotopeParameters." << endl;
+        return;
+    }
+
+    if (_type == PeakGroup::SRMTransitionType){
+        if (debug) cout << "PeakGroup::pullIsotopes(): Unable to pull isotopes: Isotopes are not available for SRM peak groups." << endl;
+        return;
+    }
+
+    if (!compound){
+        if (debug) cout << "PeakGroup::pullIsotopes(): Unable to pull isotopes: No compound associated with peakgroup." << endl;
+        return;
+    }
+
+    if (compound->formula.empty()){
+        if (debug) cout << "PeakGroup::pullIsotopes(): Unable to pull isotopes:  No formula associated with peakgroup compound." << endl;
+        return;
+    }
+
+    if (peakCount() == 0){
+        if (debug) cout << "PeakGroup::pullIsotopes(): Unable to pull isotopes:  No peaks assocaited with peakgroup." << endl;
+        return;
+    }
+
+    if (!adduct){
+        if (debug) cout << "PeakGroup::pullIsotopes(): Unable to pull isotopes:  No adduct associated with peakgroup." << endl;
+        return;
+    }
+
+    IsotopicEnvelopeGroup envelopeGroup = IsotopicEnvelopeExtractor::extractEnvelopes(
+        compound,
+        adduct,
+        this,
+        samples,
+        isotopeParameters,
+        debug);
+
+    envelopeGroup.setIsotopesToChildrenPeakGroups(isotopeParameters.clsf);
+}
 
 void PeakGroup::applyLabelsFromCompoundMetadata() {
     if (compound && compound->metaDataMap.find(Compound::getCompoundLabelsStringKey()) != compound->metaDataMap.end()){
