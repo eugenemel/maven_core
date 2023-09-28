@@ -1227,6 +1227,8 @@ void PeakGroup::pullIsotopesOld(IsotopeParameters isotopeParameters, bool isKeep
 
     if (adduct) {
         groupAdduct = adduct;
+    } else if (isotopeParameters.adduct) {
+        groupAdduct = isotopeParameters.adduct;
     }
 
     if (!groupAdduct){
@@ -1472,14 +1474,23 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, vector<mzSampl
         return;
     }
 
-    if (!adduct){
-        if (debug) cout << "PeakGroup::pullIsotopes(): Unable to pull isotopes:  No adduct associated with peakgroup." << endl;
+    // Expect encoded Adduct* in isotopesParameter when going through isotopes widget.
+    Adduct *groupAdduct = nullptr;
+
+    if (adduct) {
+        groupAdduct = adduct;
+    } else if (isotopeParameters.adduct) {
+        groupAdduct = isotopeParameters.adduct;
+    }
+
+    if (!groupAdduct){
+        if (debug) cout << "PeakGroup::pullIsotopes(): Unable to pull isotopes:  No adduct associated with peakgroup or saved in IsotopeParameters." << endl;
         return;
     }
 
     IsotopicEnvelopeGroup envelopeGroup = IsotopicEnvelopeExtractor::extractEnvelopes(
         compound,
-        adduct,
+        groupAdduct,
         this,
         samples,
         isotopeParameters,
