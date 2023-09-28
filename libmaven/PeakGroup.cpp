@@ -1227,8 +1227,6 @@ void PeakGroup::pullIsotopesOld(IsotopeParameters isotopeParameters, bool isKeep
 
     if (adduct) {
         groupAdduct = adduct;
-    } else if (isotopeParameters.adduct) {
-        groupAdduct = adduct;
     }
 
     if (!groupAdduct){
