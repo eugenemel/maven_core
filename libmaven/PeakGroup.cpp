@@ -1205,7 +1205,7 @@ string PeakGroup::getPeakGroupLabel() {
  *
  * Issue 654: Add debug flag
  */
-void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmptyIsotopes, bool debug) {
+void PeakGroup::pullIsotopesOld(IsotopeParameters isotopeParameters, bool isKeepEmptyIsotopes, bool debug) {
 
     if (_type == PeakGroup::SRMTransitionType) return; //isotopes are not available for SRM types
     if (!isotopeParameters.isIsotopes()) return;
@@ -1446,7 +1446,7 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, bool isKeepEmp
     }
 }
 
-void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, vector<mzSample*>& samples, bool debug) {
+void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, vector<mzSample*> samples, bool debug) {
 
 
     if (!isotopeParameters.isIsotopes()) {
