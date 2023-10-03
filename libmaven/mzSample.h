@@ -1064,7 +1064,8 @@ class PeakGroup {
 
         string displayName; //Issue 75: For use with tabledockwidget, other GUI displays
 
-        //Issue 402: Saved isotopeParameters should only apply to bookmarked peaks
+        //Issue 402: Saved isotopeParameters should apply to bookmarked peaks.
+        //Issue 672: Saved isotopeParameters should also apply to peak groups from searches.
         IsotopeParameters isotopeParameters;
 
         /**
