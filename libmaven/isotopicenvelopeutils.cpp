@@ -80,10 +80,16 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
     IsotopeParameters params,
     bool debug){
 
+    //Issue 671: Respect isotopes parameter
+    int maxNumProtons = INT_MAX;
+    if (params.isExtractNIsotopes) {
+        maxNumProtons = params.maxIsotopesToExtract;
+    }
+
     vector<Isotope> theoreticalIsotopes = MassCalculator::computeIsotopes(
         compound->formula,
         adduct,
-        params.maxIsotopesToExtract,
+        maxNumProtons,
         params.isC13Labeled,
         params.isN15Labeled,
         params.isS34Labeled,
