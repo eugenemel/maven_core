@@ -2447,12 +2447,10 @@ string IsotopeParameters::encodeParams() {
     //extraction algorithm
     encodedParams = encodedParams + "isotopicExtractionAlgorithm" + "=" + IsotopeParameters::getAlgorithmName(isotopicExtractionAlgorithm) + ";";
 
+    string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
+    encodedParams = encodedParams + peakPickingEncodedParams;
+
     return encodedParams;
-
-//    string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
-//    encodedParams = encodedParams + peakPickingEncodedParams;
-
-//    return encodedParams;
 }
 
 IsotopeParameters IsotopeParameters::decode(string encodedParams) {
