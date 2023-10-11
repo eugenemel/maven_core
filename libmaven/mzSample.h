@@ -58,6 +58,7 @@ class Isotope;
 struct FragmentationMatchScore;
 class CompoundIon;
 class PeakGroupBaseline;
+class BlankSingleIntensities;
 
 class LibraryMs2SpectrumParameters;
 class LoopInjectionMs2SpectrumParameters;
@@ -714,7 +715,7 @@ class EIC {
     static bool compMaxIntensity(EIC* a, EIC* b ) { return a->maxIntensity > b->maxIntensity; }
 
     //Issue 665: compute blank-specific background
-    static float calculateBlankBackground(vector<EIC*>& eics, float rtMin, float rtMax, bool debug=false);
+    static BlankSingleIntensities calculateBlankBackground(vector<EIC*>& eics, float rtMin, float rtMax, bool debug=false);
 
     //Issue 668: capture, summarize some information about merged EICs
     static PeakGroupBaseline calculateMergedEICSummaryData(EIC* mergedEIC, set<int> mergedEICPeakIndexes, bool debug=false);
@@ -1008,6 +1009,16 @@ public:
     float pickedPeakBaseline = 0; // quant types that use a single point
 
     float getCorrespondingBaseline(string quantType);
+};
+
+//Issue 676
+class BlankSingleIntensities {
+public:
+    float maxSingleIntensity = 0;  //max single intensity from any scan from any blank sample
+
+    //collect max single intensity from any scan for each blank sample.
+    //return the median value of these sample maxes.
+    float medianSingleIntenisty = 0;
 };
 
 class PeakGroup {

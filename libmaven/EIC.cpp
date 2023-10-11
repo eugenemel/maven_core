@@ -2477,7 +2477,9 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
 
         grp.groupStatistics();
 
-        grp.blankMaxHeight = EIC::calculateBlankBackground(eics, grp.minRt, grp.maxRt, debug);
+        BlankSingleIntensities intensities = EIC::calculateBlankBackground(eics, grp.minRt, grp.maxRt, debug);
+
+        grp.blankMaxHeight = intensities.maxSingleIntensity;
         grp.mergedEICSummaryData = EIC::calculateMergedEICSummaryData(m, it->second.mergedEICPeakIndexes, debug);
         grp.maxBlankRawSignal = EIC::calculateMaxBlankSignalBackground(m, eics, it->second.mergedEICPeakIndexes, false, debug);
         grp.maxBlankSmoothedSignal = EIC::calculateMaxBlankSignalBackground(m, eics, it->second.mergedEICPeakIndexes, true, debug);
@@ -2658,7 +2660,7 @@ PeakGroupBaseline EIC::calculateMergedEICSummaryData(EIC* mergedEIC, set<int> me
     return mergedEICSummaryData;
 }
 
-float EIC::calculateBlankBackground(vector<EIC *>& eics, float rtMin, float rtMax, bool debug){
+BlankSingleIntensities EIC::calculateBlankBackground(vector<EIC *>& eics, float rtMin, float rtMax, bool debug){
 
     float maxBlankIntensity = 0;
 
@@ -2674,7 +2676,10 @@ float EIC::calculateBlankBackground(vector<EIC *>& eics, float rtMin, float rtMa
         }
     }
 
-    return maxBlankIntensity;
+    BlankSingleIntensities blankSingleIntensities;
+    blankSingleIntensities.maxSingleIntensity = maxBlankIntensity;
+
+    return blankSingleIntensities;
 }
 
 float EIC::getAnalogousIntensitySum(EIC* eic, float rtAnchor, unsigned int numPoints, bool isUseSmoothedIntensity, bool debug) {
