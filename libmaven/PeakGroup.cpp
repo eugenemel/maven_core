@@ -66,6 +66,7 @@ PeakGroup::PeakGroup()  {
     isComputedGroupStatistics = false;
 
     blankMaxHeight = 0.0f;
+    blankMedianHeight = 0.0f;
     groupBackground = 0.0f;
 
 }      
@@ -144,6 +145,7 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     compounds = o.compounds;
 
     blankMaxHeight = o.blankMaxHeight;
+    blankMedianHeight = o.blankMedianHeight;
     mergedEICSummaryData = o.mergedEICSummaryData;
     maxBlankRawSignal = o.maxBlankRawSignal;
     maxBlankSmoothedSignal = o.maxBlankSmoothedSignal;
