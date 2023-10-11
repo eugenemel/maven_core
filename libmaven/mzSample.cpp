@@ -3548,6 +3548,8 @@ string PeakPickingAndGroupingParameters::getEncodedPeakParameters(string tupleMa
         groupBackgroundTypeStr = groupBackgroundTypeStr + "PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE";
     } else if (groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL) {
         groupBackgroundTypeStr = groupBackgroundTypeStr + "PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL";
+    } else if (groupBackgroundType == PeakGroupBackgroundType::MAX_MEDIAN_INTENSITY) {
+        groupBackgroundTypeStr = groupBackgroundTypeStr + "MAX_MEDIAN_INTENSITY";
     } else {
         groupBackgroundTypeStr = groupBackgroundTypeStr + "UNKNOWN";
     }
@@ -3655,6 +3657,8 @@ void PeakPickingAndGroupingParameters::fillInPeakParameters(unordered_map<string
             groupBackgroundType = PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE;
         } else if (groupBackgroundTypeStr == "PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL") {
             groupBackgroundType = PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL;
+        } else if (groupBackgroundTypeStr == "MAX_MEDIAN_INTENSITY") {
+            groupBackgroundType = PeakGroupBackgroundType::MAX_MEDIAN_INTENSITY;
         }
     }
 

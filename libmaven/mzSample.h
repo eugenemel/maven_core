@@ -996,7 +996,12 @@ enum PeakGroupBackgroundType{
     //Uses readout type from the blank samples, max for each corresponding readout.
     //Note that smoothed types should be matched up with other smoothed types,
     //and raw types with raw types - there shouldn't be any mixing.
-    PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL=3
+    PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL=3,
+
+    //Issue 676:
+    //First compute the max raw intensity measurement for each blank sample.
+    //Return the median value of all of these computed values.
+    MAX_MEDIAN_INTENSITY=4
 };
 
 //Issue 668: Retain some summary-level information from merged EIC (part of peak grouping)
