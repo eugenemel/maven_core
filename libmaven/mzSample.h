@@ -1001,7 +1001,7 @@ enum PeakGroupBackgroundType{
     //Issue 676:
     //First compute the max raw intensity measurement for each blank sample.
     //Return the median value of all of these computed values.
-    MAX_MEDIAN_INTENSITY=4
+    MEDIAN_BLANK_INTENSITY=4
 };
 
 //Issue 668: Retain some summary-level information from merged EIC (part of peak grouping)
