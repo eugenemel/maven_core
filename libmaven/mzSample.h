@@ -1018,7 +1018,7 @@ public:
 
     //collect max single intensity from any scan for each blank sample.
     //return the median value of these sample maxes.
-    float medianSingleIntenisty = 0;
+    float medianSingleIntensity = 0;
 };
 
 class PeakGroup {

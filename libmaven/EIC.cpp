@@ -2480,6 +2480,7 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
         BlankSingleIntensities intensities = EIC::calculateBlankBackground(eics, grp.minRt, grp.maxRt, debug);
 
         grp.blankMaxHeight = intensities.maxSingleIntensity;
+        grp.blankMedianHeight = intensities.medianSingleIntensity;
         grp.mergedEICSummaryData = EIC::calculateMergedEICSummaryData(m, it->second.mergedEICPeakIndexes, debug);
         grp.maxBlankRawSignal = EIC::calculateMaxBlankSignalBackground(m, eics, it->second.mergedEICPeakIndexes, false, debug);
         grp.maxBlankSmoothedSignal = EIC::calculateMaxBlankSignalBackground(m, eics, it->second.mergedEICPeakIndexes, true, debug);
@@ -2662,22 +2663,28 @@ PeakGroupBaseline EIC::calculateMergedEICSummaryData(EIC* mergedEIC, set<int> me
 
 BlankSingleIntensities EIC::calculateBlankBackground(vector<EIC *>& eics, float rtMin, float rtMax, bool debug){
 
-    float maxBlankIntensity = 0;
+    vector<float> sampleMaxIntensities{};
 
     for (auto eic : eics) {
         if (eic->sample->isBlank) {
+
+            float sampleMaxIntensity = 0;
+
             for (unsigned int i = 0; i < eic->size(); i++) {
                 if (eic->rt[i] >= rtMin && eic->rt[i] <= rtMax) {
-                    if (eic->intensity[i] > maxBlankIntensity) {
-                        maxBlankIntensity = eic->intensity[i];
+                    if (eic->intensity[i] > sampleMaxIntensity) {
+                        sampleMaxIntensity = eic->intensity[i];
                     }
                 }
             }
+
+            sampleMaxIntensities.push_back(sampleMaxIntensity);
         }
     }
 
     BlankSingleIntensities blankSingleIntensities;
-    blankSingleIntensities.maxSingleIntensity = maxBlankIntensity;
+    blankSingleIntensities.maxSingleIntensity = *max_element(sampleMaxIntensities.begin(), sampleMaxIntensities.end());
+    blankSingleIntensities.medianSingleIntensity = mzUtils::median(sampleMaxIntensities);
 
     return blankSingleIntensities;
 }
