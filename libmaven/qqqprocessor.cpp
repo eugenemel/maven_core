@@ -563,7 +563,9 @@ bool QQQProcessor::isPassPeakGroupBackground(
     ) {
 
     if (params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::MAX_BLANK_INTENSITY) {
-        return p.peakIntensity >= pg.groupBackground * params->qqqFilterMinPeakIntensityGroupBackgroundRatio;
+        return p.peakIntensity >= pg.blankMaxHeight * params->qqqFilterMinPeakIntensityGroupBackgroundRatio;
+    } else if (params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::MEDIAN_BLANK_INTENSITY) {
+        return p.peakIntensity >= pg.blankMedianHeight * params->qqqFilterMinPeakIntensityGroupBackgroundRatio;
     } else if (params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE ||
                params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL) {
         return peakQuant >= pg.groupBackground * params->qqqFilterMinPeakIntensityGroupBackgroundRatio;
@@ -683,25 +685,19 @@ void QQQProcessor::setPeakGroupBackground(
 
     for (auto & pg : peakgroups) {
 
-        if (params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::MAX_BLANK_INTENSITY) {
-            pg.groupBackground = pg.blankMaxHeight;
-            if (debug) {
-                cout << "QQQProcessor::setPeakGroupBackground(): "
-                     << " set to max height: " << pg.blankMaxHeight
-                     << " group background=" << pg.groupBackground
-                     << endl;
-            }
-        }
-
         if (!pg.compound) continue;
 
         string quantType = "smoothedPeakAreaCorrected";
         if (pg.compound->metaDataMap.find(QQQProcessor::getTransitionPreferredQuantTypeStringKey()) != pg.compound->metaDataMap.end()) {
             quantType = pg.compound->metaDataMap.at(QQQProcessor::getTransitionPreferredQuantTypeStringKey());
 
+            //Issue 677: Save the peak group background as the corresponding quant from the blank samples, unless
+            //choosing the merged EIC signal.
+            //Filtering done in QQQProcessor::isPassPeakGroupBackgroumd() always respects the appropriate type.
+            //
             if (params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE) {
                 pg.groupBackground = pg.mergedEICSummaryData.getCorrespondingBaseline(quantType);
-            } else if (params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MAX_BLANK_SIGNAL) {
+            } else {
                 pg.groupBackground = pg.getBlankSignalByQuantType(quantType);
             }
 
