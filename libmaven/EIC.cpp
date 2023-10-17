@@ -2890,7 +2890,7 @@ PeakGroupBaseline EIC::calculateMaxBlankSignalBackground(
 // Useful for debugging
 void EIC::encodeToFile(vector<EIC*> eics, string filePath){
 
-    ofstream stream(filePath);
+    ofstream stream(filePath, ios::out);
 
     stream << "START_SET" << endl;
     stream << "NUM_EICS " << eics.size() << endl;
@@ -2908,7 +2908,7 @@ void EIC::encodeToFile(vector<EIC*> eics, string filePath){
                    << eic->baseline[i]
                    << endl;
         }
-        stream << "STOP_COORDS" << endl;
+        stream << "END_COORDS" << endl;
         stream << "START_PEAKS" << endl;
         stream << "NUM_PEAKS " << eic->peaks.size() << endl;
         for (unsigned int i = 0; i < eic->peaks.size(); i++) {
@@ -2928,7 +2928,89 @@ void EIC::encodeToFile(vector<EIC*> eics, string filePath){
 vector<EIC*> EIC::decode(string filePath) {
     vector<EIC*> eics;
 
-    //TODO
+    ifstream stream(filePath, ios::in);
+    string line;
+
+    bool isInCoords, isInPeaks = false;
+    int numEICs, numCoords, numPeaks = 0;
+    int eicNum, coordNum, peakNum = 0;
+
+    EIC *eic  = nullptr;
+
+
+    while (getline(stream, line)) {
+        // cout << line << endl;
+
+        if (isInCoords) {
+            vector<string> bits{};
+            mzUtils::split(line, "\t", bits);
+
+            eic->mz[coordNum] = stof(bits[0]);
+            eic->rt[coordNum] = stof(bits[1]);
+            eic->intensity[coordNum] = stof(bits[2]);
+            eic->spline[coordNum] = stof(bits[3]);
+            eic->baseline[coordNum] = stof(bits[4]);
+
+            coordNum++;
+
+        } else if (isInPeaks) {
+            vector<string> bits{};
+            mzUtils::split(line, "\t", bits);
+
+            Peak p;
+            p.minpos = stof(bits[0]);
+            p.pos = stof(bits[1]);
+            p.maxpos = stof(bits[2]);
+
+            eic->peaks[peakNum] = p;
+
+            peakNum++;
+
+        } else if (line.find("NUM_EICS") == 0) {
+            vector<string> bits{};
+            mzUtils::split(line, " ", bits);
+            numEICs = stoi(bits[1]);
+            eics = vector<EIC*>(numEICs);
+        } else if (line.find("NUM_COORDS") == 0) {
+            vector<string> bits{};
+            mzUtils::split(line, " ", bits);
+            numCoords = stoi(bits[1]);
+
+            if (eic) {
+                eics[eicNum] = eic;
+                eicNum++;
+            }
+
+            eic = new EIC();
+
+            eic->mz = vector<float>(numCoords);
+            eic->rt = vector<float>(numCoords);
+            eic->intensity = vector<float>(numCoords);
+            eic->spline = vector<float>(numCoords);
+            eic->baseline = vector<float>(numCoords);
+
+            isInCoords = true;
+        } else if (line.find("NUM_PEAKS") == 0) {
+            vector<string> bits{};
+            mzUtils::split(line, " ", bits);
+            numPeaks = stoi(bits[1]);
+
+            eic->peaks = vector<Peak>(numPeaks);
+
+            isInPeaks = true;
+        } else if (line.find("END_COORDS") == 0) {
+            isInCoords = false;
+            coordNum = 0;
+        } else if (line.find("END_PEAKS") == 0) {
+            isInPeaks = false;
+            peakNum = 0;
+        }
+    }
+
+    if (eic) {
+        eics[eicNum] = eic;
+        eicNum++;
+    }
 
     return eics;
 }
