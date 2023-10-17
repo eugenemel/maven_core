@@ -2365,6 +2365,12 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
         it.second.recomputeProperties();
     }
 
+    if (debug) {
+        cout << "# allPeaks: " << allPeaks.size()
+             << ", # peakGroupData: " << peakGroupData.size()
+             << endl;
+    }
+
     unsigned long iterationCounter = 0;
 
     //Progressively merge peaks until group overlap issues are resolved
@@ -2379,6 +2385,10 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
         //initialize set container
         for (unsigned int i = 0; i < m->peaks.size(); i++) {
             merges.containerBySet.insert(make_pair(i, set<int>{static_cast<int>(i)}));
+        }
+
+        if (debug) {
+            cout << "# merges.containerBySet(): " << merges.containerBySet.size() << endl;
         }
 
         //merge data based on existing containers
@@ -2411,7 +2421,7 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
             }
         }
 
-        merges.combineContainers(false);
+        merges.combineContainers(debug);
 
         //stay in the while loop until no more merges need to be made.
         if (merges.isAllContainersSize(1)) {
