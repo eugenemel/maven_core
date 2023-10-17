@@ -2925,23 +2925,34 @@ void EIC::encodeToFile(vector<EIC*> eics, string filePath){
     stream.close();
 }
 
-vector<EIC*> EIC::decode(string filePath) {
+vector<EIC*> EIC::decode(string filePath, vector<mzSample*> samples) {
     vector<EIC*> eics;
 
     ifstream stream(filePath, ios::in);
     string line;
 
-    bool isInCoords, isInPeaks = false;
-    int numEICs, numCoords, numPeaks = 0;
-    int eicNum, coordNum, peakNum = 0;
+    bool isInCoords = false;
+    bool isInPeaks = false;
+    bool isInSampleName = false;
+    int numEICs = 0;
+    int numCoords = 0;
+    int numPeaks = 0;
+    int eicNum = 0;
+    int coordNum = 0;
+    int peakNum = 0;
 
     EIC *eic  = nullptr;
-
 
     while (getline(stream, line)) {
         // cout << line << endl;
 
-        if (isInCoords) {
+        if (line.find("END_COORDS") == 0) {
+            isInCoords = false;
+            coordNum = 0;
+        } else if (line.find("END_PEAKS") == 0) {
+            isInPeaks = false;
+            peakNum = 0;
+        } else if (isInCoords) {
             vector<string> bits{};
             mzUtils::split(line, "\t", bits);
 
@@ -2976,11 +2987,6 @@ vector<EIC*> EIC::decode(string filePath) {
             mzUtils::split(line, " ", bits);
             numCoords = stoi(bits[1]);
 
-            if (eic) {
-                eics[eicNum] = eic;
-                eicNum++;
-            }
-
             eic = new EIC();
 
             eic->mz = vector<float>(numCoords);
@@ -2998,18 +3004,20 @@ vector<EIC*> EIC::decode(string filePath) {
             eic->peaks = vector<Peak>(numPeaks);
 
             isInPeaks = true;
-        } else if (line.find("END_COORDS") == 0) {
-            isInCoords = false;
-            coordNum = 0;
-        } else if (line.find("END_PEAKS") == 0) {
-            isInPeaks = false;
-            peakNum = 0;
+        } else if (line.find("END_EIC") == 0) {
+            eics[eicNum] = eic->clone();
+            eicNum++;
+        } else if (isInSampleName && eic) {
+            isInSampleName = false;
+            for (auto sample : samples) {
+                if (sample->sampleName.find(line) == 0) {
+                    eic->sample = sample;
+                    break;
+                }
+            }
+        } else if (line.find("START_EIC") == 0) {
+            isInSampleName = true;
         }
-    }
-
-    if (eic) {
-        eics[eicNum] = eic;
-        eicNum++;
     }
 
     return eics;

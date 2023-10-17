@@ -724,7 +724,7 @@ class EIC {
 
     //Issue 678: primarily for debugging
     static void encodeToFile(vector<EIC*> eics, string filePath);
-    static vector<EIC*> decode(string filePath);
+    static vector<EIC*> decode(string filePath, vector<mzSample*> samples);
 
 private:
     SmootherType smootherType;
