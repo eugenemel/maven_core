@@ -722,6 +722,10 @@ class EIC {
     static PeakGroupBaseline calculateMaxBlankSignalBackground(EIC* mergedEIC, vector<EIC *>& eics, set<int> mergedEICPeakIndexes, bool isUseSmoothedIntensity, bool debug=false);
     static float getAnalogousIntensitySum(EIC* eic, float rtAnchor, unsigned int numPoints, bool isUseSmoothedIntensity, bool debug=false);
 
+    //Issue 678: primarily for debugging
+    static void encodeToFile(vector<EIC*> eics, string filePath);
+    static vector<EIC*> decode(string filePath);
+
 private:
     SmootherType smootherType;
     int baselineSmoothingWindow;

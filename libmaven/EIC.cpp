@@ -2887,3 +2887,48 @@ PeakGroupBaseline EIC::calculateMaxBlankSignalBackground(
     return maxBlankSignalBackground;
 }
 
+// Useful for debugging
+void EIC::encodeToFile(vector<EIC*> eics, string filePath){
+
+    ofstream stream(filePath);
+
+    stream << "START_SET" << endl;
+    stream << "NUM_EICS " << eics.size() << endl;
+
+    for (auto eic : eics) {
+        stream << "START_EIC" << endl;
+        stream << eic->getSample()->sampleName << endl;
+        stream << "START_COORDS" << endl;
+        stream << "NUM_COORDS " << eic->size() << endl;
+        for (unsigned int i = 0; i < eic->size(); i++) {
+            stream << eic->mz[i] << "\t"
+                   << eic->rt[i] << "\t"
+                   << eic->intensity[i] << "\t"
+                   << eic->spline[i] << "\t"
+                   << eic->baseline[i]
+                   << endl;
+        }
+        stream << "STOP_COORDS" << endl;
+        stream << "START_PEAKS" << endl;
+        stream << "NUM_PEAKS " << eic->peaks.size() << endl;
+        for (unsigned int i = 0; i < eic->peaks.size(); i++) {
+            Peak p = eic->peaks[i];
+            stream << p.minpos << "\t" << p.pos << "\t" << p.maxpos << endl;
+        }
+        stream << "END_PEAKS" << endl;
+        stream << "END_EIC" << endl;
+    }
+
+    stream << "END_SET" << endl;
+
+    stream.flush();
+    stream.close();
+}
+
+vector<EIC*> EIC::decode(string filePath) {
+    vector<EIC*> eics;
+
+    //TODO
+
+    return eics;
+}
