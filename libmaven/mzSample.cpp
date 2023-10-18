@@ -3457,8 +3457,8 @@ void IntegerSetContainer::combineContainers(bool debug){
         map<int, set<int>> containerBySetCurrent = containerBySet;
 
         if (debug) {
-            cout << "containerBySet:\n";
-            for (auto it = containerBySetCurrent. begin(); it != containerBySetCurrent.end(); ++it) {
+            cout << "containerBySet, before merges:\n";
+            for (auto it = containerBySet.begin(); it != containerBySet.end(); ++it) {
                 cout << "[" << it->first << "]: ";
                 for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
                     cout << *(it2) << " ";
@@ -3480,6 +3480,17 @@ void IntegerSetContainer::combineContainers(bool debug){
                         isCheckMerges = true;
                     }
                 }
+            }
+        }
+
+        if (debug) {
+            cout << "containerBySet, after merges:\n";
+            for (auto it = containerBySet.begin(); it != containerBySet.end(); ++it) {
+                cout << "[" << it->first << "]: ";
+                for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
+                    cout << *(it2) << " ";
+                }
+                cout << endl;
             }
         }
 
