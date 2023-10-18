@@ -31,6 +31,8 @@ EIC* EIC::clone() {
 	clonedEIC->intensity = intensity;
 	clonedEIC->mz = mz;
 	clonedEIC->scannum = scannum;
+    clonedEIC->spline = spline;
+    clonedEIC->baseline = baseline;
 
 	return clonedEIC;
 }
