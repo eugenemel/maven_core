@@ -2705,8 +2705,14 @@ BlankSingleIntensities EIC::calculateBlankBackground(vector<EIC *>& eics, float 
         }
     }
 
+    //Issue 678: Handle case where there are no blank samples in the sample set.
+    float blankMaxIntensity = 0.0f;
+    if (!sampleMaxIntensities.empty()){
+        blankMaxIntensity = *max_element(sampleMaxIntensities.begin(), sampleMaxIntensities.end());
+    }
+
     BlankSingleIntensities blankSingleIntensities;
-    blankSingleIntensities.maxSingleIntensity = *max_element(sampleMaxIntensities.begin(), sampleMaxIntensities.end());
+    blankSingleIntensities.maxSingleIntensity = blankMaxIntensity;
     blankSingleIntensities.medianSingleIntensity = mzUtils::median(sampleMaxIntensities);
 
     if (debug) cout << "EIC::calculateBlankBackground() finished." << endl;
