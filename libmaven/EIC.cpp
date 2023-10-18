@@ -2987,8 +2987,6 @@ vector<EIC*> EIC::decode(string filePath, vector<mzSample*> samples) {
             mzUtils::split(line, " ", bits);
             numCoords = stoi(bits[1]);
 
-            eic = new EIC();
-
             eic->mz = vector<float>(numCoords);
             eic->rt = vector<float>(numCoords);
             eic->intensity = vector<float>(numCoords);
@@ -3016,6 +3014,7 @@ vector<EIC*> EIC::decode(string filePath, vector<mzSample*> samples) {
                 }
             }
         } else if (line.find("START_EIC") == 0) {
+            eic = new EIC();
             isInSampleName = true;
         }
     }
