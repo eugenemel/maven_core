@@ -2427,6 +2427,7 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
 
         //stay in the while loop until no more merges need to be made.
         if (merges.isAllContainersSize(1)) {
+            if (debug) cout << "Peak group convergence reached." << endl;
             break;
 
         //recreate peakGroupData using the containers indicated by merges.
@@ -2475,8 +2476,13 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
     }
 
     for (auto it = peakGroupData.begin(); it != peakGroupData.end(); ++it) {
+
         int groupIndex = it->first;
         map<mzSample*, Peak> peaks = it->second.peaks;
+
+        if (debug) {
+            cout << "groupIndex=" << groupIndex << ", # Peaks=" << peaks.size() << endl;
+        }
 
         if (peaks.empty()) continue;
 
@@ -2488,6 +2494,10 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
         sort(grp.peaks.begin(), grp.peaks.end(), Peak::compSampleName);
 
         grp.groupStatistics();
+
+        if (debug) {
+            grp.summary();
+        }
 
         BlankSingleIntensities intensities = EIC::calculateBlankBackground(eics, grp.minRt, grp.maxRt, debug);
 
@@ -2674,6 +2684,7 @@ PeakGroupBaseline EIC::calculateMergedEICSummaryData(EIC* mergedEIC, set<int> me
 }
 
 BlankSingleIntensities EIC::calculateBlankBackground(vector<EIC *>& eics, float rtMin, float rtMax, bool debug){
+    if (debug) cout << "EIC::calculateBlankBackground() started." << endl;
 
     vector<float> sampleMaxIntensities{};
 
@@ -2698,10 +2709,12 @@ BlankSingleIntensities EIC::calculateBlankBackground(vector<EIC *>& eics, float 
     blankSingleIntensities.maxSingleIntensity = *max_element(sampleMaxIntensities.begin(), sampleMaxIntensities.end());
     blankSingleIntensities.medianSingleIntensity = mzUtils::median(sampleMaxIntensities);
 
+    if (debug) cout << "EIC::calculateBlankBackground() finished." << endl;
     return blankSingleIntensities;
 }
 
 float EIC::getAnalogousIntensitySum(EIC* eic, float rtAnchor, unsigned int numPoints, bool isUseSmoothedIntensity, bool debug) {
+    if (debug) cout << "EIC::getAnalogousIntensitySum() started." << endl;
 
     float intensitySum = 0.0f;
 
@@ -2797,6 +2810,7 @@ PeakGroupBaseline EIC::calculateMaxBlankSignalBackground(
     set<int> mergedEICPeakIndexes,
     bool isUseSmoothedIntensity,
     bool debug) {
+    if (debug) cout << "EIC::calculateMaxBlankSignalBackground() started." << endl;
 
     PeakGroupBaseline maxBlankSignalBackground;
 
