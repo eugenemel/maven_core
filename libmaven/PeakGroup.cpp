@@ -1517,3 +1517,21 @@ float PeakGroup::getBlankSignalByQuantType(string quantType){
     PeakGroupBaseline baseline = quantType.find("smoothed") != std::string::npos ? maxBlankSmoothedSignal : maxBlankRawSignal;
     return baseline.getCorrespondingBaseline(quantType);
 }
+
+//Issue 679: Alternative approach, just use the peaks that were actually measured
+//Previously, used EIC::calculateMaxBlankSignalBackground(), operating on merged EIC.
+float PeakGroup::getMaxBlankCorrespondingQuant(string quantType) {
+
+    float maxCorrespondingQuantType = 0.0f;
+
+    for (Peak p : peaks) {
+        if (p.getSample()->isBlank) {
+            float correspondingQuantType = p.getQuantByName(quantType);
+            if (correspondingQuantType > maxCorrespondingQuantType) {
+                maxCorrespondingQuantType = correspondingQuantType;
+            }
+        }
+    }
+
+    return maxCorrespondingQuantType;
+}

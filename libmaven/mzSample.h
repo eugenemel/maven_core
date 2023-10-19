@@ -1182,6 +1182,7 @@ class PeakGroup {
         float blankMaxHeight;
         float blankMedianHeight;
         float getBlankSignalByQuantType(string quantType);
+        float getMaxBlankCorrespondingQuant(string quantType);
 
         //This value takes on one of the above varlues based on setting in PeakGroupBackgroundType.
         float groupBackground;

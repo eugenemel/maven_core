@@ -2810,6 +2810,10 @@ float EIC::getAnalogousIntensitySum(EIC* eic, float rtAnchor, unsigned int numPo
     return intensitySum;
 }
 
+/**
+ * Issue 679: deprecated in favor of Peakgroup::getMaxBlankCorrespondingQuant
+ * @deprecated
+ */
 PeakGroupBaseline EIC::calculateMaxBlankSignalBackground(
     EIC* mergedEIC,
     vector<EIC *>& eics,
