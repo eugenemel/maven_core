@@ -698,7 +698,7 @@ void QQQProcessor::setPeakGroupBackground(
             if (params->peakPickingAndGroupingParameters->groupBackgroundType == PeakGroupBackgroundType::PREFERRED_QUANT_TYPE_MERGED_EIC_BASELINE) {
                 pg.groupBackground = pg.mergedEICSummaryData.getCorrespondingBaseline(quantType);
             } else {
-                pg.groupBackground = pg.getBlankSignalByQuantType(quantType);
+                pg.groupBackground = pg.getMaxBlankCorrespondingQuant(quantType);
             }
 
             if (debug) {
