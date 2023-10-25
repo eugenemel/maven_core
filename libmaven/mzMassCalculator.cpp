@@ -577,12 +577,20 @@ void NaturalAbundanceData::setAtomData(
     string atomicSymbol,
     int massNumber,
     double atomicMass,
-    double naturalAbundance){
+    double naturalAbundance,
+    int numExtraNeutrons){
 
-    auto key = make_pair(atomicSymbol, massNumber);
+    auto key = Atom(atomicSymbol, massNumber);
 
     atomToMass.insert(make_pair(key, atomicMass));
     atomToAbundance.insert(make_pair(key, naturalAbundance));
+    atomToNumExtraNeutrons.insert(make_pair(key, numExtraNeutrons));
+
+    if (extraNeutronToAtoms.find(numExtraNeutrons) == extraNeutronToAtoms.end()) {
+        extraNeutronToAtoms.insert(make_pair(numExtraNeutrons, vector<Atom>{}));
+    }
+    extraNeutronToAtoms.at(numExtraNeutrons).push_back(key);
+
 }
 
 
@@ -590,31 +598,37 @@ void NaturalAbundanceData::setAtomData(
 NaturalAbundanceData NaturalAbundanceData::defaultNaturalAbundanceData = []() -> NaturalAbundanceData {
     NaturalAbundanceData abundanceData;
 
-    abundanceData.setAtomData("C", 12, 12.0, 0.9893);
-    abundanceData.setAtomData("C", 13, 13.003355, 0.0107);
+    abundanceData.setAtomData("C", 12, 12.0, 0.9893, 0);
+    abundanceData.setAtomData("C", 13, 13.003355, 0.0107, 1);
 
-    abundanceData.setAtomData("H", 1, 1.007825, 0.999885);
-    abundanceData.setAtomData("H", 2, 2.014102, 0.000115);
+    abundanceData.setAtomData("H", 1, 1.007825, 0.999885, 0);
+    abundanceData.setAtomData("H", 2, 2.014102, 0.000115, 1);
 
-    abundanceData.setAtomData("O", 16, 15.994915, 0.99757);
-    abundanceData.setAtomData("O", 18, 17.999160, 0.00205);
+    abundanceData.setAtomData("O", 16, 15.994915, 0.99757, 0);
+    abundanceData.setAtomData("O", 18, 17.999160, 0.00205, 2);
 
-    abundanceData.setAtomData("N", 14, 14.003074, 0.99632);
-    abundanceData.setAtomData("N", 15, 15.000109, 0.00368);
+    abundanceData.setAtomData("N", 14, 14.003074, 0.99632, 0);
+    abundanceData.setAtomData("N", 15, 15.000109, 0.00368, 1);
 
-    abundanceData.setAtomData("S", 32, 31.972071, 0.9493);
-    abundanceData.setAtomData("S", 33, 32.971458, 0.0076);
-    abundanceData.setAtomData("S", 34, 33.967867, 0.0368);
-    abundanceData.setAtomData("S", 36, 35.967081, 0.0002);
+    abundanceData.setAtomData("S", 32, 31.972071, 0.9493, 0);
+    abundanceData.setAtomData("S", 33, 32.971458, 0.0076, 1);
+    abundanceData.setAtomData("S", 34, 33.967867, 0.0368, 2);
+    abundanceData.setAtomData("S", 36, 35.967081, 0.0002, 4);
 
     return abundanceData;
 }();
 
 void NaturalAbundanceData::print() {
-    for (auto it = atomToAbundance.begin(); it != atomToAbundance.end(); ++it) {
-        auto key = it->first;
-        auto val = it ->second;
-        cout << key.second << key.first << ": " << val << endl;
+    for (auto it = extraNeutronToAtoms.begin(); it != extraNeutronToAtoms.end(); ++it) {
+        int neutronNum = it->first;
+        vector<Atom> atoms = it->second;
+        cout << "[M+" << neutronNum << "]:" << endl;
+
+        for (auto atom : atoms) {
+            auto val = atomToAbundance.at(atom);
+            cout << atom.massNumber << atom.symbol << ": " << val << endl;
+        }
+        cout << endl;
     }
 }
 
@@ -626,4 +640,20 @@ double IsotopicAbundance::getNaturalAbundance(NaturalAbundanceData& naturalAbund
 double IsotopicAbundance::getMass(NaturalAbundanceData& naturalAbundanceData) {
     //TODO
     return 0.0;
+}
+
+NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
+    string compoundFormula,
+    Adduct *adduct,
+    NaturalAbundanceData& data) {
+
+    NaturalAbundanceDistribution naturalAbundanceDistribution;
+
+    map<string, int> atoms = getComposition(compoundFormula);
+    multiplyAtoms(atoms, adduct->nmol);
+    addAtoms(atoms, getComposition(adduct));
+
+    //TODO
+
+    return naturalAbundanceDistribution;
 }

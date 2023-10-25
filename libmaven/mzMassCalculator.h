@@ -109,6 +109,25 @@ class MassCalculator {
 
 };
 
+class Atom {
+    public:
+        string symbol;
+        int massNumber;
+
+    Atom(string symbol, int massNumber) {
+        this->symbol = symbol;
+        this->massNumber = massNumber;
+    }
+
+    friend bool operator< (const Atom& a, const Atom& b) {
+        if (a.symbol == b.symbol) {
+            return a.massNumber < b.massNumber;
+        } else {
+            return a.symbol < b.symbol;
+        }
+    }
+};
+
 //flexible class to store natural abundance data. In some cases, these values can change - e.g., plant metabolomics.
 class NaturalAbundanceData {
     public:
@@ -123,10 +142,12 @@ class NaturalAbundanceData {
         //    Note that these values are always given in terms of the number of total neutrons,
         //    Not the number of "extra" neutrons to the most common case. This handles cases like Selennium,
         //    Where there isn't a single "base" case.
-        map<pair<string, int>, double> atomToAbundance{};
-        map<pair<string, int>, double> atomToMass{};
+        map<Atom, double> atomToAbundance{};
+        map<Atom, double> atomToMass{};
+        map<Atom, int> atomToNumExtraNeutrons{};
+        map<int, vector<Atom>> extraNeutronToAtoms{};
 
-        void setAtomData(string atomicSymbol, int massNumber, double atomicMass, double naturalAbundance);
+        void setAtomData(string atomicSymbol, int massNumber, double atomicMass, double naturalAbundance, int numExtraNeutrons);
         void print();
 
         static NaturalAbundanceData defaultNaturalAbundanceData;
