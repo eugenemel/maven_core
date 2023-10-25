@@ -438,6 +438,13 @@ vector<Isotope> IsotopicEnvelopeAdjuster::condenseTheoreticalIsotopes(
     IsotopeParameters params,
     bool debug){
 
+    //WARNING:
+    //Isotope.abundance stores the predicted theoretical abundance.
+    //In cases where isotopes should be combined, but only one atom is labeled,
+    //the natural abundance of the unlabeled atoms must be accounted for.
+    //For example, if 13C is labeled, but the 13C cannot be resolved from the 15N,
+    //the [M+1] relative abundance must take into account both 13C and 15N.
+
     //TODO: implement
     return defaultIsotopes;
 }
