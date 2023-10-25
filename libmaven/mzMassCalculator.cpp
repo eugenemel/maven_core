@@ -573,22 +573,47 @@ map<string,int> MassCalculator::getPeptideComposition(const string& peptideSeq) 
 }
 /*-----------------------------------------------------------------------*/
 
+void NaturalAbundanceData::setAtomData(
+    string atomicSymbol,
+    int massNumber,
+    double atomicMass,
+    double naturalAbundance){
+
+    auto key = make_pair(atomicSymbol, massNumber);
+
+    atomToMass.insert(make_pair(key, atomicMass));
+    atomToAbundance.insert(make_pair(key, naturalAbundance));
+}
+
+
 //Issue 656: Initialize default Natural Abundance via C++11 idiom for initialization of static field.
 NaturalAbundanceData NaturalAbundanceData::defaultNaturalAbundanceData = []() -> NaturalAbundanceData {
     NaturalAbundanceData abundanceData;
 
-    abundanceData.atomToMass.insert(make_pair(make_pair("C", 6), 12.0));
-    abundanceData.atomToMass.insert(make_pair(make_pair("C", 6), 12.0));
-    abundanceData.atomToMass.insert(make_pair(make_pair("H", 6), 12.0));
-    abundanceData.atomToMass.insert(make_pair(make_pair("H", 6), 12.0));
-    abundanceData.atomToMass.insert(make_pair(make_pair("O", 6), 12.0));
-    abundanceData.atomToMass.insert(make_pair(make_pair("O", 6), 12.0));
-    abundanceData.atomToMass.insert(make_pair(make_pair("N", 6), 12.0));
-    abundanceData.atomToMass.insert(make_pair(make_pair("N", 6), 12.0));
-    abundanceData.atomToMass.insert(make_pair(make_pair("P", 6), 12.0));
-    abundanceData.atomToMass.insert(make_pair(make_pair("P", 6), 12.0));
-    abundanceData.atomToMass.insert(make_pair(make_pair("S", 6), 12.0));
-    abundanceData.atomToMass.insert(make_pair(make_pair("S", 6), 12.0));
+    abundanceData.setAtomData("C", 12, 12.0, 0.9893);
+    abundanceData.setAtomData("C", 13, 13.003355, 0.0107);
+
+    abundanceData.setAtomData("H", 1, 1.007825, 0.999885);
+    abundanceData.setAtomData("H", 2, 2.014102, 0.000115);
+
+    abundanceData.setAtomData("O", 16, 15.994915, 0.99757);
+    abundanceData.setAtomData("O", 18, 17.999160, 0.00205);
+
+    abundanceData.setAtomData("N", 14, 14.003074, 0.99632);
+    abundanceData.setAtomData("N", 15, 15.000109, 0.00368);
+
+    abundanceData.setAtomData("S", 32, 31.972071, 0.9493);
+    abundanceData.setAtomData("S", 33, 32.971458, 0.0076);
+    abundanceData.setAtomData("S", 34, 33.967867, 0.0368);
+    abundanceData.setAtomData("S", 36, 35.967081, 0.0002);
 
     return abundanceData;
 }();
+
+void NaturalAbundanceData::print() {
+    for (auto it = atomToAbundance.begin(); it != atomToAbundance.end(); ++it) {
+        auto key = it->first;
+        auto val = it ->second;
+        cout << key.second << key.first << ": " << val << endl;
+    }
+}

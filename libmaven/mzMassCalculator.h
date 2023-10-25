@@ -112,7 +112,7 @@ class MassCalculator {
 class NaturalAbundanceData {
     public:
         //Keys:
-        //   <atomicSymbol, numNeutrons>
+        //   <atomicSymbol, massNumber>
         //
         // Values:
         //    atomToAbundance: Proportion of a particular atom with given # neutrons.
@@ -124,6 +124,9 @@ class NaturalAbundanceData {
         //    Where there isn't a single "base" case.
         map<pair<string, int>, double> atomToAbundance{};
         map<pair<string, int>, double> atomToMass{};
+
+        void setAtomData(string atomicSymbol, int massNumber, double atomicMass, double naturalAbundance);
+        void print();
 
         static NaturalAbundanceData defaultNaturalAbundanceData;
 };
