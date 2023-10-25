@@ -617,3 +617,13 @@ void NaturalAbundanceData::print() {
         cout << key.second << key.first << ": " << val << endl;
     }
 }
+
+double IsotopicAbundance::getNaturalAbundance(NaturalAbundanceData& naturalAbundanceData) {
+     //TODO
+    return 0.0;
+}
+
+double IsotopicAbundance::getMass(NaturalAbundanceData& naturalAbundanceData) {
+    //TODO
+    return 0.0;
+}

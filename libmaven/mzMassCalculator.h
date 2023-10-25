@@ -25,6 +25,7 @@ using namespace std;
 // FAB   M+X M+N
 // ACPI  M+H  M+X
 
+class NaturalAbundanceData;
 class NaturalAbundanceDistribution;
 
 class MassCalculator { 
@@ -94,7 +95,7 @@ class MassCalculator {
     //Issue 656: Return a complete natural abundance distribution for every possible observable isotope.
     //Considers all atoms in the molecule and adducts.
     //Organizes information in various ways for easy, intuitive access.
-    static NaturalAbundanceDistribution getNaturalAbundanceDistribution(string compoundFormula, Adduct *adduct);
+    static NaturalAbundanceDistribution getNaturalAbundanceDistribution(string compoundFormula, Adduct *adduct, NaturalAbundanceData& data);
 
     map<string,int> getPeptideComposition(const string& peptideSeq);
 
@@ -131,10 +132,19 @@ class NaturalAbundanceData {
         static NaturalAbundanceData defaultNaturalAbundanceData;
 };
 
+class IsotopicAbundance {
+    public:
+        string isotopicFormula;
+        map<pair<string, int>, int> atomCounts{};
+
+        double getNaturalAbundance(NaturalAbundanceData& naturalAbundanceData);
+        double getMass(NaturalAbundanceData& naturalAbundanceData);
+};
+
 //Issue 656: Implement flexible approach for isotopic correction.
 //Takes into account all atoms, all
 class NaturalAbundanceDistribution {
-
+    vector<IsotopicAbundance> isotopicAbundances{};
 };
 
 #endif
