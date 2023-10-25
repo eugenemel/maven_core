@@ -25,7 +25,7 @@ using namespace std;
 // FAB   M+X M+N
 // ACPI  M+H  M+X
 
-
+class NaturalAbundanceDistribution;
 
 class MassCalculator { 
 
@@ -88,7 +88,13 @@ class MassCalculator {
     vector<Match> enumerateMasses(double inputMass, double charge, double maxdiff);
     double adjustMass(double mass,int charge);
 
+    //Used for computation of actual values for labeled data.
     static vector<Isotope> computeIsotopes(string compoundFormula, Adduct* adduct, int maxNumProtons=INT_MAX, bool isUse13C=true, bool isUse15N=true, bool isUse34S=true, bool isUse2H=true);
+
+    //Issue 656: Return a complete natural abundance distribution for every possible observable isotope.
+    //Considers all atoms in the molecule and adducts.
+    //Organizes information in various ways for easy, intuitive access.
+    static NaturalAbundanceDistribution getNaturalAbundanceDistribution(string compoundFormula, Adduct *adduct);
 
     map<string,int> getPeptideComposition(const string& peptideSeq);
 
@@ -100,6 +106,17 @@ class MassCalculator {
         static void modifyAtoms(map<string, int>& reference, map<string, int> toAdd, bool isAddAtoms);
         static map<string, int> getAdductComponentComposition(string formula);
 
+};
+
+//flexible class to store natural abundance data. In some cases, these values can change - e.g., plant metabolomics.
+class NaturalAbundanceData {
+    //TODO
+};
+
+//Issue 656: Implement flexible approach for isotopic correction.
+//Takes into account all atoms, all
+class NaturalAbundanceDistribution {
+    // TODO
 };
 
 #endif
