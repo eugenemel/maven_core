@@ -572,3 +572,23 @@ map<string,int> MassCalculator::getPeptideComposition(const string& peptideSeq) 
     return M;
 }
 /*-----------------------------------------------------------------------*/
+
+//Issue 656: Initialize default Natural Abundance via C++11 idiom for initialization of static field.
+NaturalAbundanceData NaturalAbundanceData::defaultNaturalAbundanceData = []() -> NaturalAbundanceData {
+    NaturalAbundanceData abundanceData;
+
+    abundanceData.atomToMass.insert(make_pair(make_pair("C", 6), 12.0));
+    abundanceData.atomToMass.insert(make_pair(make_pair("C", 6), 12.0));
+    abundanceData.atomToMass.insert(make_pair(make_pair("H", 6), 12.0));
+    abundanceData.atomToMass.insert(make_pair(make_pair("H", 6), 12.0));
+    abundanceData.atomToMass.insert(make_pair(make_pair("O", 6), 12.0));
+    abundanceData.atomToMass.insert(make_pair(make_pair("O", 6), 12.0));
+    abundanceData.atomToMass.insert(make_pair(make_pair("N", 6), 12.0));
+    abundanceData.atomToMass.insert(make_pair(make_pair("N", 6), 12.0));
+    abundanceData.atomToMass.insert(make_pair(make_pair("P", 6), 12.0));
+    abundanceData.atomToMass.insert(make_pair(make_pair("P", 6), 12.0));
+    abundanceData.atomToMass.insert(make_pair(make_pair("S", 6), 12.0));
+    abundanceData.atomToMass.insert(make_pair(make_pair("S", 6), 12.0));
+
+    return abundanceData;
+}();

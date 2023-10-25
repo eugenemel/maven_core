@@ -110,13 +110,28 @@ class MassCalculator {
 
 //flexible class to store natural abundance data. In some cases, these values can change - e.g., plant metabolomics.
 class NaturalAbundanceData {
-    //TODO
+    public:
+        //Keys:
+        //   <atomicSymbol, numNeutrons>
+        //
+        // Values:
+        //    atomToAbundance: Proportion of a particular atom with given # neutrons.
+        //        Sum of all proportions of a particular atom sums to 1.0
+        //
+        //    atomToMass: Exact mass associated with a particular atom, # neutrons.
+        //    Note that these values are always given in terms of the number of total neutrons,
+        //    Not the number of "extra" neutrons to the most common case. This handles cases like Selennium,
+        //    Where there isn't a single "base" case.
+        map<pair<string, int>, double> atomToAbundance{};
+        map<pair<string, int>, double> atomToMass{};
+
+        static NaturalAbundanceData defaultNaturalAbundanceData;
 };
 
 //Issue 656: Implement flexible approach for isotopic correction.
 //Takes into account all atoms, all
 class NaturalAbundanceDistribution {
-    // TODO
+
 };
 
 #endif
