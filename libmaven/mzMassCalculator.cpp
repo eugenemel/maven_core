@@ -685,6 +685,8 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
         string atomSymbol = it->first;
         int atomTotal = it->second;
 
+        if (debug) cout << "atomsMap: " << atomSymbol << " n=" << atomTotal << endl;
+
         vector<Atom> possibleMasses = data.getAtomsBySymbol(atomSymbol);
 
         //skip any elements that do not have multiple isotopic natural abundances recorded
@@ -737,9 +739,13 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
         string atomSymbol = it->first;
         int numAtoms = it->second;
 
+        if (debug) cout << atomSymbol << ": " << numAtoms << " => " << endl;
+
         vector<IsotopicAbundance> atomAbundances{};
 
         if (atomTypeToPartialProbability.find(atomSymbol) == atomTypeToPartialProbability.end()) {
+
+            if (debug) cout << "\tAll monoisotopic." << endl;
 
             int massNumber = round(MassCalculator::getElementMass(atomSymbol));
             Atom at(atomSymbol, massNumber);
@@ -762,6 +768,12 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
 
                 if (isotopicAbundance.proportionalAbundance >= minAbundance) {
                     atomAbundances.push_back(isotopicAbundance);
+
+                    if (debug) {
+                        for (auto it3 = isotopicAbundance.atomCounts.begin(); it3 != isotopicAbundance.atomCounts.end(); ++it3) {
+                            cout << "\t" << it3->first.massNumber << it3->first.symbol << " n=" << it3->second << endl;
+                        }
+                    }
                 }
             }
         }
