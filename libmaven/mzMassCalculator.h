@@ -175,6 +175,8 @@ class IsotopicAbundance {
         double getMass(NaturalAbundanceData& naturalAbundanceData);
 
         static IsotopicAbundance createMergedAbundance(IsotopicAbundance& one, IsotopicAbundance& two);
+        string getFormula();
+        string toString();
 };
 
 //Issue 656: Implement flexible approach for isotopic correction.

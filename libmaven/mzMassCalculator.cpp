@@ -745,13 +745,13 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
 
         if (atomTypeToPartialProbability.find(atomSymbol) == atomTypeToPartialProbability.end()) {
 
-            if (debug) cout << "\tAll monoisotopic." << endl;
-
             int massNumber = round(MassCalculator::getElementMass(atomSymbol));
             Atom at(atomSymbol, massNumber);
             IsotopicAbundance isotopicAbundance;
             isotopicAbundance.atomCounts.insert(make_pair(at, numAtoms));
             atomAbundances.push_back(isotopicAbundance);
+
+            if (debug) cout << "All monoisotopic: " << isotopicAbundance.toString();
 
         } else {
 
@@ -769,11 +769,7 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
                 if (isotopicAbundance.proportionalAbundance >= minAbundance) {
                     atomAbundances.push_back(isotopicAbundance);
 
-                    if (debug) {
-                        for (auto it3 = isotopicAbundance.atomCounts.begin(); it3 != isotopicAbundance.atomCounts.end(); ++it3) {
-                            cout << "\t" << it3->first.massNumber << it3->first.symbol << " n=" << it3->second << endl;
-                        }
-                    }
+                    if (debug) cout << "PartialProbabilityMap: " << isotopicAbundance.toString();
                 }
             }
         }
@@ -789,6 +785,7 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
 
                     if (combinedAbundance.proportionalAbundance >= minAbundance) {
                         updatedAbundances.push_back(combinedAbundance);
+                        if (debug) cout << "Updated Abundances: " << combinedAbundance.toString() << endl;
                     }
                 }
             }
@@ -855,4 +852,24 @@ IsotopicAbundance IsotopicAbundance::createMergedAbundance(IsotopicAbundance& on
     }
 
     return merged;
+}
+
+string IsotopicAbundance::getFormula() {
+    stringstream s;
+
+    for (auto it = atomCounts.begin(); it != atomCounts.end(); ++it) {
+        s << "[" << it->first.massNumber << it->first.symbol << "]" << it->second << endl;
+    }
+
+    return s.str();
+}
+
+string IsotopicAbundance::toString() {
+    stringstream s;
+
+    s << std::fixed << setprecision(5); // 5 places after the decimal
+
+    s << getFormula() << ": " << proportionalAbundance;
+
+    return s.str();
 }
