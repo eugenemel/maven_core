@@ -679,11 +679,11 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
 
     // Compute partial probabilities
     // atomSymbol, numRare, probability
-    map<string, map<int, double>> atomTypeToPartialProbability{};
+    map<string, map<vector<pair<Atom, int>>, double>> atomTypeToPartialProbability{};
 
-    for (auto atomCounts : atoms) {
-        string atomSymbol = atomCounts.first;
-        int atomTotal = atomCounts.second;
+    for (auto it = atoms.begin(); it != atoms.end(); ++it) {
+        string atomSymbol = it->first;
+        int atomTotal = it->second;
 
         vector<Atom> possibleMasses = data.getAtomsBySymbol(atomSymbol);
 
@@ -709,12 +709,18 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
         double commonAbundance = data.atomToAbundance.at(commonIsotope);
         double rareAbundance = data.atomToAbundance.at(rareIsotope);
 
-        map<int, double> atomPartialMap{};
+        map<vector<pair<Atom, int>>, double> atomPartialMap{};
 
         for (unsigned int i = 0; i <= atomTotal; i++) {
             double partialProbability = mzUtils::nchoosek(atomTotal,i)*pow(commonAbundance,atomTotal-i)*pow(rareAbundance,i);
             if (partialProbability >= minAbundance) {
-                atomPartialMap.insert(make_pair(i, partialProbability));
+
+                pair<Atom, int> firstPair = make_pair(commonIsotope, (atomTotal-i));
+                pair<Atom, int> secondPair = make_pair(rareIsotope, i);
+
+                vector<pair<Atom, int>> counts{firstPair, secondPair};
+
+                atomPartialMap.insert(make_pair(counts, partialProbability));
                 if (debug) {
                     cout << atomSymbol << ", " << i << " isotopes = " << partialProbability << endl;
                 }
@@ -724,6 +730,63 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
         atomTypeToPartialProbability.insert(make_pair(atomSymbol, atomPartialMap));
 
     }
+
+    vector<IsotopicAbundance> existingAbundances{};
+
+    for (auto it = atoms.begin(); it != atoms.end(); ++it) {
+        string atomSymbol = it->first;
+        int numAtoms = it->second;
+
+        vector<IsotopicAbundance> atomAbundances{};
+
+        if (atomTypeToPartialProbability.find(atomSymbol) == atomTypeToPartialProbability.end()) {
+
+            int massNumber = round(MassCalculator::getElementMass(atomSymbol));
+            Atom at(atomSymbol, massNumber);
+            IsotopicAbundance isotopicAbundance;
+            isotopicAbundance.atomCounts.insert(make_pair(at, numAtoms));
+            atomAbundances.push_back(isotopicAbundance);
+
+        } else {
+
+            auto atomPartialMap = atomTypeToPartialProbability.at(atomSymbol);
+
+            for (auto it2 = atomPartialMap.begin(); it2 != atomPartialMap.end(); ++it2) {
+                vector<pair<Atom, int>> atomVals = it2->first;
+                double partialProb = it2->second;
+                IsotopicAbundance isotopicAbundance;
+                for (auto atomVal : atomVals) {
+                    isotopicAbundance.atomCounts.insert(atomVal);
+                }
+                isotopicAbundance.proportionalAbundance *= partialProb;
+
+                if (isotopicAbundance.proportionalAbundance >= minAbundance) {
+                    atomAbundances.push_back(isotopicAbundance);
+                }
+            }
+        }
+
+        vector<IsotopicAbundance> updatedAbundances;
+        if (!existingAbundances.empty()) {
+            updatedAbundances = atomAbundances;
+        } else {
+            updatedAbundances = vector<IsotopicAbundance>();
+            for (auto existingAbundance : existingAbundances) {
+                for (auto atomAbundance : atomAbundances) {
+                    IsotopicAbundance combinedAbundance = IsotopicAbundance::createMergedAbundance(existingAbundance, atomAbundance);
+
+                    if (combinedAbundance.proportionalAbundance >= minAbundance) {
+                        updatedAbundances.push_back(combinedAbundance);
+                    }
+                }
+            }
+        }
+
+        existingAbundances = updatedAbundances;
+
+    }
+
+    naturalAbundanceDistribution.isotopicAbundances = existingAbundances;
 
 //    vector<IsotopicAbundance> abundances{};
 
@@ -763,4 +826,21 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
     //TODO
 
     return naturalAbundanceDistribution;
+}
+
+IsotopicAbundance IsotopicAbundance::createMergedAbundance(IsotopicAbundance& one, IsotopicAbundance& two){
+    IsotopicAbundance merged;
+    merged.proportionalAbundance = one.proportionalAbundance * two.proportionalAbundance;
+
+    merged.atomCounts = two.atomCounts;
+
+    for (auto it = one.atomCounts.begin(); it != one.atomCounts.end(); ++it) {
+        if (merged.atomCounts.find(it->first) == merged.atomCounts.end()) {
+            merged.atomCounts.insert(make_pair(it->first, it->second));
+        } else {
+            merged.atomCounts[it->first] = it->second;
+        }
+    }
+
+    return merged;
 }

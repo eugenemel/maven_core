@@ -167,16 +167,20 @@ class NaturalAbundanceData {
 
 class IsotopicAbundance {
     public:
-        string isotopicFormula;
-        map<pair<string, int>, int> atomCounts{};
+
+        map<Atom, int> atomCounts{};
+        double proportionalAbundance = 1.0;
 
         double getNaturalAbundance(NaturalAbundanceData& naturalAbundanceData);
         double getMass(NaturalAbundanceData& naturalAbundanceData);
+
+        static IsotopicAbundance createMergedAbundance(IsotopicAbundance& one, IsotopicAbundance& two);
 };
 
 //Issue 656: Implement flexible approach for isotopic correction.
 //Takes into account all atoms, all
 class NaturalAbundanceDistribution {
+public:
     vector<IsotopicAbundance> isotopicAbundances{};
 };
 
