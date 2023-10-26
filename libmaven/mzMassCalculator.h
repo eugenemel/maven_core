@@ -95,7 +95,13 @@ class MassCalculator {
     //Issue 656: Return a complete natural abundance distribution for every possible observable isotope.
     //Considers all atoms in the molecule and adducts.
     //Organizes information in various ways for easy, intuitive access.
-    static NaturalAbundanceDistribution getNaturalAbundanceDistribution(string compoundFormula, Adduct *adduct, NaturalAbundanceData& data);
+    static NaturalAbundanceDistribution getNaturalAbundanceDistribution(
+        string compoundFormula,
+        Adduct *adduct,
+        NaturalAbundanceData& data,
+        int maxNumIsotopes,
+        double minimumAbundance,
+        bool debug=false);
 
     map<string,int> getPeptideComposition(const string& peptideSeq);
 
@@ -113,6 +119,8 @@ class Atom {
     public:
         string symbol;
         int massNumber;
+
+        Atom() {symbol = "NONE"; massNumber = -1;}
 
     Atom(string symbol, int massNumber) {
         this->symbol = symbol;
@@ -146,9 +154,13 @@ class NaturalAbundanceData {
         map<Atom, double> atomToMass{};
         map<Atom, int> atomToNumExtraNeutrons{};
         map<int, vector<Atom>> extraNeutronToAtoms{};
+        map<string, vector<Atom>> symbolToAtoms{};
 
         void setAtomData(string atomicSymbol, int massNumber, double atomicMass, double naturalAbundance, int numExtraNeutrons);
         void print();
+
+        vector<Atom> getAtomsByExtraNeutrons(int numNeutrons);
+        vector<Atom> getAtomsBySymbol(string atomicSymbol);
 
         static NaturalAbundanceData defaultNaturalAbundanceData;
 };

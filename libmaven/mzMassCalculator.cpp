@@ -591,6 +591,11 @@ void NaturalAbundanceData::setAtomData(
     }
     extraNeutronToAtoms.at(numExtraNeutrons).push_back(key);
 
+    if (symbolToAtoms.find(atomicSymbol) == symbolToAtoms.end()) {
+        symbolToAtoms.insert(make_pair(atomicSymbol, vector<Atom>{}));
+    }
+    symbolToAtoms.at(atomicSymbol).push_back(key);
+
 }
 
 
@@ -604,16 +609,16 @@ NaturalAbundanceData NaturalAbundanceData::defaultNaturalAbundanceData = []() ->
     abundanceData.setAtomData("H", 1, 1.007825, 0.999885, 0);
     abundanceData.setAtomData("H", 2, 2.014102, 0.000115, 1);
 
-    abundanceData.setAtomData("O", 16, 15.994915, 0.99757, 0);
-    abundanceData.setAtomData("O", 18, 17.999160, 0.00205, 2);
+//    abundanceData.setAtomData("O", 16, 15.994915, 0.99757, 0);
+//    abundanceData.setAtomData("O", 18, 17.999160, 0.00205, 2);
 
     abundanceData.setAtomData("N", 14, 14.003074, 0.99632, 0);
     abundanceData.setAtomData("N", 15, 15.000109, 0.00368, 1);
 
     abundanceData.setAtomData("S", 32, 31.972071, 0.9493, 0);
-    abundanceData.setAtomData("S", 33, 32.971458, 0.0076, 1);
+    //abundanceData.setAtomData("S", 33, 32.971458, 0.0076, 1);
     abundanceData.setAtomData("S", 34, 33.967867, 0.0368, 2);
-    abundanceData.setAtomData("S", 36, 35.967081, 0.0002, 4);
+    //abundanceData.setAtomData("S", 36, 35.967081, 0.0002, 4);
 
     return abundanceData;
 }();
@@ -632,6 +637,22 @@ void NaturalAbundanceData::print() {
     }
 }
 
+vector<Atom> NaturalAbundanceData::getAtomsByExtraNeutrons(int numNeutrons) {
+    if (extraNeutronToAtoms.find(numNeutrons) != extraNeutronToAtoms.end()) {
+        return extraNeutronToAtoms.at(numNeutrons);
+    }
+
+    return vector<Atom>{};
+}
+
+vector<Atom> NaturalAbundanceData::getAtomsBySymbol(string atomicSymbol) {
+    if (symbolToAtoms.find(atomicSymbol) != symbolToAtoms.end()) {
+        return symbolToAtoms.at(atomicSymbol);
+    }
+
+    return vector<Atom>{};
+}
+
 double IsotopicAbundance::getNaturalAbundance(NaturalAbundanceData& naturalAbundanceData) {
      //TODO
     return 0.0;
@@ -645,13 +666,99 @@ double IsotopicAbundance::getMass(NaturalAbundanceData& naturalAbundanceData) {
 NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
     string compoundFormula,
     Adduct *adduct,
-    NaturalAbundanceData& data) {
+    NaturalAbundanceData& data,
+    int maxNumIsotopes,
+    double minAbundance,
+    bool debug) {
 
     NaturalAbundanceDistribution naturalAbundanceDistribution;
 
     map<string, int> atoms = getComposition(compoundFormula);
     multiplyAtoms(atoms, adduct->nmol);
     addAtoms(atoms, getComposition(adduct));
+
+    // Compute partial probabilities
+    // atomSymbol, numRare, probability
+    map<string, map<int, double>> atomTypeToPartialProbability{};
+
+    for (auto atomCounts : atoms) {
+        string atomSymbol = atomCounts.first;
+        int atomTotal = atomCounts.second;
+
+        vector<Atom> possibleMasses = data.getAtomsBySymbol(atomSymbol);
+
+        //skip any elements that do not have multiple isotopic natural abundances recorded
+        // (assume 100% monoisotopic)
+        if (possibleMasses.size() <= 1) continue;
+
+        if (possibleMasses.size() != 2) {
+            //TODO: support more than one possible type of isotopic shift per atom.
+            cerr << "Currenly only supports a maximum of two natural isotopic abundances. Aborting.";
+            abort();
+        }
+
+        Atom commonIsotope = possibleMasses[0];
+        Atom rareIsotope = possibleMasses[1];
+
+        if (data.atomToAbundance.at(commonIsotope) < data.atomToAbundance.at(rareIsotope)) {
+            Atom tmp = commonIsotope;
+            commonIsotope = rareIsotope;
+            rareIsotope = tmp;
+        }
+
+        double commonAbundance = data.atomToAbundance.at(commonIsotope);
+        double rareAbundance = data.atomToAbundance.at(rareIsotope);
+
+        map<int, double> atomPartialMap{};
+
+        for (unsigned int i = 0; i <= atomTotal; i++) {
+            double partialProbability = mzUtils::nchoosek(atomTotal,i)*pow(commonAbundance,atomTotal-i)*pow(rareAbundance,i);
+            if (partialProbability >= minAbundance) {
+                atomPartialMap.insert(make_pair(i, partialProbability));
+                if (debug) {
+                    cout << atomSymbol << ", " << i << " isotopes = " << partialProbability << endl;
+                }
+            }
+        }
+
+        atomTypeToPartialProbability.insert(make_pair(atomSymbol, atomPartialMap));
+
+    }
+
+//    vector<IsotopicAbundance> abundances{};
+
+//    int numNeutrons = 0;
+
+//    while (numNeutrons <= maxNumIsotopes) {
+
+//        //If the atom is not present, assume 0 abundance
+//        // vector<Atom> atoms = data.getAtoms(numNeutrons);
+
+//        for (auto it = atoms.begin(); it != atoms.end(); ++it) {
+
+//            string atomSymbol = it->first;
+//            int atomTotal = it->second;
+
+
+//            for (unsigned int i = 0; i < atomTotal; i++) {
+
+//                //double partialProbability
+//                //auto val = mzUtils::nchoosek(atomTotal,i)*pow(abC12,atomTotal-i)*pow(abC13,i);
+//            }
+//        }
+
+//        // c, n, s, d: number of heavy isotopes
+//        // 'ab' --> abundance of species
+//        // atomCount --> total number in molecule
+
+//        isotopes[i].abundance=
+//            mzUtils::nchoosek(CatomCount,c)*pow(abC12,CatomCount-c)*pow(abC13,c)
+//            * mzUtils::nchoosek(NatomCount,n)*pow(abN14,NatomCount-n)*pow(abN15,n)
+//            * mzUtils::nchoosek(SatomCount,s)*pow(abS32,SatomCount-s)*pow(abS34,s)
+//            * mzUtils::nchoosek(HatomCount,d)*pow(abH,HatomCount-d)  *pow(abH2,d);
+
+//    }
+
 
     //TODO
 
