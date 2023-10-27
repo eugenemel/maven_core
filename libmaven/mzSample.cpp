@@ -2421,6 +2421,7 @@ string IsotopeParameters::encodeParams() {
     encodedParams = encodedParams + "isN15Labeled" + "=" + to_string(isN15Labeled) + ";";
     encodedParams = encodedParams + "isS34Labeled" + "=" + to_string(isS34Labeled) + ";";
     encodedParams = encodedParams + "isD2Labeled" + "=" + to_string(isD2Labeled) + ";";
+    encodedParams = encodedParams + "isO18Labeled" + "=" + to_string(isO18Labeled) + ";";
     encodedParams = encodedParams + "isCondenseTheoreticalIsotopes" + "=" + to_string(isCondenseTheoreticalIsotopes) + ";";
     encodedParams = encodedParams + "resolvingPower" + "=" + to_string(resolvingPower) + ";";
 
@@ -2490,6 +2491,9 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     }
     if (decodedMap.find("isD2Labeled") != decodedMap.end()) {
         isotopeParameters.isD2Labeled = decodedMap["isD2Labeled"]=="1";
+    }
+    if (decodedMap.find("isO18Labeled") != decodedMap.end()) {
+        isotopeParameters.isO18Labeled = decodedMap["isO18Labeled"]=="1";
     }
     if (decodedMap.find("isCondenseTheoreticalIsotopes") != decodedMap.end()) {
         isotopeParameters.isCondenseTheoreticalIsotopes = decodedMap["isCondenseTheoreticalIsotopes"] == "1";

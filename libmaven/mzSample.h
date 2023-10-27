@@ -936,6 +936,7 @@ struct IsotopeParameters {
     bool   isN15Labeled=false;
     bool   isS34Labeled=false;
     bool   isD2Labeled=false;
+    bool   isO18Labeled=false;
 
     bool isCondenseTheoreticalIsotopes = false;
     double resolvingPower = 50000.0;
