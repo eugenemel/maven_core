@@ -858,7 +858,7 @@ string IsotopicAbundance::getFormula() {
     stringstream s;
 
     for (auto it = atomCounts.begin(); it != atomCounts.end(); ++it) {
-        s << "[" << it->first.massNumber << it->first.symbol << "]" << it->second << endl;
+        s << "[" << it->first.massNumber << it->first.symbol << "]" << it->second;
     }
 
     return s.str();
