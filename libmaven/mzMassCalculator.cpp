@@ -637,10 +637,11 @@ NaturalAbundanceData NaturalAbundanceData::defaultNaturalAbundanceData = []() ->
     abundanceData.setAtomData("N", 14, 14.00307400446, 0.99632, 0);
     abundanceData.setAtomData("N", 15, 15.0001088989, 0.00368, 1);
 
+    //TODO: need exactly two species, any more not supported.
     abundanceData.setAtomData("S", 32, 31.9720711744, 0.9493, 0);
-    abundanceData.setAtomData("S", 33, 32.9714589099, 0.0076, 1);
+//    abundanceData.setAtomData("S", 33, 32.9714589099, 0.0076, 1);
     abundanceData.setAtomData("S", 34, 33.96786701, 0.0368, 2);
-    abundanceData.setAtomData("S", 36, 35.96708070, 0.0002, 4);
+//    abundanceData.setAtomData("S", 36, 35.96708070, 0.0002, 4);
 
     return abundanceData;
 }();
