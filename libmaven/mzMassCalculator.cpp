@@ -347,6 +347,7 @@ vector<Isotope> MassCalculator::computeIsotopes(
     bool isUse34S,
     bool isUse2H) {
 
+    //TODO: delete
 //    const double abC12 = 0.9893;
 //    const double abC13 = 0.0107;
 //    const double abN14 = 0.9963620;
