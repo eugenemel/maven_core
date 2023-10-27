@@ -107,9 +107,9 @@ class MassCalculator {
 
     static bool compDiff(const Match& a, const Match& b ) { return a.diff < b.diff; }
     static bool compNumMatches(const Match& a, const Match& b ) { return a.fragScore.numMatches < b.fragScore.numMatches; }
+    static double getElementMass(string elmnt);
 
     private:
-        static double getElementMass(string elmnt);
         static void modifyAtoms(map<string, int>& reference, map<string, int> toAdd, bool isAddAtoms);
         static map<string, int> getAdductComponentComposition(string formula);
 
@@ -169,9 +169,8 @@ class IsotopicAbundance {
     public:
 
         map<Atom, int> atomCounts{};
-        double proportionalAbundance = 1.0;
+        double naturalAbundance = 1.0;
 
-        double getNaturalAbundance(NaturalAbundanceData& naturalAbundanceData);
         double getMass(NaturalAbundanceData& naturalAbundanceData);
 
         static IsotopicAbundance createMergedAbundance(IsotopicAbundance& one, IsotopicAbundance& two);

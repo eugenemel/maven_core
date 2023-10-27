@@ -653,14 +653,21 @@ vector<Atom> NaturalAbundanceData::getAtomsBySymbol(string atomicSymbol) {
     return vector<Atom>{};
 }
 
-double IsotopicAbundance::getNaturalAbundance(NaturalAbundanceData& naturalAbundanceData) {
-     //TODO
-    return 0.0;
-}
-
 double IsotopicAbundance::getMass(NaturalAbundanceData& naturalAbundanceData) {
-    //TODO
-    return 0.0;
+    double mass = 0.0;
+
+    for (auto it = atomCounts.begin(); it != atomCounts.end(); ++it) {
+        Atom atom = it->first;
+        int count = it->second;
+
+        if (naturalAbundanceData.atomToMass.find(atom) != naturalAbundanceData.atomToMass.end()) {
+            mass += naturalAbundanceData.atomToMass[atom] * count;
+        } else {
+            mass += MassCalculator::getElementMass(atom.symbol) * count;
+        }
+    }
+
+    return mass;
 }
 
 NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
@@ -762,9 +769,9 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
                 for (auto atomVal : atomVals) {
                     isotopicAbundance.atomCounts.insert(atomVal);
                 }
-                isotopicAbundance.proportionalAbundance *= partialProb;
+                isotopicAbundance.naturalAbundance *= partialProb;
 
-                if (isotopicAbundance.proportionalAbundance >= minAbundance) {
+                if (isotopicAbundance.naturalAbundance >= minAbundance) {
                     atomAbundances.push_back(isotopicAbundance);
 
                     if (debug) cout << "[atomAbundances] IsotopicAbundance: " << isotopicAbundance.toString() << endl;
@@ -789,7 +796,7 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
                 for (auto atomAbundance : atomAbundances) {
                     IsotopicAbundance combinedAbundance = IsotopicAbundance::createMergedAbundance(existingAbundance, atomAbundance);
 
-                    if (combinedAbundance.proportionalAbundance >= minAbundance) {
+                    if (combinedAbundance.naturalAbundance >= minAbundance) {
                         updatedAbundances.push_back(combinedAbundance);
                         if (debug) cout << "Updated Abundances: " << combinedAbundance.toString() << endl;
                     }
@@ -811,49 +818,12 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
 
     naturalAbundanceDistribution.isotopicAbundances = existingAbundances;
 
-//    vector<IsotopicAbundance> abundances{};
-
-//    int numNeutrons = 0;
-
-//    while (numNeutrons <= maxNumIsotopes) {
-
-//        //If the atom is not present, assume 0 abundance
-//        // vector<Atom> atoms = data.getAtoms(numNeutrons);
-
-//        for (auto it = atoms.begin(); it != atoms.end(); ++it) {
-
-//            string atomSymbol = it->first;
-//            int atomTotal = it->second;
-
-
-//            for (unsigned int i = 0; i < atomTotal; i++) {
-
-//                //double partialProbability
-//                //auto val = mzUtils::nchoosek(atomTotal,i)*pow(abC12,atomTotal-i)*pow(abC13,i);
-//            }
-//        }
-
-//        // c, n, s, d: number of heavy isotopes
-//        // 'ab' --> abundance of species
-//        // atomCount --> total number in molecule
-
-//        isotopes[i].abundance=
-//            mzUtils::nchoosek(CatomCount,c)*pow(abC12,CatomCount-c)*pow(abC13,c)
-//            * mzUtils::nchoosek(NatomCount,n)*pow(abN14,NatomCount-n)*pow(abN15,n)
-//            * mzUtils::nchoosek(SatomCount,s)*pow(abS32,SatomCount-s)*pow(abS34,s)
-//            * mzUtils::nchoosek(HatomCount,d)*pow(abH,HatomCount-d)  *pow(abH2,d);
-
-//    }
-
-
-    //TODO
-
     return naturalAbundanceDistribution;
 }
 
 IsotopicAbundance IsotopicAbundance::createMergedAbundance(IsotopicAbundance& one, IsotopicAbundance& two){
     IsotopicAbundance merged;
-    merged.proportionalAbundance = one.proportionalAbundance * two.proportionalAbundance;
+    merged.naturalAbundance = one.naturalAbundance * two.naturalAbundance;
 
     merged.atomCounts = two.atomCounts;
 
@@ -883,7 +853,7 @@ string IsotopicAbundance::toString() {
 
     s << std::fixed << setprecision(5); // 5 places after the decimal
 
-    s << getFormula() << ": " << proportionalAbundance;
+    s << getFormula() << ": " << naturalAbundance;
 
     return s.str();
 }
