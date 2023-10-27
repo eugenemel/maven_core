@@ -1020,3 +1020,18 @@ Isotope IsotopicAbundance::toIsotope() {
 
     return isotope;
   }
+
+ // Issue 656: correct quant, based on appropriate naturalAbundanceMonoProportion.
+ // Each Isotope and IsotopicAbundance keeps track of its naturalAbundanceMonoProportion.
+ // Returns any left over abundance after removing expected natural abundance.
+ // If no abundance left over, return 0.
+double MassCalculator::getNaturalAbundanceCorrectedQuantValue(float uncorrectedValue, float mZeroObserved, double naturalAbundanceMonoProportion) {
+
+    float correctedVal = uncorrectedValue - naturalAbundanceMonoProportion*mZeroObserved;
+
+    if (correctedVal > 0) {
+        return correctedVal;
+    }
+
+    return 0;
+}
