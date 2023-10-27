@@ -178,12 +178,15 @@ class IsotopicAbundance {
         double naturalAbundanceMonoProportion = 1.0;
 
         double mass = 0.0;
+        double mz = 0.0;
 
-        void computeMass(NaturalAbundanceData& naturalAbundanceData);
+        void computeIsotopeMass(NaturalAbundanceData& naturalAbundanceData, unsigned int chgNumber);
 
         static IsotopicAbundance createMergedAbundance(IsotopicAbundance& one, IsotopicAbundance& two);
         string getFormula();
         string toString();
+
+        Isotope toIsotope();
 };
 
 //Issue 656: Implement flexible approach for isotopic correction.

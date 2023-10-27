@@ -338,7 +338,14 @@ double MassCalculator::computeMass(string formula, int charge) {
     return adjustMass(mass,charge);
 }
 
-vector<Isotope> MassCalculator::computeIsotopes(string compoundFormula, Adduct* adduct, int maxNumProtons, bool isUse13C, bool isUse15N, bool isUse34S, bool isUse2H) {
+vector<Isotope> MassCalculator::computeIsotopes(
+    string compoundFormula,
+    Adduct* adduct,
+    int maxNumProtons,
+    bool isUse13C,
+    bool isUse15N,
+    bool isUse34S,
+    bool isUse2H) {
 
     const double abC12 = 0.9893;
     const double abC13 = 0.0107;
@@ -445,6 +452,8 @@ vector<Isotope> MassCalculator::computeIsotopes(string compoundFormula, Adduct* 
             }
         }
     }
+
+
 
     for(unsigned int i=0; i < isotopes.size(); i++ ) {
            Isotope& x = isotopes[i];
@@ -653,7 +662,7 @@ vector<Atom> NaturalAbundanceData::getAtomsBySymbol(string atomicSymbol) {
     return vector<Atom>{};
 }
 
-void IsotopicAbundance::computeMass(NaturalAbundanceData& naturalAbundanceData) {
+void IsotopicAbundance::computeIsotopeMass(NaturalAbundanceData& naturalAbundanceData, unsigned int chgNumber) {
     mass = 0.0;
 
     for (auto it = atomCounts.begin(); it != atomCounts.end(); ++it) {
@@ -665,6 +674,11 @@ void IsotopicAbundance::computeMass(NaturalAbundanceData& naturalAbundanceData) 
         } else {
             mass += MassCalculator::getElementMass(atom.symbol) * count;
         }
+    }
+
+    mz = mass;
+    if (chgNumber != 0){
+        mz = mass/chgNumber;
     }
 }
 
@@ -680,6 +694,8 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
     map<string, int> atoms = getComposition(compoundFormula);
     multiplyAtoms(atoms, adduct->nmol);
     addAtoms(atoms, getComposition(adduct));
+
+    unsigned int chgNum = abs(adduct->charge);
 
     // Compute partial probabilities
     // atomSymbol, numRare, probability
@@ -814,7 +830,7 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
     }
 
     for (auto& isotopeAbundance : existingAbundances) {
-        isotopeAbundance.computeMass(data);
+        isotopeAbundance.computeIsotopeMass(data, chgNum);
     }
 
     if (!existingAbundances.empty()) {
@@ -881,7 +897,6 @@ pair<double, double> NaturalAbundanceDistribution::getIsotopicAbundance(Isotope&
     int numH2 = isotope.H2;
     int numO18 = isotope.O18;
 
-
     Atom C13("C", 13);
     Atom N15("N", 15);
     Atom S34("S", 34);
@@ -934,3 +949,61 @@ pair<double, double> NaturalAbundanceDistribution::getIsotopicAbundance(Isotope&
 
     return(make_pair(naturalAbundance, naturalAbundanceMonoProportion));
 }
+
+/**
+ * @brief IsotopicAbundance::toIsotope
+ * @return IsotopicAbundance information reformatted as Isotope class.
+ * This support backwards compatability to Isotope, which is used throughout the MAVEN GUI.
+ */
+Isotope IsotopicAbundance::toIsotope() {
+
+    Isotope isotope;
+
+    Atom C13("C", 13);
+    Atom N15("N", 15);
+    Atom S34("S", 34);
+    Atom H2("H", 2);
+    Atom O18("O", 18);
+
+    //Check C13
+    int observedNumC13 = 0;
+    if (atomCounts.find(C13) != atomCounts.end()) {
+        observedNumC13 = atomCounts[C13];
+    }
+    isotope.C13 = observedNumC13;
+
+    //Check N15
+    int observedNumN15 = 0;
+    if (atomCounts.find(N15) != atomCounts.end()) {
+        observedNumN15 = atomCounts[N15];
+    }
+    isotope.N15 = observedNumN15;
+
+    //Check S34
+    int observedNumS34 = 0;
+    if (atomCounts.find(S34) != atomCounts.end()) {
+        observedNumS34 = atomCounts[S34];
+    }
+    isotope.S34 = observedNumS34;
+
+    //Check H2 (D)
+    int observedNumH2 = 0;
+    if (atomCounts.find(H2) != atomCounts.end()) {
+        observedNumH2 = atomCounts[H2];
+    }
+    isotope.H2 = observedNumH2;
+
+    //Check O18
+    int observedNumO18 = 0;
+    if (atomCounts.find(O18) != atomCounts.end()) {
+        observedNumO18 = atomCounts[O18];
+    }
+    isotope.O18 = observedNumO18;
+
+    // abundance and m/z information makes its way to here
+    isotope.abundance = naturalAbundance;
+    isotope.naturalAbundanceMonoProportion = naturalAbundanceMonoProportion;
+    isotope.mz = mz;
+
+    return isotope;
+  }
