@@ -1476,39 +1476,55 @@ class Isotope {
 public:
     string name;
     double mz; //monoisotopic mz + isotopic offset
-    double abundance; // theoretical
+    double abundance; // theoretical, equivalent to IsotopicAbundance.naturalAbundance
+    double naturalAbundanceMonoProportion; //naturalAbundance/[M+0]->naturalAbundance
     int charge;
     int N15;
     int C13;
     int S34;
     int H2;
+    int O18;
 
-    Isotope(string name, float mass, int c=0, int n=0, int s=0, int h=0) {
+    Isotope(string name, float mass, int c=0, int n=0, int s=0, int h=0, int o=0) {
         this->mz=static_cast<double>(mass); this->name=name; charge=0;
-        C13=c; N15=n; S34=s; H2=h;
+        C13=c; N15=n; S34=s; H2=h; O18=o;
     }
 
     Isotope() {
-        mz=0; abundance=0; N15=0; C13=0; S34=0; H2=0; charge=0;
+        mz=0;
+        abundance=0; naturalAbundanceMonoProportion=0;
+        N15=0; C13=0; S34=0; H2=0; O18=0;
+        charge=0;
     }
 
     Isotope(const Isotope& b) {
         name=b.name;
         mz=b.mz;
+
         abundance=b.abundance;
-        N15=b.N15; S34=b.S34; C13=b.C13; H2=b.H2;
+        naturalAbundanceMonoProportion=b.naturalAbundanceMonoProportion;
+
+        N15=b.N15; S34=b.S34; C13=b.C13; H2=b.H2; O18=b.O18;
+
         charge = b.charge;
     }
 
     Isotope& operator=(const Isotope& b) {
-        name=b.name; mz=b.mz; abundance=b.abundance;
-        N15=b.N15; S34=b.S34; C13=b.C13; H2=b.H2;
+        name=b.name;
+        mz=b.mz;
+
+        abundance=b.abundance;
+        naturalAbundanceMonoProportion=b.naturalAbundanceMonoProportion;
+
+        N15=b.N15; S34=b.S34; C13=b.C13; H2=b.H2; O18=b.O18;
+
         charge =b.charge;
+
         return *this;
     }
 
     //Issue 412
-    bool isParent() {return C13 == 0 && N15 == 0 && S34 == 0 && H2 == 0;}
+    bool isParent() {return C13 == 0 && N15 == 0 && S34 == 0 && H2 == 0 && O18 == 0;}
 
 };
 

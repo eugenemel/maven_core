@@ -879,7 +879,7 @@ pair<double, double> NaturalAbundanceDistribution::getIsotopicAbundance(Isotope&
     int numN15 = isotope.N15;
     int numS34 = isotope.S34;
     int numH2 = isotope.H2;
-    int numO18 = 0;
+    int numO18 = isotope.O18;
 
 
     Atom C13("C", 13);
