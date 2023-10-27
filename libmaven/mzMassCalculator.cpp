@@ -781,7 +781,7 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
         }
 
         vector<IsotopicAbundance> updatedAbundances;
-        if (!existingAbundances.empty()) {
+        if (existingAbundances.empty()) {
             updatedAbundances = atomAbundances;
         } else {
             updatedAbundances = vector<IsotopicAbundance>();
