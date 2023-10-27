@@ -825,7 +825,7 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
         IsotopicAbundance monoSpecies = existingAbundances[0];
 
         for (auto& isotopicAbundance : existingAbundances) {
-            isotopicAbundance.naturalAbundanceMonoRatio = isotopicAbundance.naturalAbundance/monoSpecies.naturalAbundance;
+            isotopicAbundance.naturalAbundanceMonoProportion = isotopicAbundance.naturalAbundance/monoSpecies.naturalAbundance;
         }
     }
 
@@ -866,7 +866,73 @@ string IsotopicAbundance::toString() {
 
     s << std::fixed << setprecision(5); // 5 places after the decimal
 
-    s << getFormula() << " (" << mass << "): " << naturalAbundance << " " << 100*naturalAbundanceMonoRatio << "% [M+0]";
+    s << getFormula() << " (" << mass << "): " << naturalAbundance << " " << 100*naturalAbundanceMonoProportion << "% [M+0]";
 
     return s.str();
+}
+
+pair<double, double> NaturalAbundanceDistribution::getIsotopicAbundance(Isotope& isotope){
+    double naturalAbundance = 0.0;
+    double naturalAbundanceMonoProportion = 0.0;
+
+    int numC13 = isotope.C13;
+    int numN15 = isotope.N15;
+    int numS34 = isotope.S34;
+    int numH2 = isotope.H2;
+    int numO18 = 0;
+
+
+    Atom C13("C", 13);
+    Atom N15("N", 15);
+    Atom S34("S", 34);
+    Atom H2("H", 2);
+    Atom O18("O", 18);
+
+    vector<Atom> atoms{C13, N15, S34, H2, O18};
+
+    for (auto& isotopicAbundance : isotopicAbundances) {
+
+        //Check C13
+        int observedNumC13 = 0;
+        if (isotopicAbundance.atomCounts.find(C13) != isotopicAbundance.atomCounts.end()) {
+            observedNumC13 = isotopicAbundance.atomCounts[C13];
+        }
+        if (observedNumC13 != numC13) continue;
+
+        //Check N15
+        int observedNumN15 = 0;
+        if (isotopicAbundance.atomCounts.find(N15) != isotopicAbundance.atomCounts.end()) {
+            observedNumN15 = isotopicAbundance.atomCounts[N15];
+        }
+        if (observedNumN15 != numN15) continue;
+
+        //Check S34
+        int observedNumS34 = 0;
+        if (isotopicAbundance.atomCounts.find(S34) != isotopicAbundance.atomCounts.end()) {
+            observedNumS34 = isotopicAbundance.atomCounts[S34];
+        }
+        if (observedNumS34 != numS34) continue;
+
+        //Check H2 (D)
+        int observedNumH2 = 0;
+        if (isotopicAbundance.atomCounts.find(H2) != isotopicAbundance.atomCounts.end()) {
+            observedNumH2 = isotopicAbundance.atomCounts[H2];
+        }
+        if (observedNumH2 != numH2) continue;
+
+        //Check O18
+        int observedNumO18 = 0;
+        if (isotopicAbundance.atomCounts.find(O18) != isotopicAbundance.atomCounts.end()) {
+            observedNumO18 = isotopicAbundance.atomCounts[O18];
+        }
+        if (observedNumO18 != numO18) continue;
+
+        //All checks pass - record values and exit loop
+        naturalAbundance = isotopicAbundance.naturalAbundance;
+        naturalAbundanceMonoProportion = isotopicAbundance.naturalAbundanceMonoProportion;
+        break;
+
+    }
+
+    return(make_pair(naturalAbundance, naturalAbundanceMonoProportion));
 }

@@ -175,7 +175,7 @@ class IsotopicAbundance {
 
         //represented as a proportion of the natural abundance of the [M+0] species.
         //The [M+0] is exactly 1. Computed by this->naturalAbundance/[M+0]->naturalAbundance
-        double naturalAbundanceMonoRatio = 1.0;
+        double naturalAbundanceMonoProportion = 1.0;
 
         double mass = 0.0;
 
@@ -191,6 +191,9 @@ class IsotopicAbundance {
 class NaturalAbundanceDistribution {
 public:
     vector<IsotopicAbundance> isotopicAbundances{};
+
+    // <naturalAbundance, naturalAbundanceMonoProportion>
+    pair<double, double> getIsotopicAbundance(Isotope& isotope);
 };
 
 #endif
