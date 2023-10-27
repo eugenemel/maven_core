@@ -347,14 +347,14 @@ vector<Isotope> MassCalculator::computeIsotopes(
     bool isUse34S,
     bool isUse2H) {
 
-    const double abC12 = 0.9893;
-    const double abC13 = 0.0107;
-    const double abN14 = 0.9963620;
-    const double abN15=  0.0036420;
-    const double abS32=  0.949926;
-    const double abS34=  0.042524;
-    const double abH  =  0.999885;
-    const double abH2  =  0.00011570;
+//    const double abC12 = 0.9893;
+//    const double abC13 = 0.0107;
+//    const double abN14 = 0.9963620;
+//    const double abN15=  0.0036420;
+//    const double abS32=  0.949926;
+//    const double abS34=  0.042524;
+//    const double abH  =  0.999885;
+//    const double abH2  =  0.00011570;
     //const double abO16  = 0.9975716;
     //const double abO18  = 0.0020514;
 
@@ -453,22 +453,34 @@ vector<Isotope> MassCalculator::computeIsotopes(
         }
     }
 
-
+    NaturalAbundanceDistribution abundanceDistribution =
+        MassCalculator::getNaturalAbundanceDistribution(
+            compoundFormula,
+            adduct,
+             NaturalAbundanceData::defaultNaturalAbundanceData,
+            1e-10,
+            false);
 
     for(unsigned int i=0; i < isotopes.size(); i++ ) {
            Isotope& x = isotopes[i];
-                int c=x.C13;
-                int n=x.N15;
-                int s=x.S34;
-                int d=x.H2;
 
-        x.charge = adduct->charge;
+//                int c=x.C13;
+//                int n=x.N15;
+//                int s=x.S34;
+//                int d=x.H2;
 
-		isotopes[i].abundance=
-                 mzUtils::nchoosek(CatomCount,c)*pow(abC12,CatomCount-c)*pow(abC13,c)
-               * mzUtils::nchoosek(NatomCount,n)*pow(abN14,NatomCount-n)*pow(abN15,n)
-               * mzUtils::nchoosek(SatomCount,s)*pow(abS32,SatomCount-s)*pow(abS34,s)
-               * mzUtils::nchoosek(HatomCount,d)*pow(abH,HatomCount-d)  *pow(abH2,d);
+       x.charge = adduct->charge;
+
+       pair<double, double> abundanceInfo = abundanceDistribution.getIsotopicAbundance(x);
+
+       x.abundance = abundanceInfo.first;
+       x.naturalAbundanceMonoProportion = abundanceInfo.second;
+
+//		isotopes[i].abundance=
+//                 mzUtils::nchoosek(CatomCount,c)*pow(abC12,CatomCount-c)*pow(abC13,c)
+//               * mzUtils::nchoosek(NatomCount,n)*pow(abN14,NatomCount-n)*pow(abN15,n)
+//               * mzUtils::nchoosek(SatomCount,s)*pow(abS32,SatomCount-s)*pow(abS34,s)
+//               * mzUtils::nchoosek(HatomCount,d)*pow(abH,HatomCount-d)  *pow(abH2,d);
     }
 
     return isotopes;
