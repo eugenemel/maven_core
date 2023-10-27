@@ -672,7 +672,6 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
     string compoundFormula,
     Adduct *adduct,
     NaturalAbundanceData& data,
-    int maxNumIsotopes,
     double minAbundance,
     bool debug) {
 

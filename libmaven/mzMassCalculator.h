@@ -99,7 +99,6 @@ class MassCalculator {
         string compoundFormula,
         Adduct *adduct,
         NaturalAbundanceData& data,
-        int maxNumIsotopes,
         double minimumAbundance,
         bool debug=false);
 
