@@ -847,7 +847,7 @@ IsotopicAbundance IsotopicAbundance::createMergedAbundance(IsotopicAbundance& on
         if (merged.atomCounts.find(it->first) == merged.atomCounts.end()) {
             merged.atomCounts.insert(make_pair(it->first, it->second));
         } else {
-            merged.atomCounts[it->first] = it->second;
+            merged.atomCounts[it->first]+= it->second;
         }
     }
 
