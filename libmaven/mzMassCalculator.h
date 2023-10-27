@@ -170,8 +170,9 @@ class IsotopicAbundance {
 
         map<Atom, int> atomCounts{};
         double naturalAbundance = 1.0;
+        double mass = 0.0;
 
-        double getMass(NaturalAbundanceData& naturalAbundanceData);
+        void computeMass(NaturalAbundanceData& naturalAbundanceData);
 
         static IsotopicAbundance createMergedAbundance(IsotopicAbundance& one, IsotopicAbundance& two);
         string getFormula();

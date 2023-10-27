@@ -653,8 +653,8 @@ vector<Atom> NaturalAbundanceData::getAtomsBySymbol(string atomicSymbol) {
     return vector<Atom>{};
 }
 
-double IsotopicAbundance::getMass(NaturalAbundanceData& naturalAbundanceData) {
-    double mass = 0.0;
+void IsotopicAbundance::computeMass(NaturalAbundanceData& naturalAbundanceData) {
+    mass = 0.0;
 
     for (auto it = atomCounts.begin(); it != atomCounts.end(); ++it) {
         Atom atom = it->first;
@@ -666,8 +666,6 @@ double IsotopicAbundance::getMass(NaturalAbundanceData& naturalAbundanceData) {
             mass += MassCalculator::getElementMass(atom.symbol) * count;
         }
     }
-
-    return mass;
 }
 
 NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
@@ -816,6 +814,13 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
 
     }
 
+    for (auto& isotopeAbundance : existingAbundances) {
+        isotopeAbundance.computeMass(data);
+    }
+    sort(existingAbundances.begin(), existingAbundances.end(), [](IsotopicAbundance& lhs, IsotopicAbundance& rhs){
+        return lhs.mass < rhs.mass;
+    });
+
     naturalAbundanceDistribution.isotopicAbundances = existingAbundances;
 
     return naturalAbundanceDistribution;
@@ -853,7 +858,7 @@ string IsotopicAbundance::toString() {
 
     s << std::fixed << setprecision(5); // 5 places after the decimal
 
-    s << getFormula() << ": " << naturalAbundance;
+    s << getFormula() << " (" << mass << "): " << naturalAbundance;
 
     return s.str();
 }
