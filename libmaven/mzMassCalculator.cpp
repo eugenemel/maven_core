@@ -609,16 +609,16 @@ NaturalAbundanceData NaturalAbundanceData::defaultNaturalAbundanceData = []() ->
     abundanceData.setAtomData("H", 1, 1.007825, 0.999885, 0);
     abundanceData.setAtomData("H", 2, 2.014102, 0.000115, 1);
 
-//    abundanceData.setAtomData("O", 16, 15.994915, 0.99757, 0);
-//    abundanceData.setAtomData("O", 18, 17.999160, 0.00205, 2);
+    abundanceData.setAtomData("O", 16, 15.994915, 0.99757, 0);
+    abundanceData.setAtomData("O", 18, 17.999160, 0.00205, 2);
 
     abundanceData.setAtomData("N", 14, 14.003074, 0.99632, 0);
     abundanceData.setAtomData("N", 15, 15.000109, 0.00368, 1);
 
     abundanceData.setAtomData("S", 32, 31.972071, 0.9493, 0);
-    //abundanceData.setAtomData("S", 33, 32.971458, 0.0076, 1);
+    abundanceData.setAtomData("S", 33, 32.971458, 0.0076, 1);
     abundanceData.setAtomData("S", 34, 33.967867, 0.0368, 2);
-    //abundanceData.setAtomData("S", 36, 35.967081, 0.0002, 4);
+    abundanceData.setAtomData("S", 36, 35.967081, 0.0002, 4);
 
     return abundanceData;
 }();
