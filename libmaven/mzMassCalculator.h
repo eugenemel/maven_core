@@ -169,7 +169,15 @@ class IsotopicAbundance {
     public:
 
         map<Atom, int> atomCounts{};
+
+        //represented as an absolute theoretical probability.
+        //The sum of all natural abundance values for all possible atom combinations is exactly one.
         double naturalAbundance = 1.0;
+
+        //represented as a proportion of the natural abundance of the [M+0] species.
+        //The [M+0] is exactly 1. Computed by this->naturalAbundance/[M+0]->naturalAbundance
+        double naturalAbundanceMonoRatio = 1.0;
+
         double mass = 0.0;
 
         void computeMass(NaturalAbundanceData& naturalAbundanceData);

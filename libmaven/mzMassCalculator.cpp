@@ -817,9 +817,18 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
     for (auto& isotopeAbundance : existingAbundances) {
         isotopeAbundance.computeMass(data);
     }
-    sort(existingAbundances.begin(), existingAbundances.end(), [](IsotopicAbundance& lhs, IsotopicAbundance& rhs){
-        return lhs.mass < rhs.mass;
-    });
+
+    if (!existingAbundances.empty()) {
+        sort(existingAbundances.begin(), existingAbundances.end(), [](IsotopicAbundance& lhs, IsotopicAbundance& rhs){
+            return lhs.mass < rhs.mass;
+        });
+
+        IsotopicAbundance monoSpecies = existingAbundances[0];
+
+        for (auto& isotopicAbundance : existingAbundances) {
+            isotopicAbundance.naturalAbundanceMonoRatio = isotopicAbundance.naturalAbundance/monoSpecies.naturalAbundance;
+        }
+    }
 
     naturalAbundanceDistribution.isotopicAbundances = existingAbundances;
 
@@ -858,7 +867,7 @@ string IsotopicAbundance::toString() {
 
     s << std::fixed << setprecision(5); // 5 places after the decimal
 
-    s << getFormula() << " (" << mass << "): " << naturalAbundance;
+    s << getFormula() << " (" << mass << "): " << naturalAbundance << " " << 100*naturalAbundanceMonoRatio << "% [M+0]";
 
     return s.str();
 }
