@@ -107,7 +107,11 @@ class MassCalculator {
     static bool compDiff(const Match& a, const Match& b ) { return a.diff < b.diff; }
     static bool compNumMatches(const Match& a, const Match& b ) { return a.fragScore.numMatches < b.fragScore.numMatches; }
     static double getElementMass(string elmnt);
-    static double getNaturalAbundanceCorrectedQuantValue(float uncorrectedValue, float mZeroObserved, double naturalAbundanceMonoProportion);
+    static double getNaturalAbundanceCorrectedQuantValue(
+        float isotopeObserved,
+        float mZeroObserved,
+        double isotopeExpectedAbundance,
+        double mZeroExpectedAbundance);
 
     private:
         static void modifyAtoms(map<string, int>& reference, map<string, int> toAdd, bool isAddAtoms);

@@ -1025,9 +1025,11 @@ Isotope IsotopicAbundance::toIsotope() {
  // Each Isotope and IsotopicAbundance keeps track of its naturalAbundanceMonoProportion.
  // Returns any left over abundance after removing expected natural abundance.
  // If no abundance left over, return 0.
-double MassCalculator::getNaturalAbundanceCorrectedQuantValue(float uncorrectedValue, float mZeroObserved, double naturalAbundanceMonoProportion) {
+double MassCalculator::getNaturalAbundanceCorrectedQuantValue(
+      float isotopeObserved, float mZeroObserved,
+      double isotopeExpectedAbundance, double mZeroExpectedAbundance) {
 
-    float correctedVal = uncorrectedValue - naturalAbundanceMonoProportion*mZeroObserved;
+    float correctedVal = isotopeObserved - (isotopeExpectedAbundance/mZeroExpectedAbundance)*mZeroObserved;
 
     if (correctedVal > 0) {
         return correctedVal;
