@@ -739,8 +739,6 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
         string atomSymbol = it->first;
         int numAtoms = it->second;
 
-        if (debug) cout << atomSymbol << ": " << numAtoms << " => " << endl;
-
         vector<IsotopicAbundance> atomAbundances{};
 
         if (atomTypeToPartialProbability.find(atomSymbol) == atomTypeToPartialProbability.end()) {
@@ -751,7 +749,7 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
             isotopicAbundance.atomCounts.insert(make_pair(at, numAtoms));
             atomAbundances.push_back(isotopicAbundance);
 
-            if (debug) cout << "All monoisotopic: " << isotopicAbundance.toString();
+            if (debug) cout << "IsotopicAbundance: " << isotopicAbundance.toString() << endl;
 
         } else {
 
@@ -769,7 +767,7 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
                 if (isotopicAbundance.proportionalAbundance >= minAbundance) {
                     atomAbundances.push_back(isotopicAbundance);
 
-                    if (debug) cout << "PartialProbabilityMap: " << isotopicAbundance.toString();
+                    if (debug) cout << "IsotopicAbundance: " << isotopicAbundance.toString() << endl;
                 }
             }
         }
@@ -787,6 +785,8 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
                         updatedAbundances.push_back(combinedAbundance);
                         if (debug) cout << "Updated Abundances: " << combinedAbundance.toString() << endl;
                     }
+
+                    if (debug) cout << "IsotopicAbundance: " << combinedAbundance.toString() << endl;
                 }
             }
         }
