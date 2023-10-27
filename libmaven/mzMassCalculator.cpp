@@ -888,8 +888,6 @@ pair<double, double> NaturalAbundanceDistribution::getIsotopicAbundance(Isotope&
     Atom H2("H", 2);
     Atom O18("O", 18);
 
-    vector<Atom> atoms{C13, N15, S34, H2, O18};
-
     for (auto& isotopicAbundance : isotopicAbundances) {
 
         //Check C13
