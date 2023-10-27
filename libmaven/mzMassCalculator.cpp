@@ -749,7 +749,7 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
             isotopicAbundance.atomCounts.insert(make_pair(at, numAtoms));
             atomAbundances.push_back(isotopicAbundance);
 
-            if (debug) cout << "IsotopicAbundance: " << isotopicAbundance.toString() << endl;
+            if (debug) cout << "[all mono] IsotopicAbundance: " << isotopicAbundance.toString() << endl;
 
         } else {
 
@@ -767,9 +767,17 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
                 if (isotopicAbundance.proportionalAbundance >= minAbundance) {
                     atomAbundances.push_back(isotopicAbundance);
 
-                    if (debug) cout << "IsotopicAbundance: " << isotopicAbundance.toString() << endl;
+                    if (debug) cout << "[atomAbundances] IsotopicAbundance: " << isotopicAbundance.toString() << endl;
                 }
             }
+        }
+
+
+        if (debug) {
+            cout << atomSymbol << ", before merge:"
+                 << " existingAbundances = " << existingAbundances.size()
+                 << ", atomAbundances = " << atomAbundances.size()
+                 << endl;
         }
 
         vector<IsotopicAbundance> updatedAbundances;
@@ -786,12 +794,18 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
                         if (debug) cout << "Updated Abundances: " << combinedAbundance.toString() << endl;
                     }
 
-                    if (debug) cout << "IsotopicAbundance: " << combinedAbundance.toString() << endl;
+                    if (debug) cout << "[existing + atom combination] IsotopicAbundance: " << combinedAbundance.toString() << endl;
                 }
             }
         }
 
         existingAbundances = updatedAbundances;
+
+        if (debug) {
+            cout << atomSymbol << ", after merge:"
+                 << " existingAbundances = " << existingAbundances.size()
+                 << endl;
+        }
 
     }
 
