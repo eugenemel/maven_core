@@ -487,6 +487,27 @@ vector<Isotope> MassCalculator::computeIsotopes(
     return isotopes;
 }
 
+//TODO: this isn't done, think about this
+enum IsotopeRetentionPolicy {
+
+    //All heavy atoms must be
+    REQUIRE_EXACT_MATCH,
+
+    //Case: multiple labels, one species labeled but not the other
+    //Always requires carbon be labeled, if it specified as one label among multiple labels
+    CARBON_OPTION_ALWAYS_LABELED,
+
+    //Only permit labels on heavy atoms,
+    // except for species where the natural abundance
+    // is sufficiently high (controlled by other parameters).
+    ONLY_HEAVY_LABELED_UNLESS_NATURAL,
+
+    //no mixtures of labels
+    EVERY_LABEL_FULL_LABELED,
+
+    REQUIRE_AT_LEAST_ONE_LABELED
+};
+
 vector<Isotope> MassCalculator::computeIsotopes2(
     string compoundFormula,
     Adduct *adduct,
@@ -515,6 +536,9 @@ vector<Isotope> MassCalculator::computeIsotopes2(
 
        //Avoid isotopes with too many extra neutrons
        if (numNeutrons > maxNumExtraNeutrons) continue;
+
+       //TODO: if the species contains any labels other than the specified label types,
+       // this should be false.
 
        //check that the isotope is one of the preferred label types
        bool isLabelType = false;
