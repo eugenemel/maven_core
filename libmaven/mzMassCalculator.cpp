@@ -487,21 +487,22 @@ vector<Isotope> MassCalculator::computeIsotopes(
     return isotopes;
 }
 
-
 vector<Isotope> MassCalculator::computeIsotopes2(
     string compoundFormula,
     Adduct *adduct,
     vector<Atom> heavyIsotopes,
+    NaturalAbundanceData naturalAbundanceData,
     bool isIncludeNaturalAbundance,
     int maxNumExtraNeutrons,
-    double minimumTheoreticalAbundance) {
+    double minimumProportionMPlusZero
+    ){
 
-    //First, enumerate through all theoretically possible isotopes based on the formula.
+    //First, enumerate all theoretically possible isotopes based on the formula.
     NaturalAbundanceDistribution abundanceDistribution =
         MassCalculator::getNaturalAbundanceDistribution(
             compoundFormula,
             adduct,
-            NaturalAbundanceData::defaultNaturalAbundanceData,
+            naturalAbundanceData,
             0,
             false);
 
@@ -510,20 +511,38 @@ vector<Isotope> MassCalculator::computeIsotopes2(
 
     for (auto isotopicAbundance : abundanceDistribution.isotopicAbundances) {
 
-       //parent isotope is a special case - always keep
+       int numNeutrons = isotopicAbundance.getTotalExtraNeutrons(naturalAbundanceData);
+
+       //Avoid isotopes with too many extra neutrons
+       if (numNeutrons > maxNumExtraNeutrons) continue;
 
        //check that the isotope is one of the preferred label types
+       bool isLabelType = false;
+       for (auto& atom : heavyIsotopes) {
+            bool isHasAtom = isotopicAbundance.isHasAtom(atom);
+            if (isHasAtom) {
+                isLabelType = true;
+                break;
+            }
+       }
 
-       //check that the isotope does not have too many extra neutrons
+       if (!isLabelType) {
 
-       //if the isotope is not a heavy-specified isotope and is not predicted to be very abundant, remove
+            //If the heavy label is not found and we do not want to keep natural abundance isotopes, avoid isotope.
+            if (!isIncludeNaturalAbundance) continue;
 
+            //If the heavy label is not found, we do want to keep natural abundance isotopes,
+            //but the abundance is too low, aboid isotope.
+            if (isotopicAbundance.naturalAbundanceMonoProportion < minimumProportionMPlusZero) continue;
+
+       }
+
+       isotopes.push_back(isotopicAbundance.toIsotope());
     }
 
     return isotopes;
 
 }
-
 
 /**
  * @brief MassCalculator::enumerateMasses
@@ -1018,10 +1037,13 @@ Isotope IsotopicAbundance::toIsotope() {
     Atom H2("H", 2);
     Atom O18("O", 18);
 
+    stringstream isotopeName;
+
     //Check C13
     int observedNumC13 = 0;
     if (atomCounts.find(C13) != atomCounts.end()) {
         observedNumC13 = atomCounts[C13];
+        isotopeName << "C13";
     }
     isotope.C13 = observedNumC13;
 
@@ -1029,6 +1051,7 @@ Isotope IsotopicAbundance::toIsotope() {
     int observedNumN15 = 0;
     if (atomCounts.find(N15) != atomCounts.end()) {
         observedNumN15 = atomCounts[N15];
+        isotopeName << "N15";
     }
     isotope.N15 = observedNumN15;
 
@@ -1036,6 +1059,7 @@ Isotope IsotopicAbundance::toIsotope() {
     int observedNumS34 = 0;
     if (atomCounts.find(S34) != atomCounts.end()) {
         observedNumS34 = atomCounts[S34];
+        isotopeName << "S34";
     }
     isotope.S34 = observedNumS34;
 
@@ -1043,6 +1067,7 @@ Isotope IsotopicAbundance::toIsotope() {
     int observedNumH2 = 0;
     if (atomCounts.find(H2) != atomCounts.end()) {
         observedNumH2 = atomCounts[H2];
+        isotopeName << "C";
     }
     isotope.H2 = observedNumH2;
 
@@ -1050,6 +1075,7 @@ Isotope IsotopicAbundance::toIsotope() {
     int observedNumO18 = 0;
     if (atomCounts.find(O18) != atomCounts.end()) {
         observedNumO18 = atomCounts[O18];
+        isotopeName << "O18";
     }
     isotope.O18 = observedNumO18;
 
@@ -1057,6 +1083,20 @@ Isotope IsotopicAbundance::toIsotope() {
     isotope.abundance = naturalAbundance;
     isotope.naturalAbundanceMonoProportion = naturalAbundanceMonoProportion;
     isotope.mz = mz;
+
+    //name information
+    if (isotope.isParent()) {
+        isotope.name = "C12 PARENT";
+    } else {
+        isotopeName << "-label";
+        if (isotope.C13 > 0) isotopeName << "-" << isotope.C13;
+        if (isotope.N15 > 0) isotopeName << "-" << isotope.N15;
+        if (isotope.S34 > 0) isotopeName << "-" << isotope.S34;
+        if (isotope.H2 > 0) isotopeName << "-" << isotope.H2;
+        if (isotope.O18 > 0) isotopeName << "-" << isotope.O18;
+
+        isotope.name = isotopeName.str();
+    }
 
     return isotope;
   }

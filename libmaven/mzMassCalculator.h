@@ -96,9 +96,10 @@ class MassCalculator {
     static vector<Isotope> computeIsotopes2(string compoundFormula,
                                             Adduct *adduct,
                                             vector<Atom> heavyIsotopes,
+                                            NaturalAbundanceData naturalAbundanceData,
                                             bool isIncludeNaturalAbundance = false,
                                             int maxNumExtraNeutrons=INT_MAX,
-                                            double minimumTheoreticalAbundance = 0
+                                            double minimumProportionMPlusZero = 0
                                             );
 
     //Issue 656: Return a complete natural abundance distribution for every possible observable isotope.
