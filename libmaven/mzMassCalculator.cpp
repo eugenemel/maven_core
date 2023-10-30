@@ -487,6 +487,44 @@ vector<Isotope> MassCalculator::computeIsotopes(
     return isotopes;
 }
 
+
+vector<Isotope> MassCalculator::computeIsotopes2(
+    string compoundFormula,
+    Adduct *adduct,
+    vector<Atom> heavyIsotopes,
+    bool isIncludeNaturalAbundance,
+    int maxNumExtraNeutrons,
+    double minimumTheoreticalAbundance) {
+
+    //First, enumerate through all theoretically possible isotopes based on the formula.
+    NaturalAbundanceDistribution abundanceDistribution =
+        MassCalculator::getNaturalAbundanceDistribution(
+            compoundFormula,
+            adduct,
+            NaturalAbundanceData::defaultNaturalAbundanceData,
+            0,
+            false);
+
+    //Filter the list of isotopes based on search criteria.
+    vector<Isotope> isotopes{};
+
+    for (auto isotopicAbundance : abundanceDistribution.isotopicAbundances) {
+
+       //parent isotope is a special case - always keep
+
+       //check that the isotope is one of the preferred label types
+
+       //check that the isotope does not have too many extra neutrons
+
+       //if the isotope is not a heavy-specified isotope and is not predicted to be very abundant, remove
+
+    }
+
+    return isotopes;
+
+}
+
+
 /**
  * @brief MassCalculator::enumerateMasses
  * @param inputMass
@@ -676,26 +714,6 @@ vector<Atom> NaturalAbundanceData::getAtomsBySymbol(string atomicSymbol) {
     return vector<Atom>{};
 }
 
-void IsotopicAbundance::computeIsotopeMass(NaturalAbundanceData& naturalAbundanceData, unsigned int chgNumber) {
-    mass = 0.0;
-
-    for (auto it = atomCounts.begin(); it != atomCounts.end(); ++it) {
-        Atom atom = it->first;
-        int count = it->second;
-
-        if (naturalAbundanceData.atomToMass.find(atom) != naturalAbundanceData.atomToMass.end()) {
-            mass += naturalAbundanceData.atomToMass[atom] * count;
-        } else {
-            mass += MassCalculator::getElementMass(atom.symbol) * count;
-        }
-    }
-
-    mz = mass;
-    if (chgNumber != 0){
-        mz = mass/chgNumber;
-    }
-}
-
 NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
     string compoundFormula,
     Adduct *adduct,
@@ -864,43 +882,6 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
     return naturalAbundanceDistribution;
 }
 
-IsotopicAbundance IsotopicAbundance::createMergedAbundance(IsotopicAbundance& one, IsotopicAbundance& two){
-    IsotopicAbundance merged;
-    merged.naturalAbundance = one.naturalAbundance * two.naturalAbundance;
-
-    merged.atomCounts = two.atomCounts;
-
-    for (auto it = one.atomCounts.begin(); it != one.atomCounts.end(); ++it) {
-        if (merged.atomCounts.find(it->first) == merged.atomCounts.end()) {
-            merged.atomCounts.insert(make_pair(it->first, it->second));
-        } else {
-            merged.atomCounts[it->first]+= it->second;
-        }
-    }
-
-    return merged;
-}
-
-string IsotopicAbundance::getFormula() {
-    stringstream s;
-
-    for (auto it = atomCounts.begin(); it != atomCounts.end(); ++it) {
-        s << "[" << it->first.massNumber << it->first.symbol << "]" << it->second;
-    }
-
-    return s.str();
-}
-
-string IsotopicAbundance::toString() {
-    stringstream s;
-
-    s << std::fixed << setprecision(5); // 5 places after the decimal
-
-    s << getFormula() << " (" << mass << "): " << naturalAbundance << " " << 100*naturalAbundanceMonoProportion << "% [M+0]";
-
-    return s.str();
-}
-
 pair<double, double> NaturalAbundanceDistribution::getIsotopicAbundance(Isotope& isotope){
     double naturalAbundance = 0.0;
     double naturalAbundanceMonoProportion = 0.0;
@@ -964,6 +945,64 @@ pair<double, double> NaturalAbundanceDistribution::getIsotopicAbundance(Isotope&
     return(make_pair(naturalAbundance, naturalAbundanceMonoProportion));
 }
 
+void IsotopicAbundance::computeIsotopeMass(NaturalAbundanceData& naturalAbundanceData, unsigned int chgNumber) {
+    mass = 0.0;
+
+    for (auto it = atomCounts.begin(); it != atomCounts.end(); ++it) {
+        Atom atom = it->first;
+        int count = it->second;
+
+        if (naturalAbundanceData.atomToMass.find(atom) != naturalAbundanceData.atomToMass.end()) {
+            mass += naturalAbundanceData.atomToMass[atom] * count;
+        } else {
+            mass += MassCalculator::getElementMass(atom.symbol) * count;
+        }
+    }
+
+    mz = mass;
+    if (chgNumber != 0){
+        mz = mass/chgNumber;
+    }
+}
+
+IsotopicAbundance IsotopicAbundance::createMergedAbundance(IsotopicAbundance& one, IsotopicAbundance& two){
+    IsotopicAbundance merged;
+    merged.naturalAbundance = one.naturalAbundance * two.naturalAbundance;
+
+    merged.atomCounts = two.atomCounts;
+
+    for (auto it = one.atomCounts.begin(); it != one.atomCounts.end(); ++it) {
+        if (merged.atomCounts.find(it->first) == merged.atomCounts.end()) {
+            merged.atomCounts.insert(make_pair(it->first, it->second));
+        } else {
+            merged.atomCounts[it->first]+= it->second;
+        }
+    }
+
+    return merged;
+}
+
+string IsotopicAbundance::getFormula() {
+    stringstream s;
+
+    for (auto it = atomCounts.begin(); it != atomCounts.end(); ++it) {
+        s << "[" << it->first.massNumber << it->first.symbol << "]" << it->second;
+    }
+
+    return s.str();
+}
+
+string IsotopicAbundance::toString() {
+    stringstream s;
+
+    s << std::fixed << setprecision(5); // 5 places after the decimal
+
+    s << getFormula() << " (" << mass << "): " << naturalAbundance << " " << 100*naturalAbundanceMonoProportion << "% [M+0]";
+
+    return s.str();
+}
+
+
 /**
  * @brief IsotopicAbundance::toIsotope
  * @return IsotopicAbundance information reformatted as Isotope class.
@@ -1021,6 +1060,27 @@ Isotope IsotopicAbundance::toIsotope() {
 
     return isotope;
   }
+
+int IsotopicAbundance::getTotalExtraNeutrons(NaturalAbundanceData& naturalAbundanceData) {
+
+    int numTotalExtraNeutrons = 0;
+    for (auto it = atomCounts.begin(); it != atomCounts.end(); ++it) {
+        Atom atom = it->first;
+        if (naturalAbundanceData.atomToNumExtraNeutrons.find(atom) != naturalAbundanceData.atomToNumExtraNeutrons.end()) {
+            numTotalExtraNeutrons += naturalAbundanceData.atomToNumExtraNeutrons.at(atom);
+        }
+    }
+
+    return numTotalExtraNeutrons;
+}
+
+bool IsotopicAbundance::isHasAtom(Atom& atom) {
+    for (auto it = atomCounts.begin(); it != atomCounts.end(); ++it) {
+        if (it->first.massNumber == atom.massNumber && it->first.symbol == atom.symbol) return true;
+    }
+
+    return false;
+}
 
  // Issue 656: correct quant, based on appropriate naturalAbundanceMonoProportion.
  // Each Isotope and IsotopicAbundance keeps track of its naturalAbundanceMonoProportion.

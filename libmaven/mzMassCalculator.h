@@ -13,7 +13,8 @@
 class Compound;
 class Isotope;
 class Adduct;
-
+class Atom;
+class IsotopicAbundance;
 
 using namespace std;
 
@@ -91,6 +92,14 @@ class MassCalculator {
 
     //Used for computation of actual values for labeled data.
     static vector<Isotope> computeIsotopes(string compoundFormula, Adduct* adduct, int maxNumProtons=INT_MAX, bool isUse13C=true, bool isUse15N=true, bool isUse34S=true, bool isUse2H=true);
+
+    static vector<Isotope> computeIsotopes2(string compoundFormula,
+                                            Adduct *adduct,
+                                            vector<Atom> heavyIsotopes,
+                                            bool isIncludeNaturalAbundance = false,
+                                            int maxNumExtraNeutrons=INT_MAX,
+                                            double minimumTheoreticalAbundance = 0
+                                            );
 
     //Issue 656: Return a complete natural abundance distribution for every possible observable isotope.
     //Considers all atoms in the molecule and adducts.
@@ -186,6 +195,9 @@ class IsotopicAbundance {
         double mz = 0.0;
 
         void computeIsotopeMass(NaturalAbundanceData& naturalAbundanceData, unsigned int chgNumber);
+
+        int getTotalExtraNeutrons(NaturalAbundanceData& naturalAbundanceData);
+        bool isHasAtom(Atom& atom);
 
         static IsotopicAbundance createMergedAbundance(IsotopicAbundance& one, IsotopicAbundance& two);
         string getFormula();
