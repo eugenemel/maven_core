@@ -487,25 +487,22 @@ vector<Isotope> MassCalculator::computeIsotopes(
     return isotopes;
 }
 
-//TODO: this isn't done, think about this
-enum IsotopeRetentionPolicy {
+//This enum only applies to labeled isotopes.
+//isotopic species that contain labels from natural abundance may optionally be retained
+//(handled downstream).
+enum LabeledIsotopeRetentionPolicy {
 
-    //All heavy atoms must be
-    REQUIRE_EXACT_MATCH,
+    //Disallow any multiple labels.
+    ONLY_ONE_LABEL,
 
-    //Case: multiple labels, one species labeled but not the other
-    //Always requires carbon be labeled, if it specified as one label among multiple labels
-    CARBON_OPTION_ALWAYS_LABELED,
+    //Multiple labeled species must include carbon as one of the labels.
+    ONLY_CARBON_MULTIPLE_LABELS,
 
-    //Only permit labels on heavy atoms,
-    // except for species where the natural abundance
-    // is sufficiently high (controlled by other parameters).
-    ONLY_HEAVY_LABELED_UNLESS_NATURAL,
+    //Labeled species may only enumerate through heavy isotope labels.
+    ONLY_SPECIFIED_LABELS,
 
-    //no mixtures of labels
-    EVERY_LABEL_FULL_LABELED,
-
-    REQUIRE_AT_LEAST_ONE_LABELED
+    //enumeration from MAVEN ONE set.
+    MAVEN_ONE_ENUMERATION
 };
 
 vector<Isotope> MassCalculator::computeIsotopes2(
@@ -537,8 +534,8 @@ vector<Isotope> MassCalculator::computeIsotopes2(
        //Avoid isotopes with too many extra neutrons
        if (numNeutrons > maxNumExtraNeutrons) continue;
 
-       //TODO: if the species contains any labels other than the specified label types,
-       // this should be false.
+       //TODO: more complicated logic around label enumeration.
+       // Probably want the MAVEN_ONE option implemented here.
 
        //check that the isotope is one of the preferred label types
        bool isLabelType = false;
