@@ -526,18 +526,13 @@ vector<Isotope> MassCalculator::computeIsotopes2(
             }
        }
 
-       if (!isLabelType) {
+        //isotopes can also be included if they have a high enough natural abundance.
+        bool isValidNaturalAbundance = isIncludeNaturalAbundance && isotopicAbundance.naturalAbundanceMonoProportion > minimumProportionMPlusZero;
 
-            //If the heavy label is not found and we do not want to keep natural abundance isotopes, avoid isotope.
-            if (!isIncludeNaturalAbundance) continue;
-
-            //If the heavy label is not found, we do want to keep natural abundance isotopes,
-            //but the abundance is too low, aboid isotope.
-            if (isotopicAbundance.naturalAbundanceMonoProportion < minimumProportionMPlusZero) continue;
-
-       }
-
-       isotopes.push_back(isotopicAbundance.toIsotope());
+        //retain isotopes if they are the [M+0], of the preferred label type, or pass natural abundance criteria.
+        if (isLabelType || isValidNaturalAbundance || numNeutrons == 0) {
+            isotopes.push_back(isotopicAbundance.toIsotope());
+        }
     }
 
     return isotopes;
@@ -1043,7 +1038,9 @@ Isotope IsotopicAbundance::toIsotope() {
     int observedNumC13 = 0;
     if (atomCounts.find(C13) != atomCounts.end()) {
         observedNumC13 = atomCounts[C13];
-        isotopeName << "C13";
+        if (observedNumC13 > 0) {
+            isotopeName << "C13";
+        }
     }
     isotope.C13 = observedNumC13;
 
@@ -1051,7 +1048,9 @@ Isotope IsotopicAbundance::toIsotope() {
     int observedNumN15 = 0;
     if (atomCounts.find(N15) != atomCounts.end()) {
         observedNumN15 = atomCounts[N15];
-        isotopeName << "N15";
+        if (observedNumN15 > 0) {
+            isotopeName << "N15";
+        }
     }
     isotope.N15 = observedNumN15;
 
@@ -1059,7 +1058,9 @@ Isotope IsotopicAbundance::toIsotope() {
     int observedNumS34 = 0;
     if (atomCounts.find(S34) != atomCounts.end()) {
         observedNumS34 = atomCounts[S34];
-        isotopeName << "S34";
+        if (observedNumS34 > 0) {
+            isotopeName << "S34";
+        }
     }
     isotope.S34 = observedNumS34;
 
@@ -1067,7 +1068,9 @@ Isotope IsotopicAbundance::toIsotope() {
     int observedNumH2 = 0;
     if (atomCounts.find(H2) != atomCounts.end()) {
         observedNumH2 = atomCounts[H2];
-        isotopeName << "C";
+        if (observedNumH2 > 0) {
+            isotopeName << "D";
+        }
     }
     isotope.H2 = observedNumH2;
 
@@ -1075,7 +1078,9 @@ Isotope IsotopicAbundance::toIsotope() {
     int observedNumO18 = 0;
     if (atomCounts.find(O18) != atomCounts.end()) {
         observedNumO18 = atomCounts[O18];
-        isotopeName << "O18";
+        if (observedNumO18 > 0) {
+            isotopeName << "O18";
+        }
     }
     isotope.O18 = observedNumO18;
 
