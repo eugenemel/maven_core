@@ -1106,7 +1106,8 @@ int IsotopicAbundance::getTotalExtraNeutrons(NaturalAbundanceData& naturalAbunda
     int numTotalExtraNeutrons = 0;
     for (auto it = atomCounts.begin(); it != atomCounts.end(); ++it) {
         Atom atom = it->first;
-        if (naturalAbundanceData.atomToNumExtraNeutrons.find(atom) != naturalAbundanceData.atomToNumExtraNeutrons.end()) {
+        int atomCount = it->second;
+        if (atomCount > 0 && naturalAbundanceData.atomToNumExtraNeutrons.find(atom) != naturalAbundanceData.atomToNumExtraNeutrons.end()) {
             numTotalExtraNeutrons += naturalAbundanceData.atomToNumExtraNeutrons.at(atom);
         }
     }
@@ -1116,7 +1117,7 @@ int IsotopicAbundance::getTotalExtraNeutrons(NaturalAbundanceData& naturalAbunda
 
 bool IsotopicAbundance::isHasAtom(Atom& atom) {
     for (auto it = atomCounts.begin(); it != atomCounts.end(); ++it) {
-        if (it->first.massNumber == atom.massNumber && it->first.symbol == atom.symbol) return true;
+        if (it->second > 0 && it->first.massNumber == atom.massNumber && it->first.symbol == atom.symbol) return true;
     }
 
     return false;
