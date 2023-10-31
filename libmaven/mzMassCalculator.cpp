@@ -338,6 +338,18 @@ double MassCalculator::computeMass(string formula, int charge) {
     return adjustMass(mass,charge);
 }
 
+/**
+ * @brief MassCalculator::computeIsotopes
+ * @param compoundFormula
+ * @param adduct
+ * @param maxNumProtons
+ * @param isUse13C
+ * @param isUse15N
+ * @param isUse34S
+ * @param isUse2H
+ *
+ * @deprecated in favor of MassCalculator::computeIsotopes2()
+ */
 vector<Isotope> MassCalculator::computeIsotopes(
     string compoundFormula,
     Adduct* adduct,
