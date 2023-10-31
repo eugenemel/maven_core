@@ -2601,7 +2601,7 @@ LabeledIsotopeRetentionPolicy IsotopeParameters::getLabeledIsotopeRetentionPolic
         return LabeledIsotopeRetentionPolicy::ONLY_CARBON_TWO_LABELS;
     } else if (labeledIsotopeRetentionPolicy == "ONLY_ONE_LABEL" || labeledIsotopeRetentionPolicy == "No mixed") {
         return LabeledIsotopeRetentionPolicy::ONLY_ONE_LABEL;
-    } else if (labeledIsotopeRetentionPolicy == "PEAK_FULL_RT_BOUNDS_AREA" || labeledIsotopeRetentionPolicy == "All mixed") {
+    } else if (labeledIsotopeRetentionPolicy == "ONE_OR_MORE_LABELS" || labeledIsotopeRetentionPolicy == "All mixed") {
         return LabeledIsotopeRetentionPolicy::ONE_OR_MORE_LABELS;
     }
 
