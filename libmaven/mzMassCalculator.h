@@ -126,7 +126,8 @@ class MassCalculator {
                                             NaturalAbundanceData naturalAbundanceData,
                                             bool isIncludeNaturalAbundance = false,
                                             int maxNumExtraNeutrons=INT_MAX,
-                                            double minimumProportionMPlusZero = 0
+                                            double minimumProportionMPlusZero = 0,
+                                            bool debug=false
                                             );
 
     //Issue 656: Return a complete natural abundance distribution for every possible observable isotope.

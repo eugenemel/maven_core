@@ -507,7 +507,8 @@ vector<Isotope> MassCalculator::computeIsotopes2(
     NaturalAbundanceData naturalAbundanceData,
     bool isIncludeNaturalAbundance,
     int maxNumExtraNeutrons,
-    double minimumProportionMPlusZero
+    double minimumProportionMPlusZero,
+    bool debug
     ){
 
     //First, enumerate all theoretically possible isotopes based on the formula.
@@ -526,6 +527,12 @@ vector<Isotope> MassCalculator::computeIsotopes2(
 
        //Avoid isotopes with too many extra neutrons
        if (isotopicAbundance.numTotalExtraNeutrons > maxNumExtraNeutrons) continue;
+
+       if (debug) {
+            cout << isotopicAbundance.toString()
+                 << ": " << isotopicAbundance.numTotalExtraNeutrons
+                 << " extra neutrons." << endl;
+       }
 
        //check that the isotope is one of the preferred label types
        bool isLabelType = false;
@@ -558,6 +565,13 @@ vector<Isotope> MassCalculator::computeIsotopes2(
 
        //isotopes can also be included if they have a high enough natural abundance.
        bool isValidNaturalAbundance = isIncludeNaturalAbundance && isotopicAbundance.naturalAbundanceMonoProportion > minimumProportionMPlusZero;
+
+       if (debug) {
+            cout << "isLabelType? " << isLabelType
+                 << ", isValidNaturalAbundance? " << isValidNaturalAbundance
+                 <<", is [M+0]? " << (isotopicAbundance.numTotalExtraNeutrons == 0)
+                 << endl;
+       }
 
        //retain isotopes if they are the [M+0], of the preferred label type, or pass natural abundance criteria.
        if (isLabelType || isValidNaturalAbundance || isotopicAbundance.numTotalExtraNeutrons == 0) {
