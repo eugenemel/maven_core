@@ -487,28 +487,11 @@ vector<Isotope> MassCalculator::computeIsotopes(
     return isotopes;
 }
 
-//This enum only applies to labeled isotopes.
-//isotopic species that contain labels from natural abundance may optionally be retained
-//(handled downstream).
-enum LabeledIsotopeRetentionPolicy {
-
-    //Disallow any multiple labels.
-    ONLY_ONE_LABEL,
-
-    //Multiple labeled species must include carbon as one of the labels.
-    ONLY_CARBON_MULTIPLE_LABELS,
-
-    //Labeled species may only enumerate through heavy isotope labels.
-    ONLY_SPECIFIED_LABELS,
-
-    //enumeration from MAVEN ONE set.
-    MAVEN_ONE_ENUMERATION
-};
-
 vector<Isotope> MassCalculator::computeIsotopes2(
     string compoundFormula,
     Adduct *adduct,
-    vector<Atom> heavyIsotopes,
+    vector<Atom> labeledIsotopes,
+    LabeledIsotopeRetentionPolicy labeledIsotopeRetentionPolicy,
     NaturalAbundanceData naturalAbundanceData,
     bool isIncludeNaturalAbundance,
     int maxNumExtraNeutrons,
@@ -529,31 +512,45 @@ vector<Isotope> MassCalculator::computeIsotopes2(
 
     for (auto isotopicAbundance : abundanceDistribution.isotopicAbundances) {
 
-       int numNeutrons = isotopicAbundance.getTotalExtraNeutrons(naturalAbundanceData);
-
        //Avoid isotopes with too many extra neutrons
-       if (numNeutrons > maxNumExtraNeutrons) continue;
-
-       //TODO: more complicated logic around label enumeration.
-       // Probably want the MAVEN_ONE option implemented here.
+       if (isotopicAbundance.numTotalExtraNeutrons > maxNumExtraNeutrons) continue;
 
        //check that the isotope is one of the preferred label types
        bool isLabelType = false;
-       for (auto& atom : heavyIsotopes) {
+
+       set<Atom> labeledIsotopesPresent{};
+
+       for (auto& atom : labeledIsotopes) {
             bool isHasAtom = isotopicAbundance.isHasAtom(atom);
             if (isHasAtom) {
-                isLabelType = true;
-                break;
+                labeledIsotopesPresent.insert(atom);
             }
        }
 
-        //isotopes can also be included if they have a high enough natural abundance.
-        bool isValidNaturalAbundance = isIncludeNaturalAbundance && isotopicAbundance.naturalAbundanceMonoProportion > minimumProportionMPlusZero;
+       bool isSinglePrespecifiedLabel = labeledIsotopesPresent.size() == 1 && isotopicAbundance.labeledForms.size() == 1;
 
-        //retain isotopes if they are the [M+0], of the preferred label type, or pass natural abundance criteria.
-        if (isLabelType || isValidNaturalAbundance || numNeutrons == 0) {
-            isotopes.push_back(isotopicAbundance.toIsotope());
-        }
+       bool isCarbon13MultipleLabelCase = labeledIsotopesPresent.size() == 2 && isotopicAbundance.labeledForms.size() == 2 &&
+                                        labeledIsotopesPresent.find(Atom("C", 13)) != labeledIsotopesPresent.end();
+
+       bool isMultipleLabeledForms = !labeledIsotopesPresent.empty() &&
+                                     labeledIsotopesPresent.size() == isotopicAbundance.labeledForms.size();
+
+       //Assess agreement based on isotope label retention policy
+       if (labeledIsotopeRetentionPolicy == LabeledIsotopeRetentionPolicy::ONLY_ONE_LABEL) {
+            isLabelType = isSinglePrespecifiedLabel;
+       } else if (labeledIsotopeRetentionPolicy == LabeledIsotopeRetentionPolicy::ONLY_CARBON_TWO_LABELS) {
+            isLabelType = isSinglePrespecifiedLabel || isCarbon13MultipleLabelCase;
+       } else if (labeledIsotopeRetentionPolicy == LabeledIsotopeRetentionPolicy::ONE_OR_MORE_LABELS) {
+            isLabelType = isMultipleLabeledForms;
+       }
+
+       //isotopes can also be included if they have a high enough natural abundance.
+       bool isValidNaturalAbundance = isIncludeNaturalAbundance && isotopicAbundance.naturalAbundanceMonoProportion > minimumProportionMPlusZero;
+
+       //retain isotopes if they are the [M+0], of the preferred label type, or pass natural abundance criteria.
+       if (isLabelType || isValidNaturalAbundance || isotopicAbundance.numTotalExtraNeutrons == 0) {
+           isotopes.push_back(isotopicAbundance.toIsotope());
+       }
     }
 
     return isotopes;
@@ -897,7 +894,7 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
     }
 
     for (auto& isotopeAbundance : existingAbundances) {
-        isotopeAbundance.computeIsotopeMass(data, chgNum);
+        isotopeAbundance.compute(data, chgNum);
     }
 
     if (!existingAbundances.empty()) {
@@ -980,18 +977,31 @@ pair<double, double> NaturalAbundanceDistribution::getIsotopicAbundance(Isotope&
     return(make_pair(naturalAbundance, naturalAbundanceMonoProportion));
 }
 
-void IsotopicAbundance::computeIsotopeMass(NaturalAbundanceData& naturalAbundanceData, unsigned int chgNumber) {
+void IsotopicAbundance::compute(NaturalAbundanceData& naturalAbundanceData, unsigned int chgNumber) {
     mass = 0.0;
 
     for (auto it = atomCounts.begin(); it != atomCounts.end(); ++it) {
         Atom atom = it->first;
         int count = it->second;
 
+        if (count <= 0) continue;
+
         if (naturalAbundanceData.atomToMass.find(atom) != naturalAbundanceData.atomToMass.end()) {
             mass += naturalAbundanceData.atomToMass[atom] * count;
         } else {
             mass += MassCalculator::getElementMass(atom.symbol) * count;
         }
+
+        if (naturalAbundanceData.atomToNumExtraNeutrons.find(atom) != naturalAbundanceData.atomToNumExtraNeutrons.end()) {
+            int numExtraNeutrons = naturalAbundanceData.atomToNumExtraNeutrons.at(atom);
+            numTotalExtraNeutrons += numExtraNeutrons;
+            if (numExtraNeutrons > 0) {
+                labeledForms.insert(atom);
+            } else {
+                unlabeledForms.insert(atom);
+            }
+        }
+
     }
 
     mz = mass;
@@ -1126,20 +1136,6 @@ Isotope IsotopicAbundance::toIsotope() {
 
     return isotope;
   }
-
-int IsotopicAbundance::getTotalExtraNeutrons(NaturalAbundanceData& naturalAbundanceData) {
-
-    int numTotalExtraNeutrons = 0;
-    for (auto it = atomCounts.begin(); it != atomCounts.end(); ++it) {
-        Atom atom = it->first;
-        int atomCount = it->second;
-        if (atomCount > 0 && naturalAbundanceData.atomToNumExtraNeutrons.find(atom) != naturalAbundanceData.atomToNumExtraNeutrons.end()) {
-            numTotalExtraNeutrons += naturalAbundanceData.atomToNumExtraNeutrons.at(atom);
-        }
-    }
-
-    return numTotalExtraNeutrons;
-}
 
 bool IsotopicAbundance::isHasAtom(Atom& atom) {
     for (auto it = atomCounts.begin(); it != atomCounts.end(); ++it) {

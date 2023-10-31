@@ -29,6 +29,32 @@ using namespace std;
 class NaturalAbundanceData;
 class NaturalAbundanceDistribution;
 
+//This enum only applies to labeled isotopes.
+//isotopic species that contain labels from natural abundance may optionally be retained
+//(handled downstream).
+//
+// Key case: isotope has label of interest along with some other labeled form, not of
+// interest.
+//
+// Remember, other isotopes can still survive the check even if they are not labeled forms.
+//
+enum LabeledIsotopeRetentionPolicy {
+
+    //Only one labeled form allowed per isotope.
+    //The label must come from the list of valid labeled forms.
+    ONLY_ONE_LABEL,
+
+    //Single labeled species are allowed.
+    //Double-labeled species are permitted if they include 13C as one of the labels.
+    //All labeled forms must come from the list of valid labeled forms.
+    //this is the choice for the original Maven 1.0 implementation.
+    ONLY_CARBON_TWO_LABELS,
+
+    //Any degree of labeling is supported, as long as
+    //All labeled forms come from the list of valid labeled forms.
+    ONE_OR_MORE_LABELS
+};
+
 class MassCalculator { 
 
     public:
@@ -96,6 +122,7 @@ class MassCalculator {
     static vector<Isotope> computeIsotopes2(string compoundFormula,
                                             Adduct *adduct,
                                             vector<Atom> heavyIsotopes,
+                                            LabeledIsotopeRetentionPolicy labeledIsotopeRetentionPolicy,
                                             NaturalAbundanceData naturalAbundanceData,
                                             bool isIncludeNaturalAbundance = false,
                                             int maxNumExtraNeutrons=INT_MAX,
@@ -192,12 +219,15 @@ class IsotopicAbundance {
         //The [M+0] is exactly 1. Computed by this->naturalAbundance/[M+0]->naturalAbundance
         double naturalAbundanceMonoProportion = 1.0;
 
+        //fields computed via IsotopicAbundance::compute()
         double mass = 0.0;
         double mz = 0.0;
+        unsigned int numTotalExtraNeutrons = 0;
+        set<Atom> labeledForms{};
+        set<Atom> unlabeledForms{};
 
-        void computeIsotopeMass(NaturalAbundanceData& naturalAbundanceData, unsigned int chgNumber);
+        void compute(NaturalAbundanceData& naturalAbundanceData, unsigned int chgNumber);
 
-        int getTotalExtraNeutrons(NaturalAbundanceData& naturalAbundanceData);
         bool isHasAtom(Atom& atom);
 
         static IsotopicAbundance createMergedAbundance(IsotopicAbundance& one, IsotopicAbundance& two);
