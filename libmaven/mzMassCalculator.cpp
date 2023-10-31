@@ -1179,8 +1179,14 @@ double MassCalculator::getNaturalAbundanceCorrectedQuantValue(
       float isotopeObserved, float mZeroObserved,
       double isotopeExpectedAbundance, double mZeroExpectedAbundance) {
 
+    //Do not attempt correction if the [M+0] has an expected abundance outside of valid range.
+    if (mZeroExpectedAbundance <= 0 || mZeroExpectedAbundance > 1.0){
+        return isotopeObserved;
+    }
+
     float correctedVal = isotopeObserved - (isotopeExpectedAbundance/mZeroExpectedAbundance)*mZeroObserved;
 
+    //Only return corrected vals if the value is strictly greater than 0 - negative values are ignored.
     if (correctedVal > 0) {
         return correctedVal;
     }
