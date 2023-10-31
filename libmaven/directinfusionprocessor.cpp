@@ -1,5 +1,6 @@
 #include "directinfusionprocessor.h"
 #include "lipidsummarizationutils.h"
+#include "mzMassCalculator.h"
 
 #include <chrono>
 

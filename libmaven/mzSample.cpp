@@ -2422,8 +2422,10 @@ string IsotopeParameters::encodeParams() {
     encodedParams = encodedParams + "isS34Labeled" + "=" + to_string(isS34Labeled) + ";";
     encodedParams = encodedParams + "isD2Labeled" + "=" + to_string(isD2Labeled) + ";";
     encodedParams = encodedParams + "isO18Labeled" + "=" + to_string(isO18Labeled) + ";";
+    encodedParams = encodedParams + "isNatAbundance" + "=" + to_string(isNatAbundance) + ";";
     encodedParams = encodedParams + "isCondenseTheoreticalIsotopes" + "=" + to_string(isCondenseTheoreticalIsotopes) + ";";
     encodedParams = encodedParams + "resolvingPower" + "=" + to_string(resolvingPower) + ";";
+    encodedParams = encodedParams + "natAbundanceThreshold" + "=" + to_string(natAbundanceThreshold) + ";";
 
     encodedParams = encodedParams + "eic_smoothingAlgorithm" + "=" + to_string(eic_smoothingAlgorithm) + ";";
     encodedParams = encodedParams + "eic_smoothingWindow" + "=" + to_string(eic_smoothingWindow) + ";";
@@ -2447,6 +2449,9 @@ string IsotopeParameters::encodeParams() {
 
     //extraction algorithm
     encodedParams = encodedParams + "isotopicExtractionAlgorithm" + "=" + IsotopeParameters::getAlgorithmName(isotopicExtractionAlgorithm) + ";";
+
+    //Labeled Isotope Retention Policy
+    encodedParams = encodedParams + "labeledIsotopeRetentionPolicy" + "=" + IsotopeParameters::getLabeledIsotopeRetentionPolicyName(labeledIsotopeRetentionPolicy) + ";";
 
     string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
     encodedParams = encodedParams + peakPickingEncodedParams;
@@ -2495,6 +2500,12 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     if (decodedMap.find("isO18Labeled") != decodedMap.end()) {
         isotopeParameters.isO18Labeled = decodedMap["isO18Labeled"]=="1";
     }
+    if (decodedMap.find("isNatAbundance") != decodedMap.end()) {
+        isotopeParameters.isNatAbundance = decodedMap["isNatAbundance"]=="1";
+    }
+    if (decodedMap.find("natAbundanceThreshold") != decodedMap.end()) {
+        isotopeParameters.natAbundanceThreshold = stof(decodedMap["natAbundanceThreshold"]);
+    }
     if (decodedMap.find("isCondenseTheoreticalIsotopes") != decodedMap.end()) {
         isotopeParameters.isCondenseTheoreticalIsotopes = decodedMap["isCondenseTheoreticalIsotopes"] == "1";
     }
@@ -2533,7 +2544,13 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     //extraction algorithm
     if (decodedMap.find("isotopicExtractionAlgorithm") != decodedMap.end()) {
         string algorithmStr = decodedMap["isotopicExtractionAlgorithm"];
-        isotopeParameters.isotopicExtractionAlgorithm = getExtractionAlgorithmFromName(algorithmStr);
+        isotopeParameters.isotopicExtractionAlgorithm = IsotopeParameters::getExtractionAlgorithmFromName(algorithmStr);
+    }
+
+    //Labeled Isotope Retention Policy
+    if (decodedMap.find("labeledIsotopeRetentionPolicy") != decodedMap.end()) {
+        string retentionPolicyStr = decodedMap["labeledIsotopeRetentionPolicy"];
+        isotopeParameters.labeledIsotopeRetentionPolicy = IsotopeParameters::getLabeledIsotopeRetentionPolicyFromName(retentionPolicyStr);
     }
 
     isotopeParameters.isotopeParametersType = IsotopeParametersType::SAVED;
@@ -2566,6 +2583,33 @@ IsotopicExtractionAlgorithm IsotopeParameters::getExtractionAlgorithmFromName(st
     //default
     return IsotopicExtractionAlgorithm::MAVEN_GUI_VERSION_ONE;
 }
+
+string IsotopeParameters::getLabeledIsotopeRetentionPolicyName(LabeledIsotopeRetentionPolicy policy) {
+    if (policy == LabeledIsotopeRetentionPolicy::ONLY_CARBON_TWO_LABELS) {
+        return "ONLY_CARBON_TWO_LABELS";
+    } else if (policy == LabeledIsotopeRetentionPolicy::ONLY_ONE_LABEL) {
+        return "ONLY_ONE_LABEL";
+    } else if (policy == LabeledIsotopeRetentionPolicy::ONE_OR_MORE_LABELS) {
+        return "ONE_OR_MORE_LABELS";
+    }
+
+    return "ONLY_CARBON_TWO_LABELS";
+}
+
+LabeledIsotopeRetentionPolicy IsotopeParameters::getLabeledIsotopeRetentionPolicyFromName(string labeledIsotopeRetentionPolicy){
+    if (labeledIsotopeRetentionPolicy == "ONLY_CARBON_TWO_LABELS" || labeledIsotopeRetentionPolicy == "C13 mixed") {
+        return LabeledIsotopeRetentionPolicy::ONLY_CARBON_TWO_LABELS;
+    } else if (labeledIsotopeRetentionPolicy == "ONLY_ONE_LABEL" || labeledIsotopeRetentionPolicy == "No mixed") {
+        return LabeledIsotopeRetentionPolicy::ONLY_ONE_LABEL;
+    } else if (labeledIsotopeRetentionPolicy == "PEAK_FULL_RT_BOUNDS_AREA" || labeledIsotopeRetentionPolicy == "All mixed") {
+        return LabeledIsotopeRetentionPolicy::ONE_OR_MORE_LABELS;
+    }
+
+    //default
+    return LabeledIsotopeRetentionPolicy::ONLY_CARBON_TWO_LABELS;
+}
+
+
 /**
   * Scans of the same collision energy look approximately the same,
   * so first build consensus spectra for all of the same collision energy.

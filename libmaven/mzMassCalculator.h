@@ -29,32 +29,6 @@ using namespace std;
 class NaturalAbundanceData;
 class NaturalAbundanceDistribution;
 
-//This enum only applies to labeled isotopes.
-//isotopic species that contain labels from natural abundance may optionally be retained
-//(handled downstream).
-//
-// Key case: isotope has label of interest along with some other labeled form, not of
-// interest.
-//
-// Remember, other isotopes can still survive the check even if they are not labeled forms.
-//
-enum LabeledIsotopeRetentionPolicy {
-
-    //Only one labeled form allowed per isotope.
-    //The label must come from the list of valid labeled forms.
-    ONLY_ONE_LABEL,
-
-    //Single labeled species are allowed.
-    //Double-labeled species are permitted if they include 13C as one of the labels.
-    //All labeled forms must come from the list of valid labeled forms.
-    //this is the choice for the original Maven 1.0 implementation.
-    ONLY_CARBON_TWO_LABELS,
-
-    //Any degree of labeling is supported, as long as
-    //All labeled forms come from the list of valid labeled forms.
-    ONE_OR_MORE_LABELS
-};
-
 class MassCalculator { 
 
     public:

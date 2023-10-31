@@ -1,6 +1,7 @@
 #include "Fragment.h"
 #include "mzSample.h"
 #include "lipidsummarizationutils.h"
+#include "mzMassCalculator.h"
 
 Compound::Compound(string id, string name, string formula, int charge) {
     this->id = id;

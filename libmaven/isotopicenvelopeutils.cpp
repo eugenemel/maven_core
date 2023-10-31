@@ -1,4 +1,5 @@
 #include "isotopicenvelopeutils.h"
+#include "mzMassCalculator.h"
 
 double IsotopicEnvelope::getTotalIntensity() {
     if (totalIntensity < 0) {

@@ -21,7 +21,6 @@
 #include "mzUtils.h"
 #include "mzPatterns.h"
 #include "mzFit.h"
-#include "mzMassCalculator.h"
 #include "Matrix.h"
 #include "Fragment.h"
 
@@ -921,6 +920,33 @@ enum IsotopeParametersType{
     SAVED=1,
     FROM_GUI=2};
 
+
+//This enum only applies to labeled isotopes.
+//isotopic species that contain labels from natural abundance may optionally be retained
+//(handled downstream).
+//
+// Key case: isotope has label of interest along with some other labeled form, not of
+// interest.
+//
+// Remember, other isotopes can still survive the check even if they are not labeled forms.
+//
+enum LabeledIsotopeRetentionPolicy {
+
+    //Only one labeled form allowed per isotope.
+    //The label must come from the list of valid labeled forms.
+    ONLY_ONE_LABEL,
+
+    //Single labeled species are allowed.
+    //Double-labeled species are permitted if they include 13C as one of the labels.
+    //All labeled forms must come from the list of valid labeled forms.
+    //this is the choice for the original Maven 1.0 implementation.
+    ONLY_CARBON_TWO_LABELS,
+
+    //Any degree of labeling is supported, as long as
+    //All labeled forms come from the list of valid labeled forms.
+    ONE_OR_MORE_LABELS
+};
+
 struct IsotopeParameters {
 
     string searchVersion = "2.10.8";
@@ -937,6 +963,8 @@ struct IsotopeParameters {
     bool   isS34Labeled=false;
     bool   isD2Labeled=false;
     bool   isO18Labeled=false;
+    bool   isNatAbundance=false; // Issue 680
+    float natAbundanceThreshold=1e-6f; // Issue 680
 
     bool isCondenseTheoreticalIsotopes = false;
     double resolvingPower = 50000.0;
@@ -962,15 +990,21 @@ struct IsotopeParameters {
     Adduct *adduct = nullptr;
     string adductName = "";
 
-    inline bool isIsotopes() {return (isC13Labeled || isN15Labeled || isS34Labeled || isD2Labeled);}
+    inline bool isIsotopes() {return (isC13Labeled || isN15Labeled || isS34Labeled || isD2Labeled || isO18Labeled || isNatAbundance);}
 
     //parameter added 2023-09-25
     IsotopicExtractionAlgorithm isotopicExtractionAlgorithm = IsotopicExtractionAlgorithm::MAVEN_GUI_VERSION_ONE;
+
+    //Issue 680
+    LabeledIsotopeRetentionPolicy labeledIsotopeRetentionPolicy = LabeledIsotopeRetentionPolicy::ONE_OR_MORE_LABELS;
 
     string encodeParams();
     static IsotopeParameters decode(string encodedIsotopeParameters);
     static string getAlgorithmName(IsotopicExtractionAlgorithm algorithm);
     static IsotopicExtractionAlgorithm getExtractionAlgorithmFromName(string isotopicExtractionAlgorithm);
+
+    static string getLabeledIsotopeRetentionPolicyName(LabeledIsotopeRetentionPolicy policy);
+    static LabeledIsotopeRetentionPolicy getLabeledIsotopeRetentionPolicyFromName(string labeledIsotopeRetentionPolicy);
 
 };
 

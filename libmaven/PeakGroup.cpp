@@ -1,6 +1,7 @@
 #include "mzSample.h"
 #include "directinfusionprocessor.h"
 #include "isotopicenvelopeutils.h"
+#include "mzMassCalculator.h"
 
 PeakGroup::PeakGroup()  { 
     groupId=0;
