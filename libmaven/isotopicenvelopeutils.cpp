@@ -204,8 +204,20 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesPeakFullRtBound
             p.medianMz = isotope.mz;
 
             //intensity related
+            //Issue 680: for easier review in MAVEN, just set all quant types to same value.
             p.peakArea = intensity;
-            //TODO: use peakAreaCorrected as natural-abundance corrected abundance
+            p.peakAreaCorrected = intensity;
+            p.peakAreaTop = intensity;
+            p.peakAreaFractional = intensity;
+            p.peakIntensity = intensity;
+            p.signalBaselineRatio = intensity;
+            p.smoothedIntensity = intensity;
+            p.smoothedPeakArea = intensity;
+            p.smoothedPeakAreaCorrected = intensity;
+            p.smoothedPeakAreaTop = intensity;
+            p.smoothedSignalBaselineRatio = intensity;
+            p.peakAreaFWHM = intensity;
+            p.smoothedPeakAreaFWHM = intensity;
 
             //avoid writing junk into mzrollDB
             p.gaussFitR2 = 0;
