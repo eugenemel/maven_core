@@ -947,6 +947,28 @@ enum LabeledIsotopeRetentionPolicy {
     ONE_OR_MORE_LABELS
 };
 
+
+class Atom {
+public:
+    string symbol;
+    int massNumber;
+
+    Atom() {symbol = "NONE"; massNumber = -1;}
+
+    Atom(string symbol, int massNumber) {
+        this->symbol = symbol;
+        this->massNumber = massNumber;
+    }
+
+    friend bool operator< (const Atom& a, const Atom& b) {
+        if (a.symbol == b.symbol) {
+            return a.massNumber < b.massNumber;
+        } else {
+            return a.symbol < b.symbol;
+        }
+    }
+};
+
 struct IsotopeParameters {
 
     string searchVersion = "2.10.8";
@@ -991,6 +1013,8 @@ struct IsotopeParameters {
     string adductName = "";
 
     inline bool isIsotopes() {return (isC13Labeled || isN15Labeled || isS34Labeled || isD2Labeled || isO18Labeled || isNatAbundance);}
+
+    vector<Atom> getLabeledIsotopes();
 
     //parameter added 2023-09-25
     IsotopicExtractionAlgorithm isotopicExtractionAlgorithm = IsotopicExtractionAlgorithm::MAVEN_GUI_VERSION_ONE;

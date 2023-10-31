@@ -2609,6 +2609,27 @@ LabeledIsotopeRetentionPolicy IsotopeParameters::getLabeledIsotopeRetentionPolic
     return LabeledIsotopeRetentionPolicy::ONLY_CARBON_TWO_LABELS;
 }
 
+vector<Atom> IsotopeParameters::getLabeledIsotopes() {
+    vector<Atom> labels{};
+
+    if (this->isC13Labeled) {
+        labels.push_back(Atom("C", 13));
+    }
+    if (this->isN15Labeled) {
+        labels.push_back(Atom("N", 15));
+    }
+    if (this->isD2Labeled) {
+        labels.push_back(Atom("H", 2));
+    }
+    if (this->isS34Labeled) {
+        labels.push_back(Atom("S", 34));
+    }
+    if (this->isO18Labeled) {
+        labels.push_back(Atom("O", 18));
+    }
+
+    return labels;
+}
 
 /**
   * Scans of the same collision energy look approximately the same,

@@ -131,27 +131,6 @@ class MassCalculator {
 
 };
 
-class Atom {
-    public:
-        string symbol;
-        int massNumber;
-
-        Atom() {symbol = "NONE"; massNumber = -1;}
-
-    Atom(string symbol, int massNumber) {
-        this->symbol = symbol;
-        this->massNumber = massNumber;
-    }
-
-    friend bool operator< (const Atom& a, const Atom& b) {
-        if (a.symbol == b.symbol) {
-            return a.massNumber < b.massNumber;
-        } else {
-            return a.symbol < b.symbol;
-        }
-    }
-};
-
 //flexible class to store natural abundance data. In some cases, these values can change - e.g., plant metabolomics.
 class NaturalAbundanceData {
     public:
