@@ -87,16 +87,6 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
         maxNumProtons = params.maxIsotopesToExtract;
     }
 
-//    vector<Isotope> theoreticalIsotopes = MassCalculator::computeIsotopes(
-//        compound->formula,
-//        adduct,
-//        maxNumProtons,
-//        params.isC13Labeled,
-//        params.isN15Labeled,
-//        params.isS34Labeled,
-//        params.isD2Labeled
-//        );
-
     vector<Isotope> theoreticalIsotopes = MassCalculator::computeIsotopes2(
         compound->formula,
         adduct,
