@@ -1179,11 +1179,15 @@ class PeakGroup {
         int  ms2EventCount;
 
         //isotopic information
+        int     isotopicIndex;
         float expectedAbundance;
         int   isotopeC13count;
         
         //Flag for deletion
         bool deletedFlag;
+
+        //charge state
+        int     chargeState;
 
         float minRt;
         float maxRt;
@@ -1214,11 +1218,6 @@ class PeakGroup {
 
         //internal flags
         bool isComputedGroupStatistics;
-
-
-        //LOSS
-        int     chargeState;
-        int     isotopicIndex;
 
         bool  	hasSrmId()  { return srmId.empty(); }
         void  	setSrmId(string id)	  { srmId=id; }
