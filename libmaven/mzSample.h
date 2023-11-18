@@ -67,6 +67,7 @@ class PeaksSearchParameters;
 class MzKitchenProcessor;
 
 class PeakPickingAndGroupingParameters;
+class PeakContainer;
 
 using namespace pugi;
 using namespace mzUtils;
@@ -725,6 +726,9 @@ class EIC {
     static void encodeToFile(vector<EIC*> eics, string filePath);
     static vector<EIC*> decode(string filePath, vector<mzSample*> samples);
 
+    //Issue 686: for use in mzkitcpp
+    static map<int, PeakContainer> mergePeakContainers(map<int, PeakContainer> peakGroupData, float groupMergeOverlap, bool debug=false);
+
 private:
     SmootherType smootherType;
     int baselineSmoothingWindow;
@@ -806,8 +810,8 @@ class Peak {
 		unsigned int noNoiseObs; 
 		float noNoiseFraction;
 		float symmetry;
-                float signalBaselineRatio;
-		float groupOverlap;			// 0 no overlap, 1 perfect overlap
+        float signalBaselineRatio;
+        float groupOverlap;			// 0 no overlap, 1 perfect overlap
 		float groupOverlapFrac;		
 
 		int   	chargeState;		    	

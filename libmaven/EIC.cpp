@@ -2513,6 +2513,115 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
     return pgroups;
 }
 
+
+map<int, PeakContainer> EIC::mergePeakContainers(map<int, PeakContainer> peakGroupData, float groupMergeOverlap, bool debug) {
+
+    unsigned long iterationCounter = 0;
+    unsigned int N = peakGroupData.size();
+
+    //Progressively merge peaks until group overlap issues are resolved
+    while (true) {
+
+        if (debug) {
+            cout << "ITERATION #" << iterationCounter << ":" << endl;
+        }
+
+        IntegerSetContainer merges;
+
+        //initialize set container
+        for (unsigned int i = 0; i < N; i++) {
+            merges.containerBySet.insert(make_pair(i, set<int>{static_cast<int>(i)}));
+        }
+
+        if (debug) {
+            cout << "# merges.containerBySet(): " << merges.containerBySet.size() << endl;
+        }
+
+        //merge data based on existing containers
+        for (unsigned int i = 0; i < N; i++) {
+
+            PeakContainer peaksI = peakGroupData[static_cast<int>(i)];
+
+            if (peaksI.peaks.empty()) continue;
+
+            float minPeakRtI = peaksI.minPeakRt;
+            float maxPeakRtI = peaksI.maxPeakRt;
+
+            for (unsigned int j = i+1; j < N; j++) {
+
+                PeakContainer peaksJ = peakGroupData[static_cast<int>(j)];
+
+                if (peaksJ.peaks.empty()) continue;
+
+                float minPeakRtJ = peaksJ.minPeakRt;
+                float maxPeakRtJ = peaksJ.maxPeakRt;
+
+                //Implies an overlap of 0, and all subsequent peaks should have an overlap of 0 compared to peaksI.
+                if (minPeakRtJ > maxPeakRtI) break;
+
+                float rtOverlap = mzUtils::checkOverlap(minPeakRtI, maxPeakRtI, minPeakRtJ, maxPeakRtJ);
+
+                if (rtOverlap >= groupMergeOverlap) {
+                    merges.addMerge((make_pair(i, j)));
+                }
+            }
+        }
+
+        merges.combineContainers(debug);
+
+        //stay in the while loop until no more merges need to be made.
+        if (merges.isAllContainersSize(1)) {
+            if (debug) cout << "Peak group convergence reached." << endl;
+            break;
+
+            //recreate peakGroupData using the containers indicated by merges.
+        } else {
+            map<int, PeakContainer> updatedPeakGroupData{};
+
+            for (unsigned int i = 0; i < N; i++) {
+
+                int intKey = static_cast<int>(i);
+
+                //ensure that every peak index is reassociated in the map
+                if (updatedPeakGroupData.find(intKey) == updatedPeakGroupData.end()) {
+
+                    //Case 1: create a new peak container from the merged data
+                    if (merges.containerBySet.find(intKey) != merges.containerBySet.end() && merges.containerBySet[intKey].size() > 1) {
+
+                        set<int> container = merges.containerBySet[intKey];
+
+                        PeakContainer mergedContainer;
+                        for (auto index : container) {
+                            mergedContainer.mergePeakContainer(peakGroupData[index]);
+                        }
+                        mergedContainer.recomputeProperties();
+
+                        bool isAddedMerged = false;
+                        for (auto index : container) {
+                            if (isAddedMerged) {
+                                updatedPeakGroupData.insert(make_pair(index, PeakContainer()));
+                            } else {
+                                updatedPeakGroupData.insert(make_pair(index, mergedContainer));
+                                isAddedMerged = true;
+                            }
+                        }
+
+                        //Case 2: peak container is unchanged from previous set
+                    } else {
+                        updatedPeakGroupData.insert(make_pair(i, peakGroupData[intKey]));
+                    }
+
+                }
+            }
+
+            iterationCounter++;
+            peakGroupData = updatedPeakGroupData;
+        }
+    }
+
+    return peakGroupData;
+}
+
 void EIC::interpolate() {
 
     unsigned int lastNonZero=0;
