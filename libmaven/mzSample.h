@@ -2465,7 +2465,8 @@ public:
 };
 
 //Issue 482
-struct PeakContainer {
+class PeakContainer {
+public:
 
     map<mzSample*, Peak> peaks{};
 
@@ -2486,6 +2487,9 @@ struct PeakContainer {
                 Peak oldPeak = peaks[p.getSample()];
                 if (p.peakIntensity > oldPeak.peakIntensity) {
                     peaks[p.getSample()] = p;
+                    //TODO: #687 option to create a merged peak that computes new properties
+                    //based on all constituent peaks,
+                    //e.g., rtmin, rtmax, peakArea, smoothedPeakArea, etc.
                 }
             } else {
                 peaks.insert(make_pair(p.getSample(), p));
