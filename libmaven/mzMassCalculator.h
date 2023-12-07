@@ -90,9 +90,6 @@ class MassCalculator {
     vector<Match> enumerateMasses(double inputMass, double charge, double maxdiff);
     double adjustMass(double mass,int charge);
 
-    //Used for computation of actual values for labeled data.
-    static vector<Isotope> computeIsotopes(string compoundFormula, Adduct* adduct, int maxNumProtons=INT_MAX, bool isUse13C=true, bool isUse15N=true, bool isUse34S=true, bool isUse2H=true);
-
     static vector<Isotope> computeIsotopes2(string compoundFormula,
                                             Adduct *adduct,
                                             vector<Atom> heavyIsotopes,
