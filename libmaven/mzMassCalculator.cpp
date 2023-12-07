@@ -347,6 +347,7 @@ vector<Isotope> MassCalculator::computeIsotopes2(
     bool isIncludeNaturalAbundance,
     int maxNumExtraNeutrons,
     double minimumProportionMPlusZero,
+    double minMonoisotopeTotalAbundance,
     bool debug
     ){
 
@@ -356,7 +357,7 @@ vector<Isotope> MassCalculator::computeIsotopes2(
             compoundFormula,
             adduct,
             naturalAbundanceData,
-            0,
+            minMonoisotopeTotalAbundance * minimumProportionMPlusZero, // Issue 690: speedup
             false);
 
     //Filter the list of isotopes based on search criteria.

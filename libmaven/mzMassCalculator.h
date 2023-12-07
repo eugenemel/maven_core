@@ -98,6 +98,7 @@ class MassCalculator {
                                             bool isIncludeNaturalAbundance = false,
                                             int maxNumExtraNeutrons=INT_MAX,
                                             double minimumProportionMPlusZero = 0,
+                                            double minMonoisotopeTotalAbundance = 0.01, // Assume that the monoisotope constitutes at least 1% of total abundance
                                             bool debug=false
                                             );
 
