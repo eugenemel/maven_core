@@ -116,6 +116,10 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
         envelopeGroup = extractEnvelopesVersion1(compound, adduct, group, isotopes, params, debug);
     }
 
+    //Issue 691: combine overlapping isotopes when the data is identical.
+    //TODO: control this with a parameter?
+    envelopeGroup.combineOverlappingIsotopes();
+
     envelopeGroup.extractionAlgorithmName = IsotopeParameters::getAlgorithmName(params.isotopicExtractionAlgorithm);
     return envelopeGroup;
 
@@ -483,4 +487,140 @@ void IsotopicEnvelopeGroup::setIsotopesToChildrenPeakGroups(Classifier *classifi
         }
         this->group->addChild(child);
     }
+}
+
+void IsotopicEnvelopeGroup::combineOverlappingIsotopes() {
+
+    //organize isotopes by name
+    map<string, Isotope> isotopesByName{};
+    for (Isotope isotope : isotopes) {
+        isotopesByName.insert(make_pair(isotope.name, isotope));
+    }
+
+    //re-organize data, noting overlapping quant values
+    map<pair<mzSample*, float>, vector<string>> quantValToIsotopes{};
+
+    //define new destinations for overlapping quant values
+    map<pair<PeakGroup, Peak>, vector<string>> peakToUpdatedPeakGroup{};
+
+    for (auto& child : isotopePeakGroups) {
+
+        string isotopeName = child.tagString;
+
+        if (isotopeName == "C12 PARENT") continue;
+
+        for (auto& peak : child.getPeaks()) {
+            float peakHeight = peak.peakIntensity;
+            mzSample *sample = peak.getSample();
+
+            if (sample && peakHeight > 0) {
+                auto key = make_pair(sample, peakHeight);
+                if (quantValToIsotopes.find(key) == quantValToIsotopes.end()) {
+                    quantValToIsotopes.insert(make_pair(key, vector<string>{}));
+                }
+                quantValToIsotopes[key].push_back(isotopeName);
+
+                auto destinationKey = make_pair(child, peak);
+                if (peakToUpdatedPeakGroup.find(destinationKey) == peakToUpdatedPeakGroup.end()) {
+                    peakToUpdatedPeakGroup.insert(make_pair(destinationKey, vector<string>{}));
+                }
+                peakToUpdatedPeakGroup[destinationKey].push_back(isotopeName);
+
+            }
+        }
+
+    }
+
+    //Reformat data, mapping to peaks to a single string key
+    map<string, vector<Peak>> isotopeToPeaks{};
+    for (auto it = peakToUpdatedPeakGroup.begin(); it != peakToUpdatedPeakGroup.end(); ++it) {
+
+        string isotopeNameKey;
+
+        vector<string> isotopeNames = it->second;
+        for (auto isotopeName : isotopeNames) {
+            if (isotopeNameKey != "") {
+                isotopeNameKey += " / ";
+                isotopeNameKey += isotopeName;
+            } else {
+                isotopeNameKey = isotopeName;
+            }
+        }
+
+        Peak peak = it->first.second;
+
+        if (isotopeToPeaks.find(isotopeNameKey) == isotopeToPeaks.end()) {
+            isotopeToPeaks.insert(make_pair(isotopeNameKey, vector<Peak>{}));
+        }
+        isotopeToPeaks[isotopeNameKey].push_back(peak);
+    }
+
+    //identify all of the cases where the same quant value is identified by multiple isotopes.
+    set<vector<string>> combinations{};
+    for (auto it = quantValToIsotopes.begin(); it != quantValToIsotopes.end(); ++it) {
+        if (it->second.size() > 1) {
+            combinations.insert(it->second);
+        }
+    }
+
+    //add new isotopes based on combinations (if applicable).
+    for (auto it = combinations.begin(); it != combinations.end(); ++it){
+        Isotope combinedIsotope;
+
+        for (auto & isotopeName : *it) {
+            Isotope isotope = isotopesByName[isotopeName];
+
+            if (combinedIsotope.name != "") {
+                combinedIsotope.name += " / ";
+                combinedIsotope.name += isotope.name;
+            } else {
+                combinedIsotope.name = isotope.name;
+                combinedIsotope.charge = isotope.charge;
+            }
+
+            combinedIsotope.mz += isotope.mz;
+            combinedIsotope.abundance += isotope.abundance;
+            combinedIsotope.naturalAbundanceMonoProportion += isotope.naturalAbundanceMonoProportion;
+            if (isotope.C13) combinedIsotope.C13 = true;
+            if (isotope.N15) combinedIsotope.N15 = true;
+            if (isotope.H2) combinedIsotope.H2 = true;
+            if (isotope.S34) combinedIsotope.S34 = true;
+            if (isotope.O18) combinedIsotope.O18 = true;
+
+        }
+
+        isotopesByName.insert(make_pair(combinedIsotope.name, combinedIsotope));
+    }
+
+    //create new peak groups based on merged isotopes
+    vector<PeakGroup> updatedPeakGroups(isotopeToPeaks.size());
+    vector<Isotope> updatedIsotopes(isotopeToPeaks.size());
+    unsigned int counter = 0;
+
+    for (auto it = isotopeToPeaks.begin(); it != isotopeToPeaks.end(); ++it) {
+
+        string isotopeName = it->first;
+        Isotope isotope = isotopesByName[isotopeName];
+        updatedIsotopes[counter] = isotope;
+
+        PeakGroup pg;
+        pg.meanMz = isotope.mz;
+        pg.expectedAbundance = isotope.abundance;
+        pg.isotopeC13count = isotope.C13;
+        pg.isotopicIndex = counter;
+        pg.compound = this->compound;
+        pg.adduct = this->adduct;
+        pg.tagString = isotopeName;
+        pg.setType(PeakGroup::GroupType::IsotopeType);
+        pg.peaks = it->second; //peaks
+
+        updatedPeakGroups[counter] = pg;
+
+        counter++;
+    }
+
+    this->isotopes = updatedIsotopes;
+    this->isotopePeakGroups = updatedPeakGroups;
+
+    //TODO: recompute the isotopic envelopes?
 }
