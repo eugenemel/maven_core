@@ -884,6 +884,16 @@ struct PeakMzSampleComparator {
     }
 };
 
+struct PeakIntensitySampleComparator {
+    bool operator()(const Peak& a, const Peak& b) const {
+        if (a.sample && b.sample && a.sample != b.sample) {
+            return a.sample < b.sample;
+        } else {
+            return a.peakIntensity < b.peakIntensity;
+        }
+    }
+};
+
 //Issue 371: moved from maven/classifier.h
 class Classifier
 {

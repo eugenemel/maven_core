@@ -501,7 +501,7 @@ void IsotopicEnvelopeGroup::combineOverlappingIsotopes() {
     map<pair<mzSample*, float>, vector<string>> quantValToIsotopes{};
 
     //define new destinations for overlapping quant values
-    map<Peak, vector<string>, PeakMzSampleComparator> peakToUpdatedPeakGroup{};
+    map<Peak, vector<string>, PeakIntensitySampleComparator> peakToUpdatedPeakGroup{};
 
     PeakGroup monoisotope;
 
