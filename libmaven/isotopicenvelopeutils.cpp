@@ -501,15 +501,15 @@ void IsotopicEnvelopeGroup::combineOverlappingIsotopes() {
     map<pair<mzSample*, float>, vector<string>> quantValToIsotopes{};
 
     //define new destinations for overlapping quant values
-    map<pair<PeakGroup, Peak>, vector<string>> peakToUpdatedPeakGroup{};
+    map<Peak, vector<string>, PeakMzSampleComparator> peakToUpdatedPeakGroup{};
 
-    for (auto& child : isotopePeakGroups) {
+    for (PeakGroup child : isotopePeakGroups) {
 
         string isotopeName = child.tagString;
 
         if (isotopeName == "C12 PARENT") continue;
 
-        for (auto& peak : child.getPeaks()) {
+        for (Peak peak : child.getPeaks()) {
             float peakHeight = peak.peakIntensity;
             mzSample *sample = peak.getSample();
 
@@ -520,7 +520,8 @@ void IsotopicEnvelopeGroup::combineOverlappingIsotopes() {
                 }
                 quantValToIsotopes[key].push_back(isotopeName);
 
-                auto destinationKey = make_pair(child, peak);
+                auto destinationKey = peak;
+
                 if (peakToUpdatedPeakGroup.find(destinationKey) == peakToUpdatedPeakGroup.end()) {
                     peakToUpdatedPeakGroup.insert(make_pair(destinationKey, vector<string>{}));
                 }
@@ -547,7 +548,7 @@ void IsotopicEnvelopeGroup::combineOverlappingIsotopes() {
             }
         }
 
-        Peak peak = it->first.second;
+        Peak peak = it->first;
 
         if (isotopeToPeaks.find(isotopeNameKey) == isotopeToPeaks.end()) {
             isotopeToPeaks.insert(make_pair(isotopeNameKey, vector<Peak>{}));

@@ -874,6 +874,16 @@ class Peak {
 		vector<mzLink> findCovariants();
 };
 
+struct PeakMzSampleComparator {
+    bool operator()(const Peak& a, const Peak& b) const {
+        if (a.sample && b.sample && a.sample != b.sample) {
+            return a.sample < b.sample;
+        } else {
+            return a.peakMz < b.peakMz;
+        }
+    }
+};
+
 //Issue 371: moved from maven/classifier.h
 class Classifier
 {
