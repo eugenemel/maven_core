@@ -503,11 +503,16 @@ void IsotopicEnvelopeGroup::combineOverlappingIsotopes() {
     //define new destinations for overlapping quant values
     map<Peak, vector<string>, PeakMzSampleComparator> peakToUpdatedPeakGroup{};
 
+    PeakGroup monoisotope;
+
     for (PeakGroup child : isotopePeakGroups) {
 
         string isotopeName = child.tagString;
 
-        if (isotopeName == "C12 PARENT") continue;
+        if (isotopeName == "C12 PARENT") {
+            monoisotope = child;
+            continue;
+        }
 
         for (Peak peak : child.getPeaks()) {
             float peakHeight = peak.peakIntensity;
@@ -594,9 +599,14 @@ void IsotopicEnvelopeGroup::combineOverlappingIsotopes() {
     }
 
     //create new peak groups based on merged isotopes
-    vector<PeakGroup> updatedPeakGroups(isotopeToPeaks.size());
-    vector<Isotope> updatedIsotopes(isotopeToPeaks.size());
-    unsigned int counter = 0;
+    vector<PeakGroup> updatedPeakGroups(isotopeToPeaks.size()+1); //add one for C12 PARENT
+    vector<Isotope> updatedIsotopes(isotopeToPeaks.size()+1);
+
+    //add back C12 parent
+    updatedPeakGroups[0] = monoisotope;
+    updatedIsotopes[0] = isotopesByName.at("C12 PARENT");
+
+    unsigned int counter = 1;
 
     for (auto it = isotopeToPeaks.begin(); it != isotopeToPeaks.end(); ++it) {
 
