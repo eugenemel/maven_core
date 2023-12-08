@@ -489,7 +489,7 @@ void IsotopicEnvelopeGroup::setIsotopesToChildrenPeakGroups(Classifier *classifi
     }
 }
 
-void IsotopicEnvelopeGroup::combineOverlappingIsotopes() {
+void IsotopicEnvelopeGroup::combineOverlappingIsotopes(float ppm) {
 
     //organize isotopes by name
     map<string, Isotope> isotopesByName{};
@@ -537,30 +537,6 @@ void IsotopicEnvelopeGroup::combineOverlappingIsotopes() {
 
     }
 
-    //Reformat data, mapping to peaks to a single string key
-    map<string, vector<Peak>> isotopeToPeaks{};
-    for (auto it = peakToUpdatedPeakGroup.begin(); it != peakToUpdatedPeakGroup.end(); ++it) {
-
-        string isotopeNameKey;
-
-        vector<string> isotopeNames = it->second;
-        for (auto isotopeName : isotopeNames) {
-            if (isotopeNameKey != "") {
-                isotopeNameKey += " / ";
-                isotopeNameKey += isotopeName;
-            } else {
-                isotopeNameKey = isotopeName;
-            }
-        }
-
-        Peak peak = it->first;
-
-        if (isotopeToPeaks.find(isotopeNameKey) == isotopeToPeaks.end()) {
-            isotopeToPeaks.insert(make_pair(isotopeNameKey, vector<Peak>{}));
-        }
-        isotopeToPeaks[isotopeNameKey].push_back(peak);
-    }
-
     //identify all of the cases where the same quant value is identified by multiple isotopes.
     set<vector<string>> combinations{};
     for (auto it = quantValToIsotopes.begin(); it != quantValToIsotopes.end(); ++it) {
@@ -569,9 +545,13 @@ void IsotopicEnvelopeGroup::combineOverlappingIsotopes() {
         }
     }
 
+    map<string, bool> isIsotopesOverlappingMz{};
+
     //add new isotopes based on combinations (if applicable).
     for (auto it = combinations.begin(); it != combinations.end(); ++it){
         Isotope combinedIsotope;
+
+        vector<double> isotopeMzs{};
 
         for (auto & isotopeName : *it) {
             Isotope isotope = isotopesByName[isotopeName];
@@ -584,6 +564,8 @@ void IsotopicEnvelopeGroup::combineOverlappingIsotopes() {
                 combinedIsotope.charge = isotope.charge;
             }
 
+            isotopeMzs.push_back(isotope.mz);
+
             combinedIsotope.mz += isotope.mz;
             combinedIsotope.abundance += isotope.abundance;
             combinedIsotope.naturalAbundanceMonoProportion += isotope.naturalAbundanceMonoProportion;
@@ -595,18 +577,76 @@ void IsotopicEnvelopeGroup::combineOverlappingIsotopes() {
 
         }
 
+        sort(isotopeMzs.begin(), isotopeMzs.end());
+
+        bool isMzsOverlapping = true;
+
+        for (unsigned int i = 1; i < isotopeMzs.size(); i++) {
+
+            double previousMz = isotopeMzs[i-1];
+            double currentMz = isotopeMzs[i];
+
+            float maxLowerMz = previousMz + previousMz/1e6f*ppm;
+            float minHigherMz = currentMz - currentMz/1e6f*ppm;
+
+            isMzsOverlapping = isMzsOverlapping && maxLowerMz >= minHigherMz;
+        }
+
+        isIsotopesOverlappingMz.insert(make_pair(combinedIsotope.name, isMzsOverlapping));
+
         isotopesByName.insert(make_pair(combinedIsotope.name, combinedIsotope));
     }
+
+    //Reformat data, mapping to peaks to a single string key
+    map<string, vector<Peak>> isotopeToPeaks{};
+    for (auto it = peakToUpdatedPeakGroup.begin(); it != peakToUpdatedPeakGroup.end(); ++it) {
+
+        string isotopeNameKey;
+
+        vector<string> isotopeNames = it->second;
+        for (string isotopeName : isotopeNames) {
+            if (isotopeNameKey != "") {
+                isotopeNameKey += " / ";
+                isotopeNameKey += isotopeName;
+            } else {
+                isotopeNameKey = isotopeName;
+            }
+        }
+
+        Peak peak = it->first;
+
+        bool isValidMerge = true;
+        if (isIsotopesOverlappingMz.find(isotopeNameKey) != isIsotopesOverlappingMz.end()) {
+            isValidMerge = isIsotopesOverlappingMz.at(isotopeNameKey);
+        }
+
+        if (isValidMerge) {
+            if (isotopeToPeaks.find(isotopeNameKey) == isotopeToPeaks.end()) {
+                isotopeToPeaks.insert(make_pair(isotopeNameKey, vector<Peak>{}));
+            }
+            isotopeToPeaks[isotopeNameKey].push_back(peak);
+        } else {
+            //TODO:
+            // get back to the original peaks, and associate them with the original isotopes.
+        }
+
+    }
+
+    // Case: peak would have been mapped to a merged isotope, but not all of the original isotopes were detected
+    // TODO
+
+    unsigned int counter = 0;
 
     //create new peak groups based on merged isotopes
     vector<PeakGroup> updatedPeakGroups(isotopeToPeaks.size()+1); //add one for C12 PARENT
     vector<Isotope> updatedIsotopes(isotopeToPeaks.size()+1);
 
     //add back C12 parent
-    updatedPeakGroups[0] = monoisotope;
-    updatedIsotopes[0] = isotopesByName.at("C12 PARENT");
-
-    unsigned int counter = 1;
+    if (isotopesByName.find("C12 PARENT") != isotopesByName.end()) {
+        updatedIsotopes[counter] = isotopesByName.at("C12 PARENT");
+        updatedPeakGroups[counter] = monoisotope;
+        counter++;
+    }
 
     for (auto it = isotopeToPeaks.begin(); it != isotopeToPeaks.end(); ++it) {
 

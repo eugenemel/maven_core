@@ -66,7 +66,7 @@ public:
     void setIsotopesToChildrenPeakGroups(Classifier *classifier = nullptr);
 
     // Issue 691: combine isotopes that give the same quant readout.
-    void combineOverlappingIsotopes();
+    void combineOverlappingIsotopes(float ppm=20);
 
     void print();
 };
