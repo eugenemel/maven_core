@@ -503,6 +503,9 @@ void IsotopicEnvelopeGroup::combineOverlappingIsotopes(float ppm) {
     //define new destinations for overlapping quant values
     map<Peak, vector<string>, PeakIntensitySampleComparator> peakToUpdatedPeakGroup{};
 
+    //keep mapping betwen duplicated keys, in case we need those peaks again
+    map<Peak, vector<Peak>, PeakIntensitySampleComparator> peakToAllPeaks{};
+
     PeakGroup monoisotope;
 
     for (PeakGroup child : isotopePeakGroups) {
@@ -525,12 +528,15 @@ void IsotopicEnvelopeGroup::combineOverlappingIsotopes(float ppm) {
                 }
                 quantValToIsotopes[key].push_back(isotopeName);
 
-                auto destinationKey = peak;
+                //If the peaks cannot be merged together after all, then need to send peaks back to original isotope.
+                peak.tempString = isotopeName;
 
-                if (peakToUpdatedPeakGroup.find(destinationKey) == peakToUpdatedPeakGroup.end()) {
-                    peakToUpdatedPeakGroup.insert(make_pair(destinationKey, vector<string>{}));
+                if (peakToUpdatedPeakGroup.find(peak) == peakToUpdatedPeakGroup.end()) {
+                    peakToUpdatedPeakGroup.insert(make_pair(peak, vector<string>{}));
+                    peakToAllPeaks.insert(make_pair(peak, vector<Peak>{}));
                 }
-                peakToUpdatedPeakGroup[destinationKey].push_back(isotopeName);
+                peakToUpdatedPeakGroup[peak].push_back(isotopeName);
+                peakToAllPeaks[peak].push_back(peak);
 
             }
         }
@@ -626,8 +632,14 @@ void IsotopicEnvelopeGroup::combineOverlappingIsotopes(float ppm) {
             }
             isotopeToPeaks[isotopeNameKey].push_back(peak);
         } else {
-            //TODO:
-            // get back to the original peaks, and associate them with the original isotopes.
+            vector<Peak> originalPeaks = peakToAllPeaks.at(peak);
+            for(Peak p : originalPeaks) {
+                string originalIsotopeName = p.tempString;
+                if (isotopeToPeaks.find(originalIsotopeName) == isotopeToPeaks.end()) {
+                    isotopeToPeaks.insert(make_pair(originalIsotopeName, vector<Peak>{}));
+                }
+                isotopeToPeaks[originalIsotopeName].push_back(p);
+            }
         }
 
     }

@@ -67,6 +67,9 @@ Peak::Peak(EIC* e, int p) {
         rtmaxFWHM = 0.0f;
         peakAreaFWHM = 0.0f;
         smoothedPeakAreaFWHM = 0.0f;
+
+        //Issue 601
+        tempString = "";
 }
 
 
@@ -129,6 +132,8 @@ void Peak::copyObj(const Peak& o ) {
         rtmaxFWHM = o.rtmaxFWHM;
         peakAreaFWHM = o.peakAreaFWHM;
         smoothedPeakAreaFWHM = o.smoothedPeakAreaFWHM;
+
+        tempString = o.tempString;
 }
 
 Peak& Peak::operator=(const Peak& o)  {

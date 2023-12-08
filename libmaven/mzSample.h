@@ -840,6 +840,9 @@ class Peak {
         float peakAreaFWHM;
         float smoothedPeakAreaFWHM;
 
+        //Issue 691: new field added - not saved/stored in mzrollDB file, use for local remapping
+        string tempString;
+
         mzSample *sample;  //pointer to sample
 
     private:
