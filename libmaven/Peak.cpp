@@ -4,6 +4,7 @@ Peak::Peak() {
 	pos = 0;
     eic = nullptr;
     sample = nullptr;
+    tempString = "";
 }
 
 Peak::Peak(EIC* e, int p) { 
