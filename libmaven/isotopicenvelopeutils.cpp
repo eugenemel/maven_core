@@ -117,8 +117,9 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
     }
 
     //Issue 691: combine overlapping isotopes when the data is identical.
-    //TODO: carry out this step based on parameter option?
-    envelopeGroup.combineOverlappingIsotopes(params.ppm);
+    if (params.isCombineOverlappingIsotopes) {
+        envelopeGroup.combineOverlappingIsotopes(params.ppm);
+    }
 
     envelopeGroup.extractionAlgorithmName = IsotopeParameters::getAlgorithmName(params.isotopicExtractionAlgorithm);
     return envelopeGroup;

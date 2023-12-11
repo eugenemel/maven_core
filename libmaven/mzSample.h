@@ -1049,6 +1049,9 @@ struct IsotopeParameters {
     //Issue 680
     LabeledIsotopeRetentionPolicy labeledIsotopeRetentionPolicy = LabeledIsotopeRetentionPolicy::ONE_OR_MORE_LABELS;
 
+    //Issue 691
+    bool isCombineOverlappingIsotopes = false;
+
     string encodeParams();
     static IsotopeParameters decode(string encodedIsotopeParameters);
     static string getAlgorithmName(IsotopicExtractionAlgorithm algorithm);

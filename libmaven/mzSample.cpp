@@ -2453,6 +2453,9 @@ string IsotopeParameters::encodeParams() {
     //Labeled Isotope Retention Policy
     encodedParams = encodedParams + "labeledIsotopeRetentionPolicy" + "=" + IsotopeParameters::getLabeledIsotopeRetentionPolicyName(labeledIsotopeRetentionPolicy) + ";";
 
+    //Combine isotopes based on data
+    encodedParams = encodedParams + "isCombineOverlappingIsotopes" + "=" + to_string(isCombineOverlappingIsotopes) + ";";
+
     string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
     encodedParams = encodedParams + peakPickingEncodedParams;
 
@@ -2554,6 +2557,11 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     }
 
     isotopeParameters.isotopeParametersType = IsotopeParametersType::SAVED;
+
+    //Combine isotopes based on data
+    if (decodedMap.find("isCombineOverlappingIsotopes") != decodedMap.end()) {
+        isotopeParameters.isCombineOverlappingIsotopes = decodedMap["isCombineOverlappingIsotopes"] == "1";
+    }
 
     return isotopeParameters;
 }
