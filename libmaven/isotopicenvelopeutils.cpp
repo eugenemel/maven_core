@@ -182,12 +182,25 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesPeakFullRtBound
 
             double intensity = std::accumulate(eic->intensity.begin(), eic->intensity.end(), 0.0);
 
+            //Issue 695: Collate with raw data for proper rendering in MAVEN GUI.
+            float maxIntensity = 0.0f;
+            float rtAtMaxIntensity = peak.rt;
+            for (unsigned int i = 0; i < eic->size(); i++) {
+                if (eic->intensity[i] > maxIntensity) {
+                    maxIntensity = eic->intensity[i];
+                    rtAtMaxIntensity = eic->rt[i];
+                }
+            }
+
             delete(eic);
             eic = nullptr;
 
             envelope.intensities.at(i) = intensity;
 
             Peak p;
+
+            p.rt = rtAtMaxIntensity;
+            p.peakIntensity = maxIntensity;
 
             //RT related
             p.scan = peak.scan;
@@ -199,7 +212,6 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesPeakFullRtBound
             p.width = (peak.maxpos-peak.minpos);
             p.rtmin = peak.rtmin;
             p.rtmax = peak.rtmax;
-            p.rt = peak.rt;
 
             //m/z related
             p.mzmin = mzmin;
@@ -214,7 +226,6 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesPeakFullRtBound
             p.peakAreaCorrected = intensity;
             p.peakAreaTop = intensity;
             p.peakAreaFractional = intensity;
-            p.peakIntensity = intensity;
             p.signalBaselineRatio = intensity;
             p.smoothedIntensity = intensity;
             p.smoothedPeakArea = intensity;
