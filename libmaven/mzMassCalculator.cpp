@@ -357,9 +357,11 @@ vector<Isotope> MassCalculator::computeIsotopes2(
             adduct,
             naturalAbundanceData,
 
+            0, //Issue 695: reversion of Issue 690 - retain 0-intensity isotopes
+
             // Issue 690: speedup
             // Assume that the monoisotope constitutes at least 1% of total abundance
-            0.01 * minimumProportionMPlusZero,
+            // 0.01 * minimumProportionMPlusZero,
 
             false);
 
