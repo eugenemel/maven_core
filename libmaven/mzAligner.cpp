@@ -795,6 +795,20 @@ void ExperimentAnchorPoints::compute(bool debug, bool isClean) {
     doSegmentedAlignment(debug);
 }
 
+void ExperimentAnchorPoints::computeFromMzs(bool debug, vector<double> mzs, bool isClean) {
+    determineReferenceSample(debug);
+    computeAnchorPointSetFromMzs(debug, mzs);
+    computeSampleToRtMap(debug);
+
+    if (isClean) {
+        cleanSampleToRtMap(debug);
+    } else if (debug) {
+        cout << "ExperimentAnchorPoints::compute(): skipping cleaning step." << endl;
+    }
+
+    doSegmentedAlignment(debug);
+}
+
 void ExperimentAnchorPoints::determineReferenceSample(bool debug){
     for (auto sample : samples) {
         if (sample->isAnchorPointSample){
@@ -807,6 +821,10 @@ void ExperimentAnchorPoints::determineReferenceSample(bool debug){
         cerr << "No samples were designated as containing anchor points - unable to perform anchor point based alignment. Exiting." << endl;
         abort();
     }
+}
+
+void ExperimentAnchorPoints::computeAnchorPointSetFromMzs(bool debug, vector<double> mzs) {
+    //TODO
 }
 
 void ExperimentAnchorPoints::computeAnchorPointSetFromFile(bool debug){

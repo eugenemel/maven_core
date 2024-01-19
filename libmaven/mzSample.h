@@ -2802,9 +2802,14 @@ public:
 
     void compute(bool debug, bool isClean=true);
 
+    void computeFromMzs(bool debug, vector<double> mzs, bool isClean=true);
+
 private:
     void determineReferenceSample(bool debug);
+
     void computeAnchorPointSetFromFile(bool debug);
+    void computeAnchorPointSetFromMzs(bool debug, vector<double>mzs);
+
     void computeSampleToRtMap(bool debug);
     void cleanSampleToRtMap(bool debug);
     void doSegmentedAlignment(bool debug);
