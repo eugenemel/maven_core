@@ -824,7 +824,24 @@ void ExperimentAnchorPoints::determineReferenceSample(bool debug){
 }
 
 void ExperimentAnchorPoints::computeAnchorPointSetFromMzs(bool debug, vector<double> mzs) {
-    //TODO
+
+    for (double& mz : mzs) {
+        double mzmin = mz - mz * static_cast<double>(standardsAlignment_precursorPPM)/1e6;
+        double mzmax = mz + mz * static_cast<double>(standardsAlignment_precursorPPM)/1e6;
+        double rtmin = 0;
+        double rtmax = 1e6;
+
+        AnchorPointSet anchorPointSet(mzmin, mzmax, rtmin, rtmax, eic_smoothingWindow, standardsAlignment_minPeakIntensity);
+
+        anchorPointSet.compute(samples);
+
+        anchorPointSets.push_back(anchorPointSet);
+    }
+
+    AnchorPointSet lastAnchorPointSet = AnchorPointSet::lastRt(samples);
+    anchorPointSets.push_back(lastAnchorPointSet);
+
+    if (debug) cout << "anchorPointsBasedAlignment(): Using " << anchorPointSets.size() << " anchor points." << endl;
 }
 
 void ExperimentAnchorPoints::computeAnchorPointSetFromFile(bool debug){
