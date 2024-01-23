@@ -915,16 +915,30 @@ void ExperimentAnchorPoints::computeSampleToRtMap(bool debug){
 
     for (auto &pt : anchorPointSets) {
 
+        if (debug && referenceSample && pt.sampleToPoints.find(referenceSample) != pt.sampleToPoints.end()) {
+            cout << "AnchorPointSet with RT@"
+                 << pt.sampleToPoints.at(referenceSample)->rt
+                 << endl;
+        }
+
         //invalid anchor point sets are skipped.
         if (!pt.isValid) continue;
 
         for (auto it = pt.sampleToPoints.begin(); it != pt.sampleToPoints.end(); ++it) {
+
+            //TODO
+            //Issue 698: Check that all RT information is recorded in order, in the map
 
             mzSample* sample = it->first;
             AnchorPoint* point = it->second;
 
             float observedRt = point->rt;
             float referenceRt = pt.sampleToPoints[referenceSample]->rt;
+
+            if (debug) {
+                cout << sample->sampleName
+                     << "Pair: (" << observedRt << ", " << referenceRt << ")" << endl;
+            }
 
             if (sampleToUpdatedRts.find(sample) != sampleToUpdatedRts.end()) {
 
@@ -933,11 +947,23 @@ void ExperimentAnchorPoints::computeSampleToRtMap(bool debug){
                 float lastObserved = lastPair.first;
                 float lastReference = lastPair.second;
 
+                if (debug) {
+                    cout << "Previous Pair: (" << lastObserved << ", " << lastReference << ")" << endl;
+                }
+
                 if (observedRt >= lastObserved && lastReference >= lastReference) {
                     sampleToUpdatedRts[sample].push_back(make_pair(observedRt, referenceRt));
+
+                    if (debug) {
+                        cout << "Adding pair (" << observedRt << ", " << referenceRt << ")" << endl;
+                    }
                 }
 
             } else {
+
+                if (debug) {
+                    cout << "Initial rtInfo: " << "(" << observedRt << ", " << referenceRt << ")" << endl;
+                }
 
                 pair<float, float> rtPair = make_pair(observedRt, referenceRt);
                 vector<pair<float, float>> rtInfo = vector<pair<float, float>>{};
