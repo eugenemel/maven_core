@@ -833,13 +833,32 @@ void ExperimentAnchorPoints::computeAnchorPointSetFromMzs(bool debug, vector<dou
 
         AnchorPointSet anchorPointSet(mzmin, mzmax, rtmin, rtmax, eic_smoothingWindow, standardsAlignment_minPeakIntensity);
 
+        if (debug) {
+            cout << "AnchorPoint: ( m/z=[" << mzmin << " -" << mzmax << "] rt=[" << rtmin << ", " << rtmax << "])"
+                 << ", smoothing=" << eic_smoothingWindow << "; minPeakIntensity=" << standardsAlignment_minPeakIntensity
+                 << endl;
+        }
         anchorPointSet.compute(samples);
+
+        if (debug) {
+            cout << "AnchorPoint Values:" << endl;
+            for (auto it = anchorPointSet.sampleToPoints.begin(); it != anchorPointSet.sampleToPoints.end(); ++it) {
+                cout << it->first->sampleName << ": RT=" << it->second->rt << " isRtFromEIC? " << (it->second->isRtFromEIC ? "yes" : "no") << endl;
+            }
+        }
 
         anchorPointSets.push_back(anchorPointSet);
     }
 
     AnchorPointSet lastAnchorPointSet = AnchorPointSet::lastRt(samples);
     anchorPointSets.push_back(lastAnchorPointSet);
+
+    if (debug) {
+        cout << "AnchorPoint Values:" << endl;
+        for (auto it = lastAnchorPointSet.sampleToPoints.begin(); it != lastAnchorPointSet.sampleToPoints.end(); ++it) {
+            cout << it->first->sampleName << ": RT=" << it->second->rt << " isRtFromEIC? " << (it->second->isRtFromEIC ? "yes" : "no") << endl;
+        }
+    }
 
     if (debug) cout << "anchorPointsBasedAlignment(): Using " << anchorPointSets.size() << " anchor points." << endl;
 }
