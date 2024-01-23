@@ -937,7 +937,7 @@ void ExperimentAnchorPoints::computeSampleToRtMap(bool debug){
 
             if (debug) {
                 cout << sample->sampleName
-                     << "Pair: (" << observedRt << ", " << referenceRt << ")" << endl;
+                     << " Pair: (" << observedRt << ", " << referenceRt << ")" << endl;
             }
 
             if (sampleToUpdatedRts.find(sample) != sampleToUpdatedRts.end()) {
