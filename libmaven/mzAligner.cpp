@@ -793,6 +793,12 @@ ExperimentAnchorPoints::ExperimentAnchorPoints(
 void ExperimentAnchorPoints::compute(bool debug, bool isClean) {
     determineReferenceSample(debug);
     computeAnchorPointSetFromFile(debug);
+
+    if (anchorPointSets.size() < minNumAnchorPointSetsForAlignment) {
+        cerr << "Too few anchor points to perform alignment - RT alignment will not be performed." << endl;
+        return;
+    }
+
     computeSampleToRtMap(debug);
 
     if (isClean) {
@@ -807,6 +813,12 @@ void ExperimentAnchorPoints::compute(bool debug, bool isClean) {
 void ExperimentAnchorPoints::computeFromMzs(bool debug, vector<double> mzs, bool isClean) {
     determineReferenceSample(debug);
     computeAnchorPointSetFromMzs(debug, mzs);
+
+    if (anchorPointSets.size() < minNumAnchorPointSetsForAlignment) {
+        cerr << "Too few anchor points to perform alignment - RT alignment will not be performed." << endl;
+        return;
+    }
+
     computeSampleToRtMap(debug);
 
     if (isClean) {
@@ -856,11 +868,16 @@ void ExperimentAnchorPoints::computeAnchorPointSetFromMzs(bool debug, vector<dou
             }
         }
 
-        anchorPointSets.push_back(anchorPointSet);
+        if (anchorPointSet.isValid) {
+            anchorPointSets.push_back(anchorPointSet);
+        }
     }
 
     AnchorPointSet lastAnchorPointSet = AnchorPointSet::lastRt(samples);
-    anchorPointSets.push_back(lastAnchorPointSet);
+
+    if (lastAnchorPointSet.isValid) {
+        anchorPointSets.push_back(lastAnchorPointSet);
+    }
 
     if (debug) {
         cout << "AnchorPoint Values:" << endl;

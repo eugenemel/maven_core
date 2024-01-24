@@ -2783,6 +2783,9 @@ public:
     int eic_smoothingWindow;
     float standardsAlignment_minPeakIntensity;
 
+    //options
+    int minNumAnchorPointSetsForAlignment = 3;
+
     //computed fields
     mzSample *referenceSample = nullptr;
     vector<AnchorPointSet> anchorPointSets{};
