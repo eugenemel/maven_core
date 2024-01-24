@@ -1689,7 +1689,7 @@ public:
 
     //from constructor
     mzSlice* slice;
-    vector<mzSample*> eicSamples;
+    vector<mzSample*> eicSamples{};
 
     //used for last point in file
     AnchorPointSet() {
@@ -1723,7 +1723,7 @@ public:
      * @brief compute
      * Method to determine sampleToPoints map.
      */
-    void compute(const vector<mzSample*>& allSamples);
+    void compute(const vector<mzSample*>& allSamples, bool debug);
 
     /**
      * @brief minNumObservedSamples

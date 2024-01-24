@@ -494,10 +494,11 @@ string AnchorPointSet::toString() {
  * @param allSamples
  * @param eic_smoothingWindow
  */
-void AnchorPointSet::compute(const vector<mzSample*>& allSamples){
+void AnchorPointSet::compute(const vector<mzSample*>& allSamples, bool debug=false){
 
-//    //debugging
-//    cout << this->toString() << endl;
+    if (debug) {
+        cout << "AnchorPoint: " << this->toString() << endl;
+    }
 
     //This flag is set in the constructor, or in this method.
     if (!isValid) return;
@@ -528,14 +529,12 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples){
             isComputeEIC = false;
         }
 
-//        //debugging
-//        cout << "isComputeEIC? " << (isComputeEIC ? "true" : "false") << endl;
+        if (debug) cout << "isComputeEIC? " << (isComputeEIC ? "true" : "false") << endl;
 
         if (isComputeEIC) {
             bool isFoundEIC = anchorPoint->setEICRtValue(slice, eic_smoothingWindow, minPeakIntensity);
 
-//            //debugging
-//            cout << "isFoundEIC? " << (isFoundEIC ? "true" : "false") << endl;
+            if (debug) cout << "isFoundEIC? " << (isFoundEIC ? "true" : "false") << endl;
 
             if (isFoundEIC) {
                 foundEICSamples.push_back(x);
@@ -543,8 +542,7 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples){
             }
         }
 
-//        //debugging
-//        cout << x->sampleName << " ==> " << anchorPoint->rt << endl;
+        if (debug) cout << x->sampleName << " ==> " << anchorPoint->rt << endl;
     }
 
     if (foundEICSamples.size() < minNumObservedSamples) {
@@ -558,6 +556,13 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples){
     sort(foundEICSamples.begin(), foundEICSamples.end(), [](const mzSample* lhs, const mzSample* rhs){
         return lhs->sampleId < rhs->sampleId;
     });
+
+    if (debug) {
+        cout << "foundEICSamples:" << endl;
+        for (auto &x : foundEICSamples) {
+            cout << x->sampleName << " id= " << x->sampleId << endl;
+        }
+    }
 
     //interpolate for all samples that do not have RT values from the EIC.
     for (auto &x : allSamples) {
@@ -600,6 +605,10 @@ void AnchorPointSet::compute(const vector<mzSample*>& allSamples){
 
             AnchorPoint *anchorPoint = new AnchorPoint(x);
             anchorPoint->setInterpolatedRtValue(rt);
+
+            if (debug) {
+                cout << "adding interpolated sample: '" << x->sampleName << "' with interpolated RT=" << anchorPoint->rt << endl;
+            }
 
             sampleToPoints.insert(make_pair(x, anchorPoint));
         }
@@ -838,7 +847,7 @@ void ExperimentAnchorPoints::computeAnchorPointSetFromMzs(bool debug, vector<dou
                  << ", smoothing=" << eic_smoothingWindow << "; minPeakIntensity=" << standardsAlignment_minPeakIntensity
                  << endl;
         }
-        anchorPointSet.compute(samples);
+        anchorPointSet.compute(samples, debug);
 
         if (debug) {
             cout << "AnchorPoint Values:" << endl;
