@@ -359,10 +359,11 @@ void EIC::getSingleGlobalMaxPeak(int smoothWindow) {
     computeSpline(smoothWindow);
     if (spline.size() == 0) return;
 
+    //Isuse 698: Switch from 5-point max to 3-point max
     unsigned int globalMax = 0;
-    for (unsigned int i=2; i < N-2; i++ ) {
-        if ( spline[i] > spline[i-1] && spline[i-1] > spline[i-2] &&
-             spline[i] > spline[i+1] && spline[i+1] > spline[i+2] &&
+    for (unsigned int i=1; i < N-1; i++ ) {
+        if ( spline[i] > spline[i-1] &&
+             spline[i] > spline[i+1] &&
              spline[i] > spline[globalMax]) {
             globalMax = i;
         }
