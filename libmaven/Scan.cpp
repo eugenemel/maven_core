@@ -1,3 +1,4 @@
+#include <numeric>
 #include "mzSample.h"
 
 Scan::Scan(mzSample* sample, int scannum, int mslevel, float rt, float precursorMz, int polarity) {
@@ -333,6 +334,13 @@ bool Scan::hasMz(float _mz, float ppm) {
 		if (mz[k] > mzmax ) return false;
     } 
     return false;
+}
+
+float Scan::getTIC() {
+    if (tic <= 0.0f) {
+        tic = std::accumulate(intensity.begin(), intensity.end(), 0.0f);
+    }
+    return tic;
 }
 
 void Scan::summary() {

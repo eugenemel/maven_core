@@ -417,8 +417,8 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
         if (spectrum.empty()) continue;
         map<string,string>cvParams = mzML_cvParams(spectrum);
 
-         int mslevel=1;
-            int scanpolarity=0;
+        int mslevel=1;
+        int scanpolarity=0;
         float rt=0;
         vector<float> mzVector;
         vector<float> intsVector;
@@ -431,6 +431,22 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
         if(cvParams.count("positive scan")) scanpolarity=1;
         else if(cvParams.count("negative scan")) scanpolarity=-1;
         else scanpolarity=0;
+
+        //Issue 702
+        float basePeakMz = 0.0f;
+        if (cvParams.find("base peak m/z") != cvParams.end()) {
+            basePeakMz = string2float(cvParams["base peak m/z"]);
+        }
+
+        float basePeakIntensity = 0.0f;
+        if (cvParams.find("base peak intensity") != cvParams.end()) {
+            basePeakIntensity = string2float(cvParams["base peak intensity"]);
+        }
+
+        float tic = 0.0f;
+        if (cvParams.find("total ion current") != cvParams.end()) {
+            tic = string2float(cvParams["total ion current"]);
+        }
 
         xml_node scanNode = spectrum.first_element_by_path("scanList/scan");
         map<string,string>scanAttr = mzML_cvParams(scanNode);
@@ -598,6 +614,10 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
 
         if (isolationWindowLowerOffset>0) scan->isolationWindowLowerOffset = isolationWindowLowerOffset;
         if (isolationWindowUpperOffset>0) scan->isolationWindowUpperOffset = isolationWindowUpperOffset;
+
+        scan->basePeakMz = basePeakMz;
+        scan->basePeakIntensity = basePeakIntensity;
+        scan->tic = tic;
 
         addScan(scan);
     }

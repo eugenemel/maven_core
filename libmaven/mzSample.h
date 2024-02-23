@@ -122,6 +122,7 @@ class Scan {
     bool isProfile()    { return !centroided; }
     inline int getPolarity() { return polarity; }
     void  setPolarity(int x) { polarity = x; }
+    float getTIC();
 
     double totalIntensity(){ double sum=0; for(unsigned int i=0;i<intensity.size();i++) sum += intensity[i]; return sum; }
     float maxIntensity()  { float max=0; for(unsigned int i=0;i<intensity.size();i++) if(intensity[i] > max) max=intensity[i]; return max; }
@@ -180,6 +181,11 @@ class Scan {
     //assume 1Da window centered around precursorMz unless otherwise specified
     float isolationWindowLowerOffset = 0.5f;
     float isolationWindowUpperOffset = 0.5f;
+
+    //Issue 702
+    float basePeakMz = 0.0f;
+    float basePeakIntensity = 0.0f;
+    float tic = 0.0f;
 
     void addChildScan(Scan* s) { children.push_back(s); }
     vector<Scan*> getAllChildren() { return children; }
