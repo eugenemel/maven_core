@@ -630,6 +630,15 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
     multiplyAtoms(atoms, adduct->nmol);
     addAtoms(atoms, getComposition(adduct));
 
+    //Issue 703: If the adduct atoms reduce the compound atoms to negative amounts, remove them from the map
+    map<string, int> cleanedAtoms{};
+    for (auto it = atoms.begin(); it != atoms.end(); ++it){
+        if (it->second > 0) {
+            cleanedAtoms.insert(make_pair(it->first, it->second));
+        }
+    }
+    atoms = cleanedAtoms;
+
     unsigned int chgNum = abs(adduct->charge);
 
     // Compute partial probabilities
