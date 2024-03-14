@@ -967,8 +967,17 @@ void Scan::snapToGrid(shared_ptr<ScanParameters> params, bool debug) {
             double delta = mzVal - currentGrid;
             int numChunks = floor(delta/params->binMzWidth);
 
-            currentGrid = currentGrid + numChunks * params->binMzWidth;
-            nextGrid = nextGrid + numChunks * params->binMzWidth;
+            currentGrid = currentGrid + (numChunks * params->binMzWidth);
+            nextGrid = nextGrid + (numChunks * params->binMzWidth);
+
+            if (debug) {
+                cout << "i=" << i
+                     << ": mzVal=" << mzVal
+                     << ", delta=" << delta
+                     << "--> currentGrid=" << currentGrid
+                     << " nextGrid=" << nextGrid
+                     << endl;
+            }
         }
 
         //little adjustments, in case previous step wasn't quite enough
@@ -985,6 +994,12 @@ void Scan::snapToGrid(shared_ptr<ScanParameters> params, bool debug) {
             snapMz = currentGrid;
         } else {
             snapMz = nextGrid;
+        }
+
+        if (debug) {
+            cout << currentGrid << "  <  " << mzVal << "   <  " << nextGrid
+                 << " --> snapToMz=" << snapMz
+                 << endl;
         }
 
         if (snappedMzAndIntensity.find(snapMz) == snappedMzAndIntensity.end()) {
