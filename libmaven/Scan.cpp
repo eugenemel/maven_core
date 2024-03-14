@@ -989,13 +989,18 @@ void Scan::snapToGrid(shared_ptr<ScanParameters> params, bool debug) {
 
         if (snappedMzAndIntensity.find(snapMz) == snappedMzAndIntensity.end()) {
             snappedMzAndIntensity.insert(make_pair(snapMz, vector<float>{}));
+            if (debug) {
+                cout << "Adding mz=" << snapMz << endl;
+            }
         }
         snappedMzAndIntensity[snapMz].push_back(this->intensity[i]);
     }
 
     // reduction step
-    vector<float> snappedMz{};
-    vector<float> snappedIntensity{};
+    vector<float> snappedMz(snappedMzAndIntensity.size());
+    vector<float> snappedIntensity(snappedMzAndIntensity.size());
+
+    unsigned int counter = 0;
 
     for (auto it = snappedMzAndIntensity.begin(); it != snappedMzAndIntensity.end(); ++it) {
 
@@ -1010,8 +1015,14 @@ void Scan::snapToGrid(shared_ptr<ScanParameters> params, bool debug) {
             intensity = *max_element(it->second.begin(), it->second.end());
         }
 
-        snappedMz.push_back(it->first);
-        snappedIntensity.push_back(intensity);
+        snappedMz[counter] = it->first;
+        snappedIntensity[counter] = intensity;
+
+        if (debug) {
+            cout << "(" << it->first << ", " << intensity << ")" << endl;
+        }
+
+        counter++;
     }
 
     this->mz = snappedMz;
