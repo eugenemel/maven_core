@@ -931,3 +931,91 @@ float Scan::getMaxMz(){
     return -1.0f;
 }
 
+/**
+ * @brief Scan::snapToGrid
+ * Update the m/z and intensity values based on a grid that starts at a minimum m/z value of
+ * Scan::getMinMz() (usually metadata collected in the mzML file), and continues with spacing
+ * provided by params->binMzWidth.
+ *
+ * Note that this function mutates the m/z values in the Scan object, so should be used with caution.
+ *
+ * @param params
+ * @param debug
+ */
+void Scan::snapToGrid(shared_ptr<ScanParameters> params, bool debug) {
+    if (params->binMzWidth < 0) return;
+
+    //snapping to grid is illegal if the Scan has already been snapped to grid.
+    if (this->snappedToGridSize > 0) return;
+
+    double minMz = getMinMz(); // instrument setting, if available.
+
+    double currentGrid = minMz;
+    double nextGrid = minMz + params->binMzWidth;
+
+    //  <mz,   intensity>
+    map<double, vector<float>> snappedMzAndIntensity{};
+
+    //organize intensities into mz bins, where the mz bins correspond to grid points.
+    for (unsigned int i = 0; i < mz.size(); i++) {
+        double mzVal = this->mz[i];
+
+        // Adjust currentGrid and nextGrid such that currentGrid is less than (or equal to) mz,
+        // and nextGrid is greater than mz.
+        // Because the m/z list is sorted, this only manifests as mz being greater than nextGrid.
+        if (mzVal > nextGrid) {
+            double delta = mzVal - currentGrid;
+            int numChunks = floor(delta/params->binMzWidth);
+
+            currentGrid = currentGrid + numChunks * params->binMzWidth;
+            nextGrid = nextGrid + numChunks * params->binMzWidth;
+        }
+
+        //little adjustments, in case previous step wasn't quite enough
+        while(mzVal > nextGrid) {
+            nextGrid = nextGrid + params->binMzWidth;
+            currentGrid = currentGrid + params->binMzWidth;
+        }
+
+        double deltaToCurrent = mzVal - currentGrid;
+        double deltaToNext = nextGrid - mzVal;
+
+        double snapMz = 0.0f;
+        if (deltaToCurrent <= deltaToNext) {
+            snapMz = currentGrid;
+        } else {
+            snapMz = nextGrid;
+        }
+
+        if (snappedMzAndIntensity.find(snapMz) == snappedMzAndIntensity.end()) {
+            snappedMzAndIntensity.insert(make_pair(snapMz, vector<float>{}));
+        }
+        snappedMzAndIntensity[snapMz].push_back(this->intensity[i]);
+    }
+
+    // reduction step
+    vector<float> snappedMz{};
+    vector<float> snappedIntensity{};
+
+    for (auto it = snappedMzAndIntensity.begin(); it != snappedMzAndIntensity.end(); ++it) {
+
+        float intensity = 0.0f;
+        if (params->binIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
+            intensity = median(it->second);
+        } else if (params->binIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
+            intensity = accumulate(it->second.begin(), it->second.end(), 0.0f) / it->second.size();
+        } else if (params->binIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Sum) {
+            intensity = accumulate(it->second.begin(), it->second.end(), 0.0f);
+        } else if (params->binIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Max) {
+            intensity = *max_element(it->second.begin(), it->second.end());
+        }
+
+        snappedMz.push_back(it->first);
+        snappedIntensity.push_back(intensity);
+    }
+
+    this->mz = snappedMz;
+    this->intensity = snappedIntensity;
+
+    this->snappedToGridSize = params->binMzWidth;
+}
