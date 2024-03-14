@@ -43,6 +43,8 @@ void Scan::deepcopy(Scan* b) {
     this->isolationWindow = b->isolationWindow;
     this->injectionTime = b->injectionTime;
     this->ms1PrecursorForMs3 = b->ms1PrecursorForMs3;
+    this->lowerLimitMz = b->lowerLimitMz;
+    this->upperLimitMz = b->upperLimitMz;
 }
 
 int Scan::findHighestIntensityPos(float _mz, float ppm) {
