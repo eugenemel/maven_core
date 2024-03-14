@@ -179,7 +179,7 @@ struct FragmentationMatchScore {
 class Fragment {
     public: 
         enum SortType {None=0,  Mz=1, Intensity=2 };
-        enum ConsensusIntensityAgglomerationType {Mean=0, Median=1, Sum=2};
+        enum ConsensusIntensityAgglomerationType {Mean=0, Median=1, Sum=2, Max=3};
 
         double precursorMz;				//parent
         int polarity;					//scan polarity 	+1 or -1

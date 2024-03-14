@@ -42,6 +42,7 @@
 
 class mzSample;
 class Scan;
+class ScanParameters;
 class Peak;
 class PeakGroup;
 class mzSlice;
@@ -87,6 +88,11 @@ class mzPoint {
         double x,y,z;
 };
 
+class ScanParameters {
+public:
+    double binMzWidth = -1.0; //indicates no binning
+    Fragment::ConsensusIntensityAgglomerationType binIntensityAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Sum;
+};
 
 class Scan { 
     public:
@@ -200,6 +206,11 @@ class Scan {
     vector<Isotope> getIsotopicPattern(float centerMz, float ppm, int maxZ, int maxIsotopes);
 
     string getSignature(int limitSize=200);
+
+    //Issue 706:
+    // Mutate the scan mz and rt
+    double snappedToGridSize = -1.0; // Indicates that the values have not been snapped to any grid
+    void snapToGrid(shared_ptr<ScanParameters> params, bool debug);
 
     //Issue 256
     float ms1PrecursorForMs3 = 0.0f;
