@@ -589,6 +589,8 @@ public:
     void restoreOriginalRetentionTimes();       
 	void applyPolynomialTransform();
 
+    void snapToGrid(shared_ptr<ScanParameters> params, bool debug);
+
     //class functions
     void addScan(Scan*s);
     inline int getPolarity() { if( scans.size()>0) return scans[0]->getPolarity(); return 0; }
@@ -626,6 +628,7 @@ public:
     static int getFilter_polarity() { return filter_polarity; }
 
     vector<float> getIntensityDistribution(int mslevel);
+
 
     private:
         static int filter_minIntensity;

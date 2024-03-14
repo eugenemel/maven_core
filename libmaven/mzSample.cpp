@@ -3873,3 +3873,9 @@ float PeakGroupBaseline::getCorrespondingBaseline(string name){
 
     return -1.0f;
 }
+
+void mzSample::snapToGrid(shared_ptr<ScanParameters> params, bool debug) {
+    for (Scan* scan : this->scans) {
+        scan->snapToGrid(params, debug);
+    }
+}
