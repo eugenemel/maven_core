@@ -1058,7 +1058,7 @@ string Scan::getBinaryEncodedData(string fieldName, bool includeTags) {
     }
 
     if (includeTags) {
-        encodedData = "</binary>" + encodedData + "</binary>";
+        encodedData = "<binary>" + encodedData + "</binary>";
     }
 
     return encodedData;
