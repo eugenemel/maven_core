@@ -49,19 +49,16 @@ vector<float> decode_base64(const string& src, int float_size, bool neworkorder,
 
     string destStr=b64decode(src.c_str(), src.size());
 
-
 	if (decompress) {
-#ifdef ZLIB
+    #ifdef ZLIB
 		destStr =mzUtils::decompress_string(destStr);
-#endif 
+    #endif
 	}
 
-
-
-#if (LITTLE_ENDIAN == 1)
-	 cerr << "WARNING: LITTLE_ENDIAN.. Inverted network order";
-     neworkorder=!neworkorder;
-#endif
+    #if (LITTLE_ENDIAN == 1)
+        cerr << "WARNING: LITTLE_ENDIAN.. Inverted network order";
+        neworkorder=!neworkorder;
+    #endif
 
     int size = 1+(destStr.size() - 4)/float_size;
     //cerr << "decode_base64 " << float_size << "\t src=" << src.length() << " decodeLen=" << destStr.length() << endl;
