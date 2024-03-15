@@ -28,6 +28,7 @@ namespace base64 {
 		}
 
         //Issue 706
-        string encode_base64(vector<float>& floats, size_t length);
+        //floats are always 32 bits, double 64 bits
+        string encode_base64(vector<float>& floats);
 }
 #endif
