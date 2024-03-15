@@ -27,5 +27,7 @@ namespace base64 {
 						(uint64_t)swapbytes((uint32_t)(x >> 32))));
 		}
 
+        //Issue 706
+        string encode_base64(vector<float>& floats, size_t length);
 }
 #endif

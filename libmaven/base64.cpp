@@ -106,4 +106,42 @@ vector<float> decode_base64(const string& src, int float_size, bool neworkorder,
 
 }
 
+//Issue 706
+string encode_base64(vector<float>& floats) {
+    std::string base64 = "";
+    if (floats.empty()) return base64;
+
+    // Convert vector of floats to a byte array
+    const unsigned char* byteArray = reinterpret_cast<const unsigned char*>(floats.data());
+    size_t byteArrayLength = floats.size() * sizeof(float);
+
+    static constexpr char base64Chars[] =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz"
+        "0123456789+/";
+
+    for (size_t i = 0; i < byteArrayLength; i += 3) {
+        unsigned int val = byteArray[i] << 16;
+        if (i + 1 < byteArrayLength) val |= byteArray[i + 1] << 8;
+        if (i + 2 < byteArrayLength) val |= byteArray[i + 2];
+
+        base64.push_back(base64Chars[(val >> 18) & 0x3F]);
+        base64.push_back(base64Chars[(val >> 12) & 0x3F]);
+
+        if (i + 1 < byteArrayLength) {
+            base64.push_back(base64Chars[(val >> 6) & 0x3F]);
+        } else {
+            base64.push_back('=');
+        }
+
+        if (i + 2 < byteArrayLength) {
+            base64.push_back(base64Chars[val & 0x3F]);
+        } else {
+            base64.push_back('=');
+        }
+    };
+
+    return base64;
+}
+
 }//namespace
