@@ -994,6 +994,31 @@ std::string decompress_string(const std::string& str)
     return outstring;
 }
 
+string compress_string(const string& str){
+    string outstring;
+#ifdef ZLIB
+
+    uLongf compressedSize = compressBound(str.size());
+    std::vector<char> compressed(compressedSize);
+
+    // The compress2 function requires Bytef pointers for the input and output
+    int result = compress2(
+        reinterpret_cast<Bytef*>(&compressed[0]), &compressedSize,
+        reinterpret_cast<const Bytef*>(str.data()), str.size(),
+        Z_DEFAULT_COMPRESSION);
+
+    if (result != Z_OK) {
+        std::cerr << "Compression failed" << std::endl;
+        return "";
+    }
+
+    // Construct a string from the compressed data
+    return std::string(compressed.begin(), compressed.begin() + compressedSize);
+
+#endif
+    return outstring;
+}
+
 bool ends_with(std::string const & value, std::string const & ending)
 {
   if (ending.size() > value.size()) return false;

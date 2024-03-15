@@ -124,7 +124,10 @@ int strincmp(char *s1, char* s2,int n);
 string cleanFilename(const string& s);  
 string substituteInQuotedString(const string& s, const string& chars, const string& substitutions );
 bool gzipInflate( const std::string& compressedBytes, std::string& uncompressedBytes );
+
 std::string decompress_string(const std::string& str);
+string compress_string(const string& str);
+
 bool ends_with(std::string const & value, std::string const & ending);
 bool replace(std::string& str, const std::string& from, const std::string& to);
 void replaceAll(std::string& str, const std::string& from, const std::string& to);
