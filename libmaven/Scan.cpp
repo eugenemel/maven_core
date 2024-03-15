@@ -1047,3 +1047,11 @@ void Scan::snapToGrid(shared_ptr<ScanParameters> params, bool debug) {
 
     this->snappedToGridSize = params->binMzWidth;
 }
+
+string Scan::getBinaryEncodedData(bool includeTags) {
+    //base64::
+
+    //TODO
+
+    return "";
+}
