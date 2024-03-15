@@ -1048,10 +1048,18 @@ void Scan::snapToGrid(shared_ptr<ScanParameters> params, bool debug) {
     this->snappedToGridSize = params->binMzWidth;
 }
 
-string Scan::getBinaryEncodedData(bool includeTags) {
-    //base64::
+string Scan::getBinaryEncodedData(string fieldName, bool includeTags) {
 
-    //TODO
+    string encodedData;
+    if (fieldName == "mz") {
+        encodedData = base64::encode_base64(this->mz);
+    } else if (fieldName == "intensity") {
+        encodedData = base64::encode_base64(this->intensity);
+    }
 
-    return "";
+    if (includeTags) {
+        encodedData = "</binary>" + encodedData + "</binary>";
+    }
+
+    return encodedData;
 }

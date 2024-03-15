@@ -211,7 +211,7 @@ class Scan {
     // Mutate the scan mz and rt
     double snappedToGridSize = -1.0; // Indicates that the values have not been snapped to any grid
     void snapToGrid(shared_ptr<ScanParameters> params, bool debug);
-    string getBinaryEncodedData(bool includeTags=true);
+    string getBinaryEncodedData(string fieldName, bool includeTags=true);
 
     //Issue 256
     float ms1PrecursorForMs3 = 0.0f;
