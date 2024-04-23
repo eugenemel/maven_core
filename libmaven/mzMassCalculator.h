@@ -111,6 +111,16 @@ class MassCalculator {
         double minimumAbundance,
         bool debug=false);
 
+    //Issue 711: Convert input values to cache key
+    static string getNaturalAbundanceDistributionCacheKey(
+        string compoundFormula,
+        Adduct *adduct,
+        double minimumAbundance
+        );
+
+    //Issue 711: Declare cache
+    static map<string, NaturalAbundanceDistribution> naturalAbundanceDistributionCache;
+
     map<string,int> getPeptideComposition(const string& peptideSeq);
 
     static bool compDiff(const Match& a, const Match& b ) { return a.diff < b.diff; }

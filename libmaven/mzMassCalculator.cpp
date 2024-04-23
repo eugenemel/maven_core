@@ -1,5 +1,8 @@
 #include "mzMassCalculator.h"
 
+//Issue 711: cache must be initialized out-of-line
+map<string, NaturalAbundanceDistribution> MassCalculator::naturalAbundanceDistributionCache = {};
+
 using namespace mzUtils;
 using namespace std;
 
@@ -31,6 +34,26 @@ MassCalculator::IonizationType MassCalculator::ionizationType = MassCalculator::
 Adduct* MassCalculator::PlusHAdduct  = new Adduct("[M+H]+",  PROTON , 1, 1);
 Adduct* MassCalculator::MinusHAdduct = new Adduct("[M-H]-", -PROTON, -1, 1);
 Adduct* MassCalculator::ZeroMassAdduct = new Adduct("[M]",0 ,1, 1);
+
+//Issue 711: convert arguments to cache key
+string MassCalculator::getNaturalAbundanceDistributionCacheKey(
+    string compoundFormula,
+    Adduct *adduct,
+    double minimumAbundance
+    ) {
+
+    //not an acceptable cache key
+    if (!adduct) return "";
+
+    stringstream s;
+    s << std::fixed << setprecision(3);
+    s << "formula=" << compoundFormula
+      << ";adduct=" << adduct->name
+      << ";minimumAbundance=" << minimumAbundance
+      << ";";
+
+    return s.str();
+}
 
 /*---------- function to get molar weight of an element or group --------*/
 double MassCalculator::getElementMass(string elmnt){
@@ -624,6 +647,13 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
     double minAbundance,
     bool debug) {
 
+    string cacheKey = MassCalculator::getNaturalAbundanceDistributionCacheKey(compoundFormula, adduct, minAbundance);
+
+    if (cacheKey != "" && naturalAbundanceDistributionCache.find(cacheKey) != naturalAbundanceDistributionCache.end()) {
+        if (debug) cout << "Found Cached NaturalAbundanceDistribution - returning cached value!" << endl;
+        return (naturalAbundanceDistributionCache.at(cacheKey));
+    }
+
     NaturalAbundanceDistribution naturalAbundanceDistribution;
 
     map<string, int> atoms = getComposition(compoundFormula);
@@ -790,6 +820,11 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
     }
 
     naturalAbundanceDistribution.isotopicAbundances = existingAbundances;
+
+    //Issue 711: Write value to cache to avoid excessive recomputations.
+    if (cacheKey != "") {
+        naturalAbundanceDistributionCache.insert(make_pair(cacheKey, naturalAbundanceDistribution));
+    }
 
     return naturalAbundanceDistribution;
 }
