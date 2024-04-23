@@ -131,6 +131,7 @@ string compress_string(const string& str);
 bool ends_with(std::string const & value, std::string const & ending);
 bool replace(std::string& str, const std::string& from, const std::string& to);
 void replaceAll(std::string& str, const std::string& from, const std::string& to);
+string doubleQuoteString(const std::string& in);
 
 
 /* file parsing functions */

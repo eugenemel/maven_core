@@ -1327,5 +1327,14 @@ vector<vector<float>> decodeMsMsSpectrum(string encodedMsMsSpectrum){
 
 } //decodeMsMsSpectrum()
 
+//Issue 710: factor this out to utility method
+string doubleQuoteString(const std::string& in) {
+    if(in.find('\"') != std::string::npos or in.find(",") != std::string::npos) {
+        return "\"" + in + "\"";
+    } else{
+        return in;
+    }
+}
+
 } //namespace end
 
