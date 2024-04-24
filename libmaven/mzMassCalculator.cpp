@@ -371,7 +371,7 @@ double MassCalculator::computeMass(string formula, int charge) {
     return adjustMass(mass,charge);
 }
 
-vector<Isotope> MassCalculator::computeIsotopes2(
+vector<Isotope> MassCalculator::computeIsotopes(
     string compoundFormula,
     Adduct *adduct,
     vector<Atom> labeledIsotopes,

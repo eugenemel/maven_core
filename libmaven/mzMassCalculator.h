@@ -90,7 +90,7 @@ class MassCalculator {
     vector<Match> enumerateMasses(double inputMass, double charge, double maxdiff);
     double adjustMass(double mass,int charge);
 
-    static vector<Isotope> computeIsotopes2(string compoundFormula,
+    static vector<Isotope> computeIsotopes(string compoundFormula,
                                             Adduct *adduct,
                                             vector<Atom> heavyIsotopes,
                                             LabeledIsotopeRetentionPolicy labeledIsotopeRetentionPolicy,
