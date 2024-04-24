@@ -96,7 +96,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
         params.isNatAbundance,
         maxNumProtons,
         params.natAbundanceThreshold,
-        false
+        debug
         );
 
     vector<Isotope> isotopes = theoreticalIsotopes;
@@ -104,7 +104,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
         isotopes = IsotopicEnvelopeAdjuster::condenseTheoreticalIsotopes(
             theoreticalIsotopes,
             params,
-            false
+            debug
             );
     }
 
