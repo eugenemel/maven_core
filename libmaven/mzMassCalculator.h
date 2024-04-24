@@ -111,15 +111,18 @@ class MassCalculator {
         double minimumAbundance,
         bool debug=false);
 
-    //Issue 711: Convert input values to cache key
-    static string getNaturalAbundanceDistributionCacheKey(
-        string compoundFormula,
-        Adduct *adduct,
-        double minimumAbundance
-        );
+    //Issue 715
+    static string getCachedIsotopeKey(
+        string formula,
+        Adduct* adduct,
+        vector<Atom> labeledIsotopes,
+        LabeledIsotopeRetentionPolicy labeledIsotopeRetentionPolicy,
+        bool isIncludeNaturalAbundance,
+        int maxNumExtraNeutrons,
+        double minimumProportionMPlusZero);
 
     //Issue 711: Declare cache
-    static map<string, NaturalAbundanceDistribution> naturalAbundanceDistributionCache;
+    static map<string, vector<Isotope>> isotopesCache;
 
     map<string,int> getPeptideComposition(const string& peptideSeq);
 
