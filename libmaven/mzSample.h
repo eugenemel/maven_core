@@ -1354,7 +1354,14 @@ class PeakGroup {
         //Issue 371: refactor to dedicated method
         //Issue 615: Option to create empty Isotopic Peak Groups
         //Issue 652: cleanup
-        void pullIsotopes(IsotopeParameters isotopeParameters, vector<mzSample*> samples, bool debug=false);
+        void pullIsotopes(IsotopeParameters& isotopeParameters, vector<mzSample*>& samples, bool debug=false);
+
+        //Issue 720: differential abundance score
+        void pullIsotopesDifferentialAbundance(
+            IsotopeParameters& isotopeParameters,
+            vector<mzSample*>& unlabeledSamples,
+            vector<mzSample*>& labeledSamples,
+            bool debug = false);
 
         bool isGroupGood();
         bool isGroupBad();

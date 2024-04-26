@@ -1197,7 +1197,7 @@ string PeakGroup::getPeakGroupLabel() {
     return string(labels.begin(), labels.end());
 }
 
-void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, vector<mzSample*> samples, bool debug) {
+void PeakGroup::pullIsotopes(IsotopeParameters& isotopeParameters, vector<mzSample*>& samples, bool debug) {
 
 
     if (!isotopeParameters.isIsotopes()) {
@@ -1248,6 +1248,16 @@ void PeakGroup::pullIsotopes(IsotopeParameters isotopeParameters, vector<mzSampl
         debug);
 
     envelopeGroup.setIsotopesToChildrenPeakGroups(isotopeParameters.clsf);
+}
+
+//Issue 720: differential abundance score
+void PeakGroup::pullIsotopesDifferentialAbundance(
+    IsotopeParameters& isotopeParameters,
+    vector<mzSample*>& unlabeledSamples,
+    vector<mzSample*>& labeledSamples,
+    bool debug) {
+
+    //TODO
 }
 
 void PeakGroup::applyLabelsFromCompoundMetadata() {
