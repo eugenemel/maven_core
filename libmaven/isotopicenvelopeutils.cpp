@@ -720,6 +720,13 @@ float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
 
         PeakGroup pg = childrenSortedByMz.at(i);
 
+        if (debug) {
+            cout << "[IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes()]: "
+                 << pg.tagString
+                 << " (m/z=" << pg.meanMz << ")"
+                 << endl;
+        }
+
         vector<float> unlabeledIsotopeValues{};
         vector<float> labeledIsotopeValues{};
 
@@ -730,12 +737,28 @@ float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
                 if (quantVal > 0) {
                     unlabeledIsotopeValues.push_back(quantVal);
                 }
+                if (debug) {
+                    cout << "[IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes()]: "
+                         << pg.tagString
+                         << "UNLABELED: '"
+                         << p.getSample()->sampleName << "': quant="
+                         << quantVal
+                         << endl;
+                }
            }
 
            if (find(labeledSamples.begin(), labeledSamples.end(), p.getSample()) != labeledSamples.end()) {
                 float quantVal = p.getQuantByName(params.diffIsoQuantType);
                 if (quantVal > 0) {
                     labeledIsotopeValues.push_back(quantVal);
+                }
+                if (debug) {
+                    cout << "[IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes()]: "
+                         << pg.tagString
+                         << "  LABELED: '"
+                         << p.getSample()->sampleName << "': quant="
+                         << quantVal
+                         << endl;
                 }
            }
         }
@@ -767,10 +790,48 @@ float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
         unlabeledIsotopesEnvelope[i] = unlabeledIntensity;
         labeledIsotopesEnvelope[i] = labeledIntensity;
 
+        if (debug) {
+           cout << "[IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes()]: "
+                << pg.tagString
+                << " UNLABELED: {";
+           for (unsigned int i = 0; i < unlabeledIsotopeValues.size(); i++) {
+                if (i > 0) cout << ", ";
+                cout << unlabeledIsotopeValues[i];
+           }
+           cout << "} ==> " << unlabeledIntensity << "; LABELED: {";
+           for (unsigned int i = 0; i < labeledIsotopeValues.size(); i++) {
+                if (i > 0) cout << ", ";
+                cout << labeledIsotopeValues[i];
+           }
+           cout << "} ==> " << labeledIntensity << ";" << endl;
+        }
+
+    }
+
+    if (debug) {
+        cout << "[IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes()]: "
+             << "ENVELOPE UNLABELED: {";
+            for (unsigned int i = 0; i < unlabeledIsotopesEnvelope.size(); i++) {
+                if (i > 0) cout << ", ";
+                cout << unlabeledIsotopesEnvelope[i];
+            }
+            cout << "}; ENVELOPE LABELED: {";
+            for (unsigned int i = 0; i < labeledIsotopesEnvelope.size(); i++) {
+                if (i > 0) cout << ", ";
+                cout << labeledIsotopesEnvelope[i];
+            }
+            cout << "};" << endl;
+
     }
 
     //TODO: think about other scores here
     float score = 1.0f - mzUtils::correlation(unlabeledIsotopesEnvelope, labeledIsotopesEnvelope);
+
+    if (debug) {
+            cout << "[IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes()]: score="
+                 << score
+                 << endl;
+    }
 
     return score;
 }
