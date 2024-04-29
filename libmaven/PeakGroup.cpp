@@ -1114,7 +1114,7 @@ bool PeakGroup::isMonoisotopic( float ppm) {
 
     int scanum = highestIntensityPeak->scan;
     Scan* s = highestIntensityPeak->getSample()->getScan(scanum);
-    return s->isMonoisotopicPrecursor(highestIntensityPeak->peakMz,ppm, this->chargeState);
+    return s->isMonoisotopicPrecursor(highestIntensityPeak->peakMz, ppm, this->chargeState);
 }
 
 bool PeakGroup::isGroupGood() {
