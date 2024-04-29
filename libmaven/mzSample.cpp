@@ -2476,6 +2476,21 @@ string IsotopeParameters::encodeParams() {
     //Combine isotopes based on data
     encodedParams = encodedParams + "isCombineOverlappingIsotopes" + "=" + to_string(isCombineOverlappingIsotopes) + ";";
 
+    //Issue 720: diff iso comparison
+    encodedParams = encodedParams + "diffIsoQuantType" + "=" + diffIsoQuantType + ";";
+
+    string diffIsoAgglomerationTypeStr = "UNSPECIFIED";
+    if (diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
+        diffIsoAgglomerationTypeStr = "MEAN";
+    } else if (diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
+        diffIsoAgglomerationTypeStr = "MEDIAN";
+    } else if (diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Max) {
+        diffIsoAgglomerationTypeStr = "MAX";
+    } else if (diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Sum) {
+        diffIsoAgglomerationTypeStr = "SUM";
+    }
+    encodedParams = encodedParams + "diffIsoAgglomerationType" + "=" + diffIsoAgglomerationTypeStr + ";";
+
     string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
     encodedParams = encodedParams + peakPickingEncodedParams;
 
@@ -2581,6 +2596,22 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     //Combine isotopes based on data
     if (decodedMap.find("isCombineOverlappingIsotopes") != decodedMap.end()) {
         isotopeParameters.isCombineOverlappingIsotopes = decodedMap["isCombineOverlappingIsotopes"] == "1";
+    }
+
+    if (decodedMap.find("diffIsoQuantType") != decodedMap.end()) {
+        isotopeParameters.diffIsoQuantType = decodedMap["diffIsoQuantType"];
+    }
+    if (decodedMap.find("diffIsoAgglomerationType") != decodedMap.end()) {
+        string diffIsoAgglomerationTypeStr = decodedMap["diffIsoAgglomerationType"];
+        if (diffIsoAgglomerationTypeStr == "MEAN") {
+           isotopeParameters.diffIsoAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Mean;
+        } else if (diffIsoAgglomerationTypeStr == "MEDIAN") {
+           isotopeParameters.diffIsoAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
+        } else if (diffIsoAgglomerationTypeStr == "MAX") {
+           isotopeParameters.diffIsoAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Max;
+        } else if (diffIsoAgglomerationTypeStr == "SUM") {
+           isotopeParameters.diffIsoAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Sum;
+        }
     }
 
     return isotopeParameters;

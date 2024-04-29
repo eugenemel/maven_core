@@ -1074,7 +1074,6 @@ struct IsotopeParameters {
     bool isCombineOverlappingIsotopes = false;
 
     //Issue 720
-    //TODO: encoding/decoding
     string diffIsoQuantType = "peakIntensity";
     Fragment::ConsensusIntensityAgglomerationType diffIsoAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
 
