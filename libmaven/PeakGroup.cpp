@@ -1257,69 +1257,13 @@ void PeakGroup::scoreIsotopesDifferentialAbundance(
     vector<mzSample*> labeledSamples,
     bool debug) {
 
-    vector<PeakGroup> childrenSortedByMz = this->children;
-    sort(childrenSortedByMz.begin(), childrenSortedByMz.end(), [](PeakGroup& lhs, PeakGroup& rhs){
-        return lhs.meanMz < rhs.meanMz;
-    });
-
-    vector<float> unlabeledIsotopesEnvelope(childrenSortedByMz.size());
-    vector<float> labeledIsotopesEnvelope(childrenSortedByMz.size());
-
-    for (unsigned int i = 0; i < childrenSortedByMz.size(); i++) {
-
-        PeakGroup pg = childrenSortedByMz.at(i);
-
-        vector<float> unlabeledIsotopeValues{};
-        vector<float> labeledIsotopeValues{};
-
-        for (Peak p : pg.peaks) {
-
-           if (find(unlabeledSamples.begin(), unlabeledSamples.end(), p.getSample()) != unlabeledSamples.end()){
-                float quantVal = p.getQuantByName(isotopeParameters.diffIsoQuantType);
-                if (quantVal > 0) {
-                    unlabeledIsotopeValues.push_back(quantVal);
-                }
-           }
-
-           if (find(labeledSamples.begin(), labeledSamples.end(), p.getSample()) != labeledSamples.end()) {
-                float quantVal = p.getQuantByName(isotopeParameters.diffIsoQuantType);
-                if (quantVal > 0) {
-                    labeledIsotopeValues.push_back(quantVal);
-                }
-           }
-        }
-
-        float unlabeledIntensity = 0.0f;
-
-        if (isotopeParameters.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
-           unlabeledIntensity = median(unlabeledIsotopeValues);
-        } else if (isotopeParameters.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
-           unlabeledIntensity = accumulate(unlabeledIsotopeValues.begin(), unlabeledIsotopeValues.end(), 0.0f) / unlabeledIsotopeValues.size();
-        } else if (isotopeParameters.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Sum) {
-           unlabeledIntensity = accumulate(unlabeledIsotopeValues.begin(), unlabeledIsotopeValues.end(), 0.0f);
-        } else if (isotopeParameters.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Max) {
-           unlabeledIntensity = *max_element(unlabeledIsotopeValues.begin(), unlabeledIsotopeValues.end());
-        }
-
-        float labeledIntensity = 0.0f;
-
-        if (isotopeParameters.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
-           labeledIntensity = median(labeledIsotopeValues);
-        } else if (isotopeParameters.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
-           labeledIntensity = accumulate(labeledIsotopeValues.begin(), labeledIsotopeValues.end(), 0.0f) / labeledIsotopeValues.size();
-        } else if (isotopeParameters.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Sum) {
-           labeledIntensity = accumulate(labeledIsotopeValues.begin(), labeledIsotopeValues.end(), 0.0f);
-        } else if (isotopeParameters.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Max) {
-           labeledIntensity = *max_element(labeledIsotopeValues.begin(), labeledIsotopeValues.end());
-        }
-
-        unlabeledIsotopesEnvelope[i] = unlabeledIntensity;
-        labeledIsotopesEnvelope[i] = labeledIntensity;
-
-    }
-
-    //TODO: think about other scores here
-    this->fragMatchScore.mergedScore = 1.0f - mzUtils::correlation(unlabeledIsotopesEnvelope, labeledIsotopesEnvelope);
+    this->fragMatchScore.mergedScore = IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
+        this->children,
+        unlabeledSamples,
+        labeledSamples,
+        isotopeParameters,
+        debug
+        );
 }
 
 void PeakGroup::applyLabelsFromCompoundMetadata() {

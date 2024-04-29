@@ -699,3 +699,78 @@ void IsotopicEnvelopeGroup::combineOverlappingIsotopes(float ppm) {
 
     //TODO: recompute the isotopic envelopes?
 }
+
+float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
+    vector<PeakGroup>& isotopePeakGroups,
+    vector<mzSample*> unlabeledSamples,
+    vector<mzSample*> labeledSamples,
+    IsotopeParameters params,
+    bool debug
+    ){
+
+    vector<PeakGroup> childrenSortedByMz = isotopePeakGroups;
+    sort(childrenSortedByMz.begin(), childrenSortedByMz.end(), [](PeakGroup& lhs, PeakGroup& rhs){
+        return lhs.meanMz < rhs.meanMz;
+    });
+
+    vector<float> unlabeledIsotopesEnvelope(childrenSortedByMz.size());
+    vector<float> labeledIsotopesEnvelope(childrenSortedByMz.size());
+
+    for (unsigned int i = 0; i < childrenSortedByMz.size(); i++) {
+
+        PeakGroup pg = childrenSortedByMz.at(i);
+
+        vector<float> unlabeledIsotopeValues{};
+        vector<float> labeledIsotopeValues{};
+
+        for (Peak p : pg.peaks) {
+
+           if (find(unlabeledSamples.begin(), unlabeledSamples.end(), p.getSample()) != unlabeledSamples.end()){
+                float quantVal = p.getQuantByName(params.diffIsoQuantType);
+                if (quantVal > 0) {
+                    unlabeledIsotopeValues.push_back(quantVal);
+                }
+           }
+
+           if (find(labeledSamples.begin(), labeledSamples.end(), p.getSample()) != labeledSamples.end()) {
+                float quantVal = p.getQuantByName(params.diffIsoQuantType);
+                if (quantVal > 0) {
+                    labeledIsotopeValues.push_back(quantVal);
+                }
+           }
+        }
+
+        float unlabeledIntensity = 0.0f;
+
+        if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
+           unlabeledIntensity = median(unlabeledIsotopeValues);
+        } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
+           unlabeledIntensity = accumulate(unlabeledIsotopeValues.begin(), unlabeledIsotopeValues.end(), 0.0f) / unlabeledIsotopeValues.size();
+        } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Sum) {
+           unlabeledIntensity = accumulate(unlabeledIsotopeValues.begin(), unlabeledIsotopeValues.end(), 0.0f);
+        } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Max) {
+           unlabeledIntensity = *max_element(unlabeledIsotopeValues.begin(), unlabeledIsotopeValues.end());
+        }
+
+        float labeledIntensity = 0.0f;
+
+        if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
+           labeledIntensity = median(labeledIsotopeValues);
+        } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
+           labeledIntensity = accumulate(labeledIsotopeValues.begin(), labeledIsotopeValues.end(), 0.0f) / labeledIsotopeValues.size();
+        } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Sum) {
+           labeledIntensity = accumulate(labeledIsotopeValues.begin(), labeledIsotopeValues.end(), 0.0f);
+        } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Max) {
+           labeledIntensity = *max_element(labeledIsotopeValues.begin(), labeledIsotopeValues.end());
+        }
+
+        unlabeledIsotopesEnvelope[i] = unlabeledIntensity;
+        labeledIsotopesEnvelope[i] = labeledIntensity;
+
+    }
+
+    //TODO: think about other scores here
+    float score = 1.0f - mzUtils::correlation(unlabeledIsotopesEnvelope, labeledIsotopesEnvelope);
+
+    return score;
+}

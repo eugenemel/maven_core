@@ -149,5 +149,23 @@ public:
         );
 };
 
+class IsotopicEnvelopeEvaluator {
+public:
+    /**
+     * @brief
+     * Given a vector<PeakGroup> corresponding to IsotopicEnvelopeGroup.isotopePeakGroups,
+     * along with a vector<mzSample*> corresponding to unlabeled samples and a vector<mzSample*> corresponding to
+     * labeled samples, evaluate the disparity between the isotopic envelope measured from unlabeled samples compared to
+     * labeled samples.
+     *
+     */
+    static float differentialIsotopicEnvelopes(
+        vector<PeakGroup>& isotopePeakGroups,
+        vector<mzSample*> unlabeledSamples,
+        vector<mzSample*> labeledSamples,
+        IsotopeParameters params,
+        bool debug=false
+        );
+};
 
 #endif // ISOTOPICENVELOPEUTILS_H
