@@ -1073,6 +1073,11 @@ struct IsotopeParameters {
     //Issue 691
     bool isCombineOverlappingIsotopes = false;
 
+    //Issue 720
+    //TODO: encoding/decoding
+    string diffIsoQuantType = "peakIntensity";
+    Fragment::ConsensusIntensityAgglomerationType diffIsoAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
+
     string encodeParams();
     static IsotopeParameters decode(string encodedIsotopeParameters);
     static string getAlgorithmName(IsotopicExtractionAlgorithm algorithm);
