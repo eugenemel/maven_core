@@ -1251,7 +1251,7 @@ void PeakGroup::pullIsotopes(IsotopeParameters& isotopeParameters, vector<mzSamp
 }
 
 //Issue 720: differential abundance score
-void PeakGroup::pullIsotopesDifferentialAbundance(
+void PeakGroup::scoreIsotopesDifferentialAbundance(
     IsotopeParameters& isotopeParameters,
     vector<mzSample*> unlabeledSamples,
     vector<mzSample*> labeledSamples,

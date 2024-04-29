@@ -1361,7 +1361,7 @@ class PeakGroup {
         void pullIsotopes(IsotopeParameters& isotopeParameters, vector<mzSample*> samples, bool debug=false);
 
         //Issue 720: differential abundance score
-        void pullIsotopesDifferentialAbundance(
+        void scoreIsotopesDifferentialAbundance(
             IsotopeParameters& isotopeParameters,
             vector<mzSample*> unlabeledSamples,
             vector<mzSample*> labeledSamples,
