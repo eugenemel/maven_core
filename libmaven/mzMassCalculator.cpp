@@ -383,6 +383,8 @@ vector<Isotope> MassCalculator::computeIsotopes(
     bool debug
     ){
 
+    vector<IsotopicAbundance> isotopicAbundances;
+
     string cacheKey = MassCalculator::getCachedIsotopeKey(
         compoundFormula,
         adduct,
@@ -414,10 +416,12 @@ vector<Isotope> MassCalculator::computeIsotopes(
 
             false);
 
+    isotopicAbundances = abundanceDistribution.isotopicAbundances;
+
     //Filter the list of isotopes based on search criteria.
     vector<Isotope> isotopes{};
 
-    for (auto isotopicAbundance : abundanceDistribution.isotopicAbundances) {
+    for (auto isotopicAbundance : isotopicAbundances) {
 
        //Avoid isotopes with too many extra neutrons
        if (isotopicAbundance.numTotalExtraNeutrons > maxNumExtraNeutrons) continue;
@@ -1098,4 +1102,18 @@ double MassCalculator::getNaturalAbundanceCorrectedQuantValue(
     }
 
     return 0;
+}
+
+vector<IsotopicAbundance> MassCalculator::getUnknownFormulaIsotopicAbundances(
+    double mz,
+    vector<Atom> heavyIsotopes,
+    int maxNumExtraNeutrons,
+    bool debug
+    ) {
+
+    vector<IsotopicAbundance> allAbundances{};
+
+    //TODO
+
+    return allAbundances;
 }

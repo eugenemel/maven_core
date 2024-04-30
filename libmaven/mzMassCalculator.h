@@ -111,6 +111,15 @@ class MassCalculator {
         double minimumAbundance,
         bool debug=false);
 
+    //Issue 684: Compute a set of stubbed IsotopicAbundance for a case where
+    // the atomic composition of a species isn't known (unknown compound mz).
+    static vector<IsotopicAbundance> getUnknownFormulaIsotopicAbundances(
+        double mz,
+        vector<Atom> heavyIsotopes,
+        int maxNumExtraNeutrons,
+        bool debug=false
+        );
+
     //Issue 715
     static string getCachedIsotopeKey(
         string formula,
