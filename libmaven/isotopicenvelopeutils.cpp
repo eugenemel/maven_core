@@ -763,6 +763,9 @@ float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
            }
         }
 
+        //TODO: may want to implement logic/control around these values,
+        // e.g. require some number of measurements
+
         float unlabeledIntensity = 0.0f;
 
         if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
@@ -787,6 +790,7 @@ float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
            labeledIntensity = *max_element(labeledIsotopeValues.begin(), labeledIsotopeValues.end());
         }
 
+        //TODO: parameter, may want option to average in zeros
         if (unlabeledIntensity > 0 && labeledIntensity > 0) {
            unlabeledIsotopesEnvelope.push_back(unlabeledIntensity);
            labeledIsotopesEnvelope.push_back(labeledIntensity);
@@ -826,8 +830,9 @@ float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
 
     }
 
-    //TODO: think about other scores here
-    float score = 1.0f - mzUtils::correlation(unlabeledIsotopesEnvelope, labeledIsotopesEnvelope);
+    //deviation from r^2
+    float r = mzUtils::correlation(unlabeledIsotopesEnvelope, labeledIsotopesEnvelope);
+    float score = 1.0f - r*r;
 
     if (debug) {
             cout << "[IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes()]: score="
