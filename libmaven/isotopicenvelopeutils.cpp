@@ -713,8 +713,8 @@ float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
         return lhs.meanMz < rhs.meanMz;
     });
 
-    vector<float> unlabeledIsotopesEnvelope(childrenSortedByMz.size());
-    vector<float> labeledIsotopesEnvelope(childrenSortedByMz.size());
+    vector<float> unlabeledIsotopesEnvelope{};
+    vector<float> labeledIsotopesEnvelope{};
 
     for (unsigned int i = 0; i < childrenSortedByMz.size(); i++) {
 
@@ -734,7 +734,7 @@ float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
 
            if (find(unlabeledSamples.begin(), unlabeledSamples.end(), p.getSample()) != unlabeledSamples.end()){
                 float quantVal = p.getQuantByName(params.diffIsoQuantType);
-                if (quantVal > 0) {
+                if (quantVal >= 0) {
                     unlabeledIsotopeValues.push_back(quantVal);
                 }
                 if (debug) {
@@ -749,7 +749,7 @@ float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
 
            if (find(labeledSamples.begin(), labeledSamples.end(), p.getSample()) != labeledSamples.end()) {
                 float quantVal = p.getQuantByName(params.diffIsoQuantType);
-                if (quantVal > 0) {
+                if (quantVal >= 0) {
                     labeledIsotopeValues.push_back(quantVal);
                 }
                 if (debug) {
@@ -787,8 +787,10 @@ float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
            labeledIntensity = *max_element(labeledIsotopeValues.begin(), labeledIsotopeValues.end());
         }
 
-        unlabeledIsotopesEnvelope[i] = unlabeledIntensity;
-        labeledIsotopesEnvelope[i] = labeledIntensity;
+        if (unlabeledIntensity > 0 && labeledIntensity > 0) {
+           unlabeledIsotopesEnvelope.push_back(unlabeledIntensity);
+           labeledIsotopesEnvelope.push_back(labeledIntensity);
+        }
 
         if (debug) {
            cout << "[IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes()]: "

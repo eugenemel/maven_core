@@ -1257,6 +1257,13 @@ void PeakGroup::scoreIsotopesDifferentialAbundance(
     vector<mzSample*> labeledSamples,
     bool debug) {
 
+    if (debug) {
+        cout << this->meanMz << "@" << this->meanRt;
+        if (compound) cout << " " << compound->name;
+        if (adduct) cout << " " << adduct->name;
+        cout << endl;
+    }
+
     this->fragMatchScore.mergedScore = IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
         this->children,
         unlabeledSamples,
