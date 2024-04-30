@@ -734,7 +734,7 @@ float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
 
            if (find(unlabeledSamples.begin(), unlabeledSamples.end(), p.getSample()) != unlabeledSamples.end()){
                 float quantVal = p.getQuantByName(params.diffIsoQuantType);
-                if (quantVal >= 0) {
+                if (quantVal > 0) {
                     unlabeledIsotopeValues.push_back(quantVal);
                 }
                 if (debug) {
@@ -749,7 +749,7 @@ float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
 
            if (find(labeledSamples.begin(), labeledSamples.end(), p.getSample()) != labeledSamples.end()) {
                 float quantVal = p.getQuantByName(params.diffIsoQuantType);
-                if (quantVal >= 0) {
+                if (quantVal > 0) {
                     labeledIsotopeValues.push_back(quantVal);
                 }
                 if (debug) {
@@ -763,35 +763,50 @@ float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
            }
         }
 
-        //TODO: may want to implement logic/control around these values,
-        // e.g. require some number of measurements
-
         float unlabeledIntensity = 0.0f;
 
-        if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
-           unlabeledIntensity = median(unlabeledIsotopeValues);
-        } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
-           unlabeledIntensity = accumulate(unlabeledIsotopeValues.begin(), unlabeledIsotopeValues.end(), 0.0f) / unlabeledIsotopeValues.size();
-        } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Sum) {
-           unlabeledIntensity = accumulate(unlabeledIsotopeValues.begin(), unlabeledIsotopeValues.end(), 0.0f);
-        } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Max) {
-           unlabeledIntensity = *max_element(unlabeledIsotopeValues.begin(), unlabeledIsotopeValues.end());
+        if (unlabeledIsotopeValues.size() >= params.diffIsoReproducibilityThreshold) {
+           if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
+                unlabeledIntensity = median(unlabeledIsotopeValues);
+           } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
+                unlabeledIntensity = accumulate(unlabeledIsotopeValues.begin(), unlabeledIsotopeValues.end(), 0.0f) / unlabeledIsotopeValues.size();
+           } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Sum) {
+                unlabeledIntensity = accumulate(unlabeledIsotopeValues.begin(), unlabeledIsotopeValues.end(), 0.0f);
+           } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Max) {
+                unlabeledIntensity = *max_element(unlabeledIsotopeValues.begin(), unlabeledIsotopeValues.end());
+           }
         }
 
         float labeledIntensity = 0.0f;
 
-        if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
-           labeledIntensity = median(labeledIsotopeValues);
-        } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
-           labeledIntensity = accumulate(labeledIsotopeValues.begin(), labeledIsotopeValues.end(), 0.0f) / labeledIsotopeValues.size();
-        } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Sum) {
-           labeledIntensity = accumulate(labeledIsotopeValues.begin(), labeledIsotopeValues.end(), 0.0f);
-        } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Max) {
-           labeledIntensity = *max_element(labeledIsotopeValues.begin(), labeledIsotopeValues.end());
+        if (labeledIsotopeValues.size() >= params.diffIsoReproducibilityThreshold) {
+           if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
+                labeledIntensity = median(labeledIsotopeValues);
+           } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
+                labeledIntensity = accumulate(labeledIsotopeValues.begin(), labeledIsotopeValues.end(), 0.0f) / labeledIsotopeValues.size();
+           } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Sum) {
+                labeledIntensity = accumulate(labeledIsotopeValues.begin(), labeledIsotopeValues.end(), 0.0f);
+           } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Max) {
+                labeledIntensity = *max_element(labeledIsotopeValues.begin(), labeledIsotopeValues.end());
+           }
         }
 
-        //TODO: parameter, may want option to average in zeros
-        if (unlabeledIntensity > 0 && labeledIntensity > 0) {
+        //double zero
+        if (unlabeledIntensity <= 0 && labeledIntensity <= 0) {
+           if (params.diffIsoIncludeDoubleZero) {
+                unlabeledIsotopesEnvelope.push_back(unlabeledIntensity);
+                labeledIsotopesEnvelope.push_back(labeledIntensity);
+           }
+
+        //single zero
+        } else if (unlabeledIntensity <= 0 || labeledIntensity <= 0) {
+           if (params.diffIsoIncludeSingleZero) {
+                unlabeledIsotopesEnvelope.push_back(unlabeledIntensity);
+                labeledIsotopesEnvelope.push_back(labeledIntensity);
+           }
+
+        //no zero values
+        } else {
            unlabeledIsotopesEnvelope.push_back(unlabeledIntensity);
            labeledIsotopesEnvelope.push_back(labeledIntensity);
         }
@@ -828,6 +843,13 @@ float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
             }
             cout << "};" << endl;
 
+    }
+
+    // If fewer than 2 measurements in the envelopes,
+    // the two envelopes are not very interesting, and so
+    // just return a score of 0 (i.e., no deviation in envelopes)
+    if (unlabeledIsotopesEnvelope.size() < 2) {
+        return 0;
     }
 
     //deviation from r^2

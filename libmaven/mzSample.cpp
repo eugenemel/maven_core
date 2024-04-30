@@ -2490,6 +2490,9 @@ string IsotopeParameters::encodeParams() {
         diffIsoAgglomerationTypeStr = "SUM";
     }
     encodedParams = encodedParams + "diffIsoAgglomerationType" + "=" + diffIsoAgglomerationTypeStr + ";";
+    encodedParams = encodedParams + "diffIsoIncludeDoubleZero" + "=" + to_string(diffIsoIncludeDoubleZero) + ";";
+    encodedParams = encodedParams + "diffIsoIncludeSingleZero" + "=" + to_string(diffIsoIncludeSingleZero) + ";";
+    encodedParams = encodedParams + "diffIsoReproducibilityThreshold" + "=" + to_string(diffIsoReproducibilityThreshold) + ";";
 
     string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
     encodedParams = encodedParams + peakPickingEncodedParams;
@@ -2612,6 +2615,15 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
         } else if (diffIsoAgglomerationTypeStr == "SUM") {
            isotopeParameters.diffIsoAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Sum;
         }
+    }
+    if (decodedMap.find("diffIsoIncludeDoubleZero") != decodedMap.end()) {
+        isotopeParameters.diffIsoIncludeDoubleZero = decodedMap["diffIsoIncludeDoubleZero"] == "1";
+    }
+    if (decodedMap.find("diffIsoIncludeSingleZero") != decodedMap.end()) {
+        isotopeParameters.diffIsoIncludeSingleZero = decodedMap["diffIsoIncludeSingleZero"] == "1";
+    }
+    if (decodedMap.find("diffIsoReproducibilityThreshold") != decodedMap.end()) {
+        isotopeParameters.diffIsoReproducibilityThreshold = stoi(decodedMap["diffIsoReproducibilityThreshold"]);
     }
 
     return isotopeParameters;

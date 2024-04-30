@@ -1076,6 +1076,9 @@ struct IsotopeParameters {
     //Issue 720
     string diffIsoQuantType = "peakIntensity";
     Fragment::ConsensusIntensityAgglomerationType diffIsoAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
+    bool diffIsoIncludeSingleZero = false;
+    bool diffIsoIncludeDoubleZero = false;
+    int diffIsoReproducibilityThreshold = 1;
 
     string encodeParams();
     static IsotopeParameters decode(string encodedIsotopeParameters);
