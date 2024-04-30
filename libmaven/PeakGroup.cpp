@@ -1264,7 +1264,8 @@ void PeakGroup::scoreIsotopesDifferentialAbundance(
         cout << endl;
     }
 
-    this->fragMatchScore.mergedScore = IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
+    //Use groupRank to retain MS2 score information
+    this->groupRank = IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
         this->children,
         unlabeledSamples,
         labeledSamples,
