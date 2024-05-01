@@ -507,11 +507,53 @@ vector<IsotopicAbundance> MassCalculator::getUnknownFormulaIsotopicAbundances(
     bool debug
     ) {
 
-    vector<IsotopicAbundance> allAbundances{};
+    //initialize abundances
+    vector<IsotopicAbundance> isotopicAbundances{};
 
-    //TODO
+    IsotopicAbundance seed;
+    seed.mz = mz;
+    isotopicAbundances.push_back(seed);
 
-    return allAbundances;
+    //Enumerate every possible combination of heavy atoms, store into atomCounts
+    for (Atom& atom : heavyIsotopes) {
+
+        vector<IsotopicAbundance> isotopicAbundancesAddCurrentAtom{};
+
+        for (IsotopicAbundance abundance : isotopicAbundances) {
+           for (unsigned int i = 0; i <= maxNumExtraNeutrons; i++) {
+
+                //make a copy
+                IsotopicAbundance isotopicAbundance = abundance;
+                isotopicAbundance.atomCounts.insert(make_pair(atom, i));
+                isotopicAbundance.numTotalExtraNeutrons++;
+
+                //TODO: relocate to NaturalAbundanceData, propagate through as function argument
+                //adjust mz
+                double deltaMz = 0;
+                if (atom.symbol == "C") {
+                    deltaMz = 1.00335483521;
+                } else if (atom.symbol == "H") {
+                    deltaMz = 1.00627674587;
+                } else if (atom.symbol == "O") {
+                    deltaMz = 2.004244992879;
+                } else if (atom.symbol == "N") {
+                    deltaMz = 0.99703489444;
+                } else if (atom.symbol == "S") {
+                    deltaMz = 1.9957958356;
+                }
+
+                isotopicAbundance.mz += deltaMz * i;
+
+                if (isotopicAbundance.numTotalExtraNeutrons <= maxNumExtraNeutrons) {
+                    isotopicAbundancesAddCurrentAtom.push_back(isotopicAbundance);
+                }
+           }
+        }
+
+        isotopicAbundances = isotopicAbundancesAddCurrentAtom;
+    }
+
+    return isotopicAbundances;
 }
 /**
  * @brief MassCalculator::enumerateMasses
