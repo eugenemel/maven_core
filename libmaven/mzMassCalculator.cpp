@@ -374,6 +374,7 @@ double MassCalculator::computeMass(string formula, int charge) {
 vector<Isotope> MassCalculator::computeIsotopes(
     string compoundFormula,
     Adduct *adduct,
+    double mz,
     vector<Atom> labeledIsotopes,
     LabeledIsotopeRetentionPolicy labeledIsotopeRetentionPolicy,
     NaturalAbundanceData naturalAbundanceData,
@@ -384,39 +385,53 @@ vector<Isotope> MassCalculator::computeIsotopes(
     ){
 
     vector<IsotopicAbundance> isotopicAbundances;
+    string cacheKey = "";
 
-    string cacheKey = MassCalculator::getCachedIsotopeKey(
-        compoundFormula,
-        adduct,
-        labeledIsotopes,
-        labeledIsotopeRetentionPolicy,
-        isIncludeNaturalAbundance,
-        maxNumExtraNeutrons,
-        minimumProportionMPlusZero);
+    // known atomic composition case
+    if (compoundFormula != "" && adduct) {
 
-    if (isotopesCache.find(cacheKey) != isotopesCache.end()) {
-       if (debug) cout << "Found Cached vector<Isotope> - returning cached value!" << endl;
-       return (isotopesCache.at(cacheKey));
-    } else if (debug) {
-       cout << "vector<Isotope> not found in cache, will re-compute." << endl;
+       cacheKey = MassCalculator::getCachedIsotopeKey(
+           compoundFormula,
+           adduct,
+           labeledIsotopes,
+           labeledIsotopeRetentionPolicy,
+           isIncludeNaturalAbundance,
+           maxNumExtraNeutrons,
+           minimumProportionMPlusZero);
+
+       if (isotopesCache.find(cacheKey) != isotopesCache.end()) {
+                if (debug) cout << "Found Cached vector<Isotope> - returning cached value!" << endl;
+                return (isotopesCache.at(cacheKey));
+       } else if (debug) {
+                cout << "vector<Isotope> not found in cache, will re-compute." << endl;
+       }
+
+       //First, enumerate all theoretically possible isotopes based on the formula.
+       NaturalAbundanceDistribution abundanceDistribution =
+           MassCalculator::getNaturalAbundanceDistribution(
+               compoundFormula,
+               adduct,
+               naturalAbundanceData,
+
+               0, //Issue 695: reversion of Issue 690 - retain 0-intensity isotopes
+
+               // Issue 690: speedup
+               // Assume that the monoisotope constitutes at least 1% of total abundance
+               // 0.01 * minimumProportionMPlusZero,
+
+               false);
+
+       isotopicAbundances = abundanceDistribution.isotopicAbundances;
+
+    // unknown atomic composition case
+    } else {
+       isotopicAbundances = MassCalculator::getUnknownFormulaIsotopicAbundances(
+           mz,
+           labeledIsotopes,
+           maxNumExtraNeutrons,
+           debug
+           );
     }
-
-    //First, enumerate all theoretically possible isotopes based on the formula.
-    NaturalAbundanceDistribution abundanceDistribution =
-        MassCalculator::getNaturalAbundanceDistribution(
-            compoundFormula,
-            adduct,
-            naturalAbundanceData,
-
-            0, //Issue 695: reversion of Issue 690 - retain 0-intensity isotopes
-
-            // Issue 690: speedup
-            // Assume that the monoisotope constitutes at least 1% of total abundance
-            // 0.01 * minimumProportionMPlusZero,
-
-            false);
-
-    isotopicAbundances = abundanceDistribution.isotopicAbundances;
 
     //Filter the list of isotopes based on search criteria.
     vector<Isotope> isotopes{};
@@ -478,12 +493,26 @@ vector<Isotope> MassCalculator::computeIsotopes(
     }
 
     //Issue 711: Write value to cache to avoid excessive recomputations.
-    isotopesCache.insert(make_pair(cacheKey, isotopes));
+    if (cacheKey != "") {
+        isotopesCache.insert(make_pair(cacheKey, isotopes));
+    }
 
     return isotopes;
-
 }
 
+vector<IsotopicAbundance> MassCalculator::getUnknownFormulaIsotopicAbundances(
+    double mz,
+    vector<Atom> heavyIsotopes,
+    int maxNumExtraNeutrons,
+    bool debug
+    ) {
+
+    vector<IsotopicAbundance> allAbundances{};
+
+    //TODO
+
+    return allAbundances;
+}
 /**
  * @brief MassCalculator::enumerateMasses
  * @param inputMass
@@ -1102,18 +1131,4 @@ double MassCalculator::getNaturalAbundanceCorrectedQuantValue(
     }
 
     return 0;
-}
-
-vector<IsotopicAbundance> MassCalculator::getUnknownFormulaIsotopicAbundances(
-    double mz,
-    vector<Atom> heavyIsotopes,
-    int maxNumExtraNeutrons,
-    bool debug
-    ) {
-
-    vector<IsotopicAbundance> allAbundances{};
-
-    //TODO
-
-    return allAbundances;
 }

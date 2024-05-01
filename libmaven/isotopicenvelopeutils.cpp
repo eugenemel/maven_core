@@ -87,9 +87,15 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
         maxNumProtons = params.maxIsotopesToExtract;
     }
 
+    string compoundFormula = "";
+    if (compound) {
+        compoundFormula = compound->formula;
+    }
+
     vector<Isotope> theoreticalIsotopes = MassCalculator::computeIsotopes(
-        compound->formula,
+        compoundFormula,
         adduct,
+        static_cast<double>(group->meanMz),
         params.getLabeledIsotopes(),
         params.labeledIsotopeRetentionPolicy,
         NaturalAbundanceData::defaultNaturalAbundanceData,
@@ -99,6 +105,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
         debug
         );
 
+    //TODO: currently does not consider possibility of unknown atomic composition isotopes
     vector<Isotope> isotopes = theoreticalIsotopes;
     if (params.isCondenseTheoreticalIsotopes) {
         isotopes = IsotopicEnvelopeAdjuster::condenseTheoreticalIsotopes(

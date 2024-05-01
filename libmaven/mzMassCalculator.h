@@ -90,16 +90,18 @@ class MassCalculator {
     vector<Match> enumerateMasses(double inputMass, double charge, double maxdiff);
     double adjustMass(double mass,int charge);
 
-    static vector<Isotope> computeIsotopes(string compoundFormula,
-                                            Adduct *adduct,
-                                            vector<Atom> heavyIsotopes,
-                                            LabeledIsotopeRetentionPolicy labeledIsotopeRetentionPolicy,
-                                            NaturalAbundanceData naturalAbundanceData,
-                                            bool isIncludeNaturalAbundance = false,
-                                            int maxNumExtraNeutrons=INT_MAX,
-                                            double minimumProportionMPlusZero = 0,
-                                            bool debug=false
-                                            );
+    static vector<Isotope> computeIsotopes(
+        string compoundFormula,
+        Adduct *adduct,
+        double mz,
+        vector<Atom> labeledIsotopes,
+        LabeledIsotopeRetentionPolicy labeledIsotopeRetentionPolicy,
+        NaturalAbundanceData naturalAbundanceData,
+        bool isIncludeNaturalAbundance = false,
+        int maxNumExtraNeutrons=INT_MAX,
+        double minimumProportionMPlusZero = 0,
+        bool debug=false
+        );
 
     //Issue 656: Return a complete natural abundance distribution for every possible observable isotope.
     //Considers all atoms in the molecule and adducts.
@@ -115,7 +117,7 @@ class MassCalculator {
     // the atomic composition of a species isn't known (unknown compound mz).
     static vector<IsotopicAbundance> getUnknownFormulaIsotopicAbundances(
         double mz,
-        vector<Atom> heavyIsotopes,
+        vector<Atom> labeledIsotopes,
         int maxNumExtraNeutrons,
         bool debug=false
         );
