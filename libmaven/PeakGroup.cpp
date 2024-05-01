@@ -1210,16 +1210,6 @@ void PeakGroup::pullIsotopes(IsotopeParameters& isotopeParameters, vector<mzSamp
         return;
     }
 
-//    if (!compound){
-//        if (debug) cout << "PeakGroup::pullIsotopes(): Unable to pull isotopes: No compound associated with peakgroup." << endl;
-//        return;
-//    }
-
-//    if (compound->formula.empty()){
-//        if (debug) cout << "PeakGroup::pullIsotopes(): Unable to pull isotopes:  No formula associated with peakgroup compound." << endl;
-//        return;
-//    }
-
     if (peakCount() == 0){
         if (debug) cout << "PeakGroup::pullIsotopes(): Unable to pull isotopes:  No peaks assocaited with peakgroup." << endl;
         return;
@@ -1233,11 +1223,6 @@ void PeakGroup::pullIsotopes(IsotopeParameters& isotopeParameters, vector<mzSamp
     } else if (isotopeParameters.adduct) {
         groupAdduct = isotopeParameters.adduct;
     }
-
-//    if (!groupAdduct){
-//        if (debug) cout << "PeakGroup::pullIsotopes(): Unable to pull isotopes:  No adduct associated with peakgroup or saved in IsotopeParameters." << endl;
-//        return;
-//    }
 
     IsotopicEnvelopeGroup envelopeGroup = IsotopicEnvelopeExtractor::extractEnvelopes(
         compound,
