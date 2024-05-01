@@ -428,6 +428,7 @@ vector<Isotope> MassCalculator::computeIsotopes(
        isotopicAbundances = MassCalculator::getUnknownFormulaIsotopicAbundances(
            mz,
            labeledIsotopes,
+           naturalAbundanceData,
            maxNumExtraNeutrons,
            debug
            );
@@ -503,6 +504,7 @@ vector<Isotope> MassCalculator::computeIsotopes(
 vector<IsotopicAbundance> MassCalculator::getUnknownFormulaIsotopicAbundances(
     double mz,
     vector<Atom> heavyIsotopes,
+    NaturalAbundanceData& naturalAbundanceData,
     int maxNumExtraNeutrons,
     bool debug
     ) {
@@ -527,22 +529,8 @@ vector<IsotopicAbundance> MassCalculator::getUnknownFormulaIsotopicAbundances(
                 isotopicAbundance.atomCounts.insert(make_pair(atom, i));
                 isotopicAbundance.numTotalExtraNeutrons++;
 
-                //TODO: relocate to NaturalAbundanceData, propagate through as function argument
                 //adjust mz
-                double deltaMz = 0;
-                if (atom.symbol == "C") {
-                    deltaMz = 1.00335483521;
-                } else if (atom.symbol == "H") {
-                    deltaMz = 1.00627674587;
-                } else if (atom.symbol == "O") {
-                    deltaMz = 2.004244992879;
-                } else if (atom.symbol == "N") {
-                    deltaMz = 0.99703489444;
-                } else if (atom.symbol == "S") {
-                    deltaMz = 1.9957958356;
-                }
-
-                isotopicAbundance.mz += deltaMz * i;
+                isotopicAbundance.mz += naturalAbundanceData.getDeltaMzBySymbol(atom.symbol) * i;
 
                 if (isotopicAbundance.numTotalExtraNeutrons <= maxNumExtraNeutrons) {
                     isotopicAbundancesAddCurrentAtom.push_back(isotopicAbundance);
@@ -711,6 +699,12 @@ NaturalAbundanceData NaturalAbundanceData::defaultNaturalAbundanceData = []() ->
     abundanceData.setAtomData("S", 34, 33.96786701, 0.0368, 2);
 //    abundanceData.setAtomData("S", 36, 35.96708070, 0.0002, 4);
 
+    abundanceData.atomToDeltaMz.insert(make_pair("C", 1.00335483521));
+    abundanceData.atomToDeltaMz.insert(make_pair("H", 1.00627674587));
+    abundanceData.atomToDeltaMz.insert(make_pair("O", 2.004244992879));
+    abundanceData.atomToDeltaMz.insert(make_pair("N", 0.99703489444));
+    abundanceData.atomToDeltaMz.insert(make_pair("S", 1.9957958356));
+
     return abundanceData;
 }();
 
@@ -742,6 +736,13 @@ vector<Atom> NaturalAbundanceData::getAtomsBySymbol(string atomicSymbol) {
     }
 
     return vector<Atom>{};
+}
+
+double NaturalAbundanceData::getDeltaMzBySymbol(string atomicSymbol){
+    if (atomToDeltaMz.find(atomicSymbol) != atomToDeltaMz.end()) {
+        return atomToDeltaMz.at(atomicSymbol);
+    }
+    return 0;
 }
 
 NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(

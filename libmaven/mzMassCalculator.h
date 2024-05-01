@@ -118,6 +118,7 @@ class MassCalculator {
     static vector<IsotopicAbundance> getUnknownFormulaIsotopicAbundances(
         double mz,
         vector<Atom> labeledIsotopes,
+        NaturalAbundanceData& naturalAbundanceData,
         int maxNumExtraNeutrons,
         bool debug=false
         );
@@ -172,11 +173,16 @@ class NaturalAbundanceData {
         map<int, vector<Atom>> extraNeutronToAtoms{};
         map<string, vector<Atom>> symbolToAtoms{};
 
+        //In the case where there are only two possible isotopes for a given atom,
+        // retrieve a deltaMz based on the atom string.
+        map<string, double> atomToDeltaMz{};
+
         void setAtomData(string atomicSymbol, int massNumber, double atomicMass, double naturalAbundance, int numExtraNeutrons);
         void print();
 
         vector<Atom> getAtomsByExtraNeutrons(int numNeutrons);
         vector<Atom> getAtomsBySymbol(string atomicSymbol);
+        double getDeltaMzBySymbol(string atomicSymbol);
 
         static NaturalAbundanceData defaultNaturalAbundanceData;
 };
