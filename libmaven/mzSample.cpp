@@ -1240,8 +1240,13 @@ EIC* mzSample::getEIC(SRMTransition* srmTransition,
         return nullptr;
     }
 
+    set<string> srmIds{};
     //sets are always sorted, avoids non-determinism
-    set<string> srmIds = srmTransition->srmIdBySample.at(this);
+    if (srmTransition->srmIdBySample.find(this) != srmTransition->srmIdBySample.end()) {
+        srmIds = srmTransition->srmIdBySample.at(this);
+    } else if (debug) {
+        cout << "mzSample::getEIC(): srmTransition->srmIdBySample.at(" << this->sampleName << ") not found in srmTransition map!" << endl;
+    }
 
     //   rt   scannum
     map<float, int> rtToScanNum{};
