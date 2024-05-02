@@ -1225,7 +1225,11 @@ EIC* mzSample::getEIC(string srm) {
 	return e;
 }
 
-EIC* mzSample::getEIC(SRMTransition* srmTransition, Fragment::ConsensusIntensityAgglomerationType agglomerationType) {
+//Issue 721: Added debugging flag
+EIC* mzSample::getEIC(SRMTransition* srmTransition,
+                      Fragment::ConsensusIntensityAgglomerationType agglomerationType,
+                      bool debug) {
+
     if (!srmTransition) return nullptr;
 
     //   rt,       intensities
@@ -1247,12 +1251,12 @@ EIC* mzSample::getEIC(SRMTransition* srmTransition, Fragment::ConsensusIntensity
         if (srmScans.find(srmId) != srmScans.end()) {
             vector<int> srmscans = srmScans[srmId];
             for (unsigned int i = 0; i < srmscans.size(); i++) {
-                Scan* scan = scans[static_cast<unsigned long>(srmscans[i])];
+                    Scan* scan = scans.at(static_cast<unsigned long>(srmscans[i]));
 
                 float maxIntensity = 0.0f;
 
                 for(unsigned int k=0; k < scan->nobs(); k++ ) {
-                    if (scan->intensity[k] > maxIntensity ) {
+                     if (scan->intensity.at(k) > maxIntensity ) {
                         maxIntensity = scan->intensity[k];
                     }
                 }
@@ -1285,6 +1289,10 @@ EIC* mzSample::getEIC(SRMTransition* srmTransition, Fragment::ConsensusIntensity
     e->mz = vector<float>(rtToIntensities.size(), srmTransition->productMz);
 
     unsigned int i = 0;
+
+    if (debug) {
+        cout << "mzSample::getEIC(): starting rtToIntensities iteration." << endl;
+    }
 
     for (auto it = rtToIntensities.begin(); it != rtToIntensities.end(); ++it) {
         float rt = it->first;

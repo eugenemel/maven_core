@@ -540,8 +540,10 @@ public:
     EIC* getEIC(pair<float, float> mzKey, mzSlice* slice); //get eic based on SRM precursor, product ion mzs
 
     // get EIC based on SRM transition - combine multiple srmIds if necessary
+    // Issue 721: Add debugging flag
     EIC* getEIC(SRMTransition* srmTransition,
-                Fragment::ConsensusIntensityAgglomerationType agglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median);
+                Fragment::ConsensusIntensityAgglomerationType agglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median,
+                bool debug = false);
 
     EIC* getTIC(float,float,int);		//get Total Ion Chromatogram
     EIC* getBIC(float,float,int);		//get Base Peak Chromatogram
