@@ -99,7 +99,7 @@ double MassCalculator::getElementMass(string elmnt){
 
 map<string,int> MassCalculator::getComposition(Adduct* adduct){
 
-    cout << "MassCalculator::getComposition(Adduct*)" << endl;
+    //cout << "MassCalculator::getComposition(Adduct*)" << endl;
 
     map<string, int> atoms {};
 
