@@ -179,11 +179,8 @@ void MzKitchenProcessor::assignBestLipidToGroup(
             int observedIndex = ranks[i];
 
             if (observedIndex != -1) {
-
                 s.numMatches++;
-
                 string compoundLabel = library.fragment_labels[i];
-
                 s.addLabelSpecificMatches(compoundLabel, debug);
             }
         }
@@ -384,7 +381,7 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
 
         //skip entries when the RT is required, and out of range
         float rtDiff = abs(g->medianRt() - compound->expectedRt);
-        if (params->rtIsRequireRtMatch & (rtDiff > params->rtMatchTolerance)) {
+        if (params->rtIsRequireRtMatch && (rtDiff > params->rtMatchTolerance)) {
             continue;
         }
 
