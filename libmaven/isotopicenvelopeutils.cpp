@@ -123,9 +123,9 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
         envelopeGroup = extractEnvelopesVersion1(compound, adduct, group, isotopes, params, debug);
     }
 
-    //Issue 691: combine overlapping isotopes when the data is identical.
+    //Issue 691: combine overlapping isotopes when the peak height for nearby isotopes is identical.
     if (params.isCombineOverlappingIsotopes) {
-        envelopeGroup.combineOverlappingIsotopes(params.ppm);
+        envelopeGroup.combineOverlappingIsotopes(params.ppm, debug);
     }
 
     envelopeGroup.extractionAlgorithmName = IsotopeParameters::getAlgorithmName(params.isotopicExtractionAlgorithm);
@@ -508,7 +508,7 @@ void IsotopicEnvelopeGroup::setIsotopesToChildrenPeakGroups(Classifier *classifi
     }
 }
 
-void IsotopicEnvelopeGroup::combineOverlappingIsotopes(float ppm) {
+void IsotopicEnvelopeGroup::combineOverlappingIsotopes(float ppm, bool debug) {
 
     //organize isotopes by name
     map<string, Isotope> isotopesByName{};
@@ -559,7 +559,20 @@ void IsotopicEnvelopeGroup::combineOverlappingIsotopes(float ppm) {
 
             }
         }
+    }
 
+
+    if (debug) {
+        cout << "[IsotopicEnvelopeGroup::combineOverlappingIsotopes()] quantValToIsotopes:" << endl;
+        for (auto it = quantValToIsotopes.begin(); it != quantValToIsotopes.end(); ++it) {
+            cout << it->first.first->sampleName << ", height=" << it->first.second << ": {";
+            for (unsigned int i = 0; i < it->second.size(); i++) {
+                if (i > 0) cout << ",";
+                cout << it->second[i];
+            }
+            cout << "}\n";
+        }
+        cout << endl;
     }
 
     //identify all of the cases where the same quant value is identified by multiple isotopes.
@@ -568,6 +581,20 @@ void IsotopicEnvelopeGroup::combineOverlappingIsotopes(float ppm) {
         if (it->second.size() > 1) {
             combinations.insert(it->second);
         }
+    }
+
+    if (debug) {
+        cout << "[IsotopicEnvelopeGroup::combineOverlappingIsotopes()] combinations:" << endl;
+        for (auto it = combinations.begin(); it != combinations.end(); ++it) {
+            cout << "{";
+            vector<string> combos = (*it);
+            for (unsigned int i = 0; i < combos.size(); i++) {
+                if (i > 0) cout << ", ";
+                cout << combos[i];
+            }
+            cout << "}\n";
+        }
+        cout << endl;
     }
 
     map<string, bool> isIsotopesOverlappingMz{};
