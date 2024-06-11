@@ -163,9 +163,22 @@ public:
         vector<PeakGroup>& isotopePeakGroups,
         vector<mzSample*> unlabeledSamples,
         vector<mzSample*> labeledSamples,
-        IsotopeParameters params,
+        const IsotopeParameters& params,
         bool debug=false
         );
+
+    /**
+     *
+     * @brief
+     * Scoring appraoch for isotopic envelopes, comparing the variability within a set of envelopes
+     * to the variability between two agglomerated envelopes.
+     *
+     *
+     */
+    static float normInterVariance(
+        const IsotopeParameters& params,
+        bool debug=false
+    );
 };
 
 #endif // ISOTOPICENVELOPEUTILS_H

@@ -738,7 +738,7 @@ float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
     vector<PeakGroup>& isotopePeakGroups,
     vector<mzSample*> unlabeledSamples,
     vector<mzSample*> labeledSamples,
-    IsotopeParameters params,
+    const IsotopeParameters& params,
     bool debug
     ){
 
@@ -897,9 +897,16 @@ float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
         return 0;
     }
 
+    float score = 0.0f;
     //deviation from r^2
-    float r = mzUtils::correlation(unlabeledIsotopesEnvelope, labeledIsotopesEnvelope);
-    float score = 1.0f - r*r;
+    if (params.diffIsoScoringType == DiffIsoScoringType::PEARSON_CORRELATION) {
+        float r = mzUtils::correlation(unlabeledIsotopesEnvelope, labeledIsotopesEnvelope);
+        score = 1.0f - r*r;
+    } else if (params.diffIsoScoringType == DiffIsoScoringType::NORM_INTER_VARIANCE) {
+        score = IsotopicEnvelopeEvaluator::normInterVariance(
+            params,
+            debug);
+    }
 
     if (debug) {
             cout << "[IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes()]: score="
