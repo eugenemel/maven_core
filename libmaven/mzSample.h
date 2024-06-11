@@ -970,6 +970,10 @@ enum IsotopeParametersType{
     SAVED=1,
     FROM_GUI=2};
 
+enum DiffIsoScoringType{
+    PEARSON_CORRELATION,
+    NORM_INTER_VARIANCE
+};
 
 //This enum only applies to labeled isotopes.
 //isotopic species that contain labels from natural abundance may optionally be retained
@@ -1081,6 +1085,7 @@ struct IsotopeParameters {
     bool diffIsoIncludeSingleZero = false;
     bool diffIsoIncludeDoubleZero = false;
     int diffIsoReproducibilityThreshold = 1;
+    DiffIsoScoringType diffIsoScoringType = DiffIsoScoringType::PEARSON_CORRELATION;
 
     string encodeParams();
     static IsotopeParameters decode(string encodedIsotopeParameters);

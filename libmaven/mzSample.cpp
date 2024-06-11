@@ -2507,6 +2507,14 @@ string IsotopeParameters::encodeParams() {
     encodedParams = encodedParams + "diffIsoIncludeSingleZero" + "=" + to_string(diffIsoIncludeSingleZero) + ";";
     encodedParams = encodedParams + "diffIsoReproducibilityThreshold" + "=" + to_string(diffIsoReproducibilityThreshold) + ";";
 
+    string diffIsoScoringTypeStr = "UNSPECIFIED";
+    if (diffIsoScoringType == DiffIsoScoringType::PEARSON_CORRELATION) {
+        diffIsoScoringTypeStr = "PEARSON_CORRELATION";
+    } else if (diffIsoScoringType == DiffIsoScoringType::NORM_INTER_VARIANCE) {
+        diffIsoScoringTypeStr = "NORM_INTER_VARIANCE";
+    }
+    encodedParams = encodedParams + "diffIsoScoringType" + "=" + diffIsoScoringTypeStr + ";";
+
     string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
     encodedParams = encodedParams + peakPickingEncodedParams;
 
@@ -2637,6 +2645,14 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     }
     if (decodedMap.find("diffIsoReproducibilityThreshold") != decodedMap.end()) {
         isotopeParameters.diffIsoReproducibilityThreshold = stoi(decodedMap["diffIsoReproducibilityThreshold"]);
+    }
+    if (decodedMap.find("diffIsoScoringType") != decodedMap.end()) {
+        string diffIsoScoringTypeStr = decodedMap["diffIsoScoringType"];
+        if (diffIsoScoringTypeStr == "PEARSON_CORRELATION") {
+           isotopeParameters.diffIsoScoringType = DiffIsoScoringType::PEARSON_CORRELATION;
+        } else if (diffIsoScoringTypeStr == "NORM_INTER_VARIANCE") {
+           isotopeParameters.diffIsoScoringType = DiffIsoScoringType::NORM_INTER_VARIANCE;
+        }
     }
 
     return isotopeParameters;
