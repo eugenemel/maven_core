@@ -797,6 +797,17 @@ float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
            }
         }
 
+        // Issue 725: Insufficient sample case
+        // Isotopic extraction starts with peaks identified in the [M+0] peak group.
+        // If the [M+0] peak group doesn't have enough measurements, then no other isotopes will,
+        // which might produce a vector of all zeros. This can cause strange results in the
+        // correlation score. Instead, just return 0 (no incorporation).
+        if (i == 0 &&
+                ((unlabeledIsotopeValues.size() < params.diffIsoReproducibilityThreshold) ||
+                       (labeledIsotopeValues.size() < params.diffIsoReproducibilityThreshold))) {
+           return 0;
+        }
+
         float unlabeledIntensity = 0.0f;
 
         if (unlabeledIsotopeValues.size() >= params.diffIsoReproducibilityThreshold) {
