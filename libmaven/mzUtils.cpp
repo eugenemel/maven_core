@@ -573,6 +573,22 @@ float variance(const vector<float>& data) {
     return static_cast<float>(sq_sum / data.size());
 }
 
+//Issue 725: double version
+float variance(const vector<double>& data) {
+    if (data.empty()) {
+        return -1.0;
+    }
+
+    double sum = accumulate(data.begin(), data.end(), 0.0);
+    double mean = sum / data.size();
+
+    vector<double> diff(data.size());
+    transform(data.begin(), data.end(), diff.begin(), [mean](double x) { return x - mean; });
+    double sq_sum = inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+
+    return sq_sum / data.size();
+}
+
 tuple<double, double, string> parseMspFragLine(string line){
 
     int space1 = -1;
