@@ -734,7 +734,7 @@ void IsotopicEnvelopeGroup::combineOverlappingIsotopes(float ppm, bool debug) {
     //TODO: recompute the isotopic envelopes?
 }
 
-float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
+float DifferentialIsotopicEnvelopeUtils::compareDifferentialIsotopicEnvelopes(
     vector<PeakGroup>& isotopePeakGroups,
     vector<mzSample*> unlabeledSamples,
     vector<mzSample*> labeledSamples,
@@ -903,7 +903,7 @@ float IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes(
         float r = mzUtils::correlation(unlabeledIsotopesEnvelope, labeledIsotopesEnvelope);
         score = 1.0f - r*r;
     } else if (params.diffIsoScoringType == DiffIsoScoringType::NORM_INTER_VARIANCE) {
-        score = IsotopicEnvelopeEvaluator::normInterVariance(
+        score = DifferentialIsotopicEnvelopeUtils::normInterVariance(
             params,
             debug);
     }

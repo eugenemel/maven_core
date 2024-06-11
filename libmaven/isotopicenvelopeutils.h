@@ -149,7 +149,7 @@ public:
         );
 };
 
-class IsotopicEnvelopeEvaluator {
+class DifferentialIsotopicEnvelopeUtils {
 public:
     /**
      * @brief
@@ -159,7 +159,7 @@ public:
      * labeled samples.
      *
      */
-    static float differentialIsotopicEnvelopes(
+    static float compareDifferentialIsotopicEnvelopes(
         vector<PeakGroup>& isotopePeakGroups,
         vector<mzSample*> unlabeledSamples,
         vector<mzSample*> labeledSamples,
