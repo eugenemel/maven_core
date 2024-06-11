@@ -566,9 +566,10 @@ float variance(const vector<float>& data) {
     double sum = accumulate(data.begin(), data.end(), 0.0f);
     double mean = sum / data.size();
 
-    vector<double> diff(data.size());
-    transform(data.begin(), data.end(), diff.begin(), [mean](double x) { return x - mean; });
-    double sq_sum = inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+    double sq_sum = 0.0;
+    for (unsigned int i = 0; i < data.size(); i++) {
+        sq_sum += (data[i] - mean) * (data[i] - mean);
+    }
 
     return static_cast<float>(sq_sum / data.size());
 }
@@ -582,9 +583,10 @@ float variance(const vector<double>& data) {
     double sum = accumulate(data.begin(), data.end(), 0.0);
     double mean = sum / data.size();
 
-    vector<double> diff(data.size());
-    transform(data.begin(), data.end(), diff.begin(), [mean](double x) { return x - mean; });
-    double sq_sum = inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+    double sq_sum = 0.0;
+    for (unsigned int i = 0; i < data.size(); i++) {
+        sq_sum += (data[i] - mean) * (data[i] - mean);
+    }
 
     return sq_sum / data.size();
 }
