@@ -557,6 +557,22 @@ float correlation(const vector<float>&x, const vector<float>&y) {
     return (sumxy -( sumx*sumy)/n) / sqrt((x2-(sumx*sumx)/n)*(y2-(sumy*sumy)/n));
 }
 
+//Issue 725: Note the handling of float vs doubles here - may want to switch everything to double eventually
+float variance(const vector<float>& data) {
+    if (data.empty()) {
+        return -1.0f;
+    }
+
+    double sum = accumulate(data.begin(), data.end(), 0.0f);
+    double mean = sum / data.size();
+
+    vector<double> diff(data.size());
+    transform(data.begin(), data.end(), diff.begin(), [mean](double x) { return x - mean; });
+    double sq_sum = inner_product(diff.begin(), diff.end(), diff.begin(), 0.0);
+
+    return static_cast<float>(sq_sum / data.size());
+}
+
 tuple<double, double, string> parseMspFragLine(string line){
 
     int space1 = -1;

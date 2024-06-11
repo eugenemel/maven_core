@@ -22,6 +22,7 @@
 #include "statistics.h"
 #include "SavGolSmoother.h"
 #include "ThreadSafeSmoother.h"
+#include <numeric>
 
 #ifdef ZLIB
 #include <zlib.h>
@@ -96,6 +97,8 @@ float torben_median(const vector<float> &m);
 vector<float> quantileDistribution( vector<float> y );
 int countBelow(vector<float>& y, float ymax);
 float correlation(const vector<float>&a, const vector<float>&b);
+float variance(const vector<float>& data);
+
 std::pair<float, float> gaussFit(const vector<float>& yobs, float default_sigma, float default_R2);
 inline unsigned long factorial(int n);
 long long nchoosek(int n, int k);
