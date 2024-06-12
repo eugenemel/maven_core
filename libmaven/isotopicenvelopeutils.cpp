@@ -1193,8 +1193,7 @@ float DifferentialIsotopicEnvelopeUtils::scoreByFStatistic(
     return F_sum;
 }
 
-
-float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
+IsotopeMatrix DifferentialIsotopicEnvelopeUtils::constructDiffIsotopeMatrix(
     PeakGroup *group,
     vector<mzSample*> unlabeledSamples,
     vector<mzSample*> labeledSamples,
@@ -1204,13 +1203,142 @@ float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
 
     PeakGroup::QType qtype = PeakGroup::getQTypeByName(params.diffIsoQuantType);
 
-    IsotopeMatrix unlabeledMatrix = IsotopeMatrix::getIsotopeMatrix(
+    vector<mzSample*> allSamples = unlabeledSamples;
+    allSamples.insert(allSamples.end(), labeledSamples.begin(), labeledSamples.end());
+
+    IsotopeMatrix isoMatrix = IsotopeMatrix::getIsotopeMatrix(
         group,
         qtype,
-        unlabeledSamples,
+        allSamples,
         params.diffIsoScoringCorrectNatAbundance,
-        false
+        true, // fractionOfTotal
+        false // debug
         );
 
-    return 0.0f;
+    return isoMatrix;
+}
+
+float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
+    PeakGroup *group,
+    vector<mzSample*> unlabeledSamples,
+    vector<mzSample*> labeledSamples,
+    const IsotopeParameters& params,
+    bool debug
+    ) {
+
+    IsotopeMatrix diffIsotopeMatrix = DifferentialIsotopicEnvelopeUtils::constructDiffIsotopeMatrix(group, unlabeledSamples, labeledSamples, params, debug);
+
+    vector<float> unlabeledIsotopesEnvelope(diffIsotopeMatrix.isotopesData.cols());
+    vector<float> labeledIsotopesEnvelope(diffIsotopeMatrix.isotopesData.cols());
+
+    //rows = samples (i); cols = isotopes (j)
+    //earlier rows are reserved for unlabeled samples, then labeled samples
+    for (unsigned int j = 0; j < diffIsotopeMatrix.isotopesData.cols(); j++) {
+
+        vector<float> unlabeledIsotopeValues{};
+        vector<float> labeledIsotopeValues{};
+
+        for (unsigned int i = 0; i < diffIsotopeMatrix.isotopesData.rows(); i++) {
+            if (i < unlabeledSamples.size()) {
+                unlabeledIsotopeValues[i] = diffIsotopeMatrix.isotopesData(i, j);
+            } else {
+                unsigned int index = i - unlabeledSamples.size();
+                labeledIsotopeValues.at(index) = diffIsotopeMatrix.isotopesData(i, j);
+            }
+        }
+
+        if (debug) {
+            cout << "[IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes()]: "
+                 << diffIsotopeMatrix.isotopeNames.at(j) << ": UNLABELED={";
+            for (unsigned int k = 0; k < unlabeledIsotopeValues.size(); k++) {
+                if (k > 0) cout << ", ";
+                cout << unlabeledIsotopeValues[k];
+            }
+            cout << "}, LABELED={";
+            for (unsigned int k = 0; k < labeledIsotopeValues.size(); k++) {
+                if (k > 0) cout << ", ";
+                cout << labeledIsotopeValues[k];
+            }
+            cout << "}" << endl;
+        }
+
+        // Issue 725: Insufficient sample case
+        // Isotopic extraction starts with peaks identified in the [M+0] peak group.
+        // If the [M+0] peak group doesn't have enough measurements, then no other isotopes will,
+        // which might produce a vector of all zeros. This can cause strange results in the
+        // correlation score. Instead, just return 0 (no incorporation).
+        if (j == 0 &&
+            ((unlabeledIsotopeValues.size() < params.diffIsoReproducibilityThreshold) ||
+             (labeledIsotopeValues.size() < params.diffIsoReproducibilityThreshold))) {
+            return 0;
+        }
+
+        //render isotope measurements into agglomerated values
+        float unlabeledIntensity = 0.0f;
+
+        if (unlabeledIsotopeValues.size() >= params.diffIsoReproducibilityThreshold) {
+            if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
+                unlabeledIntensity = median(unlabeledIsotopeValues);
+            } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
+                unlabeledIntensity = accumulate(unlabeledIsotopeValues.begin(), unlabeledIsotopeValues.end(), 0.0f) / unlabeledIsotopeValues.size();
+            } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Sum) {
+                unlabeledIntensity = accumulate(unlabeledIsotopeValues.begin(), unlabeledIsotopeValues.end(), 0.0f);
+            } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Max) {
+                unlabeledIntensity = *max_element(unlabeledIsotopeValues.begin(), unlabeledIsotopeValues.end());
+            }
+        }
+
+        float labeledIntensity = 0.0f;
+
+        if (labeledIsotopeValues.size() >= params.diffIsoReproducibilityThreshold) {
+            if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
+                labeledIntensity = median(labeledIsotopeValues);
+            } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
+                labeledIntensity = accumulate(labeledIsotopeValues.begin(), labeledIsotopeValues.end(), 0.0f) / labeledIsotopeValues.size();
+            } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Sum) {
+                labeledIntensity = accumulate(labeledIsotopeValues.begin(), labeledIsotopeValues.end(), 0.0f);
+            } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Max) {
+                labeledIntensity = *max_element(labeledIsotopeValues.begin(), labeledIsotopeValues.end());
+            }
+        }
+
+        //double zero
+        if (unlabeledIntensity <= 0 && labeledIntensity <= 0) {
+            if (params.diffIsoIncludeDoubleZero) {
+                unlabeledIsotopesEnvelope.push_back(unlabeledIntensity);
+                labeledIsotopesEnvelope.push_back(labeledIntensity);
+            }
+
+        //single zero
+        } else if (unlabeledIntensity <= 0 || labeledIntensity <= 0) {
+            if (params.diffIsoIncludeSingleZero) {
+                unlabeledIsotopesEnvelope.push_back(unlabeledIntensity);
+                labeledIsotopesEnvelope.push_back(labeledIntensity);
+            }
+
+        //no zero values
+        } else {
+            unlabeledIsotopesEnvelope.push_back(unlabeledIntensity);
+            labeledIsotopesEnvelope.push_back(labeledIntensity);
+        }
+    }
+
+    if (debug) {
+        cout << "[IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes()]: "
+             << "ENVELOPE UNLABELED: {";
+        for (unsigned int i = 0; i < unlabeledIsotopesEnvelope.size(); i++) {
+            if (i > 0) cout << ", ";
+            cout << unlabeledIsotopesEnvelope[i];
+        }
+        cout << "}; ENVELOPE LABELED: {";
+        for (unsigned int i = 0; i < labeledIsotopesEnvelope.size(); i++) {
+            if (i > 0) cout << ", ";
+            cout << labeledIsotopesEnvelope[i];
+        }
+        cout << "};" << endl;
+
+    }
+
+    float r = mzUtils::correlation(unlabeledIsotopesEnvelope, labeledIsotopesEnvelope);
+    return 1.0f - r*r;
 }

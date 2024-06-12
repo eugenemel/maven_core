@@ -199,6 +199,14 @@ public:
         bool debug=false
     );
 
+    static IsotopeMatrix constructDiffIsotopeMatrix(
+        PeakGroup *group,
+        vector<mzSample*> unlabeledSamples,
+        vector<mzSample*> labeledSamples,
+        const IsotopeParameters& params,
+        bool debug=false
+        );
+
     static float scoreByPearsonCorrelationCoefficient(
         PeakGroup *group,
         vector<mzSample*> unlabeledSamples,
