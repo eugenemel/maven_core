@@ -6,6 +6,15 @@
 #include "mzSample.h"
 #include <numeric>
 
+
+//Issue 673: makes exporting much easier
+class IsotopeMatrix {
+public:
+    vector<string> sampleNames{};
+    vector<string> isotopeNames{};
+    MatrixXf isotopesData{}; // (rows = samples, columns = isotope names)
+};
+
 /**
  * @brief The IsotopicEnvelope class
  * Measurements for a set of isotopes in a single sample.
@@ -181,14 +190,6 @@ public:
         const IsotopeParameters& params,
         bool debug=false
     );
-};
-
-//Issue 673: makes exporting much easier
-class IsotopeMatrix {
-public:
-    vector<string> sampleNames{};
-    vector<string> isotopeNames{};
-    MatrixXf isotopesData{}; // (rows = samples, columns = isotope names)
 };
 
 #endif // ISOTOPICENVELOPEUTILS_H
