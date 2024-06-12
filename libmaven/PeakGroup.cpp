@@ -1301,3 +1301,26 @@ float PeakGroup::getMaxBlankCorrespondingQuant(string quantType) {
 
     return maxCorrespondingQuantType;
 }
+
+PeakGroup::QType PeakGroup::getQTypeByName(string name) {
+
+    if (name == "peakArea") return AreaTop;
+    if (name == "peakAreaCorrected") return Area;
+    if (name == "peakIntensity") return Height;
+    if (name == "peakArea") return AreaNotCorrected;
+    if (name == "peakAreaFractional") return AreaFractional;
+    if (name == "rt") return RetentionTime;
+    if (name == "quality") return Quality;
+    if (name == "signalBaselineRatio") return SNRatio;
+    if (name == "ms2EventCount") return MS2Count;
+    if (name == "smoothedIntensity") return SmoothedHeight;
+    if (name == "smoothedPeakArea") return SmoothedAreaNotCorrected;
+    if (name == "smoothedPeakAreaCorrected") return SmoothedArea;
+    if (name == "smoothedPeakAreaTop") return SmoothedAreaTop;
+    if (name == "smoothedSignalBaselineRatio") return SmoothedSNRatio;
+    if (name == "peakAreaFWHM") return AreaFWHM;
+    if (name == "smoothedPeakAreaFWHM") return SmoothedAreaFWHM;
+
+    //default
+    return PeakGroup::QType::AreaTop;
+}

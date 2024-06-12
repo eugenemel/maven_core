@@ -1202,5 +1202,15 @@ float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
     bool debug
     ) {
 
+    PeakGroup::QType qtype = PeakGroup::getQTypeByName(params.diffIsoQuantType);
+
+    IsotopeMatrix unlabeledMatrix = IsotopeMatrix::getIsotopeMatrix(
+        group,
+        qtype,
+        unlabeledSamples,
+        params.diffIsoScoringCorrectNatAbundance,
+        false
+        );
+
     return 0.0f;
 }

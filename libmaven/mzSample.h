@@ -1089,6 +1089,7 @@ struct IsotopeParameters {
     bool diffIsoIncludeSingleZero = false;
     bool diffIsoIncludeDoubleZero = false;
     int diffIsoReproducibilityThreshold = 1;
+    bool diffIsoScoringCorrectNatAbundance = false;
     DiffIsoScoringType diffIsoScoringType = DiffIsoScoringType::PEARSON_CORRELATION;
 
     string encodeParams();
@@ -1435,6 +1436,8 @@ class PeakGroup {
         static bool compMaxIntensity(const PeakGroup* a, const PeakGroup* b) { return(a->maxIntensity > b->maxIntensity); }
         static void clusterGroups(vector<PeakGroup*> &allgroups, vector<mzSample*>samples, double maxRtDiff, double minSampleCorrelation, double minPeakShapeCorrelation, double ppm, vector<double> mzDeltas=vector<double>());
         static void clusterGroups(vector<PeakGroup> &allgroups, vector<mzSample*>samples, double maxRtDiff, double minSampleCorrelation, double minPeakShapeCorrelation, double ppm, vector<double> mzDeltas=vector<double>());
+
+        static QType getQTypeByName(string quantTypeName);
 
 private:
         void processLabel(char label, bool isToggle);
