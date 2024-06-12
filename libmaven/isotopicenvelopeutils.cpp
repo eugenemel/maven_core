@@ -1264,12 +1264,18 @@ float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
         vector<float> unlabeledIsotopeValues = vector<float>(unlabeledSamples.size());
         vector<float> labeledIsotopeValues= vector<float>(labeledSamples.size());
 
+        int numUnlabeledNonZero = 0;
+        int numLabeledNonZero = 0;
+
         for (unsigned int i = 0; i < N; i++) {
+            float quantVal = diffIsotopeMatrix.isotopesData(i, j);
             if (i < unlabeledSamples.size()) {
-                unlabeledIsotopeValues[i] = diffIsotopeMatrix.isotopesData(i, j);
+                unlabeledIsotopeValues[i] = quantVal;
+                if (quantVal > 0) numUnlabeledNonZero++;
             } else {
                 unsigned int index = i - unlabeledSamples.size();
-                labeledIsotopeValues.at(index) = diffIsotopeMatrix.isotopesData(i, j);
+                labeledIsotopeValues[index] = quantVal;
+                if (quantVal > 0) numLabeledNonZero++;
             }
         }
 
@@ -1294,15 +1300,15 @@ float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
         // which might produce a vector of all zeros. This can cause strange results in the
         // correlation score. Instead, just return 0 (no incorporation).
         if (j == 0 &&
-            ((unlabeledIsotopeValues.size() < params.diffIsoReproducibilityThreshold) ||
-             (labeledIsotopeValues.size() < params.diffIsoReproducibilityThreshold))) {
+            ((numUnlabeledNonZero < params.diffIsoReproducibilityThreshold) ||
+             (numLabeledNonZero < params.diffIsoReproducibilityThreshold))) {
             return 0;
         }
 
         //render isotope measurements into agglomerated values
         float unlabeledIntensity = 0.0f;
 
-        if (unlabeledIsotopeValues.size() >= params.diffIsoReproducibilityThreshold) {
+        if (numUnlabeledNonZero >= params.diffIsoReproducibilityThreshold) {
             if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
                 unlabeledIntensity = median(unlabeledIsotopeValues);
             } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
@@ -1316,7 +1322,7 @@ float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
 
         float labeledIntensity = 0.0f;
 
-        if (labeledIsotopeValues.size() >= params.diffIsoReproducibilityThreshold) {
+        if (numLabeledNonZero >= params.diffIsoReproducibilityThreshold) {
             if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Mean) {
                 labeledIntensity = median(labeledIsotopeValues);
             } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
