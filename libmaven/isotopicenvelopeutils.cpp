@@ -966,10 +966,31 @@ float DifferentialIsotopicEnvelopeUtils::scoreByFStatistic(
         float mean_A = sumUnlabeled / n_A;
         float var_A = mzUtils::variance(unlabeledIsotope);
 
+        if (var_A <= 0) {
+            if (debug) {
+                cout << "DifferentialIsotopicEnvelopeUtils::scoreByFStatistic(): i=" << i << ":\n"
+                     << "mean_total=" << mean_Total
+                     << ", n_A=" << n_A << ", mean_A=" << mean_A << ", var_A=" << var_A
+                     << endl;
+            }
+            continue;
+        }
+
         unsigned int n_B = labeledIsotope.size();
         double sumLabeled = std::accumulate(labeledIsotope.begin(), labeledIsotope.end(), 0.0);
         float mean_B = sumLabeled / n_B;
         float var_B = mzUtils::variance(labeledIsotope);
+
+        if (var_B <= 0) {
+            if (debug) {
+                cout << "DifferentialIsotopicEnvelopeUtils::scoreByFStatistic(): i=" << i << ":\n"
+                     << "mean_total=" << mean_Total
+                     << ", n_A=" << n_A << ", mean_A=" << mean_A << ", var_A=" << var_A
+                     << ", n_B=" << n_B << ", mean_B=" << mean_B << ", var_B=" << var_B << "\n"
+                     << endl;
+            }
+            continue;
+        }
 
         unsigned int k = 2;
 
