@@ -747,11 +747,24 @@ float DifferentialIsotopicEnvelopeUtils::compareDifferentialIsotopicEnvelopes(
         return lhs.meanMz < rhs.meanMz;
     });
 
+    //agglomerated values
     vector<float> unlabeledIsotopesEnvelope{};
     vector<float> labeledIsotopesEnvelope{};
 
+    //original values
+    //(i, j) index matching between quant value and sample.
     vector<vector<float>> unlabeledIsotopeValuesEnvelope{};
     vector<vector<float>> labeledIsotopeValuesEnvelope{};
+    vector<vector<mzSample*>> unlabeledIsotopeSamplesEnvelope{};
+    vector<vector<mzSample*>> labeledIsotopeSamplesEnvelope{};
+
+    map<mzSample*, float> sampleTotals{};
+    for (auto& sample : unlabeledSamples) {
+        sampleTotals.insert(make_pair(sample, 0.0f));
+    }
+    for (auto& sample : labeledSamples) {
+        sampleTotals.insert(make_pair(sample, 0.0f));
+    }
 
     for (unsigned int i = 0; i < childrenSortedByMz.size(); i++) {
 
@@ -765,14 +778,20 @@ float DifferentialIsotopicEnvelopeUtils::compareDifferentialIsotopicEnvelopes(
         }
 
         vector<float> unlabeledIsotopeValues{};
+        vector<mzSample*> unlabeledIsotopeSamples{};
+
         vector<float> labeledIsotopeValues{};
+        vector<mzSample*> labeledIsotopeSamples{};
 
         for (Peak p : pg.peaks) {
 
            if (find(unlabeledSamples.begin(), unlabeledSamples.end(), p.getSample()) != unlabeledSamples.end()){
                 float quantVal = p.getQuantByName(params.diffIsoQuantType);
                 if (quantVal > 0) {
+                    mzSample* sample = p.getSample();
                     unlabeledIsotopeValues.push_back(quantVal);
+                    unlabeledIsotopeSamples.push_back(sample);
+                    sampleTotals[sample] += quantVal;
                 }
                 if (debug) {
                     cout << "[IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes()]: "
@@ -787,7 +806,10 @@ float DifferentialIsotopicEnvelopeUtils::compareDifferentialIsotopicEnvelopes(
            if (find(labeledSamples.begin(), labeledSamples.end(), p.getSample()) != labeledSamples.end()) {
                 float quantVal = p.getQuantByName(params.diffIsoQuantType);
                 if (quantVal > 0) {
+                    mzSample* sample = p.getSample();
                     labeledIsotopeValues.push_back(quantVal);
+                    labeledIsotopeSamples.push_back(sample);
+                    sampleTotals[sample] += quantVal;
                 }
                 if (debug) {
                     cout << "[IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes()]: "
@@ -812,7 +834,10 @@ float DifferentialIsotopicEnvelopeUtils::compareDifferentialIsotopicEnvelopes(
         }
 
         unlabeledIsotopeValuesEnvelope.push_back(unlabeledIsotopeValues);
+        unlabeledIsotopeSamplesEnvelope.push_back(unlabeledIsotopeSamples);
+
         labeledIsotopeValuesEnvelope.push_back(labeledIsotopeValues);
+        labeledIsotopeSamplesEnvelope.push_back(labeledIsotopeSamples);
 
         float unlabeledIntensity = 0.0f;
 
@@ -910,9 +935,82 @@ float DifferentialIsotopicEnvelopeUtils::compareDifferentialIsotopicEnvelopes(
         float r = mzUtils::correlation(unlabeledIsotopesEnvelope, labeledIsotopesEnvelope);
         score = 1.0f - r*r;
     } else if (params.diffIsoScoringType == DiffIsoScoringType::F_STATISTIC) {
+
+        //Interested in relative proportions in this case. So, need to normalize appropriately.
+
+        vector<vector<float>> unlabeledIsotopeValuesEnvelopeNorm = vector<vector<float>>(unlabeledIsotopeValuesEnvelope.size());
+
+        for (unsigned int i = 0; i < unlabeledIsotopeValuesEnvelope.size(); i++) {
+
+            vector<float> ithValues = unlabeledIsotopeValuesEnvelope[i];
+            vector<mzSample*> ithSamples = unlabeledIsotopeSamplesEnvelope[i];
+
+            vector<float> normIthValues = vector<float>(ithValues.size());
+
+            for (unsigned int j = 0; j < ithValues.size(); j++) {
+                float jthValue = ithValues[j];
+                mzSample* sample = ithSamples[j];
+
+                float normFactor = sampleTotals.at(sample);
+
+                normIthValues[j] = jthValue / normFactor;
+            }
+
+            unlabeledIsotopeValuesEnvelopeNorm[i] = normIthValues;
+        }
+
+        vector<vector<float>> labeledIsotopeValuesEnvelopeNorm = vector<vector<float>>(labeledIsotopeValuesEnvelope.size());
+
+        for (unsigned int i = 0; i < labeledIsotopeValuesEnvelope.size(); i++) {
+
+            vector<float> ithValues = labeledIsotopeValuesEnvelope[i];
+            vector<mzSample*> ithSamples = labeledIsotopeSamplesEnvelope[i];
+
+            vector<float> normIthValues = vector<float>(ithValues.size());
+
+            for (unsigned int j = 0; j < ithValues.size(); j++) {
+                float jthValue = ithValues[j];
+                mzSample* sample = ithSamples[j];
+
+                float normFactor = sampleTotals.at(sample);
+
+                normIthValues[j] = jthValue / normFactor;
+            }
+
+            labeledIsotopeValuesEnvelopeNorm[i] = normIthValues;
+        }
+
+        if (debug) {
+            cout << "[IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes()]: "
+                 << "SOURCE ENVELOPES UNLABELED:\n";
+            for (unsigned int i = 0; i < unlabeledIsotopeValuesEnvelopeNorm.size(); i++) {
+                vector<float> unlabeledIsotopeValuesNorm = unlabeledIsotopeValuesEnvelopeNorm.at(i);
+                cout << "{";
+                for (unsigned int j = 0; j < unlabeledIsotopeValuesNorm.size(); j++) {
+                    if (j > 0) cout << ", ";
+                    cout << unlabeledIsotopeValuesNorm[i];
+                }
+                cout << "}; ";
+            }
+            cout << endl;
+
+            cout << "[IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes()]: "
+                 << "SOURCE ENVELOPES LABELED:\n";
+            for (unsigned int i = 0; i < labeledIsotopeValuesEnvelopeNorm.size(); i++) {
+                vector<float> labeledIsotopeValuesNorm = labeledIsotopeValuesEnvelopeNorm.at(i);
+                cout << "{";
+                for (unsigned int j = 0; j < labeledIsotopeValuesNorm.size(); j++) {
+                    if (j > 0) cout << ", ";
+                    cout << labeledIsotopeValuesNorm[i];
+                }
+                cout << "}; ";
+            }
+            cout << endl;
+        }
+
         score = DifferentialIsotopicEnvelopeUtils::scoreByFStatistic(
-            unlabeledIsotopeValuesEnvelope,
-            labeledIsotopeValuesEnvelope,
+            unlabeledIsotopeValuesEnvelopeNorm,
+            labeledIsotopeValuesEnvelopeNorm,
             params,
             debug);
     }
