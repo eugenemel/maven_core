@@ -198,6 +198,14 @@ public:
         const IsotopeParameters& params,
         bool debug=false
     );
+
+    static float scoreByPearsonCorrelationCoefficient(
+        PeakGroup *group,
+        vector<mzSample*> unlabeledSamples,
+        vector<mzSample*> labeledSamples,
+        const IsotopeParameters& params,
+        bool debug=false
+        );
 };
 
 #endif // ISOTOPICENVELOPEUTILS_H

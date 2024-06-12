@@ -1,6 +1,89 @@
 #include "isotopicenvelopeutils.h"
 #include "mzMassCalculator.h"
 
+
+IsotopeMatrix IsotopeMatrix::getIsotopeMatrix(
+    PeakGroup *group,
+    PeakGroup::QType quantType,
+    vector<mzSample*> samples,
+    bool isNaturalAbundanceCorrected,
+    bool isFractionOfSampleTotal,
+    bool debug){
+
+    double mZeroExpectedAbundance = group->expectedAbundance;
+
+    vector<float> mPlusZeroAbundance{};
+
+    //get isotopic groups
+    vector<PeakGroup*>isotopes;
+    for(int i=0; i < group->childCount(); i++ ) {
+        if (group->children[i].isIsotope() ) {
+            PeakGroup* isotope = &(group->children[i]);
+            isotopes.push_back(isotope);
+
+            if (isotope->tagString == "C12 PARENT") {
+                mZeroExpectedAbundance = isotope->expectedAbundance;
+                mPlusZeroAbundance = isotope->getOrderedIntensityVector(samples, quantType);
+            }
+        }
+    }
+    std::sort(isotopes.begin(), isotopes.end(), PeakGroup::compIsotopicIndex);
+
+    //rows=samples, columns=isotopes
+    MatrixXf MM((int) samples.size(),(int) isotopes.size());
+    MM.setZero();
+
+    for(int i=0; i < isotopes.size(); i++ ) {
+        if (! isotopes[i] ) continue;
+
+        vector<float> values = isotopes[i]->getOrderedIntensityVector(samples, quantType); //sort isotopes by sample
+        for(int j=0; j < values.size(); j++ ) {
+
+            float isotopeObserved = values[j];
+
+            //Do not correct C12 parent.
+            if (isNaturalAbundanceCorrected && !mPlusZeroAbundance.empty() && isotopes[i]->tagString != "C12 PARENT") {
+                float isotopeExpectedAbundance = isotopes[i]->expectedAbundance;
+                float mZeroObserved = mPlusZeroAbundance[j];
+
+                MM(j,i) = MassCalculator::getNaturalAbundanceCorrectedQuantValue(
+                    isotopeObserved,
+                    mZeroObserved,
+                    isotopeExpectedAbundance,
+                    mZeroExpectedAbundance);
+
+            } else {
+                MM(j,i)=isotopeObserved;
+            }
+        }
+    }
+
+    if (isFractionOfSampleTotal) {
+        for (unsigned int i = 0; i < MM.rows(); i++) {
+            float sum= MM.row(i).sum();
+            if (sum == 0) continue;
+            MM.row(i) /= sum;
+        }
+    }
+
+    IsotopeMatrix isotopeMatrix;
+    vector<string> sampleNames = vector<string>(samples.size());
+    for (unsigned int i = 0; i < samples.size(); i++) {
+        sampleNames[i] = samples[i]->sampleName;
+    }
+
+    vector<string> isotopeNames = vector<string>(isotopes.size());
+    for (unsigned int i = 0; i < isotopes.size(); i++) {
+        isotopeNames[i] = isotopes[i]->tagString;
+    }
+
+    isotopeMatrix.isotopesData = MM;
+    isotopeMatrix.sampleNames = sampleNames;
+    isotopeMatrix.isotopeNames = isotopeNames;
+
+    return isotopeMatrix;
+}
+
 double IsotopicEnvelope::getTotalIntensity() {
     if (totalIntensity < 0) {
         totalIntensity = std::accumulate(intensities.begin(), intensities.end(), 0.0);
@@ -1110,84 +1193,14 @@ float DifferentialIsotopicEnvelopeUtils::scoreByFStatistic(
     return F_sum;
 }
 
-IsotopeMatrix IsotopeMatrix::getIsotopeMatrix(
+
+float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
     PeakGroup *group,
-    PeakGroup::QType quantType,
-    vector<mzSample*> samples,
-    bool isNaturalAbundanceCorrected,
-    bool isFractionOfSampleTotal,
-    bool debug){
+    vector<mzSample*> unlabeledSamples,
+    vector<mzSample*> labeledSamples,
+    const IsotopeParameters& params,
+    bool debug
+    ) {
 
-    double mZeroExpectedAbundance = group->expectedAbundance;
-
-    vector<float> mPlusZeroAbundance{};
-
-    //get isotopic groups
-    vector<PeakGroup*>isotopes;
-    for(int i=0; i < group->childCount(); i++ ) {
-        if (group->children[i].isIsotope() ) {
-                PeakGroup* isotope = &(group->children[i]);
-                isotopes.push_back(isotope);
-
-                if (isotope->tagString == "C12 PARENT") {
-                    mZeroExpectedAbundance = isotope->expectedAbundance;
-                    mPlusZeroAbundance = isotope->getOrderedIntensityVector(samples, quantType);
-                }
-        }
-    }
-    std::sort(isotopes.begin(), isotopes.end(), PeakGroup::compIsotopicIndex);
-
-    //rows=samples, columns=isotopes
-    MatrixXf MM((int) samples.size(),(int) isotopes.size());
-    MM.setZero();
-
-    for(int i=0; i < isotopes.size(); i++ ) {
-        if (! isotopes[i] ) continue;
-
-        vector<float> values = isotopes[i]->getOrderedIntensityVector(samples, quantType); //sort isotopes by sample
-        for(int j=0; j < values.size(); j++ ) {
-
-            float isotopeObserved = values[j];
-
-            //Do not correct C12 parent.
-            if (isNaturalAbundanceCorrected && !mPlusZeroAbundance.empty() && isotopes[i]->tagString != "C12 PARENT") {
-            float isotopeExpectedAbundance = isotopes[i]->expectedAbundance;
-            float mZeroObserved = mPlusZeroAbundance[j];
-
-            MM(j,i) = MassCalculator::getNaturalAbundanceCorrectedQuantValue(
-                isotopeObserved,
-                mZeroObserved,
-                isotopeExpectedAbundance,
-                mZeroExpectedAbundance);
-
-            } else {
-                MM(j,i)=isotopeObserved;
-            }
-        }
-    }
-
-    if (isFractionOfSampleTotal) {
-        for (unsigned int i = 0; i < MM.rows(); i++) {
-                float sum= MM.row(i).sum();
-                if (sum == 0) continue;
-                MM.row(i) /= sum;
-        }
-    }
-
-    IsotopeMatrix isotopeMatrix;
-    vector<string> sampleNames = vector<string>(samples.size());
-    for (unsigned int i = 0; i < samples.size(); i++) {
-        sampleNames[i] = samples[i]->sampleName;
-    }
-
-    vector<string> isotopeNames = vector<string>(isotopes.size());
-    for (unsigned int i = 0; i < isotopes.size(); i++) {
-        isotopeNames[i] = isotopes[i]->tagString;
-    }
-
-    isotopeMatrix.isotopesData = MM;
-    isotopeMatrix.sampleNames = sampleNames;
-    isotopeMatrix.isotopeNames = isotopeNames;
-
-    return isotopeMatrix;
+    return 0.0f;
 }
