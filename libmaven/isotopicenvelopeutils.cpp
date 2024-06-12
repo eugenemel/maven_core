@@ -1215,6 +1215,25 @@ IsotopeMatrix DifferentialIsotopicEnvelopeUtils::constructDiffIsotopeMatrix(
         false // debug
         );
 
+    if (debug) {
+        cout << "isoMatrix:\n";
+        cout << "sample_name\t";
+        for (unsigned int j = 0; j < isoMatrix.isotopeNames.size(); j++) {
+                if (j > 0) cout << "\t";
+                cout << isoMatrix.isotopeNames.at(j);
+        }
+
+        for (unsigned int i = 0; i < isoMatrix.sampleNames.size(); i++) {
+            cout << isoMatrix.sampleNames.at(i);
+            for (unsigned int j = 0; j < isoMatrix.isotopeNames.size(); j++) {
+                cout << "\t" << isoMatrix.isotopesData(i, j);
+            }
+
+            cout << endl;
+        }
+        cout << endl;
+    }
+
     return isoMatrix;
 }
 
@@ -1226,19 +1245,25 @@ float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
     bool debug
     ) {
 
+    if (debug) {
+        cout << "[DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient()]" << endl;
+    }
     IsotopeMatrix diffIsotopeMatrix = DifferentialIsotopicEnvelopeUtils::constructDiffIsotopeMatrix(group, unlabeledSamples, labeledSamples, params, debug);
 
-    vector<float> unlabeledIsotopesEnvelope(diffIsotopeMatrix.isotopesData.cols());
-    vector<float> labeledIsotopesEnvelope(diffIsotopeMatrix.isotopesData.cols());
+    unsigned int N = diffIsotopeMatrix.isotopesData.rows();
+    unsigned int M = diffIsotopeMatrix.isotopesData.cols();
+
+    vector<float> unlabeledIsotopesEnvelope(M);
+    vector<float> labeledIsotopesEnvelope(M);
 
     //rows = samples (i); cols = isotopes (j)
     //earlier rows are reserved for unlabeled samples, then labeled samples
-    for (unsigned int j = 0; j < diffIsotopeMatrix.isotopesData.cols(); j++) {
+    for (unsigned int j = 0; j < M; j++) {
 
         vector<float> unlabeledIsotopeValues{};
         vector<float> labeledIsotopeValues{};
 
-        for (unsigned int i = 0; i < diffIsotopeMatrix.isotopesData.rows(); i++) {
+        for (unsigned int i = 0; i < N; i++) {
             if (i < unlabeledSamples.size()) {
                 unlabeledIsotopeValues[i] = diffIsotopeMatrix.isotopesData(i, j);
             } else {
