@@ -945,6 +945,11 @@ float DifferentialIsotopicEnvelopeUtils::scoreByFStatistic(
         vector<float> unlabeledIsotope = unlabeledIsotopeValuesEnvelope.at(i);
         vector<float> labeledIsotope = labeledIsotopeValuesEnvelope.at(i);
 
+        // Avoid NaNs
+        if (unlabeledIsotope.empty() || labeledIsotope.empty()) {
+            continue;
+        }
+
         vector<float> allObservations = unlabeledIsotope;
         allObservations.insert(allObservations.end(), labeledIsotope.begin(), labeledIsotope.end());
 
