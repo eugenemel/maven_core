@@ -1216,7 +1216,7 @@ IsotopeMatrix DifferentialIsotopicEnvelopeUtils::constructDiffIsotopeMatrix(
         );
 
     if (debug) {
-        cout << "isoMatrix:\n";
+        cout << "[DifferentialIsotopicEnvelopeUtils::constructDiffIsotopeMatrix()] isoMatrix:\n";
         cout << "sample_name\t";
         for (unsigned int j = 0; j < isoMatrix.isotopeNames.size(); j++) {
                 if (j > 0) cout << "\t";
@@ -1254,15 +1254,15 @@ float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
     unsigned int N = diffIsotopeMatrix.isotopesData.rows();
     unsigned int M = diffIsotopeMatrix.isotopesData.cols();
 
-    vector<float> unlabeledIsotopesEnvelope(M);
-    vector<float> labeledIsotopesEnvelope(M);
+    vector<float> unlabeledIsotopesEnvelope{};
+    vector<float> labeledIsotopesEnvelope{};
 
     //rows = samples (i); cols = isotopes (j)
     //earlier rows are reserved for unlabeled samples, then labeled samples
     for (unsigned int j = 0; j < M; j++) {
 
-        vector<float> unlabeledIsotopeValues{};
-        vector<float> labeledIsotopeValues{};
+        vector<float> unlabeledIsotopeValues = vector<float>(unlabeledSamples.size());
+        vector<float> labeledIsotopeValues= vector<float>(labeledSamples.size());
 
         for (unsigned int i = 0; i < N; i++) {
             if (i < unlabeledSamples.size()) {
