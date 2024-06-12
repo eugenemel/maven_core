@@ -941,6 +941,7 @@ float DifferentialIsotopicEnvelopeUtils::scoreByFStatistic(
     float F_sum = 0.0f;
 
     for (unsigned int i = 0; i < unlabeledIsotopeValuesEnvelope.size(); i++) {
+
         vector<float> unlabeledIsotope = unlabeledIsotopeValuesEnvelope.at(i);
         vector<float> labeledIsotope = labeledIsotopeValuesEnvelope.at(i);
 
@@ -966,6 +967,15 @@ float DifferentialIsotopicEnvelopeUtils::scoreByFStatistic(
         float MSW_i = ((n_A - 1) * var_A + (n_B - 1) * var_B) / (n_A + n_B - k);
 
         F_sum += MSB_i/MSW_i;
+
+        if (debug) {
+                cout << "DifferentialIsotopicEnvelopeUtils::scoreByFStatistic(): i=" << i << ":\n"
+                     << "mean_total=" << mean_Total
+                     << ", n_A=" << n_A << ", mean_A=" << mean_A << ", var_A=" << var_A
+                     << ", n_B=" << n_B << ", mean_B=" << mean_B << ", var_B=" << var_B << "\n"
+                     << "MSB=" << MSB_i << ", MSW=" << MSW_i << ", F_sum=" << F_sum
+                     << endl;
+        }
     }
 
     return F_sum;
