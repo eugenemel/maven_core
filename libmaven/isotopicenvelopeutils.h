@@ -13,6 +13,14 @@ public:
     vector<string> sampleNames{};
     vector<string> isotopeNames{};
     MatrixXf isotopesData{}; // (rows = samples, columns = isotope names)
+
+    static IsotopeMatrix getIsotopeMatrix(
+        PeakGroup *group,
+        PeakGroup::QType quantType,
+        vector<mzSample*> samples,
+        bool isNaturalAbundanceCorrected,
+        bool isFractionOfSampleTotal,
+        bool debug = false);
 };
 
 /**
