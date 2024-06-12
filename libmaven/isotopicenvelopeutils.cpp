@@ -750,6 +750,9 @@ float DifferentialIsotopicEnvelopeUtils::compareDifferentialIsotopicEnvelopes(
     vector<float> unlabeledIsotopesEnvelope{};
     vector<float> labeledIsotopesEnvelope{};
 
+    vector<vector<float>> unlabeledIsotopeValuesEnvelope{};
+    vector<vector<float>> labeledIsotopeValuesEnvelope{};
+
     for (unsigned int i = 0; i < childrenSortedByMz.size(); i++) {
 
         PeakGroup pg = childrenSortedByMz.at(i);
@@ -807,6 +810,9 @@ float DifferentialIsotopicEnvelopeUtils::compareDifferentialIsotopicEnvelopes(
                        (labeledIsotopeValues.size() < params.diffIsoReproducibilityThreshold))) {
            return 0;
         }
+
+        unlabeledIsotopeValuesEnvelope.push_back(unlabeledIsotopeValues);
+        labeledIsotopeValuesEnvelope.push_back(labeledIsotopesEnvelope);
 
         float unlabeledIntensity = 0.0f;
 
@@ -898,12 +904,15 @@ float DifferentialIsotopicEnvelopeUtils::compareDifferentialIsotopicEnvelopes(
     }
 
     float score = 0.0f;
+
     //deviation from r^2
     if (params.diffIsoScoringType == DiffIsoScoringType::PEARSON_CORRELATION) {
         float r = mzUtils::correlation(unlabeledIsotopesEnvelope, labeledIsotopesEnvelope);
         score = 1.0f - r*r;
-    } else if (params.diffIsoScoringType == DiffIsoScoringType::NORM_INTER_VARIANCE) {
-        score = DifferentialIsotopicEnvelopeUtils::normInterVariance(
+    } else if (params.diffIsoScoringType == DiffIsoScoringType::F_STATISTIC) {
+        score = DifferentialIsotopicEnvelopeUtils::scoreByFStatistic(
+            unlabeledIsotopeValuesEnvelope,
+            labeledIsotopeValuesEnvelope,
             params,
             debug);
     }
@@ -915,4 +924,49 @@ float DifferentialIsotopicEnvelopeUtils::compareDifferentialIsotopicEnvelopes(
     }
 
     return score;
+}
+
+float DifferentialIsotopicEnvelopeUtils::scoreByFStatistic(
+    vector<vector<float>> unlabeledIsotopeValuesEnvelope,
+    vector<vector<float>> labeledIsotopeValuesEnvelope,
+    const IsotopeParameters& params,
+    bool debug
+    ) {
+
+    //Envelopes need to be able to be compared.
+    if (unlabeledIsotopeValuesEnvelope.size() != labeledIsotopeValuesEnvelope.size()) {
+        return 0.0f;
+    }
+
+    float F_sum = 0.0f;
+
+    for (unsigned int i = 0; i < unlabeledIsotopeValuesEnvelope.size(); i++) {
+        vector<float> unlabeledIsotope = unlabeledIsotopeValuesEnvelope.at(i);
+        vector<float> labeledIsotope = labeledIsotopeValuesEnvelope.at(i);
+
+        vector<float> allObservations = unlabeledIsotope;
+        allObservations.insert(allObservations.end(), labeledIsotope.begin(), labeledIsotope.end());
+
+        double sum = std::accumulate(allObservations.begin(), allObservations.end(), 0.0);
+        float mean_Total = sum / allObservations.size();
+
+        unsigned int n_A = unlabeledIsotope.size();
+        double sumUnlabeled = std::accumulate(unlabeledIsotope.begin(), unlabeledIsotope.end(), 0.0);
+        float mean_A = sumUnlabeled / n_A;
+        float var_A = mzUtils::variance(unlabeledIsotope);
+
+        unsigned int n_B = labeledIsotope.size();
+        double sumLabeled = std::accumulate(labeledIsotope.begin(), labeledIsotope.end(), 0.0);
+        float mean_B = sumLabeled / n_B;
+        float var_B = mzUtils::variance(labeledIsotope);
+
+        unsigned int k = 2;
+
+        float MSB_i = (n_A * (mean_A - mean_Total))*(n_A * (mean_A - mean_Total)) + (n_B * (mean_B - mean_Total))*(n_B * (mean_B - mean_Total));
+        float MSW_i = ((n_A - 1) * var_A + (n_B - 1) * var_B) / (n_A + n_B - k);
+
+        F_sum += MSB_i/MSW_i;
+    }
+
+    return F_sum;
 }

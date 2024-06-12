@@ -175,7 +175,9 @@ public:
      *
      *
      */
-    static float normInterVariance(
+    static float scoreByFStatistic(
+        vector<vector<float>> unlabeledIsotopeValuesEnvelope,
+        vector<vector<float>> labeledIsotopeValuesEnvelope,
         const IsotopeParameters& params,
         bool debug=false
     );

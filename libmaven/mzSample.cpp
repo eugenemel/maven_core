@@ -2510,8 +2510,8 @@ string IsotopeParameters::encodeParams() {
     string diffIsoScoringTypeStr = "UNSPECIFIED";
     if (diffIsoScoringType == DiffIsoScoringType::PEARSON_CORRELATION) {
         diffIsoScoringTypeStr = "PEARSON_CORRELATION";
-    } else if (diffIsoScoringType == DiffIsoScoringType::NORM_INTER_VARIANCE) {
-        diffIsoScoringTypeStr = "NORM_INTER_VARIANCE";
+    } else if (diffIsoScoringType == DiffIsoScoringType::F_STATISTIC) {
+        diffIsoScoringTypeStr = "F_STATISTIC";
     }
     encodedParams = encodedParams + "diffIsoScoringType" + "=" + diffIsoScoringTypeStr + ";";
 
@@ -2650,8 +2650,8 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
         string diffIsoScoringTypeStr = decodedMap["diffIsoScoringType"];
         if (diffIsoScoringTypeStr == "PEARSON_CORRELATION") {
            isotopeParameters.diffIsoScoringType = DiffIsoScoringType::PEARSON_CORRELATION;
-        } else if (diffIsoScoringTypeStr == "NORM_INTER_VARIANCE") {
-           isotopeParameters.diffIsoScoringType = DiffIsoScoringType::NORM_INTER_VARIANCE;
+        } else if (diffIsoScoringTypeStr == "F_STATISTIC") {
+           isotopeParameters.diffIsoScoringType = DiffIsoScoringType::F_STATISTIC;
         }
     }
 

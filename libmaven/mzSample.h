@@ -972,7 +972,7 @@ enum IsotopeParametersType{
 
 enum DiffIsoScoringType{
     PEARSON_CORRELATION,
-    NORM_INTER_VARIANCE
+    F_STATISTIC
 };
 
 //This enum only applies to labeled isotopes.
