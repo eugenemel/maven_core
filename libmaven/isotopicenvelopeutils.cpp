@@ -1222,6 +1222,7 @@ IsotopeMatrix DifferentialIsotopicEnvelopeUtils::constructDiffIsotopeMatrix(
                 if (j > 0) cout << "\t";
                 cout << isoMatrix.isotopeNames.at(j);
         }
+        cout << endl;
 
         for (unsigned int i = 0; i < isoMatrix.sampleNames.size(); i++) {
             cout << isoMatrix.sampleNames.at(i);
