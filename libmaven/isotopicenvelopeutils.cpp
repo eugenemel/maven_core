@@ -812,7 +812,7 @@ float DifferentialIsotopicEnvelopeUtils::compareDifferentialIsotopicEnvelopes(
         }
 
         unlabeledIsotopeValuesEnvelope.push_back(unlabeledIsotopeValues);
-        labeledIsotopeValuesEnvelope.push_back(labeledIsotopesEnvelope);
+        labeledIsotopeValuesEnvelope.push_back(labeledIsotopeValues);
 
         float unlabeledIntensity = 0.0f;
 
