@@ -1250,8 +1250,16 @@ void PeakGroup::scoreIsotopesDifferentialAbundance(
     }
 
     //Use groupRank to retain MS2 score information
-    this->groupRank = DifferentialIsotopicEnvelopeUtils::compareDifferentialIsotopicEnvelopes(
-        this->children,
+//    this->groupRank = DifferentialIsotopicEnvelopeUtils::compareDifferentialIsotopicEnvelopes(
+//        this->children,
+//        unlabeledSamples,
+//        labeledSamples,
+//        isotopeParameters,
+//        debug
+//        );
+
+    this->groupRank = DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
+        this,
         unlabeledSamples,
         labeledSamples,
         isotopeParameters,
