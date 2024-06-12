@@ -947,6 +947,11 @@ float DifferentialIsotopicEnvelopeUtils::scoreByFStatistic(
 
         // Avoid NaNs
         if (unlabeledIsotope.empty() || labeledIsotope.empty()) {
+            if (debug) {
+                cout << "DifferentialIsotopicEnvelopeUtils::scoreByFStatistic(): i=" << i << ":\n"
+                     << ", unlabeledIsotope.size(): " << unlabeledIsotope.size()
+                     << ", labeledIsotope.size(): "<< labeledIsotope.size() << "\n";
+            }
             continue;
         }
 
