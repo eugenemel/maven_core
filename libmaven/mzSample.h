@@ -23,6 +23,9 @@
 #include "mzFit.h"
 #include "Matrix.h"
 #include "Fragment.h"
+#include <Eigen/Core>
+#include <Eigen/LU>
+#include <Eigen/SVD>
 
 #ifdef ZLIB
 #include <zlib.h>
@@ -73,6 +76,7 @@ class PeakContainer;
 using namespace pugi;
 using namespace mzUtils;
 using namespace std;
+using namespace Eigen;
 
 class mzPoint {
 	public:
