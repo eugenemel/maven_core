@@ -578,6 +578,11 @@ void IsotopicEnvelopeGroup::setIsotopesToChildrenPeakGroups(Classifier *classifi
 
     this->group->children.clear();
 
+    std::sort(isotopePeakGroups.begin(), isotopePeakGroups.end(), [](PeakGroup& lhs, PeakGroup& rhs){
+        return lhs.meanMz < rhs.meanMz;
+    });
+
+    unsigned int isotopicIndex = 0;
     for (auto & child : isotopePeakGroups) {
 
         child.metaGroupId = this->group->metaGroupId;
@@ -585,6 +590,7 @@ void IsotopicEnvelopeGroup::setIsotopesToChildrenPeakGroups(Classifier *classifi
         child.adduct= this->adduct;
         child.parent = this->group;
         child.setType(PeakGroup::IsotopeType);
+        child.isotopicIndex = isotopicIndex;
 
         child.groupStatistics();
         if (classifier && classifier->hasModel()) {
@@ -592,6 +598,8 @@ void IsotopicEnvelopeGroup::setIsotopesToChildrenPeakGroups(Classifier *classifi
             child.groupStatistics();
         }
         this->group->addChild(child);
+
+        isotopicIndex++;
     }
 }
 
