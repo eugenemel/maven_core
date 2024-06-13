@@ -1251,7 +1251,7 @@ float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
     ) {
 
     if (debug) {
-        cout << "[DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient()]" << endl;
+        cout << "[DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient()] START" << endl;
     }
     IsotopeMatrix diffIsotopeMatrix = DifferentialIsotopicEnvelopeUtils::constructDiffIsotopeMatrix(group, unlabeledSamples, labeledSamples, params, debug);
 
@@ -1308,6 +1308,7 @@ float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
         if (j == 0 &&
             ((numUnlabeledNonZero < params.diffIsoReproducibilityThreshold) ||
              (numLabeledNonZero < params.diffIsoReproducibilityThreshold))) {
+            if (debug) cout << "[DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient()] END: Insufficient Sample Case" << endl;
             return 0;
         }
 
@@ -1385,6 +1386,17 @@ float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
 
     }
 
+    // If fewer than 2 measurements in the envelopes,
+    // the two envelopes are not very interesting, and so
+    // just return a score of 0 (i.e., no deviation in envelopes)
+    if (unlabeledIsotopesEnvelope.size() < 2) {
+        if (debug) cout << "[DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient()] END: small envelopes case" << endl;
+        return 0;
+    }
+
     float r = mzUtils::correlation(unlabeledIsotopesEnvelope, labeledIsotopesEnvelope);
-    return 1.0f - r*r;
+    float score = 1.0f - r*r;
+
+    if (debug) cout << "[DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient()] END: score=" << score << endl;
+    return score;
 }
