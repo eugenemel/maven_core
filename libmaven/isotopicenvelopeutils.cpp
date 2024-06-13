@@ -27,7 +27,11 @@ IsotopeMatrix IsotopeMatrix::getIsotopeMatrix(
             }
         }
     }
-    std::sort(isotopes.begin(), isotopes.end(), PeakGroup::compIsotopicIndex);
+
+    //Issue 725: Sort by increasing m/z instead of isotopic index
+    std::sort(isotopes.begin(), isotopes.end(), [](PeakGroup *lhs, PeakGroup *rhs){
+        return lhs->meanMz < rhs->meanMz;
+    });
 
     //rows=samples, columns=isotopes
     MatrixXf MM((int) samples.size(),(int) isotopes.size());
