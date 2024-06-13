@@ -1291,7 +1291,9 @@ float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
                 if (k > 0) cout << ", ";
                 cout << labeledIsotopeValues[k];
             }
-            cout << "}" << endl;
+            cout << "} numUnlabeledNonZero=" << numUnlabeledNonZero
+                 << ", numLabeledNonZero=" << numLabeledNonZero << endl;
+
         }
 
         // Issue 725: Insufficient sample case
@@ -1332,6 +1334,14 @@ float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
             } else if (params.diffIsoAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Max) {
                 labeledIntensity = *max_element(labeledIsotopeValues.begin(), labeledIsotopeValues.end());
             }
+        }
+
+        if (debug){
+            cout << "params.diffIsoReproducibilityThreshold=" << params.diffIsoReproducibilityThreshold
+                 << ", params.diffIsoIncludeSingleZero=" << params.diffIsoIncludeSingleZero
+                 << "; unlabeledIntensity=" << unlabeledIntensity
+                 << ", labeledIntensity=" << labeledIntensity
+                 << endl;
         }
 
         //double zero
