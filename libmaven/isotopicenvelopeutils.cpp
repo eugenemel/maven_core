@@ -1378,20 +1378,33 @@ float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
         }
     }
 
+    //Issue 725: Normalize aggregate envelopes.
+    //Note that this is always done after any untrustworthy isotope measurements have been removed.
+
+    vector<float> normUnlabeledIsotopesEnvelope = vector<float>(unlabeledIsotopesEnvelope.size());
+    vector<float> normLabeledIsotopesEnvelope = vector<float>(labeledIsotopesEnvelope.size());
+
+    float unlabeledTotal = std::accumulate(unlabeledIsotopesEnvelope.begin(), unlabeledIsotopesEnvelope.end(), 0);
+    float labeledTotal = std::accumulate(labeledIsotopesEnvelope.begin(), labeledIsotopesEnvelope.end(), 0);
+
+    for (unsigned int i = 0; i < unlabeledIsotopesEnvelope.size(); i++) {
+        normUnlabeledIsotopesEnvelope[i] = unlabeledIsotopesEnvelope[i]/unlabeledTotal;
+        normLabeledIsotopesEnvelope[i] = labeledIsotopesEnvelope[i]/labeledTotal;
+    }
+
     if (debug) {
         cout << "[IsotopicEnvelopeEvaluator::differentialIsotopicEnvelopes()]: "
              << "ENVELOPE UNLABELED: {";
-        for (unsigned int i = 0; i < unlabeledIsotopesEnvelope.size(); i++) {
+        for (unsigned int i = 0; i < normUnlabeledIsotopesEnvelope.size(); i++) {
             if (i > 0) cout << ", ";
-            cout << unlabeledIsotopesEnvelope[i];
+            cout << normUnlabeledIsotopesEnvelope[i];
         }
         cout << "}; ENVELOPE LABELED: {";
-        for (unsigned int i = 0; i < labeledIsotopesEnvelope.size(); i++) {
+        for (unsigned int i = 0; i < normLabeledIsotopesEnvelope.size(); i++) {
             if (i > 0) cout << ", ";
-            cout << labeledIsotopesEnvelope[i];
+            cout << normLabeledIsotopesEnvelope[i];
         }
         cout << "};" << endl;
-
     }
 
     // If fewer than 2 measurements in the envelopes,
@@ -1402,24 +1415,20 @@ float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
         return 0;
     }
 
-    // Issue 725: Require that labeled isotopes envelope shows closer similarity to "full incorporation" case than unlabeled isotopes envelope.
-    // Specifically, unlabeled has to show more deviation from perfect labeled case than the labeled case.
-    //TODO: this calculation needs to be more careful, having problem dropping real signal too often
-    vector<float> perfectIncorporation = vector<float>(labeledIsotopesEnvelope.size());
-    perfectIncorporation.at(perfectIncorporation.size() - 1) = 1.0f;
-
-    float unlabeledToPerfect_r = mzUtils::correlation(unlabeledIsotopesEnvelope, perfectIncorporation);
-    float unlabeledToPerfectScore = 1.0 - unlabeledToPerfect_r * unlabeledToPerfect_r;
-
-    float labeledToPerfect_r = mzUtils::correlation(labeledIsotopesEnvelope, perfectIncorporation);
-    float labeledToPerfectScore = 1.0 - labeledToPerfect_r * labeledToPerfect_r;
-
-    // If the unlabeled shows less deviation than the labeled, there is likely a problem with the
-    if (unlabeledToPerfectScore > labeledToPerfectScore) {
+    // Issue 725: Require that more incorporation has happened in the labeled envelope than unlabeled -
+    // in other words, the relative contribution of [M+0] should be less in the labeled case
+    // (indicating that other isotopes have taken up more of the intensity).
+    if (normUnlabeledIsotopesEnvelope[0] < normLabeledIsotopesEnvelope[0]) {
+        if (debug){
+            cout << "[DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient()] END: [M+0] violation case"
+                 << "unlabeled [M+0]=" << normUnlabeledIsotopesEnvelope[0]
+                 << ", labeled [M+0]=" << normLabeledIsotopesEnvelope[0]
+                 << endl;
+        }
         return 0;
     }
 
-    float r = mzUtils::correlation(unlabeledIsotopesEnvelope, labeledIsotopesEnvelope);
+    float r = mzUtils::correlation(normUnlabeledIsotopesEnvelope, normLabeledIsotopesEnvelope);
     float score = 1.0f - r*r;
 
     if (debug) cout << "[DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient()] END: score=" << score << endl;
