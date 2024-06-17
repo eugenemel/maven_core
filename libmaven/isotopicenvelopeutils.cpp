@@ -1404,6 +1404,7 @@ float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
 
     // Issue 725: Require that labeled isotopes envelope shows closer similarity to "full incorporation" case than unlabeled isotopes envelope.
     // Specifically, unlabeled has to show more deviation from perfect labeled case than the labeled case.
+    //TODO: this calculation needs to be more careful, having problem dropping real signal too often
     vector<float> perfectIncorporation = vector<float>(labeledIsotopesEnvelope.size());
     perfectIncorporation.at(perfectIncorporation.size() - 1) = 1.0f;
 
@@ -1414,7 +1415,7 @@ float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
     float labeledToPerfectScore = 1.0 - labeledToPerfect_r * labeledToPerfect_r;
 
     // If the unlabeled shows less deviation than the labeled, there is likely a problem with the
-    if (unlabeledToPerfectScore < labeledToPerfectScore) {
+    if (unlabeledToPerfectScore > labeledToPerfectScore) {
         return 0;
     }
 
