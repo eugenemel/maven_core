@@ -1421,7 +1421,7 @@ float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
     if (normUnlabeledIsotopesEnvelope[0] < normLabeledIsotopesEnvelope[0]) {
         if (debug){
             cout << "[DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient()] END: [M+0] violation case"
-                 << "unlabeled [M+0]=" << normUnlabeledIsotopesEnvelope[0]
+                 << " unlabeled [M+0]=" << normUnlabeledIsotopesEnvelope[0]
                  << ", labeled [M+0]=" << normLabeledIsotopesEnvelope[0]
                  << endl;
         }
