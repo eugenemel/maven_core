@@ -1223,7 +1223,7 @@ IsotopeMatrix DifferentialIsotopicEnvelopeUtils::constructDiffIsotopeMatrix(
         qtype,
         allSamples,
         params.diffIsoScoringCorrectNatAbundance,
-        true, // fractionOfTotal
+        false, // fractionOfTotal
         false // debug
         );
 
