@@ -250,15 +250,49 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
 
         auto sample = peak.sample;
 
+        vector<float> mPlusZeroIntensities{};
+
         for (unsigned int i = 0; i < isotopes.size(); i++) {
 
             Isotope isotope = isotopes.at(i);
 
+            float rtmin = 0.0f;
+            float rtmax = 0.0f;
+
+            if (params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA) {
+
+                rtmin = peak.rtmin;
+                rtmax = peak.rtmax;
+
+            } else if (params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA ||
+                       params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA_CORR) {
+
+                rtmin = peak.rtminFWHM;
+                rtmax = peak.rtmaxFWHM;
+
+            }
+
+            //C12 PARENT should always be first
+            if (i == 0 && params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA_CORR) {
+
+                EIC *eic = sample->getEIC(
+                    static_cast<float>(isotope.mz - isotope.mz/1e6f*params.ppm),
+                    static_cast<float>(isotope.mz + isotope.mz/1e6f*params.ppm),
+                    rtmin,
+                    rtmax,
+                    1);
+
+                mPlusZeroIntensities = eic->intensity;
+
+                delete(eic);
+                eic = nullptr;
+            }
+
             EIC *eic = sample->getEIC(
                 static_cast<float>(isotope.mz - isotope.mz/1e6f*params.ppm),
                 static_cast<float>(isotope.mz + isotope.mz/1e6f*params.ppm),
-                peak.rtmin,
-                peak.rtmax,
+                rtmin,
+                rtmax,
                 1);
 
             float mzmin = eic->mzmin;
@@ -273,6 +307,18 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
                 if (eic->intensity[i] > maxIntensity) {
                     maxIntensity = eic->intensity[i];
                     rtAtMaxIntensity = eic->rt[i];
+                }
+            }
+
+            if (IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA_CORR) {
+                float corr = mzUtils::correlation(mPlusZeroIntensities, eic->intensity);
+                if (corr < params.minIsotopicCorrelation) {
+                    envelope.intensities[i] = 0; //effectively skip this isotope
+
+                    delete(eic);
+                    eic = nullptr;
+
+                    continue;
                 }
             }
 
