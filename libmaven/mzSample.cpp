@@ -2684,7 +2684,7 @@ IsotopicExtractionAlgorithm IsotopeParameters::getExtractionAlgorithmFromName(st
         return IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA;
     } else if (isotopicExtractionAlgorithm == "PEAK_FULL_RT_BOUNDS_AREA" || isotopicExtractionAlgorithm == "[M+0] Full Width Integration") {
         return IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA;
-    } else if (isotopicExtractionAlgorithm == "PEAK_FWHM_RT_BOUNDS_AREA_CORR" || isotopicExtractionAlgorithm == "[M+0] FWHM with correlation") {
+    } else if (isotopicExtractionAlgorithm == "PEAK_FWHM_RT_BOUNDS_AREA_CORR" || isotopicExtractionAlgorithm == "[M+0] FWHM Integration with correlation") {
         return IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA_CORR;
     }
 
