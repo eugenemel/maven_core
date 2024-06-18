@@ -117,7 +117,7 @@ public:
         bool debug=false);
 
     //usually called from IsotopicEnvelopeExtractor::extractEnvelope()
-    static IsotopicEnvelopeGroup extractEnvelopesPeakFullRtBounds(
+    static IsotopicEnvelopeGroup extractEnvelopesFromMPlusZeroPeaks(
         Compound *compound,
         Adduct *adduct,
         PeakGroup *group,
@@ -133,28 +133,6 @@ public:
         vector<Isotope>& isotopes,
         IsotopeParameters params,
         bool debug=false);
-};
-
-class IsotopicEnvelopeAdjuster {
-public:
-
-    /**
-     * @brief condenseTheoreticalIsotopes
-     * Based on the resolving power of the instrument and other parameters, condense a vector
-     * of isotopes produced by mzMassCalculator::computeIsotopes() into a new vector of isotopes.
-     *
-     * For example, for low-res data, condense separate 13C and 15N isotopes into a single "[M+1]" isotopes.
-     *
-     * @param uncondensedIsotopes
-     * @param params
-     * @param debug
-     * @return corrected vector<Isotope> with new isotopic names, theretical m/z, and theoretical abundances.
-     */
-    static vector<Isotope> condenseTheoreticalIsotopes(
-        vector<Isotope> uncondensedIsotopes,
-        IsotopeParameters params,
-        bool debug
-        );
 };
 
 class DifferentialIsotopicEnvelopeUtils {
