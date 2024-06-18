@@ -337,7 +337,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
                 }
             }
 
-            if (IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA_CORR) {
+            if (params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA_CORR) {
                 float corr = mzUtils::correlation(mPlusZeroIntensities, eic->intensity);
 
                 if (debug) {
