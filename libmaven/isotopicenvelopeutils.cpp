@@ -192,6 +192,10 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
         debug
         );
 
+    if (debug) {
+        cout << "[IsotopicEnvelopeExtractor::extractEnvelopes()]: MassCalculator::computeIsotopes() returned " << isotopes.size() << " isotopes." << endl;
+    }
+
     IsotopicEnvelopeGroup envelopeGroup;
 
     if (params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA ||
@@ -212,6 +216,12 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
     }
 
     envelopeGroup.extractionAlgorithmName = IsotopeParameters::getAlgorithmName(params.isotopicExtractionAlgorithm);
+
+    if (debug) {
+        cout << "[IsotopicEnvelopeExtractor::extractEnvelopes()]: envelopeGroup:" << endl;
+        envelopeGroup.print();
+    }
+
     return envelopeGroup;
 
 }

@@ -390,6 +390,8 @@ vector<Isotope> MassCalculator::computeIsotopes(
     // known atomic composition case
     if (compoundFormula != "" && adduct) {
 
+       if (debug) cout << "MassCalculator::computeIsotopes(): Known atomic composition case." << endl;
+
        cacheKey = MassCalculator::getCachedIsotopeKey(
            compoundFormula,
            adduct,
@@ -425,6 +427,9 @@ vector<Isotope> MassCalculator::computeIsotopes(
 
     // unknown atomic composition case
     } else {
+
+       if (debug) cout << "MassCalculator::computeIsotopes(): Unknown atomic composition case." << endl;
+
        isotopicAbundances = MassCalculator::getUnknownFormulaIsotopicAbundances(
            mz,
            labeledIsotopes,
