@@ -2666,8 +2666,10 @@ string IsotopeParameters::getAlgorithmName(IsotopicExtractionAlgorithm algorithm
 
     if (algorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA) {
         return "PEAK_FULL_RT_BOUNDS_AREA";
-    } else if (algorithm == IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS_AREA) {
-        return "PEAK_SHRINKING_RT_BOUNDS_AREA";
+    } else if (algorithm == IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA) {
+        return "PEAK_FWHM_RT_BOUNDS_AREA";
+    } else if (algorithm == IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA_CORR) {
+        return "PEAK_FWHM_RT_BOUNDS_AREA_CORR";
     } else if (algorithm == IsotopicExtractionAlgorithm::MAVEN_GUI_VERSION_ONE) {
         return "MAVEN_GUI_VERSION_ONE";
     }
@@ -2678,10 +2680,12 @@ string IsotopeParameters::getAlgorithmName(IsotopicExtractionAlgorithm algorithm
 IsotopicExtractionAlgorithm IsotopeParameters::getExtractionAlgorithmFromName(string isotopicExtractionAlgorithm) {
     if (isotopicExtractionAlgorithm == "MAVEN_GUI_VERSION_ONE" || isotopicExtractionAlgorithm == "Original (MAVEN 1.0)") {
         return IsotopicExtractionAlgorithm::MAVEN_GUI_VERSION_ONE;
-    } else if (isotopicExtractionAlgorithm == "PEAK_SHRINKING_RT_BOUNDS_AREA" || isotopicExtractionAlgorithm == "TODO:implement GUI hook") {
-        return IsotopicExtractionAlgorithm::PEAK_SHRINKING_RT_BOUNDS_AREA;
+    } else if (isotopicExtractionAlgorithm == "PEAK_FWHM_RT_BOUNDS_AREA" || isotopicExtractionAlgorithm == "[M+0] FWHM Integration") {
+        return IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA;
     } else if (isotopicExtractionAlgorithm == "PEAK_FULL_RT_BOUNDS_AREA" || isotopicExtractionAlgorithm == "[M+0] Full Width Integration") {
         return IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA;
+    } else if (isotopicExtractionAlgorithm == "PEAK_FWHM_RT_BOUNDS_AREA_CORR" || isotopicExtractionAlgorithm == "[M+0] FWHM with correlation") {
+        return IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA_CORR;
     }
 
     //default
