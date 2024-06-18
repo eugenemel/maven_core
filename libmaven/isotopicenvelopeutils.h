@@ -125,15 +125,6 @@ public:
         IsotopeParameters params,
         bool debug=false);
 
-    //TODO: not yet implemented
-    static IsotopicEnvelopeGroup extractEnvelopesPeakShrinkingRtBounds(
-        Compound *compound,
-        Adduct *adduct,
-        PeakGroup *group,
-        vector<Isotope>& isotopes,
-        IsotopeParameters params,
-        bool debug=false);
-
     //The original approach implemented in MAVEN up through version 2.0 2023-09-25
     static IsotopicEnvelopeGroup extractEnvelopesVersion1(
         Compound *compound,
