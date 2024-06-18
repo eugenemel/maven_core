@@ -1199,6 +1199,9 @@ string PeakGroup::getPeakGroupLabel() {
 
 void PeakGroup::pullIsotopes(IsotopeParameters& isotopeParameters, vector<mzSample*> samples, bool debug) {
 
+    if (debug) {
+        cout << meanMz << "@" << meanRt << ": Starting PeakGroup::pullIsotopes()" << endl;
+    }
 
     if (!isotopeParameters.isIsotopes()) {
         if (debug) cout << "PeakGroup::pullIsotopes(): Unable to pull isotopes: No isotopes specified in isotopeParameters." << endl;

@@ -387,8 +387,10 @@ vector<Isotope> MassCalculator::computeIsotopes(
     vector<IsotopicAbundance> isotopicAbundances;
     string cacheKey = "";
 
+    bool isKnownAtomicComposition = compoundFormula != "" && adduct;
+
     // known atomic composition case
-    if (compoundFormula != "" && adduct) {
+    if (isKnownAtomicComposition) {
 
        if (debug) cout << "MassCalculator::computeIsotopes(): Known atomic composition case." << endl;
 
@@ -489,11 +491,12 @@ vector<Isotope> MassCalculator::computeIsotopes(
             cout << "isLabelType? " << isLabelType
                  << ", isValidNaturalAbundance? " << isValidNaturalAbundance
                  <<", is [M+0]? " << (isotopicAbundance.numTotalExtraNeutrons == 0)
+                 << ", is unknown atomic composition? " << !isKnownAtomicComposition
                  << endl;
        }
 
-       //retain isotopes if they are the [M+0], of the preferred label type, or pass natural abundance criteria.
-       if (isLabelType || isValidNaturalAbundance || isotopicAbundance.numTotalExtraNeutrons == 0) {
+       //retain isotopes if they are the [M+0], of the preferred label type, pass natural abundance criteria, or are associated with an unknown formula.
+       if (isLabelType || isValidNaturalAbundance || isotopicAbundance.numTotalExtraNeutrons == 0 || !isKnownAtomicComposition) {
            isotopes.push_back(isotopicAbundance.toIsotope());
        }
     }
@@ -501,6 +504,10 @@ vector<Isotope> MassCalculator::computeIsotopes(
     //Issue 711: Write value to cache to avoid excessive recomputations.
     if (cacheKey != "") {
         isotopesCache.insert(make_pair(cacheKey, isotopes));
+    }
+
+    if (debug) {
+        cout << "MassCalculator::computeIsotopes() Created " << isotopes.size() << " isotopes." << endl;
     }
 
     return isotopes;
