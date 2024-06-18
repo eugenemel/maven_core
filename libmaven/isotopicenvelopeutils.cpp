@@ -292,6 +292,17 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
 
                 delete(eic);
                 eic = nullptr;
+
+                if (debug) {
+                    cout << "[IsotopicEnvelopeEvaluator::extractEnvelopesFromMPlusZeroPeaks()]: "
+                         << sample->sampleName << ": "
+                         << isotope.name << ": {";
+                    for (unsigned int i = 0; i < mPlusZeroIntensities.size(); i++) {
+                        if (i > 0) cout << ", ";
+                        cout << mPlusZeroIntensities[i];
+                    }
+                    cout << "}; " << endl;
+                }
             }
 
             EIC *eic = sample->getEIC(
@@ -320,13 +331,9 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
                 float corr = mzUtils::correlation(mPlusZeroIntensities, eic->intensity);
 
                 if (debug) {
-                    cout << "[IsotopicEnvelopeEvaluator::extractEnvelopesFromMPlusZeroPeaks()]: "
-                         << "C12 PARENT: {";
-                    for (unsigned int i = 0; i < mPlusZeroIntensities.size(); i++) {
-                        if (i > 0) cout << ", ";
-                        cout << mPlusZeroIntensities[i];
-                    }
-                    cout << "}; " << isotope.name << ": {";
+                         cout << "[IsotopicEnvelopeEvaluator::extractEnvelopesFromMPlusZeroPeaks()]: "
+                         << sample->sampleName << ": "
+                         << isotope.name << ": {";
                     for (unsigned int i = 0; i < eic->intensity.size(); i++) {
                         if (i > 0) cout << ", ";
                         cout << eic->intensity.at(i);
@@ -335,7 +342,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
                 }
 
                 if (corr < params.minIsotopicCorrelation) {
-                    envelope.intensities[i] = 0; //effectively skip this isotope
+                    envelope.intensities[i] = 0; //effectively skip this isotope, for this sample
 
                     delete(eic);
                     eic = nullptr;
