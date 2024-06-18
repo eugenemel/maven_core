@@ -413,6 +413,9 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
         IsotopeParameters params,
         bool debug) {
 
+    if (debug) {
+        cout << "Starting IsotopicEnvelopeExtractor::extractEnvelopesVersion1()." << endl;
+    }
     IsotopicEnvelopeGroup envelopeGroup;
 
     envelopeGroup.compound = compound;
@@ -446,7 +449,12 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
         auto sample = parentPeak.sample;
 
         if (debug) {
-            cout << "\n" << compound->name << " " << adduct->name << endl;
+            if (compound) {
+                cout << "\n" << compound->name;
+            }
+            if (adduct) {
+                cout <<  " " << adduct->name << endl;
+            }
         }
 
         for (unsigned int i = 0; i < isotopes.size(); i++) {
@@ -492,7 +500,13 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
                         isotopePeakIntensity = s->intensity[static_cast<unsigned int>(pos)];
                         rt = s->rt;
                         if (debug) {
-                            cout << compound->name << " " << adduct->name << " " << isotope.name << " " << sample->sampleName
+                            if (compound) {
+                                cout << "\n" << compound->name;
+                            }
+                            if (adduct) {
+                                cout <<  " " << adduct->name << " ";
+                            }
+                            cout << isotope.name << " " << sample->sampleName
                                  << " Scan #" << s->scannum << ": m/z=" << s->mz.at(pos) << ", intensity=" << isotopePeakIntensity
                                  << endl;
                     }
@@ -501,7 +515,13 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
             }
 
             if (debug && isotopePeakIntensity < 1e-6f) {
-                cout << compound->name << " " << adduct->name << " " << isotope.name << " " << sample->sampleName
+                if (compound) {
+                    cout << "\n" << compound->name;
+                }
+                if (adduct) {
+                    cout <<  " " << adduct->name << " ";
+                }
+                cout << isotope.name << " " << sample->sampleName
                      << " isotope not detected. "<< endl;
             }
 
@@ -537,7 +557,13 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
             if (c < params.minIsotopicCorrelation) continue;
 
             if (debug) {
-                cout << compound->name << " " << adduct->name << " " << isotope.name << " " << sample->sampleName
+                if (compound) {
+                    cout << "\n" << compound->name;
+                }
+                if (adduct) {
+                    cout <<  " " << adduct->name << " ";
+                }
+                cout << isotope.name << " " << sample->sampleName
                      << isotope.mz << " [" << (rtmin-w) << " - " <<  (rtmax+w) << "] correlation=" << c << endl;
             }
 
