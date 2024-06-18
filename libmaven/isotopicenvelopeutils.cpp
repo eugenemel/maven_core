@@ -194,10 +194,16 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
 
     IsotopicEnvelopeGroup envelopeGroup;
 
-    if (params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA) {
+    if (params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA ||
+        params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA ||
+        params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA_CORR) {
+
         envelopeGroup = extractEnvelopesFromMPlusZeroPeaks(compound, adduct, group, isotopes, params, debug);
+
     } else if (params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::MAVEN_GUI_VERSION_ONE) {
+
         envelopeGroup = extractEnvelopesVersion1(compound, adduct, group, isotopes, params, debug);
+
     }
 
     //Issue 691: combine overlapping isotopes when the peak height for nearby isotopes is identical.
