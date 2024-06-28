@@ -590,7 +590,7 @@ vector<PeakGroup> QQQProcessor::filterPeakGroups(vector<PeakGroup>& peakgroups, 
         }
 
         string quantType = "smoothedPeakAreaCorrected";
-        if (pg.compound->metaDataMap.find(QQQProcessor::getTransitionPreferredQuantTypeStringKey()) != pg.compound->metaDataMap.end()) {
+        if (pg.compound && pg.compound->metaDataMap.find(QQQProcessor::getTransitionPreferredQuantTypeStringKey()) != pg.compound->metaDataMap.end()) {
             quantType = pg.compound->metaDataMap.at(QQQProcessor::getTransitionPreferredQuantTypeStringKey());
         }
 
