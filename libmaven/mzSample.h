@@ -1091,6 +1091,7 @@ struct IsotopeParameters {
     bool diffIsoIncludeDoubleZero = false;
     int diffIsoReproducibilityThreshold = 1;
     bool diffIsoScoringCorrectNatAbundance = false;
+    bool diffIsoScoringFractionOfSampleTotal = false;
     DiffIsoScoringType diffIsoScoringType = DiffIsoScoringType::PEARSON_CORRELATION;
 
     string encodeParams();

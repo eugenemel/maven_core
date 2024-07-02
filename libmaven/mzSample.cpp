@@ -2507,6 +2507,7 @@ string IsotopeParameters::encodeParams() {
     encodedParams = encodedParams + "diffIsoIncludeSingleZero" + "=" + to_string(diffIsoIncludeSingleZero) + ";";
     encodedParams = encodedParams + "diffIsoReproducibilityThreshold" + "=" + to_string(diffIsoReproducibilityThreshold) + ";";
     encodedParams = encodedParams + "diffIsoScoringCorrectNatAbundance" + "=" + to_string(diffIsoScoringCorrectNatAbundance) + ";";
+    encodedParams = encodedParams + "diffIsoScoringFractionOfSampleTotal" + "=" + to_string(diffIsoScoringFractionOfSampleTotal) + ";";
 
     string diffIsoScoringTypeStr = "UNSPECIFIED";
     if (diffIsoScoringType == DiffIsoScoringType::PEARSON_CORRELATION) {
@@ -2650,6 +2651,10 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     if (decodedMap.find("diffIsoScoringCorrectNatAbundance") != decodedMap.end()) {
         isotopeParameters.diffIsoScoringCorrectNatAbundance = decodedMap["diffIsoScoringCorrectNatAbundance"] == "1";
     }
+    if (decodedMap.find("diffIsoScoringFractionOfSampleTotal") != decodedMap.end()) {
+        isotopeParameters.diffIsoScoringFractionOfSampleTotal = decodedMap["diffIsoScoringFractionOfSampleTotal"] == "1";
+    }
+
     if (decodedMap.find("diffIsoScoringType") != decodedMap.end()) {
         string diffIsoScoringTypeStr = decodedMap["diffIsoScoringType"];
         if (diffIsoScoringTypeStr == "PEARSON_CORRELATION") {
