@@ -404,6 +404,7 @@ vector<string> SECTrace::getPeakSummaryString(
     return summaryString;
 }
 
+//Issue 740: return peak positions based on fraction nums.
 string SECTrace::getPeakPositionsString(){
     string peakStr = "";
 
@@ -411,7 +412,7 @@ string SECTrace::getPeakPositionsString(){
         if (i>0) {
             peakStr = peakStr + ", ";
         }
-        peakStr = peakStr + to_string(peaks[i].pos);
+        peakStr = peakStr + to_string(fractionNums[peaks[i].pos]);
     }
 
     return peakStr;
