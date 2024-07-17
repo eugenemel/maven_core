@@ -3690,6 +3690,7 @@ string PeakPickingAndGroupingParameters::getEncodedPeakParameters(string tupleMa
     encodedParams = encodedParams + "peakBaselineDropTopX" + "=" + to_string(peakBaselineDropTopX) + ";";
     encodedParams = encodedParams + "peakIsComputeBounds" + "=" + to_string(peakIsComputeBounds) + ";";
     encodedParams = encodedParams + "peakIsReassignPosToUnsmoothedMax" + "=" + to_string(peakIsReassignPosToUnsmoothedMax) + ";";
+    encodedParams = encodedParams + "peakIsPickEdgePeaks" + "=" + to_string(peakIsPickEdgePeaks) + ";";
 
     //eic
     string baselineEstimationTypeStr = "eicBaselineEstimationType=";
@@ -3784,6 +3785,9 @@ void PeakPickingAndGroupingParameters::fillInPeakParameters(unordered_map<string
     }
     if (decodedMap.find("peakIsReassignPosToUnsmoothedMax") != decodedMap.end()) {
         peakIsReassignPosToUnsmoothedMax = decodedMap["peakIsReassignPosToUnsmoothedMax"] == "1";
+    }
+    if (decodedMap.find("peakIsPickEdgePeaks") != decodedMap.end()) {
+        peakIsPickEdgePeaks = decodedMap["peakIsPickEdgePeaks"] == "1";
     }
 
     //eic

@@ -2156,6 +2156,7 @@ public:
     int peakBaselineDropTopX = 60;
     bool peakIsComputeBounds = true;
     bool peakIsReassignPosToUnsmoothedMax = false;
+    bool peakIsPickEdgePeaks = false; //only one-sided max required for first and last scan in spline
 
     //eic
     EICBaselineEstimationType eicBaselineEstimationType = EICBaselineEstimationType::DROP_TOP_X;
