@@ -38,6 +38,7 @@ string SECSearchParameters::encodeParams() {
     encodedParams = encodedParams + "traceBaselineDropTopX" + "=" + to_string(traceBaselineDropTopX) + ";";
     encodedParams = encodedParams + "tracePeakBoundsMaxIntensityFraction" + "=" + to_string(tracePeakBoundsMaxIntensityFraction) + ";";
     encodedParams = encodedParams + "traceRtBoundsSlopeThreshold" + "=" + to_string(traceRtBoundsSlopeThreshold) + ";";
+    encodedParams = encodedParams + "traceIsPickEdgePeaks" + "=" + to_string(traceIsPickEdgePeaks) + ";";
 
     // Fragment
     encodedParams = encodedParams + "fragmentIsSmoothedIntensity" + "=" + to_string(fragmentIsSmoothedIntensity) +";";
@@ -123,6 +124,9 @@ shared_ptr<SECSearchParameters> SECSearchParameters::decode(string encodedParams
     }
     if (decodedMap.find("traceRtBoundsSlopeThreshold") != decodedMap.end()) {
         secSearchParameters->traceRtBoundsSlopeThreshold = stof(decodedMap["traceRtBoundsSlopeThreshold"]);
+    }
+    if (decodedMap.find("traceIsPickEdgePeaks") != decodedMap.end()) {
+        secSearchParameters->traceIsPickEdgePeaks = decodedMap["traceIsPickEdgePeaks"] == "1";
     }
 
     // Fragment

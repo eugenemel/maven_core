@@ -46,6 +46,7 @@ class SECSearchParameters {
      int traceBaselineDropTopX = 80; //EIC is full width
      float tracePeakBoundsMaxIntensityFraction = 0.0f;
      float traceRtBoundsSlopeThreshold = 0.01f; //minimum change in slope between peak points, as a fraction of the peak's max intensity (otherwise, reached edge of peak)
+     bool traceIsPickEdgePeaks = false; // treat one-sided maxima at the edge of the sec trace as peaks
 
      /** =======================
       * FRAGMENT
