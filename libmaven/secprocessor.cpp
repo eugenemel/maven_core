@@ -340,15 +340,8 @@ void SECTrace::pickPeaks(bool debug) {
     eic->setBaselineSmoothingWindow(params->traceWindowSize);
     eic->setBaselineDropTopX(params->traceBaselineDropTopX);
 
-    //Issue 740: Update to newer peak picking approach
+    //Issue 740: Update from EIC::getPeakPositionsD() to EIC::getPeakPositions()
     eic->getPeakPositionsD(getPeakPickingParams(), debug);
-
-//    eic->getPeakPositionsC(
-//                params->traceWindowSize,
-//                debug,
-//                true,
-//                params->tracePeakBoundsMaxIntensityFraction,
-//                params->traceRtBoundsSlopeThreshold);
 
     this->smoothedIntensities = eic->spline;
 
