@@ -151,6 +151,8 @@ public:
     void pickPeaks(bool debug);
 
     string getPeakPositionsString();
+
+    shared_ptr<PeakPickingAndGroupingParameters> getPeakPickingParams();
 };
 
 //Introduced in 622

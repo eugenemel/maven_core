@@ -307,6 +307,22 @@ void SECTrace::computeTraceData(
     }
 }
 
+// Necessary to plug into EIC::getPeakPositionsD()
+shared_ptr<PeakPickingAndGroupingParameters> SECTrace::getPeakPickingParams() {
+    shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParams = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
+
+    peakPickingAndGroupingParams->peakSmoothingWindow = params->traceWindowSize;
+    peakPickingAndGroupingParams->peakRtBoundsMaxIntensityFraction = params->traceMinFracTopPeakIntensity;
+    peakPickingAndGroupingParams->peakRtBoundsSlopeThreshold = params->traceRtBoundsSlopeThreshold;
+    peakPickingAndGroupingParams->peakBaselineSmoothingWindow = params->traceWindowSize;
+    peakPickingAndGroupingParams->peakBaselineDropTopX = params->traceBaselineDropTopX;
+    peakPickingAndGroupingParams->peakRtBoundsMaxIntensityFraction = params->tracePeakBoundsMaxIntensityFraction;
+    peakPickingAndGroupingParams->peakIsComputeBounds = true;
+    peakPickingAndGroupingParams->peakIsReassignPosToUnsmoothedMax = false;
+
+    return peakPickingAndGroupingParams;
+}
+
 void SECTrace::pickPeaks(bool debug) {
     EIC *eic = new EIC();
 
@@ -324,12 +340,15 @@ void SECTrace::pickPeaks(bool debug) {
     eic->setBaselineSmoothingWindow(params->traceWindowSize);
     eic->setBaselineDropTopX(params->traceBaselineDropTopX);
 
-    eic->getPeakPositionsC(
-                params->traceWindowSize,
-                debug,
-                true,
-                params->tracePeakBoundsMaxIntensityFraction,
-                params->traceRtBoundsSlopeThreshold);
+    //Issue 740: Update to newer peak picking approach
+    eic->getPeakPositionsD(getPeakPickingParams(), debug);
+
+//    eic->getPeakPositionsC(
+//                params->traceWindowSize,
+//                debug,
+//                true,
+//                params->tracePeakBoundsMaxIntensityFraction,
+//                params->traceRtBoundsSlopeThreshold);
 
     this->smoothedIntensities = eic->spline;
 
