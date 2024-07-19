@@ -780,6 +780,15 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
         }
     }
 
+    //Issue 740: Support option to pick maxima on the edge of a trace as peaks, if
+    //they are higher than the point directly adjacent to them.
+    //This option requires at least 3 points; a trace of 2 points would always have one of the edges picked
+    //a peak, which doesn't make a lot of sense.
+    if (params->peakIsPickEdgePeaks && N >= 3) {
+        if (spline[0] > spline[1]) splineAnnotation[0] = SplineAnnotation::MAX;
+        if (spline[N-1] > spline[N-2]) splineAnnotation[N-1] = SplineAnnotation::MAX;
+    }
+
     if (firstMax == -1) return; //no peaks determined based on 3-point max rule
 
     if (debug && !params->peakIsComputeBounds) {
@@ -813,7 +822,7 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
    //Issue 482: re-work peak boundary assignments (maxima and minima)
     peaks.clear();
 
-    for (unsigned int i = 1; i < N-1; i++) {
+    for (unsigned int i = 0; i < N; i++) {
 
         //indicates a new peak
         if (splineAnnotation[i] == SplineAnnotation::MAX) {
@@ -853,6 +862,12 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
             }
 
             while(true) {
+
+                //left-edge peak - special case from params->peakIsPickEdgePeaks
+                if (i == 0) {
+                    leftMinimumIntensityIndex = 0;
+                    break;
+                }
 
                 if (debug) {
                     cout << "Evaluating " << leftIndex << ": "
@@ -956,6 +971,12 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
             }
 
             while(true) {
+
+                //right-edge peak - special case from params->peakIsPickEdgePeaks
+                if (i == (N-1)) {
+                    rightMinimumIntensityIndex = N-1;
+                    break;
+                }
 
                 if (debug) {
                     cout << "Evaluating " << rightIndex << ": "
