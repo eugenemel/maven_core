@@ -785,8 +785,18 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
     //This option requires at least 3 points; a trace of 2 points would always have one of the edges picked
     //a peak, which doesn't make a lot of sense.
     if (params->peakIsPickEdgePeaks && N >= 3) {
-        if (spline[0] > spline[1]) splineAnnotation[0] = SplineAnnotation::MAX;
-        if (spline[N-1] > spline[N-2]) splineAnnotation[N-1] = SplineAnnotation::MAX;
+        if (spline[0] > spline[1]) {
+            splineAnnotation[0] = SplineAnnotation::MAX;
+            if (firstMax == -1) {
+                firstMax = 0;
+            }
+        }
+        if (spline[N-1] > spline[N-2]){
+            splineAnnotation[N-1] = SplineAnnotation::MAX;
+            if (firstMax == -1) {
+                firstMax = N-1;
+            }
+        }
     }
 
     if (firstMax == -1) return; //no peaks determined based on 3-point max rule
