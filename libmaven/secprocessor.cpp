@@ -321,6 +321,8 @@ shared_ptr<PeakPickingAndGroupingParameters> SECTrace::getPeakPickingParams() {
     peakPickingAndGroupingParams->peakBaselineSmoothingWindow = params->traceWindowSize;
     peakPickingAndGroupingParams->peakBaselineDropTopX = params->traceBaselineDropTopX;
     peakPickingAndGroupingParams->peakRtBoundsMaxIntensityFraction = params->tracePeakBoundsMaxIntensityFraction;
+    peakPickingAndGroupingParams->peakIsPickEdgePeaks = params->traceIsPickEdgePeaks;
+
     peakPickingAndGroupingParams->peakIsComputeBounds = true;
     peakPickingAndGroupingParams->peakIsReassignPosToUnsmoothedMax = false;
 
