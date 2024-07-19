@@ -357,6 +357,15 @@ void SECTrace::pickPeaks(bool debug) {
     float rawIntensityThreshold = max(params->traceMinFracTopPeakIntensity * maxRawIntensity, params->traceMinPeakIntensity);
     float smoothedIntensityThreshold = max(params->traceMinFracTopSmoothedIntensity * maxSmoothedIntensity, params->traceMinSmoothedIntensity);
 
+    if (debug) {
+        cout << "SECTrace::pickPeaks():\n"
+             << "\tmaxRawIntensity: " << maxRawIntensity << "\n"
+             << "\tmaxSmoothedIntensity: " << maxSmoothedIntensity << "\n"
+             << "\trawIntensityThreshold: " << rawIntensityThreshold << "\n"
+             << "\tsmoothedIntensityThreshold: " << smoothedIntensityThreshold << "\n"
+             << endl;
+    }
+
     //float minPeakIntensity = maxRawIntensity * params->trace
     for (auto p : eic->peaks) {
 
@@ -368,12 +377,22 @@ void SECTrace::pickPeaks(bool debug) {
         float peakRawIntensity = this->rawIntensities[p.pos];
         float peakSmoothedIntensity = this->smoothedIntensities[p.pos];
 
+        if (debug) {
+            cout << "Peak @ pos=" << p.pos
+                 << ": width=" << p.width
+                 << ", peakRawIntensity=" << peakRawIntensity
+                 << ", peakSmoothedIntensity=" << peakSmoothedIntensity;
+        }
+
         if (peakRawIntensity >= rawIntensityThreshold
                 && peakSmoothedIntensity >= smoothedIntensityThreshold
                 && p.signalBaselineRatio >= params->traceMinPeakSN
                 && p.width >= static_cast<unsigned int>(params->traceMinPeakWidth)) {
             this->peaks.push_back(p);
+            if (debug) cout << " --> passing";
         }
+
+        if (debug) cout << endl;
     }
 
     delete(eic);

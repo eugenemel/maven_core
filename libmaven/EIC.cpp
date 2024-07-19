@@ -965,7 +965,7 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
             }
 
             if (debug) {
-                cout << "leftMinimumIntensityIndex: " << leftMinimumIntensityIndex << endl;
+                cout << "leftMinimumIntensityIndex: " << leftMinimumIntensityIndex << "\n" << endl;
             }
 
             //descend to the right
@@ -1074,7 +1074,7 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
             }
 
             if (debug) {
-                cout << "rightMinimumIntensityIndex: " << rightMinimumIntensityIndex << endl;
+                cout << "rightMinimumIntensityIndex: " << rightMinimumIntensityIndex  << "\n" << endl;
             }
 
             peak->minpos = leftMinimumIntensityIndex;
@@ -1117,6 +1117,7 @@ void EIC::getPeakPositionsD(shared_ptr<PeakPickingAndGroupingParameters> params,
     sort(peaks.begin(), peaks.end(), Peak::compRt);
 
     if (debug) {
+        cout << "===================================\n";
         for (auto peak : peaks) {
             cout << "PEAK: pos=" << peak.pos << ", mz=" << peak.peakMz << ", rt=" << peak.rt << "\n";
             cout << "\t min=" << peak.minpos << ", minmz=" << peak.mzmin << ", rtmin=" << peak.rtmin << "\n";
