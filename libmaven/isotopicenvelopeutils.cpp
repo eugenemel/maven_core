@@ -424,6 +424,68 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
     return envelopeGroup;
 }
 
+IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesMPlusZeroMergedEIC(
+    Compound *compound,
+    Adduct *adduct,
+    PeakGroup *group,
+    vector<Isotope>& isotopes,
+    IsotopeParameters params,
+    bool debug) {
+
+    IsotopicEnvelopeGroup envelopeGroup;
+
+    envelopeGroup.compound = compound;
+    envelopeGroup.adduct = adduct;
+    envelopeGroup.group = group;
+    envelopeGroup.isotopes = isotopes;
+
+    //initialize peak groups
+    envelopeGroup.isotopePeakGroups = vector<PeakGroup>(isotopes.size());
+    for (unsigned int i = 0; i < envelopeGroup.isotopePeakGroups.size(); i++) {
+        Isotope isotope = isotopes[i];
+
+        PeakGroup g;
+        g.meanMz = isotope.mz;
+        g.tagString = isotope.name;
+        g.expectedAbundance = isotope.abundance;
+        g.isotopeC13count= isotope.C13;
+        g.isotopicIndex = i;
+        g.compound = compound;
+        g.adduct = adduct;
+        g.setType(PeakGroup::GroupType::IsotopeType);
+
+        envelopeGroup.isotopePeakGroups[i] = g;
+    }
+
+    vector<EIC*> individualEICs{};
+    for (auto & peak : group->peaks) {
+        if (peak.hasSample()) {
+            EIC* sampleEIC = peak.sample->getEIC(peak.mzmin, peak.mzmax, peak.rtmin, peak.rtmax, 1);
+            individualEICs.push_back(sampleEIC);
+        }
+    }
+
+    float rtminFWHM = 0.0f;
+    float rtmaxFWHM = 0.0f;
+
+    if (individualEICs.empty()) {
+        cerr << "IsotopicEnvelopeExtractor::extractEnvelopesMPlusZeroMergedEIC(): No EICs found! Oh nooooo!" << endl;
+        abort();
+    } else if (individualEICs.size() == 1) {
+        rtminFWHM = individualEICs[0]->rtmin;
+        rtmaxFWHM = individualEICs[0]->rtmax;
+    } else {
+        EIC* m = EIC::eicMerge(individualEICs);
+
+        // TODO: pick peaks (pass along params), then find the RT of the closest peak to
+        // the group RT. Take the corresponding peak's FWHM RT values
+        //
+        // m->getPeakPositionsD(mergedEICParams, debug);
+    }
+
+    return envelopeGroup;
+}
+
 IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
         Compound *compound,
         Adduct *adduct,
