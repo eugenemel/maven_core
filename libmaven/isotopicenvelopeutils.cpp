@@ -379,8 +379,10 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
             p.minpos = peak.minpos;
             p.maxpos = peak.maxpos;
             p.width = (peak.maxpos-peak.minpos);
-            p.rtmin = peak.rtmin;
-            p.rtmax = peak.rtmax;
+            p.rtmin = rtmin;
+            p.rtmax = rtmax;
+            p.rtminFWHM = peak.rtminFWHM;
+            p.rtmaxFWHM = peak.rtmaxFWHM;
 
             //m/z related
             p.mzmin = mzmin;
