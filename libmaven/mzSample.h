@@ -1100,6 +1100,7 @@ struct IsotopeParameters {
     static IsotopeParameters decode(string encodedIsotopeParameters);
     static string getAlgorithmName(IsotopicExtractionAlgorithm algorithm);
     static IsotopicExtractionAlgorithm getExtractionAlgorithmFromName(string isotopicExtractionAlgorithm);
+    static bool isMPlusZeroBasedExtraction(const IsotopicExtractionAlgorithm& isotopicExtractionAlgorithm);
 
     static string getLabeledIsotopeRetentionPolicyName(LabeledIsotopeRetentionPolicy policy);
     static LabeledIsotopeRetentionPolicy getLabeledIsotopeRetentionPolicyFromName(string labeledIsotopeRetentionPolicy);

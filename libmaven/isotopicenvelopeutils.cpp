@@ -198,9 +198,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
 
     IsotopicEnvelopeGroup envelopeGroup;
 
-    if (params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA ||
-        params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA ||
-        params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA_CORR) {
+    if (IsotopeParameters::isMPlusZeroBasedExtraction(params.isotopicExtractionAlgorithm)) {
 
         envelopeGroup = extractEnvelopesFromMPlusZeroPeaks(compound, adduct, group, isotopes, params, debug);
 

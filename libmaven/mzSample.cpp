@@ -2701,6 +2701,13 @@ IsotopicExtractionAlgorithm IsotopeParameters::getExtractionAlgorithmFromName(st
     return IsotopicExtractionAlgorithm::MAVEN_GUI_VERSION_ONE;
 }
 
+bool IsotopeParameters::isMPlusZeroBasedExtraction(const IsotopicExtractionAlgorithm& isotopicExtractionAlgorithm) {
+    return isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA ||
+           isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA ||
+           isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA_CORR ||
+           isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::MEIC_FWHM_RT_BOUNDS_AREA;
+}
+
 string IsotopeParameters::getLabeledIsotopeRetentionPolicyName(LabeledIsotopeRetentionPolicy policy) {
     if (policy == LabeledIsotopeRetentionPolicy::ONLY_CARBON_TWO_LABELS) {
         return "ONLY_CARBON_TWO_LABELS";
