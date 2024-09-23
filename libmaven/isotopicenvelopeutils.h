@@ -125,13 +125,10 @@ public:
         IsotopeParameters params,
         bool debug=false);
 
-    //Issue 750: FWHM based approach
-    static IsotopicEnvelopeGroup extractEnvelopesMPlusZeroMergedEIC(
-        Compound *compound,
-        Adduct *adduct,
+    //Issue 750: Compute RT range from FWHM of merged EIC
+    static pair<float, float> extractFWHMRtRangeFromMergedEIC(
         PeakGroup *group,
-        vector<Isotope>& isotopes,
-        IsotopeParameters params,
+        IsotopeParameters& params,
         bool debug=false);
 
     //The original approach implemented in MAVEN up through version 2.0 2023-09-25

@@ -241,6 +241,15 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
     envelopeGroup.group = group;
     envelopeGroup.isotopes = isotopes;
 
+    float mergedEICrtminFWHM = 0.0f;
+    float mergedEICrtmaxFWHM = 0.0f;
+
+    if (params.isotopicExtractionAlgorithm == MEIC_FWHM_RT_BOUNDS_AREA) {
+        pair<float, float> mergedEICrtFWHMRange = IsotopicEnvelopeExtractor::extractFWHMRtRangeFromMergedEIC(group, params, debug);
+        mergedEICrtminFWHM = mergedEICrtFWHMRange.first;
+        mergedEICrtmaxFWHM = mergedEICrtFWHMRange.second;
+    }
+
     //initialize peak groups
     envelopeGroup.isotopePeakGroups = vector<PeakGroup>(isotopes.size());
     for (unsigned int i = 0; i < envelopeGroup.isotopePeakGroups.size(); i++) {
@@ -286,6 +295,10 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
                 rtmin = peak.rtminFWHM;
                 rtmax = peak.rtmaxFWHM;
 
+            } else if (params.isotopicExtractionAlgorithm == MEIC_FWHM_RT_BOUNDS_AREA) {
+
+                rtmin = mergedEICrtminFWHM;
+                rtmax = mergedEICrtmaxFWHM;
             }
 
             //C12 PARENT should always be first
@@ -424,38 +437,18 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
     return envelopeGroup;
 }
 
-IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesMPlusZeroMergedEIC(
-    Compound *compound,
-    Adduct *adduct,
+pair<float, float> IsotopicEnvelopeExtractor::extractFWHMRtRangeFromMergedEIC(
     PeakGroup *group,
-    vector<Isotope>& isotopes,
-    IsotopeParameters params,
+    IsotopeParameters& params,
     bool debug) {
 
-    IsotopicEnvelopeGroup envelopeGroup;
-
-    envelopeGroup.compound = compound;
-    envelopeGroup.adduct = adduct;
-    envelopeGroup.group = group;
-    envelopeGroup.isotopes = isotopes;
-
-    //initialize peak groups
-    envelopeGroup.isotopePeakGroups = vector<PeakGroup>(isotopes.size());
-    for (unsigned int i = 0; i < envelopeGroup.isotopePeakGroups.size(); i++) {
-        Isotope isotope = isotopes[i];
-
-        PeakGroup g;
-        g.meanMz = isotope.mz;
-        g.tagString = isotope.name;
-        g.expectedAbundance = isotope.abundance;
-        g.isotopeC13count= isotope.C13;
-        g.isotopicIndex = i;
-        g.compound = compound;
-        g.adduct = adduct;
-        g.setType(PeakGroup::GroupType::IsotopeType);
-
-        envelopeGroup.isotopePeakGroups[i] = g;
+    if (!group) {
+        return make_pair(0.0f, 0.0f);
     }
+
+    float groupRt = group->medianRt();
+    float rtminFWHM = 0.0f;
+    float rtmaxFWHM = 0.0f;
 
     vector<EIC*> individualEICs{};
     for (auto & peak : group->peaks) {
@@ -465,25 +458,53 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesMPlusZeroMerged
         }
     }
 
-    float rtminFWHM = 0.0f;
-    float rtmaxFWHM = 0.0f;
-
     if (individualEICs.empty()) {
-        cerr << "IsotopicEnvelopeExtractor::extractEnvelopesMPlusZeroMergedEIC(): No EICs found! Oh nooooo!" << endl;
+        cerr << "[IsotopicEnvelopeExtractor::extractEnvelopesMPlusZeroMergedEIC()]: No EICs found - aborting." << endl;
         abort();
     } else if (individualEICs.size() == 1) {
-        rtminFWHM = individualEICs[0]->rtmin;
+        if (debug) {
+            cout << "[IsotopicEnvelopeExtractor::extractEnvelopesMPlusZeroMergedEIC()]: Single peak" << endl;
+        }
+         rtminFWHM = individualEICs[0]->rtmin;
         rtmaxFWHM = individualEICs[0]->rtmax;
     } else {
         EIC* m = EIC::eicMerge(individualEICs);
 
-        // TODO: pick peaks (pass along params), then find the RT of the closest peak to
-        // the group RT. Take the corresponding peak's FWHM RT values
-        //
-        // m->getPeakPositionsD(mergedEICParams, debug);
+        m->getPeakPositionsD(params.peakPickingAndGroupingParameters, debug);
+
+        if (debug) {
+            cout << "Identified " << m->peaks.size() << " peaks from merged EIC.";
+        }
+
+        Peak eicBestPeak;
+        float peakDiff = -1.0f;
+        for (unsigned int i = 0; i < m->peaks.size(); i++) {
+            Peak peak = m->peaks.at(i);
+            float ithPeakDiff = abs(peak.rt - groupRt);
+            if (ithPeakDiff < peakDiff || peakDiff < 0) {
+                eicBestPeak = peak;
+                peakDiff = ithPeakDiff;
+            }
+        }
+
+        if (debug) {
+            cout << "[IsotopicEnvelopeExtractor::extractEnvelopesMPlusZeroMergedEIC()]: "
+                 << "Group median RT = " << groupRt << "; "
+                 << "merged EIC peak RT = " << eicBestPeak.rt
+                 << endl;
+        }
+
+        rtminFWHM = eicBestPeak.rtminFWHM;
+        rtmaxFWHM = eicBestPeak.rtmaxFWHM;
     }
 
-    return envelopeGroup;
+    if (debug) {
+        cout << "[IsotopicEnvelopeExtractor::extractEnvelopesMPlusZeroMergedEIC()]: "
+             << "returnining pair(" << rtminFWHM << ", " << rtmaxFWHM << ")"
+             << endl;
+    }
+
+    return make_pair(rtminFWHM, rtmaxFWHM);
 }
 
 IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(

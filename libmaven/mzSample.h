@@ -968,7 +968,9 @@ enum IsotopicExtractionAlgorithm{
     MAVEN_GUI_VERSION_ONE,
     PEAK_FULL_RT_BOUNDS_AREA,
     PEAK_FWHM_RT_BOUNDS_AREA,
-    PEAK_FWHM_RT_BOUNDS_AREA_CORR};
+    PEAK_FWHM_RT_BOUNDS_AREA_CORR,
+    MEIC_FWHM_RT_BOUNDS_AREA
+};
 
 enum IsotopeParametersType{
     INVALID=0,
