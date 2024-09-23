@@ -229,7 +229,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
     Adduct *adduct,
     PeakGroup *group,
     vector<Isotope>& isotopes,
-    IsotopeParameters params,
+    const IsotopeParameters& params,
     bool debug) {
 
     IsotopicEnvelopeGroup envelopeGroup;
@@ -437,7 +437,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
 
 pair<float, float> IsotopicEnvelopeExtractor::extractFWHMRtRangeFromMergedEIC(
     PeakGroup *group,
-    IsotopeParameters& params,
+    const IsotopeParameters& params,
     bool debug) {
 
     if (!group) {
@@ -510,7 +510,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
         Adduct *adduct,
         PeakGroup *group,
         vector<Isotope>& isotopes,
-        IsotopeParameters params,
+        const IsotopeParameters& params,
         bool debug) {
 
     if (debug) {

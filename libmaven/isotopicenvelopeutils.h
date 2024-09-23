@@ -122,13 +122,13 @@ public:
         Adduct *adduct,
         PeakGroup *group,
         vector<Isotope>& isotopes,
-        IsotopeParameters params,
+        const IsotopeParameters& params,
         bool debug=false);
 
     //Issue 750: Compute RT range from FWHM of merged EIC
     static pair<float, float> extractFWHMRtRangeFromMergedEIC(
         PeakGroup *group,
-        IsotopeParameters& params,
+        const IsotopeParameters& params,
         bool debug=false);
 
     //The original approach implemented in MAVEN up through version 2.0 2023-09-25
@@ -137,7 +137,7 @@ public:
         Adduct *adduct,
         PeakGroup *group,
         vector<Isotope>& isotopes,
-        IsotopeParameters params,
+        const IsotopeParameters& params,
         bool debug=false);
 };
 
