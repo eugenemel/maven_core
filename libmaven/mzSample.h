@@ -1032,7 +1032,7 @@ public:
 
 struct IsotopeParameters {
 
-    string searchVersion = "2.10.8";
+    string searchVersion = "2.10.19";
     IsotopeParametersType isotopeParametersType = IsotopeParametersType::INVALID;
 
     //Used to determine m/z bounds from theoretical isotope m/z
