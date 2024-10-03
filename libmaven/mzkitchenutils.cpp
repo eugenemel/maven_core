@@ -399,7 +399,7 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
                  << " VS params->ms2MinNumMatches = " << params->ms2MinNumMatches
                  << " " << (s.numMatches >= params->ms2MinNumMatches ? "yes" : "no")
                  << " VS params->ms2MinScore = " << params->ms2MinScore
-                 << " " << (s.dotProduct < params->ms2MinScore ? "yes" : "no")
+                 << " " << (s.dotProduct >= params->ms2MinScore ? "yes" : "no")
                  << "\n\n\n";
         }
 
