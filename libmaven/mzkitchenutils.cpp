@@ -403,6 +403,9 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
 
         if (s.numMatches < params->ms2MinNumMatches) continue;
 
+        //Issue 752: valid scores must meet score threshold
+        if (s.dotProduct < params->ms2MinScore) continue;
+
 
         scores.push_back(make_pair(ion, s));
     }
