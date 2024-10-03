@@ -2063,7 +2063,6 @@ string PeaksSearchParameters::encodeParams(){
     //ms2 matching
     encodedParams = encodedParams + "ms2IsMatchMs2" + "=" + to_string(ms2IsMatchMs2) + ";";
     encodedParams = encodedParams + "ms2ScoringAlgorithm" + "=" + ms2ScoringAlgorithm + ";";
-    encodedParams = encodedParams + "ms2MinScore" + "=" + to_string(ms2MinScore) + ";";
 
     //matching options
     encodedParams = encodedParams + "matchingIsRequireAdductPrecursorMatch" + "=" + to_string(matchingIsRequireAdductPrecursorMatch) + ";";
@@ -2176,9 +2175,6 @@ shared_ptr<PeaksSearchParameters> PeaksSearchParameters::decode(string encodedPa
     }
     if (decodedMap.find("ms2ScoringAlgorithm") != decodedMap.end()){
         peaksSearchParameters->ms2ScoringAlgorithm = decodedMap["ms2ScoringAlgorithm"];
-    }
-    if (decodedMap.find("ms2MinScore") != decodedMap.end()){
-        peaksSearchParameters->ms2MinScore = stof(decodedMap["ms2MinScore"]);
     }
 
     //matching options
@@ -3379,6 +3375,9 @@ void SearchParameters::fillInBaseParams(unordered_map<string, string> decodedMap
      }
      if (decodedMap.find("ms2MinIntensity") != decodedMap.end()) {
          ms2MinIntensity = stof(decodedMap["ms2MinIntensity"]);
+     }
+     if (decodedMap.find("ms2MinScore") != decodedMap.end()){
+         ms2MinScore = stof(decodedMap["ms2MinScore"]);
      }
 
      //Identification related

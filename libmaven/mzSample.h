@@ -2047,6 +2047,11 @@ class SearchParameters {
     /** New Param 2020-05-04 **/
     map<string, int> ms2MinNumDiagnosticMatchesMap {};
 
+    //Note that this parameter may varies depending on type of scoring performed.
+    //For example, scores may range between 0 and 1 (e.g., normDotProduct), or could start at 0 and be unlimited
+    //(e.g., hypergeometric score)
+    float ms2MinScore = 0;
+
     virtual string encodeParams() = 0;
 
     /** ===================
@@ -2116,6 +2121,7 @@ class SearchParameters {
         encodedParams = encodedParams + "ms2PpmTolr" + "=" + to_string(ms2PpmTolr) + ";";
         encodedParams = encodedParams + "ms2MinIntensity" + "=" + to_string(ms2MinIntensity) + ";";
         encodedParams = encodedParams + "ms2IsRequirePrecursorMatch"  + "=" + to_string(ms2IsRequirePrecursorMatch) + ";"; //Issue 390
+        encodedParams = encodedParams + "ms2MinScore" + "=" + to_string(ms2MinScore) + ";";
 
         //Identification related
         encodedParams = encodedParams + "IDisRequireMatchingAdduct" + "=" + to_string(IDisRequireMatchingAdduct) + ";"; //Issue 606
