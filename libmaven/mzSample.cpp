@@ -2024,6 +2024,9 @@ SearchParameters::~SearchParameters() = default;
 
 string SearchParameters::baseParams() {
 
+    cout << "DEBUGGING - calling SearchParameters::baseParams()" << endl;
+    cout << "DEBUGGING - ms2MinScore = " << ms2MinScore << endl;
+
     string encodedParams;
 
     //START SearchParameters
@@ -2092,6 +2095,8 @@ string SearchParameters::baseParams() {
 string PeaksSearchParameters::encodeParams(){
 
     string encodedParams = baseParams();
+
+    cout << "DEBUGGING - from PeaksSearchParameters::encodeParams(), ms2MinScore = " << this->ms2MinScore << endl;
 
     //baseline
     encodedParams = encodedParams + "baselineSmoothingWindow" + "=" + to_string(baselineSmoothingWindow) + ";";

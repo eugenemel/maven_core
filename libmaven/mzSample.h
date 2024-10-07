@@ -2148,7 +2148,7 @@ public:
  *
  * Used by Peaks Dialog in maven GUI
  */
-class PeaksSearchParameters : public SearchParameters {
+class PeaksSearchParameters : public virtual SearchParameters {
 
 public:
 
