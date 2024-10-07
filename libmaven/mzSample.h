@@ -1955,8 +1955,6 @@ public:
 
         Parameters& params = static_cast<Parameters&>(*this);
 
-        cout << "DEBUGGING - calling EncodingDecodingTemplate::baseParams()" << endl;
-
         string encodedParams;
 
         //START SearchParameters
