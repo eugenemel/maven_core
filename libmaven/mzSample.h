@@ -2254,12 +2254,7 @@ class SearchParameters {
      * ==================== */
     bool IDisRequireMatchingAdduct = false;
 
-    void fillInBaseParams(unordered_map<string, string> decodedMap);
-
     virtual ~SearchParameters();
-
-    string baseParams();
-
 };
 
 enum PeakGroupCompoundMatchingPolicy {
@@ -2342,7 +2337,7 @@ public:
  *
  * Used by Peaks Dialog in maven GUI
  */
-class PeaksSearchParameters : public SearchParameters {
+class PeaksSearchParameters : public SearchParameters, public EncodingDecodingTemplate<PeaksSearchParameters> {
 
 public:
 
@@ -2542,7 +2537,7 @@ private:
 };
 
 //Issue 455
-class LCLipidSearchParameters : public MzkitchenMspSearchParameters, public LipidParameterGroup {
+class LCLipidSearchParameters : public MzkitchenMspSearchParameters, public LipidParameterGroup, public EncodingDecodingTemplate<LCLipidSearchParameters> {
 
 public:
 
@@ -2572,7 +2567,7 @@ public:
 };
 
 //Issue 538
-class MzkitchenMetaboliteSearchParameters : public MzkitchenMspSearchParameters {
+class MzkitchenMetaboliteSearchParameters : public MzkitchenMspSearchParameters, public EncodingDecodingTemplate<MzkitchenMetaboliteSearchParameters> {
 
 public:
 
@@ -2799,7 +2794,7 @@ enum QQQTransitionCompoundMappingPolicy{
     RETAIN_ALL_TRANSITIONS
 };
 
-class QQQSearchParameters : public SearchParameters {
+class QQQSearchParameters : public SearchParameters, public EncodingDecodingTemplate<QQQSearchParameters> {
 
 public:
 
@@ -2826,7 +2821,7 @@ public:
     shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters;
 };
 
-class QQQProcessor{
+class QQQProcessor {
     public:
 
     /**
