@@ -463,7 +463,7 @@ pair<float, float> IsotopicEnvelopeExtractor::extractFWHMRtRangeFromMergedEIC(
         if (debug) {
             cout << "[IsotopicEnvelopeExtractor::extractEnvelopesMPlusZeroMergedEIC()]: Single peak" << endl;
         }
-         rtminFWHM = individualEICs[0]->rtmin;
+        rtminFWHM = individualEICs[0]->rtmin;
         rtmaxFWHM = individualEICs[0]->rtmax;
     } else {
         EIC* m = EIC::eicMerge(individualEICs);
