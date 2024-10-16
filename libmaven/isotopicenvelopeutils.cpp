@@ -739,8 +739,8 @@ void IsotopicEnvelopeGroup::setIsotopesToChildrenPeakGroups(Classifier *classifi
     for (auto & child : isotopePeakGroups) {
 
         child.metaGroupId = this->group->metaGroupId;
-        child.compound = this->compound;
-        child.adduct= this->adduct;
+        child.compound = this->group->compound;
+        child.adduct= this->group->adduct;
         child.parent = this->group;
         child.setType(PeakGroup::IsotopeType);
         child.isotopicIndex = isotopicIndex;
