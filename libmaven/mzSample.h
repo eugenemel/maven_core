@@ -1031,6 +1031,29 @@ public:
     }
 };
 
+class MassAtom : public Atom {
+public:
+    string symbol;
+    int massNumber;
+    double massValue;
+
+    MassAtom() {symbol = "NONE"; massNumber = -1; massValue = -1.0;}
+
+    MassAtom(string symbol, int massNumber, double massValue) {
+        this->symbol = symbol;
+        this->massNumber = massNumber;
+        this->massValue = massValue;
+    }
+
+    friend bool operator< (const MassAtom& a, const MassAtom& b) {
+        if (a.symbol == b.symbol) {
+            return a.massNumber < b.massNumber;
+        } else {
+            return a.symbol < b.symbol;
+        }
+    }
+};
+
 struct IsotopeParameters {
 
     string searchVersion = "2.10.19";
