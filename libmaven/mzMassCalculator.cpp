@@ -1187,3 +1187,198 @@ double MassCalculator::getNaturalAbundanceCorrectedQuantValue(
 
     return 0;
 }
+
+//Issue 758
+vector<pair<Adduct, map<MassAtom, int>>> MassCalculator::candidateAtomMaps(
+    double mz,
+    vector<Adduct> possibleAdducts,
+    map<MassAtom, pair<int, int>> legalAtomCounts,
+    double ppmDiff,
+    bool debug
+    ) {
+
+    //initialize output
+    vector<pair<Adduct, map<MassAtom, int>>> atomMapCandidates{};
+
+    double minMz = mz - mz*ppmDiff/1e6;
+    double maxMz = mz + mz*ppmDiff/1e6;
+
+    if (debug) {
+        cout << "Enumerating valid atom maps with mz= [" << minMz << ", " << maxMz << "]" << endl;
+    }
+
+    //Determine which atoms can legally stand alone (that is, do not require any other atoms)
+    //For atom X, if any atoms in the map occur before atom X with a non-zero requirement, atom X cannot stand on its own.
+    vector<MassAtom> cannotStandAlone{};
+    for (auto it = legalAtomCounts.begin(); it != legalAtomCounts.end(); ++it) {
+        if (it->second.first > 0) {
+
+            auto nextIt = std::next(it);
+
+            if (nextIt != legalAtomCounts.end()) {
+                //all subsequent atoms cannot stand on their own.
+                std::transform(nextIt, legalAtomCounts.end(), std::back_inserter(cannotStandAlone),
+                               [](const pair<MassAtom, pair<int, int>> pair) { return pair.first; });
+            }
+
+            break;
+        }
+    }
+
+    set<string> cannotStandAloneSymbols{};
+    for (MassAtom & massAtom : cannotStandAlone) {
+        cannotStandAloneSymbols.insert(massAtom.symbol);
+    }
+
+    if (debug) {
+        cout << "The following atoms cannot stand alone: ";
+        for (MassAtom & massAtom : cannotStandAlone) {
+            cout << massAtom.symbol << " ";
+        }
+        cout << endl;
+    }
+
+    //Wrap everything in the adducts map - this enumeration is then solving for the "M" part of the
+    //adduct, we don't care about the other stuff
+    for (auto& adduct : possibleAdducts) {
+
+        double minParentMass = min(adduct.computeParentMass(maxMz), adduct.computeParentMass(minMz));
+        double maxParentMass = max(adduct.computeParentMass(maxMz), adduct.computeParentMass(minMz));
+
+        if (debug) {
+            cout << "Enumerating candidates for parent mass, assuming adduct="
+                 << adduct.name << "; parent range=[" << minParentMass << ", " << maxParentMass << "]" << endl;
+        }
+
+        //Enumerate all possible candidates for this "M".
+        //While enumerating, immediately stop if the M so far if the mass is too high.
+        vector<map<MassAtom, int>> candidatesMap{};
+
+        //iterate through every possible number of non-carbon atoms.
+        for (auto it = legalAtomCounts.begin(); it != legalAtomCounts.end(); ++it) {
+
+            const MassAtom& atomType = it->first;
+
+            int minNum = it->second.first;
+            int maxNum = it->second.second;
+            int N = maxNum-minNum+1;
+
+            //Case: do not add any of the new atoms.
+            //Note that this is only legal if minNum is zero.
+            vector<map<MassAtom, int>> mapWithNoNewAdditions{};
+            if (minNum == 0) {
+                mapWithNoNewAdditions = candidatesMap;
+            }
+
+            //Case: only add the new atoms, do not keep any old atoms.
+            //check to see if this is legal first
+            vector<map<MassAtom, int>> newAdditionsOnly(N);
+            unsigned long counter = 0;
+            bool isStandAlone = true;
+            if (cannotStandAloneSymbols.find(atomType.symbol) != cannotStandAloneSymbols.end()) {
+                isStandAlone = false;
+                newAdditionsOnly.clear();
+            }
+
+            vector<map<MassAtom,int>> combinationMap{};
+            for (unsigned int i = minNum; i <= maxNum; i++) {
+
+                if (isStandAlone) {
+                    map<MassAtom, int> newMap = map<MassAtom, int>();
+                    newMap.insert(make_pair(atomType, i));
+                    newAdditionsOnly[counter] = newMap;
+                }
+
+                //Case: every atom that is already in the map is updated with the new additions.
+                vector<map<MassAtom, int>> ithDuplicate = candidatesMap;
+                for (auto & candidate : ithDuplicate) {
+                    candidate.insert(make_pair(atomType, i));
+                    combinationMap.push_back(candidate);
+                }
+
+                counter++;
+            }
+
+            unsigned int updatedSize = mapWithNoNewAdditions.size() + newAdditionsOnly.size() + combinationMap.size();
+            vector<map<MassAtom, int>> updatedCandidatesMap;
+            updatedCandidatesMap.reserve(updatedSize);
+
+            updatedCandidatesMap.insert(updatedCandidatesMap.end(), mapWithNoNewAdditions.begin(), mapWithNoNewAdditions.end());
+            updatedCandidatesMap.insert(updatedCandidatesMap.end(), newAdditionsOnly.begin(), newAdditionsOnly.end());
+            updatedCandidatesMap.insert(updatedCandidatesMap.end(), combinationMap.begin(), combinationMap.end());
+
+            //prepare for next iteration
+            candidatesMap.clear();
+
+            //filtering for next iteration - if the m/z is already too high, abort.
+            for (auto & candidate : updatedCandidatesMap) {
+                double parentMassTotal = 0.0;
+                for(auto it2 = candidate.begin(); it2 != candidate.end(); ++it2) {
+                    parentMassTotal += it2->second* it2->first.massValue;
+                    if (parentMassTotal > maxParentMass) break;
+                }
+                if (parentMassTotal <= maxParentMass) {
+                    candidatesMap.push_back(candidate);
+                }
+            }
+
+            if (debug) {
+                cout << "After introduction of " << atomType.symbol << ": "
+                     << candidatesMap.size() << " atom map candidates. "
+                     << endl;
+            }
+        }
+
+        for (auto & candidate : candidatesMap) {
+            double parentMassTotal = 0.0;
+            for(auto it = candidate.begin(); it != candidate.end(); ++it) {
+                parentMassTotal += it->second * it->first.massValue;
+            }
+            if (parentMassTotal <= maxParentMass && parentMassTotal >= minParentMass) {
+                atomMapCandidates.push_back(make_pair(adduct, candidate));
+            }
+        }
+    }
+
+    return atomMapCandidates;
+}
+
+
+vector<pair<string, double>> MassCalculator::evaluateAtomMapCandidates(
+    double mz,
+    const vector<pair<Adduct, map<MassAtom, int>>>& atomMapCandidates,
+    bool debug) {
+
+    vector<pair<string, double>> evaluatedCandidates(atomMapCandidates.size());
+
+    for (unsigned int i = 0; i < atomMapCandidates.size(); i++) {
+
+        Adduct adduct = atomMapCandidates[i].first;
+        map<MassAtom, int> atomMap = atomMapCandidates[i].second;
+
+        double parentMassTotal = 0;
+
+        stringstream s;
+        for(auto it = atomMap.begin(); it != atomMap.end(); ++it) {
+            parentMassTotal += it->second * it->first.massValue;
+
+            s << it->first.symbol;
+            if (it->second > 1) {
+                s << it->second;
+            }
+        }
+
+        double candidateMz = adduct.computeAdductMass(parentMassTotal);
+
+        double ppmDiff = (candidateMz-mz)/mz*1e6;
+        string formulaString = s.str();
+
+        evaluatedCandidates[i] = make_pair(formulaString, ppmDiff);
+    }
+
+    sort(evaluatedCandidates.begin(), evaluatedCandidates.end(), [](pair<string, double>& lhs, pair<string, double>& rhs) {
+        return abs(lhs.second) < abs(rhs.second);
+    });
+
+    return evaluatedCandidates;
+}

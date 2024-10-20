@@ -90,6 +90,21 @@ class MassCalculator {
     vector<Match> enumerateMasses(double inputMass, double charge, double maxdiff);
     double adjustMass(double mass,int charge);
 
+
+    //Issue 758: predict molecular formula for an arbitrary m/z
+    static vector<pair<Adduct, map<MassAtom, int>>> candidateAtomMaps(
+        double mz,
+        vector<Adduct> possibleAdducts,
+        map<MassAtom, pair<int, int>> legalAtomCounts,
+        double ppmDiff,
+        bool debug=false
+        );
+
+    static vector<pair<string, double>> evaluateAtomMapCandidates(
+        double mz,
+        const vector<pair<Adduct, map<MassAtom, int>>>& atomMapCandidates,
+        bool debug = false);
+
     static vector<Isotope> computeIsotopes(
         string compoundFormula,
         Adduct *adduct,
