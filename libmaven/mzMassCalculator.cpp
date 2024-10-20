@@ -346,8 +346,8 @@ double MassCalculator::computeNeutralMass(string formula) {
 	map<string,int>::iterator itr;
 
 	double mass=0;
-	for( itr = atoms.begin(); itr != atoms.end(); itr++ ) {
-			mass += getElementMass((*itr).first) * (*itr).second;
+    for(itr = atoms.begin(); itr != atoms.end(); itr++ ) {
+        mass += getElementMass((*itr).first) * (*itr).second;
 	}
 	return mass;
 }
