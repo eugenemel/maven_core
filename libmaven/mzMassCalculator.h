@@ -79,11 +79,14 @@ class MassCalculator {
     static void addAtoms(map<string, int>& reference, map<string, int> toAdd);
     static void subtractAtoms(map<string, int>& reference, map<string, int> toSubtract);
     static void multiplyAtoms(map<string, int>& reference, int factor);
-
     double computeMass(string formula, int polarity);
     double computeC13IsotopeMass(string formula);
     map<string,double>computeLabeledMasses(string formula, int polarity);
     map<string,double>computeLabeledAbundances(string formula);
+
+    static int getAdductCharge(string adductName);
+    static int getAdductMols(string adductName);
+    static Adduct parseAdductFromName(string adductName);
 
     void matchMass(double mass, double ppm);
     string prettyName(int c, int h, int n, int o, int p, int s, int d=0);

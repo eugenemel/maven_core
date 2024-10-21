@@ -1,4 +1,5 @@
 #include "mzMassCalculator.h"
+#include <regex>
 
 //Issue 711: cache must be initialized out-of-line
 map<string, vector<Isotope>> MassCalculator::isotopesCache = {};
@@ -193,6 +194,68 @@ map<string,int> MassCalculator::getComposition(Adduct* adduct){
     }
 
     return atoms;
+}
+
+int MassCalculator::getAdductCharge(string adductName) {
+    int adductCharge = 1;
+    regex suffixRe("\\](.*)$");
+    regex chgNumRe("(\\d+)[+-]");
+
+    smatch match, match2;
+    if (regex_search(adductName, match, suffixRe)) {
+        string suffix = match[1].str();
+        if (regex_search(suffix, match2, chgNumRe)) {
+            string suffixStr = match2[1].str();
+            adductCharge = stoi(suffixStr.substr(0, suffixStr.size()-2));
+            if (suffix.substr(suffix.size()-1, 1) == "-") {
+                adductCharge = -1 * adductCharge;
+            }
+        } else if (suffix == "-") {
+            adductCharge = -1;
+        }
+    }
+
+    return adductCharge;
+}
+
+int MassCalculator::getAdductMols(string adductName) {
+    int adductNumMols = 1;
+    regex grabNumMols("\\[([^+-]+)[+-]");
+    regex grabInts("^([^M]*)");
+    smatch match, match2;
+    if (regex_search(adductName, match, grabNumMols)) {
+        string numMolsStr = match[1].str();
+        if (regex_search (numMolsStr, match2, grabInts)) {
+            string numInts = match2[1].str();
+            if (numInts != "") {
+                adductNumMols = stoi(numInts);
+            }
+        }
+    }
+
+    return adductNumMols;
+}
+
+Adduct MassCalculator::parseAdductFromName(string adductName) {
+
+    Adduct adduct;
+    adduct.name = adductName;
+
+    map<string, int> atomComposition = MassCalculator::getComposition(&(adduct));
+    int adductCharge = MassCalculator::getAdductCharge(adductName);
+    int adductMols = MassCalculator::getAdductMols(adductName);
+
+    //# of electrons gained or lost
+    double massShift = EMASS * -1 * adductCharge;
+
+    for (auto it = atomComposition.begin(); it != atomComposition.end(); ++it) {
+        massShift += MassCalculator::getElementMass(it->first) * it->second;
+    }
+    adduct.mass = massShift;
+    adduct.nmol = adductMols;
+    adduct.charge = adductCharge;
+
+    return adduct;
 }
 
 void MassCalculator::addAtoms(map<string, int>& reference, map<string, int> toAdd) {
