@@ -1257,6 +1257,7 @@ vector<pair<Adduct, map<MassAtom, int>>> MassCalculator::candidateAtomMaps(
     vector<Adduct> possibleAdducts,
     map<MassAtom, pair<int, int>> legalAtomCounts,
     double ppmDiff,
+    long maxNumCandidates,
     bool debug
     ) {
 
@@ -1384,6 +1385,14 @@ vector<pair<Adduct, map<MassAtom, int>>> MassCalculator::candidateAtomMaps(
                 }
                 if (parentMassTotal <= maxParentMass) {
                     candidatesMap.push_back(candidate);
+                    if (candidatesMap.size() > maxNumCandidates) {
+                        if (debug) {
+                            cerr << "Too many candidates to enumerate - reduce m/z or modify legal atom counts argument.\n"
+                                 << "Returning an empty vector."
+                                 << endl;
+                        }
+                        return vector<pair<Adduct, map<MassAtom, int>>>();
+                    }
                 }
             }
 
@@ -1407,7 +1416,6 @@ vector<pair<Adduct, map<MassAtom, int>>> MassCalculator::candidateAtomMaps(
 
     return atomMapCandidates;
 }
-
 
 vector<pair<string, double>> MassCalculator::evaluateAtomMapCandidates(
     double mz,

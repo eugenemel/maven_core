@@ -100,6 +100,7 @@ class MassCalculator {
         vector<Adduct> possibleAdducts,
         map<MassAtom, pair<int, int>> legalAtomCounts,
         double ppmDiff,
+        long maxNumCandidates = 2e6,
         bool debug=false
         );
 
