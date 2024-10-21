@@ -59,6 +59,23 @@ string SECSearchParameters::encodeParams() {
     return encodedParams;
 }
 
+shared_ptr<PeakPickingAndGroupingParameters> SECSearchParameters::toPeakPickingAndGroupingParams() {
+    shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParams = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
+
+    peakPickingAndGroupingParams->peakSmoothingWindow = traceWindowSize;
+    peakPickingAndGroupingParams->peakRtBoundsMaxIntensityFraction = traceMinFracTopPeakIntensity;
+    peakPickingAndGroupingParams->peakRtBoundsSlopeThreshold = traceRtBoundsSlopeThreshold;
+    peakPickingAndGroupingParams->peakBaselineSmoothingWindow = traceWindowSize;
+    peakPickingAndGroupingParams->peakBaselineDropTopX = traceBaselineDropTopX;
+    peakPickingAndGroupingParams->peakRtBoundsMaxIntensityFraction = tracePeakBoundsMaxIntensityFraction;
+    peakPickingAndGroupingParams->peakIsPickEdgePeaks = traceIsPickEdgePeaks;
+
+    peakPickingAndGroupingParams->peakIsComputeBounds = true;
+    peakPickingAndGroupingParams->peakIsReassignPosToUnsmoothedMax = false;
+
+    return peakPickingAndGroupingParams;
+}
+
 shared_ptr<SECSearchParameters> SECSearchParameters::decode(string encodedParams) {
 
     shared_ptr<SECSearchParameters> secSearchParameters = shared_ptr<SECSearchParameters>(new SECSearchParameters());
@@ -311,26 +328,8 @@ void SECTrace::computeTraceData(
     }
 }
 
-// Necessary to plug into EIC::getPeakPositionsD()
-shared_ptr<PeakPickingAndGroupingParameters> SECTrace::getPeakPickingParams() {
-    shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParams = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
-
-    peakPickingAndGroupingParams->peakSmoothingWindow = params->traceWindowSize;
-    peakPickingAndGroupingParams->peakRtBoundsMaxIntensityFraction = params->traceMinFracTopPeakIntensity;
-    peakPickingAndGroupingParams->peakRtBoundsSlopeThreshold = params->traceRtBoundsSlopeThreshold;
-    peakPickingAndGroupingParams->peakBaselineSmoothingWindow = params->traceWindowSize;
-    peakPickingAndGroupingParams->peakBaselineDropTopX = params->traceBaselineDropTopX;
-    peakPickingAndGroupingParams->peakRtBoundsMaxIntensityFraction = params->tracePeakBoundsMaxIntensityFraction;
-    peakPickingAndGroupingParams->peakIsPickEdgePeaks = params->traceIsPickEdgePeaks;
-
-    peakPickingAndGroupingParams->peakIsComputeBounds = true;
-    peakPickingAndGroupingParams->peakIsReassignPosToUnsmoothedMax = false;
-
-    return peakPickingAndGroupingParams;
-}
-
 void SECTrace::pickPeaks(bool debug) {
-    EIC *eic = new EIC();
+    eic = new EIC();
 
     vector<float> pseudoRt(fractionNums.size());
     for (unsigned int i = 0; i < fractionNums.size(); i++) {
@@ -347,7 +346,7 @@ void SECTrace::pickPeaks(bool debug) {
     eic->setBaselineDropTopX(params->traceBaselineDropTopX);
 
     //Issue 740: Update from EIC::getPeakPositionsD() to EIC::getPeakPositions()
-    eic->getPeakPositionsD(getPeakPickingParams(), debug);
+    eic->getPeakPositionsD(params->toPeakPickingAndGroupingParams(), debug);
 
     this->smoothedIntensities = eic->spline;
 
@@ -367,7 +366,11 @@ void SECTrace::pickPeaks(bool debug) {
     }
 
     //float minPeakIntensity = maxRawIntensity * params->trace
-    for (auto p : eic->peaks) {
+
+    //EIC peaks are subject to additional constraints
+    vector<Peak> validPeaks{};
+
+    for (auto & p : eic->peaks) {
 
         //Issue 598: peak width has a different meaning for LC data, involving noise estimates
         //here, it simply means the total # of fractions the peak spans
@@ -388,14 +391,43 @@ void SECTrace::pickPeaks(bool debug) {
                 && peakSmoothedIntensity >= smoothedIntensityThreshold
                 && p.signalBaselineRatio >= params->traceMinPeakSN
                 && p.width >= static_cast<unsigned int>(params->traceMinPeakWidth)) {
-            this->peaks.push_back(p);
+            validPeaks.push_back(p);
             if (debug) cout << " --> passing";
         }
 
         if (debug) cout << endl;
     }
 
-    delete(eic);
+    this->peaks = validPeaks;
+    eic->peaks = validPeaks;
+
+    //Issue 759: Retain for grouping
+    //delete(eic);
+}
+
+vector<EIC*> SECTraceGroups::getEICs() {
+    vector<EIC*> eics{};
+    for (SECTrace* trace : secTraces){
+        if (trace->eic) {
+            eics.push_back(trace->eic);
+        }
+    }
+    return eics;
+}
+
+//Issue 759
+void SECTraceGroups::groupPeaks(bool debug) {
+
+    vector<EIC*> eics = getEICs();
+
+    groups.clear();
+    groups = EIC::groupPeaksE(eics, params->toPeakPickingAndGroupingParams(), debug);
+
+    //TODO: the EIC peaks have been filtered prior to grouping, make sure there are no issues
+    //mapping groups to phantom peaks
+    //
+    //alternatively, do not filter out the EIC peaks up front,
+    // and just filter out the downstream peak groups here
 }
 
 vector<string> SECTrace::getPeakSummaryString(

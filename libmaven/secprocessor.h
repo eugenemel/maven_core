@@ -84,6 +84,7 @@ class SECSearchParameters {
 
      string encodeParams();
      shared_ptr<SECSearchParameters> static decode(string encodedParams);
+     shared_ptr<PeakPickingAndGroupingParameters> toPeakPickingAndGroupingParams();
 };
 
 enum SECTraceType {Unset=0, Peptide=1, Protein=2};
@@ -114,6 +115,7 @@ public:
     vector<Peak> peaks{};
 
     Fragment *fragment = nullptr;
+    EIC *eic = nullptr;
 
     //default constructor
     SECTrace(){}
@@ -152,8 +154,17 @@ public:
     void pickPeaks(bool debug);
 
     string getPeakPositionsString();
+};
 
-    shared_ptr<PeakPickingAndGroupingParameters> getPeakPickingParams();
+class SECTraceGroups {
+    string id;
+    vector<SECTrace*> secTraces;
+    shared_ptr<SECSearchParameters> params;
+    vector<PeakGroup> groups{};
+
+    vector<EIC*> getEICs();
+
+    void groupPeaks(bool debug);
 };
 
 //Introduced in 622
