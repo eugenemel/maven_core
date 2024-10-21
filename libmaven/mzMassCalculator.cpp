@@ -1283,6 +1283,8 @@ vector<pair<Adduct, map<MassAtom, int>>> MassCalculator::candidateAtomMaps(
             vector<map<MassAtom,int>> combinationMap{};
             for (unsigned int i = minNum; i <= maxNum; i++) {
 
+                if (i == 0) continue;
+
                 if (isStandAlone) {
                     map<MassAtom, int> newMap = map<MassAtom, int>();
                     newMap.insert(make_pair(atomType, i));
@@ -1370,7 +1372,7 @@ vector<pair<string, double>> MassCalculator::evaluateAtomMapCandidates(
 
         double candidateMz = adduct.computeAdductMass(parentMassTotal);
 
-        double ppmDiff = (candidateMz-mz)/mz*1e6;
+        double ppmDiff = (candidateMz-mz)/candidateMz*1e6;
         string formulaString = s.str();
 
         evaluatedCandidates[i] = make_pair(formulaString, ppmDiff);
