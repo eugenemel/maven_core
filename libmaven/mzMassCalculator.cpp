@@ -1440,7 +1440,12 @@ vector<pair<string, double>> MassCalculator::evaluateAtomMapCandidates(
         for(auto it = atomMap.begin(); it != atomMap.end(); ++it) {
             parentMassTotal += it->second * it->first.massValue;
 
-            s << it->first.symbol;
+            if (std::isdigit(it->first.symbol[0])) {
+                s << "[" << it->first.symbol << "]";
+            } else {
+                s << it->first.symbol;
+            }
+
             if (it->second > 1) {
                 s << it->second;
             }
