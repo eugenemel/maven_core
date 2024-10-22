@@ -76,7 +76,9 @@ double MassCalculator::getElementMass(string elmnt){
     if (elmnt == "H")        val_atome = 1.0078250321;
     else if (elmnt == "D")   val_atome = 2.01410178;
     else if (elmnt == "C")   val_atome = 12.00000000;
+    else if (elmnt == "13C") val_atome = 13.003354835336;
     else if (elmnt == "N")   val_atome = 14.0030740052;
+    else if (elmnt == "15N") val_atome = 15.000108898266;
     else if (elmnt == "O")   val_atome = 15.9949146221;
     else if (elmnt == "S")   val_atome = 31.97207069;
     else if (elmnt == "P")   val_atome = 30.97376151;
