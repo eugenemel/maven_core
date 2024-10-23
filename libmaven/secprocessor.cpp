@@ -442,7 +442,7 @@ void SECTraceGroups::computePeakGroups(bool debug) {
             traceSample->setSampleId(traceCounter);
             traceSample->setSampleName(sampleName);
             samples.push_back(traceSample);
-            if (debug) cout << "Sample: '" << sampleName << "':";
+            if (debug) cout << "Sample: '" << sampleName << "': ";
 
             for (Peak& p : trace->eic->peaks) {
                 p.sample = traceSample;
