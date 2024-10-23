@@ -157,6 +157,7 @@ public:
 };
 
 class SECTraceGroups {
+public:
     string id;
     vector<SECTrace*> secTraces;
     shared_ptr<SECSearchParameters> params;
