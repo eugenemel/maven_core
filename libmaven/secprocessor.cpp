@@ -424,16 +424,17 @@ void SECTraceGroups::groupPeaks(bool debug) {
         unsigned long counter = 0;
         for (EIC *eic : eics) {
             cout << "EIC #" << counter << ": ";
-            for (Peak p : eic->peaks) {
+            for (Peak& p : eic->peaks) {
                 cout << p.rt << ": " << p.peakIntensity << " ";
             }
             cout << endl;
+            counter++;
         }
     }
 
     groups.clear();
 
-    //groups = EIC::groupPeaksE(eics, params->toPeakPickingAndGroupingParams(), debug);
+    groups = EIC::groupPeaksE(eics, params->toPeakPickingAndGroupingParams(), debug);
 
     //TODO: the EIC peaks have been filtered prior to grouping, make sure there are no issues
     //mapping groups to phantom peaks
