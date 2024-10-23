@@ -101,7 +101,14 @@ class SECTrace {
 
 public:
 
-    string id; //unique name-type string
+    //unique name-type string for this trace.
+    //this ID must always be unique amongst all analytes and samples.
+    string id;
+
+    // name-type string for this analyte.
+    // This ID may be shared between different samples / sample roll-ups.
+    // For example, this could be a protein ID, gene name, or peptide sequence.
+    string analyteId;
 
     SECTraceType type = SECTraceType::Unset;
 
