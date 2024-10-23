@@ -2273,10 +2273,9 @@ vector<PeakGroup> EIC::groupPeaksE(vector<EIC*>& eics, shared_ptr<PeakPickingAnd
         }
     }
 
-
-    //Issue 759: EARLY EXIT DEBUGGING
-    if (debug) cout << "EARLY EXIT DEBUGGING: JUST BEFORE mergedEICToGroups()" << endl;
-    return(pgroups);
+//    //Issue 759: EARLY EXIT DEBUGGING
+//    if (debug) cout << "EARLY EXIT DEBUGGING: JUST BEFORE mergedEICToGroups()" << endl;
+//    return(pgroups);
 
     //calls PeakGroups::groupStatistics()
     pgroups = mergedEICToGroups(eics, m, params->groupMaxRtDiff, params->groupMergeOverlap, debug);

@@ -416,23 +416,38 @@ vector<EIC*> SECTraceGroups::getEICs() {
 }
 
 //Issue 759
-void SECTraceGroups::groupPeaks(bool debug) {
+void SECTraceGroups::computePeakGroups(bool debug) {
 
-    vector<EIC*> eics = getEICs();
+    //reset to prepare for new computation
+    delete_all(samples);
+    groups.clear();
 
-    if (debug) {
-        unsigned long counter = 0;
-        for (EIC *eic : eics) {
-            cout << "EIC #" << counter << ": ";
-            for (Peak& p : eic->peaks) {
-                cout << p.rt << ": " << p.peakIntensity << " ";
+    // Prepare EICs
+    vector<EIC*> eics{};
+
+    unsigned long traceCounter = 0;
+    for (SECTrace *trace : secTraces){
+        if (trace && trace->eic) {
+            string sampleName = to_string(traceCounter);
+            if (!trace->id.empty()) {
+                sampleName = trace->id;
             }
-            cout << endl;
-            counter++;
+
+            mzSample *traceSample = new mzSample();
+            traceSample->setSampleId(traceCounter);
+            traceSample->setSampleName(sampleName);
+            if (debug) cout << "Sample: '" << sampleName << "':" << endl;
+
+            for (Peak& p : trace->eic->peaks) {
+                p.sample = traceSample;
+                if (debug) cout << "(" << p.rt << ", " << p.peakIntensity << ") ";
+            }
+            if (debug) cout << endl;
+
+            eics.push_back(trace->eic);
+            traceCounter++;
         }
     }
-
-    groups.clear();
 
     groups = EIC::groupPeaksE(eics, params->toPeakPickingAndGroupingParams(), debug);
 
