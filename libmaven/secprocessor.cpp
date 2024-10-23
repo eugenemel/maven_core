@@ -420,6 +420,17 @@ void SECTraceGroups::groupPeaks(bool debug) {
 
     vector<EIC*> eics = getEICs();
 
+    if (debug) {
+        unsigned long counter = 0;
+        for (EIC* eic : eics) {
+            cout << "EIC #" << counter << ": ";
+            for (Peak p : eic->peaks) {
+                cout << p.rt << ": " << p.peakIntensity << " ";
+            }
+            cout << endl;
+        }
+    }
+
     groups.clear();
     groups = EIC::groupPeaksE(eics, params->toPeakPickingAndGroupingParams(), debug);
 
