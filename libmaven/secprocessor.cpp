@@ -40,6 +40,10 @@ string SECSearchParameters::encodeParams() {
     encodedParams = encodedParams + "traceRtBoundsSlopeThreshold" + "=" + to_string(traceRtBoundsSlopeThreshold) + ";";
     encodedParams = encodedParams + "traceIsPickEdgePeaks" + "=" + to_string(traceIsPickEdgePeaks) + ";";
 
+    // Grouping
+    encodedParams = encodedParams + "groupMaxFracDiff" + "=" + to_string(groupMaxFracDiff) + ";";
+    encodedParams = encodedParams + "groupMergeOverlap" + "=" + to_string(groupMergeOverlap) + ";";
+
     // Fragment
     encodedParams = encodedParams + "fragmentIsSmoothedIntensity" + "=" + to_string(fragmentIsSmoothedIntensity) +";";
 
@@ -72,6 +76,9 @@ shared_ptr<PeakPickingAndGroupingParameters> SECSearchParameters::toPeakPickingA
 
     peakPickingAndGroupingParams->peakIsComputeBounds = true;
     peakPickingAndGroupingParams->peakIsReassignPosToUnsmoothedMax = false;
+
+    peakPickingAndGroupingParams->groupMaxRtDiff = groupMaxFracDiff;
+    peakPickingAndGroupingParams->groupMergeOverlap = groupMergeOverlap;
 
     return peakPickingAndGroupingParams;
 }
@@ -144,6 +151,14 @@ shared_ptr<SECSearchParameters> SECSearchParameters::decode(string encodedParams
     }
     if (decodedMap.find("traceIsPickEdgePeaks") != decodedMap.end()) {
         secSearchParameters->traceIsPickEdgePeaks = decodedMap["traceIsPickEdgePeaks"] == "1";
+    }
+
+    //Grouping
+    if (decodedMap.find("groupMaxFracDiff") != decodedMap.end()) {
+        secSearchParameters->groupMaxFracDiff = stof(decodedMap["groupMaxFracDiff"]);
+    }
+    if (decodedMap.find("") != decodedMap.end()) {
+        secSearchParameters->groupMergeOverlap = stof(decodedMap["groupMergeOverlap"]);
     }
 
     // Fragment

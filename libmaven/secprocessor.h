@@ -48,6 +48,13 @@ class SECSearchParameters {
      float traceRtBoundsSlopeThreshold = 0.01f; //minimum change in slope between peak points, as a fraction of the peak's max intensity (otherwise, reached edge of peak)
      bool traceIsPickEdgePeaks = false; // treat one-sided maxima at the edge of the sec trace as peaks
 
+
+     /** =======================
+      * PEAK Grouping
+      * ========================*/
+     float groupMaxFracDiff = 1.0f; // analogous to PeakPickingAndGroupingParameters.groupMaxRtDiff
+     float groupMergeOverlap = 0.8f; // analogous to PeakPickingAndGroupingParameters.groupMergeOverlap
+
      /** =======================
       * FRAGMENT
       * comments:
