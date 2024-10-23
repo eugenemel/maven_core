@@ -408,7 +408,7 @@ void SECTrace::pickPeaks(bool debug) {
 vector<EIC*> SECTraceGroups::getEICs() {
     vector<EIC*> eics{};
     for (SECTrace* trace : secTraces){
-        if (trace->eic) {
+        if (trace && trace->eic) {
             eics.push_back(trace->eic);
         }
     }
@@ -422,7 +422,7 @@ void SECTraceGroups::groupPeaks(bool debug) {
 
     if (debug) {
         unsigned long counter = 0;
-        for (EIC* eic : eics) {
+        for (EIC *eic : eics) {
             cout << "EIC #" << counter << ": ";
             for (Peak p : eic->peaks) {
                 cout << p.rt << ": " << p.peakIntensity << " ";
