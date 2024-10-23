@@ -405,16 +405,6 @@ void SECTrace::pickPeaks(bool debug) {
     //delete(eic);
 }
 
-vector<EIC*> SECTraceGroups::getEICs() {
-    vector<EIC*> eics{};
-    for (SECTrace* trace : secTraces){
-        if (trace && trace->eic) {
-            eics.push_back(trace->eic);
-        }
-    }
-    return eics;
-}
-
 //Issue 759
 void SECTraceGroups::computePeakGroups(bool debug) {
 
@@ -436,7 +426,8 @@ void SECTraceGroups::computePeakGroups(bool debug) {
             mzSample *traceSample = new mzSample();
             traceSample->setSampleId(traceCounter);
             traceSample->setSampleName(sampleName);
-            if (debug) cout << "Sample: '" << sampleName << "':" << endl;
+            samples.push_back(traceSample);
+            if (debug) cout << "Sample: '" << sampleName << "':";
 
             for (Peak& p : trace->eic->peaks) {
                 p.sample = traceSample;

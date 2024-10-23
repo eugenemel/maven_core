@@ -169,11 +169,8 @@ public:
     vector<SECTrace*> secTraces;
     shared_ptr<SECSearchParameters> params;
 
-
     vector<PeakGroup> groups{};
     vector<mzSample*> samples{};
-
-    vector<EIC*> getEICs();
 
     void computePeakGroups(bool debug);
 };
