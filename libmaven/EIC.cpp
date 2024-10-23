@@ -2207,6 +2207,9 @@ vector<PeakGroup> EIC::groupPeaksE(vector<EIC*>& eics, shared_ptr<PeakPickingAnd
     //find peaks in merged eic
     m->getPeakPositionsD(mergedEICParams, debug);
 
+    //Issue 759: EARLY EXIT DEBUGGING
+    return(pgroups);
+
     //Issue 597: Remove peaks with insufficient ratios
     if (params->mergedSmoothedMaxToBoundsMinRatio > 0) {
 
