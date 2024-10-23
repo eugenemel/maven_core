@@ -432,7 +432,8 @@ void SECTraceGroups::groupPeaks(bool debug) {
     }
 
     groups.clear();
-    groups = EIC::groupPeaksE(eics, params->toPeakPickingAndGroupingParams(), debug);
+
+    //groups = EIC::groupPeaksE(eics, params->toPeakPickingAndGroupingParams(), debug);
 
     //TODO: the EIC peaks have been filtered prior to grouping, make sure there are no issues
     //mapping groups to phantom peaks
