@@ -2536,12 +2536,15 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
             grp.summary();
         }
 
-        //start skip zone
+        //OLD - start skip zone
 
-//        BlankSingleIntensities intensities = EIC::calculateBlankBackground(eics, grp.minRt, grp.maxRt, debug);
+        BlankSingleIntensities intensities = EIC::calculateBlankBackground(eics, grp.minRt, grp.maxRt, debug);
 
-//        grp.blankMaxHeight = intensities.maxSingleIntensity;
-//        grp.blankMedianHeight = intensities.medianSingleIntensity;
+        grp.blankMaxHeight = intensities.maxSingleIntensity;
+        grp.blankMedianHeight = intensities.medianSingleIntensity;
+
+        //NEW - start skip zone
+
 //        grp.mergedEICSummaryData = EIC::calculateMergedEICSummaryData(m, it->second.mergedEICPeakIndexes, debug);
 //        grp.maxBlankRawSignal = EIC::calculateMaxBlankSignalBackground(m, eics, it->second.mergedEICPeakIndexes, false, debug);
 //        grp.maxBlankSmoothedSignal = EIC::calculateMaxBlankSignalBackground(m, eics, it->second.mergedEICPeakIndexes, true, debug);
