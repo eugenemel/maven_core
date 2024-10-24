@@ -2555,7 +2555,7 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
     }
 
     //Issue 759 debugging
-    cout << "DEBUGGING: exiting in skipping background computations just before exiting EIC::mergedEICToGroups()." << endl;
+    cout << "DEBUGGING: skipping EIC::calculate* computations just before exiting EIC::mergedEICToGroups()." << endl;
     return pgroups;
 
     return pgroups;
