@@ -2530,11 +2530,13 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
         }
         sort(grp.peaks.begin(), grp.peaks.end(), Peak::compSampleName);
 
-//        grp.groupStatistics();
+        grp.groupStatistics();
 
-//        if (debug) {
-//            grp.summary();
-//        }
+        if (debug) {
+            grp.summary();
+        }
+
+        //start skip zone
 
 //        BlankSingleIntensities intensities = EIC::calculateBlankBackground(eics, grp.minRt, grp.maxRt, debug);
 
@@ -2544,11 +2546,13 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
 //        grp.maxBlankRawSignal = EIC::calculateMaxBlankSignalBackground(m, eics, it->second.mergedEICPeakIndexes, false, debug);
 //        grp.maxBlankSmoothedSignal = EIC::calculateMaxBlankSignalBackground(m, eics, it->second.mergedEICPeakIndexes, true, debug);
 
+        //end skip zone
+
         pgroups.push_back(grp);
     }
 
     //Issue 759 debugging
-    cout << "DEBUGGING: exiting in skipping group-specific computations just before exiting EIC::mergedEICToGroups()." << endl;
+    cout << "DEBUGGING: exiting in skipping background computations just before exiting EIC::mergedEICToGroups()." << endl;
     return pgroups;
 
     return pgroups;
