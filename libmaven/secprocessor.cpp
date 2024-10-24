@@ -463,15 +463,6 @@ void SECTraceGroups::computePeakGroups(bool debug) {
         }
     }
 
-    //debugging - check merged EIC
-    if (debug && eics.size() > 1) {
-        EIC* m = EIC::eicMerge(eics);
-        cout << "Merged EIC has "<< m->size() << " elements." << endl;
-        for (unsigned int i = 0; i < m->size(); i++) {
-            cout << "i=" << i << ": " << m->rt[i] << " " <<  m->intensity[i] << endl;
-        }
-    }
-
     groups = EIC::groupPeaksE(eics, params->toPeakPickingAndGroupingParams(), debug);
 
     //TODO: the EIC peaks have been filtered prior to grouping, make sure there are no issues

@@ -2532,28 +2532,16 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
             grp.summary();
         }
 
-        //OLD - start skip zone
-
         BlankSingleIntensities intensities = EIC::calculateBlankBackground(eics, grp.minRt, grp.maxRt, debug);
 
         grp.blankMaxHeight = intensities.maxSingleIntensity;
         grp.blankMedianHeight = intensities.medianSingleIntensity;
-
-        //BUG FOUND + FIXED IN THIS ZONE
-        //NEW - start skip zone
-
         grp.mergedEICSummaryData = EIC::calculateMergedEICSummaryData(m, it->second.mergedEICPeakIndexes, debug);
         grp.maxBlankRawSignal = EIC::calculateMaxBlankSignalBackground(m, eics, it->second.mergedEICPeakIndexes, false, debug);
         grp.maxBlankSmoothedSignal = EIC::calculateMaxBlankSignalBackground(m, eics, it->second.mergedEICPeakIndexes, true, debug);
 
-        //end skip zone
-
         pgroups.push_back(grp);
     }
-
-//    //Issue 759 debugging
-//    cout << "DEBUGGING: skipping EIC::calculate* computations just before exiting EIC::mergedEICToGroups()." << endl;
-//    return pgroups;
 
     return pgroups;
 }
