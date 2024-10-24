@@ -444,6 +444,8 @@ void SECTraceGroups::computePeakGroups(bool debug) {
             mzSample *traceSample = new mzSample();
             traceSample->setSampleId(traceCounter);
             traceSample->setSampleName(sampleName);
+            traceSample->isBlank = false;
+
             samples.push_back(traceSample);
             if (debug) cout << "Sample: '" << sampleName << "': ";
 
