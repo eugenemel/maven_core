@@ -356,6 +356,9 @@ void SECTrace::pickPeaks(bool debug) {
     eic->mz = pseudoRt; // x axis: fractions
     eic->scannum = this->fractionNums;
 
+    eic->rtmin = pseudoRt[0];
+    eic->rtmax = pseudoRt[pseudoRt.size()-1];
+
     eic->setSmootherType(params->traceSmoothingType);
     eic->setBaselineSmoothingWindow(params->traceWindowSize);
     eic->setBaselineDropTopX(params->traceBaselineDropTopX);
