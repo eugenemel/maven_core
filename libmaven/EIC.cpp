@@ -2508,10 +2508,6 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
         }
     }
 
-//    //Issue 759 debugging
-//    cout << "DEBUGGING: exiting in EIC::mergedEICToGroups(), directly following progressive peak merging step." << endl;
-//    return pgroups;
-
     for (auto it = peakGroupData.begin(); it != peakGroupData.end(); ++it) {
 
         int groupIndex = it->first;
@@ -2543,20 +2539,21 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
         grp.blankMaxHeight = intensities.maxSingleIntensity;
         grp.blankMedianHeight = intensities.medianSingleIntensity;
 
+        //BUG FOUND + FIXED IN THIS ZONE
         //NEW - start skip zone
 
-//        grp.mergedEICSummaryData = EIC::calculateMergedEICSummaryData(m, it->second.mergedEICPeakIndexes, debug);
-//        grp.maxBlankRawSignal = EIC::calculateMaxBlankSignalBackground(m, eics, it->second.mergedEICPeakIndexes, false, debug);
-//        grp.maxBlankSmoothedSignal = EIC::calculateMaxBlankSignalBackground(m, eics, it->second.mergedEICPeakIndexes, true, debug);
+        grp.mergedEICSummaryData = EIC::calculateMergedEICSummaryData(m, it->second.mergedEICPeakIndexes, debug);
+        grp.maxBlankRawSignal = EIC::calculateMaxBlankSignalBackground(m, eics, it->second.mergedEICPeakIndexes, false, debug);
+        grp.maxBlankSmoothedSignal = EIC::calculateMaxBlankSignalBackground(m, eics, it->second.mergedEICPeakIndexes, true, debug);
 
         //end skip zone
 
         pgroups.push_back(grp);
     }
 
-    //Issue 759 debugging
-    cout << "DEBUGGING: skipping EIC::calculate* computations just before exiting EIC::mergedEICToGroups()." << endl;
-    return pgroups;
+//    //Issue 759 debugging
+//    cout << "DEBUGGING: skipping EIC::calculate* computations just before exiting EIC::mergedEICToGroups()." << endl;
+//    return pgroups;
 
     return pgroups;
 }
