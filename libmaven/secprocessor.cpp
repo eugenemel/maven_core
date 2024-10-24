@@ -446,6 +446,9 @@ void SECTraceGroups::computePeakGroups(bool debug) {
             traceSample->setSampleName(sampleName);
             traceSample->isBlank = false;
 
+            //Necessary for EIC::calculateBlankBackground() calculation
+            trace->eic->sample = traceSample;
+
             samples.push_back(traceSample);
             if (debug) cout << "Sample: '" << sampleName << "': ";
 
