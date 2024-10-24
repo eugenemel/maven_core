@@ -2342,9 +2342,9 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
         cout << "EIC::mergedEICToGroups(): END allPeaks" << endl;
     }
 
-    //Issue 759 debugging
-     cout << "DEBUGGING: exiting in EIC::mergedEICToGroups(), before allGroups iteration" << endl;
-     return pgroups;
+//    //Issue 759 debugging
+//     cout << "DEBUGGING: exiting in EIC::mergedEICToGroups(), before allGroups iteration" << endl;
+//     return pgroups;
 
     for (auto peak : allPeaks) {
 
@@ -2409,6 +2409,10 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
              << ", # peakGroupData: " << peakGroupData.size()
              << endl;
     }
+
+    //Issue 759 debugging
+    cout << "DEBUGGING: exiting in EIC::mergedEICToGroups(), right before progressive peak merging step." << endl;
+    return pgroups;
 
     unsigned long iterationCounter = 0;
 
