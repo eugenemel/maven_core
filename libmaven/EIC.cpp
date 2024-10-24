@@ -2273,10 +2273,6 @@ vector<PeakGroup> EIC::groupPeaksE(vector<EIC*>& eics, shared_ptr<PeakPickingAnd
         }
     }
 
-    //Isuse 759 debugging
-    cout << "DEBUGGING: exiting before mergedEICToGroups()" << endl;
-    return pgroups;
-
     //calls PeakGroups::groupStatistics()
     pgroups = mergedEICToGroups(eics, m, params->groupMaxRtDiff, params->groupMergeOverlap, debug);
 
@@ -2304,16 +2300,6 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
         for (auto peak : eic->peaks) {
             allPeaks.push_back(peak);
         }
-    }
-
-    if (debug) {
-       cout << "EIC::mergedEICToGroups(): START allPeaks" << endl;
-       for (auto peak : allPeaks) {
-           cout << fixed << setprecision(5)
-                << "(" << peak.peakMz << ", " << peak.rt << ", " << peak.peakIntensity << ") " << peak.sample->sampleName
-                << endl;
-       }
-       cout << "EIC::mergedEICToGroups(): END allPeaks" << endl;
     }
 
     //try to annotate most intense peaks first
@@ -2345,6 +2331,20 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
         //rt is last resort tiebreaker to produce deterministic ordering
         return lhs.rt < rhs.rt;
     });
+
+    if (debug) {
+        cout << "EIC::mergedEICToGroups(): START allPeaks" << endl;
+        for (auto peak : allPeaks) {
+            cout << fixed << setprecision(5)
+                 << "(" << peak.peakMz << ", " << peak.rt << ", " << peak.peakIntensity << ") " << peak.sample->sampleName
+                 << endl;
+        }
+        cout << "EIC::mergedEICToGroups(): END allPeaks" << endl;
+    }
+
+    //Issue 759 debugging
+     cout << "DEBUGGING: exiting in EIC::mergedEICToGroups(), before allGroups iteration" << endl;
+     return pgroups;
 
     for (auto peak : allPeaks) {
 
