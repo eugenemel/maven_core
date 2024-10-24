@@ -2273,6 +2273,10 @@ vector<PeakGroup> EIC::groupPeaksE(vector<EIC*>& eics, shared_ptr<PeakPickingAnd
         }
     }
 
+    //Isuse 759 debugging
+    cout << "DEBUGGING: exiting before mergedEICToGroups()" << endl;
+    return pgroups;
+
     //calls PeakGroups::groupStatistics()
     pgroups = mergedEICToGroups(eics, m, params->groupMaxRtDiff, params->groupMergeOverlap, debug);
 
