@@ -2508,9 +2508,11 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
         }
     }
 
+    //Ensure that all indices start at 0.
+    unsigned long groupIndex = 0;
+
     for (auto it = peakGroupData.begin(); it != peakGroupData.end(); ++it) {
 
-        int groupIndex = it->first;
         map<mzSample*, Peak> peaks = it->second.peaks;
 
         if (debug) {
@@ -2541,6 +2543,7 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
         grp.maxBlankSmoothedSignal = EIC::calculateMaxBlankSignalBackground(m, eics, it->second.mergedEICPeakIndexes, true, debug);
 
         pgroups.push_back(grp);
+        groupIndex++;
     }
 
     return pgroups;
