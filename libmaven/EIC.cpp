@@ -2342,10 +2342,6 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
         cout << "EIC::mergedEICToGroups(): END allPeaks" << endl;
     }
 
-//    //Issue 759 debugging
-//     cout << "DEBUGGING: exiting in EIC::mergedEICToGroups(), before allGroups iteration" << endl;
-//     return pgroups;
-
     for (auto peak : allPeaks) {
 
         float peakRt = peak.rt;
@@ -2410,9 +2406,9 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
              << endl;
     }
 
-    //Issue 759 debugging
-    cout << "DEBUGGING: exiting in EIC::mergedEICToGroups(), right before progressive peak merging step." << endl;
-    return pgroups;
+//    //Issue 759 debugging
+//    cout << "DEBUGGING: exiting in EIC::mergedEICToGroups(), right before progressive peak merging step." << endl;
+//    return pgroups;
 
     unsigned long iterationCounter = 0;
 
@@ -2515,6 +2511,10 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
             peakGroupData = updatedPeakGroupData;
         }
     }
+
+    //Issue 759 debugging
+    cout << "DEBUGGING: exiting in EIC::mergedEICToGroups(), directly following progressive peak merging step." << endl;
+    return pgroups;
 
     for (auto it = peakGroupData.begin(); it != peakGroupData.end(); ++it) {
 
