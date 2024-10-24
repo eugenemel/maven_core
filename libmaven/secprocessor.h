@@ -112,10 +112,17 @@ public:
     //this ID must always be unique amongst all analytes and samples.
     string id;
 
-    // name-type string for this analyte.
+    // name-type string for this trace.
+    // This ID describes the analyte associated with this trace.
     // This ID may be shared between different samples / sample roll-ups.
     // For example, this could be a protein ID, gene name, or peptide sequence.
     string analyteId;
+
+    //name-type string for this trace.
+    //This ID describes a biological source for this trace such as a sample or group.
+    //There may be multiple analyteIds for a given biologicalId
+    //For example, the same sample might have multiple proteins.
+    string biologicalId;
 
     SECTraceType type = SECTraceType::Unset;
 
