@@ -433,6 +433,8 @@ void SECTraceGroups::computePeakGroups(bool debug) {
     // Prepare EICs
     vector<EIC*> eics{};
 
+    map<mzSample*, SECTrace*> sampleToTrace{};
+
     unsigned long traceCounter = 0;
     for (SECTrace *trace : secTraces){
         if (trace && trace->eic) {
@@ -449,6 +451,9 @@ void SECTraceGroups::computePeakGroups(bool debug) {
             //Necessary for EIC::calculateBlankBackground() calculation
             trace->eic->sample = traceSample;
 
+            //Needed for re-assignment of corrected peaks
+            sampleToTrace.insert(make_pair(traceSample, trace));
+
             samples.push_back(traceSample);
             if (debug) cout << "Sample: '" << sampleName << "': ";
 
@@ -459,17 +464,28 @@ void SECTraceGroups::computePeakGroups(bool debug) {
             if (debug) cout << endl;
 
             eics.push_back(trace->eic);
+
+            //peaks will be reassigned after grouping, with possible merges.
+            trace->peaks.clear();
+
             traceCounter++;
         }
     }
 
     groups = EIC::groupPeaksE(eics, params->toPeakPickingAndGroupingParams(), debug);
 
-    //TODO: the EIC peaks have been filtered prior to grouping, make sure there are no issues
-    //mapping groups to phantom peaks
-    //
-    //alternatively, do not filter out the EIC peaks up front,
-    // and just filter out the downstream peak groups here
+    //SECTrace peaks are updated after grouping, as grouping may have merged peaks
+    for (PeakGroup& group : groups) {
+        for (Peak& p : group.peaks) {
+            if (sampleToTrace.find(p.getSample()) != sampleToTrace.end()) {
+                SECTrace *trace = sampleToTrace[p.getSample()];
+                trace->peaks.push_back(p);
+            }
+        }
+    }
+
+    //avoid memory leaks
+    delete_all(samples);
 }
 
 vector<string> SECTrace::getPeakSummaryString(
@@ -513,6 +529,20 @@ vector<string> SECTrace::getPeakSummaryString(
     }
 
     return summaryString;
+}
+
+vector<int> SECTraceGroups::getGroupIdsVector(SECTrace* trace, unsigned long groupIdOffset) {
+
+    if (!trace) return vector<int>{};
+
+    vector<int> groupIds(trace->fractionNums.size(), -1);
+
+    for (unsigned int i = 0; i < trace->peaks.size(); i++) {
+        unsigned int max_coord = trace->peaks[i].pos;
+        groupIds[max_coord] = trace->peaks[i].groupNum + groupIdOffset;
+    }
+
+    return groupIds;
 }
 
 //Issue 740: return peak positions based on fraction nums.
