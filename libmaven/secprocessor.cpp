@@ -548,7 +548,7 @@ vector<int> SECTraceGroups::getGroupIdsVector(SECTrace* trace, unsigned long gro
 vector<float> SECTraceGroups::getGroupsQuantVector(SECTrace *trace, string quantType) {
     if (!trace) return vector<float>{};
 
-    vector<float> groupsQuant(trace->fractionNums.size(), 0);
+    vector<float> groupsQuant(trace->fractionNums.size(), -1);
 
     for (unsigned int i = 0; i < trace->peaks.size(); i++) {
         unsigned int coord = trace->peaks[i].pos;
@@ -562,10 +562,7 @@ vector<float> SECTraceGroups::getGroupsQuantVector(SECTrace *trace, string quant
         } else if (quantType == "smoothed_area") {
             groupsQuant[coord] = trace->peaks[i].smoothedPeakArea;
         } else {
-            float possibleQuant = trace->peaks[i].getQuantByName(quantType);
-            if (possibleQuant != -1.0f) {
-                groupsQuant[coord] = possibleQuant;
-            }
+            groupsQuant[coord] = trace->peaks[i].getQuantByName(quantType);
         }
     }
 
