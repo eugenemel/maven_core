@@ -545,6 +545,33 @@ vector<int> SECTraceGroups::getGroupIdsVector(SECTrace* trace, unsigned long gro
     return groupIds;
 }
 
+vector<float> SECTraceGroups::getGroupsQuantVector(SECTrace *trace, string quantType) {
+    if (!trace) return vector<float>{};
+
+    vector<float> groupsQuant(trace->fractionNums.size(), 0);
+
+    for (unsigned int i = 0; i < trace->peaks.size(); i++) {
+        unsigned int coord = trace->peaks[i].pos;
+
+        if (quantType == "abundance") {
+            groupsQuant[coord] = trace->peaks[i].peakIntensity;
+        } else if (quantType == "smoothed") {
+            groupsQuant[coord] = trace->peaks[i].smoothedIntensity;
+        } else if (quantType == "area") {
+            groupsQuant[coord] = trace->peaks[i].peakArea;
+        } else if (quantType == "smoothed_area") {
+            groupsQuant[coord] = trace->peaks[i].smoothedPeakArea;
+        } else {
+            float possibleQuant = trace->peaks[i].getQuantByName(quantType);
+            if (possibleQuant != -1.0f) {
+                groupsQuant[coord] = possibleQuant;
+            }
+        }
+    }
+
+    return groupsQuant;
+}
+
 //Issue 740: return peak positions based on fraction nums.
 string SECTrace::getPeakPositionsString(){
     string peakStr = "";

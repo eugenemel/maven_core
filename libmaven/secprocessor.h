@@ -187,7 +187,9 @@ public:
     vector<mzSample*> samples{};
 
     void computePeakGroups(bool debug);
+
     vector<int> getGroupIdsVector(SECTrace* trace, unsigned long groupIdOffset = 0);
+    vector<float> getGroupsQuantVector(SECTrace* trace, string quantType);
 };
 
 //Introduced in 622
