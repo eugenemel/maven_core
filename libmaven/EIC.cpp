@@ -2273,8 +2273,19 @@ vector<PeakGroup> EIC::groupPeaksE(vector<EIC*>& eics, shared_ptr<PeakPickingAnd
         }
     }
 
+    //Issue 769: groupMergeOverlap takes a value of exactly -1.0 if and only if
+    // groupIsMergeOverlappingPeakGroups is false.
+    float groupMergeOverlap = params->groupMergeOverlap;
+    if (groupMergeOverlap < 0.0f) {
+        groupMergeOverlap = 0.0f;
+    }
+
+    if (!params->groupIsMergeOverlappingPeakGroups) {
+        groupMergeOverlap = -1.0f;
+    }
+
     //calls PeakGroups::groupStatistics()
-    pgroups = mergedEICToGroups(eics, m, params->groupMaxRtDiff, params->groupMergeOverlap, debug);
+    pgroups = mergedEICToGroups(eics, m, params->groupMaxRtDiff, groupMergeOverlap, debug);
 
     if (m) delete(m);
     return pgroups;
@@ -2408,8 +2419,15 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
 
     unsigned long iterationCounter = 0;
 
+    //Issue 759: If groupMergeOverlap is set to a value less than 0,
+    //Do not merge peak groups by RT
+    //Note that this is set via EIC::groupPeaksE(), where the parameter
+    //groupIsMergeOverlappingPeakGroups is used to modify groupMergeOverlap.
+    //the data was encoded this way to avoid having to refactor this method to intake another
+    //parameter.
+
     //Progressively merge peaks until group overlap issues are resolved
-    while (true) {
+    while (groupMergeOverlap >= 0.0f) {
 
         if (debug) {
             cout << "ITERATION #" << iterationCounter << ":" << endl;
