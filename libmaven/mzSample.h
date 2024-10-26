@@ -2332,6 +2332,10 @@ public:
     //grouping
     float groupMaxRtDiff = 0.25f;
     float groupMergeOverlap = 0.8f;
+
+    // should always be true unless a very good reason not to be, e.g. SEC data
+    float groupIsMergeOverlappingPeakGroups = true;
+
     // END EIC::groupPeaksE()
 
     //computed properties

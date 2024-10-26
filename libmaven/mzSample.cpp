@@ -3627,6 +3627,7 @@ string PeakPickingAndGroupingParameters::getEncodedPeakParameters(string tupleMa
     //grouping
     encodedParams = encodedParams + "groupMaxRtDiff" + "=" + to_string(groupMaxRtDiff) + ";";
     encodedParams = encodedParams + "groupMergeOverlap" + "=" + to_string(groupMergeOverlap) + ";";
+    encodedParams = encodedParams + "groupIsMergeOverlappingPeakGroups" + "=" + to_string(groupIsMergeOverlappingPeakGroups) + ";";
 
     //computed properties
     string groupBackgroundTypeStr = "groupBackgroundType=";
@@ -3737,6 +3738,9 @@ void PeakPickingAndGroupingParameters::fillInPeakParameters(unordered_map<string
     }
     if (decodedMap.find("groupMergeOverlap") != decodedMap.end()) {
         groupMergeOverlap = stof(decodedMap["groupMergeOverlap"]);
+    }
+    if (decodedMap.find("groupIsMergeOverlappingPeakGroups") != decodedMap.end()) {
+        groupIsMergeOverlappingPeakGroups = decodedMap["groupIsMergeOverlappingPeakGroups"] == "1";
     }
 
     //computed properties
