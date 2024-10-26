@@ -54,6 +54,7 @@ class SECSearchParameters {
       * ========================*/
      float groupMaxFracDiff = 1.0f; // analogous to PeakPickingAndGroupingParameters.groupMaxRtDiff
      float groupMergeOverlap = 0.8f; // analogous to PeakPickingAndGroupingParameters.groupMergeOverlap
+     bool groupIsMergeOverlappingPeakGroups = true; // analogous to PeakPickingAndGroupingParameters.groupIsMergeOverlappingPeakGroups
 
      /** =======================
       * FRAGMENT
