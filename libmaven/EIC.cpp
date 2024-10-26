@@ -2451,6 +2451,23 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
                 float rtOverlap = mzUtils::checkOverlap(minPeakRtI, maxPeakRtI, minPeakRtJ, maxPeakRtJ);
 
                 if (rtOverlap >= groupMergeOverlap) {
+                    if (debug) {
+                        cout << "PeakContainer I:" << endl;
+                        for (auto it = peaksI.peaks.begin(); it != peaksI.peaks.end(); ++it) {
+                            cout << it->first->sampleName << ": [" << it->second.rtmin << " - " << it->second.rtmax << "]" << endl;
+                        }
+
+                        cout << "PeakCounter J:" << endl;
+                        for (auto it = peaksJ.peaks.begin(); it != peaksJ.peaks.end(); ++it) {
+                            cout << it->first->sampleName << ": [" << it->second.rtmin << " - " << it->second.rtmax << "]" << endl;
+                        }
+
+                        cout << "MERGE:"
+                             << " i= [" << minPeakRtI << " - " << maxPeakRtI << "]"
+                             << " j= [" << minPeakRtJ << " - " << maxPeakRtJ << "]"
+                             << " rtOverlap=" << rtOverlap << "; groupMergeOverlap=" << groupMergeOverlap
+                             << endl;
+                    }
                     merges.addMerge((make_pair(i, j)));
                 }
             }
