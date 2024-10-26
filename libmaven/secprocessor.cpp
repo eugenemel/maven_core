@@ -66,6 +66,8 @@ string SECSearchParameters::encodeParams() {
 shared_ptr<PeakPickingAndGroupingParameters> SECSearchParameters::toPeakPickingAndGroupingParams() {
     shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParams = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
 
+    // peak picking
+
     peakPickingAndGroupingParams->peakSmoothingWindow = traceWindowSize;
     peakPickingAndGroupingParams->peakRtBoundsMaxIntensityFraction = traceMinFracTopPeakIntensity;
     peakPickingAndGroupingParams->peakRtBoundsSlopeThreshold = traceRtBoundsSlopeThreshold;
@@ -76,6 +78,13 @@ shared_ptr<PeakPickingAndGroupingParameters> SECSearchParameters::toPeakPickingA
 
     peakPickingAndGroupingParams->peakIsComputeBounds = true;
     peakPickingAndGroupingParams->peakIsReassignPosToUnsmoothedMax = false;
+
+    // peak grouping
+    peakPickingAndGroupingParams->mergedSmoothingWindow = traceWindowSize;
+    peakPickingAndGroupingParams->mergedPeakRtBoundsMaxIntensityFraction = traceMinFracTopPeakIntensity;
+    peakPickingAndGroupingParams->mergedPeakRtBoundsSlopeThreshold = traceRtBoundsSlopeThreshold;
+    peakPickingAndGroupingParams->mergedBaselineSmoothingWindow = traceWindowSize;
+    peakPickingAndGroupingParams->mergedBaselineDropTopX = traceBaselineDropTopX;
 
     peakPickingAndGroupingParams->groupMaxRtDiff = groupMaxFracDiff;
     peakPickingAndGroupingParams->groupMergeOverlap = groupMergeOverlap;
