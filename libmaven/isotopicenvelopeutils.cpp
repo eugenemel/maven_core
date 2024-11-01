@@ -192,6 +192,10 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
         debug
         );
 
+    if (params.isApplyMZeroMzOffset) {
+        MassCalculator::applyMZeroMzOffset(isotopes, static_cast<double>(group->meanMz));
+    }
+
     if (debug) {
         cout << "[IsotopicEnvelopeExtractor::extractEnvelopes()]: MassCalculator::computeIsotopes() returned " << isotopes.size() << " isotopes." << endl;
     }

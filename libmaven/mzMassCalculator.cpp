@@ -1465,3 +1465,19 @@ vector<pair<string, double>> MassCalculator::evaluateAtomMapCandidates(
 
     return evaluatedCandidates;
 }
+
+void MassCalculator::applyMZeroMzOffset(vector<Isotope>& isotopes, double peakGroupMz){
+    double offSet = 0.0;
+    for (auto& isotope : isotopes) {
+        if (isotope.isParent()) {
+            offSet = peakGroupMz - isotope.mz;
+            break;
+        }
+    }
+
+    if (offSet != 0.0) {
+        for (auto& isotope : isotopes) {
+            isotope.mz = isotope.mz + offSet;
+        }
+    }
+}

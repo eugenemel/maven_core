@@ -79,6 +79,9 @@ class MassCalculator {
     static void addAtoms(map<string, int>& reference, map<string, int> toAdd);
     static void subtractAtoms(map<string, int>& reference, map<string, int> toSubtract);
     static void multiplyAtoms(map<string, int>& reference, int factor);
+
+    static void applyMZeroMzOffset(vector<Isotope>& isotopes, double peakGroupMz);
+
     double computeMass(string formula, int polarity);
     double computeC13IsotopeMass(string formula);
     map<string,double>computeLabeledMasses(string formula, int polarity);
