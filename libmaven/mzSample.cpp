@@ -2487,6 +2487,9 @@ string IsotopeParameters::encodeParams() {
     //Combine isotopes based on data
     encodedParams = encodedParams + "isCombineOverlappingIsotopes" + "=" + to_string(isCombineOverlappingIsotopes) + ";";
 
+    //Issue 760: alternative isotope m/z enumeration
+    encodedParams = encodedParams + "isApplyMZeroMzOffset" + "=" + to_string(isApplyMZeroMzOffset) + ";";
+
     //Issue 720: diff iso comparison
     encodedParams = encodedParams + "diffIsoQuantType" + "=" + diffIsoQuantType + ";";
 
@@ -2620,6 +2623,11 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     //Combine isotopes based on data
     if (decodedMap.find("isCombineOverlappingIsotopes") != decodedMap.end()) {
         isotopeParameters.isCombineOverlappingIsotopes = decodedMap["isCombineOverlappingIsotopes"] == "1";
+    }
+
+    // If true, offset each isotope theoretical m/z by the observed m/z offset from the measured [M+0] m/z to theoretical m/z.
+    if (decodedMap.find("isApplyMZeroMzOffset") != decodedMap.end()) {
+        isotopeParameters.isApplyMZeroMzOffset = decodedMap["isApplyMZeroMzOffset"] == "1";
     }
 
     if (decodedMap.find("diffIsoQuantType") != decodedMap.end()) {

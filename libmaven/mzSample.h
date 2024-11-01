@@ -1110,6 +1110,12 @@ struct IsotopeParameters {
     //Issue 691
     bool isCombineOverlappingIsotopes = false;
 
+    //Issue 760
+    //if false, use the theoretical m/z (if possible).
+    // If true, offset each isotope theoretical m/z by the observed m/z offset from the measured [M+0] m/z to theoretical m/z.
+    // Note that this parameter only applies to features with annotated atom sets
+    bool isApplyMZeroMzOffset = false;
+
     //Issue 720
     string diffIsoQuantType = "peakIntensity";
     Fragment::ConsensusIntensityAgglomerationType diffIsoAgglomerationType = Fragment::ConsensusIntensityAgglomerationType::Median;
