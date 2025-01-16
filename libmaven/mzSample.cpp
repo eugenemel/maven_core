@@ -943,6 +943,12 @@ Scan* mzSample::parseMzXMLScan(const xml_node& mzxml_scan_node, int scannum) {
         } else if (scanType  == "MRM") {
             _scan->filterLine = scanType + ":" + float2string(_scan->precursorMz,4) + " [" + float2string(_scan->productMz,4) + "]";
         }
+
+        // Issue 763: if nothing else is in the filter line, record the scan type
+        if (_scan->filterLine == "") {
+            _scan->filterLine = scanType;
+        }
+        _scan->filterString = _scan->filterLine;
     }
     return _scan;
 }
