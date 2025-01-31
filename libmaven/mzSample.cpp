@@ -3441,14 +3441,17 @@ void LipidParameterGroup::addClassAdductParamsFromCSVFile(string csvFile, bool d
 
         pair<string, string> key = make_pair(lipidClass, adductName);
 
-        //Assume that the CSV file covers all possible (lipidClass, adduct) forms.
-        validClassAdducts.push_back(key);
+        //Issue 765: Reverse decision from 588, e.g. support lipidClass, adducts that
+        //are not explicitly mentioned in the CSV file.
 
-        if (debug) {
-            cout << "(" << lipidClass << ", " << adductName
-                 << ") added to params->validClassAdducts [N=" << validClassAdducts.size() << "]"
-                 << endl;
-        }
+//        //Assume that the CSV file covers all possible (lipidClass, adduct) forms.
+//        validClassAdducts.push_back(key);
+
+//        if (debug) {
+//            cout << "(" << lipidClass << ", " << adductName
+//                 << ") added to params->validClassAdducts [N=" << validClassAdducts.size() << "]"
+//                 << endl;
+//        }
 
         updateIntMap(key, headerToIndex, fields, "ms2MinNumMatches", ms2MinNumMatchesByLipidClassAndAdduct);
         updateIntMap(key, headerToIndex, fields, "ms2MinNumDiagnosticMatches", ms2MinNumDiagnosticMatchesByLipidClassAndAdduct);
