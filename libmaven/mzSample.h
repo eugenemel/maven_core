@@ -1235,6 +1235,9 @@ class PeakGroup {
 
 		vector<Peak> peaks;
 
+        //Issue 768: Used for `getFragmentationEvents()`
+        vector<Scan*> peakGroupScans{};
+
         //Issue 544: switch to vector<PeakGroup*>
         vector<PeakGroup> children;
 
