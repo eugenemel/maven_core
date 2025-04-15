@@ -650,7 +650,7 @@ vector<Scan*> PeakGroup::getRepresentativeFullScans() {
 
 vector<Scan*> PeakGroup::getFragmentationEvents() {
 
-    vector<Scan*> matchedscans;
+    vector<Scan*> peakGroupScans;
 
     for(unsigned int i=0; i < peaks.size(); i++ ) {
         mzSample* sample = peaks[i].getSample();
@@ -662,11 +662,11 @@ vector<Scan*> PeakGroup::getFragmentationEvents() {
             if (scan->rt < peaks[i].rtmin) continue;
             if (scan->rt > peaks[i].rtmax) break;
             if( scan->precursorMz >= minMz and scan->precursorMz <= maxMz) {
-                matchedscans.push_back(scan);
+                peakGroupScans.push_back(scan);
             }
         }
     }
-    return matchedscans;
+    return peakGroupScans;
 }
 
 void PeakGroup::findHighestPurityMS2Pattern(float prePpmTolr) {
