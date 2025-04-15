@@ -650,22 +650,23 @@ vector<Scan*> PeakGroup::getRepresentativeFullScans() {
 
 vector<Scan*> PeakGroup::getFragmentationEvents() {
 
-    vector<Scan*> peakGroupScans;
+    if (peakGroupScans.empty()) {
+        for(unsigned int i=0; i < peaks.size(); i++ ) {
+            mzSample* sample = peaks[i].getSample();
+            if (!sample) continue;
 
-    for(unsigned int i=0; i < peaks.size(); i++ ) {
-        mzSample* sample = peaks[i].getSample();
-        if (!sample) continue;
-
-        for( unsigned int j=0; j < sample->scans.size(); j++ ) {
-            Scan* scan = sample->scans[j];
-            if (scan->mslevel <= 1) continue; //ms2 + scans only
-            if (scan->rt < peaks[i].rtmin) continue;
-            if (scan->rt > peaks[i].rtmax) break;
-            if( scan->precursorMz >= minMz and scan->precursorMz <= maxMz) {
-                peakGroupScans.push_back(scan);
+            for( unsigned int j=0; j < sample->scans.size(); j++ ) {
+                Scan* scan = sample->scans[j];
+                if (scan->mslevel <= 1) continue; //ms2 + scans only
+                if (scan->rt < peaks[i].rtmin) continue;
+                if (scan->rt > peaks[i].rtmax) break;
+                if( scan->precursorMz >= minMz and scan->precursorMz <= maxMz) {
+                    peakGroupScans.push_back(scan);
+                }
             }
         }
     }
+
     return peakGroupScans;
 }
 
