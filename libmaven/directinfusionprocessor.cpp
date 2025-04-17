@@ -295,7 +295,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
     if (debug) {
         cout << "scans in consensus MS1 scan:" << endl;
         for (auto it = ms1Fragment->consensus->scanNumMap.begin(); it != ms1Fragment->consensus->scanNumMap.end(); ++it){
-            cout << it->first->sampleName << ": " << endl;
+            cout << it->first << ": " << endl;
             for (auto x : it->second) {
                 cout << x << " ";
             }

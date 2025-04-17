@@ -59,8 +59,8 @@ Fragment::Fragment(Scan* scan,
 	this->mergedScore=0;
 	this->clusterId=0;
     this->scanNumMap={};
-    scanNumMap.insert(make_pair(scan->sample, unordered_set<int>()));
-    scanNumMap[scan->sample].insert(scan->scannum);
+    scanNumMap.insert(make_pair(scan->getSampleName(), unordered_set<int>()));
+    scanNumMap[scan->getSampleName()].insert(scan->scannum);
 
     //faster implementation when fewer filters specified
 
@@ -134,8 +134,8 @@ Fragment::Fragment(Scan *scan){
     this->sortedBy = SortType::Mz; // scans should always be encoded in increasing m/z.
     this->obscount = vector<int>( this->mzs.size(), 1); //used when creating consensus spectra.
     this->scanNumMap={};
-    scanNumMap.insert(make_pair(scan->sample, unordered_set<int>()));
-    scanNumMap[scan->sample].insert(scan->scannum);
+    scanNumMap.insert(make_pair(scan->getSampleName(), unordered_set<int>()));
+    scanNumMap[scan->getSampleName()].insert(scan->scannum);
     this->isNLSpectrum = false;
 }
 
@@ -834,10 +834,10 @@ void Fragment::buildConsensus(float productPpmTolr,
         Cons->sortedBy = SortType::None;
         Cons->sortByMz();
 
-        map<mzSample*, unordered_set<int>> brotherMap = brother->scanNumMap;
+        map<string, unordered_set<int>> brotherMap = brother->scanNumMap;
         for (auto it = brotherMap.begin(); it != brotherMap.end(); ++it) {
 
-            mzSample* sample = it->first;
+            string sample = it->first;
             unordered_set<int> scans = it->second;
 
             if (Cons->scanNumMap.find(sample) == Cons->scanNumMap.end()) {
@@ -851,7 +851,7 @@ void Fragment::buildConsensus(float productPpmTolr,
     }
 
     for (auto it = this->scanNumMap.begin(); it != scanNumMap.end(); ++it){
-        mzSample* sample = it->first;
+        string sample = it->first;
         unordered_set<int> scans = it->second;
 
         if (Cons->scanNumMap.find(sample) == Cons->scanNumMap.end()) {

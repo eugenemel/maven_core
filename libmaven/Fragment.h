@@ -199,7 +199,7 @@ class Fragment {
 		void truncateTopN(int n);
 		int clusterId;
         float mergedScore;
-        map<mzSample*, unordered_set<int>> scanNumMap;
+        map<string, unordered_set<int>> scanNumMap;
 
         //this is only populated if isRetainOriginalScanIntensities == true in buildConsensus()
         map<int, vector<float>> consensusPositionToScanIntensities{};
