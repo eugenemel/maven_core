@@ -50,7 +50,7 @@ Fragment::Fragment(Scan* scan,
     this->precursorMz = scan->precursorMz;
     this->collisionEnergy = scan->collisionEnergy;
     this->polarity = scan->getPolarity();
-    this->sampleName = scan->sample->sampleName;
+    this->sampleName = scan->getSampleName();
     this->scanNum = scan->scannum;
     this->precursorCharge = scan->precursorCharge;
     this->group = nullptr;
@@ -118,7 +118,7 @@ Fragment::Fragment(Scan *scan){
     this->precursorMz = scan->precursorMz;
     this->collisionEnergy = scan->collisionEnergy;
     this->polarity = scan->getPolarity();
-    this->sampleName = scan->sample->sampleName;
+    this->sampleName = scan->getSampleName();
     this->scanNum = scan->scannum;
     this->precursorCharge = scan->precursorCharge;
     this->group = nullptr;
