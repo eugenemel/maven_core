@@ -801,7 +801,7 @@ string Scan::getSignature(int limitSize) {
     map<int,bool>seen;
 
     int mz_count=0;
-    for(int pos: intensityOrderDesc() ) {
+    for(unsigned int pos = 0; pos < mz.size(); pos++) {
         float mzround = (int) mz[pos];
         int peakIntensity = (int) intensity[pos];
 

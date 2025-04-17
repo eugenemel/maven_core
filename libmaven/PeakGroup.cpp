@@ -152,6 +152,7 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     maxBlankSmoothedSignal = o.maxBlankSmoothedSignal;
 
     groupBackground = o.groupBackground;
+    peakGroupScans = o.peakGroupScans; //Issue 768
 
     copyChildren(o);
 }
