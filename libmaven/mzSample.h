@@ -134,6 +134,7 @@ class Scan {
     inline int getPolarity() { return polarity; }
     void  setPolarity(int x) { polarity = x; }
     float getTIC();
+    string getSampleName();
 
     double totalIntensity(){ double sum=0; for(unsigned int i=0;i<intensity.size();i++) sum += intensity[i]; return sum; }
     float maxIntensity()  { float max=0; for(unsigned int i=0;i<intensity.size();i++) if(intensity[i] > max) max=intensity[i]; return max; }
@@ -183,6 +184,7 @@ class Scan {
     string scanType;
     string filterLine;
     string filterString = "";
+    string sampleName = "";
     mzSample* sample;
 
     float lowerLimitMz = -1.0f;
@@ -211,7 +213,6 @@ class Scan {
     vector<Isotope> getIsotopicPattern(float centerMz, float ppm, int maxZ, int maxIsotopes);
 
     string getSignature(int limitSize=200);
-    static Scan fromSignature(int scannum, int mslevel, float rt, float precursorMz, int polarity, string encodedScan);
 
     //Issue 706:
     // Mutate the scan mz and rt

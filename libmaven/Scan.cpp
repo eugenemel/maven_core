@@ -45,6 +45,7 @@ void Scan::deepcopy(Scan* b) {
     this->ms1PrecursorForMs3 = b->ms1PrecursorForMs3;
     this->lowerLimitMz = b->lowerLimitMz;
     this->upperLimitMz = b->upperLimitMz;
+    this->sampleName = b->sampleName;
 }
 
 int Scan::findHighestIntensityPos(float _mz, float ppm) {
@@ -815,14 +816,6 @@ string Scan::getSignature(int limitSize) {
     return SIG.str();
 }
 
-Scan Scan::fromSignature(int scannum, int mslevel, float rt, float precursorMz, int polarity, string encodedScan) {
-    Scan scan = Scan(nullptr, scannum, mslevel, rt, precursorMz, polarity);
-
-    mzUtils::decodeBracketEncodedString(encodedScan, scan.mz, scan.intensity);
-
-    return scan;
-}
-
 vector<mzPoint> Scan::getIsolatedRegion(float isolationWindowAmu=1.0) {
 
 	vector<mzPoint>isolatedSegment;
@@ -1070,4 +1063,13 @@ string Scan::getBinaryEncodedData(string fieldName, bool includeTags) {
     }
 
     return encodedData;
+}
+
+//Issue 768: Sometimes, scans will not have a corresponding mzSample*, but may still have name information.
+string Scan::getSampleName() {
+    if (sample) {
+        return sample->sampleName;
+    } else {
+        return sampleName;
+    }
 }
