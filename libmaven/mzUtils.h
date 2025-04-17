@@ -151,6 +151,9 @@ double intKeyToMz(const long intKey, const long multFactor=1000000L);
 vector<vector<int>> simpleParsimonyReducer(vector<vector<int>> originalSet);
 vector<vector<float>> decodeMsMsSpectrum(string encodedString);
 
+//Isuse 768: for Scan::getSignature() decoding
+void decodeBracketEncodedString(const std::string& encodedString, std::vector<float>& xValues, std::vector<float>& yValues);
+
 /* file system functions */
 bool fileExists(string strFilename);
 int createDir(const char* path);

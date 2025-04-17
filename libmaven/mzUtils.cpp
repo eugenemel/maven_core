@@ -1348,6 +1348,62 @@ vector<vector<float>> decodeMsMsSpectrum(string encodedMsMsSpectrum){
 
 } //decodeMsMsSpectrum()
 
+//Issue 768: For example, used with Scan::getSignature()
+void decodeBracketEncodedString(const std::string& encodedString, std::vector<float>& xValues, std::vector<float>& yValues) {
+    // Clear the output vectors to ensure they are empty before adding new values.  Important for repeated calls.
+    xValues.clear();
+    yValues.clear();
+
+    // Use stringstream to efficiently parse the string.
+    std::stringstream ss(encodedString);
+    std::string segment;
+
+    // Use getline to extract segments delimited by ']'
+    while (std::getline(ss, segment, ']')) {
+        // Skip empty segments (which might occur if the input string has trailing ']' or is malformed)
+        if (segment.empty()) {
+            continue;
+        }
+
+        // Check if the segment starts with '['.  If not, the input is malformed.
+        if (segment[0] != '[') {
+            std::cerr << "Warning: Malformed segment found: " << segment << ". Skipping.\n";
+            continue; // Skip to the next segment.  Consider throwing an exception for more robust error handling.
+        }
+
+        // Remove the brackets '[' and ']' for easier parsing.  We already checked for '['
+        segment = segment.substr(1); // Remove the leading '['.
+
+        // Find the comma to split x and y.
+        size_t commaPos = segment.find(',');
+        if (commaPos == std::string::npos) {
+            std::cerr << "Warning: Comma not found in segment: " << segment << ". Skipping.\n";
+            continue; // Skip if no comma found.  Again, consider exceptions in real code.
+        }
+
+        // Extract x and y as strings.
+        std::string xStr = segment.substr(0, commaPos);
+        std::string yStr = segment.substr(commaPos + 1);
+
+        // Convert the strings to floats using std::stod (string to double).
+        try {
+            float x = std::stod(xStr);
+            float y = std::stod(yStr);
+            xValues.push_back(x);
+            yValues.push_back(y);
+        }
+        catch (const std::invalid_argument& e) {
+            // Handle conversion errors.  Important for robustness.
+            std::cerr << "Error converting string to float: " << e.what() << " in segment: " << segment << ". Skipping.\n";
+            continue; // Skip this segment.
+        }
+        catch (const std::out_of_range& e) {
+            std::cerr << "Error: Float value out of range: " << e.what() << " in segment: " << segment << ". Skipping.\n";
+            continue;
+        }
+    }
+}
+
 //Issue 710: factor this out to utility method
 string doubleQuoteString(const std::string& in) {
     if(in.find('\"') != std::string::npos or in.find(",") != std::string::npos) {

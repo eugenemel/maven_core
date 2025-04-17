@@ -809,10 +809,18 @@ string Scan::getSignature(int limitSize) {
             seen[mzround]=true;
         }
 
-        if (mz_count++ >= limitSize) break;
+        if (limitSize > 0 && mz_count++ >= limitSize) break;
     }
 
     return SIG.str();
+}
+
+Scan Scan::fromSignature(int scannum, int mslevel, float rt, float precursorMz, int polarity, string encodedScan) {
+    Scan scan = Scan(nullptr, scannum, mslevel, rt, precursorMz, polarity);
+
+    mzUtils::decodeBracketEncodedString(encodedScan, scan.mz, scan.intensity);
+
+    return scan;
 }
 
 vector<mzPoint> Scan::getIsolatedRegion(float isolationWindowAmu=1.0) {

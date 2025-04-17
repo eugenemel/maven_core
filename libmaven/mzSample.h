@@ -211,6 +211,7 @@ class Scan {
     vector<Isotope> getIsotopicPattern(float centerMz, float ppm, int maxZ, int maxIsotopes);
 
     string getSignature(int limitSize=200);
+    static Scan fromSignature(int scannum, int mslevel, float rt, float precursorMz, int polarity, string encodedScan);
 
     //Issue 706:
     // Mutate the scan mz and rt
