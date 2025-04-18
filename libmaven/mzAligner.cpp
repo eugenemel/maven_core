@@ -890,6 +890,7 @@ void ExperimentAnchorPoints::computeAnchorPointSetFromMzs(bool debug, vector<dou
 }
 
 void ExperimentAnchorPoints::computeAnchorPointSetFromFile(bool debug){
+    if (debug) cout << "ExperimentAnchorPoints::computeAnchorPointSetFromFile()" << endl;
 
     string line;
     ifstream anchorPointsFileStream(anchorPointsFile);
@@ -900,6 +901,14 @@ void ExperimentAnchorPoints::computeAnchorPointSetFromFile(bool debug){
 
         vector<string>fields;
         mzUtils::split(line, ',', fields);
+
+        if (debug) {
+            cout << line << " --> " << fields.size() << " fields: "<< endl;
+            for (unsigned int i = 0; i < fields.size(); i++) {
+                cout << "fields[" << i << "]: " << fields[i] << " ";
+            }
+            cout << endl;
+        }
 
         if (fields.size() < 2) continue;
 
@@ -944,6 +953,7 @@ void ExperimentAnchorPoints::computeAnchorPointSetFromFile(bool debug){
 }
 
 void ExperimentAnchorPoints::computeSampleToRtMap(bool debug){
+    if (debug) cout << "ExperimentAnchorPoints::computeSampleToRtMap()" << endl;
 
     mzSample *referenceSample = this->referenceSample;
     sort(anchorPointSets.begin(), anchorPointSets.end(), [referenceSample](const AnchorPointSet& lhs, const AnchorPointSet& rhs){
@@ -1069,6 +1079,8 @@ void ExperimentAnchorPoints::cleanSampleToRtMap(bool debug) {
 }
 
 void ExperimentAnchorPoints::doSegmentedAlignment(bool debug) {
+    if (debug) cout << "ExperimentAnchorPoints::doSegmentedAlignment()" << endl;
+
     Aligner rtAligner;
     rtAligner.setSamples(samples);
 
