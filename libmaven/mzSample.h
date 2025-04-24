@@ -1514,6 +1514,8 @@ class Compound {
 
             string srmId;
             float expectedRt;
+            float expectedRtMin = -1.0f;
+            float expectedRtMax = -1.0f;
             int charge;
 
             //QQQ mapping
