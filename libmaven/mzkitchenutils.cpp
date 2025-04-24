@@ -38,6 +38,8 @@ void MzKitchenProcessor::matchLipids_LC(
                     compoundIons,
                     params,
                     debug);
+
+        MzKitchenProcessor::labelRtAgreement(&g, 'l', debug);
     }
 }
 
@@ -259,6 +261,18 @@ void MzKitchenProcessor::assignBestLipidToGroup(
         }
     }
 
+}
+
+void MzKitchenProcessor::labelRtAgreement(PeakGroup *g, char rtMatchLabel, bool debug){
+
+    if (!g) return;
+    if (!g->compound) return;
+    if (g->compound->expectedRtMin < 0) return;
+    if (g->compound->expectedRtMax < 0) return;
+
+    if (g->meanRt >= g->compound->expectedRtMin && g->meanRt <= g->compound->expectedRtMax) {
+        g->addLabel(rtMatchLabel);
+    }
 }
 
 /**

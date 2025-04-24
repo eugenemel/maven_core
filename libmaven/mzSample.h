@@ -2710,6 +2710,8 @@ public:
                                             vector<CompoundIon>& compounds,
                                             shared_ptr<MzkitchenMetaboliteSearchParameters> params,
                                             bool debug=false);
+
+    static void labelRtAgreement(PeakGroup *g, char RtMatchLabel = 'l', bool debug = false);
 };
 
 //Issue 482
