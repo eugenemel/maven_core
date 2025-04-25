@@ -270,6 +270,15 @@ void MzKitchenProcessor::labelRtAgreement(PeakGroup *g, char rtMatchLabel, bool 
     if (g->compound->expectedRtMin < 0) return;
     if (g->compound->expectedRtMax < 0) return;
 
+    if (debug) {
+        cout << "MzKitchenProcessor::labelRtAgreement(): Group: " << g->meanMz
+             << "@" << g->meanRt
+             << " (" << g->compound->name
+             << "): Compound RT range [" << g->compound->expectedRtMin
+             << ", " << g->compound->expectedRtMax << "]"
+             << endl;
+    }
+
     if (g->meanRt >= g->compound->expectedRtMin && g->meanRt <= g->compound->expectedRtMax) {
         g->addLabel(rtMatchLabel);
     }
