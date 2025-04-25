@@ -38,8 +38,6 @@ void MzKitchenProcessor::matchLipids_LC(
                     compoundIons,
                     params,
                     debug);
-
-        MzKitchenProcessor::labelRtAgreement(&g, 'l', debug);
     }
 }
 
@@ -255,6 +253,9 @@ void MzKitchenProcessor::assignBestLipidToGroup(
         if (bestPair.first.adduct) g->adduct = bestPair.first.adduct;
         g->fragMatchScore = bestPair.second;
         g->fragMatchScore.mergedScore = bestPair.second.hypergeomScore;
+
+        //Issue 769
+        MzKitchenProcessor::labelRtAgreement(g, 'l', debug);
 
         if (debug) {
             cout << "MATCH: " << g->meanMz << "@" << g->meanRt  << " <--> " << g->compound->id << "\n" << endl;
