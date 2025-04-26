@@ -10,6 +10,10 @@ IsotopeMatrix IsotopeMatrix::getIsotopeMatrix(
     bool isFractionOfSampleTotal,
     bool debug){
 
+    if (debug) {
+        cout << "IsotopeMatrix::getIsotopeMatrix(): Started." << endl;
+    }
+
     double mZeroExpectedAbundance = group->expectedAbundance;
 
     vector<float> mPlusZeroAbundance{};
@@ -32,6 +36,14 @@ IsotopeMatrix IsotopeMatrix::getIsotopeMatrix(
     std::sort(isotopes.begin(), isotopes.end(), [](PeakGroup *lhs, PeakGroup *rhs){
         return lhs->meanMz < rhs->meanMz;
     });
+
+    if (debug) {
+        cout << "IsotopeMatrix::getIsotopeMatrix(): " << isotopes.size() << "isotopes found." << endl;
+        for (unsigned int i = 0; i < isotopes.size(); i++) {
+            cout << isotopes[i]->tagString << " (" << isotopes[i]->meanMz << "): " << isotopes[i]->peaks.size() << " peaks." << endl;
+        }
+        cout << endl;
+    }
 
     //rows=samples, columns=isotopes
     MatrixXf MM((int) samples.size(),(int) isotopes.size());
@@ -84,6 +96,10 @@ IsotopeMatrix IsotopeMatrix::getIsotopeMatrix(
     isotopeMatrix.isotopesData = MM;
     isotopeMatrix.sampleNames = sampleNames;
     isotopeMatrix.isotopeNames = isotopeNames;
+
+    if (debug) {
+        cout << "IsotopeMatrix::getIsotopeMatrix(): Completed." << endl;
+    }
 
     return isotopeMatrix;
 }
@@ -1380,7 +1396,7 @@ IsotopeMatrix DifferentialIsotopicEnvelopeUtils::constructDiffIsotopeMatrix(
         allSamples,
         params.diffIsoScoringCorrectNatAbundance,
         params.diffIsoScoringFractionOfSampleTotal,
-        false // debug
+        debug // debug
         );
 
     if (debug) {
