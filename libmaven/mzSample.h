@@ -74,6 +74,8 @@ class MzKitchenProcessor;
 class PeakPickingAndGroupingParameters;
 class PeakContainer;
 
+class PeakAndGroup;
+
 using namespace pugi;
 using namespace mzUtils;
 using namespace std;
@@ -3042,6 +3044,13 @@ private:
     void computeSampleToRtMap(bool debug);
     void cleanSampleToRtMap(bool debug);
     void doSegmentedAlignment(bool debug);
+};
+
+//Issue 776: introduced for easier usage with signals and slots
+class PeakAndGroup{
+public:
+    Peak* peak;
+    PeakGroup* group;
 };
 
 #endif
