@@ -209,6 +209,9 @@ void MzKitchenProcessor::assignBestLipidToGroup(
                  << "\n\n\n";
         }
 
+        //Issue 777: MS2 score is not controlled by (class, adduct) settings for lipids
+        if (s.hypergeomScore < params->ms2MinScore) continue;
+
         scores.push_back(make_pair(ion, s));
     }
 
