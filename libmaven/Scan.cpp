@@ -1076,7 +1076,7 @@ string Scan::getSampleName() {
 
 // Issue 778: For the case where a single scan represents the baseline, mutate the intensity values
 // on an mz-by-mz basis.
-void Scan::subtractBaselineScan(Scan* baselineScan, double mzTol, bool debug) {
+void Scan::subtractBaselineScan(Scan* baselineScan, double mzPpmTol, bool debug) {
 
     unsigned int baselineIndex = 0;
     vector<float> modifiedIntensity = this->intensity;
@@ -1086,8 +1086,8 @@ void Scan::subtractBaselineScan(Scan* baselineScan, double mzTol, bool debug) {
         float mzI = this->mz[i];
         float intensityI = this->intensity[i];
 
-        float mzJ_min = mzI - mzI*mzTol/1e6;
-        float mzJ_max = mzI + mzI*mzTol/1e6;
+        float mzJ_min = mzI - mzI*mzPpmTol/1e6;
+        float mzJ_max = mzI + mzI*mzPpmTol/1e6;
 
         float topBaselineIntensity = -1.0f;
 
@@ -1127,6 +1127,13 @@ void Scan::subtractBaselineScan(Scan* baselineScan, double mzTol, bool debug) {
             if (intensityI < 0) {
                 intensityI = 0;
             }
+        }
+
+        if (debug) {
+            cout << "i=" << i << ": (" << mzI << ", " << intensityI << ")"
+                 << " ==> "
+                 << intensityI
+                 << endl;
         }
 
         modifiedIntensity[i] = intensityI;

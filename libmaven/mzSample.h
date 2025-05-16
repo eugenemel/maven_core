@@ -226,7 +226,7 @@ class Scan {
     float ms1PrecursorForMs3 = 0.0f;
 
     //Issue 778
-    void subtractBaselineScan(Scan* baselineScan, double mzTol, bool debug);
+    void subtractBaselineScan(Scan* baselineScan, double mzPpmTol, bool debug);
 
 private:
     	vector<Scan*> children;
