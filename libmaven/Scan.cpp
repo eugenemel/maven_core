@@ -1076,7 +1076,7 @@ string Scan::getSampleName() {
 
 // Issue 778: For the case where a single scan represents the baseline, mutate the intensity values
 // on an mz-by-mz basis.
-void Scan::subtractBaselineScan(Scan* baselineScan, double mzPpmTol, bool debug) {
+void Scan::subtractBackgroundScan(Scan* baselineScan, double mzPpmTol, bool debug) {
 
     unsigned int baselineIndex = 0;
     vector<float> modifiedIntensity = this->intensity;
