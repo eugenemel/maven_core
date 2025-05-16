@@ -1073,3 +1073,64 @@ string Scan::getSampleName() {
         return sampleName;
     }
 }
+
+// Issue 778: For the case where a single scan represents the baseline, mutate the intensity values
+// on an mz-by-mz basis.
+void Scan::subtractBaselineScan(Scan* baselineScan, double mzTol, bool debug) {
+
+    unsigned int baselineIndex = 0;
+    vector<float> modifiedIntensity = this->intensity;
+
+    for (unsigned int i = 0; i < this->mz.size(); i++) {
+
+        float mzI = this->mz[i];
+        float intensityI = this->intensity[i];
+
+        float mzJ_min = mzI - mzI*mzTol/1e6;
+        float mzJ_max = mzI + mzI*mzTol/1e6;
+
+        float topBaselineIntensity = -1.0f;
+
+        // This approach is aggressive - always use the highest intensity in the window (if there are any matches).
+        for (unsigned int j = baselineIndex; j < baselineScan->mz.size(); j++) {
+
+            double mzJ = baselineScan->mz[j];
+            double intensityJ = baselineScan->intensity[j];
+
+            if (mzJ < mzJ_min) {
+                //baseline m/z is too low to map to target m/z.
+                //All other m/z examined will also be too low.
+                baselineIndex = j;
+            } else if (mzJ > mzJ_max) {
+                //baseline m/z is too high to map to target mz.
+                //All other m/z examined will also be too high.
+                break;
+            } else if (intensityJ > topBaselineIntensity) {
+                //the baseline m/z is within tolerance, and the intensity
+                //is higher than any other baseline value found so far.
+                //(or this intensity is the first found).
+                topBaselineIntensity = intensityJ;
+
+                if (debug) {
+                        cout << "i=" << i << ": (" << mzI << ", " << intensityI << ")"
+                             << " ==> "
+                             << "j=" << j << ": (" << mzJ << ", " << intensityJ << ")"
+                             << endl;
+                }
+            }
+
+        }
+
+        //raw intensity values are adjusted based on corresponding baseline intensity scan.
+        if (topBaselineIntensity > 0) {
+            intensityI -= topBaselineIntensity;
+            if (intensityI < 0) {
+                intensityI = 0;
+            }
+        }
+
+        modifiedIntensity[i] = intensityI;
+    }
+
+    this->intensity = modifiedIntensity;
+}

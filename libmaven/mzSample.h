@@ -225,6 +225,9 @@ class Scan {
     //Issue 256
     float ms1PrecursorForMs3 = 0.0f;
 
+    //Issue 778
+    void subtractBaselineScan(Scan* baselineScan, double mzTol, bool debug);
+
 private:
     	vector<Scan*> children;
         int polarity;
