@@ -194,9 +194,19 @@ public:
 class ScanIsotopicEnvelope {
 public:
     unsigned int charge;
+
     vector<int> scanCoordinates;
     vector<float> mz;
     vector<float> intensity;
+
+    float totalIntensity = -1.0f;
+
+    float getTotalIntensity() {
+        if (totalIntensity < 0) {
+            totalIntensity = std::accumulate(intensity.begin(), intensity.end(), 0.0);
+        }
+        return totalIntensity;
+    }
 };
 
 class ScanIsotopicEnvelopeFinder {
