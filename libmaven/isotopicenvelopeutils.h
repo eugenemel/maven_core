@@ -195,11 +195,10 @@ class ScanIsotopicEnvelope {
 public:
     unsigned int charge;
 
-    float monoIsotopicMass = 0.0f;
-
-    vector<int> scanCoordinates;
-    vector<float> mz;
-    vector<float> intensity;
+    // position 0 is the [M+0], position 1 the [M+1], and so on
+    vector<int> scanCoordinates{};
+    vector<float> mz{};
+    vector<float> intensity{};
 
     float totalIntensity = -1.0f;
 
