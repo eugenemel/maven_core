@@ -1618,7 +1618,7 @@ void ScanIsotopicEnvelope::print() {
 
     stringstream ss;
     ss << std::fixed << setprecision(4);
-    ss << "mz: " << monoIsotopicMass
+    ss << "mz: " << mz.at(0)
        << ", z=" << charge
        << ", N=" << mz.size()
        << ": {";
