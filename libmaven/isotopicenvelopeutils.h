@@ -222,7 +222,7 @@ public:
      * Species in the window may contain anywhere from @param minCharge to @param maxCharge charges.
      * Show debugging print statements when @param debug is true.
      */
-    static vector<vector<int>> predictEnvelopesC13(
+    static vector<ScanIsotopicEnvelope> predictEnvelopesC13(
         vector<float>& mz,
         vector<float>& intensity,
         float isotopePpmDist,

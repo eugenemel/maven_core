@@ -1654,7 +1654,7 @@ void ScanIsotopicEnvelope::print() {
  * If multiple envelopes are found for a single m/z, the one that has more isotopes will be returned.
  * If there are multiple envelopes with the same number of isotopes, the lower charge state will be preferred.
  */
-vector<vector<int>> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
+vector<ScanIsotopicEnvelope> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
     vector<float>& mz,
     vector<float>& intensity,
     float isotopePpmDist,
@@ -1667,7 +1667,7 @@ vector<vector<int>> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
     ) {
 
     double C13_DELTA = 1.003354835336;
-    vector<vector<int>> envelopes{};
+    vector<ScanIsotopicEnvelope> envelopes{};
 
     bool isValidInput = true;
 
@@ -1679,6 +1679,11 @@ vector<vector<int>> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
              << intensity.size()
              << ". "
              << endl;
+        isValidInput = false;
+    }
+
+    if (intensityThreshold < 0) {
+        cerr << "Intensity thresholds less than zero are not supported." << endl;
         isValidInput = false;
     }
 
@@ -1719,8 +1724,8 @@ vector<vector<int>> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
         float mz_I = mz[i];
         float intensity_I = intensity[i];
 
-        float min_mz = mz_I - mz_I/(1e6*isotopePpmDist);
-        float max_mz = mz_I + mz_I/(1e6*isotopePpmDist);
+        float min_mz = mz_I - (mz_I/1e6)*isotopePpmDist;
+        float max_mz = mz_I + (mz_I/1e6)*isotopePpmDist;
 
         //skip over any peaks that are too low.
         if (intensity_I < intensityThreshold) {
@@ -1743,7 +1748,7 @@ vector<vector<int>> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
 
                 vector<int> matches = mzUtils::findMatchingMzs(mz, min_isotopeMz, max_isotopeMax);
 
-                unsigned int highestIntensityValidMatch = -1;
+                int highestIntensityValidMatch = -1;
                 float highestIntensity = -1;
                 for (unsigned int j = 0; j < matches.size(); j++) {
                     int match = matches[j];
@@ -1775,6 +1780,8 @@ vector<vector<int>> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
 
         // Check candidate envelopes
         vector<int> currentBestEnvelope{};
+        int currentBestChg = -1;
+
         for (auto it = possibleEnvelopes.begin(); it != possibleEnvelopes.end(); ++it) {
             vector<int> candidateEnvelope = it->second;
 
@@ -1791,10 +1798,7 @@ vector<vector<int>> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
             //This will happen by deafult as a consequence of ordering in a map.
             if (candidateEnvelope.size() > currentBestEnvelope.size()) {
                 currentBestEnvelope = candidateEnvelope;
-
-                if (debug) {
-                    cout << "**Best**";
-                }
+                currentBestChg = it->first;
             }
 
             if (debug) {
@@ -1804,10 +1808,39 @@ vector<vector<int>> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
 
         // If an envelope is not empty, save it for outputs.
         if (!currentBestEnvelope.empty()) {
-            envelopes.push_back(currentBestEnvelope);
+
+            if (debug) {
+                cout << "i=" << i << ": **Best Envelope** chg=" << currentBestChg << endl;
+            }
+
+            ScanIsotopicEnvelope scanEnvelope;
+            scanEnvelope.charge = currentBestChg;
+
+            vector<int> envelopeIndexes = vector<int>(currentBestEnvelope.size() + 1);
+            vector<float> envelopeMz = vector<float>(currentBestEnvelope.size() + 1);
+            vector<float> envelopeIntensity = vector<float>(currentBestEnvelope.size() + 1);
+
+            isUsedPeaks[i] = true;
+            envelopeIndexes[0] = i;
+            envelopeMz[0] = mz_I;
+            envelopeIntensity[0] = intensity_I;
+
+            unsigned int counter = 1;
+
             for (int envelopeIndex : currentBestEnvelope) {
                 isUsedPeaks[envelopeIndex] = true;
+
+                envelopeMz[counter] = mz[envelopeIndex];
+                envelopeIntensity[counter] = intensity[envelopeIndex];
+
+                counter++;
             }
+
+            scanEnvelope.scanCoordinates = envelopeIndexes;
+            scanEnvelope.mz = envelopeMz;
+            scanEnvelope.intensity = envelopeIntensity;
+
+            envelopes.push_back(scanEnvelope);
         }
 
     }
