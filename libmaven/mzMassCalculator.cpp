@@ -1625,11 +1625,27 @@ vector<vector<int>> IsotopicEnvelopeFinder::predictEnvelopesC13(
         for (auto it = possibleEnvelopes.begin(); it != possibleEnvelopes.end(); ++it) {
             vector<int> candidateEnvelope = it->second;
 
+            if (debug) {
+                cout << "i=" << i << ": Envelope chg=" << it->first << ": ";
+                for (unsigned int k = 0; k < candidateEnvelope.size(); k++) {
+                    unsigned int index = candidateEnvelope[k];
+                    cout << "(" << "index=" << index << ", mz=" << mz[index] << ", i=" << intensity[index] << ") ";
+                }
+            }
+
             //If more isotopes are detected in one envelope vs another, take it.
             //If the same number of isotopes are detected, prefer the envelope with the smaller charge state.
             //This will happen by deafult as a consequence of ordering in a map.
             if (candidateEnvelope.size() > currentBestEnvelope.size()) {
                 currentBestEnvelope = candidateEnvelope;
+
+                if (debug) {
+                    cout << "**Best**";
+                }
+            }
+
+            if (debug) {
+                cout << endl;
             }
         }
 
