@@ -1607,6 +1607,30 @@ float DifferentialIsotopicEnvelopeUtils::scoreByPearsonCorrelationCoefficient(
     return score;
 }
 
+float ScanIsotopicEnvelope::getTotalIntensity() {
+    if (totalIntensity < 0) {
+        totalIntensity = std::accumulate(intensity.begin(), intensity.end(), 0.0);
+    }
+    return totalIntensity;
+}
+
+void ScanIsotopicEnvelope::print() {
+
+    stringstream ss;
+    ss << std::fixed << setprecision(4);
+    ss << "mz: " << monoIsotopicMass << ", z=" << charge << " :{";
+
+    ss << std::fixed << setprecision(0);
+    for (unsigned int i = 0; i < intensity.size(); i++) {
+        if (i > 0) ss << ", ";
+        ss << intensity.at(i);
+    }
+    ss << "}; Total=";
+    ss << getTotalIntensity();
+
+    cout << ss.str();
+}
+
 /**
  * @brief predictEnvelopesC13
  * Input:
