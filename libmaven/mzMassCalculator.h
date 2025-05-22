@@ -250,4 +250,33 @@ public:
     pair<double, double> getIsotopicAbundance(Isotope& isotope);
 };
 
+class IsotopicEnvelopeFinder {
+public:
+    /**
+     * @brief predictEnvelopesC13
+     * Input: @param mz (ordered by mz - as from a Scan or Fragment)
+     * @param intensity (corresponding to mz vector - as from Scan or Fragment)
+     *
+     * Return coordinates corresponding to predicted isotopic envelopes.
+     * In this case, only look for C13 m/z shifts (ignore all other isotopes).
+     * Isotope m/z must be within @param isotopePpmDist tolerance.
+     * Only intensity values above @param intensityThreshold are considered.
+     * An envelope must have at least @param minNumIsotopes to be considered a real envelope.
+     * An envelope should not have more than @param maxNumIsotopes. The envelope is stopped at that point.
+     * Species in the window may contain anywhere from @param minCharge to @param maxCharge charges.
+     * Show debugging print statements when @param debug is true.
+     */
+    static vector<vector<int>> predictEnvelopesC13(
+        vector<float>& mz,
+        vector<float>& intensity,
+        float isotopePpmDist,
+        float intensityThreshold,
+        int minNumIsotopes,
+        int maxNumIsotopes,
+        int minCharge,
+        int minMaxCharge,
+        bool debug
+        );
+};
+
 #endif
