@@ -1413,8 +1413,6 @@ string doubleQuoteString(const std::string& in) {
     }
 }
 
-} //namespace end
-
 /**
  * @brief findMatchingMzs
  * @param mz
@@ -1440,3 +1438,5 @@ vector<int> findMatchingMzs(vector<float>& mz, float mzmin, float mzmax) {
 
     return matches;
 }
+
+} //namespace mzUtils end
