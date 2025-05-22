@@ -110,7 +110,7 @@ float crossCorrelationZ(vector<float>&xvector, vector<float>& yvector, float off
 float intensityAtPercentile(vector<float> intensities, float percentile);
 
 vector<double> naturalAbundanceCorrection(int nC, vector<double>& M);
-
+vector<int> findMatchingMzs(vector<float>& mz, float mzmin, float mzmax);
 
 /* string functions */
 int string2integer(const std::string& s);

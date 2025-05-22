@@ -273,8 +273,8 @@ public:
         float intensityThreshold,
         int minNumIsotopes,
         int maxNumIsotopes,
-        int minCharge,
-        int minMaxCharge,
+        unsigned int minCharge,
+        unsigned int maxCharge,
         bool debug
         );
 };

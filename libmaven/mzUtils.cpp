@@ -1415,3 +1415,28 @@ string doubleQuoteString(const std::string& in) {
 
 } //namespace end
 
+/**
+ * @brief findMatchingMzs
+ * @param mz
+ * @param mzmin
+ * @param mzmax
+ * @return indexes from original mz vector- so if mz[1502] and mz[1503] are matches,
+ * returns a vector containining 1502 and 1503
+ *
+ */
+vector<int> findMatchingMzs(vector<float>& mz, float mzmin, float mzmax) {
+    vector<int> matches;
+    auto itr = lower_bound(mz.begin(), mz.end(), mzmin);
+
+    auto lb = static_cast<unsigned int>(itr - mz.begin());
+
+    for(unsigned int k = lb; k < mz.size(); k++ ) {
+        if (mz[k] <= mzmax) {
+            matches.push_back(static_cast<int>(k));
+        } else {
+            break;
+        }
+    }
+
+    return matches;
+}

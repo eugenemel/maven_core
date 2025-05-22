@@ -1496,6 +1496,10 @@ void MassCalculator::applyMZeroMzOffset(vector<Isotope>& isotopes, double peakGr
  * An envelope should not have more than @param maxNumIsotopes. The envelope is stopped at that point.
  * Species in the window may contain anywhere from @param minCharge to @param maxCharge charges.
  * Show debugging print statements when @param debug is true.
+ *
+ * This approach assumes that any single m/z is a part of only one isotopic envelope.
+ * If multiple envelopes are found for a single m/z, the one that has more isotopes will be returned.
+ * If there are multiple envelopes with the same number of isotopes, the lower charge state will be preferred.
  */
 vector<vector<int>> IsotopicEnvelopeFinder::predictEnvelopesC13(
     vector<float>& mz,
@@ -1504,14 +1508,140 @@ vector<vector<int>> IsotopicEnvelopeFinder::predictEnvelopesC13(
     float intensityThreshold,
     int minNumIsotopes,
     int maxNumIsotopes,
-    int minCharge,
-    int minMaxCharge,
+    unsigned int minCharge,
+    unsigned int maxCharge,
     bool debug
     ) {
 
+    double C13_DELTA = 1.003354835336;
     vector<vector<int>> envelopes{};
 
-    //TODO
+    bool isValidInput = true;
+
+    //input validation
+    if (mz.size() != intensity.size()) {
+        cerr << "mz and intensity arrays must be the same size. mz has size "
+             << mz.size()
+             << ", intensity has size "
+             << intensity.size()
+             << ". "
+             << endl;
+        isValidInput = false;
+    }
+
+    if (minNumIsotopes < 1) {
+        cerr << "Number of isotopes must be at least 1." << endl;
+        isValidInput = false;
+    }
+
+    if (minNumIsotopes > maxNumIsotopes) {
+        cerr << "Minimum number of isotopes must be less than or equal to the maximum number of isotopes." << endl;
+        isValidInput = false;
+    }
+
+    if (minCharge < 1) {
+        cerr << "Minimum charge number must be at least 1." << endl;
+        isValidInput = false;
+    }
+
+    if (minCharge > maxCharge) {
+        cerr << "Minimum charge number must be less than or equal to the maximum charge number." << endl;
+        isValidInput = false;
+    }
+
+    if (!isValidInput) {
+        return envelopes;
+    }
+
+    // Keep track of peaks that have already been assigned to an envelope.
+    vector<bool> isUsedPeaks = vector<bool>(mz.size(), false);
+
+    for (unsigned int i = 0; i < mz.size(); i++) {
+
+        // If a peak has already been assigned to an isotopic envelope, move on
+        if (isUsedPeaks[i]) {
+            continue;
+        }
+
+        float mz_I = mz[i];
+        float intensity_I = intensity[i];
+
+        float min_mz = mz_I - mz_I/(1e6*isotopePpmDist);
+        float max_mz = mz_I + mz_I/(1e6*isotopePpmDist);
+
+        //skip over any peaks that are too low.
+        if (intensity_I < intensityThreshold) {
+            isUsedPeaks[i] = true;
+            continue;
+        }
+
+        //enumerate candidates
+        // charge, mz indexes
+        map<int, vector<int>> possibleEnvelopes{};
+
+        for (unsigned int chg = minCharge; chg <= maxCharge; chg++) {
+
+            vector<int> candidateEnvelope{};
+            //look for m/z values in the envelope
+
+            while (true) {
+                double min_isotopeMz = min_mz + ((candidateEnvelope.size()+1) * C13_DELTA)/chg;
+                double max_isotopeMax = max_mz + ((candidateEnvelope.size()+1) * C13_DELTA)/chg;
+
+                vector<int> matches = mzUtils::findMatchingMzs(mz, min_isotopeMz, max_isotopeMax);
+
+                unsigned int highestIntensityValidMatch = -1;
+                float highestIntensity = -1;
+                for (unsigned int j = 0; j < matches.size(); j++) {
+                    int match = matches[j];
+                    if (!isUsedPeaks[match] && intensity[match] > highestIntensity) {
+                        highestIntensityValidMatch = match;
+                        highestIntensity = intensity[match];
+                    }
+                }
+
+                if (highestIntensityValidMatch > 0) {
+                    candidateEnvelope.push_back(highestIntensityValidMatch);
+                } else {
+                    //No isotope detected - stop enumerating possible envelope
+                    break;
+                }
+
+                //candidate envelope has reached maximum size - stop checking for more isotopes
+                if (candidateEnvelope.size() >= maxNumIsotopes) {
+                    break;
+                }
+            }
+
+            // if candidate envelope is sufficiently large, record as a possibility
+            if (candidateEnvelope.size() >= minNumIsotopes) {
+                possibleEnvelopes.insert(make_pair(chg, candidateEnvelope));
+            }
+
+        }
+
+        // Check candidate envelopes
+        vector<int> currentBestEnvelope{};
+        for (auto it = possibleEnvelopes.begin(); it != possibleEnvelopes.end(); ++it) {
+            vector<int> candidateEnvelope = it->second;
+
+            //If more isotopes are detected in one envelope vs another, take it.
+            //If the same number of isotopes are detected, prefer the envelope with the smaller charge state.
+            //This will happen by deafult as a consequence of ordering in a map.
+            if (candidateEnvelope.size() > currentBestEnvelope.size()) {
+                currentBestEnvelope = candidateEnvelope;
+            }
+        }
+
+        // If an envelope is not empty, save it for outputs.
+        if (!currentBestEnvelope.empty()) {
+            envelopes.push_back(currentBestEnvelope);
+            for (int envelopeIndex : currentBestEnvelope) {
+                isUsedPeaks[envelopeIndex] = true;
+            }
+        }
+
+    }
 
     return envelopes;
 }
