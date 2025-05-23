@@ -1752,9 +1752,9 @@ vector<ScanIsotopicEnvelope> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
                 float highestIntensity = -1;
                 for (unsigned int j = 0; j < matches.size(); j++) {
                     int match = matches[j];
-                    if (!isUsedPeaks[match] && intensity[match] > highestIntensity) {
-                    highestIntensityValidMatch = match;
-                    highestIntensity = intensity[match];
+                    if (!isUsedPeaks[match] && intensity[match] > highestIntensity && intensity[match] >= intensityThreshold) {
+                        highestIntensityValidMatch = match;
+                        highestIntensity = intensity[match];
                     }
                 }
 
