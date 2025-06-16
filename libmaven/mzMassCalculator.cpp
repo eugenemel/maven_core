@@ -72,11 +72,12 @@ double MassCalculator::getElementMass(string elmnt){
     /* default behavior is to ignore string */
     double val_atome(0);
 
-/* Check for atoms */
+    /* Check for atoms */
     if (elmnt == "H")        val_atome = 1.0078250321;
     else if (elmnt == "2H")  val_atome = 2.01410178;
     else if (elmnt == "D")   val_atome = 2.01410178;
     else if (elmnt == "C")   val_atome = 12.00000000;
+    else if (elmnt == "Co")  val_atome = 58.93319352;
     else if (elmnt == "13C") val_atome = 13.003354835336;
     else if (elmnt == "N")   val_atome = 14.0030740052;
     else if (elmnt == "15N") val_atome = 15.000108898266;
