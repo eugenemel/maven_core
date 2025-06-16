@@ -369,47 +369,84 @@ map<string, int> MassCalculator::getAdductComponentComposition(string formula){
 
 map<string,int> MassCalculator::getComposition(string formula) {
 
-	/* define allowed characters for formula */
-	const string UPP("ABCDEFGHIKLMNOPRSTUVWXYZ");
-	const string LOW("abcdefghiklmnoprstuy");
-	const string COEFF("0123456789");
+    // Allowed characters for formula
+    const string UPP("ABCDEFGHIKLMNOPRSTUVWXYZ");
+    const string LOW("abcdefghiklmnoprstuy");
+    const string COEFF("0123456789");
+    const string CHG("+-");
 
-	/* define some variable */
-	int SIZE = formula.length();
-	map<string,int> atoms;
+    //Initialize variables
+    int SIZE = formula.length();
+    map<string,int> atoms;
 
-	/* parse the formula */
-	for(int i = 0; i < SIZE; i++) {
-		string bloc, coeff_txt;
-		int coeff;
+    int wholeFormulaCoefficient = 1;
 
-		/* start of symbol must be uppercase letter */
-		if (UPP.find(formula[i]) != string::npos){
-			bloc = formula[i];
-			if (LOW.find(formula[i+1]) != string::npos){
-				bloc += formula[i+1];
-				i++;
-			}
-		}
+    /* parse the formula */
+    for(int i = 0; i < SIZE; i++) {
 
-		while ( COEFF.find(formula[i+1]) != string::npos ) {
-			coeff_txt += formula[i+1];
-			i++;
-		}
+        //Formula may begin with an integer coefficient, which is understood to mean a
+        //multiplier on everything that follows.
+        //This is only true for the very first position
+        if (i == 0) {
+            string wholeFormulaCoeffText = "";
+            int j = i;
+            while (COEFF.find(formula[j]) != string::npos) {
+                wholeFormulaCoeffText += formula[j];
+                j++;
+            }
 
-		if ( coeff_txt.length() > 0 ) {
-				coeff = string2integer(coeff_txt);
-		} else {
-				coeff = 1;
+            if (wholeFormulaCoeffText != "") {
+                wholeFormulaCoefficient = stoi(wholeFormulaCoeffText);
+            }
         }
 
-		/* compute normally if there was no open bracket */
-		//cout << bloc <<  " " << coeff << endl;
-		atoms[bloc] += coeff;
-	}
+        string bloc, coeff_txt;
+        int coeff;
 
-	return(atoms);
-	/* send back value to main.cpp */
+        // Start of symbol must be uppercase letter. If it is not, block will remain an empty string, and will not be added to the atoms map.
+        // Note that following the initial upper case letter, there may follow any number of lower case letters.
+        if (UPP.find(formula[i]) != string::npos){
+            bloc = formula[i];
+            if (LOW.find(formula[i+1]) != string::npos){
+                bloc += formula[i+1];
+                i++;
+            }
+        }
+
+        //Coefficient following atom
+        while ( COEFF.find(formula[i+1]) != string::npos ) {
+            coeff_txt += formula[i+1];
+            i++;
+        }
+
+        //Conversion of coefficient characters to number
+        if ( coeff_txt.length() > 0 ) {
+            coeff = stoi(coeff_txt);
+        } else {
+            coeff = 1;
+        }
+
+        //Indicates a valid symbol for an atom (series of letters that starts with uppercase letter)
+        if (!bloc.empty()) {
+            atoms[bloc] += coeff;
+        }
+    }
+
+    // If a formula ends with a '+' or a '-', this indicates some form that is constitutively charged
+    // the 'formula' actually corresponds to an ion in this case, adjust # of e- accordingly
+    string chg;
+    if (CHG.find(formula[SIZE-1]) != string::npos){
+        chg = formula[SIZE-1];
+        atoms[chg] = 1;
+    }
+
+    //Coefficient applies to all components, even designated extra charges at the end (if applicable)
+    if (wholeFormulaCoefficient != 1) {
+        for (auto it = atoms.begin(); it != atoms.end(); ++it) {
+            atoms[it->first] *= wholeFormulaCoefficient;
+        }
+    }
+    return(atoms);
 }
 
 double MassCalculator::computeNeutralMass(string formula) {
