@@ -74,7 +74,7 @@ double MassCalculator::getElementMass(string elmnt){
 
 /* Check for atoms */
     if (elmnt == "H")        val_atome = 1.0078250321;
-    else if (elmnt == "2H")   val_atome = 2.01410178;
+    else if (elmnt == "2H")  val_atome = 2.01410178;
     else if (elmnt == "D")   val_atome = 2.01410178;
     else if (elmnt == "C")   val_atome = 12.00000000;
     else if (elmnt == "13C") val_atome = 13.003354835336;
@@ -99,6 +99,8 @@ double MassCalculator::getElementMass(string elmnt){
     else if (elmnt == "Si")  val_atome = 27.9769265325;
     else if (elmnt == "Fe")  val_atome = 55.934939;
     else if (elmnt == "Li")  val_atome = 7.016003437;
+    else if (elmnt == "+")   val_atome = -0.00054857971; //used to indicate 1 e- missing
+    else if (elmnt == "-")   val_atome = 0.00054857971; //used to indicate 1 e- extra
     return(val_atome);
 }
 /*-----------------------------------------------------------------------*/
