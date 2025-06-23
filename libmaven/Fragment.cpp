@@ -141,8 +141,11 @@ Fragment::Fragment(Scan *scan){
 
 //delete
 Fragment::~Fragment() {
+    if(consensus) {
+        delete(consensus);
+        consensus = nullptr;
+    }
     mzUtils::delete_all(brothers);
-    if(consensus) delete(consensus);
 }
 
 //make a copy of Fragment.
