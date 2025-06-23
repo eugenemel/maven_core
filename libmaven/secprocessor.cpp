@@ -44,6 +44,7 @@ string SECSearchParameters::encodeParams() {
     encodedParams = encodedParams + "groupMaxFracDiff" + "=" + to_string(groupMaxFracDiff) + ";";
     encodedParams = encodedParams + "groupMergeOverlap" + "=" + to_string(groupMergeOverlap) + ";";
     encodedParams = encodedParams + "groupIsMergeOverlappingPeakGroups" + "=" + to_string(groupIsMergeOverlappingPeakGroups) + ";";
+    encodedParams = encodedParams + "groupMinNumPeaks" + "=" + to_string(groupMinNumPeaks) + ";";
 
     // Fragment
     encodedParams = encodedParams + "fragmentIsSmoothedIntensity" + "=" + to_string(fragmentIsSmoothedIntensity) +";";
@@ -173,6 +174,9 @@ shared_ptr<SECSearchParameters> SECSearchParameters::decode(string encodedParams
     }
     if (decodedMap.find("groupIsMergeOverlappingPeakGroups") != decodedMap.end()) {
         secSearchParameters->groupIsMergeOverlappingPeakGroups = decodedMap["groupIsMergeOverlappingPeakGroups"] == "1";
+    }
+    if (decodedMap.find("groupMinNumPeaks") != decodedMap.end()) {
+        secSearchParameters->groupMinNumPeaks = stoi(decodedMap["groupMinNumPeaks"]);
     }
 
     // Fragment
@@ -486,16 +490,23 @@ void SECTraceGroups::computePeakGroups(bool debug) {
         }
     }
 
-    groups = EIC::groupPeaksE(eics, params->toPeakPickingAndGroupingParams(), debug);
+    vector<PeakGroup> unfilteredGroups = EIC::groupPeaksE(eics, params->toPeakPickingAndGroupingParams(), debug);
 
     //SECTrace peaks are updated after grouping, as grouping may have merged peaks
-    for (PeakGroup& group : groups) {
-        for (Peak& p : group.peaks) {
-            if (sampleToTrace.find(p.getSample()) != sampleToTrace.end()) {
-                SECTrace *trace = sampleToTrace[p.getSample()];
-                trace->peaks.push_back(p);
+    //A group is only retained if has sufficienlyt many peaks
+
+    for (PeakGroup& group : unfilteredGroups) {
+
+        if (group.peakCount() >= params->groupMinNumPeaks) {
+            groups.push_back(group);
+            for (Peak& p : group.peaks) {
+                if (sampleToTrace.find(p.getSample()) != sampleToTrace.end()) {
+                    SECTrace *trace = sampleToTrace[p.getSample()];
+                    trace->peaks.push_back(p);
+                }
             }
         }
+
     }
 
     //avoid memory leaks
