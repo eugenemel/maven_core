@@ -227,7 +227,7 @@ class Scan {
 
     //Issue 778, 782
     void subtractBackgroundScan(Scan* baselineScan, double mzPpmTol, bool debug);
-    void subtractBackground(vector<float>& mz, vector<float>& intensity, double mzPpmTol, bool debug);
+    void subtractBackground(vector<float>& backgroundMz, vector<float>& backgroundIntensity, double mzPpmTol, bool debug);
 
 private:
     	vector<Scan*> children;
