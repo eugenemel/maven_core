@@ -1077,6 +1077,11 @@ string Scan::getSampleName() {
 // Issue 778: For the case where a single scan represents the baseline, mutate the intensity values
 // on an mz-by-mz basis.
 void Scan::subtractBackgroundScan(Scan* baselineScan, double mzPpmTol, bool debug) {
+    if (!baselineScan) return;
+    subtractBackground(baselineScan->mz, baselineScan->intensity, mzPpmTol, debug);
+}
+
+void Scan::subtractBackground(vector<float>& backgroundMz, vector<float>& backgroundIntensity, double mzPpmTol, bool debug) {
 
     unsigned int baselineIndex = 0;
     vector<float> modifiedIntensity = this->intensity;
@@ -1092,10 +1097,10 @@ void Scan::subtractBackgroundScan(Scan* baselineScan, double mzPpmTol, bool debu
         float topBaselineIntensity = -1.0f;
 
         // This approach is aggressive - always use the highest intensity in the window (if there are any matches).
-        for (unsigned int j = baselineIndex; j < baselineScan->mz.size(); j++) {
+        for (unsigned int j = baselineIndex; j < backgroundMz.size(); j++) {
 
-            double mzJ = baselineScan->mz[j];
-            double intensityJ = baselineScan->intensity[j];
+            double mzJ = backgroundMz[j];
+            double intensityJ = backgroundIntensity[j];
 
             if (mzJ < mzJ_min) {
                 //baseline m/z is too low to map to target m/z.

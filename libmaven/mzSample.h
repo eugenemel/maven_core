@@ -225,8 +225,9 @@ class Scan {
     //Issue 256
     float ms1PrecursorForMs3 = 0.0f;
 
-    //Issue 778
+    //Issue 778, 782
     void subtractBackgroundScan(Scan* baselineScan, double mzPpmTol, bool debug);
+    void subtractBackground(vector<float>& mz, vector<float>& intensity, double mzPpmTol, bool debug);
 
 private:
     	vector<Scan*> children;
