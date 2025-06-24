@@ -1886,6 +1886,12 @@ Fragment* Fragment::createFromScans(vector<Scan*>& scans, shared_ptr<PeaksSearch
         if (debug) cout << "[Fragment::createFromScans()]: No valid scans detected!." << endl;
     } else if (fragments.size() == 1) {
         parent = fragments.at(0);
+
+        //Here, a 'consensus' built out of a single fragment just passes back the parent fragment data.
+        parent->consensus = new Fragment();
+        parent->consensus->mzs = parent->mzs;
+        parent->consensus->intensity_array = parent->intensity_array;
+
         if (debug) cout << "[Fragment::createFromScans()]: A single-scan consensus spectrum was created with " << parent->nobs() << " peaks." << endl;
     } else {
         parent = fragments.at(0);
