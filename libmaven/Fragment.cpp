@@ -1859,3 +1859,61 @@ void FragmentationMatchScore::addLabelSpecificMatches(string compoundLabel, bool
     if (isSn4Fragment) numSn4Matches++;
     if (isOxidationFragment) numOxidations++;
 }
+
+Fragment* Fragment::createFromScans(vector<Scan*>& scans, shared_ptr<PeaksSearchParameters> params, bool debug) {
+
+    Fragment *parent = nullptr;
+    vector<Fragment*> fragments{};
+
+    for (Scan* scan : scans) {
+
+        Fragment *frag = new Fragment(
+            scan,
+            params->scanFilterMinFracIntensity,
+            params->scanFilterMinSNRatio,
+            params->scanFilterMaxNumberOfFragments,
+            params->scanFilterBaseLinePercentile,
+            params->scanFilterIsRetainFragmentsAbovePrecursorMz,
+            params->scanFilterPrecursorPurityPpm,
+            params->scanFilterMinIntensity
+            );
+
+        fragments.push_back(frag);
+    }
+
+    if (fragments.empty()) {
+        parent = new Fragment();
+        if (debug) cout << "[Fragment::createFromScans()]: No valid scans detected!." << endl;
+    } else if (fragments.size() == 1) {
+        parent = fragments.at(0);
+        if (debug) cout << "[Fragment::createFromScans()]: A single-scan consensus spectrum was created with " << parent->nobs() << " peaks." << endl;
+    } else {
+        parent = fragments.at(0);
+        for (unsigned int i = 1; i < fragments.size(); i++) {
+            Fragment *frag = fragments[i];
+            parent->addFragment(frag);
+        }
+        if (debug) {
+            cout << "[Fragment::createFromScans()]: Successfully defined parent Fragment*, and added "
+                 << (fragments.size()-1)
+                 << " child Fragment*s."
+                 <<  endl;
+        }
+        parent->buildConsensus(
+            params->consensusPpmTolr,
+            params->consensusIntensityAgglomerationType,
+            params->consensusIsIntensityAvgByObserved,
+            params->consensusIsNormalizeTo10K,
+            params->consensusMinNumMs2Scans,
+            params->consensusMinFractionMs2Scans,
+            params->consensusIsRetainOriginalScanIntensities
+            );
+
+        if (debug) {
+            cout << "[Fragment::createFromScans()]: Successfully built a true consensus spectrum." << endl;
+        }
+
+    }
+
+    return parent;
+}

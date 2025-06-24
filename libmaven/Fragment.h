@@ -16,6 +16,7 @@ class Adduct;
 class TMT;
 class DirectInfusionSearchParameters;
 class mzSample;
+class PeaksSearchParameters;
 
 using namespace std;
 
@@ -313,6 +314,9 @@ class Fragment {
         static bool compPrecursorMz(const Fragment* a, const Fragment* b) { return a->precursorMz<b->precursorMz; }
         bool operator<(const Fragment* b) const{ return this->precursorMz < b->precursorMz; }
         bool operator==(const Fragment* b) const{ return fabs(this->precursorMz-b->precursorMz)<0.001; }
+
+    //Issue 782
+    static Fragment* createFromScans(vector<Scan*>& scans, shared_ptr<PeaksSearchParameters> params, bool debug);
 };
 
 
