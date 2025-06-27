@@ -509,11 +509,20 @@ void SECTraceGroups::computePeakGroups(bool debug) {
                 if (sampleToTrace.find(p.getSample()) != sampleToTrace.end()) {
                     SECTrace *trace = sampleToTrace[p.getSample()];
                     trace->peaks.push_back(p);
+
+                    if (debug) {
+                        cout << "(" << trace->analyteId
+                             << ", " << trace->biologicalId
+                             << "): group #"
+                             << groupNum
+                             << endl;
+                    }
                 }
             }
 
             groups.push_back(group);
             groupNum++;
+
         }
 
     }
