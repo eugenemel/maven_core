@@ -495,16 +495,25 @@ void SECTraceGroups::computePeakGroups(bool debug) {
     //SECTrace peaks are updated after grouping, as grouping may have merged peaks
     //A group is only retained if has sufficienlyt many peaks
 
+    //Issue 781: groups should be re-numbered to only include those groups that pass filters.
+    //This step is necessary to keep group IDs aligned
+    unsigned int groupNum = 0;
+
     for (PeakGroup& group : unfilteredGroups) {
 
         if (group.peakCount() >= params->groupMinNumPeaks) {
-            groups.push_back(group);
+            group.groupId = groupNum;
+
             for (Peak& p : group.peaks) {
+                p.groupNum = groupNum;
                 if (sampleToTrace.find(p.getSample()) != sampleToTrace.end()) {
                     SECTrace *trace = sampleToTrace[p.getSample()];
                     trace->peaks.push_back(p);
                 }
             }
+
+            groups.push_back(group);
+            groupNum++;
         }
 
     }
