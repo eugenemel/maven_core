@@ -256,6 +256,12 @@ Adduct MassCalculator::parseAdductFromName(string adductName) {
     //# of electrons gained or lost
     double massShift = EMASS * -1 * adductCharge;
 
+    // Issue 780: [M] is a legal adduct type, indicating no mass change
+    // The charge is assumed to be +1 or -1 in this case
+    if (adductName == "[M]") {
+        massShift = 0;
+    }
+
     for (auto it = atomComposition.begin(); it != atomComposition.end(); ++it) {
         massShift += MassCalculator::getElementMass(it->first) * it->second;
     }
