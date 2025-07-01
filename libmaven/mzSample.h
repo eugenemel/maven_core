@@ -1729,18 +1729,21 @@ class Adduct {
         string name;
 		int	  nmol;
 		float mass;
-		float charge;
-		
-        //given adduct mass, compute monoisotopic parent mass
-        inline float computeParentMass(float mz)  {
+        float charge;
+
+        // [M+H]+ mz is the 'adduct mz'
+        // 'M' is the 'parent mass'
+
+        //given adduct mz, compute parent monoisotopic mass
+        inline float computeParentMass(float adductMz)  {
             float divisor = nmol != 0 ? nmol : 1; //Issue 495: Avoid divide-by-zero
-            return  (mz*abs(charge)-mass)/divisor;
+            return  (adductMz*abs(charge)-mass)/divisor;
         }
 
-        //given parent monoisotopic mass, compute adduct mass
-        inline float computeAdductMass(float pmz) {
+        //given parent monoisotopic mass, compute adduct mz
+        inline float computeAdductMass(float parentMass) {
             float divisor = charge != 0 ? abs(charge) : 1; //Issue 495: avoid divide-by-zero
-            return (pmz*nmol+mass)/divisor;
+            return (parentMass*nmol+mass)/divisor;
         }
 
         static vector<Adduct*> loadAdducts(string filename);
