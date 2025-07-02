@@ -1762,8 +1762,8 @@ vector<ScanIsotopicEnvelope> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
                     if (minIsotopeIntensityRatioLowerMzToHigherMz >= 0 && intensityRatio > maxIsotopeIntensityRatioLowerMzToHigherMz) continue;
 
                     if (intensity[match] > highestIntensity) {
-                    highestIntensityValidMatch = match;
-                    highestIntensity = intensity[match];
+                        highestIntensityValidMatch = match;
+                        highestIntensity = intensity[match];
                     }
                 }
 
