@@ -1635,25 +1635,6 @@ void ScanIsotopicEnvelope::print() {
     cout << ss.str();
 }
 
-/**
- * @brief predictEnvelopesC13
- * Input:
- * @param mz (ordered by mz - as from a Scan or Fragment)
- * @param intensity (corresponding to mz vector - as from Scan or Fragment)
- *
- * Return coordinates corresponding to predicted isotopic envelopes.
- * In this case, only look for C13 m/z shifts (ignore all other isotopes).
- * Isotope m/z must be within @param isotopePpmDist tolerance.
- * Only intensity values above @param intensityThreshold are considered.
- * An envelope must have at least @param minNumIsotopes to be considered a real envelope.
- * An envelope should not have more than @param maxNumIsotopes. The envelope is stopped at that point.
- * Species in the window may contain anywhere from @param minCharge to @param maxCharge charges.
- * Show debugging print statements when @param debug is true.
- *
- * This approach assumes that any single m/z is a part of only one isotopic envelope.
- * If multiple envelopes are found for a single m/z, the one that has more isotopes will be returned.
- * If there are multiple envelopes with the same number of isotopes, the lower charge state will be preferred.
- */
 vector<ScanIsotopicEnvelope> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
     vector<float>& mz,
     vector<float>& intensity,
@@ -1663,6 +1644,8 @@ vector<ScanIsotopicEnvelope> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
     int maxNumIsotopes,
     unsigned int minCharge,
     unsigned int maxCharge,
+    float minIsotopeIntensityRatioLowerMzToHigherMz,
+    float maxIsotopeIntensityRatioLowerMzToHigherMz,
     bool debug
     ) {
 
@@ -1716,12 +1699,17 @@ vector<ScanIsotopicEnvelope> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
 
     for (unsigned int i = 0; i < mz.size(); i++) {
 
+        float mz_I = mz[i];
+
+        if (debug) {
+            cout << "BEGIN i=" << i << ": mz=" << mz_I << endl;
+        }
+
         // If a peak has already been assigned to an isotopic envelope, move on
         if (isUsedPeaks[i]) {
             continue;
         }
 
-        float mz_I = mz[i];
         float intensity_I = intensity[i];
 
         float min_mz = mz_I - (mz_I/1e6)*isotopePpmDist;
@@ -1742,6 +1730,8 @@ vector<ScanIsotopicEnvelope> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
             vector<int> candidateEnvelope{};
             //look for m/z values in the envelope
 
+            float previousMzIntensity = intensity_I;
+
             while (true) {
                 double min_isotopeMz = min_mz + ((candidateEnvelope.size()+1) * C13_DELTA)/chg;
                 double max_isotopeMax = max_mz + ((candidateEnvelope.size()+1) * C13_DELTA)/chg;
@@ -1751,14 +1741,34 @@ vector<ScanIsotopicEnvelope> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
                 int highestIntensityValidMatch = -1;
                 float highestIntensity = -1;
                 for (unsigned int j = 0; j < matches.size(); j++) {
+
                     int match = matches[j];
-                    if (!isUsedPeaks[match] && intensity[match] > highestIntensity && intensity[match] >= intensityThreshold) {
-                        highestIntensityValidMatch = match;
-                        highestIntensity = intensity[match];
+                    float matchIntensity = intensity[match];
+
+                    if (isUsedPeaks[match]) continue;
+
+                    float intensityRatio = previousMzIntensity / matchIntensity;
+                    if (debug){
+                    cout << "base mz: " << mz_I << ": "
+                         << "[M + " << candidateEnvelope.size() << "] / [M + " << (candidateEnvelope.size()+1) << "]: "
+                         << intensityRatio
+                         << endl;
+                    }
+
+                    //isotope intensity ratio is too low - mz_I is probably a noise peak
+                    if (minIsotopeIntensityRatioLowerMzToHigherMz >= 0 && intensityRatio < minIsotopeIntensityRatioLowerMzToHigherMz) continue;
+
+                    //isotope intensity ratio is too high - match is probably a noise peak
+                    if (minIsotopeIntensityRatioLowerMzToHigherMz >= 0 && intensityRatio > maxIsotopeIntensityRatioLowerMzToHigherMz) continue;
+
+                    if (intensity[match] > highestIntensity) {
+                    highestIntensityValidMatch = match;
+                    highestIntensity = intensity[match];
                     }
                 }
 
                 if (highestIntensityValidMatch > 0) {
+                    previousMzIntensity = highestIntensity;
                     candidateEnvelope.push_back(highestIntensityValidMatch);
                 } else {
                     //No isotope detected - stop enumerating possible envelope
@@ -1843,6 +1853,9 @@ vector<ScanIsotopicEnvelope> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
             envelopes.push_back(scanEnvelope);
         }
 
+        if (debug) {
+            cout << "END i=" << i << ": " << mz_I << endl << endl;
+        }
     }
 
     return envelopes;

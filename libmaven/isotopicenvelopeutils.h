@@ -210,7 +210,8 @@ class ScanIsotopicEnvelopeFinder {
 public:
     /**
      * @brief predictEnvelopesC13
-     * Input: @param mz (ordered by mz - as from a Scan or Fragment)
+     * Input:
+     * @param mz (ordered by mz - as from a Scan or Fragment)
      * @param intensity (corresponding to mz vector - as from Scan or Fragment)
      *
      * Return coordinates corresponding to predicted isotopic envelopes.
@@ -221,6 +222,19 @@ public:
      * An envelope should not have more than @param maxNumIsotopes. The envelope is stopped at that point.
      * Species in the window may contain anywhere from @param minCharge to @param maxCharge charges.
      * Show debugging print statements when @param debug is true.
+     * When reviewing possible candidates to the next m/z in an isotopic envelope,
+     * The intensity of the candidate m/z, compared to the last m/z in the envelope will be evaluated.
+     * m/z are always evaluated in order, so the last m/z is the lower m/z, while the candidate is the higher m/z.
+     * There are two guiding principles for intensity ratios:
+     * The @param minIsotopeIntensityRatioLowerMzToHigherMz is designed to identify cases where
+     * the query m/z is noise - e.g. the true envelope starts at the next m/z, while
+     * the param @param maxIsotopeIntensityRatioLowerMzToHigherMz is designed to identify cases where
+     * the query m/z is real but the next m/z is just noise - e.g. we have descended into the noise.
+     * These parameters may be effectively skipped by setting them to negative values (e.g., -1).
+     *
+     * This approach assumes that any single m/z is a part of only one isotopic envelope.
+     * If multiple envelopes are found for a single m/z, the one that has more isotopes will be returned.
+     * If there are multiple envelopes with the same number of isotopes, the lower charge state will be preferred.
      */
     static vector<ScanIsotopicEnvelope> predictEnvelopesC13(
         vector<float>& mz,
@@ -231,6 +245,8 @@ public:
         int maxNumIsotopes,
         unsigned int minCharge,
         unsigned int maxCharge,
+        float minIsotopeIntensityRatioLowerMzToHigherMz,
+        float maxIsotopeIntensityRatioLowerMzToHigherMz,
         bool debug
         );
 };
