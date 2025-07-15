@@ -2353,7 +2353,17 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
         cout << "EIC::mergedEICToGroups(): END allPeaks" << endl;
     }
 
+    cout << "EIC::mergedEICToGroups(): Starting peak assignment to PeakGroupData (if appropriate)" << endl;
+
     for (auto peak : allPeaks) {
+
+        if (debug) {
+            cout << fixed << setprecision(5)
+                 << "Starting (" << peak.peakMz << ", " << peak.rt << ", " << peak.peakIntensity << ") "
+                 << peak.sample->sampleName
+                 << "..."
+                 << endl;
+        }
 
         float peakRt = peak.rt;
         float minPeakRt = max(0.0f, peakRt-groupMaxRtDiff);
@@ -2402,8 +2412,21 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
         if (bestGroupIndex != -1) {
             peakGroupSamples[bestGroupIndex].insert(peak.sample);
             peakGroupData[bestGroupIndex].peaks.insert(make_pair(peak.sample, peak));
+
+            if (debug) {
+                cout << "Peak was associated with PeakGroupData #" << bestGroupIndex << endl;
+            }
+        } else if (debug) {
+            cout << "Peak was dropped from groups (not associated)" << endl;
         }
 
+        if (debug) {
+            cout << fixed << setprecision(5)
+                 << "Completed assignment of (" << peak.peakMz << ", " << peak.rt << ", " << peak.peakIntensity << ") "
+                 << peak.sample->sampleName
+                 << "."
+                 << endl;
+        }
     }
 
     for (auto& it : peakGroupData) {

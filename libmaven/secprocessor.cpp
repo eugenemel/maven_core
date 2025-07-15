@@ -493,7 +493,7 @@ void SECTraceGroups::computePeakGroups(bool debug) {
     vector<PeakGroup> unfilteredGroups = EIC::groupPeaksE(eics, params->toPeakPickingAndGroupingParams(), debug);
 
     //SECTrace peaks are updated after grouping, as grouping may have merged peaks
-    //A group is only retained if has sufficienlyt many peaks
+    //A group is only retained if has sufficiently many peaks
 
     //Issue 781: groups should be re-numbered to only include those groups that pass filters.
     //This step is necessary to keep group IDs aligned
