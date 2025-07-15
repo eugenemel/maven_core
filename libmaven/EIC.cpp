@@ -2429,6 +2429,8 @@ vector<PeakGroup> EIC::mergedEICToGroups(vector<EIC*>& eics, EIC* m, float group
         }
     }
 
+    cout << "EIC::mergedEICToGroups(): Completed peak assignment to PeakGroupData (if appropriate)" << endl;
+
     for (auto& it : peakGroupData) {
         it.second.mergedEICPeakIndexes.insert(it.first);
         it.second.recomputeProperties();
