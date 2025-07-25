@@ -71,7 +71,7 @@ shared_ptr<PeakPickingAndGroupingParameters> SECSearchParameters::toPeakPickingA
     // peak picking
 
     peakPickingAndGroupingParams->peakSmoothingWindow = traceWindowSize;
-    peakPickingAndGroupingParams->peakRtBoundsMaxIntensityFraction = traceMinFracTopPeakIntensity;
+    peakPickingAndGroupingParams->peakRtBoundsMaxIntensityFraction = tracePeakBoundsMaxIntensityFraction;
     peakPickingAndGroupingParams->peakRtBoundsSlopeThreshold = traceRtBoundsSlopeThreshold;
     peakPickingAndGroupingParams->peakBaselineSmoothingWindow = traceWindowSize;
     peakPickingAndGroupingParams->peakBaselineDropTopX = traceBaselineDropTopX;
@@ -83,7 +83,7 @@ shared_ptr<PeakPickingAndGroupingParameters> SECSearchParameters::toPeakPickingA
 
     // peak grouping
     peakPickingAndGroupingParams->mergedSmoothingWindow = traceWindowSize;
-    peakPickingAndGroupingParams->mergedPeakRtBoundsMaxIntensityFraction = traceMinFracTopPeakIntensity;
+    peakPickingAndGroupingParams->mergedPeakRtBoundsMaxIntensityFraction = tracePeakBoundsMaxIntensityFraction;
     peakPickingAndGroupingParams->mergedPeakRtBoundsSlopeThreshold = traceRtBoundsSlopeThreshold;
     peakPickingAndGroupingParams->mergedBaselineSmoothingWindow = traceWindowSize;
     peakPickingAndGroupingParams->mergedBaselineDropTopX = traceBaselineDropTopX;

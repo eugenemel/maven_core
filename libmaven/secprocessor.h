@@ -26,7 +26,7 @@ class SECSearchParameters {
      * ========================*/
      float traceMissingIntensityFill = 0.0f;
      int traceMinFractionNumber = 1;
-     int traceMaxFractionNumber = 72;
+     int traceMaxFractionNumber = 53;
      bool traceNormalizeToSumIntensity = false;
 
      /** =======================
