@@ -321,6 +321,12 @@ map<string, int> MassCalculator::getAdductComponentComposition(string formula){
         return map<string, int>{{"C", 6}, {"H", 9}, {"N", 3}};
     } else if (formula == "TFA") { //trifluoroacetate
         return map<string, int>{{"C", 2}, {"H", 1}, {"O", 2}, {"F", 3}};
+    } else if (formula == "2TFA") { //double trifluoroacetate
+        return map<string, int>{{"C", 4}, {"H", 2}, {"O", 4}, {"F", 6}};
+    } else if (formula == "3TFA") { //triple trifluoroacetate
+        return map<string, int>{{"C", 6}, {"H", 3}, {"O", 6}, {"F", 9}};
+    } else if (formula == "4TFA") { //quadruple trifluoroacetate
+        return map<string, int>{{"C", 8}, {"H", 4}, {"O", 8}, {"F", 12}};
     } else if (formula == "FA") { //formic acid (HCOOH)
         return map<string, int>{{"C", 1}, {"H", 2}, {"O", 2}};
     } else if (formula == "tributylamine") {
