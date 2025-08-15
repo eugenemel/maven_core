@@ -1804,11 +1804,28 @@ vector<ScanIsotopicEnvelope> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
             }
 
             //If more isotopes are detected in one envelope vs another, take it.
-            //If the same number of isotopes are detected, prefer the envelope with the smaller charge state.
-            //This will happen by deafult as a consequence of ordering in a map.
+            //If the same number of isotopes are detected, take the envelope with higher intensity.
+
             if (candidateEnvelope.size() > currentBestEnvelope.size()) {
+                //Case: candidate has more isotopes than previous best
                 currentBestEnvelope = candidateEnvelope;
                 currentBestChg = it->first;
+            } else if (candidateEnvelope.size() == currentBestEnvelope.size()) {
+                //Case: candidate has same # isotopes as previous best, but total intensity is higher - take higher intensity
+                float candidateEnvelopeIntensity = 0;
+                for (int index : candidateEnvelope) {
+                    candidateEnvelopeIntensity += intensity[index];
+                }
+
+                float currentBestEnvelopeIntensity = 0;
+                for (int index : currentBestEnvelope) {
+                    currentBestEnvelopeIntensity += intensity[index];
+                }
+
+                if (candidateEnvelopeIntensity > currentBestEnvelopeIntensity) {
+                    currentBestEnvelope = candidateEnvelope;
+                    currentBestChg = it->first;
+                }
             }
 
             if (debug) {
@@ -1842,6 +1859,7 @@ vector<ScanIsotopicEnvelope> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
 
                 envelopeMz[counter] = mz[envelopeIndex];
                 envelopeIntensity[counter] = intensity[envelopeIndex];
+                envelopeIndexes[counter] = envelopeIndex;
 
                 counter++;
             }
