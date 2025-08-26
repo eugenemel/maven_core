@@ -923,6 +923,9 @@ void Fragment::buildConsensus(float productPpmTolr,
                 Cons->intensity_array[i] = mzUtils::median(posToIntensityMap[static_cast<int>(i)]);
             } else if (consensusIntensityAgglomerationType == Sum) {
                 Cons->intensity_array[i] = accumulate(posToIntensityMap[static_cast<int>(i)].begin(), posToIntensityMap[static_cast<int>(i)].end(), 0.0f);
+            } else if (consensusIntensityAgglomerationType == Max) {
+                auto max_iterator = std::max_element(posToIntensityMap[static_cast<int>(i)].begin(), posToIntensityMap[static_cast<int>(i)].end());
+                Cons->intensity_array[i] = *max_iterator;
             }
         }
 	}
