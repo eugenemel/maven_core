@@ -1871,9 +1871,9 @@ Fragment* Fragment::createFromScans(vector<Scan*>& scans, shared_ptr<PeaksSearch
     for (Scan* scan : scans) {
 
         if (debug) {
-            cout << "Scan #" << scan->scannum << ": " << scan->nobs() << " peaks." << endl;
+            cout << "[Fragment::createFromScans()]: Scan #" << scan->scannum << ": " << scan->nobs() << " peaks." << endl;
 
-            cout << "Fragment Params: "
+            cout << "[Fragment::createFromScans()]: Fragment Params: "
                  << "minFracIntensity=" << params->scanFilterMinFracIntensity << ", "
                  << "minSNRatio=" << params->scanFilterMinSNRatio << ", "
                  << "maxNumberOfFragments=" << params->scanFilterMaxNumberOfFragments << ", "
@@ -1896,7 +1896,7 @@ Fragment* Fragment::createFromScans(vector<Scan*>& scans, shared_ptr<PeaksSearch
             );
 
         if (debug) {
-            cout << "Fragment: " << frag->nobs() << " peaks." << endl;
+            cout << "[Fragment::createFromScans()]: Fragment: " << frag->nobs() << " peaks." << endl;
         }
 
         fragments.push_back(frag);
@@ -1940,6 +1940,10 @@ Fragment* Fragment::createFromScans(vector<Scan*>& scans, shared_ptr<PeaksSearch
             cout << "[Fragment::createFromScans()]: Successfully built a true consensus spectrum." << endl;
         }
 
+    }
+
+    if (debug) {
+        cout << "[Fragment::createFromScans()]: Final Fragment  # peaks=" << parent->consensus->nobs() << endl;
     }
 
     return parent;
