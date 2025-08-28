@@ -1870,6 +1870,20 @@ Fragment* Fragment::createFromScans(vector<Scan*>& scans, shared_ptr<PeaksSearch
 
     for (Scan* scan : scans) {
 
+        if (debug) {
+            cout << "Scan #" << scan->scannum << ": " << scan->nobs() << " peaks." << endl;
+
+            cout << "Fragment Params: "
+                 << "minFracIntensity=" << params->scanFilterMinFracIntensity << ", "
+                 << "minSNRatio=" << params->scanFilterMinSNRatio << ", "
+                 << "maxNumberOfFragments=" << params->scanFilterMaxNumberOfFragments << ", "
+                 << "baseLinePercentile=" << params->scanFilterBaseLinePercentile << ", "
+                 << "isRetainFragmentsAbovePrecursorMz=" << params->scanFilterIsRetainFragmentsAbovePrecursorMz << ", "
+                 << "precursorPurityPpm=" << params->scanFilterPrecursorPurityPpm << ", "
+                 << "minIntensity=" << params->scanFilterMinIntensity
+                 << endl;
+        }
+
         Fragment *frag = new Fragment(
             scan,
             params->scanFilterMinFracIntensity,
