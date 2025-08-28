@@ -1895,6 +1895,10 @@ Fragment* Fragment::createFromScans(vector<Scan*>& scans, shared_ptr<PeaksSearch
             params->scanFilterMinIntensity
             );
 
+        if (debug) {
+            cout << "Fragment: " << frag->nobs() << " peaks." << endl;
+        }
+
         fragments.push_back(frag);
     }
 
