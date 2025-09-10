@@ -289,6 +289,58 @@ void MzKitchenProcessor::labelRtAgreement(PeakGroup *g, char rtMatchLabel, bool 
 }
 
 /**
+ * @brief MzKitchenProcessor::isRtAgreement
+ * Determine if a peakgroup and compound are close enough in RT space to constitute a possible match.
+ * This function will intelligently determine if the compound has an RT value, if it has an RT value
+ * and no RT_min/Rt_max, or if it has an RT value, RT_min and RT_max, and will carry out
+ * the comparison appropriately.
+ *
+ * @param group
+ * @param compound
+ * @param ms1RtTolr: fallback tolerance for RT matching
+ */
+bool MzKitchenProcessor::isRtAgreement(PeakGroup *group, Compound *compound, float ms1RtTolr, bool debug) {
+    if (!group || !compound) return false;
+
+    //Issue 792: If the compound is missing a valid RT value,
+    //return 'true', indicating that there is no disagreement between
+    //the compound's stated RT and the peak group's measured RT.
+    //This was an intentional behavior change introduced in this case.
+    if (compound->expectedRt < 0) return true;
+
+    float medianRt = group->medianRt();
+
+    // Case: compounds expected RT range is known
+    if (compound->expectedRtMin > 0 && compound->expectedRtMax > 0) {
+        if (debug) cout
+                << compound->name
+                 << " RT Range: ["
+                << compound->expectedRtMin
+                << " "
+                << compound->expectedRt
+                << " "
+                << compound->expectedRtMax
+                << "] vs. "
+                << medianRt
+                << endl;
+        return medianRt > compound->expectedRtMin && medianRt < compound->expectedRtMax;
+    } else {
+        //Case: compounds expected Rt range is not provided
+        if (debug) cout
+                << compound->name
+                << " RT : "
+                << compound->expectedRt
+                << " vs. "
+                << medianRt
+                << endl;
+        float rtDiff = abs(group->medianRt() - compound->expectedRt);
+        return rtDiff <= ms1RtTolr;
+    }
+
+    return false;
+}
+
+/**
  * @brief MzKitchenProcessor::matchMetabolites
  * @param groups
  * @param compounds

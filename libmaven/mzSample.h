@@ -2730,6 +2730,7 @@ public:
                                             bool debug=false);
 
     static void labelRtAgreement(PeakGroup *g, char RtMatchLabel = 'l', bool debug = false);
+    static bool isRtAgreement(PeakGroup *group, Compound *compound, float ms1RtTolr, bool debug = false);
 };
 
 //Issue 482
