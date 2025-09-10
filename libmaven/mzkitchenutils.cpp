@@ -458,9 +458,8 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
         library.intensity_array = compound->fragment_intensity;
         library.fragment_labels = compound->fragment_labels;
 
-        //skip entries when the RT is required, and out of range
-        float rtDiff = abs(g->medianRt() - compound->expectedRt);
-        if (params->rtIsRequireRtMatch && (rtDiff > params->rtMatchTolerance)) {
+        //Issue 792: Altered logic around RT Agreement
+        if (params->rtIsRequireRtMatch && !MzKitchenProcessor::isRtAgreement(g, compound, params->rtMatchTolerance, debug)) {
             continue;
         }
 
