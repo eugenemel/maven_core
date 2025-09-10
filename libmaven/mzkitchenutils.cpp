@@ -513,6 +513,9 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
         if (bestPair.first.adduct) g->adduct = bestPair.first.adduct;
         g->fragMatchScore = bestPair.second;
         g->fragMatchScore.mergedScore = bestPair.second.dotProduct;
+        if (g->compound->expectedRt > 0) {
+            g->expectedRtDiff = abs(g->compound->expectedRt - g->medianRt());
+        }
     }
 
     //Issue 546: debugging
