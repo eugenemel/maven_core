@@ -1370,6 +1370,10 @@ class PeakGroup {
         //This value takes on one of the above varlues based on setting in PeakGroupBackgroundType.
         float groupBackground;
 
+        //Issue 792: Retain max peak mz and rt values to avoid excessive recomputations
+        float maxPeakMzVal;
+        float maxPeakRtVal;
+
         bool isPrimaryGroup();
         inline bool hasCompoundLink()  { if(compound != NULL) return true ; return false; }
         inline bool isEmpty()   { if(peaks.size() == 0) return true; return false; }
@@ -1422,7 +1426,6 @@ class PeakGroup {
         void groupStatistics(bool isForceRecomputation=true);
 		void updateQuality();
 		float medianRt();
-        float maxPeakRt();
 		float meanRtW();
 
         //Issue 371: refactor to dedicated method

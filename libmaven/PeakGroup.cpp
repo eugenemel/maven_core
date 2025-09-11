@@ -70,6 +70,9 @@ PeakGroup::PeakGroup()  {
     blankMedianHeight = 0.0f;
     groupBackground = 0.0f;
 
+    //Issue 792
+    maxPeakMzVal = 0.0f;
+    maxPeakRtVal = 0.0f;
 }      
 
 void PeakGroup::copyObj(const PeakGroup& o)  { 
@@ -154,6 +157,9 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
     groupBackground = o.groupBackground;
     peakGroupScans = o.peakGroupScans; //Issue 768
 
+    maxPeakMzVal = o.maxPeakMzVal;
+    maxPeakRtVal = o.maxPeakRtVal; //Issue 792
+
     copyChildren(o);
 }
 
@@ -173,7 +179,7 @@ void PeakGroup::clear() {
     deletePeaks();
     deleteChildren();
     meanMz  = 0;
-    groupRank=INT_MAX;
+    groupRank=-1.0f;
 
     //Issue 235: try forcing these connections to nullptr
     parent = nullptr;
@@ -219,20 +225,6 @@ float PeakGroup::medianRt() {
     vector<float> rts(peaks.size(),0);
     for(unsigned int i=0; i < peakCount(); i++ ) rts[i]=peaks[i].rt;
     return mzUtils::median(rts);
-}
-
-//Issue 560
-float PeakGroup::maxPeakRt(){
-    float maxRt = 0.0f;
-    float maxIntensity = -1.0f;
-    for (auto p : peaks) {
-        if (p.peakIntensity > maxIntensity) {
-            maxRt = p.rt;
-            maxIntensity = p.peakIntensity;
-        }
-    }
-
-    return maxRt;
 }
 
 void PeakGroup::deleteChildren() { 
@@ -498,6 +490,8 @@ void PeakGroup::groupStatistics(bool isForceRecomputation) {
             maxIntensity = peaks[i].peakIntensity;
             meanMz=peaks[i].baseMz;
             meanRt=peaks[i].rt;
+            maxPeakMzVal=peaks[i].peakMz;
+            maxPeakRtVal=peaks[i].rt;
         }
 
         if(peaks[i].noNoiseObs>maxNoNoiseObs) maxNoNoiseObs = peaks[i].noNoiseObs;

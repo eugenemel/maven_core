@@ -495,7 +495,7 @@ void QQQProcessor::rollUpToCompoundQuant(vector<PeakGroup>& peakgroups, shared_p
         Compound* representativeCompound = nullptr;
         PeakGroup* representative = nullptr;
         for (auto pg : peakGroups) {
-           if (isCheckRt && abs(pg->maxPeakRt() - pg->compound->expectedRt) > params->rollUpRtTolerance) {
+            if (isCheckRt && abs(pg->maxPeakRtVal - pg->compound->expectedRt) > params->rollUpRtTolerance) {
                 continue;
            }
 
