@@ -2512,6 +2512,16 @@ public:
     string mspFilePath = "";
     shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
 
+    //Issue 792
+    /**
+     * @brief isUseGroupMaxPeakVals
+     * If TRUE, use the max peak values instead of meanMz and medianRt.
+     * This can help in cases where the peak group contains a lot of blank or bad samples,
+     * which might get pulled in and throw off the average values.
+     * By default, this should be true.
+     */
+    bool isUseGroupMaxPeakVals = true;
+
     virtual string getMzKitchenSearchType() = 0;
     virtual ~MzkitchenMspSearchParameters();
 

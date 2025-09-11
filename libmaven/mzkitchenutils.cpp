@@ -556,6 +556,9 @@ string LCLipidSearchParameters::encodeParams() {
     //Issue 586
     encodedParams = encodedParams + getEncodedLipidParameters(TUPLE_MAP_KEY_DELIMITER, INTERNAL_MAP_DELIMITER);
 
+    //Issue 792
+    encodedParams = encodedParams + "isUseGroupMaxPeakVals" + "=" + to_string(isUseGroupMaxPeakVals) + ";";
+
     return encodedParams;
 }
 
@@ -603,6 +606,12 @@ shared_ptr<LCLipidSearchParameters> LCLipidSearchParameters::decode(string encod
             }
         }
     }
+
+    //Isuse 792
+    if (decodedMap.find("isUseGroupMaxPeakVals") != decodedMap.end()) {
+        lipidSearchParameters->isUseGroupMaxPeakVals = decodedMap["isUseGroupMaxPeakVals"] == "1";
+    }
+
     // END LCLipidSearchParameters
 
     return lipidSearchParameters;
@@ -640,6 +649,9 @@ string MzkitchenMetaboliteSearchParameters::encodeParams() {
     }
     encodedParams = encodedParams + "matchingPolicy" + "=" + matchingPolicyStr + ";";
     encodedParams = encodedParams + "isComputeAllFragScores" + "=" + to_string(isComputeAllFragScores) + ";";
+
+    //Issue 792
+    encodedParams = encodedParams + "isUseGroupMaxPeakVals" + "=" + to_string(isUseGroupMaxPeakVals) + ";";
 
     string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
 
@@ -683,6 +695,11 @@ shared_ptr<MzkitchenMetaboliteSearchParameters> MzkitchenMetaboliteSearchParamet
     }
     if (decodedMap.find("isComputeAllFragScores") != decodedMap.end()) {
         metaboliteSearchParameters->isComputeAllFragScores = decodedMap["isComputeAllFragScores"] == "1";
+    }
+
+    //Isue 792
+    if (decodedMap.find("isUseGroupMaxPeakVals") != decodedMap.end()) {
+        metaboliteSearchParameters->isUseGroupMaxPeakVals = decodedMap["isUseGroupMaxPeakVals"] == "1";
     }
 
     // END MzkitchenMetaboliteSearchParameters
