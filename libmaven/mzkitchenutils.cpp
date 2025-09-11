@@ -57,9 +57,18 @@ void MzKitchenProcessor::assignBestLipidToGroup(
 
     if (!g) return;
 
-    float minMz = g->meanMz - (g->meanMz*params->ms1PpmTolr/1000000);
-    float maxMz = g->meanMz + (g->meanMz*params->ms1PpmTolr/1000000);
-    float deltaMz = g->meanMz*params->ms1PpmTolr/1000000;
+    float peakGroupMz = g->meanMz;
+    float peakGroupRt = g->meanRt;
+
+    if (params->isUseGroupMaxPeakVals) {
+        peakGroupMz = g->maxPeakMzVal;
+        peakGroupRt = g->maxPeakRtVal;
+    }
+
+    float minMz = peakGroupMz - (peakGroupMz*params->ms1PpmTolr/1000000);
+    float maxMz = peakGroupMz + (peakGroupMz*params->ms1PpmTolr/1000000);
+    float deltaMz = peakGroupMz*params->ms1PpmTolr/1000000;
+
 
     auto lb = lower_bound(compounds.begin(), compounds.end(), minMz, [](const CompoundIon& lhs, const float& rhs){
         return lhs.precursorMz < rhs;
@@ -72,7 +81,7 @@ void MzKitchenProcessor::assignBestLipidToGroup(
     vector<pair<CompoundIon, FragmentationMatchScore>> scores{};
 
     if (debug) {
-        cout << g->meanMz << "@" << g->meanRt << ":\n";
+        cout << peakGroupMz << "@" << peakGroupRt << ":\n";
         cout << "tol: " << params->ms1PpmTolr
              << " ppm, deltaMz=" << deltaMz
              <<  ", search range: ["
@@ -196,7 +205,7 @@ void MzKitchenProcessor::assignBestLipidToGroup(
         s.dotProduct = Fragment::normCosineScore(&library, &observed, ranks);
 
         s.fractionMatched = s.numMatches/library.mzs.size();
-        s.ppmError = static_cast<double>(mzUtils::ppmDist(compound->precursorMz, g->meanMz));
+        s.ppmError = static_cast<double>(mzUtils::ppmDist(compound->precursorMz, peakGroupMz));
 
         //debugging
         if (debug) {
@@ -261,7 +270,7 @@ void MzKitchenProcessor::assignBestLipidToGroup(
         MzKitchenProcessor::labelRtAgreement(g, 'l', debug);
 
         if (debug) {
-            cout << "MATCH: " << g->meanMz << "@" << g->meanRt  << " <--> " << g->compound->id << "\n" << endl;
+            cout << "MATCH: " << peakGroupMz << "@" << peakGroupRt  << " <--> " << g->compound->id << "\n" << endl;
         }
     }
 
