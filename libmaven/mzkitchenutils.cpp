@@ -308,16 +308,14 @@ void MzKitchenProcessor::labelRtAgreement(PeakGroup *g, char rtMatchLabel, bool 
  * @param compound
  * @param ms1RtTolr: fallback tolerance for RT matching
  */
-bool MzKitchenProcessor::isRtAgreement(PeakGroup *group, Compound *compound, float ms1RtTolr, bool debug) {
-    if (!group || !compound) return false;
+bool MzKitchenProcessor::isRtAgreement(float groupRtVal, Compound *compound, float ms1RtTolr, bool debug) {
+    if (!compound) return false;
 
     //Issue 792: If the compound is missing a valid RT value,
     //return 'true', indicating that there is no disagreement between
     //the compound's stated RT and the peak group's measured RT.
     //This was an intentional behavior change introduced in this case.
     if (compound->expectedRt < 0) return true;
-
-    float medianRt = group->medianRt();
 
     // Case: compounds expected RT range is known
     if (compound->expectedRtMin > 0 && compound->expectedRtMax > 0) {
@@ -330,9 +328,9 @@ bool MzKitchenProcessor::isRtAgreement(PeakGroup *group, Compound *compound, flo
                 << " "
                 << compound->expectedRtMax
                 << "] vs. "
-                << medianRt
+                << groupRtVal
                 << endl;
-        return medianRt > compound->expectedRtMin && medianRt < compound->expectedRtMax;
+        return groupRtVal > compound->expectedRtMin && groupRtVal < compound->expectedRtMax;
     } else {
         //Case: compounds expected Rt range is not provided
         if (debug) cout
@@ -340,9 +338,9 @@ bool MzKitchenProcessor::isRtAgreement(PeakGroup *group, Compound *compound, flo
                 << " RT : "
                 << compound->expectedRt
                 << " vs. "
-                << medianRt
+                << groupRtVal
                 << endl;
-        float rtDiff = abs(group->medianRt() - compound->expectedRt);
+        float rtDiff = abs(groupRtVal - compound->expectedRt);
         return rtDiff <= ms1RtTolr;
     }
 
@@ -400,8 +398,18 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
         shared_ptr<MzkitchenMetaboliteSearchParameters> params,
         bool debug){
 
-    float minMz = g->meanMz - (g->meanMz*params->ms1PpmTolr/1000000);
-    float maxMz = g->meanMz + (g->meanMz*params->ms1PpmTolr/1000000);
+    if (!g) return;
+
+    float peakGroupMz = g->meanMz;
+    float peakGroupRt = g->meanRt;
+
+    if (params->isUseGroupMaxPeakVals) {
+        peakGroupMz = g->maxPeakMzVal;
+        peakGroupRt = g->maxPeakRtVal;
+    }
+
+    float minMz = peakGroupMz - (peakGroupMz*params->ms1PpmTolr/1000000);
+    float maxMz = peakGroupMz + (peakGroupMz*params->ms1PpmTolr/1000000);
 
     if (debug) {
         cout << "[minMz, maxMz] = [" << minMz << ", " << maxMz << "]" << endl;
@@ -468,7 +476,7 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
         library.fragment_labels = compound->fragment_labels;
 
         //Issue 792: Altered logic around RT Agreement
-        if (params->rtIsRequireRtMatch && !MzKitchenProcessor::isRtAgreement(g, compound, params->rtMatchTolerance, debug)) {
+        if (params->rtIsRequireRtMatch && !MzKitchenProcessor::isRtAgreement(peakGroupRt, compound, params->rtMatchTolerance, debug)) {
             continue;
         }
 
@@ -501,7 +509,7 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
 
     //Issue 559: print empty groups
     if (debug) {
-        cout << g->meanMz << "@" << g->medianRt() << " #ms2s=" << g->ms2EventCount << " :" << endl;
+        cout << peakGroupMz << "@" << peakGroupRt << " #ms2s=" << g->ms2EventCount << " :" << endl;
     }
 
     if (scores.empty()) return;
@@ -523,7 +531,7 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
         g->fragMatchScore = bestPair.second;
         g->fragMatchScore.mergedScore = bestPair.second.dotProduct;
         if (g->compound->expectedRt > 0) {
-            g->expectedRtDiff = abs(g->compound->expectedRt - g->medianRt());
+            g->expectedRtDiff = abs(g->compound->expectedRt - peakGroupRt);
         }
     }
 
