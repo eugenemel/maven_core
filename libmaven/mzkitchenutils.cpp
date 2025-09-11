@@ -330,7 +330,7 @@ bool MzKitchenProcessor::isRtAgreement(float groupRtVal, Compound *compound, flo
                 << "] vs. "
                 << groupRtVal
                 << endl;
-        return groupRtVal > compound->expectedRtMin && groupRtVal < compound->expectedRtMax;
+        return groupRtVal >= compound->expectedRtMin && groupRtVal <= compound->expectedRtMax;
     } else {
         //Case: compounds expected Rt range is not provided
         if (debug) cout
