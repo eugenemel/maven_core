@@ -1,5 +1,6 @@
 #include "mzMassCalculator.h"
 #include <regex>
+#include <stdexcept>
 
 //Issue 711: cache must be initialized out-of-line
 map<string, vector<Isotope>> MassCalculator::isotopesCache = {};
@@ -433,7 +434,13 @@ map<string,int> MassCalculator::getComposition(string formula) {
 
         //Conversion of coefficient characters to number
         if ( coeff_txt.length() > 0 ) {
-            coeff = stoi(coeff_txt);
+
+        	// Issue 791: If coefficient is too large to be parsed, probably bad input - set to 1
+        	try {
+            	coeff = stoi(coeff_txt);        	
+        	} catch (const std::exception& e) {
+        		coeff = 1;
+        	}
         } else {
             coeff = 1;
         }
