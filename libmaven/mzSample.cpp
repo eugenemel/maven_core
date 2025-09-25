@@ -530,13 +530,15 @@ void mzSample::parseMzMLSpectrumList(xml_node spectrumList) {
         } else { //no precursor (mslevel == 1) or a single precursor (mslevel == 2). ms level higher than 3 is not supported
 
             map<string,string>selectedIon = mzML_cvParams(spectrum.first_element_by_path("precursorList/precursor/selectedIonList/selectedIon"));
-
-            precursorMzStr = selectedIon["selected ion m/z"];
-
             map<string,string>isolationWindow = mzML_cvParams(spectrum.first_element_by_path("precursorList/precursor/isolationWindow"));
 
-            if ( precursorMzStr.length() == 0 && isolationWindow.find("isolation window target m/z") != isolationWindow.end()){
+            // Issue 796: Prefer "isolation window upper offset" over "selected ion m/z" for isotopes issue
+            if (precursorMzStr.length() == 0 && isolationWindow.find("isolation window target m/z") != isolationWindow.end()){
                 precursorMzStr = isolationWindow["isolation window target m/z"];
+            }
+
+            if (precursorMzStr.length() == 0 && selectedIon.find("selected ion m/z") != selectedIon.end()){
+                precursorMzStr = selectedIon["selected ion m/z"];
             }
 
             if (isolationWindow.find("isolation window upper offset") != isolationWindow.end()) {
