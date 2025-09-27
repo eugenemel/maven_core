@@ -23,6 +23,8 @@
 #include "SavGolSmoother.h"
 #include "ThreadSafeSmoother.h"
 #include <numeric>
+#include <set>
+#include <map>
 
 #ifdef ZLIB
 #include <zlib.h>
@@ -263,8 +265,28 @@ bool isBetweenInclusive(T x, T lb, T ub) {
     return (x>=lb && x<=ub) || (x>=ub && x <=lb);
 }
 
+template <typename T>
+vector<T> removeIndexes(const vector<T>& myVector, const set<int>& indexesToRemove) {
+    vector<T> updatedVector{};
+    for (unsigned int i = 0; i < myVector.size(); i++) {
+        if (indexesToRemove.find(i) == indexesToRemove.end()) {
+            updatedVector.push_back(myVector[i]);
+        }
+    }
+    return updatedVector;
+}
 
-
+template <typename T>
+map<int, T> removeIndexesFromMap(const map<int, T>& myMap, const set<int>& indexesToRemove) {
+    map<int, T> updatedMap{};
+    for (auto it = myMap.begin(); it != myMap.end(); ++it) {
+        int i = it->first;
+        if (indexesToRemove.find(i) == indexesToRemove.end()) {
+            updatedMap.insert(make_pair(i, it->second));
+        }
+    }
+    return updatedMap;
+}
 
 } // end mzutils
 
