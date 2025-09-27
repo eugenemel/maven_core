@@ -971,7 +971,7 @@ void Fragment::buildConsensus(float productPpmTolr,
 
         // update via removing indexes
         Cons->mzs = mzUtils::removeIndexes(Cons->mzs, indexesToRemove);
-        Cons->intensity_array = mzUtils::removeIndexes(Cons->mzs, indexesToRemove);
+        Cons->intensity_array = mzUtils::removeIndexes(Cons->intensity_array, indexesToRemove);
         Cons->fragment_labels = mzUtils::removeIndexes(Cons->fragment_labels, indexesToRemove);
         Cons->obscount = mzUtils::removeIndexes(Cons->obscount, indexesToRemove);
         posToIntensityMap = mzUtils::removeIndexesFromMap(posToIntensityMap, indexesToRemove);
