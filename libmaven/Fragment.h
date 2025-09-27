@@ -273,7 +273,9 @@ class Fragment {
                             bool isNormalizeIntensityArray=true,
                             int minNumMs2ScansForConsensus=0,
                             float minFractionMs2ScansForConsensus=0.0f,
-                            bool isRetainOriginalScanIntensities=false);
+                            bool isRetainOriginalScanIntensities=false,
+                            vector<float> mzToRemove = {},
+                            float mzToRemoveTol = 10.0f);
 
         //Issue 530: irreversible transformations
         void normalizeIntensityArray(float normValue = 10000);

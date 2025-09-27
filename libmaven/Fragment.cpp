@@ -714,6 +714,8 @@ void Fragment::truncateTopN(int n) {
  * @param minNumMs2ScansForConsensus: retain peaks found in at least this many scans
  * @param minFractionMs2ScansForConsensus: retain peaks found in at least this proportion of scans
  * @param  bool isRetainOriginalScanIntensities: retain map of <consensus position, vector of scan intensities>
+ * @param mzToRemove: vector<float> of m/z values that are removed from the scan after all other processing steps
+ * @param mzToRemoveTol: ppm tolerance to remove m/z values from scan (based on proximity in m/z)
  */
 void Fragment::buildConsensus(float productPpmTolr,
                               ConsensusIntensityAgglomerationType consensusIntensityAgglomerationType,
@@ -721,7 +723,9 @@ void Fragment::buildConsensus(float productPpmTolr,
                               bool isNormalizeIntensityArray,
                               int minNumMs2ScansForConsensus,
                               float minFractionMs2ScansForConsensus,
-                              bool isRetainOriginalScanIntensities) {
+                              bool isRetainOriginalScanIntensities,
+                              vector<float> mzToRemove,
+                              float mzToRemoveTol) {
 
     if(this->consensus) {
         delete(this->consensus);
@@ -941,6 +945,38 @@ void Fragment::buildConsensus(float productPpmTolr,
         }
     }
 
+    //Issue 797
+    if (!mzToRemove.empty()) {
+
+        set<int> indexesToRemove{};
+
+        for (float mz : mzToRemove) {
+
+            const float mzLowerBound = mz - mz*mzToRemoveTol/1e6;
+            const float mzUpperBound = mz + mz*mzToRemoveTol/1e6;
+
+            auto it = std::lower_bound(Cons->mzs.begin(), Cons->mzs.end(), mzLowerBound);
+
+            while(it != Cons->mzs.end()) {
+                const float mzI = *it;
+                size_t pos = std::distance(Cons->mzs.begin(), it);
+                if (mzI <= mzUpperBound) {
+                    indexesToRemove.insert(pos);
+                } else {
+                    break;
+                }
+                it++;
+            }
+        }
+
+        // update via removing indexes
+        Cons->mzs = mzUtils::removeIndexes(Cons->mzs, indexesToRemove);
+        Cons->intensity_array = mzUtils::removeIndexes(Cons->mzs, indexesToRemove);
+        Cons->fragment_labels = mzUtils::removeIndexes(Cons->fragment_labels, indexesToRemove);
+        Cons->obscount = mzUtils::removeIndexes(Cons->obscount, indexesToRemove);
+        posToIntensityMap = mzUtils::removeIndexesFromMap(posToIntensityMap, indexesToRemove);
+    }
+
     //Issue 468, 532
     if (isRetainOriginalScanIntensities) {
         Cons->consensusPositionToScanIntensities = posToIntensityMap;
@@ -950,7 +986,6 @@ void Fragment::buildConsensus(float productPpmTolr,
 
     this->consensus = Cons; 
 }
-
 
 vector<unsigned int> Fragment::intensityOrderDesc() {
     unsigned int nobs = intensity_array.size();
