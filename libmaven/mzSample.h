@@ -2056,6 +2056,8 @@ public:
         encodedParams = encodedParams + "consensusPpmTolr" + "=" + to_string(params.consensusPpmTolr) + ";";
         encodedParams = encodedParams + "consensusMinNumMs2Scans" + "=" + to_string(params.consensusMinNumMs2Scans) + ";";
         encodedParams = encodedParams + "consensusMinFractionMs2Scans" + "=" + to_string(params.consensusMinFractionMs2Scans) + ";";
+        encodedParams = encodedParams + "consensusMs2MzRemovedStr" + "=" + params.consensusMs2MzRemovedStr + ";";
+        encodedParams = encodedParams + "consensusMs2MzRemovedTol" + "=" + to_string(params.consensusMs2MzRemovedTol) + ";";
 
         // ms1 matching
         encodedParams = encodedParams + "ms1PpmTolr" + "=" + to_string(params.ms1PpmTolr) + ";";
@@ -2162,6 +2164,12 @@ public:
         if (decodedMap.find("consensusMinFractionMs2Scans") != decodedMap.end()){
             params.consensusMinFractionMs2Scans = stof(decodedMap["consensusMinFractionMs2Scans"]);
         }
+        if (decodedMap.find("consensusMs2MzRemovedStr") != decodedMap.end()) {
+            params.consensusMs2MzRemovedStr = decodedMap["consensusMs2MzRemovedStr"];
+        }
+        if (decodedMap.find("consensusMs2MzRemovedTol") != decodedMap.end()) {
+            params.consensusMs2MzRemovedTol = stof(decodedMap["consensusMs2MzRemovedTol"]);
+        }
 
         // ms1 matching
         if (decodedMap.find("ms1PpmTolr") != decodedMap.end()) {
@@ -2254,6 +2262,8 @@ class SearchParameters {
     int consensusMinNumMs2Scans = 0;
     float consensusMinFractionMs2Scans = 0;
     bool consensusIsRetainOriginalScanIntensities = false;
+    string consensusMs2MzRemovedStr = "";
+    float consensusMs2MzRemovedTol = 10.0f;
 
     /** ===================
      * MS1 SEARCH RELATED
