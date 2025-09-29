@@ -748,7 +748,10 @@ void PeakGroup::computeFragPattern(SearchParameters *parameters) {
                 parameters->consensusIsNormalizeTo10K,
                 parameters->consensusMinNumMs2Scans,
                 parameters->consensusMinFractionMs2Scans,
-                parameters->consensusIsRetainOriginalScanIntensities);
+                parameters->consensusIsRetainOriginalScanIntensities,
+                mzUtils::decodeMzRemovedStr(parameters->consensusMs2MzRemovedStr),
+                parameters->consensusMs2MzRemovedTol
+        );
 
     f->consensus->sortByMz();
 
@@ -814,7 +817,10 @@ void PeakGroup::computePeaksSearchFragPattern(shared_ptr<PeaksSearchParameters> 
                       params->consensusIsIntensityAvgByObserved,
                       params->consensusIsNormalizeTo10K,
                       params->consensusMinNumMs2Scans,
-                      params->consensusMinFractionMs2Scans
+                      params->consensusMinFractionMs2Scans,
+                      params->consensusIsRetainOriginalScanIntensities,
+                      mzUtils::decodeMzRemovedStr(params->consensusMs2MzRemovedStr),
+                      params->consensusMs2MzRemovedTol
                       );
 
     f->consensus->sortByMz();
