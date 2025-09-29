@@ -948,6 +948,9 @@ void Fragment::buildConsensus(float productPpmTolr,
     //Issue 797
     if (!mzToRemove.empty()) {
 
+        // Must be sorted by m/z, otherwise std::lower_bound() returns nonsense
+        Cons->sortByMz();
+
         set<int> indexesToRemove{};
 
         for (float mz : mzToRemove) {
