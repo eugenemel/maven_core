@@ -152,6 +152,7 @@ double intKeyToMz(const long intKey, const long multFactor=1000000L);
 
 vector<vector<int>> simpleParsimonyReducer(vector<vector<int>> originalSet);
 vector<vector<float>> decodeMsMsSpectrum(string encodedString);
+vector<float> decodeMzRemovedStr(string mzRemovedStr);
 
 //Isuse 768: for Scan::getSignature() decoding
 void decodeBracketEncodedString(const std::string& encodedString, std::vector<float>& xValues, std::vector<float>& yValues);

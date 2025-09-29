@@ -1348,6 +1348,25 @@ vector<vector<float>> decodeMsMsSpectrum(string encodedMsMsSpectrum){
 
 } //decodeMsMsSpectrum()
 
+
+//Issue 797: New parameter for MS/MS spectrum
+vector<float> decodeMzRemovedStr(string mzRemovedStr) {
+    vector<float> mz{};
+    vector<string> decodedMzAsStr{};
+    mzUtils::split(mzRemovedStr, ",", decodedMzAsStr);
+
+    for (string& mzStr : decodedMzAsStr) {
+        try {
+            float val = stof(mzStr);
+            mz.push_back(val);
+        } catch (const std::exception e) {
+            // swallow
+        }
+    }
+
+    return mz;
+}
+
 //Issue 768: For example, used with Scan::getSignature()
 void decodeBracketEncodedString(const std::string& encodedString, std::vector<float>& xValues, std::vector<float>& yValues) {
     // Clear the output vectors to ensure they are empty before adding new values.  Important for repeated calls.
