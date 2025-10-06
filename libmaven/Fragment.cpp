@@ -1971,8 +1971,9 @@ Fragment* Fragment::createFromScans(vector<Scan*>& scans, shared_ptr<PeaksSearch
             params->consensusIsNormalizeTo10K,
             params->consensusMinNumMs2Scans,
             params->consensusMinFractionMs2Scans,
-            params->consensusIsRetainOriginalScanIntensities
-            );
+            params->consensusIsRetainOriginalScanIntensities,
+            mzUtils::decodeMzRemovedStr(params->consensusMs2MzRemovedStr),
+            params->consensusMs2MzRemovedTol);
 
         if (debug) {
             cout << "[Fragment::createFromScans()]: Successfully built a true consensus spectrum." << endl;
