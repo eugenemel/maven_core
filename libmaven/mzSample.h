@@ -2059,6 +2059,9 @@ public:
         encodedParams = encodedParams + "consensusMs2MzRemovedStr" + "=" + params.consensusMs2MzRemovedStr + ";";
         encodedParams = encodedParams + "consensusMs2MzRemovedTol" + "=" + to_string(params.consensusMs2MzRemovedTol) + ";";
 
+        // group consensus ms2 formation
+        encodedParams = encodedParams + "grpMaxMs2ScanRtTolFromApex" + "=" + to_string(params.grpMaxMs2ScanRtTolFromApex) + ";";
+
         // ms1 matching
         encodedParams = encodedParams + "ms1PpmTolr" + "=" + to_string(params.ms1PpmTolr) + ";";
 
@@ -2171,6 +2174,11 @@ public:
             params.consensusMs2MzRemovedTol = stof(decodedMap["consensusMs2MzRemovedTol"]);
         }
 
+        // group consensus ms2 formation
+        if (decodedMap.find("grpMaxMs2ScanRtTolFromApex") != decodedMap.end()) {
+            params.grpMaxMs2ScanRtTolFromApex = stof(decodedMap["grpMaxMs2ScanRtTolFromApex"]);
+        }
+
         // ms1 matching
         if (decodedMap.find("ms1PpmTolr") != decodedMap.end()) {
             params.ms1PpmTolr = stof(decodedMap["ms1PpmTolr"]);
@@ -2264,6 +2272,12 @@ class SearchParameters {
     bool consensusIsRetainOriginalScanIntensities = false;
     string consensusMs2MzRemovedStr = "";
     float consensusMs2MzRemovedTol = 10.0f;
+
+    /** =======================
+     * CONSENSUS SPECTRUM ASSOCIATED for PeakGroup
+     * Used by PeakGroup::getFragmentationScans()
+     * ========================*/
+    float grpMaxMs2ScanRtTolFromApex = -1.0f;
 
     /** ===================
      * MS1 SEARCH RELATED
@@ -2423,7 +2437,6 @@ public:
     //grouping
     string grpVersion = "EIC::groupPeaksC()";
     float grpMergeOverlap = 0.80f;
-    float grpMaxMs2ScanRtTolFromApex = -1.0f;
 
     //quality
     float qualitySignalBaselineRatio = 1.00;
