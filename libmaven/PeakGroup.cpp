@@ -726,7 +726,7 @@ void PeakGroup::computeFragPattern(float productPpmTolr)  {
 void PeakGroup::computeFragPattern(SearchParameters *parameters) {
 
     //build consensus ms2 specta
-    vector<Scan*>ms2events = getFragmentationEvents();
+    vector<Scan*>ms2events = getFragmentationEvents(parameters->grpMaxMs2ScanRtTolFromApex);
     if (ms2events.size() == 0 ) return;
     sort(ms2events.begin(), ms2events.end(), Scan::compIntensity);
 
