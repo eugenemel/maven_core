@@ -648,7 +648,7 @@ vector<Scan*> PeakGroup::getFragmentationEvents(SearchParameters* params) {
     float maxRtTolFromApex = -1.0f;
 
     if (params) {
-        maxRtTolFromApex = params->grpMaxMs2ScanRtTolFromApex;
+        maxRtTolFromApex = params->grpMs2MaxScanRtTolFromApex;
     }
 
     // Issue 806: For safety, clear this out every time, as parameters might change

@@ -2060,7 +2060,12 @@ public:
         encodedParams = encodedParams + "consensusMs2MzRemovedTol" + "=" + to_string(params.consensusMs2MzRemovedTol) + ";";
 
         // group consensus ms2 formation
-        encodedParams = encodedParams + "grpMaxMs2ScanRtTolFromApex" + "=" + to_string(params.grpMaxMs2ScanRtTolFromApex) + ";";
+        encodedParams = encodedParams + "grpMs2MaxScanRtTolFromApex" + "=" + to_string(params.grpMs2MaxScanRtTolFromApex) + ";";
+        encodedParams = encodedParams + "grpMs2PurityTopN" + "=" + to_string(params.grpMs2PurityTopN) + ";";
+        encodedParams = encodedParams + "grpMs2PurityTopNCode" + "=" + params.grpMs2PurityTopNCode + ";";
+        encodedParams = encodedParams + "grpMs2PurityThresholdAfterTopN" + "=" + to_string(params.grpMs2PurityThresholdAfterTopN) + ";";
+        encodedParams = encodedParams + "grpMs2LabelAvgPurityThresh" + "=" + to_string(params.grpMs2LabelAvgPurityThresh) + ";";
+        encodedParams = encodedParams + "grpMs2LabelAvgPurityCode" + "=" + params.grpMs2LabelAvgPurityCode + ";";
 
         // ms1 matching
         encodedParams = encodedParams + "ms1PpmTolr" + "=" + to_string(params.ms1PpmTolr) + ";";
@@ -2175,8 +2180,23 @@ public:
         }
 
         // group consensus ms2 formation
-        if (decodedMap.find("grpMaxMs2ScanRtTolFromApex") != decodedMap.end()) {
-            params.grpMaxMs2ScanRtTolFromApex = stof(decodedMap["grpMaxMs2ScanRtTolFromApex"]);
+        if (decodedMap.find("grpMs2MaxScanRtTolFromApex") != decodedMap.end()) {
+            params.grpMs2MaxScanRtTolFromApex = stof(decodedMap["grpMs2MaxScanRtTolFromApex"]);
+        }
+        if (decodedMap.find("grpMs2PurityTopN") != decodedMap.end()) {
+            params.grpMs2PurityTopN = stoi(decodedMap["grpMs2PurityTopN"]);
+        }
+        if (decodedMap.find("grpMs2PurityTopNCode") != decodedMap.end()) {
+            params.grpMs2PurityTopNCode = decodedMap["grpMs2PurityTopNCode"];
+        }
+        if (decodedMap.find("grpMs2PurityThresholdAfterTopN") != decodedMap.end()) {
+            params.grpMs2PurityThresholdAfterTopN = stof(decodedMap["grpMs2PurityThresholdAfterTopN"]);
+        }
+        if (decodedMap.find("grpMs2LabelAvgPurityThresh") != decodedMap.end()) {
+            params.grpMs2LabelAvgPurityThresh = stof(decodedMap["grpMs2LabelAvgPurityThresh"]);
+        }
+        if (decodedMap.find("grpMs2LabelAvgPurityCode") != decodedMap.end()) {
+            params.grpMs2LabelAvgPurityCode = decodedMap["grpMs2LabelAvgPurityCode"];
         }
 
         // ms1 matching
@@ -2276,8 +2296,19 @@ class SearchParameters {
     /** =======================
      * CONSENSUS SPECTRUM ASSOCIATED for PeakGroup
      * Used by PeakGroup::getFragmentationScans()
+     * grpMs2MaxScanRtTolFromApex: When >= 0, Only consider MS2 scans that are this close to the apex (peak.rt)
+     * grpMs2PurityTopN: Include at least this many MS2 scans of any purity value.
+     * grpMs2PurityTopNCode: When number of MS2 scans is less than or equal to grpMs2PurityTopN, label peak group with this code (when set to non-empty string).
+     * grpMs2PurityThresholdAfterTopN: After the TopN scans have been required, require that purity be this value or greater.
+     * grpMs2LabelAvgPurityThresh: Average MS2 purity threshold, below which results in group being labeled.
+     * grpMs2LabelAvgPurityCode: Specific code used for this peak group when average purity too low (when set to non-empty string)
      * ========================*/
-    float grpMaxMs2ScanRtTolFromApex = -1.0f;
+    float grpMs2MaxScanRtTolFromApex = -1.0f;
+    int grpMs2PurityTopN = 3;
+    string grpMs2PurityTopNCode = "";
+    float grpMs2PurityThresholdAfterTopN = 0.95f;
+    float grpMs2LabelAvgPurityThresh = 0.5f;
+    string grpMs2LabelAvgPurityCode = "";
 
     /** ===================
      * MS1 SEARCH RELATED
