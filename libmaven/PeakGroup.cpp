@@ -653,7 +653,10 @@ vector<Scan*> PeakGroup::getFragmentationEvents(float maxRtTolFromApex) {
             float rtMin = peaks[i].rtmin;
             float rtMax = peaks[i].rtmax;
 
-            //Issue 806: Update RT scans
+            //Issue 806: Update RT scans based on RT range around peak's RT.
+            // If the tolerance value is not provided or is <= 0,
+            // fall back to the peak's RT bounds.
+            // Otherwise, use the tolerance value to define a range centered at the peak RT.
             if (maxRtTolFromApex > 0) {
                 float apexRt = peaks[i].rt;
                 rtMin = max(apexRt - maxRtTolFromApex, rtMin);
