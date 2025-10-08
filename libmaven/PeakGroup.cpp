@@ -643,34 +643,41 @@ vector<Scan*> PeakGroup::getRepresentativeFullScans() {
     return matchedscans;
 }
 
-vector<Scan*> PeakGroup::getFragmentationEvents(float maxRtTolFromApex) {
+vector<Scan*> PeakGroup::getFragmentationEvents(SearchParameters* params) {
 
-    if (peakGroupScans.empty()) {
-        for(unsigned int i=0; i < peaks.size(); i++ ) {
-            mzSample* sample = peaks[i].getSample();
-            if (!sample) continue;
+    float maxRtTolFromApex = -1.0f;
 
-            float rtMin = peaks[i].rtmin;
-            float rtMax = peaks[i].rtmax;
+    if (params) {
+        maxRtTolFromApex = params->grpMaxMs2ScanRtTolFromApex;
+    }
 
-            //Issue 806: Update RT scans based on RT range around peak's RT.
-            // If the tolerance value is not provided or is <= 0,
-            // fall back to the peak's RT bounds.
-            // Otherwise, use the tolerance value to define a range centered at the peak RT.
-            if (maxRtTolFromApex > 0) {
-                float apexRt = peaks[i].rt;
-                rtMin = max(apexRt - maxRtTolFromApex, rtMin);
-                rtMax = min(apexRt + maxRtTolFromApex, rtMax);
-            }
+    // Issue 806: For safety, clear this out every time, as parameters might change
+    peakGroupScans.clear();
 
-            for( unsigned int j=0; j < sample->scans.size(); j++ ) {
-                Scan* scan = sample->scans[j];
-                if (scan->mslevel <= 1) continue; //ms2 + scans only
-                if (scan->rt < rtMin) continue;
-                if (scan->rt > rtMax) break;
-                if( scan->precursorMz >= minMz and scan->precursorMz <= maxMz) {
-                    peakGroupScans.push_back(scan);
-                }
+    for(unsigned int i=0; i < peaks.size(); i++ ) {
+        mzSample* sample = peaks[i].getSample();
+        if (!sample) continue;
+
+        float rtMin = peaks[i].rtmin;
+        float rtMax = peaks[i].rtmax;
+
+        //Issue 806: Update RT scans based on RT range around peak's RT.
+        // If the tolerance value is not provided or is <= 0,
+        // fall back to the peak's RT bounds.
+        // Otherwise, use the tolerance value to define a range centered at the peak RT.
+        if (maxRtTolFromApex > 0) {
+            float apexRt = peaks[i].rt;
+            rtMin = max(apexRt - maxRtTolFromApex, rtMin);
+            rtMax = min(apexRt + maxRtTolFromApex, rtMax);
+        }
+
+        for( unsigned int j=0; j < sample->scans.size(); j++ ) {
+            Scan* scan = sample->scans[j];
+            if (scan->mslevel <= 1) continue; //ms2 + scans only
+            if (scan->rt < rtMin) continue;
+            if (scan->rt > rtMax) break;
+            if( scan->precursorMz >= minMz and scan->precursorMz <= maxMz) {
+                peakGroupScans.push_back(scan);
             }
         }
     }
@@ -726,7 +733,7 @@ void PeakGroup::computeFragPattern(float productPpmTolr)  {
 void PeakGroup::computeFragPattern(SearchParameters *parameters) {
 
     //build consensus ms2 specta
-    vector<Scan*>ms2events = getFragmentationEvents(parameters->grpMaxMs2ScanRtTolFromApex);
+    vector<Scan*>ms2events = getFragmentationEvents(parameters);
     if (ms2events.size() == 0 ) return;
     sort(ms2events.begin(), ms2events.end(), Scan::compIntensity);
 
@@ -795,7 +802,7 @@ void PeakGroup::computePeaksSearchFragPattern(shared_ptr<PeaksSearchParameters> 
 //    f.consensus->sortByMz();
 //    fragmentationPattern = f.consensus;
 
-    vector<Scan*> ms2Scans = getFragmentationEvents(params->grpMaxMs2ScanRtTolFromApex);
+    vector<Scan*> ms2Scans = getFragmentationEvents(params.get());
     ms2EventCount = static_cast<int>(ms2Scans.size());
 
     if (ms2Scans.empty()) return;   //this can happen when a peakgroup is associated with the wrong meanMz.
