@@ -1387,7 +1387,7 @@ class PeakGroup {
         inline vector<PeakGroup>& getChildren()  { return children; }
 
         vector<Scan*> getRepresentativeFullScans();
-        vector<Scan*> getFragmentationEvents();
+        vector<Scan*> getFragmentationEvents(float maxRtTolFromApex = -1.0f);
         void findHighestPurityMS2Pattern(float precPpmTolr);
 
         //Issue 515: This is an old method

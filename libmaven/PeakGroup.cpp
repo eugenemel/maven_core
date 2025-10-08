@@ -643,18 +643,28 @@ vector<Scan*> PeakGroup::getRepresentativeFullScans() {
     return matchedscans;
 }
 
-vector<Scan*> PeakGroup::getFragmentationEvents() {
+vector<Scan*> PeakGroup::getFragmentationEvents(float maxRtTolFromApex) {
 
     if (peakGroupScans.empty()) {
         for(unsigned int i=0; i < peaks.size(); i++ ) {
             mzSample* sample = peaks[i].getSample();
             if (!sample) continue;
 
+            float rtMin = peaks[i].rtmin;
+            float rtMax = peaks[i].rtmax;
+
+            //Issue 806: Update RT scans
+            if (maxRtTolFromApex > 0) {
+                float apexRt = peaks[i].rt;
+                rtMin = max(apexRt - maxRtTolFromApex, rtMin);
+                rtMax = min(apexRt + maxRtTolFromApex, rtMax);
+            }
+
             for( unsigned int j=0; j < sample->scans.size(); j++ ) {
                 Scan* scan = sample->scans[j];
                 if (scan->mslevel <= 1) continue; //ms2 + scans only
-                if (scan->rt < peaks[i].rtmin) continue;
-                if (scan->rt > peaks[i].rtmax) break;
+                if (scan->rt < rtMin) continue;
+                if (scan->rt > rtMax) break;
                 if( scan->precursorMz >= minMz and scan->precursorMz <= maxMz) {
                     peakGroupScans.push_back(scan);
                 }
