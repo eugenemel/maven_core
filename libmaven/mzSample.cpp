@@ -2049,6 +2049,7 @@ string PeaksSearchParameters::encodeParams(){
     //grouping
     encodedParams = encodedParams + "grpVersion" + "=" + grpVersion + ";";
     encodedParams = encodedParams + "grpMergeOverlap" + "=" + to_string(grpMergeOverlap) + ";";
+    encodedParams = encodedParams + "grpMaxMs2ScanRtTolFromApex" + "=" + to_string(grpMaxMs2ScanRtTolFromApex) + ";";
 
     //quality
     encodedParams = encodedParams + "qualitySignalBaselineRatio" + "=" + to_string(qualitySignalBaselineRatio) + ";";
@@ -2129,6 +2130,9 @@ shared_ptr<PeaksSearchParameters> PeaksSearchParameters::decode(string encodedPa
     }
     if (decodedMap.find("grpMergeOverlap") != decodedMap.end()) {
         peaksSearchParameters->grpMergeOverlap = stof(decodedMap["grpMergeOverlap"]);
+    }
+    if (decodedMap.find("grpMaxMs2ScanRtTolFromApex") != decodedMap.end()) {
+        peaksSearchParameters->grpMaxMs2ScanRtTolFromApex = stof(decodedMap["grpMaxMs2ScanRtTolFromApex"]);
     }
 
     //quality

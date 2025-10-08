@@ -2423,6 +2423,7 @@ public:
     //grouping
     string grpVersion = "EIC::groupPeaksC()";
     float grpMergeOverlap = 0.80f;
+    float grpMaxMs2ScanRtTolFromApex = -1.0f;
 
     //quality
     float qualitySignalBaselineRatio = 1.00;

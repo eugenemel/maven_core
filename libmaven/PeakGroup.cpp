@@ -795,7 +795,7 @@ void PeakGroup::computePeaksSearchFragPattern(shared_ptr<PeaksSearchParameters> 
 //    f.consensus->sortByMz();
 //    fragmentationPattern = f.consensus;
 
-    vector<Scan*> ms2Scans = getFragmentationEvents();
+    vector<Scan*> ms2Scans = getFragmentationEvents(params->grpMaxMs2ScanRtTolFromApex);
     ms2EventCount = static_cast<int>(ms2Scans.size());
 
     if (ms2Scans.empty()) return;   //this can happen when a peakgroup is associated with the wrong meanMz.
