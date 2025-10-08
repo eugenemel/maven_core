@@ -654,6 +654,8 @@ vector<Scan*> PeakGroup::getFragmentationEvents(SearchParameters* params) {
     // Issue 806: For safety, clear this out every time, as parameters might change
     peakGroupScans.clear();
 
+    vector<Scan*> preliminaryScans{};
+
     for(unsigned int i=0; i < peaks.size(); i++ ) {
         mzSample* sample = peaks[i].getSample();
         if (!sample) continue;
@@ -677,10 +679,78 @@ vector<Scan*> PeakGroup::getFragmentationEvents(SearchParameters* params) {
             if (scan->rt < rtMin) continue;
             if (scan->rt > rtMax) break;
             if( scan->precursorMz >= minMz and scan->precursorMz <= maxMz) {
-                peakGroupScans.push_back(scan);
+                preliminaryScans.push_back(scan);
             }
         }
     }
+
+    //labeling cases where topN is handled as a subset of this case
+    bool isFilterByPurity = params->grpMs2PurityTopN > 0 && params->grpMs2PurityThresholdAfterTopN > 0;
+
+    //This label may occur independently of filtering settings
+    bool isLabelLowPurity = params->grpMs2LabelAvgPurityThresh > 0 && !params->grpMs2LabelAvgPurityCode.empty();
+
+    // If there is no labeling to do or filtering by low purity, early exit is possible.
+    if (!isFilterByPurity && !isLabelLowPurity) {
+        peakGroupScans = preliminaryScans;
+        return(peakGroupScans);
+    }
+
+    // Note that this is only used for breaking ties in sorting scans by purity - unlikely ever to occur in practice
+    const float rt = this->medianRt();
+
+    vector<pair<Scan*, float>> scansWithPurity{};
+
+    for (Scan* scan : preliminaryScans) {
+        float purity = scan->getPrecursorPurity(params->scanFilterPrecursorPurityPpm);
+        scansWithPurity.push_back(make_pair(scan, purity));
+    }
+
+    sort(scansWithPurity.begin(), scansWithPurity.end(), [rt](const pair<Scan*, float>& lhs, const pair<Scan*, float>& rhs){
+        if (lhs.second == rhs.second) {
+
+            // prefer scans closer to the best RT
+            float left = abs(lhs.first->rt - rt);
+            float right = abs(lhs.first->rt - rt);
+
+            return left < right;
+        } else {
+            return lhs.second > rhs.second;
+        }
+    });
+
+
+    float avgPurity = 0.0f;
+
+    vector<Scan*> purityPassingScans{};
+    for (unsigned int i = 0; i < scansWithPurity.size(); i++) {
+        Scan *scan = scansWithPurity[i].first;
+        float purity = scansWithPurity[i].second;
+
+        // purity filtering is not specified, OR
+        // purity filtering is specified and the scan is in the first topN scans, OR
+        // purity filtering is specified and the scan is not in the first top N scans and the scan is sufficiently pure.
+        if (!isFilterByPurity || (i < params->grpMs2PurityTopN || purity >= params->grpMs2PurityThresholdAfterTopN)) {
+            avgPurity += purity;
+            purityPassingScans.push_back(scan);
+        }
+    }
+
+    if (!purityPassingScans.empty()) {
+        avgPurity /= purityPassingScans.size();
+    }
+
+    //If a label is specified to flag cases where there aren't many scans, apply the label if there aren't many scans.
+    if (!params->grpMs2PurityTopNCode.empty() && purityPassingScans.size() < params->grpMs2PurityTopN) {
+        this->addLabel(params->grpMs2PurityTopNCode[0]);
+    }
+
+    //If a label is specified to flag cases where the average purity is low, apply the label
+    if (isLabelLowPurity && avgPurity < params->grpMs2LabelAvgPurityThresh) {
+        this->addLabel(params->grpMs2LabelAvgPurityCode[0]);
+    }
+
+    peakGroupScans = purityPassingScans;
 
     return peakGroupScans;
 }
