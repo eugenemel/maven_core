@@ -643,32 +643,45 @@ vector<Scan*> PeakGroup::getRepresentativeFullScans() {
     return matchedscans;
 }
 
-vector<Scan*> PeakGroup::getFragmentationEvents(SearchParameters* params) {
+vector<Scan*> PeakGroup::getFragmentationEvents(SearchParameters* params, bool debug) {
+    if (debug) cout << "Starting PeakGroup::getFragmentationEvents()" << endl;
 
     float maxRtTolFromApex = -1.0f;
+    int grpMs2PurityTopN = -1;
+    float grpMs2PurityThresholdAfterTopN= -1.0f;
+    float grpMs2LabelAvgPurityThresh = -1.0f;
+    float scanFilterPrecursorPurityPpm = 10;
+    string grpMs2LabelAvgPurityCode = "";
+    string grpMs2PurityTopNCode = "";
 
     if (params) {
         maxRtTolFromApex = params->grpMs2MaxScanRtTolFromApex;
+        grpMs2PurityTopN = params->grpMs2PurityTopN;
+        grpMs2PurityThresholdAfterTopN = params->grpMs2PurityThresholdAfterTopN;
+        grpMs2LabelAvgPurityThresh = params->grpMs2LabelAvgPurityThresh;
+        scanFilterPrecursorPurityPpm = params->scanFilterPrecursorPurityPpm;
+        grpMs2LabelAvgPurityCode = params->grpMs2LabelAvgPurityCode;
+        grpMs2PurityTopNCode = params->grpMs2PurityTopNCode;
     }
 
     // Issue 806: For safety, clear this out every time, as parameters might change
-    peakGroupScans.clear();
+    this->peakGroupScans.clear();
 
     vector<Scan*> preliminaryScans{};
 
-    for(unsigned int i=0; i < peaks.size(); i++ ) {
-        mzSample* sample = peaks[i].getSample();
+    for(unsigned int i=0; i < this->peaks.size(); i++ ) {
+        mzSample* sample = this->peaks[i].getSample();
         if (!sample) continue;
 
-        float rtMin = peaks[i].rtmin;
-        float rtMax = peaks[i].rtmax;
+        float rtMin = this->peaks[i].rtmin;
+        float rtMax = this->peaks[i].rtmax;
 
         //Issue 806: Update RT scans based on RT range around peak's RT.
         // If the tolerance value is not provided or is <= 0,
         // fall back to the peak's RT bounds.
         // Otherwise, use the tolerance value to define a range centered at the peak RT.
         if (maxRtTolFromApex > 0) {
-            float apexRt = peaks[i].rt;
+            float apexRt = this->peaks[i].rt;
             rtMin = max(apexRt - maxRtTolFromApex, rtMin);
             rtMax = min(apexRt + maxRtTolFromApex, rtMax);
         }
@@ -678,22 +691,23 @@ vector<Scan*> PeakGroup::getFragmentationEvents(SearchParameters* params) {
             if (scan->mslevel <= 1) continue; //ms2 + scans only
             if (scan->rt < rtMin) continue;
             if (scan->rt > rtMax) break;
-            if( scan->precursorMz >= minMz and scan->precursorMz <= maxMz) {
+            if( scan->precursorMz >= this->minMz and scan->precursorMz <= this->maxMz) {
                 preliminaryScans.push_back(scan);
             }
         }
     }
 
     //labeling cases where topN is handled as a subset of this case
-    bool isFilterByPurity = params->grpMs2PurityTopN > 0 && params->grpMs2PurityThresholdAfterTopN > 0;
+    bool isFilterByPurity = grpMs2PurityTopN > 0 && grpMs2PurityThresholdAfterTopN > 0;
 
     //This label may occur independently of filtering settings
-    bool isLabelLowPurity = params->grpMs2LabelAvgPurityThresh > 0 && !params->grpMs2LabelAvgPurityCode.empty();
+    bool isLabelLowPurity = grpMs2LabelAvgPurityThresh > 0 && !grpMs2LabelAvgPurityCode.empty();
 
     // If there is no labeling to do or filtering by low purity, early exit is possible.
     if (!isFilterByPurity && !isLabelLowPurity) {
-        peakGroupScans = preliminaryScans;
-        return(peakGroupScans);
+        this->peakGroupScans = preliminaryScans;
+        if (debug) cout << "Exiting PeakGroup::getFragmentationEvents() without purity calculations." << endl;
+        return(this->peakGroupScans);
     }
 
     // Note that this is only used for breaking ties in sorting scans by purity - unlikely ever to occur in practice
@@ -702,7 +716,7 @@ vector<Scan*> PeakGroup::getFragmentationEvents(SearchParameters* params) {
     vector<pair<Scan*, float>> scansWithPurity{};
 
     for (Scan* scan : preliminaryScans) {
-        float purity = scan->getPrecursorPurity(params->scanFilterPrecursorPurityPpm);
+        float purity = scan->getPrecursorPurity(scanFilterPrecursorPurityPpm);
         scansWithPurity.push_back(make_pair(scan, purity));
     }
 
@@ -711,7 +725,7 @@ vector<Scan*> PeakGroup::getFragmentationEvents(SearchParameters* params) {
 
             // prefer scans closer to the best RT
             float left = abs(lhs.first->rt - rt);
-            float right = abs(lhs.first->rt - rt);
+            float right = abs(rhs.first->rt - rt);
 
             return left < right;
         } else {
@@ -721,38 +735,52 @@ vector<Scan*> PeakGroup::getFragmentationEvents(SearchParameters* params) {
 
 
     float avgPurity = 0.0f;
+    if (debug) cout << "group RT: " << rt << endl;
 
     vector<Scan*> purityPassingScans{};
     for (unsigned int i = 0; i < scansWithPurity.size(); i++) {
         Scan *scan = scansWithPurity[i].first;
         float purity = scansWithPurity[i].second;
 
+        if (debug) cout
+                << "i=" << i
+                << ": purity=" << purity
+                << ", Scan #" << scan->scannum
+                << " (sample=" << scan->sample->sampleName
+                << ", RT=" << scan->rt
+                << ", rtDelta=" << abs(scan->rt - rt)
+                << "";
+
         // purity filtering is not specified, OR
         // purity filtering is specified and the scan is in the first topN scans, OR
         // purity filtering is specified and the scan is not in the first top N scans and the scan is sufficiently pure.
-        if (!isFilterByPurity || (i < params->grpMs2PurityTopN || purity >= params->grpMs2PurityThresholdAfterTopN)) {
+        if (!isFilterByPurity || (i < grpMs2PurityTopN || purity >= grpMs2PurityThresholdAfterTopN)) {
             avgPurity += purity;
             purityPassingScans.push_back(scan);
+            if (debug) cout << " PASSING";
         }
+        if (debug) cout << ")" << endl;
     }
 
     if (!purityPassingScans.empty()) {
         avgPurity /= purityPassingScans.size();
     }
+    if (debug) cout << "avgPurity=" << avgPurity << endl;
 
     //If a label is specified to flag cases where there aren't many scans, apply the label if there aren't many scans.
-    if (!params->grpMs2PurityTopNCode.empty() && purityPassingScans.size() < params->grpMs2PurityTopN) {
-        this->addLabel(params->grpMs2PurityTopNCode[0]);
+    if (!grpMs2PurityTopNCode.empty() && purityPassingScans.size() < grpMs2PurityTopN) {
+        this->addLabel(grpMs2PurityTopNCode[0]);
     }
 
     //If a label is specified to flag cases where the average purity is low, apply the label
-    if (isLabelLowPurity && avgPurity < params->grpMs2LabelAvgPurityThresh) {
-        this->addLabel(params->grpMs2LabelAvgPurityCode[0]);
+    if (isLabelLowPurity && avgPurity < grpMs2LabelAvgPurityThresh) {
+        this->addLabel(grpMs2LabelAvgPurityCode[0]);
     }
 
-    peakGroupScans = purityPassingScans;
+    this->peakGroupScans = purityPassingScans;
 
-    return peakGroupScans;
+    if (debug) cout << "Completed PeakGroup::getFragmentationEvents()." << endl;
+    return this->peakGroupScans;
 }
 
 void PeakGroup::findHighestPurityMS2Pattern(float prePpmTolr) {

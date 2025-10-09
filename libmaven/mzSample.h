@@ -1387,7 +1387,7 @@ class PeakGroup {
         inline vector<PeakGroup>& getChildren()  { return children; }
 
         vector<Scan*> getRepresentativeFullScans();
-        vector<Scan*> getFragmentationEvents(SearchParameters *params = nullptr);
+        vector<Scan*> getFragmentationEvents(SearchParameters *params = nullptr, bool debug = false);
         void findHighestPurityMS2Pattern(float precPpmTolr);
 
         //Issue 515: This is an old method
