@@ -330,6 +330,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
                      << "]; mz=["
                      << mzminEIC
                      << " - "
+                     << mzmaxEIC
                      << "] (ppm="
                      << params.ppm
                      << ")"
