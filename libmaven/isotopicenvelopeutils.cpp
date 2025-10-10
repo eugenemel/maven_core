@@ -301,6 +301,8 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
 
             float rtmin = 0.0f;
             float rtmax = 0.0f;
+            float mzminEIC = static_cast<float>(isotope.mz - isotope.mz/1e6f*params.ppm);
+            float mzmaxEIC = static_cast<float>(isotope.mz + isotope.mz/1e6f*params.ppm);
 
             if (params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA) {
 
@@ -319,12 +321,27 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
                 rtmax = mergedEICrtmaxFWHM;
             }
 
+            if (debug) cout << "[IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPeaks()]: "
+                     << sample->sampleName
+                     << ": RT=["
+                     << rtmin
+                     << " - "
+                     << rtmax
+                     << "]; mz=["
+                     << mzminEIC
+                     << " - "
+                     << "] (ppm="
+                     << params.ppm
+                     << ")"
+                     << endl;
+
+
             //C12 PARENT should always be first
             if (i == 0 && params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA_CORR) {
 
                 EIC *eic = sample->getEIC(
-                    static_cast<float>(isotope.mz - isotope.mz/1e6f*params.ppm),
-                    static_cast<float>(isotope.mz + isotope.mz/1e6f*params.ppm),
+                    mzminEIC,
+                    mzmaxEIC,
                     rtmin,
                     rtmax,
                     1);
@@ -347,8 +364,8 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
             }
 
             EIC *eic = sample->getEIC(
-                static_cast<float>(isotope.mz - isotope.mz/1e6f*params.ppm),
-                static_cast<float>(isotope.mz + isotope.mz/1e6f*params.ppm),
+                mzminEIC,
+                mzmaxEIC,
                 rtmin,
                 rtmax,
                 1);
