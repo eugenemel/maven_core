@@ -321,22 +321,6 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
                 rtmax = mergedEICrtmaxFWHM;
             }
 
-            if (debug) cout << "[IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPeaks()]: "
-                     << sample->sampleName
-                     << ": RT=["
-                     << rtmin
-                     << " - "
-                     << rtmax
-                     << "]; mz=["
-                     << mzminEIC
-                     << " - "
-                     << mzmaxEIC
-                     << "] (ppm="
-                     << params.ppm
-                     << ")"
-                     << endl;
-
-
             //C12 PARENT should always be first
             if (i == 0 && params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA_CORR) {
 
@@ -375,6 +359,23 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
             float mzmax = eic->mzmax;
 
             double intensity = std::accumulate(eic->intensity.begin(), eic->intensity.end(), 0.0);
+
+
+            if (debug) cout << "[IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPeaks()]: "
+                     << sample->sampleName
+                     << ": RT=["
+                     << rtmin
+                     << " - "
+                     << rtmax
+                     << "]; mz=["
+                     << mzminEIC
+                     << " - "
+                     << mzmaxEIC
+                     << "] (ppm="
+                     << params.ppm
+                     << "), intensity="
+                     << intensity
+                     << endl;
 
             //Issue 695: Collate with raw data for proper rendering in MAVEN GUI.
             float maxIntensity = 0.0f;
