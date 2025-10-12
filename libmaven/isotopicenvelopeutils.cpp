@@ -362,6 +362,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
 
 
             if (debug) cout << "[IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPeaks()]: "
+                     << std::fixed << std::setprecision(6)
                      << sample->sampleName
                      << ": RT=["
                      << rtmin
