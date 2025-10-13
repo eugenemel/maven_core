@@ -226,6 +226,10 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
 
         envelopeGroup = extractEnvelopesVersion1(compound, adduct, group, isotopes, params, debug);
 
+    } else if (params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::VISIBLE_SAMPLES_FULL_RT_BOUNDS_AREA) {
+
+        envelopeGroup = extractFullRtRangeFromGroup(compound, adduct, group, samples, isotopes, params, debug);
+
     }
 
     //Issue 691: combine overlapping isotopes when the peak height for nearby isotopes is identical.
@@ -1920,7 +1924,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractFullRtRangeFromGroup(
 
     if (!group) return IsotopicEnvelopeGroup();
 
-    return IsotopicEnvelopeExtractor::extractFullRtRange(
+    IsotopicEnvelopeGroup envelopeGroup = IsotopicEnvelopeExtractor::extractFullRtRange(
         compound,
         adduct,
         group->minRt,
@@ -1929,6 +1933,10 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractFullRtRangeFromGroup(
         isotopes,
         params,
         debug);
+
+    envelopeGroup.group = group;
+
+    return envelopeGroup;
 }
 
 IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractFullRtRange(
@@ -1941,6 +1949,160 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractFullRtRange(
     const IsotopeParameters& params,
     bool debug) {
 
-    //TODO
+    IsotopicEnvelopeGroup envelopeGroup;
+
+    envelopeGroup.compound = compound;
+    envelopeGroup.adduct = adduct;
+    envelopeGroup.isotopes = isotopes;
+
+    //initialize peak groups
+    envelopeGroup.isotopePeakGroups = vector<PeakGroup>(isotopes.size());
+    for (unsigned int i = 0; i < envelopeGroup.isotopePeakGroups.size(); i++) {
+        Isotope isotope = isotopes[i];
+
+        PeakGroup g;
+        g.meanMz = isotope.mz;
+        g.tagString = isotope.name;
+        g.expectedAbundance = isotope.abundance;
+        g.isotopeC13count= isotope.C13;
+        g.isotopicIndex = i;
+        g.compound = compound;
+        g.adduct = adduct;
+        g.setType(PeakGroup::GroupType::IsotopeType);
+
+        envelopeGroup.isotopePeakGroups[i] = g;
+    }
+
+    for (mzSample* sample : samples) {
+
+        IsotopicEnvelope envelope;
+        envelope.intensities = vector<double>(isotopes.size());
+
+        vector<float> mPlusZeroIntensities{};
+
+        for (unsigned int i = 0; i < isotopes.size(); i++) {
+
+            Isotope isotope = isotopes.at(i);
+
+            float mzminEIC = static_cast<float>(isotope.mz - isotope.mz/1e6f*params.ppm);
+            float mzmaxEIC = static_cast<float>(isotope.mz + isotope.mz/1e6f*params.ppm);
+
+            EIC *eic = sample->getEIC(
+                mzminEIC,
+                mzmaxEIC,
+                minRt,
+                maxRt,
+                1);
+
+            float mzmin = eic->mzmin;
+            float mzmax = eic->mzmax;
+
+            double intensity = std::accumulate(eic->intensity.begin(), eic->intensity.end(), 0.0);
+
+            // Issue 805 debugging: start with summary, then provide details
+            if (debug) {
+                cout << "[IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPeaks()]: "
+                     << std::fixed << std::setprecision(6)
+                     << sample->sampleName
+                     << ": RT=["
+                     << minRt
+                     << " - "
+                     << maxRt
+                     << "]; mz=["
+                     << mzminEIC
+                     << " - "
+                     << mzmaxEIC
+                     << "] (ppm="
+                     << params.ppm
+                     << "), intensity="
+                     << intensity
+                     << endl;
+                cout << "[IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPeaks()] EIC: " << endl;
+                for (unsigned int i = 0; i < eic->size(); i++) {
+                    cout << "i=" << i << " rt=" << eic->rt[i] << " mz=" << eic->mz[i] << " intensity=" << eic->intensity[i] << endl;
+                }
+                cout << endl;
+            }
+
+            //Issue 695: Collate with raw data for proper rendering in MAVEN GUI.
+            float maxIntensity = 0.0f;
+            float rtAtMaxIntensity = minRt;
+            int scan = 0;
+
+            int minscan, maxscan = -1;
+            if (eic->size() > 0) {
+                minscan = eic->scannum[0];
+                maxscan = eic->scannum[eic->size()-1];
+            }
+
+            for (unsigned int i = 0; i < eic->size(); i++) {
+                if (eic->intensity[i] > maxIntensity) {
+                    maxIntensity = eic->intensity[i];
+                    rtAtMaxIntensity = eic->rt[i];
+                    scan = eic->scannum[i];
+                }
+            }
+
+            delete(eic);
+            eic = nullptr;
+
+            envelope.intensities.at(i) = intensity;
+
+            Peak p;
+
+            p.rt = rtAtMaxIntensity;
+            p.peakIntensity = maxIntensity;
+
+            //RT related
+            p.scan = scan;
+            p.minscan = minscan;
+            p.maxscan = maxscan;
+            p.pos = scan;
+            p.minpos = minscan;
+            p.maxpos = maxscan;
+            p.width = (maxscan-minscan+1);
+            p.rtmin = minRt;
+            p.rtmax = maxRt;
+            p.rtminFWHM = 0;
+            p.rtmaxFWHM = 0;
+
+            //m/z related
+            p.mzmin = mzmin;
+            p.mzmax = mzmax;
+            p.peakMz = isotope.mz;
+            p.baseMz = isotope.mz;
+            p.medianMz = isotope.mz;
+
+            //intensity related
+            //Issue 680: for easier review in MAVEN, just set all quant types to same value.
+            p.peakArea = intensity;
+            p.peakAreaCorrected = intensity;
+            p.peakAreaTop = intensity;
+            p.peakAreaFractional = intensity;
+            p.signalBaselineRatio = intensity;
+            p.smoothedIntensity = intensity;
+            p.smoothedPeakArea = intensity;
+            p.smoothedPeakAreaCorrected = intensity;
+            p.smoothedPeakAreaTop = intensity;
+            p.smoothedSignalBaselineRatio = intensity;
+            p.peakAreaFWHM = intensity;
+            p.smoothedPeakAreaFWHM = intensity;
+
+            //avoid writing junk into mzrollDB
+            p.gaussFitR2 = 0;
+            p.noNoiseObs = 0;
+            p.signalBaselineRatio = 0;
+
+            p.sample = sample;
+
+            envelopeGroup.isotopePeakGroups[i].addPeak(p);
+        }
+
+        envelope.getTotalIntensity();
+
+        envelopeGroup.envelopeBySample.insert(make_pair(sample, envelope));
+    }
+
+    return envelopeGroup;
 }
 
