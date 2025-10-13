@@ -358,6 +358,14 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
             float mzmin = eic->mzmin;
             float mzmax = eic->mzmax;
 
+            if (debug) {
+                cout << "[IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPeaks()] EIC: " << endl;
+                for (unsigned int i = 0; i < eic->size(); i++) {
+                    cout << "i=" << i << " rt=" << eic->rt[i] << " mz=" << eic->mz[i] << " intensity=" << eic->intensity[i] << endl;
+                }
+                cout << endl;
+            }
+
             double intensity = std::accumulate(eic->intensity.begin(), eic->intensity.end(), 0.0);
 
 
