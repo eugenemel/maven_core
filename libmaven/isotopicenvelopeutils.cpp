@@ -1906,3 +1906,41 @@ vector<ScanIsotopicEnvelope> ScanIsotopicEnvelopeFinder::predictEnvelopesC13(
 
     return envelopes;
 }
+
+//Issue 806: Introduce non-[M+0] based simple RT extraction
+
+IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractFullRtRangeFromGroup(
+    Compound *compound,
+    Adduct *adduct,
+    PeakGroup *group,
+    vector<mzSample*>& samples,
+    vector<Isotope>& isotopes,
+    const IsotopeParameters& params,
+    bool debug) {
+
+    if (!group) return IsotopicEnvelopeGroup();
+
+    return IsotopicEnvelopeExtractor::extractFullRtRange(
+        compound,
+        adduct,
+        group->minRt,
+        group->maxRt,
+        samples,
+        isotopes,
+        params,
+        debug);
+}
+
+IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractFullRtRange(
+    Compound *compound,
+    Adduct *adduct,
+    float minRt,
+    float maxRt,
+    vector<mzSample*>& samples,
+    vector<Isotope>& isotopes,
+    const IsotopeParameters& params,
+    bool debug) {
+
+    //TODO
+}
+

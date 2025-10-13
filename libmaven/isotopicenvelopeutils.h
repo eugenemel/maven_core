@@ -139,6 +139,25 @@ public:
         vector<Isotope>& isotopes,
         const IsotopeParameters& params,
         bool debug=false);
+
+    static IsotopicEnvelopeGroup extractFullRtRangeFromGroup(
+        Compound *compound,
+        Adduct *adduct,
+        PeakGroup *group, //used only to get rtMin, rtMax values
+        vector<mzSample*>& samples,
+        vector<Isotope>& isotopes,
+        const IsotopeParameters& params,
+        bool debug=false);
+
+    static IsotopicEnvelopeGroup extractFullRtRange(
+        Compound *compound,
+        Adduct *adduct,
+        float minRt,
+        float maxRt,
+        vector<mzSample*>& samples,
+        vector<Isotope>& isotopes,
+        const IsotopeParameters& params,
+        bool debug=false);
 };
 
 class DifferentialIsotopicEnvelopeUtils {
