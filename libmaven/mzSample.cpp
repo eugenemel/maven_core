@@ -2693,6 +2693,8 @@ string IsotopeParameters::getAlgorithmName(IsotopicExtractionAlgorithm algorithm
         return "MAVEN_GUI_VERSION_ONE";
     } else if (algorithm == IsotopicExtractionAlgorithm::MEIC_FWHM_RT_BOUNDS_AREA) {
         return "MEIC_FWHM_RT_BOUNDS_AREA";
+    } else if (algorithm == IsotopicExtractionAlgorithm::VISIBLE_SAMPLES_FULL_RT_BOUNDS_AREA) {
+        return "VISIBLE_SAMPLES_FULL_RT_BOUNDS_AREA";
     }
 
     return "UNKNOWN";
@@ -2709,6 +2711,8 @@ IsotopicExtractionAlgorithm IsotopeParameters::getExtractionAlgorithmFromName(st
         return IsotopicExtractionAlgorithm::PEAK_FWHM_RT_BOUNDS_AREA_CORR;
     } else if (isotopicExtractionAlgorithm == "MEIC_FWHM_RT_BOUNDS_AREA" || isotopicExtractionAlgorithm == "[M+0] Group EIC FWHM Integration") {
         return IsotopicExtractionAlgorithm::MEIC_FWHM_RT_BOUNDS_AREA;
+    } else if (isotopicExtractionAlgorithm == "VISIBLE_SAMPLES_FULL_RT_BOUNDS_AREA" || isotopicExtractionAlgorithm == "Visible Samples Full RT Width") {
+        return IsotopicExtractionAlgorithm::VISIBLE_SAMPLES_FULL_RT_BOUNDS_AREA;
     }
 
     //default
