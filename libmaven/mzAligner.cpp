@@ -852,7 +852,7 @@ void ExperimentAnchorPoints::computeAnchorPointSetFromMzs(bool debug, vector<dou
         double rtmin = 0;
         double rtmax = 1e6;
 
-        AnchorPointSet anchorPointSet(mzmin, mzmax, rtmin, rtmax, eic_smoothingWindow, standardsAlignment_minPeakIntensity);
+        AnchorPointSet anchorPointSet(mz, -1, mzmin, mzmax, rtmin, rtmax, eic_smoothingWindow, standardsAlignment_minPeakIntensity);
 
         if (debug) {
             cout << "AnchorPoint: ( m/z=[" << mzmin << " -" << mzmax << "] rt=[" << rtmin << ", " << rtmax << "])"
@@ -926,7 +926,7 @@ void ExperimentAnchorPoints::computeAnchorPointSetFromFile(bool debug){
         double rtmin = rt - static_cast<double>(standardsAlignment_maxRtWindow);
         double rtmax = rt + static_cast<double>(standardsAlignment_maxRtWindow);
 
-        AnchorPointSet anchorPointSet(mzmin, mzmax, rtmin, rtmax, eic_smoothingWindow, standardsAlignment_minPeakIntensity);
+        AnchorPointSet anchorPointSet(mz, rt, mzmin, mzmax, rtmin, rtmax, eic_smoothingWindow, standardsAlignment_minPeakIntensity);
 
         if (!stringFilter.empty()){
             anchorPointSet.setEICSamplesByFilter(samples, stringFilter);

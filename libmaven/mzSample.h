@@ -1810,7 +1810,9 @@ public:
     }
 
     //used for reading from file.
-    AnchorPointSet(double mzmin, double mzmax, double rtmin, double rtmax, int eic_smoothingWindowVal, float minPeakIntensityVal) {
+    AnchorPointSet(double mz, double rt, double mzmin, double mzmax, double rtmin, double rtmax, int eic_smoothingWindowVal, float minPeakIntensityVal) {
+        referenceMz = mz;
+        referenceRt = rt;
         slice = new mzSlice(mzmin, mzmax, rtmin, rtmax);
         eic_smoothingWindow = eic_smoothingWindowVal;
         minPeakIntensity = minPeakIntensityVal;
@@ -1849,6 +1851,10 @@ public:
     //keep these attached as fields
     int eic_smoothingWindow = 5;
     float minPeakIntensity = 0.0f;
+
+    //Issue 798: Keep track of these values, if they are known.
+    double referenceMz = -1.0;
+    double referenceRt = -1.0;
 
     static AnchorPointSet lastRt(vector<mzSample*>& allSamples);
 
