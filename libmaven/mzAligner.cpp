@@ -793,7 +793,13 @@ ExperimentAnchorPoints::ExperimentAnchorPoints(
 }
 
 void ExperimentAnchorPoints::compute(bool debug, bool isClean) {
-    determineReferenceSample(debug);
+
+    if (!isRtAlignmentAnchorPointReference) {
+        determineReferenceSample(debug);
+    } else if (debug) {
+        cout << "Anchor Point RT values will be used for reference" << endl;
+    }
+
     computeAnchorPointSetFromFile(debug);
 
     if (anchorPointSets.size() < minNumAnchorPointSetsForAlignment) {
@@ -958,9 +964,15 @@ void ExperimentAnchorPoints::computeSampleToRtMap(bool debug){
     if (debug) cout << "ExperimentAnchorPoints::computeSampleToRtMap()" << endl;
 
     mzSample *referenceSample = this->referenceSample;
-    sort(anchorPointSets.begin(), anchorPointSets.end(), [referenceSample](const AnchorPointSet& lhs, const AnchorPointSet& rhs){
+    bool isRtAlignmentAnchorPointReference = this->isRtAlignmentAnchorPointReference;
+
+    sort(anchorPointSets.begin(), anchorPointSets.end(), [referenceSample, isRtAlignmentAnchorPointReference](const AnchorPointSet& lhs, const AnchorPointSet& rhs){
         if (lhs.isValid && rhs.isValid) {
-            return lhs.sampleToPoints.at(referenceSample)->rt < rhs.sampleToPoints.at(referenceSample)->rt;
+            if (isRtAlignmentAnchorPointReference) {
+                return lhs.referenceRt < rhs.referenceRt;
+            } else {
+                return lhs.sampleToPoints.at(referenceSample)->rt < rhs.sampleToPoints.at(referenceSample)->rt;
+            }
         } else {
             return lhs.slice->rtmax < rhs.slice->rtmax;
         }
@@ -972,11 +984,20 @@ void ExperimentAnchorPoints::computeSampleToRtMap(bool debug){
 
     for (auto &pt : anchorPointSets) {
 
-        if (debug && referenceSample && pt.sampleToPoints.find(referenceSample) != pt.sampleToPoints.end()) {
-            cout << "AnchorPointSet with RT@"
-                 << pt.sampleToPoints.at(referenceSample)->rt
-                 << endl;
+        if (this->isRtAlignmentAnchorPointReference) {
+            if (debug) {
+                cout << "AnchorPointSet with RT@"
+                     << pt.referenceRt
+                     << endl;
+            }
+        } else {
+            if (debug && referenceSample && pt.sampleToPoints.find(referenceSample) != pt.sampleToPoints.end()) {
+                cout << "AnchorPointSet with RT@"
+                     << pt.sampleToPoints.at(referenceSample)->rt
+                     << endl;
+            }
         }
+
 
         //invalid anchor point sets are skipped.
         if (!pt.isValid) continue;
@@ -990,7 +1011,13 @@ void ExperimentAnchorPoints::computeSampleToRtMap(bool debug){
             AnchorPoint* point = it->second;
 
             float observedRt = point->rt;
-            float referenceRt = pt.sampleToPoints[referenceSample]->rt;
+
+            float referenceRt = 0.0f;
+            if (this->isRtAlignmentAnchorPointReference) {
+                referenceRt = pt.referenceRt;
+            } else {
+                referenceRt = pt.sampleToPoints[referenceSample]->rt;
+            }
 
             if (debug) {
                 cout << sample->sampleName
