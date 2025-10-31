@@ -3105,6 +3105,7 @@ public:
 
     //options
     int minNumAnchorPointSetsForAlignment = 3;
+    bool isRtAlignmentAnchorPointReference = false;
 
     //computed fields
     mzSample *referenceSample = nullptr;
@@ -3121,7 +3122,8 @@ public:
                            float standardsAlignment_precursorPPM,
                            float standardsAlignment_maxRtWindow,
                            int eic_smoothingWindow,
-                           float standardsAlignment_minPeakIntensity);
+                           float standardsAlignment_minPeakIntensity,
+                           bool isRtAlignmentAnchorPointReference=false);
 
     void compute(bool debug, bool isClean=true);
 

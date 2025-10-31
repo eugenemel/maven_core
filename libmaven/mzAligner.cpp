@@ -781,13 +781,15 @@ ExperimentAnchorPoints::ExperimentAnchorPoints(
         float standardsAlignment_precursorPPM,
         float standardsAlignment_maxRtWindow,
         int eic_smoothingWindow,
-        float standardsAlignment_minPeakIntensity){
+        float standardsAlignment_minPeakIntensity,
+        bool isRtAlignmentAnchorPointReference){
     this->samples = samples;
     this->anchorPointsFile = anchorPointsFile;
     this->standardsAlignment_precursorPPM = standardsAlignment_precursorPPM;
     this->standardsAlignment_maxRtWindow = standardsAlignment_maxRtWindow;
     this->eic_smoothingWindow = eic_smoothingWindow;
     this->standardsAlignment_minPeakIntensity = standardsAlignment_minPeakIntensity;
+    this->isRtAlignmentAnchorPointReference = isRtAlignmentAnchorPointReference;
 }
 
 void ExperimentAnchorPoints::compute(bool debug, bool isClean) {
