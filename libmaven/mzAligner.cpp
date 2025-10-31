@@ -763,14 +763,25 @@ void Aligner::exportAlignmentFile(vector<AnchorPointSet>& anchorPoints, mzSample
  * gradient.
  */
 AnchorPointSet AnchorPointSet::lastRt(vector<mzSample*>& allSamples) {
+
+    float avgLastRt = 0.0f;
     AnchorPointSet lastAnchorPoint;
     for (auto samp : allSamples) {
 
         AnchorPoint *anchorPoint = new AnchorPoint(samp);
-        anchorPoint->setInterpolatedRtValue(samp->scans.back()->rt);
+
+        float lastRt = samp->scans.back()->rt;
+        anchorPoint->setInterpolatedRtValue(lastRt);
 
         lastAnchorPoint.sampleToPoints.insert(make_pair(samp, anchorPoint));
+
+        avgLastRt += lastRt;
     }
+
+    avgLastRt /= allSamples.size();
+
+    // Issue 798: No reference RT exists for the last RT in the file, so just pick the avg last RT across all files.
+    lastAnchorPoint.referenceRt = avgLastRt;
 
     return lastAnchorPoint;
 }
@@ -801,6 +812,13 @@ void ExperimentAnchorPoints::compute(bool debug, bool isClean) {
     }
 
     computeAnchorPointSetFromFile(debug);
+
+    if (debug && isRtAlignmentAnchorPointReference) {
+        cout << "Computed Anchor Point Reference Set:" << endl;
+        for (AnchorPointSet& set : this->anchorPointSets) {
+            cout << "AnchorPoint @ RT=" << set.referenceRt << endl;
+        }
+    }
 
     if (anchorPointSets.size() < minNumAnchorPointSetsForAlignment) {
         cerr << "Too few anchor points to perform alignment - RT alignment will not be performed." << endl;
