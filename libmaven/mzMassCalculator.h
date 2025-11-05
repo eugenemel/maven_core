@@ -98,6 +98,16 @@ class MassCalculator {
     vector<Match> enumerateMasses(double inputMass, double charge, double maxdiff);
     double adjustMass(double mass,int charge);
 
+    /**
+     * Returns an approximate natural abundance distribution by neglecting all non-carbon atoms.
+     * @brief computeAllC13NatDistribution
+     * @param numCarbon
+     * @param abundanceC13
+     * @return
+     */
+    static vector<double> computeAllC13NatDistribution(int numCarbon, double abundanceC13=0.0107);
+    static map<int, double> C13NatDistribution(int numCarbon, double abundanceC13=0.0107, double threshold=1e-6);
+    static map<int, double> peptideC13Distribution(string peptideSequence, double abundanceC13=0.0107, double threshold=1e-6, bool debug=false);
 
     //Issue 758: predict molecular formula for an arbitrary m/z
     static vector<pair<Adduct, map<MassAtom, int>>> candidateAtomMaps(

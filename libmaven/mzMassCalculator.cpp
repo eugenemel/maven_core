@@ -1551,3 +1551,61 @@ void MassCalculator::applyMZeroMzOffset(vector<Isotope>& isotopes, double peakGr
         }
     }
 }
+
+map<int, double> MassCalculator::peptideC13Distribution(
+    string peptideSequence,
+    double abundanceC13,
+    double threshold,
+    bool debug) {
+
+    map<int, double> carbonNaturalAbundanceDist{};
+
+    map<string, int> atoms = MassCalculator::getPeptideComposition(peptideSequence);
+
+    if (atoms.find("C") != atoms.end()) {
+        int numCarbon = atoms.at("C");
+        if (debug) cout << "Peptide '" << peptideSequence << "' contains " << numCarbon << " carbons." << endl;
+
+        carbonNaturalAbundanceDist = MassCalculator::C13NatDistribution(numCarbon, abundanceC13, threshold);
+    }
+
+    return carbonNaturalAbundanceDist;
+}
+
+vector<double> MassCalculator::computeAllC13NatDistribution(int numCarbon, double abundanceC13){
+    vector<double> dist = vector<double>((numCarbon+1));
+
+    double abundanceC12 = (1.0 - abundanceC13);
+
+    for (unsigned int i = 0; i <= numCarbon; i++) {
+        double partialProbability = mzUtils::nchoosek(numCarbon,i)*pow(abundanceC12,(numCarbon - i))*pow(abundanceC13,i);
+        dist[i] = partialProbability;
+    }
+
+    return dist;
+}
+
+map<int, double> MassCalculator::C13NatDistribution(int numCarbon, double abundanceC13, double threshold) {
+
+    map<int, double> topC13NatDist{};
+
+    vector<double> dist = MassCalculator::computeAllC13NatDistribution(numCarbon, abundanceC13);
+
+    double max = 0;
+
+    for (unsigned int i =0; i < dist.size(); i++) {
+        double val = dist[i];
+        if (val >= max) {
+            max = val;
+        }
+    }
+
+    for (unsigned int i = 0; i <= numCarbon; i++) {
+        double prob = dist[i];
+        if (prob >= max*threshold) {
+            topC13NatDist.insert(make_pair(i, prob));
+        }
+    }
+
+    return topC13NatDist;
+}
