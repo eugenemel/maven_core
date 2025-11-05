@@ -478,12 +478,12 @@ double MassCalculator::computeNeutralMass(map<string, int>& atoms) {
 }
 
 double MassCalculator::computeNeutralMass(string formula) {
-	map<string,int> atoms = getComposition(formula);
+    map<string,int> atoms = MassCalculator::getComposition(formula);
     return MassCalculator::computeNeutralMass(atoms);
 }
 
 double MassCalculator::computePeptideNeutralMass(string peptideSequence) {
-    map<string,int> atoms = getPeptideComposition(peptideSequence);
+    map<string,int> atoms = MassCalculator::getPeptideComposition(peptideSequence);
     return MassCalculator::computeNeutralMass(atoms);
 }
 
@@ -793,6 +793,9 @@ map<string,int> MassCalculator::getPeptideComposition(const string& peptideSeq) 
     M["O"]=O;
     M["S"]=S;
     M["P"]=P;
+
+    // Issue 813: Add final H2O to peptide sequence
+    MassCalculator::modifyAtoms(M, {{"H", 2}, {"O", 1}}, true);
 
     return M;
 }
