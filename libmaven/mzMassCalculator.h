@@ -73,7 +73,9 @@ class MassCalculator {
 
 
     MassCalculator(){}
+    static double computeNeutralMass(map<string, int>& atoms);
     static double computeNeutralMass(string formula);
+    static double computePeptideNeutralMass(string peptideSequence);
     static map<string,int> getComposition(string formula);
     static map<string,int> getComposition(Adduct* adduct);
     static void addAtoms(map<string, int>& reference, map<string, int> toAdd);
@@ -158,7 +160,8 @@ class MassCalculator {
     //Issue 711: Declare cache
     static map<string, vector<Isotope>> isotopesCache;
 
-    map<string,int> getPeptideComposition(const string& peptideSeq);
+    //Issue 813: make static
+    static map<string,int> getPeptideComposition(const string& peptideSeq);
 
     static bool compDiff(const Match& a, const Match& b ) { return a.diff < b.diff; }
     static bool compNumMatches(const Match& a, const Match& b ) { return a.fragScore.numMatches < b.fragScore.numMatches; }

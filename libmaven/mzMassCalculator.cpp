@@ -468,15 +468,23 @@ map<string,int> MassCalculator::getComposition(string formula) {
     return(atoms);
 }
 
+
+double MassCalculator::computeNeutralMass(map<string, int>& atoms) {
+    double mass=0;
+    for(auto itr = atoms.begin(); itr != atoms.end(); itr++ ) {
+        mass += getElementMass((*itr).first) * (*itr).second;
+    }
+    return mass;
+}
+
 double MassCalculator::computeNeutralMass(string formula) {
 	map<string,int> atoms = getComposition(formula);
-	map<string,int>::iterator itr;
+    return MassCalculator::computeNeutralMass(atoms);
+}
 
-	double mass=0;
-    for(itr = atoms.begin(); itr != atoms.end(); itr++ ) {
-        mass += getElementMass((*itr).first) * (*itr).second;
-	}
-	return mass;
+double MassCalculator::computePeptideNeutralMass(string peptideSequence) {
+    map<string,int> atoms = getPeptideComposition(peptideSequence);
+    return MassCalculator::computeNeutralMass(atoms);
 }
 
 
