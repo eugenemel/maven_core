@@ -13,6 +13,12 @@ public:
     vector<string> ionName{};
     vector<int> chg{};
     bool isSinglePrecursorMz = false;
+
+    //only used by large peptide protein binding assay ion list
+    vector<string> adductName{};
+    vector<string> isotopeCode{};
+    vector<double> isotopeNaturalAbundance{};
+    vector<int> numBound{};
 };
 
 class MaldesiIonListGenerator {

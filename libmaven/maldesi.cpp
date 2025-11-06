@@ -81,9 +81,10 @@ MaldesiIonList MaldesiIonListGenerator::getLargePeptideProteinBindingAssayIonLis
                 int numC13 = it->first;
                 double isotopeProbability = it->second;
                 string adductName = adduct.name;
+                string isotopeCode = "[M+" + to_string(numC13) + "]";
 
                 s << adductName << " "
-                  << "[M+" << numC13 << "] "
+                  << isotopeCode << " "
                   << "f=" << isotopeProbability << " "
                   << "L=" << numBoundLigand;
 
@@ -113,6 +114,12 @@ MaldesiIonList MaldesiIonListGenerator::getLargePeptideProteinBindingAssayIonLis
                 ionList.maxMz.push_back(maxMz);
                 ionList.ionName.push_back(ionName);
                 ionList.chg.push_back(adduct.charge);
+
+                //peptide-specific items
+                ionList.adductName.push_back(adductName);
+                ionList.isotopeCode.push_back(isotopeCode);
+                ionList.isotopeNaturalAbundance.push_back(isotopeProbability);
+                ionList.numBound.push_back(numBoundLigand);
             }
         }
 
