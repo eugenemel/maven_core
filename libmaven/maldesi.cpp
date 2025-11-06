@@ -71,9 +71,9 @@ MaldesiIonList MaldesiIonListGenerator::getLargePeptideProteinBindingAssayIonLis
         false); // debug
 
     int numBoundLigand = 0;
-    for (auto it = peptideIsotopeDist.begin(); it != peptideIsotopeDist.end(); ++it) {
-        for (Adduct& adduct : adducts) {
-            while (numBoundLigand <= maxNumBoundLigand) {
+    while (numBoundLigand <= maxNumBoundLigand) {
+        for (auto it = peptideIsotopeDist.begin(); it != peptideIsotopeDist.end(); ++it) {
+            for (Adduct& adduct : adducts) {
 
                 stringstream s;
                 s << std::fixed << setprecision(4);
@@ -113,10 +113,10 @@ MaldesiIonList MaldesiIonListGenerator::getLargePeptideProteinBindingAssayIonLis
                 ionList.maxMz.push_back(maxMz);
                 ionList.ionName.push_back(ionName);
                 ionList.chg.push_back(adduct.charge);
-
-                numBoundLigand++;
             }
         }
+
+        numBoundLigand++;
     }
 
     return ionList;
