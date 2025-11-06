@@ -32,7 +32,8 @@ SOURCES=base64.cpp mzMassCalculator.cpp mzSample.cpp  mzUtils.cpp statistics.cpp
        sha1.cpp \
        ThreadSafeSmoother.cpp \
        directinfusionprocessor.cpp \
-       lipidsummarizationutils.cpp
+       lipidsummarizationutils.cpp \
+       maldesi.cpp
 
 
 HEADERS += base64.h mzFit.h mzMassCalculator.h mzSample.h mzPatterns.h mzUtils.h  statistics.h SavGolSmoother.h PolyAligner.h Fragment.h parallelmassSlicer.h BondBreaker.h Peptide.h sha1.hpp \
@@ -41,6 +42,7 @@ HEADERS += base64.h mzFit.h mzMassCalculator.h mzSample.h mzPatterns.h mzUtils.h
     isotopicenvelopeutils.h \
     lipidsummarizationutils.h \
     proteinutils.h \
-    secprocessor.h
+    secprocessor.h \
+    maldesi.h
 
 message($$LIBS)
