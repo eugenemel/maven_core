@@ -76,7 +76,7 @@ MaldesiIonList MaldesiIonListGenerator::getLargePeptideProteinBindingAssayIonLis
             for (Adduct& adduct : adducts) {
 
                 stringstream s;
-                s << std::fixed << setprecision(4);
+                s << std::fixed << setprecision(6);
 
                 int numC13 = it->first;
                 double isotopeProbability = it->second;
