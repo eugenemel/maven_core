@@ -1672,6 +1672,7 @@ public:
     static double getMS1QuantPrecursorMz(Compound *compound, Adduct* adduct, bool debug);
     static string getSummarizedCompoundId(Compound *compound, Adduct *adduct);
     static string getIdentifierKey(IdentifierType identifierType);
+    static vector<Compound*> fromExactMassAdducts(string encodedExactMassAdducts, bool debug=false);
 };
 
 class Isotope {

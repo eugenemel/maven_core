@@ -492,3 +492,62 @@ void Compound::traverseAndAdd(PeakGroup& group, set<Compound*>& compoundSet) {
        Compound::traverseAndAdd(child, compoundSet);
     }
 }
+
+vector<Compound*> CompoundUtils::fromExactMassAdducts(string encodedExactMassAdducts, bool debug){
+    if (debug) cout << "Starting CompoundUtils::fromExactMassAdducts(): "<< encodedExactMassAdducts << endl;
+
+    vector<Compound*> compounds{};
+    vector<string> adducts{};
+    float exactMass = -1.0f;
+    string compoundName = "";
+
+    unordered_map<string, string> exactMassAdductsMap = mzUtils::decodeParameterMap(encodedExactMassAdducts, ";");
+
+
+    for (auto it = exactMassAdductsMap.begin(); it != exactMassAdductsMap.end(); ++it) {
+        if(debug) cout << it->first << ": " << it->second << endl;
+        if (it->first == "adducts"){
+            mzUtils::split(it->second, ',', adducts);
+            for (string adductString : adducts) {
+                cout << "adduct: " << adductString << endl;
+            }
+        }
+
+        if (it->first == "exactMass") {
+            try {
+                exactMass = stof(it->second);
+            } catch (std::exception e) {
+                //swallow
+            }
+        }
+
+        if (it->first == "name") {
+            compoundName = it->second;
+        }
+    }
+
+    if (compoundName.empty()) {
+        compoundName = "mz@" + to_string(exactMass);
+    }
+
+    if (exactMass > 0 && !adducts.empty()) {
+        for (string adductString : adducts) {
+
+            string id = compoundName + " " + adductString;
+
+            Compound* exactMassCompound = new Compound(
+                id,
+                compoundName,
+                "",
+                0,
+                exactMass);
+            exactMassCompound->adductString = adductString;
+
+            compounds.push_back(exactMassCompound);
+        }
+    }
+
+    if (debug) cout << "Parsed " << compounds.size() << " compounds." << endl;
+    if (debug) cout << "Fininshed CompoundUtils::fromExactMassAdducts()." << endl;
+    return compounds;
+}
