@@ -543,6 +543,9 @@ vector<Compound*> CompoundUtils::fromExactMassAdducts(string encodedExactMassAdd
                 exactMass);
             exactMassCompound->adductString = adductString;
 
+            Adduct adduct = MassCalculator::parseAdductFromName(adductString);
+            exactMassCompound->precursorMz = adduct.computeAdductMass(exactMass);
+
             compounds.push_back(exactMassCompound);
         }
     }
