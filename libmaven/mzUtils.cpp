@@ -1233,6 +1233,7 @@ unordered_map<string, string> decodeParameterMap(string encodedParams, string de
     unordered_map<string, string> decodedMap = {};
 
     if (encodedParams.size() < 3) return decodedMap;
+    if (delimiter.empty()) return decodedMap;
 
     //remove starting/ending brackets, if they are included
     if (encodedParams[0] == '{'){
@@ -1240,6 +1241,10 @@ unordered_map<string, string> decodeParameterMap(string encodedParams, string de
     }
     if (encodedParams[encodedParams.size()-1] == '}') {
         encodedParams.erase(encodedParams.size()-1);
+    }
+
+    if (encodedParams[encodedParams.size()-1] != delimiter[0]) {
+        encodedParams = encodedParams + delimiter;
     }
 
     string::size_type posPrevious = 0;
