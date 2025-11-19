@@ -2591,6 +2591,25 @@ public:
     void setLegacyPeakGroupParameters();
 };
 
+class PeptideStabilitySearchParameters : public SearchParameters {
+
+    /**
+     * @brief isPullIsotopes: if true, isotopes should be pulled and isotopes-related parameters should be assessed.
+     * Note that isotope parameters might be set during encoding/decoding, but only if this flag is true
+     * should isotopes actually be pulled and evaluated.
+     * @brief minNumIsotopes: minimum number of isotopes, beyond the [M+0], required to retain this peak group.
+     * @brief encodedIsotopeParameters: isotope parameters applied to every peak group in the peptide stability set.
+     * an empty string indicates that no isotopes should be extracted or evaluated for filtering/labels.
+     */
+    bool isPullIsotopes = false;
+    int minNumIsotopes = 0;
+    IsotopeParameters isotopeParameters;
+
+    string encodeParams();
+    static shared_ptr<PeptideStabilitySearchParameters> decode(string encodedParams);
+
+};
+
 //Issue 586:
 //dedicated class for lipid search parameters
 class LipidParameterGroup {
@@ -2807,6 +2826,22 @@ public:
 
     static void labelRtAgreement(PeakGroup *g, char RtMatchLabel = 'l', bool debug = false);
     static bool isRtAgreement(float groupRtVal, Compound *compound, float ms1RtTolr, bool debug = false);
+};
+
+// Issue 815
+class PeptideStabilityProcessor {
+public:
+    static vector<PeakGroup> filterPeptideStabilitySet(
+        vector<PeakGroup>& peptideStabilityGroupSet,
+        shared_ptr<PeptideStabilitySearchParameters> params,
+        bool debug = false
+        );
+
+    static void labelPeptideStabilitySet(
+        vector<PeakGroup>& peptideStabilityGroupSet,
+        shared_ptr<PeptideStabilitySearchParameters> params,
+        bool debug = false
+        );
 };
 
 //Issue 482

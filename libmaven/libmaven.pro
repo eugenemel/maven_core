@@ -19,6 +19,7 @@ SOURCES=base64.cpp mzMassCalculator.cpp mzSample.cpp  mzUtils.cpp statistics.cpp
        Compound.cpp \
        isotopicenvelopeutils.cpp \
        mzkitchenutils.cpp \
+       peptidestabilityutils.cpp \
        proteinutils.cpp \
        qqqprocessor.cpp \
        savgol.cpp \
