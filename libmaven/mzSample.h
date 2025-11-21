@@ -2591,7 +2591,9 @@ public:
     void setLegacyPeakGroupParameters();
 };
 
-class PeptideStabilitySearchParameters : public SearchParameters {
+class PeptideStabilitySearchParameters : public SearchParameters, public EncodingDecodingTemplate<PeptideStabilitySearchParameters> {
+
+    shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
 
     /**
      * @brief isPullIsotopes: if true, isotopes should be pulled and isotopes-related parameters should be assessed.
