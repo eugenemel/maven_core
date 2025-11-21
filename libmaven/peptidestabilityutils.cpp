@@ -4,12 +4,12 @@ string PeptideStabilitySearchParameters::encodeParams() {
 
     string encodedParams = baseParams();
 
-    encodedParams = encodedParams + peakPickingAndGroupingParameters->getEncodedPeakParameters();
+    // encodedParams = encodedParams + peakPickingAndGroupingParameters->getEncodedPeakParameters();
 
     encodedParams = encodedParams + "isPullIsotopes=" + to_string(isPullIsotopes) + ";";
     encodedParams = encodedParams + "minNumIsotopes=" + to_string(minNumIsotopes) + ";";
 
-    encodedParams = encodedParams + isotopeParameters.encodeParams();
+    // encodedParams = encodedParams + isotopeParameters.encodeParams();
 
     return encodedParams;
 }
