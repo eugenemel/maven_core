@@ -2445,7 +2445,7 @@ void SRMTransition::printKey(){
     cout << this->getKey();
 }
 
-string IsotopeParameters::encodeParams() {
+string IsotopeParameters::encodeParams(bool isIncludePeakPickingAndGroupingParameters) {
 
     string encodedParams;
 
@@ -2526,8 +2526,9 @@ string IsotopeParameters::encodeParams() {
     }
     encodedParams = encodedParams + "diffIsoScoringType" + "=" + diffIsoScoringTypeStr + ";";
 
-    string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
-    encodedParams = encodedParams + peakPickingEncodedParams;
+    if (isIncludePeakPickingAndGroupingParameters) {
+        encodedParams = encodedParams + peakPickingAndGroupingParameters->getEncodedPeakParameters();
+    }
 
     return encodedParams;
 }

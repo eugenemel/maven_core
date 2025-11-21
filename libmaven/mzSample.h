@@ -1147,7 +1147,7 @@ struct IsotopeParameters {
     // default constructor
     IsotopeParameters();
 
-    string encodeParams();
+    string encodeParams(bool isIncludePeakPickingAndGroupingParameters=true);
     static IsotopeParameters decode(string encodedIsotopeParameters);
     static string getAlgorithmName(IsotopicExtractionAlgorithm algorithm);
     static IsotopicExtractionAlgorithm getExtractionAlgorithmFromName(string isotopicExtractionAlgorithm);
@@ -2610,6 +2610,9 @@ public:
     bool isPullIsotopes = false;
     int minNumIsotopes = 0;
     IsotopeParameters isotopeParameters = IsotopeParameters();
+
+    //default constructor
+    PeptideStabilitySearchParameters();
 
     string encodeParams();
     static shared_ptr<PeptideStabilitySearchParameters> decode(string encodedParams);

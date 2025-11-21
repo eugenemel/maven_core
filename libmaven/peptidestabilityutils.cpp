@@ -1,5 +1,12 @@
 #include "mzSample.h"
 
+//default constructor
+PeptideStabilitySearchParameters::PeptideStabilitySearchParameters() {
+
+    //Enforce synchrony between two shared_ptr<PeakPickingAndGroupingParameters>
+    this->isotopeParameters.peakPickingAndGroupingParameters=this->peakPickingAndGroupingParameters;
+}
+
 string PeptideStabilitySearchParameters::encodeParams() {
 
     string encodedParams = baseParams();
@@ -9,7 +16,9 @@ string PeptideStabilitySearchParameters::encodeParams() {
     encodedParams = encodedParams + "isPullIsotopes=" + to_string(isPullIsotopes) + ";";
     encodedParams = encodedParams + "minNumIsotopes=" + to_string(minNumIsotopes) + ";";
 
-    encodedParams = encodedParams + isotopeParameters.encodeParams();
+    //exclude peak picking and grouping parameters from isotope parameters encoding
+    //only using the isotope-specific information
+    encodedParams = encodedParams + isotopeParameters.encodeParams(false);
 
     return encodedParams;
 }
@@ -26,6 +35,9 @@ shared_ptr<PeptideStabilitySearchParameters> PeptideStabilitySearchParameters::d
 
     IsotopeParameters isotopeParameters = IsotopeParameters::decode(encodedParams);
     params->isotopeParameters = isotopeParameters;
+
+    //enforce synchrony between two copies of PeakPickingAndGroupingParameters
+    params->isotopeParameters.peakPickingAndGroupingParameters->fillInPeakParameters(decodedMap);
 
     // START PeptideStabilitySearchParameters
 
