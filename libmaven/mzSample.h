@@ -1144,6 +1144,9 @@ struct IsotopeParameters {
     bool diffIsoScoringFractionOfSampleTotal = false;
     DiffIsoScoringType diffIsoScoringType = DiffIsoScoringType::PEARSON_CORRELATION;
 
+    // default constructor
+    IsotopeParameters();
+
     string encodeParams();
     static IsotopeParameters decode(string encodedIsotopeParameters);
     static string getAlgorithmName(IsotopicExtractionAlgorithm algorithm);
@@ -2606,7 +2609,7 @@ public:
      */
     bool isPullIsotopes = false;
     int minNumIsotopes = 0;
-    IsotopeParameters isotopeParameters;
+    IsotopeParameters isotopeParameters = IsotopeParameters();
 
     string encodeParams();
     static shared_ptr<PeptideStabilitySearchParameters> decode(string encodedParams);
