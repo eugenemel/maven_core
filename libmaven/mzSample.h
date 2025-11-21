@@ -2592,6 +2592,7 @@ public:
 };
 
 class PeptideStabilitySearchParameters : public SearchParameters, public EncodingDecodingTemplate<PeptideStabilitySearchParameters> {
+public:
 
     shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
 
