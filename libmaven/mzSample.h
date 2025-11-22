@@ -3192,10 +3192,4 @@ public:
     PeakGroup* group;
 };
 
-
-//constructor
-IsotopeParameters::IsotopeParameters() {
-    this->peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
-}
-
 #endif
