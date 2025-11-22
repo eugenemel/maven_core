@@ -2105,8 +2105,3 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractFullRtRange(
 
     return envelopeGroup;
 }
-
-//constructor
-IsotopeParameters::IsotopeParameters() {
-    this->peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
-}
