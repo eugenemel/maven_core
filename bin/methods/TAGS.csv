@@ -3,7 +3,7 @@ Revisit,r,1,daffodil_triangle.png,Revisit this Peak Group later.,0
 Internal Standard,i,2,blue_star.png,Corresponds to an internal standard.,1
 QQQ Compound,q,3,orange_circle.png,This peak group is the QQQ representative for the compound.,2
 RT Agreement,l,4,pink_star.png,Observed RT agrees with library RT (Lipidomics),3
-External Source,e,5,daffodil_circle.png,Annotated from an external source.,4
+Selected Candidate,e,5,daffodil_circle.png,Best candidate for annotated compound.,4
 Compound of Interest,c,6,blue_circle.png,This peak group corresponds to a compound of interest.,5
 Major Adduct,a,7,pink_circle.png,The adduct associated with this peak group's compound is the major form.,6
 Sparse MS2,w,8,green_circle.png,Consensus MS2 was constructed from a small number of scans.,7
