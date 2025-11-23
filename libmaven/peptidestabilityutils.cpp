@@ -16,6 +16,7 @@ string PeptideStabilitySearchParameters::encodeParams() {
     encodedParams = encodedParams + "peptideName=" + peptideName + ";";
     encodedParams = encodedParams + "peptideExactMass=" + to_string(peptideExactMass) + ";";
     encodedParams = encodedParams + "peptideAdducts=" + peptideAdducts + ";";
+    encodedParams = encodedParams + "peptideRtTol=" + to_string(peptideRtTol) + ";";
 
     encodedParams = encodedParams + "isPullIsotopes=" + to_string(isPullIsotopes) + ";";
     encodedParams = encodedParams + "minNumIsotopes=" + to_string(minNumIsotopes) + ";";
@@ -53,6 +54,9 @@ shared_ptr<PeptideStabilitySearchParameters> PeptideStabilitySearchParameters::d
     if (decodedMap.find("peptideAdducts") != decodedMap.end()) {
         params->peptideAdducts = decodedMap["peptideAdducts"];
     }
+    if (decodedMap.find("peptideRtTol") != decodedMap.end()) {
+        params->peptideRtTol = stof(decodedMap["peptideRtTol"]);
+    }
 
     if (decodedMap.find("isPullIsotopes") != decodedMap.end()) {
         params->isPullIsotopes = decodedMap["isPullIsotopes"] == "1";
@@ -69,13 +73,27 @@ shared_ptr<PeptideStabilitySearchParameters> PeptideStabilitySearchParameters::d
 
 vector<PeakGroup> PeptideStabilityProcessor::filterPeptideStabilitySet(
     vector<PeakGroup>& peptideStabilityGroupSet,
+    const vector<mzSample*>& samples,
     shared_ptr<PeptideStabilitySearchParameters> params,
     bool debug
     ) {
 
     vector<PeakGroup> groups{};
 
-    // TODO
+    for (PeakGroup g : peptideStabilityGroupSet) {
+        if (params->isPullIsotopes) {
+            g.pullIsotopes(
+                params->isotopeParameters,
+                samples,
+                debug);
+        }
+
+        if (g.getChildren().size() < params->minNumIsotopes) continue;
+
+        // any peak groups that survive all filters are saved.
+        // peak groups may be transformed along the way (for example, isotopes may be added).
+        groups.push_back(g);
+    }
 
     return groups;
 }
@@ -85,5 +103,32 @@ void labelPeptideStabilitySet(
     shared_ptr<PeptideStabilitySearchParameters> params,
     bool debug
     ) {
-    // TODO
+
+    //sort peak groups in descending order by intensity
+    sort(peptideStabilityGroupSet.begin(), peptideStabilityGroupSet.end(), [](PeakGroup & lhs, PeakGroup & rhs) {
+        return lhs.maxIntensity > rhs.maxIntensity;
+    });
+
+    float peptideRt = -1.0f;
+    set<string> labeledAdducts{};
+
+    //Associate peptides with chosen candidate peptide, based on proximity to max intensity peptide.
+    for (PeakGroup & g : peptideStabilityGroupSet) {
+
+        // block is only triggered on the first peak group (most abundant peak group)
+        if (peptideRt < 0) {
+            peptideRt = g.maxPeakRtVal;
+            labeledAdducts.insert(g.compound->adductString);
+            g.addLabel('e');
+        } else {
+            // compare all subsequent groups to data defined from first group
+            // candidate peak group must be in RT range
+            float rtDiff = abs(g.maxPeakRtVal - peptideRt);
+            string adductName = g.compound->adductString;
+            if (rtDiff < params->peptideRtTol && labeledAdducts.find(adductName) == labeledAdducts.end()) {
+                labeledAdducts.insert(adductName);
+                g.addLabel('e');
+            }
+        }
+    }
 }

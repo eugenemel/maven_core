@@ -2609,6 +2609,13 @@ public:
     string peptideAdducts = "";
 
     /**
+     * @brief peptideRtTol: Used in the association of other adduct forms to max intensity peptide adduct.
+     * Designated peptide (and corresponding RT) is selected based on max intensity from any adduct form,
+     * any other peak group that is nearby to that RT and is a different adduct form also gets the label
+     */
+    float peptideRtTol = 0.5f;
+
+    /**
      * @brief isPullIsotopes: if true, isotopes should be pulled and isotopes-related parameters should be assessed.
      * Note that isotope parameters might be set during encoding/decoding, but only if this flag is true
      * should isotopes actually be pulled and evaluated.
@@ -2851,6 +2858,7 @@ class PeptideStabilityProcessor {
 public:
     static vector<PeakGroup> filterPeptideStabilitySet(
         vector<PeakGroup>& peptideStabilityGroupSet,
+        const vector<mzSample*>& samples,
         shared_ptr<PeptideStabilitySearchParameters> params,
         bool debug = false
         );
