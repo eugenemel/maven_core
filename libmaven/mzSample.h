@@ -2605,7 +2605,7 @@ public:
      * @brief peptideAdducts: list of adducts searched
      */
     string peptideName = "";
-    float peptideExactMass = -1.0f;
+    double peptideExactMass = -1.0;
     string peptideAdducts = "";
 
     /**

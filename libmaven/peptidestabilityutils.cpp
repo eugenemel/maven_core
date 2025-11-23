@@ -48,7 +48,7 @@ shared_ptr<PeptideStabilitySearchParameters> PeptideStabilitySearchParameters::d
         params->peptideName = decodedMap["peptideName"];
     }
     if (decodedMap.find("peptideExactMass") != decodedMap.end()) {
-        params->peptideExactMass = stof(decodedMap["peptideExactMass"]);
+        params->peptideExactMass = stod(decodedMap["peptideExactMass"]);
     }
     if (decodedMap.find("peptideAdducts") != decodedMap.end()) {
         params->peptideAdducts = decodedMap["peptideAdducts"];
