@@ -13,6 +13,10 @@ string PeptideStabilitySearchParameters::encodeParams() {
 
     encodedParams = encodedParams + peakPickingAndGroupingParameters->getEncodedPeakParameters();
 
+    encodedParams = encodedParams + "peptideName=" + peptideName + ";";
+    encodedParams = encodedParams + "peptideExactMass=" + to_string(peptideExactMass) + ";";
+    encodedParams = encodedParams + "peptideAdducts=" + peptideAdducts + ";";
+
     encodedParams = encodedParams + "isPullIsotopes=" + to_string(isPullIsotopes) + ";";
     encodedParams = encodedParams + "minNumIsotopes=" + to_string(minNumIsotopes) + ";";
 
@@ -40,6 +44,15 @@ shared_ptr<PeptideStabilitySearchParameters> PeptideStabilitySearchParameters::d
     params->isotopeParameters.peakPickingAndGroupingParameters->fillInPeakParameters(decodedMap);
 
     // START PeptideStabilitySearchParameters
+    if (decodedMap.find("peptideName") != decodedMap.end()) {
+        params->peptideName = decodedMap["peptideName"];
+    }
+    if (decodedMap.find("peptideExactMass") != decodedMap.end()) {
+        params->peptideExactMass = stof(decodedMap["peptideExactMass"]);
+    }
+    if (decodedMap.find("peptideAdducts") != decodedMap.end()) {
+        params->peptideAdducts = decodedMap["peptideAdducts"];
+    }
 
     if (decodedMap.find("isPullIsotopes") != decodedMap.end()) {
         params->isPullIsotopes = decodedMap["isPullIsotopes"] == "1";

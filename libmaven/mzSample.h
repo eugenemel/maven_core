@@ -2600,6 +2600,15 @@ public:
     shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
 
     /**
+     * @brief peptideName: Name/Identifier of single peptide searched
+     * @brief peptideExactMass: Exact mass of peptide
+     * @brief peptideAdducts: list of adducts searched
+     */
+    string peptideName = "";
+    float peptideExactMass = -1.0f;
+    string peptideAdducts = "";
+
+    /**
      * @brief isPullIsotopes: if true, isotopes should be pulled and isotopes-related parameters should be assessed.
      * Note that isotope parameters might be set during encoding/decoding, but only if this flag is true
      * should isotopes actually be pulled and evaluated.
