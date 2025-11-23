@@ -98,7 +98,7 @@ vector<PeakGroup> PeptideStabilityProcessor::processPeptideStabilitySet(
     return groups;
 }
 
-void labelPeptideStabilitySet(
+void PeptideStabilityProcessor::labelPeptideStabilitySet(
     vector<PeakGroup>& peptideStabilityGroupSet,
     shared_ptr<PeptideStabilitySearchParameters> params,
     bool debug
