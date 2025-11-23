@@ -2856,7 +2856,7 @@ public:
 // Issue 815
 class PeptideStabilityProcessor {
 public:
-    static vector<PeakGroup> filterPeptideStabilitySet(
+    static vector<PeakGroup> processPeptideStabilitySet(
         vector<PeakGroup>& peptideStabilityGroupSet,
         const vector<mzSample*>& samples,
         shared_ptr<PeptideStabilitySearchParameters> params,

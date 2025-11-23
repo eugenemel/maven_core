@@ -71,7 +71,7 @@ shared_ptr<PeptideStabilitySearchParameters> PeptideStabilitySearchParameters::d
     return params;
 }
 
-vector<PeakGroup> PeptideStabilityProcessor::filterPeptideStabilitySet(
+vector<PeakGroup> PeptideStabilityProcessor::processPeptideStabilitySet(
     vector<PeakGroup>& peptideStabilityGroupSet,
     const vector<mzSample*>& samples,
     shared_ptr<PeptideStabilitySearchParameters> params,
