@@ -112,6 +112,9 @@ void PeptideStabilityProcessor::labelPeptideStabilitySet(
     float peptideRt = -1.0f;
     set<string> labeledAdducts{};
 
+    //peptides are ranked based on decreasing intensity
+    unsigned int rankCounter = 1;
+
     //Associate peptides with chosen candidate peptide, based on proximity to max intensity peptide.
     for (PeakGroup & g : peptideStabilityGroupSet) {
 
@@ -130,5 +133,8 @@ void PeptideStabilityProcessor::labelPeptideStabilitySet(
                 g.addLabel('e');
             }
         }
+
+        g.groupRank = static_cast<float>(rankCounter);
+        rankCounter++;
     }
 }
