@@ -126,6 +126,17 @@ public:
     //For example, the same sample might have multiple proteins.
     string biologicalId;
 
+    //name-type string for this trace.
+    //This ID describes the set of traces considered together for peak grouping.
+    // Note that peak grouping may take place considering the same analyteId across biologicalId
+    // (e.g., protein X across samples 1, 2, and 3),
+    // or, the same biologicalId across the same analyteId
+    // (e.g. proteins X, Y, and Z in sample 1),
+    // or, some combination of both
+    // (e.g., consider simultaneously proteins X, Y, and Z in samples 1, 2, and 3,
+    // builds a merged trace from all 6 constituent traces)
+    string traceSetId;
+
     SECTraceType type = SECTraceType::Unset;
 
     vector<int> fractionNums{}; //Includes missing fractions, e.g. from params
