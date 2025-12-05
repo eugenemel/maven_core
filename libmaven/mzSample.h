@@ -2824,15 +2824,21 @@ public:
 };
 
 /**
- * @brief The RtMatchState enum
+ * @brief The RtAgreementState enum
  * Explicitly handle case where RT is missing.
  * Note that 'RT_AGREEMENT' covers two different cases:
  * (1) the compound contains explicit RT min and RT max values.
  * (2) the compound contains only a single RT value, and an external rt tolerance value (e.g., a parameter) is used to define the RT min and RT max values.
+ *
+ * The COMPOUND_MISSING state is explicitly included to handle the possibility that a Compound* is passed in as nullptr
+ * (which should probably only happen in error).
+ *
+ * COMPOUND_MISSING_RT means the compound exists, but the compound does not have a valid RT value.
  */
-enum RtMatchState {
+enum RtAgreementState {
     RT_AGREEMENT,
     RT_DISAGREEMENT,
+    COMPOUND_MISSING,
     COMPOUND_MISSING_RT
 };
 
@@ -2863,7 +2869,7 @@ public:
                                             bool debug=false);
 
     static void labelRtAgreement(PeakGroup *g, char RtMatchLabel = 'l', bool debug = false);
-    static bool isRtAgreement(float groupRtVal, Compound *compound, float ms1RtTolr, bool debug = false);
+    static RtAgreementState assessRtAgreement(float groupRtVal, Compound *compound, float ms1RtTolr, bool debug = false);
 };
 
 // Issue 815

@@ -298,7 +298,7 @@ void MzKitchenProcessor::labelRtAgreement(PeakGroup *g, char rtMatchLabel, bool 
 }
 
 /**
- * @brief MzKitchenProcessor::isRtAgreement
+ * @brief MzKitchenProcessor::assessRtAgreement
  * Determine if a peakgroup and compound are close enough in RT space to constitute a possible match.
  * This function will intelligently determine if the compound has an RT value, if it has an RT value
  * and no RT_min/Rt_max, or if it has an RT value, RT_min and RT_max, and will carry out
@@ -308,14 +308,14 @@ void MzKitchenProcessor::labelRtAgreement(PeakGroup *g, char rtMatchLabel, bool 
  * @param compound
  * @param ms1RtTolr: fallback tolerance for RT matching
  */
-bool MzKitchenProcessor::isRtAgreement(float groupRtVal, Compound *compound, float ms1RtTolr, bool debug) {
-    if (!compound) return false;
+RtAgreementState MzKitchenProcessor::assessRtAgreement(float groupRtVal, Compound *compound, float ms1RtTolr, bool debug) {
+    if (!compound) return RtAgreementState::COMPOUND_MISSING;
 
     //Issue 792: If the compound is missing a valid RT value,
     //return 'true', indicating that there is no disagreement between
     //the compound's stated RT and the peak group's measured RT.
     //This was an intentional behavior change introduced in this case.
-    if (compound->expectedRt < 0) return true;
+    if (compound->expectedRt < 0) return RtAgreementState::COMPOUND_MISSING_RT;
 
     // Case: compounds expected RT range is known
     if (compound->expectedRtMin > 0 && compound->expectedRtMax > 0) {
@@ -330,7 +330,7 @@ bool MzKitchenProcessor::isRtAgreement(float groupRtVal, Compound *compound, flo
                 << "] vs. "
                 << groupRtVal
                 << endl;
-        return groupRtVal >= compound->expectedRtMin && groupRtVal <= compound->expectedRtMax;
+        return groupRtVal >= compound->expectedRtMin && groupRtVal <= compound->expectedRtMax ? RtAgreementState::RT_AGREEMENT : RtAgreementState::RT_DISAGREEMENT;
     } else {
         //Case: compounds expected Rt range is not provided
         if (debug) cout
@@ -341,10 +341,8 @@ bool MzKitchenProcessor::isRtAgreement(float groupRtVal, Compound *compound, flo
                 << groupRtVal
                 << endl;
         float rtDiff = abs(groupRtVal - compound->expectedRt);
-        return rtDiff <= ms1RtTolr;
+        return rtDiff <= ms1RtTolr ? RtAgreementState::RT_AGREEMENT : RtAgreementState::RT_DISAGREEMENT;
     }
-
-    return false;
 }
 
 /**
@@ -476,8 +474,18 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
         library.fragment_labels = compound->fragment_labels;
 
         //Issue 792: Altered logic around RT Agreement
-        if (params->rtIsRequireRtMatch && !MzKitchenProcessor::isRtAgreement(peakGroupRt, compound, params->rtMatchTolerance, debug)) {
+        //Issue 816: Expanded options around RT matching to more properly deal with code paths.
+        RtAgreementState RtAgreementState = MzKitchenProcessor::assessRtAgreement(peakGroupRt, compound, params->rtMatchTolerance, debug);
+
+        // matches are only skipped if there is an explicit disagreement between compound and measured RT.
+        // If insufficient information is available to make this comparison, the compound passes.
+        if (params->rtIsRequireRtMatch && (RtAgreementState == RtAgreementState::RT_DISAGREEMENT)){
             continue;
+        }
+
+        //Issue 816: Add an explicit label for RT agreement
+        if (RtAgreementState == RtAgreementState::RT_AGREEMENT) {
+            // TODO: add label
         }
 
         FragmentationMatchScore s = library.scoreMatch(&(g->fragmentationPattern), params->ms2PpmTolr);
