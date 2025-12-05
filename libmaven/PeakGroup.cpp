@@ -770,11 +770,13 @@ vector<Scan*> PeakGroup::getFragmentationEvents(SearchParameters* params, bool d
     //If a label is specified to flag cases where there aren't many scans, apply the label if there aren't many scans.
     if (!grpMs2PurityTopNCode.empty() && purityPassingScans.size() < grpMs2PurityTopN) {
         this->addLabel(grpMs2PurityTopNCode[0]);
+        if (debug) cout << "Added label for low scan numbers: '" << grpMs2PurityTopNCode[0] << "'" << endl;
     }
 
     //If a label is specified to flag cases where the average purity is low, apply the label
     if (isLabelLowPurity && avgPurity < grpMs2LabelAvgPurityThresh) {
         this->addLabel(grpMs2LabelAvgPurityCode[0]);
+        if (debug) cout << "Added label for low average purity: '" << grpMs2LabelAvgPurityCode[0] << "'" << endl;
     }
 
     this->peakGroupScans = purityPassingScans;
