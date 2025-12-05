@@ -483,9 +483,10 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
             continue;
         }
 
-        //Issue 816: Add an explicit label for RT agreement
+        //Issue 816: Add an explicit label for RT agreement.
+        //compounds missing RT values do not receive the label
         if (RtAgreementState == RtAgreementState::RT_AGREEMENT) {
-            // TODO: add label
+            g->addLabel('l');
         }
 
         FragmentationMatchScore s = library.scoreMatch(&(g->fragmentationPattern), params->ms2PpmTolr);
