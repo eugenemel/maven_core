@@ -2823,6 +2823,19 @@ public:
     }
 };
 
+/**
+ * @brief The RtMatchState enum
+ * Explicitly handle case where RT is missing.
+ * Note that 'RT_AGREEMENT' covers two different cases:
+ * (1) the compound contains explicit RT min and RT max values.
+ * (2) the compound contains only a single RT value, and an external rt tolerance value (e.g., a parameter) is used to define the RT min and RT max values.
+ */
+enum RtMatchState {
+    RT_AGREEMENT,
+    RT_DISAGREEMENT,
+    COMPOUND_MISSING_RT
+};
+
 class MzKitchenProcessor{
 public:
     static constexpr const char* const LIPID_SCORING_NAME = "Mzkitchen Lipid Score";
