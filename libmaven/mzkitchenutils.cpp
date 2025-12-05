@@ -496,6 +496,7 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
 
         //debugging
         if (debug) {
+            cout << "Peak group fragmentation pattern has " << g->fragmentationPattern.nobs() << " peaks.\n";
             cout << "Candidate Score: " << compound->id << ":\n";
             cout << "numMatches= " << s.numMatches
                  << ", hyperGeometricScore= " << s.hypergeomScore
