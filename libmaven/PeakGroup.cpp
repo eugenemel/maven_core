@@ -644,7 +644,7 @@ vector<Scan*> PeakGroup::getRepresentativeFullScans() {
 }
 
 vector<Scan*> PeakGroup::getFragmentationEvents(SearchParameters* params, bool debug) {
-    if (debug) cout << "Starting PeakGroup::getFragmentationEvents()" << endl;
+    if (debug) cout << "Starting PeakGroup::getFragmentationEvents(SearchParameters* params, bool debug)" << endl;
 
     float maxRtTolFromApex = -1.0f;
     int grpMs2PurityTopN = -1;
@@ -779,6 +779,7 @@ vector<Scan*> PeakGroup::getFragmentationEvents(SearchParameters* params, bool d
         if (debug) cout << "Added label for low average purity: '" << grpMs2LabelAvgPurityCode[0] << "'" << endl;
     }
 
+    if (debug) cout << "# MS2 Scans (final count): " << purityPassingScans.size() << endl;
     this->peakGroupScans = purityPassingScans;
 
     if (debug) cout << "Completed PeakGroup::getFragmentationEvents()." << endl;
@@ -830,10 +831,13 @@ void PeakGroup::computeFragPattern(float productPpmTolr)  {
     ms2EventCount = static_cast<int>(ms2events.size());
 }
 
-void PeakGroup::computeFragPattern(SearchParameters *parameters) {
+void PeakGroup::computeFragPattern(SearchParameters *parameters, bool debug) {
 
     //build consensus ms2 specta
-    vector<Scan*>ms2events = getFragmentationEvents(parameters);
+
+    //retrieve fragmentation events
+    //possible side effect: modify PeakGroup labels
+    vector<Scan*>ms2events = getFragmentationEvents(parameters, debug);
     if (ms2events.size() == 0 ) return;
     sort(ms2events.begin(), ms2events.end(), Scan::compIntensity);
 

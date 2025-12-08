@@ -1403,7 +1403,7 @@ class PeakGroup {
         void computeFragPattern(float productPpmTolr);
 
         //Issue 538: reimplementation of computeFragPattern(productPpmTolr) with more control
-        void computeFragPattern(SearchParameters *parameters);
+        void computeFragPattern(SearchParameters *parameters, bool debug=false);
 
         void computeDIFragPattern(shared_ptr<DirectInfusionSearchParameters> directInfusionSearchParameters);
         void computePeaksSearchFragPattern(shared_ptr<PeaksSearchParameters> params);

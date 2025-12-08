@@ -418,7 +418,7 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
     });
 
     if (g->fragmentationPattern.mzs.empty()) {
-        g->computeFragPattern(params.get());
+        g->computeFragPattern(params.get(), debug);
     }
 
     vector<pair<CompoundIon, FragmentationMatchScore>> scores{};
