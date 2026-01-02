@@ -73,6 +73,9 @@ PeakGroup::PeakGroup()  {
     //Issue 792
     maxPeakMzVal = 0.0f;
     maxPeakRtVal = 0.0f;
+
+    //Issue 817
+    notes = "";
 }      
 
 void PeakGroup::copyObj(const PeakGroup& o)  { 
@@ -159,6 +162,8 @@ void PeakGroup::copyObj(const PeakGroup& o)  {
 
     maxPeakMzVal = o.maxPeakMzVal;
     maxPeakRtVal = o.maxPeakRtVal; //Issue 792
+
+    notes = o.notes; //Issue 817
 
     copyChildren(o);
 }

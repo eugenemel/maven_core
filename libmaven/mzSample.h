@@ -1378,6 +1378,9 @@ class PeakGroup {
         float maxPeakMzVal;
         float maxPeakRtVal;
 
+        //Issue 817: 'notes' column for peakgroup
+        string notes;
+
         bool isPrimaryGroup();
         inline bool hasCompoundLink()  { if(compound != NULL) return true ; return false; }
         inline bool isEmpty()   { if(peaks.size() == 0) return true; return false; }
