@@ -1454,8 +1454,12 @@ class PeakGroup {
         void markGroupBad();
         void addLabel(char label);
         void toggleLabel(char label);
-        void applyLabelsFromCompoundMetadata(); //Issue 662
         string getPeakGroupLabel();
+
+        //Issue 662 / 817: compound/peakgroup synchrony
+        void applyLabelsFromCompoundMetadata(); //Issue 662
+        void applyNotesFromCompound(); //Issue 817
+        void transferCompoundDataToPeakGroup(); // Issue 817
 
 		void reduce();
 		void fillInPeaks(const vector<EIC*>& eics);

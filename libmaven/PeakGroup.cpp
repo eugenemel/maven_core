@@ -1404,6 +1404,26 @@ void PeakGroup::applyLabelsFromCompoundMetadata() {
     }
 }
 
+void PeakGroup::applyNotesFromCompound() {
+    if (compound) {
+        if (this->notes == "") {
+            this->notes = compound->notes;
+        } else {
+            this->notes += "; " + compound->notes;
+        }
+    }
+
+    for (auto& child : children) {
+        child.applyNotesFromCompound();
+    }
+}
+
+//Issue 817: Also apply notes to peak groups, in addition to labels
+void PeakGroup::transferCompoundDataToPeakGroup() {
+    applyLabelsFromCompoundMetadata();
+    applyNotesFromCompound();
+}
+
 float PeakGroup::getBlankSignalByQuantType(string quantType){
     PeakGroupBaseline baseline = quantType.find("smoothed") != std::string::npos ? maxBlankSmoothedSignal : maxBlankRawSignal;
     return baseline.getCorrespondingBaseline(quantType);
