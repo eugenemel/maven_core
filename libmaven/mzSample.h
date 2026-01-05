@@ -1562,6 +1562,8 @@ class Compound {
             map<int,string>fragment_iontype;
             vector<string> category;
 
+            string notes = ""; //Added in Issue 817
+
             float ajustedMass(int charge);
             static bool compMass(const Compound* a, const Compound* b )      { return(a->exactMass < b->exactMass);       }
             static bool compName(const Compound* a, const Compound* b )    { return(a->name < b->name);       }
