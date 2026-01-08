@@ -1244,7 +1244,7 @@ class PeakGroup {
             BAD='b',
             DELETED='x',
             COMPOUND_MANUALLY_CHANGED='@', //Issue 429
-            MANUALLY_INTEGRATED='%' //Issue 819
+            MANUALLY_INTEGRATED='m' //Issue 819
         };
 
 		PeakGroup();
