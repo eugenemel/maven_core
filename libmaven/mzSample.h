@@ -1239,7 +1239,13 @@ class PeakGroup {
             SmoothedAreaFWHM=15 //Peak.smoothedPeakAreaFWHM
         };
 
-        enum ReservedLabel {GOOD='g', BAD='b', DELETED='x', COMPOUND_MANUALLY_CHANGED='@'}; //Issue 429
+        enum ReservedLabel {
+            GOOD='g',
+            BAD='b',
+            DELETED='x',
+            COMPOUND_MANUALLY_CHANGED='@', //Issue 429
+            MANUALLY_INTEGRATED='%' //Issue 819
+        };
 
 		PeakGroup();
 		PeakGroup(const PeakGroup& o);
