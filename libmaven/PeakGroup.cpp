@@ -1282,14 +1282,18 @@ void PeakGroup::addLabel(char label) {
 }
 
 void PeakGroup::processLabel(char label, bool isToggle) {
-    if (label == '\0') {
+    if (label == '\0') {//reserved character: clear all labels
 
-        //reserved character: clear all labels
+        //special labels that cannot be cleared - added as part of some other process
         bool isHasManualChanged = find(labels.begin(), labels.end(), ReservedLabel::COMPOUND_MANUALLY_CHANGED) != labels.end();
+        bool isHasManualIntegration = find(labels.begin(), labels.end(), ReservedLabel::MANUALLY_INTEGRATED) != labels.end();
 
         labels.clear();
         if (isHasManualChanged) {
             labels.push_back(ReservedLabel::COMPOUND_MANUALLY_CHANGED);
+        }
+        if (isHasManualIntegration) {
+            labels.push_back(ReservedLabel::MANUALLY_INTEGRATED);
         }
 
     } else if (find(labels.begin(), labels.end(), label) != labels.end()) {
