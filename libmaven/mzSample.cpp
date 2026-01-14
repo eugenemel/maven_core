@@ -2623,7 +2623,7 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     if (decodedMap.find("atomSpecificMaxIsotopes") != decodedMap.end()) {
         string encodedAtomSpecificMaxIsotopes = decodedMap["atomSpecificMaxIsotopes"];
         unordered_map<string, string> decodedMapAtomIsotopes = mzUtils::decodeParameterMap(encodedAtomSpecificMaxIsotopes, INTERNAL_MAP_DELIMITER);
-        for (auto it = decodedMap.begin(); it != decodedMap.end(); ++it){
+        for (auto it = decodedMapAtomIsotopes.begin(); it != decodedMapAtomIsotopes.end(); ++it){
             string key = it->first;
             int value = stoi(it->second);
             isotopeParameters.atomSpecificMaxIsotopes.insert(make_pair(key, value));
