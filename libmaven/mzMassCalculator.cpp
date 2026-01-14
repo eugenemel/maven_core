@@ -510,14 +510,20 @@ vector<Isotope> MassCalculator::computeIsotopes(
     string compoundFormula,
     Adduct *adduct,
     double mz,
-    vector<Atom> labeledIsotopes,
-    LabeledIsotopeRetentionPolicy labeledIsotopeRetentionPolicy,
+    IsotopeParameters& isotopeParams,
     NaturalAbundanceData naturalAbundanceData,
-    bool isIncludeNaturalAbundance,
-    int maxNumExtraNeutrons,
-    double minimumProportionMPlusZero,
     bool debug
     ){
+
+    vector<Atom> labeledIsotopes = isotopeParams.getLabeledIsotopes();
+    LabeledIsotopeRetentionPolicy labeledIsotopeRetentionPolicy = isotopeParams.labeledIsotopeRetentionPolicy;
+    bool isIncludeNaturalAbundance = isotopeParams.isNatAbundance;
+    double minimumProportionMPlusZero = isotopeParams.natAbundanceThreshold;
+
+    int maxNumExtraNeutrons = INT_MAX;
+    if (isotopeParams.isExtractNIsotopes) {
+        maxNumExtraNeutrons = isotopeParams.maxIsotopesToExtract;
+    }
 
     vector<IsotopicAbundance> isotopicAbundances;
     string cacheKey = "";

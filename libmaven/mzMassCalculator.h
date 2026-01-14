@@ -128,12 +128,8 @@ class MassCalculator {
         string compoundFormula,
         Adduct *adduct,
         double mz,
-        vector<Atom> labeledIsotopes,
-        LabeledIsotopeRetentionPolicy labeledIsotopeRetentionPolicy,
+        IsotopeParameters& isotopeParams,
         NaturalAbundanceData naturalAbundanceData,
-        bool isIncludeNaturalAbundance = false,
-        int maxNumExtraNeutrons=INT_MAX,
-        double minimumProportionMPlusZero = 0,
         bool debug=false
         );
 

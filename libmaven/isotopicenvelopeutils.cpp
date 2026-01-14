@@ -199,12 +199,8 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
         compoundFormula,
         adduct,
         static_cast<double>(group->meanMz),
-        params.getLabeledIsotopes(),
-        params.labeledIsotopeRetentionPolicy,
+        params,
         NaturalAbundanceData::defaultNaturalAbundanceData,
-        params.isNatAbundance,
-        maxNumProtons,
-        params.natAbundanceThreshold,
         debug
         );
 
