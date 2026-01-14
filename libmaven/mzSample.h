@@ -1074,7 +1074,11 @@ public:
 
 struct IsotopeParameters {
 
-    string searchVersion = "2.10.19";
+    //RESERVED DELIMITERS - DO NOT CHANGE!
+    static constexpr const char* const INTERNAL_MAP_DELIMITER = "|,|";
+    static constexpr const char* const TUPLE_MAP_KEY_DELIMITER = "&";
+
+    string searchVersion = "2.12.4";
     IsotopeParametersType isotopeParametersType = IsotopeParametersType::INVALID;
 
     //Used to determine m/z bounds from theoretical isotope m/z
@@ -1104,6 +1108,7 @@ struct IsotopeParameters {
     bool isExtractNIsotopes = false;
     int maxIsotopesToExtract = 5;
     bool isKeepEmptyIsotopes = false;
+    map<string, int> atomSpecificMaxIsotopes = {}; //Issue 820
 
     //clsf encodes itself as clsfFile.
     //decoding only decodes clsfFile, it does not try to create the Classifier object.

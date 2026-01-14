@@ -2474,6 +2474,17 @@ string IsotopeParameters::encodeParams(bool isIncludePeakPickingAndGroupingParam
     encodedParams = encodedParams + "maxIsotopesToExtract" + "=" + to_string(maxIsotopesToExtract) + ";";
     encodedParams = encodedParams + "isKeepEmptyIsotopes" + "=" + to_string(isKeepEmptyIsotopes) + ";";
 
+    //Issue 820
+    encodedParams = encodedParams + "atomSpecificMaxIsotopes" + "=" + "{";
+
+    for (auto it = atomSpecificMaxIsotopes.begin(); it != atomSpecificMaxIsotopes.end(); ++it) {
+        string key = it->first;
+        string value = to_string(it->second);
+        encodedParams = encodedParams + key + "=" + value + INTERNAL_MAP_DELIMITER;
+    }
+
+    encodedParams = encodedParams + "};";
+
     if (clsf) {
         encodedParams = encodedParams + "clsfFile" + "=" + clsf->getModelFilename() + ";"; // use with Classifier* parameter
     } else {
@@ -2606,6 +2617,17 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     }
     if (decodedMap.find("isKeepEmptyIsotopes") != decodedMap.end()) {
         isotopeParameters.isKeepEmptyIsotopes = decodedMap["isKeepEmptyIsotopes"] == "1";
+    }
+
+    //Issue 820
+    if (decodedMap.find("atomSpecificMaxIsotopes") != decodedMap.end()) {
+        string encodedAtomSpecificMaxIsotopes = decodedMap["atomSpecificMaxIsotopes"];
+        unordered_map<string, string> decodedMapAtomIsotopes = mzUtils::decodeParameterMap(encodedAtomSpecificMaxIsotopes, INTERNAL_MAP_DELIMITER);
+        for (auto it = decodedMap.begin(); it != decodedMap.end(); ++it){
+            string key = it->first;
+            int value = stoi(it->second);
+            isotopeParameters.atomSpecificMaxIsotopes.insert(make_pair(key, value));
+        }
     }
 
     if (decodedMap.find("clsfFile") != decodedMap.end()) {
