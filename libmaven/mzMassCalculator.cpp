@@ -590,6 +590,25 @@ vector<Isotope> MassCalculator::computeIsotopes(
        //Avoid isotopes with too many extra neutrons
        if (isotopicAbundance.numTotalExtraNeutrons > maxNumExtraNeutrons) continue;
 
+       // Issue 820: avoid isotopes that violate atom-specific limits
+       if (!isotopeParams.atomSpecificMaxIsotopes.empty()){
+           bool isAtomSpecificCountExceeded = false;
+           for (auto it = isotopicAbundance.atomCounts.begin(); it != isotopicAbundance.atomCounts.end(); ++it) {
+               string atomSymbol = it->first.symbol;
+               int numAtoms = it->second;
+               if (isotopeParams.atomSpecificMaxIsotopes.find(atomSymbol) != isotopeParams.atomSpecificMaxIsotopes.end()) {
+                   int maxAllowableAtoms = isotopeParams.atomSpecificMaxIsotopes.at(atomSymbol);
+                   if (numAtoms > maxAllowableAtoms) {
+                       isAtomSpecificCountExceeded = true;
+                       break;
+                   }
+               }
+           }
+           if (isAtomSpecificCountExceeded) {
+               continue;
+           }
+       }
+
        if (debug) {
             cout << isotopicAbundance.toString()
                  << ": " << isotopicAbundance.numTotalExtraNeutrons
