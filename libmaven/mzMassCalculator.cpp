@@ -649,6 +649,8 @@ vector<Isotope> MassCalculator::computeIsotopes(
             isLabelType = isSinglePrespecifiedLabel;
         } else if (labeledIsotopeRetentionPolicy == LabeledIsotopeRetentionPolicy::ONLY_CARBON_TWO_LABELS) {
             isLabelType = isSinglePrespecifiedLabel || isCarbon13DoubleLabelCase;
+        } else if (labeledIsotopeRetentionPolicy == LabeledIsotopeRetentionPolicy::ONLY_CARBON_MULTIPLE_LABELS) {
+            isLabelType = isSinglePrespecifiedLabel || isCarbon13MultipleLabelCase;
         } else if (labeledIsotopeRetentionPolicy == LabeledIsotopeRetentionPolicy::ONE_OR_MORE_LABELS) {
             isLabelType = isMultipleLabeledForms;
         }
