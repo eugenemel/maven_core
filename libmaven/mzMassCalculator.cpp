@@ -704,6 +704,14 @@ vector<IsotopicAbundance> MassCalculator::getUnknownFormulaIsotopicAbundances(
                 //adjust mz
                 isotopicAbundance.mz += naturalAbundanceData.getDeltaMzBySymbol(atom.symbol) * i;
 
+
+                //Issue 820: note unlabeled/labeled forms
+                if (atom.isLabeled()) {
+                    isotopicAbundance.labeledForms.insert(atom);
+                } else {
+                    isotopicAbundance.unlabeledForms.insert(atom);
+                }
+
                 if (isotopicAbundance.numTotalExtraNeutrons <= maxNumExtraNeutrons) {
                     isotopicAbundancesAddCurrentAtom.push_back(isotopicAbundance);
                 }
