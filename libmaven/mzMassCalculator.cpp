@@ -533,53 +533,53 @@ vector<Isotope> MassCalculator::computeIsotopes(
     // known atomic composition case
     if (isKnownAtomicComposition) {
 
-       if (debug) cout << "MassCalculator::computeIsotopes(): Known atomic composition case." << endl;
+        if (debug) cout << "MassCalculator::computeIsotopes(): Known atomic composition case." << endl;
 
-       cacheKey = MassCalculator::getCachedIsotopeKey(
-           compoundFormula,
-           adduct,
-           labeledIsotopes,
-           labeledIsotopeRetentionPolicy,
-           isIncludeNaturalAbundance,
-           maxNumExtraNeutrons,
-           minimumProportionMPlusZero);
+        cacheKey = MassCalculator::getCachedIsotopeKey(
+            compoundFormula,
+            adduct,
+            labeledIsotopes,
+            labeledIsotopeRetentionPolicy,
+            isIncludeNaturalAbundance,
+            maxNumExtraNeutrons,
+            minimumProportionMPlusZero);
 
-       if (isotopesCache.find(cacheKey) != isotopesCache.end()) {
-                if (debug) cout << "Found Cached vector<Isotope> - returning cached value!" << endl;
-                return (isotopesCache.at(cacheKey));
-       } else if (debug) {
-                cout << "vector<Isotope> not found in cache, will re-compute." << endl;
-       }
+        if (isotopesCache.find(cacheKey) != isotopesCache.end()) {
+            if (debug) cout << "Found Cached vector<Isotope> - returning cached value!" << endl;
+            return (isotopesCache.at(cacheKey));
+        } else if (debug) {
+            cout << "vector<Isotope> not found in cache, will re-compute." << endl;
+        }
 
-       //First, enumerate all theoretically possible isotopes based on the formula.
-       NaturalAbundanceDistribution abundanceDistribution =
-           MassCalculator::getNaturalAbundanceDistribution(
-               compoundFormula,
-               adduct,
-               naturalAbundanceData,
+        //First, enumerate all theoretically possible isotopes based on the formula.
+        NaturalAbundanceDistribution abundanceDistribution =
+            MassCalculator::getNaturalAbundanceDistribution(
+                compoundFormula,
+                adduct,
+                naturalAbundanceData,
 
-               0, //Issue 695: reversion of Issue 690 - retain 0-intensity isotopes
+                0, //Issue 695: reversion of Issue 690 - retain 0-intensity isotopes
 
-               // Issue 690: speedup
-               // Assume that the monoisotope constitutes at least 1% of total abundance
-               // 0.01 * minimumProportionMPlusZero,
+                // Issue 690: speedup
+                // Assume that the monoisotope constitutes at least 1% of total abundance
+                // 0.01 * minimumProportionMPlusZero,
 
-               false);
+                false);
 
-       isotopicAbundances = abundanceDistribution.isotopicAbundances;
+        isotopicAbundances = abundanceDistribution.isotopicAbundances;
 
-    // unknown atomic composition case
+        // unknown atomic composition case
     } else {
 
-       if (debug) cout << "MassCalculator::computeIsotopes(): Unknown atomic composition case." << endl;
+        if (debug) cout << "MassCalculator::computeIsotopes(): Unknown atomic composition case." << endl;
 
-       isotopicAbundances = MassCalculator::getUnknownFormulaIsotopicAbundances(
-           mz,
-           labeledIsotopes,
-           isotopeParams,
-           naturalAbundanceData,
-           debug
-           );
+        isotopicAbundances = getUnknownFormulaIsotopicAbundances(
+            mz,
+            labeledIsotopes,
+            isotopeParams,
+            naturalAbundanceData,
+            debug
+            );
     }
 
     //Filter the list of isotopes based on search criteria.
@@ -587,78 +587,91 @@ vector<Isotope> MassCalculator::computeIsotopes(
 
     for (auto isotopicAbundance : isotopicAbundances) {
 
-       //Avoid isotopes with too many extra neutrons
-       if (isotopicAbundance.numTotalExtraNeutrons > maxNumExtraNeutrons) continue;
+        //Avoid isotopes with too many extra neutrons
+        if (isotopicAbundance.numTotalExtraNeutrons > maxNumExtraNeutrons) continue;
 
-       // Issue 820: avoid isotopes that violate atom-specific limits
-       if (!isotopeParams.atomSpecificMaxIsotopes.empty()){
-           bool isAtomSpecificCountExceeded = false;
-           for (auto it = isotopicAbundance.atomCounts.begin(); it != isotopicAbundance.atomCounts.end(); ++it) {
-               string atomSymbol = it->first.symbol;
-               int numAtoms = it->second;
-               if (isotopeParams.atomSpecificMaxIsotopes.find(atomSymbol) != isotopeParams.atomSpecificMaxIsotopes.end()) {
-                   int maxAllowableAtoms = isotopeParams.atomSpecificMaxIsotopes.at(atomSymbol);
-                   if (numAtoms > maxAllowableAtoms) {
-                       isAtomSpecificCountExceeded = true;
-                       break;
-                   }
-               }
-           }
-           if (isAtomSpecificCountExceeded) {
-               continue;
-           }
-       }
+        // Issue 820: avoid isotopes that violate atom-specific limits
+        if (!isotopeParams.atomSpecificMaxIsotopes.empty()){
+            bool isAtomSpecificCountExceeded = false;
+            for (auto it = isotopicAbundance.atomCounts.begin(); it != isotopicAbundance.atomCounts.end(); ++it) {
 
-       if (debug) {
+                Atom atom = it->first;
+                if (atom.isLabeled()) {
+                    string atomSymbol = atom.symbol;
+                    int numAtoms = it->second;
+
+                    if (isotopeParams.atomSpecificMaxIsotopes.find(atomSymbol) != isotopeParams.atomSpecificMaxIsotopes.end()) {
+                        int maxAllowableAtoms = isotopeParams.atomSpecificMaxIsotopes.at(atomSymbol);
+                        if (numAtoms > maxAllowableAtoms) {
+                            isAtomSpecificCountExceeded = true;
+                            break;
+                        }
+                    }
+                }
+
+            }
+            if (isAtomSpecificCountExceeded) {
+                continue;
+            }
+        }
+
+        if (debug) {
             cout << isotopicAbundance.toString()
-                 << ": " << isotopicAbundance.numTotalExtraNeutrons
-                 << " extra neutrons." << endl;
-       }
+            << ": " << isotopicAbundance.numTotalExtraNeutrons
+            << " extra neutrons." << endl;
+        }
 
-       //check that the isotope is one of the preferred label types
-       bool isLabelType = false;
+        //check that the isotope is one of the preferred label types
+        bool isLabelType = false;
 
-       set<Atom> labeledIsotopesPresent{};
+        set<Atom> labeledIsotopesPresent{};
 
-       for (auto& atom : labeledIsotopes) {
+        for (auto& atom : labeledIsotopes) {
             bool isHasAtom = isotopicAbundance.isHasAtom(atom);
             if (isHasAtom) {
                 labeledIsotopesPresent.insert(atom);
             }
-       }
+        }
 
-       bool isSinglePrespecifiedLabel = labeledIsotopesPresent.size() == 1 && isotopicAbundance.labeledForms.size() == 1;
+        bool isSinglePrespecifiedLabel = labeledIsotopesPresent.size() == 1 && isotopicAbundance.labeledForms.size() == 1;
 
-       bool isCarbon13MultipleLabelCase = labeledIsotopesPresent.size() == 2 && isotopicAbundance.labeledForms.size() == 2 &&
-                                        labeledIsotopesPresent.find(Atom("C", 13)) != labeledIsotopesPresent.end();
+        bool isCarbon13DoubleLabelCase = labeledIsotopesPresent.size() == 2 && isotopicAbundance.labeledForms.size() == 2 &&
+                                         labeledIsotopesPresent.find(Atom("C", 13)) != labeledIsotopesPresent.end();
 
-       bool isMultipleLabeledForms = !labeledIsotopesPresent.empty() &&
-                                     labeledIsotopesPresent.size() == isotopicAbundance.labeledForms.size();
+        bool isCarbon13MultipleLabelCase = labeledIsotopesPresent.size() > 1 && isotopicAbundance.labeledForms.size() > 1 &&
+                                           labeledIsotopesPresent.find(Atom("C", 13)) != labeledIsotopesPresent.end();
 
-       //Assess agreement based on isotope label retention policy
-       if (labeledIsotopeRetentionPolicy == LabeledIsotopeRetentionPolicy::ONLY_ONE_LABEL) {
+        bool isMultipleLabeledForms = !labeledIsotopesPresent.empty() &&
+                                      labeledIsotopesPresent.size() == isotopicAbundance.labeledForms.size();
+
+        //Assess agreement based on isotope label retention policy
+        if (labeledIsotopeRetentionPolicy == LabeledIsotopeRetentionPolicy::ONLY_ONE_LABEL) {
             isLabelType = isSinglePrespecifiedLabel;
-       } else if (labeledIsotopeRetentionPolicy == LabeledIsotopeRetentionPolicy::ONLY_CARBON_TWO_LABELS) {
-            isLabelType = isSinglePrespecifiedLabel || isCarbon13MultipleLabelCase;
-       } else if (labeledIsotopeRetentionPolicy == LabeledIsotopeRetentionPolicy::ONE_OR_MORE_LABELS) {
+        } else if (labeledIsotopeRetentionPolicy == LabeledIsotopeRetentionPolicy::ONLY_CARBON_TWO_LABELS) {
+            isLabelType = isSinglePrespecifiedLabel || isCarbon13DoubleLabelCase;
+        } else if (labeledIsotopeRetentionPolicy == LabeledIsotopeRetentionPolicy::ONE_OR_MORE_LABELS) {
             isLabelType = isMultipleLabeledForms;
-       }
+        }
 
-       //isotopes can also be included if they have a high enough natural abundance.
-       bool isValidNaturalAbundance = isIncludeNaturalAbundance && isotopicAbundance.naturalAbundanceMonoProportion > minimumProportionMPlusZero;
+        //isotopes can also be included if they have a high enough natural abundance.
+        bool isValidNaturalAbundance = isIncludeNaturalAbundance && isotopicAbundance.naturalAbundanceMonoProportion > minimumProportionMPlusZero;
 
-       if (debug) {
-            cout << "isLabelType? " << isLabelType
+        if (debug) {
+            cout << "isSinglePrespecifiedLabel? " << isSinglePrespecifiedLabel
+                 << "isCarbon13DoubleLabelCase? " << isCarbon13DoubleLabelCase
+                 << "isCarbon13MultipleLabelCase? " << isCarbon13MultipleLabelCase
+                 << "isMultipleLabeledForms? " << isMultipleLabeledForms
+                 << "isLabelType? " << isLabelType
                  << ", isValidNaturalAbundance? " << isValidNaturalAbundance
                  <<", is [M+0]? " << (isotopicAbundance.numTotalExtraNeutrons == 0)
                  << ", is unknown atomic composition? " << !isKnownAtomicComposition
                  << endl;
-       }
+        }
 
-       //retain isotopes if they are the [M+0], of the preferred label type, pass natural abundance criteria, or are associated with an unknown formula.
-       if (isLabelType || isValidNaturalAbundance || isotopicAbundance.numTotalExtraNeutrons == 0 || !isKnownAtomicComposition) {
-           isotopes.push_back(isotopicAbundance.toIsotope());
-       }
+        //retain isotopes if they are the [M+0], of the preferred label type, pass natural abundance criteria.
+        if (isLabelType || isValidNaturalAbundance || isotopicAbundance.numTotalExtraNeutrons == 0) {
+            isotopes.push_back(isotopicAbundance.toIsotope());
+        }
     }
 
     //Issue 711: Write value to cache to avoid excessive recomputations.
@@ -671,6 +684,7 @@ vector<Isotope> MassCalculator::computeIsotopes(
     }
 
     return isotopes;
+
 }
 
 vector<IsotopicAbundance> MassCalculator::getUnknownFormulaIsotopicAbundances(
