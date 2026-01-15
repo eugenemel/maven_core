@@ -576,8 +576,8 @@ vector<Isotope> MassCalculator::computeIsotopes(
        isotopicAbundances = MassCalculator::getUnknownFormulaIsotopicAbundances(
            mz,
            labeledIsotopes,
+           isotopeParams,
            naturalAbundanceData,
-           maxNumExtraNeutrons,
            debug
            );
     }
@@ -676,52 +676,110 @@ vector<Isotope> MassCalculator::computeIsotopes(
 vector<IsotopicAbundance> MassCalculator::getUnknownFormulaIsotopicAbundances(
     double mz,
     vector<Atom> heavyIsotopes,
+    IsotopeParameters& isotopeParams,
     NaturalAbundanceData& naturalAbundanceData,
-    int maxNumExtraNeutrons,
     bool debug
     ) {
 
     //initialize abundances
-    vector<IsotopicAbundance> isotopicAbundances{};
+    map<string, IsotopicAbundance> allIsotopicAbundances{};
+    vector<IsotopicAbundance> currentIsotopicAbundances{};
+    vector<IsotopicAbundance> nextIsotopicAbundances{};
 
     IsotopicAbundance seed;
     seed.mz = mz;
-    isotopicAbundances.push_back(seed);
+    currentIsotopicAbundances.push_back(seed);
+    allIsotopicAbundances.insert(make_pair("C12-PARENT", seed));
 
-    //Enumerate every possible combination of heavy atoms, store into atomCounts
-    for (Atom& atom : heavyIsotopes) {
+    //Enumerate every possible combination of heavy atoms, save legal combinations
 
-        vector<IsotopicAbundance> isotopicAbundancesAddCurrentAtom{};
-
-        for (IsotopicAbundance abundance : isotopicAbundances) {
-           for (unsigned int i = 0; i <= maxNumExtraNeutrons; i++) {
-
-                //make a copy
-                IsotopicAbundance isotopicAbundance = abundance;
-                isotopicAbundance.atomCounts.insert(make_pair(atom, i));
-                isotopicAbundance.numTotalExtraNeutrons++;
-
-                //adjust mz
-                isotopicAbundance.mz += naturalAbundanceData.getDeltaMzBySymbol(atom.symbol) * i;
-
-
-                //Issue 820: note unlabeled/labeled forms
-                if (atom.isLabeled()) {
-                    isotopicAbundance.labeledForms.insert(atom);
-                } else {
-                    isotopicAbundance.unlabeledForms.insert(atom);
-                }
-
-                if (isotopicAbundance.numTotalExtraNeutrons <= maxNumExtraNeutrons) {
-                    isotopicAbundancesAddCurrentAtom.push_back(isotopicAbundance);
-                }
-           }
+    bool isAddedIsotopes = true;
+    int iterationNum = 1;
+    while (isAddedIsotopes) {
+        if (debug) {
+            cout << "Starting iteration #" << iterationNum << endl;
         }
 
-        isotopicAbundances = isotopicAbundancesAddCurrentAtom;
+        isAddedIsotopes = false;
+
+        // Try to add a single atom to each seed abundance
+        for (IsotopicAbundance seedAbundance : currentIsotopicAbundances) {
+
+            if (debug) {
+                cout << "Starting with seed abundance: " << seedAbundance.toString() << endl;
+            }
+
+            for (Atom& atom : heavyIsotopes) {
+
+                int numHeavyLabel = 0;
+                if (seedAbundance.atomCounts.find(atom) != seedAbundance.atomCounts.end()) {
+                    numHeavyLabel = seedAbundance.atomCounts.at(atom);
+                }
+                numHeavyLabel++;
+
+
+                bool isAddLabel = true;
+                if (isotopeParams.atomSpecificMaxIsotopes.find(atom.symbol) != isotopeParams.atomSpecificMaxIsotopes.end()) {
+                    int maxHeavyLabelIsotopes = isotopeParams.atomSpecificMaxIsotopes.at(atom.symbol);
+                    if (numHeavyLabel > maxHeavyLabelIsotopes) {
+                        isAddLabel = false;
+                    }
+                }
+
+                int numTotalExtraNeutrons = seedAbundance.numTotalExtraNeutrons;
+                numTotalExtraNeutrons++;
+
+                if (numTotalExtraNeutrons > isotopeParams.maxIsotopesToExtract) {
+                    isAddLabel = false;
+                }
+
+                if (isAddLabel) {
+
+                    //make a copy
+                    IsotopicAbundance isotopicAbundance = seedAbundance;
+                    isotopicAbundance.numTotalExtraNeutrons = numTotalExtraNeutrons;
+                    isotopicAbundance.atomCounts[atom] = numHeavyLabel;
+                    isotopicAbundance.mz += naturalAbundanceData.getDeltaMzBySymbol(atom.symbol); //offset m/z by adding one heavy label unit
+                    isotopicAbundance.labeledForms.insert(atom);
+                    nextIsotopicAbundances.push_back(isotopicAbundance);
+
+                    isAddedIsotopes = true;
+
+                    if (debug) {
+                        cout << "\tAdded New Abundance: " << isotopicAbundance.toString() << endl;
+                    }
+                }
+            } // end isotopicAbundances
+        } // end heavyIsotopes
+
+        //This round's updates become next round's seed abundances.
+        //only abundances that are new to this round are propagated forward
+        currentIsotopicAbundances.clear();
+        for (IsotopicAbundance & abundance : nextIsotopicAbundances) {
+            string formula = abundance.getFormula();
+            if (allIsotopicAbundances.find(formula) == allIsotopicAbundances.end()) {
+                allIsotopicAbundances.insert(make_pair(formula, abundance));
+                currentIsotopicAbundances.push_back(abundance);
+            }
+        }
+        nextIsotopicAbundances.clear();
+        iterationNum++;
+
+    } // end while
+
+    vector<IsotopicAbundance> abundances = vector<IsotopicAbundance>(allIsotopicAbundances.size());
+    unsigned int i = 0;
+    for (auto it = allIsotopicAbundances.begin(); it != allIsotopicAbundances.end(); ++it) {
+        abundances[i] = it->second;
+        i++;
     }
 
-    return isotopicAbundances;
+    sort(abundances.begin(), abundances.end(), [](IsotopicAbundance& lhs, IsotopicAbundance& rhs){
+        return lhs.mz < rhs.mz;
+    });
+
+    return abundances;
+
 }
 /**
  * @brief MassCalculator::enumerateMasses
