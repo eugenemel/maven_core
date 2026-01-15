@@ -1048,7 +1048,7 @@ public:
         }
     }
 
-    bool isLabeled();
+    const bool isLabeled();
 };
 
 class MassAtom : public Atom {
