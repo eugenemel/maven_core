@@ -1328,7 +1328,7 @@ bool IsotopicAbundance::isHasAtom(Atom& atom) {
     return false;
 }
 
-bool Atom::isLabeled() {
+const bool Atom::isLabeled() {
     if (this->symbol == "C" && this->massNumber == 13) {
         return true;
     } else if (this->symbol == "N" && this->massNumber == 15) {
