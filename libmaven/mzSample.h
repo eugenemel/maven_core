@@ -1017,10 +1017,15 @@ enum LabeledIsotopeRetentionPolicy {
     ONLY_ONE_LABEL,
 
     //Single labeled species are allowed.
-    //Multiple-labeled species are permitted if they include 13C as one of the labels.
+    //Double-labeled species are permitted if they include 13C as one of the labels.
     //All labeled forms must come from the list of valid labeled forms.
     //this is the choice for the original Maven 1.0 implementation.
     ONLY_CARBON_TWO_LABELS,
+
+    //Single labeled species are allowed.
+    //Multiple-labeled species are permitted as long as they include 13C as one of the labels.
+    //All labeled forms must come from the list of valid labeled forms.
+    ONLY_CARBON_MULTIPLE_LABELS,
 
     //Any degree of labeling is supported, as long as
     //All labeled forms come from the list of valid labeled forms.

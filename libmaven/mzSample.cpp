@@ -2752,6 +2752,8 @@ bool IsotopeParameters::isMPlusZeroBasedExtraction(const IsotopicExtractionAlgor
 string IsotopeParameters::getLabeledIsotopeRetentionPolicyName(LabeledIsotopeRetentionPolicy policy) {
     if (policy == LabeledIsotopeRetentionPolicy::ONLY_CARBON_TWO_LABELS) {
         return "ONLY_CARBON_TWO_LABELS";
+    } else if (policy == LabeledIsotopeRetentionPolicy::ONLY_CARBON_MULTIPLE_LABELS) {
+        return "ONLY_CARBON_MULTIPLE_LABELS";
     } else if (policy == LabeledIsotopeRetentionPolicy::ONLY_ONE_LABEL) {
         return "ONLY_ONE_LABEL";
     } else if (policy == LabeledIsotopeRetentionPolicy::ONE_OR_MORE_LABELS) {
@@ -2764,6 +2766,8 @@ string IsotopeParameters::getLabeledIsotopeRetentionPolicyName(LabeledIsotopeRet
 LabeledIsotopeRetentionPolicy IsotopeParameters::getLabeledIsotopeRetentionPolicyFromName(string labeledIsotopeRetentionPolicy){
     if (labeledIsotopeRetentionPolicy == "ONLY_CARBON_TWO_LABELS" || labeledIsotopeRetentionPolicy == "C13 mixed") {
         return LabeledIsotopeRetentionPolicy::ONLY_CARBON_TWO_LABELS;
+    } else if (labeledIsotopeRetentionPolicy == "ONLY_CARBON_MULTIPLE_LABELS" || labeledIsotopeRetentionPolicy == "C13 omni-mixed") {
+        return LabeledIsotopeRetentionPolicy::ONLY_CARBON_MULTIPLE_LABELS;
     } else if (labeledIsotopeRetentionPolicy == "ONLY_ONE_LABEL" || labeledIsotopeRetentionPolicy == "No mixed") {
         return LabeledIsotopeRetentionPolicy::ONLY_ONE_LABEL;
     } else if (labeledIsotopeRetentionPolicy == "ONE_OR_MORE_LABELS" || labeledIsotopeRetentionPolicy == "All mixed") {
