@@ -1328,6 +1328,22 @@ bool IsotopicAbundance::isHasAtom(Atom& atom) {
     return false;
 }
 
+bool Atom::isLabeled() {
+    if (this->symbol == "C" && this->massNumber == 13) {
+        return true;
+    } else if (this->symbol == "N" && this->massNumber == 15) {
+        return true;
+    } else if (this->symbol == "S" && this->massNumber == 34) {
+        return true;
+    } else if (this->symbol == "H" && this->massNumber == 2) {
+        return true;
+    } else if (this->symbol == "O" && this->massNumber == 18) {
+        return true;
+    }
+
+    return false;
+}
+
  // Issue 656: correct quant, based on appropriate naturalAbundanceMonoProportion.
  // Each Isotope and IsotopicAbundance keeps track of its naturalAbundanceMonoProportion.
  // Returns any left over abundance after removing expected natural abundance.

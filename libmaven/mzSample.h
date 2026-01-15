@@ -1047,6 +1047,8 @@ public:
             return a.symbol < b.symbol;
         }
     }
+
+    bool isLabeled();
 };
 
 class MassAtom : public Atom {
