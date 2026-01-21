@@ -268,6 +268,11 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
         mergedEICrtmaxFWHM = mergedEICrtFWHMRange.second;
     }
 
+    if (mergedEICrtminFWHM <= 0 && mergedEICrtmaxFWHM <= 0) {
+        cout << "WARNING: FWHM RT range could not be extracted - unable to extract any isotopes." << endl;
+        return envelopeGroup;
+    }
+
     //initialize peak groups
     envelopeGroup.isotopePeakGroups = vector<PeakGroup>(isotopes.size());
     for (unsigned int i = 0; i < envelopeGroup.isotopePeakGroups.size(); i++) {
