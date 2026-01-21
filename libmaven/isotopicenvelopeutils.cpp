@@ -550,7 +550,7 @@ pair<float, float> IsotopicEnvelopeExtractor::extractFWHMRtRangeFromMergedEIC(
 
     if (debug) {
         cout << "[IsotopicEnvelopeExtractor::extractEnvelopesMPlusZeroMergedEIC()]: "
-             << "returnining pair(" << rtminFWHM << ", " << rtmaxFWHM << ")"
+             << "returning pair(" << rtminFWHM << ", " << rtmaxFWHM << ")"
              << endl;
     }
 
