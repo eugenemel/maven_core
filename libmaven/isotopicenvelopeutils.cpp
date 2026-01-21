@@ -505,8 +505,7 @@ pair<float, float> IsotopicEnvelopeExtractor::extractFWHMRtRangeFromMergedEIC(
     }
 
     if (individualEICs.empty()) {
-        cerr << "[IsotopicEnvelopeExtractor::extractEnvelopesMPlusZeroMergedEIC()]: No EICs found - aborting." << endl;
-        abort();
+        cerr << "WARNING: [IsotopicEnvelopeExtractor::extractEnvelopesMPlusZeroMergedEIC()]: No EICs found!" << endl;
     } else if (individualEICs.size() == 1) {
         if (debug) {
             cout << "[IsotopicEnvelopeExtractor::extractEnvelopesMPlusZeroMergedEIC()]: Single peak" << endl;
