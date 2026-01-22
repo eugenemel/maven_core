@@ -40,28 +40,10 @@ Adduct* MassCalculator::ZeroMassAdduct = new Adduct("[M]",0 ,1, 1);
 string MassCalculator::getCachedIsotopeKey(
     string formula,
     Adduct* adduct,
-    vector<Atom> labeledIsotopes,
-    LabeledIsotopeRetentionPolicy labeledIsotopeRetentionPolicy,
-    bool isIncludeNaturalAbundance,
-    int maxNumExtraNeutrons,
-    double minimumProportionMPlusZero
+    IsotopeParameters& isotopeParams
     ) {
 
-    string key = "formula=" + formula + ";";
-    if (adduct) {
-        key = key + "adduct=" + adduct->name + ";";
-    }
-
-    key = key + "{";
-    for (auto& atom : labeledIsotopes) {
-        key = key + to_string(atom.massNumber) + atom.symbol + ";";
-    }
-    key = key + "}";
-
-    key = key + "labeledIsotopeRetentionPolicy=" + to_string(labeledIsotopeRetentionPolicy) + ";";
-    key = key + "isIncludeNaturalAbundance=" + to_string(isIncludeNaturalAbundance) + ";";
-    key = key + "maxNumExtraNeutrons=" + to_string(maxNumExtraNeutrons) + ";";
-    key = key + "minimumProportionMPlusZero=" + to_string(minimumProportionMPlusZero) + ";";
+    string key = isotopeParams.encodeParams(false);
 
     return key;
 }
@@ -538,11 +520,7 @@ vector<Isotope> MassCalculator::computeIsotopes(
         cacheKey = MassCalculator::getCachedIsotopeKey(
             compoundFormula,
             adduct,
-            labeledIsotopes,
-            labeledIsotopeRetentionPolicy,
-            isIncludeNaturalAbundance,
-            maxNumExtraNeutrons,
-            minimumProportionMPlusZero);
+            isotopeParams);
 
         if (isotopesCache.find(cacheKey) != isotopesCache.end()) {
             if (debug) cout << "Found Cached vector<Isotope> - returning cached value!" << endl;

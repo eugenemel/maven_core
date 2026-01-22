@@ -158,11 +158,7 @@ class MassCalculator {
     static string getCachedIsotopeKey(
         string formula,
         Adduct* adduct,
-        vector<Atom> labeledIsotopes,
-        LabeledIsotopeRetentionPolicy labeledIsotopeRetentionPolicy,
-        bool isIncludeNaturalAbundance,
-        int maxNumExtraNeutrons,
-        double minimumProportionMPlusZero);
+        IsotopeParameters& isotopeParams);
 
     //Issue 711: Declare cache
     static map<string, vector<Isotope>> isotopesCache;
