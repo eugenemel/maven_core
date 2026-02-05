@@ -2509,6 +2509,9 @@ string IsotopeParameters::encodeParams(bool isIncludePeakPickingAndGroupingParam
     //Issue 760: alternative isotope m/z enumeration
     encodedParams = encodedParams + "isApplyMZeroMzOffset" + "=" + to_string(isApplyMZeroMzOffset) + ";";
 
+    //Issue 823: combine based on number neutrons
+    encodedParams = encodedParams + "isCombineToSameNumberNeutrons" + "=" + to_string(isCombineToSameNumberNeutrons) + ";";
+
     //Issue 720: diff iso comparison
     encodedParams = encodedParams + "diffIsoQuantType" + "=" + diffIsoQuantType + ";";
 
@@ -2654,6 +2657,11 @@ IsotopeParameters IsotopeParameters::decode(string encodedParams) {
     //Combine isotopes based on data
     if (decodedMap.find("isCombineOverlappingIsotopes") != decodedMap.end()) {
         isotopeParameters.isCombineOverlappingIsotopes = decodedMap["isCombineOverlappingIsotopes"] == "1";
+    }
+
+    //Combine isotopes based on common number of neutrons
+    if (decodedMap.find("isCombineToSameNumberNeutrons") != decodedMap.end()) {
+        isotopeParameters.isCombineToSameNumberNeutrons = decodedMap["isCombineToSameNumberNeutrons"] == "1";
     }
 
     // If true, offset each isotope theoretical m/z by the observed m/z offset from the measured [M+0] m/z to theoretical m/z.

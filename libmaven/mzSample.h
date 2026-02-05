@@ -1117,6 +1117,8 @@ struct IsotopeParameters {
     bool isKeepEmptyIsotopes = false;
     map<string, int> atomSpecificMaxIsotopes = {}; //Issue 820
 
+    bool isCombineToSameNumberNeutrons = false; //Issue 823
+
     //clsf encodes itself as clsfFile.
     //decoding only decodes clsfFile, it does not try to create the Classifier object.
     Classifier *clsf = nullptr;
