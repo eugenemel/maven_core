@@ -720,8 +720,10 @@ vector<IsotopicAbundance> MassCalculator::getUnknownFormulaIsotopicAbundances(
                     }
                 }
 
-                int numTotalExtraNeutrons = seedAbundance.numTotalExtraNeutrons;
-                numTotalExtraNeutrons++;
+
+                // Use the default num extra neutrons in this case
+                int numTotalExtraNeutrons = seedAbundance.numTotalExtraNeutrons + atom.getDefaultNumExtraNeutrons();
+                int numTotalHeavyAtoms = seedAbundance.numTotalHeavyAtoms + 1;
 
                 if (numTotalExtraNeutrons > isotopeParams.maxIsotopesToExtract) {
                     isAddLabel = false;
@@ -732,6 +734,7 @@ vector<IsotopicAbundance> MassCalculator::getUnknownFormulaIsotopicAbundances(
                     //make a copy
                     IsotopicAbundance isotopicAbundance = seedAbundance;
                     isotopicAbundance.numTotalExtraNeutrons = numTotalExtraNeutrons;
+                    isotopicAbundance.numTotalHeavyAtoms = numTotalHeavyAtoms;
                     isotopicAbundance.atomCounts[atom] = numHeavyLabel;
                     isotopicAbundance.mz += naturalAbundanceData.getDeltaMzBySymbol(atom.symbol); //offset m/z by adding one heavy label unit
                     isotopicAbundance.labeledForms.insert(atom);
@@ -1403,6 +1406,17 @@ const bool Atom::isLabeled() {
     }
 
     return false;
+}
+
+const int Atom::getDefaultNumExtraNeutrons() {
+    if (this->symbol == "S") {
+        return 2;
+    } else if (this->symbol == "O") {
+        return 2;
+    }
+
+    //13C, 2H, 15N, and all others have 1 extra neutron compared to the common form.
+    return 1;
 }
 
  // Issue 656: correct quant, based on appropriate naturalAbundanceMonoProportion.

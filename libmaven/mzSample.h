@@ -1054,6 +1054,9 @@ public:
     }
 
     const bool isLabeled();
+
+    //Issue 823: Convenience function for use when a natural abundance distribution is not available
+    const int getDefaultNumExtraNeutrons();
 };
 
 class MassAtom : public Atom {
