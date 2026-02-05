@@ -563,6 +563,7 @@ vector<Isotope> MassCalculator::computeIsotopes(
     //Filter the list of isotopes based on search criteria.
     vector<Isotope> isotopes{};
 
+    vector<IsotopicAbundance> passingIsotopicAbundances{};
     for (auto isotopicAbundance : isotopicAbundances) {
 
         //Avoid isotopes with too many extra neutrons
@@ -650,8 +651,18 @@ vector<Isotope> MassCalculator::computeIsotopes(
 
         //retain isotopes if they are the [M+0], of the preferred label type, pass natural abundance criteria.
         if (isLabelType || isValidNaturalAbundance || isotopicAbundance.numTotalExtraNeutrons == 0) {
-            isotopes.push_back(isotopicAbundance.toIsotope());
+            passingIsotopicAbundances.push_back(isotopicAbundance);
         }
+    }
+
+    //Issue 823: condense (if necessary)
+    if (isotopeParams.isCombineToSameNumberNeutrons) {
+        // TODO: new logic to handle names properly
+    }
+
+    //convert to Isotope (necessary for downstream compatibility)
+    for (IsotopicAbundance & isotopicAbundance : passingIsotopicAbundances) {
+        isotopes.push_back(isotopicAbundance.toIsotope());
     }
 
     //Issue 711: Write value to cache to avoid excessive recomputations.
