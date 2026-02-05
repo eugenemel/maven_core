@@ -1238,6 +1238,7 @@ void IsotopicAbundance::compute(NaturalAbundanceData& naturalAbundanceData, unsi
         if (naturalAbundanceData.atomToNumExtraNeutrons.find(atom) != naturalAbundanceData.atomToNumExtraNeutrons.end()) {
             int numExtraNeutrons = naturalAbundanceData.atomToNumExtraNeutrons.at(atom) * count;
             numTotalExtraNeutrons += numExtraNeutrons;
+            numTotalHeavyAtoms += count;
             if (numExtraNeutrons > 0) {
                 labeledForms.insert(atom);
             } else {

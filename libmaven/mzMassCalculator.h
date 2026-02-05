@@ -231,7 +231,8 @@ class IsotopicAbundance {
         //fields computed via IsotopicAbundance::compute()
         double mass = 0.0;
         double mz = 0.0;
-        unsigned int numTotalExtraNeutrons = 0;
+        unsigned int numTotalExtraNeutrons = 0; // 34S counts for 2 (2 neutrons more than 32S)
+        unsigned int numTotalHeavyAtoms = 0; // 34S counts for 1 (1 atom)
         set<Atom> labeledForms{};
         set<Atom> unlabeledForms{};
 
