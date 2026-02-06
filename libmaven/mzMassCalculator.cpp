@@ -1310,9 +1310,6 @@ Isotope IsotopicAbundance::createMultipleAbundanceIsotope(int numNeutrons, vecto
         isotopeName = "[M+" + to_string(numNeutrons) + "]";
     }
 
-    //TODO: isotope.mz now needs to have keep a minMz and a maxMz from all merged isotopes
-    // isotope.getMinMz(IsotopeParameters) can respect this automatically
-
     float minMz = 1e99;
     float maxMz = 0;
     float cumulativeNaturalAbundance = 0;
@@ -1333,6 +1330,8 @@ Isotope IsotopicAbundance::createMultipleAbundanceIsotope(int numNeutrons, vecto
     combinedIsotope.name = isotopeName;
     combinedIsotope.abundance = cumulativeNaturalAbundance;
     combinedIsotope.naturalAbundanceMonoProportion = cumulativeNaturalAbundanceMonoProportion;
+    combinedIsotope.minMz = minMz;
+    combinedIsotope.maxMz = maxMz;
 
     return combinedIsotope;
 }
