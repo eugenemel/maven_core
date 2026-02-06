@@ -306,8 +306,8 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
 
             float rtmin = 0.0f;
             float rtmax = 0.0f;
-            float mzminEIC = static_cast<float>(isotope.mz - isotope.mz/1e6f*params.ppm);
-            float mzmaxEIC = static_cast<float>(isotope.mz + isotope.mz/1e6f*params.ppm);
+            float mzminEIC = static_cast<float>(isotope.getMinMz(params));
+            float mzmaxEIC = static_cast<float>(isotope.getMaxMz(params));
 
             if (params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA) {
 
@@ -617,8 +617,8 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
                 cout << "Starting " << isotope.name << " " << sample->sampleName << "..." << endl;
             }
 
-            float mzmin = isotope.mz-isotope.mz/1e6f*params.ppm;
-            float mzmax = isotope.mz+isotope.mz/1e6f*params.ppm;
+            float mzmin = isotope.getMinMz(params);
+            float mzmax = isotope.getMaxMz(params);
 
             float rt  =   parentPeak.rt;
             float rtmin = parentPeak.rtmin;
@@ -1984,8 +1984,8 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractFullRtRange(
 
             Isotope isotope = isotopes.at(i);
 
-            float mzminEIC = static_cast<float>(isotope.mz - isotope.mz/1e6f*params.ppm);
-            float mzmaxEIC = static_cast<float>(isotope.mz + isotope.mz/1e6f*params.ppm);
+            float mzminEIC = static_cast<float>(isotope.getMinMz(params));
+            float mzmaxEIC = static_cast<float>(isotope.getMaxMz(params));
 
             EIC *eic = sample->getEIC(
                 mzminEIC,

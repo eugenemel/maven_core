@@ -1727,6 +1727,15 @@ void MassCalculator::applyMZeroMzOffset(vector<Isotope>& isotopes, double peakGr
     if (offSet != 0.0) {
         for (auto& isotope : isotopes) {
             isotope.mz = isotope.mz + offSet;
+
+            //Issue 823: Need to adjust min and max mz offsets, if they exist/it is appropriate
+            if (isotope.minMz > 0) {
+                isotope.minMz += offSet;
+            }
+
+            if (isotope.maxMz > 0) {
+                isotope.maxMz += offSet;
+            }
         }
     }
 }

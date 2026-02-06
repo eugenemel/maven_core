@@ -1776,8 +1776,8 @@ public:
     bool isParent() {return C13 == 0 && N15 == 0 && S34 == 0 && H2 == 0 && O18 == 0;}
 
     //Issue 823
-    double getMinMz(IsotopeParameters& params);
-    double getMaxMz(IsotopeParameters& params);
+    double getMinMz(IsotopeParameters params);
+    double getMaxMz(IsotopeParameters params);
 
 };
 
