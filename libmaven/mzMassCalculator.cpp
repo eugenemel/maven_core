@@ -655,15 +655,33 @@ vector<Isotope> MassCalculator::computeIsotopes(
         }
     }
 
-    //Issue 823: condense (if necessary)
+    //Issue 823: condense and convert to Isotope (necessary for downstream compatibility)
     if (isotopeParams.isCombineToSameNumberNeutrons) {
-        // TODO: new logic to handle names properly
+        map<int, vector<IsotopicAbundance>> combinedIsotopicAbundances{};
+
+        for (IsotopicAbundance isotopicAbundance : passingIsotopicAbundances) {
+            int numNeutrons = isotopicAbundance.numTotalExtraNeutrons;
+            if (combinedIsotopicAbundances.find(numNeutrons) == combinedIsotopicAbundances.end()) {
+                combinedIsotopicAbundances.insert(make_pair(numNeutrons, vector<IsotopicAbundance>{}));
+            }
+            combinedIsotopicAbundances[numNeutrons].push_back(isotopicAbundance);
+        }
+
+        for (auto it = combinedIsotopicAbundances.begin(); it != combinedIsotopicAbundances.end(); ++it) {
+
+            int numNeutrons = it->first;
+            vector<IsotopicAbundance> sameNeutronAbundances = it->second;
+
+            isotopes.push_back(IsotopicAbundance::createMultipleAbundanceIsotope(numNeutrons, sameNeutronAbundances));
+        }
+
+    } else {
+        //Each IsotopicAbundance is preserved as its own isotope
+        for (IsotopicAbundance & isotopicAbundance : passingIsotopicAbundances) {
+            isotopes.push_back(isotopicAbundance.toIsotope());
+        }
     }
 
-    //convert to Isotope (necessary for downstream compatibility)
-    for (IsotopicAbundance & isotopicAbundance : passingIsotopicAbundances) {
-        isotopes.push_back(isotopicAbundance.toIsotope());
-    }
 
     //Issue 711: Write value to cache to avoid excessive recomputations.
     if (cacheKey != "") {
@@ -1283,6 +1301,40 @@ IsotopicAbundance IsotopicAbundance::createMergedAbundance(IsotopicAbundance& on
     }
 
     return merged;
+}
+
+Isotope IsotopicAbundance::createMultipleAbundanceIsotope(int numNeutrons, vector<IsotopicAbundance> abundances){
+    Isotope combinedIsotope;
+    string isotopeName = "C12 PARENT";
+    if (numNeutrons > 0) {
+        isotopeName = "[M+" + to_string(numNeutrons) + "]";
+    }
+
+    //TODO: isotope.mz now needs to have keep a minMz and a maxMz from all merged isotopes
+    // isotope.getMinMz(IsotopeParameters) can respect this automatically
+
+    float minMz = 1e99;
+    float maxMz = 0;
+    float cumulativeNaturalAbundance = 0;
+    float cumulativeNaturalAbundanceMonoProportion = 0;
+
+    for (IsotopicAbundance abundance : abundances) {
+        if (abundance.mz < minMz) {
+            minMz = abundance.mz;
+        }
+        if (abundance.mz > maxMz) {
+            maxMz = abundance.mz;
+        }
+        cumulativeNaturalAbundance += abundance.naturalAbundance;
+        cumulativeNaturalAbundanceMonoProportion += abundance.naturalAbundanceMonoProportion;
+    }
+
+    combinedIsotope.C13 = numNeutrons; //not correct, but in most cases, C13 dominates
+    combinedIsotope.name = isotopeName;
+    combinedIsotope.abundance = cumulativeNaturalAbundance;
+    combinedIsotope.naturalAbundanceMonoProportion = cumulativeNaturalAbundanceMonoProportion;
+
+    return combinedIsotope;
 }
 
 string IsotopicAbundance::getFormula() {

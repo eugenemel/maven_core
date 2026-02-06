@@ -240,7 +240,16 @@ class IsotopicAbundance {
 
         bool isHasAtom(Atom& atom);
 
+        //Used for enumerating isotopes with heavy atoms of both sources
+        //multiples natural abundances
         static IsotopicAbundance createMergedAbundance(IsotopicAbundance& one, IsotopicAbundance& two);
+
+        // Used for adding together distinct isotopic abundances --> low-resolution isotopes
+        // sums natural abundance
+        // e.g. label-C13-1 and label-N15-1 become just [M+1]
+        static Isotope createMultipleAbundanceIsotope(int numNeutrons, vector<IsotopicAbundance> abundances);
+
+
         string getFormula();
         string toString();
 
