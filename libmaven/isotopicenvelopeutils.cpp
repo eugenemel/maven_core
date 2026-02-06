@@ -184,12 +184,6 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopes(
     IsotopeParameters params,
     bool debug){
 
-    //Issue 671: Respect isotopes parameter
-    int maxNumProtons = INT_MAX;
-    if (params.isExtractNIsotopes) {
-        maxNumProtons = params.maxIsotopesToExtract;
-    }
-
     string compoundFormula = "";
     if (compound) {
         compoundFormula = compound->formula;
