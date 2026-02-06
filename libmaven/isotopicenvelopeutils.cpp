@@ -266,11 +266,11 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
         pair<float, float> mergedEICrtFWHMRange = IsotopicEnvelopeExtractor::extractFWHMRtRangeFromMergedEIC(group, params, debug);
         mergedEICrtminFWHM = mergedEICrtFWHMRange.first;
         mergedEICrtmaxFWHM = mergedEICrtFWHMRange.second;
-    }
 
-    if (mergedEICrtminFWHM <= 0 && mergedEICrtmaxFWHM <= 0) {
-        cout << "WARNING: FWHM RT range could not be extracted - unable to extract any isotopes." << endl;
-        return envelopeGroup;
+        if (mergedEICrtminFWHM <= 0 && mergedEICrtmaxFWHM <= 0) {
+            cout << "WARNING: FWHM RT range could not be extracted - unable to extract any isotopes." << endl;
+            return envelopeGroup;
+        }
     }
 
     //initialize peak groups
