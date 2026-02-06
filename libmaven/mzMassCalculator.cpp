@@ -43,7 +43,12 @@ string MassCalculator::getCachedIsotopeKey(
     IsotopeParameters& isotopeParams
     ) {
 
-    string key = isotopeParams.encodeParams(false);
+    //Issue 826: Updated key to include formula and adduct
+    //Necessary as Isotope contains isotope.mz field, which is used for extraction
+    string key = isotopeParams.encodeParams(false) + ";formula=" + formula + ";";
+    if (adduct) {
+        key += "adduct=" + adduct->name + ";";
+    }
 
     return key;
 }
