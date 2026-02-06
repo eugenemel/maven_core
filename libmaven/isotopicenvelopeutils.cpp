@@ -309,6 +309,20 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
             float mzminEIC = static_cast<float>(isotope.getMinMz(params));
             float mzmaxEIC = static_cast<float>(isotope.getMaxMz(params));
 
+            // debugging
+            if (debug) {
+                stringstream ss;
+                ss << std::fixed << setprecision(7);
+                ss << "[IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPeaks()]: Isotope " << isotope.name
+                   << ": minMz=" << isotope.minMz
+                   << ", mz=" << isotope.mz
+                   << ", maxMz=" << isotope.maxMz
+                   << ", mzminEIC=" << mzminEIC
+                   << ", mzmaxEIC=" << mzmaxEIC
+                   << endl;
+                cout << ss.str();
+            }
+
             if (params.isotopicExtractionAlgorithm == IsotopicExtractionAlgorithm::PEAK_FULL_RT_BOUNDS_AREA) {
 
                 rtmin = peak.rtmin;
