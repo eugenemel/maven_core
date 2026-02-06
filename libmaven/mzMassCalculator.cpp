@@ -502,9 +502,9 @@ vector<Isotope> MassCalculator::computeIsotopes(
     bool isIncludeNaturalAbundance = isotopeParams.isNatAbundance;
     double minimumProportionMPlusZero = isotopeParams.natAbundanceThreshold;
 
-    int maxNumExtraNeutrons = INT_MAX;
+    int maxIsotopesToExtract = INT_MAX;
     if (isotopeParams.isExtractNIsotopes) {
-        maxNumExtraNeutrons = isotopeParams.maxIsotopesToExtract;
+        maxIsotopesToExtract = isotopeParams.maxIsotopesToExtract;
     }
 
     vector<IsotopicAbundance> isotopicAbundances;
@@ -561,13 +561,12 @@ vector<Isotope> MassCalculator::computeIsotopes(
     }
 
     //Filter the list of isotopes based on search criteria.
-    vector<Isotope> isotopes{};
-
     vector<IsotopicAbundance> passingIsotopicAbundances{};
+
     for (auto isotopicAbundance : isotopicAbundances) {
 
-        //Avoid isotopes with too many extra neutrons
-        if (isotopicAbundance.numTotalExtraNeutrons > maxNumExtraNeutrons) continue;
+        // isotopeParams.maxIsotopesToExtract is used for X as 'max [M+X]', e.g. max num neutrons
+        if (isotopicAbundance.numTotalExtraNeutrons > maxIsotopesToExtract) continue;
 
         // Issue 820: avoid isotopes that violate atom-specific limits
         if (!isotopeParams.atomSpecificMaxIsotopes.empty()){
@@ -654,6 +653,8 @@ vector<Isotope> MassCalculator::computeIsotopes(
             passingIsotopicAbundances.push_back(isotopicAbundance);
         }
     }
+
+    vector<Isotope> isotopes{};
 
     //Issue 823: condense and convert to Isotope (necessary for downstream compatibility)
     if (isotopeParams.isCombineToSameNumberNeutrons) {
@@ -754,6 +755,7 @@ vector<IsotopicAbundance> MassCalculator::getUnknownFormulaIsotopicAbundances(
                 int numTotalExtraNeutrons = seedAbundance.numTotalExtraNeutrons + atom.getDefaultNumExtraNeutrons();
                 int numTotalHeavyAtoms = seedAbundance.numTotalHeavyAtoms + 1;
 
+                //isotopeParams.maxIsotopesToExtract is used for X as 'max [M+X]', e.g. max num neutrons
                 if (numTotalExtraNeutrons > isotopeParams.maxIsotopesToExtract) {
                     isAddLabel = false;
                 }
@@ -1310,10 +1312,11 @@ Isotope IsotopicAbundance::createMultipleAbundanceIsotope(int numNeutrons, vecto
         isotopeName = "[M+" + to_string(numNeutrons) + "]";
     }
 
-    float minMz = 1e99;
-    float maxMz = 0;
-    float cumulativeNaturalAbundance = 0;
-    float cumulativeNaturalAbundanceMonoProportion = 0;
+    double minMz = 1e99;
+    double maxMz = 0;
+    double cumulativeNaturalAbundance = 0;
+    double cumulativeNaturalAbundanceMonoProportion = 0;
+    double meanMz = 0;
 
     for (IsotopicAbundance abundance : abundances) {
         if (abundance.mz < minMz) {
@@ -1324,7 +1327,9 @@ Isotope IsotopicAbundance::createMultipleAbundanceIsotope(int numNeutrons, vecto
         }
         cumulativeNaturalAbundance += abundance.naturalAbundance;
         cumulativeNaturalAbundanceMonoProportion += abundance.naturalAbundanceMonoProportion;
+        meanMz += abundance.mz;
     }
+    meanMz /= abundances.size();
 
     combinedIsotope.C13 = numNeutrons; //not correct, but in most cases, C13 dominates
     combinedIsotope.name = isotopeName;
@@ -1332,6 +1337,7 @@ Isotope IsotopicAbundance::createMultipleAbundanceIsotope(int numNeutrons, vecto
     combinedIsotope.naturalAbundanceMonoProportion = cumulativeNaturalAbundanceMonoProportion;
     combinedIsotope.minMz = minMz;
     combinedIsotope.maxMz = maxMz;
+    combinedIsotope.mz = meanMz;
 
     return combinedIsotope;
 }
