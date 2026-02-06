@@ -1723,6 +1723,11 @@ public:
     int H2;
     int O18;
 
+    //Issue 823: deal with possibility that isotope represents a range of m/z
+    //e.g. a combination of several of the same neutron, e.g. [M+1] might encompass 13C and 15N
+    double minMz = 0;
+    double maxMz = 0;
+
     Isotope(string name, float mass, int c=0, int n=0, int s=0, int h=0, int o=0) {
         this->mz=static_cast<double>(mass); this->name=name; charge=0;
         C13=c; N15=n; S34=s; H2=h; O18=o;
@@ -1733,6 +1738,7 @@ public:
         abundance=0; naturalAbundanceMonoProportion=0;
         N15=0; C13=0; S34=0; H2=0; O18=0;
         charge=0;
+        minMz = 0; maxMz = 0;
     }
 
     Isotope(const Isotope& b) {
@@ -1745,6 +1751,9 @@ public:
         N15=b.N15; S34=b.S34; C13=b.C13; H2=b.H2; O18=b.O18;
 
         charge = b.charge;
+
+        minMz=b.minMz;
+        maxMz=b.maxMz;
     }
 
     Isotope& operator=(const Isotope& b) {
@@ -1757,12 +1766,18 @@ public:
         N15=b.N15; S34=b.S34; C13=b.C13; H2=b.H2; O18=b.O18;
 
         charge =b.charge;
+        minMz = b.minMz;
+        maxMz = b.maxMz;
 
         return *this;
     }
 
     //Issue 412
     bool isParent() {return C13 == 0 && N15 == 0 && S34 == 0 && H2 == 0 && O18 == 0;}
+
+    //Issue 823
+    double getMinMz(IsotopeParameters& params);
+    double getMaxMz(IsotopeParameters& params);
 
 };
 

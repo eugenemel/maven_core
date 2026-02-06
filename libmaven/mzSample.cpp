@@ -3926,3 +3926,19 @@ void mzSample::snapToGrid(shared_ptr<ScanParameters> params, bool debug) {
         scan->snapToGrid(params, debug);
     }
 }
+
+double Isotope::getMinMz(IsotopeParameters& params) {
+    if (minMz <= 0 || maxMz <= 0) {
+        return this->mz - this->mz/1e6*params.ppm;
+    } else {
+        return this->minMz - this->minMz/1e6*params.ppm;
+    }
+}
+
+double Isotope::getMaxMz(IsotopeParameters& params) {
+    if (minMz <= 0 || maxMz <= 0) {
+        return this->mz + this->mz/1e6*params.ppm;
+    } else {
+        return this->maxMz - this->maxMz/1e6*params.ppm;
+    }
+}
