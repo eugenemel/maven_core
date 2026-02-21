@@ -78,7 +78,7 @@ void MzKitchenProcessor::assignBestLipidToGroup(
         g->computeFragPattern(params.get());
     }
 
-    vector<pair<CompoundIon, FragmentationMatchScore>> scores{};
+    vector<tuple<CompoundIon, FragmentationMatchScore, RtAgreementState>> scores{};
 
     if (debug) {
         cout << peakGroupMz << "@" << peakGroupRt << ":\n";
@@ -158,11 +158,22 @@ void MzKitchenProcessor::assignBestLipidToGroup(
 
         if (!isValidClassAdduct) continue;
 
-        //skip entries when the RT is out of range
+        // Assess RTAgreementState
+
+        RtAgreementState rtAgreementState = RtAgreementState::COMPOUND_MISSING_RT;
+
+        //skip entries when the RT is out of range.
         if (params->lipidClassToRtRange.find(lipidClass) != params->lipidClassToRtRange.end()) {
             pair<float, float> validRtRange = params->lipidClassToRtRange[lipidClass];
 
-            if (g->medianRt() < validRtRange.first || g->medianRt() > validRtRange.second) continue;
+            if (g->medianRt() < validRtRange.first || g->medianRt() > validRtRange.second) {
+                rtAgreementState = RtAgreementState::RT_DISAGREEMENT;
+            }
+        }
+
+        //skip entries when the RT is out of range.
+        if (rtAgreementState == RtAgreementState::RT_DISAGREEMENT) {
+            continue;
         }
 
         Fragment observed = g->fragmentationPattern;
@@ -221,7 +232,7 @@ void MzKitchenProcessor::assignBestLipidToGroup(
         //Issue 777: MS2 score is not controlled by (class, adduct) settings for lipids
         if (s.hypergeomScore < params->ms2MinScore) continue;
 
-        scores.push_back(make_pair(ion, s));
+        scores.push_back(make_tuple(ion, s, rtAgreementState));
     }
 
     if (debug) {
@@ -234,37 +245,45 @@ void MzKitchenProcessor::assignBestLipidToGroup(
         g->compounds = scores;
 
         //Issue 593: guarantee non-determinism
-        sort(scores.begin(), scores.end(), [](pair<CompoundIon, FragmentationMatchScore>& lhs, pair<CompoundIon, FragmentationMatchScore>& rhs){
-            if (lhs.second.hypergeomScore != rhs.second.hypergeomScore) {
-                return lhs.second.hypergeomScore > rhs.second.hypergeomScore;
+        sort(scores.begin(), scores.end(), [](tuple<CompoundIon, FragmentationMatchScore, RtAgreementState>& lhs, tuple<CompoundIon, FragmentationMatchScore, RtAgreementState>& rhs){
+
+            if (get<1>(lhs).hypergeomScore != get<1>(rhs).hypergeomScore) {
+                return get<1>(lhs).hypergeomScore > get<1>(rhs).hypergeomScore;
             }
 
-            if (lhs.second.dotProduct != rhs.second.dotProduct) {
-                return lhs.second.dotProduct > rhs.second.dotProduct;
+            if (get<1>(lhs).dotProduct != get<1>(rhs).dotProduct) {
+                return get<1>(lhs).dotProduct > get<1>(rhs).dotProduct;
             }
 
-            return lhs.first.compound->name < rhs.first.compound->name;
+            return get<0>(lhs).compound->name < get<0>(rhs).compound->name;
         });
 
         if (debug) {
             cout << "Sorted scores:\n";
             for (auto score : scores) {
-                cout << score.first.compound->name << " " << score.first.getAdductName() << ":\n";
-                cout << "numMatches= " << score.second.numMatches
-                     << ", numDiagnosticMatches= " << score.second.numDiagnosticMatches
-                     << ", numAcylMatches= " << score.second.numAcylChainMatches
-                     << ", hyperGeometricScore= " << score.second.hypergeomScore
-                     << ", cosineScore= " << score.second.dotProduct
+                Compound *compound = get<0>(score).compound;
+                if (compound) {
+                    cout << compound->name << " " << get<0>(score).getAdductName() << ":\n";
+                }
+                FragmentationMatchScore fragmentationMatchScore = get<1>(score);
+                cout << "numMatches= " << fragmentationMatchScore.numMatches
+                     << ", numDiagnosticMatches= " << fragmentationMatchScore.numDiagnosticMatches
+                     << ", numAcylMatches= " << fragmentationMatchScore.numAcylChainMatches
+                     << ", hyperGeometricScore= " << fragmentationMatchScore.hypergeomScore
+                     << ", cosineScore= " << fragmentationMatchScore.dotProduct
                      << endl;
             }
         }
 
-        pair<CompoundIon, FragmentationMatchScore> bestPair = scores[0];
+        tuple<CompoundIon, FragmentationMatchScore, RtAgreementState> bestScore = scores[0];
 
-        g->compound = bestPair.first.compound;
-        if (bestPair.first.adduct) g->adduct = bestPair.first.adduct;
-        g->fragMatchScore = bestPair.second;
-        g->fragMatchScore.mergedScore = bestPair.second.hypergeomScore;
+        Adduct *adduct = get<0>(bestScore).adduct;
+        FragmentationMatchScore fragmentationMatchScore = get<1>(bestScore);
+
+        g->compound = get<0>(bestScore).compound;
+        if (adduct) g->adduct = adduct;
+        g->fragMatchScore = fragmentationMatchScore;
+        g->fragMatchScore.mergedScore = fragmentationMatchScore.hypergeomScore;
 
         //Issue 769
         MzKitchenProcessor::labelRtAgreement(g, 'l', debug);
@@ -421,7 +440,7 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
         g->computeFragPattern(params.get(), debug);
     }
 
-    vector<pair<CompoundIon, FragmentationMatchScore>> scores{};
+    vector<tuple<CompoundIon, FragmentationMatchScore, RtAgreementState>> scores{};
 
     for (long pos = lb - compounds.begin(); pos < static_cast<long>(compounds.size()); pos++){
 
@@ -475,18 +494,12 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
 
         //Issue 792: Altered logic around RT Agreement
         //Issue 816: Expanded options around RT matching to more properly deal with code paths.
-        RtAgreementState RtAgreementState = MzKitchenProcessor::assessRtAgreement(peakGroupRt, compound, params->rtMatchTolerance, debug);
+        RtAgreementState rtAgreementState = MzKitchenProcessor::assessRtAgreement(peakGroupRt, compound, params->rtMatchTolerance, debug);
 
         // matches are only skipped if there is an explicit disagreement between compound and measured RT.
         // If insufficient information is available to make this comparison, the compound passes.
-        if (params->rtIsRequireRtMatch && (RtAgreementState == RtAgreementState::RT_DISAGREEMENT)){
+        if (params->rtIsRequireRtMatch && (rtAgreementState == RtAgreementState::RT_DISAGREEMENT)){
             continue;
-        }
-
-        //Issue 816: Add an explicit label for RT agreement.
-        //compounds missing RT values do not receive the label
-        if (RtAgreementState == RtAgreementState::RT_AGREEMENT) {
-            g->addLabel('l');
         }
 
         FragmentationMatchScore s = library.scoreMatch(&(g->fragmentationPattern), params->ms2PpmTolr);
@@ -514,7 +527,7 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
         if (s.dotProduct < params->ms2MinScore) continue;
 
 
-        scores.push_back(make_pair(ion, s));
+        scores.push_back(make_tuple(ion, s, rtAgreementState));
     }
 
     //Issue 559: print empty groups
@@ -527,32 +540,48 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
     g->compounds = scores;
 
     float maxScore = -1.0f;
-    pair<CompoundIon, FragmentationMatchScore> bestPair;
+    tuple<CompoundIon, FragmentationMatchScore, RtAgreementState> bestScore;
     for (auto score : scores) {
-        if (score.second.dotProduct > maxScore) {
-            bestPair = score;
-            maxScore = score.second.dotProduct;
+        float dotProduct = get<1>(score).dotProduct;
+        if (get<1>(score).dotProduct > maxScore) {
+            bestScore = score;
+            maxScore = dotProduct;
         }
     }
 
     if (maxScore > -1.0f) {
-        g->compound = bestPair.first.compound;
-        if (bestPair.first.adduct) g->adduct = bestPair.first.adduct;
-        g->fragMatchScore = bestPair.second;
-        g->fragMatchScore.mergedScore = bestPair.second.dotProduct;
-        if (g->compound->expectedRt > 0) {
+
+        Compound *compound = get<0>(bestScore).compound;
+        Adduct *adduct =get<0>(bestScore).adduct;
+        FragmentationMatchScore fragMatchScore = get<1>(bestScore);
+        RtAgreementState rtAgreementState = get<2>(bestScore);
+
+        g->compound = compound;
+
+        if (adduct) g->adduct = adduct;
+        g->fragMatchScore = fragMatchScore;
+        g->fragMatchScore.mergedScore = fragMatchScore.dotProduct;
+
+        if (compound->expectedRt > 0) {
             g->expectedRtDiff = abs(g->compound->expectedRt - peakGroupRt);
+        }
+
+        //Issue 816: Add an explicit label for RT agreement.
+        //compounds missing RT values do not receive the label
+        if (rtAgreementState == RtAgreementState::RT_AGREEMENT) {
+            g->addLabel('l');
         }
     }
 
     //Issue 546: debugging
     if (debug) {
-        for (auto pair : g->compounds) {
-            cout << "\t" << pair.first.compound->name << " "
-                 << pair.second.numMatches << " "
-                 << pair.second.fractionMatched << " "
-                 << pair.second.dotProduct  << " "
-                 << pair.second.hypergeomScore << " "
+        for (auto score : g->compounds) {
+            FragmentationMatchScore fragmentationMatchScore = get<1>(score);
+            cout << "\t" << get<0>(score).compound->name << " "
+                 << fragmentationMatchScore.numMatches << " "
+                 << fragmentationMatchScore.fractionMatched << " "
+                 << fragmentationMatchScore.dotProduct  << " "
+                 << fragmentationMatchScore.hypergeomScore << " "
                  << endl;
         }
     }
