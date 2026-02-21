@@ -566,8 +566,11 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
             g->expectedRtDiff = abs(g->compound->expectedRt - peakGroupRt);
         }
 
-        //Issue 816: Add an explicit label for RT agreement.
-        //compounds missing RT values do not receive the label
+        // Issue 816: Add an explicit label for RT agreement.
+        // compounds missing RT values do not receive the label
+        // Issue 828: label is only added once group is finalized, to prevent bug
+        // where RT label might be added from a candidate that is ultimately filtered out
+        // or usurped by a higher-scoring candidate.
         if (rtAgreementState == RtAgreementState::RT_AGREEMENT) {
             g->addLabel('l');
         }
