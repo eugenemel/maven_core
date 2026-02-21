@@ -81,6 +81,26 @@ using namespace mzUtils;
 using namespace std;
 using namespace Eigen;
 
+
+/**
+ * @brief The RtAgreementState enum
+ * Explicitly handle case where RT is missing.
+ * Note that 'RT_AGREEMENT' covers two different cases:
+ * (1) the compound contains explicit RT min and RT max values.
+ * (2) the compound contains only a single RT value, and an external rt tolerance value (e.g., a parameter) is used to define the RT min and RT max values.
+ *
+ * The COMPOUND_MISSING state is explicitly included to handle the possibility that a Compound* is passed in as nullptr
+ * (which should probably only happen in error).
+ *
+ * COMPOUND_MISSING_RT means the compound exists, but the compound does not have a valid RT value.
+ */
+enum RtAgreementState {
+    RT_AGREEMENT,
+    RT_DISAGREEMENT,
+    COMPOUND_MISSING,
+    COMPOUND_MISSING_RT
+};
+
 class mzPoint {
 	public:
 		mzPoint() {x=y=z=0; }
@@ -1494,7 +1514,7 @@ class PeakGroup {
         Fragment fragmentationPattern;
 
         //Issue 546: Attach hypotheses to group, same way as vector<Peak> works
-        vector<pair<CompoundIon, FragmentationMatchScore>> compounds{};
+        vector<tuple<CompoundIon, FragmentationMatchScore, RtAgreementState>> compounds{};
 
 		void deletePeaks();
         bool deletePeak(unsigned int index);
@@ -2868,25 +2888,6 @@ public:
 
         return s.str();
     }
-};
-
-/**
- * @brief The RtAgreementState enum
- * Explicitly handle case where RT is missing.
- * Note that 'RT_AGREEMENT' covers two different cases:
- * (1) the compound contains explicit RT min and RT max values.
- * (2) the compound contains only a single RT value, and an external rt tolerance value (e.g., a parameter) is used to define the RT min and RT max values.
- *
- * The COMPOUND_MISSING state is explicitly included to handle the possibility that a Compound* is passed in as nullptr
- * (which should probably only happen in error).
- *
- * COMPOUND_MISSING_RT means the compound exists, but the compound does not have a valid RT value.
- */
-enum RtAgreementState {
-    RT_AGREEMENT,
-    RT_DISAGREEMENT,
-    COMPOUND_MISSING,
-    COMPOUND_MISSING_RT
 };
 
 class MzKitchenProcessor{
