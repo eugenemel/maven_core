@@ -397,39 +397,75 @@ map<string,int> MassCalculator::getComposition(string formula) {
 
             if (wholeFormulaCoeffText != "") {
                 wholeFormulaCoefficient = stoi(wholeFormulaCoeffText);
+                i = j - 1;
+                continue;
             }
         }
 
-        string bloc, coeff_txt;
-        int coeff;
+        string bloc = "";
+        string coeff_txt = "";
+        int coeff = 1;
 
         // Start of symbol must be uppercase letter. If it is not, block will remain an empty string, and will not be added to the atoms map.
         // Note that following the initial upper case letter, there may follow any number of lower case letters.
         if (UPP.find(formula[i]) != string::npos){
             bloc = formula[i];
-            if (LOW.find(formula[i+1]) != string::npos){
+            if ((i+1) < SIZE && LOW.find(formula[i+1]) != string::npos){
                 bloc += formula[i+1];
                 i++;
             }
-        }
 
-        //Coefficient following atom
-        while ( COEFF.find(formula[i+1]) != string::npos ) {
-            coeff_txt += formula[i+1];
-            i++;
-        }
+            //parse coefficient for standard (non-isotope) atom
+            while ((i+1) < SIZE && COEFF.find(formula[i+1]) != string::npos ) {
+                coeff_txt += formula[i+1];
+                i++;
+            }
 
-        //Conversion of coefficient characters to number
-        if ( coeff_txt.length() > 0 ) {
+            //Conversion of coefficient characters to number
+            if ( coeff_txt.length() > 0 ) {
 
-        	// Issue 791: If coefficient is too large to be parsed, probably bad input - set to 1
-        	try {
-            	coeff = stoi(coeff_txt);        	
-        	} catch (const std::exception& e) {
-        		coeff = 1;
-        	}
-        } else {
-            coeff = 1;
+                // Issue 791: If coefficient is too large to be parsed, probably bad input - set to 1
+                try {
+                    coeff = stoi(coeff_txt);
+                } catch (const std::exception& e) {
+                    coeff = 1;
+                }
+            } else {
+                coeff = 1;
+            }
+
+            // Issue 616: Support heavy-labeled formulas, or other bracketed atom definitions.
+        } else if (formula[i] == '[') {
+            size_t closeBracket = formula.find(']', i);
+
+            if (closeBracket != string::npos) {
+                // Extract content between [ and ]
+                // e.g., for "[13C]", bloc becomes "13C"
+                bloc = formula.substr(i + 1, closeBracket - i - 1);
+
+                // Move the index i to the closing bracket
+                i = closeBracket;
+
+                // After the bracket, there might still be a coefficient, e.g., [13C]9
+                string bracket_coeff_txt = "";
+                while (i + 1 < SIZE && COEFF.find(formula[i+1]) != string::npos) {
+                    bracket_coeff_txt += formula[i+1];
+                    i++;
+                }
+
+                if (!bracket_coeff_txt.empty()) {
+                    try {
+                        coeff = stoi(bracket_coeff_txt);
+                    } catch (...) {
+                        coeff = 1;
+                    }
+                } else {
+                    coeff = 1;
+                }
+            } else {
+                // Handle malformed input (open bracket with no close)
+                // Just skip the bracket and continue
+            }
         }
 
         //Indicates a valid symbol for an atom (series of letters that starts with uppercase letter)
@@ -441,7 +477,7 @@ map<string,int> MassCalculator::getComposition(string formula) {
     // If a formula ends with a '+' or a '-', this indicates some form that is constitutively charged
     // the 'formula' actually corresponds to an ion in this case, adjust # of e- accordingly
     string chg;
-    if (CHG.find(formula[SIZE-1]) != string::npos){
+    if (SIZE > 0 && CHG.find(formula[SIZE-1]) != string::npos){
         chg = formula[SIZE-1];
         atoms[chg] = 1;
     }
