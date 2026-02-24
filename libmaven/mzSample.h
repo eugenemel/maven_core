@@ -1806,27 +1806,27 @@ class Adduct {
 	public:
         Adduct(){ mass=0; charge=1; nmol=1; }
 
-        Adduct(string name, float mass, int charge, int nmol){
+        Adduct(string name, double mass, int charge, int nmol){
             this->name=name; this->mass=mass; this->charge=charge; this->nmol=nmol;
         }
 
         string name;
 		int	  nmol;
-		float mass;
-        float charge;
+        double mass;
+        double charge;
 
         // [M+H]+ mz is the 'adduct mz'
         // 'M' is the 'parent mass'
 
         //given adduct mz, compute parent monoisotopic mass
-        inline float computeParentMass(float adductMz)  {
-            float divisor = nmol != 0 ? nmol : 1; //Issue 495: Avoid divide-by-zero
+        inline double computeParentMass(double adductMz)  {
+            double divisor = nmol != 0 ? nmol : 1; //Issue 495: Avoid divide-by-zero
             return  (adductMz*abs(charge)-mass)/divisor;
         }
 
         //given parent monoisotopic mass, compute adduct mz
-        inline float computeAdductMass(float parentMass) {
-            float divisor = charge != 0 ? abs(charge) : 1; //Issue 495: avoid divide-by-zero
+        inline double computeAdductMass(double parentMass) {
+            double divisor = charge != 0 ? abs(charge) : 1; //Issue 495: avoid divide-by-zero
             return (parentMass*nmol+mass)/divisor;
         }
 
