@@ -1102,6 +1102,20 @@ public:
     }
 };
 
+// Issue 830: clean up/refactor
+class Molecule {
+public:
+    map<MassAtom, int> atoms{};
+    double totalMass = 0.0;
+
+    friend bool operator< (const Molecule& a, const Molecule& b) {
+        if (std::abs(a.totalMass - b.totalMass) > 1e-9) { //add tol for rounding errors
+            return a.totalMass < b.totalMass;
+        }
+        return a.atoms < b.atoms; // Fallback to map comparison for uniqueness
+    }
+};
+
 struct IsotopeParameters {
 
     //RESERVED DELIMITERS - DO NOT CHANGE!
