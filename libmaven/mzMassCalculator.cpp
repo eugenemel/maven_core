@@ -541,7 +541,7 @@ string MassCalculator::atomMapToFormula(map<string, int>& atoms) {
 
     }
 
-    return string(s.str());
+    return s.str();
 }
 
 string MassCalculator::peptideSequenceToFormula(string peptideSequence) {
