@@ -77,8 +77,6 @@ class MassCalculator {
     static double computeNeutralMass(string formula);
     static double computePeptideNeutralMass(string peptideSequence);
 
-    static string peptideSequenceToFormula(string peptideSequence);
-
     static map<string,int> getComposition(string formula);
     static map<string,int> getComposition(Adduct* adduct);
     static void addAtoms(map<string, int>& reference, map<string, int> toAdd);
@@ -86,6 +84,9 @@ class MassCalculator {
     static void multiplyAtoms(map<string, int>& reference, int factor);
 
     static void applyMZeroMzOffset(vector<Isotope>& isotopes, double peakGroupMz);
+
+    static string atomMapToFormula(map<string, int>& atoms);
+    static string peptideSequenceToFormula(string peptideSequence);
 
     double computeMass(string formula, int polarity);
     double computeC13IsotopeMass(string formula);

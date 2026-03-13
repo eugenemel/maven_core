@@ -510,9 +510,14 @@ double MassCalculator::computePeptideNeutralMass(string peptideSequence) {
     return MassCalculator::computeNeutralMass(atoms);
 }
 
-string MassCalculator::peptideSequenceToFormula(string peptideSequence) {
-    map<string, int> atoms = MassCalculator::getPeptideComposition(peptideSequence);
-
+/**
+ * @brief MassCalculator::atomMapToFormula
+ * assumes that map was created with insertion order into atoms matching
+ * preferred order in formula - e.g. CHNOPS<others>
+ * @param atoms
+ * @return
+ */
+string MassCalculator::atomMapToFormula(map<string, int>& atoms) {
     stringstream s;
 
     static const regex isotopeRegex("^[0-9].*");
@@ -536,9 +541,13 @@ string MassCalculator::peptideSequenceToFormula(string peptideSequence) {
 
     }
 
-    return s.str();
+    return string(s.str());
 }
 
+string MassCalculator::peptideSequenceToFormula(string peptideSequence) {
+    map<string, int> atoms = MassCalculator::getPeptideComposition(peptideSequence);
+    return MassCalculator::atomMapToFormula(atoms);
+}
 
 double MassCalculator::adjustMass(double mass,int charge) {
 
