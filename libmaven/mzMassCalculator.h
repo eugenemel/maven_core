@@ -76,6 +76,9 @@ class MassCalculator {
     static double computeNeutralMass(map<string, int>& atoms);
     static double computeNeutralMass(string formula);
     static double computePeptideNeutralMass(string peptideSequence);
+
+    static string peptideSequenceToFormula(string peptideSequence);
+
     static map<string,int> getComposition(string formula);
     static map<string,int> getComposition(Adduct* adduct);
     static void addAtoms(map<string, int>& reference, map<string, int> toAdd);

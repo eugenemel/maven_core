@@ -510,6 +510,35 @@ double MassCalculator::computePeptideNeutralMass(string peptideSequence) {
     return MassCalculator::computeNeutralMass(atoms);
 }
 
+string MassCalculator::peptideSequenceToFormula(string peptideSequence) {
+    map<string, int> atoms = MassCalculator::getPeptideComposition(peptideSequence);
+
+    stringstream s;
+
+    static const regex isotopeRegex("^[0-9].*");
+
+    for (auto const& kv: atoms) {
+        const string symbol = kv.first;
+        const int atomCount = kv.second;
+
+        // shouldn't happen, but keeping this a a guard
+        if (atomCount <= 0) continue;
+
+        if (regex_match(symbol, isotopeRegex)) {
+            s << "[" << symbol << "]";
+        } else {
+            s << symbol;
+        }
+
+        if (atomCount > 1) {
+            s << atomCount;
+        }
+
+    }
+
+    return s.str();
+}
+
 
 double MassCalculator::adjustMass(double mass,int charge) {
 
