@@ -64,18 +64,29 @@ MaldesiIonList MaldesiIonListGenerator::getLargePeptideProteinBindingAssayIonLis
     ionList.isSinglePrecursorMz = false;
 
     //Issue 832: Prefer formula, if it is provided
-    double peptideExactMass = 0.0;
+    map<string, int> atoms{};
+
     if (!molecularFormula.empty()) {
-        peptideExactMass = MassCalculator::computeNeutralMass(molecularFormula);
+        atoms = MassCalculator::getComposition(molecularFormula);
     } else {
-        peptideExactMass = MassCalculator::computePeptideNeutralMass(peptideSequence);
+        atoms = MassCalculator::getPeptideComposition(peptideSequence);
     }
 
-    map<int, double> peptideIsotopeDist = MassCalculator::peptideC13Distribution(
-        peptideSequence,
-        0.0107, // natural abundance of C13
-        peptidePredictedIsotopeRatioThreshold,
-        false); // debug
+    double peptideExactMass = MassCalculator::computeNeutralMass(atoms);
+
+    map<int, double> peptideIsotopeDist{};
+
+    // Use quantity of natural carbon to estimate abundance
+    // 13C is not used here, because it would be introduced artificially,
+    // and so not follow natural abundance distributions.
+    if (atoms.find("C") != atoms.end()) {
+        int numCarbon = atoms.at("C");
+        peptideIsotopeDist = MassCalculator::C13NatDistribution(
+            numCarbon,
+            0.0107, // natural abundance of C13
+            peptidePredictedIsotopeRatioThreshold);
+
+    }
 
     int numBoundLigand = 0;
     while (numBoundLigand <= maxNumBoundLigand) {
