@@ -33,6 +33,7 @@ public:
         );
 
     static MaldesiIonList getLargePeptideProteinBindingAssayIonList(
+        string molecularFormula,
         string peptideSequence,
         vector<Adduct>& adducts,
         double boundLigandExactMass,

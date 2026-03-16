@@ -49,6 +49,7 @@ MaldesiIonList MaldesiIonListGenerator::getMaldesiIonList(
 }
 
 MaldesiIonList MaldesiIonListGenerator::getLargePeptideProteinBindingAssayIonList(
+    string molecularFormula,
     string peptideSequence,
     vector<Adduct>& adducts,
     double boundLigandExactMass,
@@ -62,7 +63,13 @@ MaldesiIonList MaldesiIonListGenerator::getLargePeptideProteinBindingAssayIonLis
     MaldesiIonList ionList;
     ionList.isSinglePrecursorMz = false;
 
-    double peptideExactMass = MassCalculator::computePeptideNeutralMass(peptideSequence);
+    //Issue 832: Prefer formula, if it is provided
+    double peptideExactMass = 0.0;
+    if (!molecularFormula.empty()) {
+        peptideExactMass = MassCalculator::computeNeutralMass(molecularFormula);
+    } else {
+        peptideExactMass = MassCalculator::computePeptideNeutralMass(peptideSequence);
+    }
 
     map<int, double> peptideIsotopeDist = MassCalculator::peptideC13Distribution(
         peptideSequence,
