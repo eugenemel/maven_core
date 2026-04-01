@@ -288,6 +288,11 @@ void MzKitchenProcessor::assignBestLipidToGroup(
         //Issue 769
         MzKitchenProcessor::labelRtAgreement(g, 'l', debug);
 
+        //Issue 835
+        if (g->compound->metaDataMap.find(MzKitchenProcessor::MZKITCHEN_NOTES_KEY) != g->compound->metaDataMap.end()) {
+            g->notes = g->compound->metaDataMap.at(MzKitchenProcessor::MZKITCHEN_NOTES_KEY);
+        }
+
         if (debug) {
             cout << "MATCH: " << peakGroupMz << "@" << peakGroupRt  << " <--> " << g->compound->id << "\n" << endl;
         }
@@ -573,6 +578,11 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
         // or usurped by a higher-scoring candidate.
         if (rtAgreementState == RtAgreementState::RT_AGREEMENT) {
             g->addLabel('l');
+        }
+
+        //Issue 835
+        if (g->compound->metaDataMap.find(MzKitchenProcessor::MZKITCHEN_NOTES_KEY) != g->compound->metaDataMap.end()) {
+            g->notes = g->compound->metaDataMap.at(MzKitchenProcessor::MZKITCHEN_NOTES_KEY);
         }
     }
 
