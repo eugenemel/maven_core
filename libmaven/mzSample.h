@@ -2908,6 +2908,7 @@ class MzKitchenProcessor{
 public:
     static constexpr const char* const LIPID_SCORING_NAME = "Mzkitchen Lipid Score";
     static constexpr const char* const METABOLITES_SCORING_NAME = "Mzkitchen Metabolite Score";
+    static constexpr const char* const MZKITCHEN_NOTES_KEY = "MZKITCHEN_NOTES";
 
     static void matchLipids_LC(vector<PeakGroup>& groups,
                                vector<Compound*>& compounds,
