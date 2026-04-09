@@ -3106,7 +3106,7 @@ public:
     static shared_ptr<HRMSQCSearchParameters> decode(string encodedParams);
 
     //fields
-    // this->ms1PpmTolr = 0 for mz tolerance
+    // use this->ms1PpmTolr for mz tolerance
     float rtTol = 0.1f; // min
 
     shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters;
