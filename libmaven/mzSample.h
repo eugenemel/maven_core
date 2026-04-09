@@ -3099,6 +3099,19 @@ public:
     shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters;
 };
 
+class HRMSQCSearchParameters : public SearchParameters, public EncodingDecodingTemplate<HRMSQCSearchParameters> {
+
+public:
+    string encodeParams();
+    static shared_ptr<HRMSQCSearchParameters> decode(string encodedParams);
+
+    //fields
+    // this->ms1PpmTolr = 0 for mz tolerance
+    float rtTol = 0.1f; // min
+
+    shared_ptr<PeakPickingAndGroupingParameters> peakPickingAndGroupingParameters;
+};
+
 class QQQProcessor {
     public:
 

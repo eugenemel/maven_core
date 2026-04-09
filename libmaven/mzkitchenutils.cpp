@@ -799,3 +799,39 @@ void MzkitchenMspSearchParameters::setLegacyPeakGroupParameters(){
 
 MzkitchenMspSearchParameters::~MzkitchenMspSearchParameters() = default;
 
+// new parameters for encoding/decoding
+
+string HRMSQCSearchParameters::encodeParams() {
+
+    string encodedParams = baseParams();
+
+    encodedParams = encodedParams + "ms1PpmTolr" + "=" + to_string(this->ms1PpmTolr) + ";";
+    encodedParams = encodedParams + "rtrtTol" + "=" + to_string(this->rtTol) + ";";
+
+    string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
+
+    encodedParams = encodedParams + peakPickingEncodedParams;
+
+    return encodedParams;
+}
+
+shared_ptr<HRMSQCSearchParameters> HRMSQCSearchParameters::decode(string encodedParams){
+
+    shared_ptr<HRMSQCSearchParameters> hrmsQcSearchParameters = shared_ptr<HRMSQCSearchParameters>(new HRMSQCSearchParameters());
+
+    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams); //use semicolon (default)
+
+    hrmsQcSearchParameters->fillInBaseParams(decodedMap);
+
+    hrmsQcSearchParameters->peakPickingAndGroupingParameters = shared_ptr<PeakPickingAndGroupingParameters>(new PeakPickingAndGroupingParameters());
+    hrmsQcSearchParameters->peakPickingAndGroupingParameters->fillInPeakParameters(decodedMap);
+
+    if (decodedMap.find("ms1PpmTolr") != decodedMap.end()) {
+        hrmsQcSearchParameters->ms1PpmTolr = stof(decodedMap["ms1PpmTolr"]);
+    }
+    if (decodedMap.find("rtTol") != decodedMap.end()) {
+        hrmsQcSearchParameters->rtTol = stof(decodedMap["rtTol"]);
+    }
+
+    return hrmsQcSearchParameters;
+}
