@@ -806,7 +806,7 @@ string HRMSQCSearchParameters::encodeParams() {
     string encodedParams = baseParams();
 
     encodedParams = encodedParams + "ms1PpmTolr" + "=" + to_string(this->ms1PpmTolr) + ";";
-    encodedParams = encodedParams + "rtrtTol" + "=" + to_string(this->rtTol) + ";";
+    encodedParams = encodedParams + "rtTol" + "=" + to_string(this->rtTol) + ";";
 
     string peakPickingEncodedParams = peakPickingAndGroupingParameters->getEncodedPeakParameters();
 
