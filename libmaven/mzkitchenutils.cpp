@@ -41,6 +41,11 @@ void MzKitchenProcessor::matchLipids_LC(
     }
 }
 
+// to deal with C++14 vs C++17 ODR issues
+constexpr const char* const MzKitchenProcessor::LIPID_SCORING_NAME;
+constexpr const char* const MzKitchenProcessor::METABOLITES_SCORING_NAME;
+constexpr const char* const MzKitchenProcessor::MZKITCHEN_NOTES_KEY;
+
 /**
  * @brief MzKitchenProcessor::assignBestLipidToGroup
  * @param g
