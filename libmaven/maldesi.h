@@ -19,6 +19,7 @@ public:
     vector<string> isotopeCode{};
     vector<double> isotopeNaturalAbundance{};
     vector<int> numBound{};
+    vector<bool> isMaxAbundanceIsotope{};
 };
 
 class MaldesiIonListGenerator {

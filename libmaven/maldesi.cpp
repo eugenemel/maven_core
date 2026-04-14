@@ -88,6 +88,17 @@ MaldesiIonList MaldesiIonListGenerator::getLargePeptideProteinBindingAssayIonLis
 
     }
 
+    //Determine which num carbons corresponds to max abundance isotope
+    int maxNumIsotopeCount = -1;
+    double maxIsotopeVal = 0.0f;
+    for (auto it = peptideIsotopeDist.begin(); it != peptideIsotopeDist.end(); ++it) {
+        if (it->second > maxIsotopeVal) {
+            maxIsotopeVal = it->second;
+            maxNumIsotopeCount = it->first;
+        }
+    }
+
+    bool isMaxAbundanceIsotope = false;
     int numBoundLigand = 0;
     while (numBoundLigand <= maxNumBoundLigand) {
         for (auto it = peptideIsotopeDist.begin(); it != peptideIsotopeDist.end(); ++it) {
@@ -138,6 +149,7 @@ MaldesiIonList MaldesiIonListGenerator::getLargePeptideProteinBindingAssayIonLis
                 ionList.isotopeCode.push_back(isotopeCode);
                 ionList.isotopeNaturalAbundance.push_back(isotopeProbability);
                 ionList.numBound.push_back(numBoundLigand);
+                ionList.isMaxAbundanceIsotope.push_back(numC13 == maxNumIsotopeCount);
             }
         }
 
