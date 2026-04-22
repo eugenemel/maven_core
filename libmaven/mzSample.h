@@ -1835,7 +1835,11 @@ class Adduct {
         //given adduct mz, compute parent monoisotopic mass
         inline double computeParentMass(double adductMz)  {
             double divisor = nmol != 0 ? nmol : 1; //Issue 495: Avoid divide-by-zero
-            return  (adductMz*abs(charge)-mass)/divisor;
+
+            //Issue 840: special-case '0' charged adduct - no m/z transformation
+            int chargeNum = charge != 0 ? abs(charge) : 1;
+
+            return  (adductMz*chargeNum-mass)/divisor;
         }
 
         //given parent monoisotopic mass, compute adduct mz
