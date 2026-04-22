@@ -193,6 +193,10 @@ map<string,int> MassCalculator::getComposition(Adduct* adduct){
 }
 
 int MassCalculator::getAdductCharge(string adductName) {
+
+    // check suffix, return '0' if no '+' or '-' provided
+    if (adductName.empty() || (adductName.back() != '+' && adductName.back() != '-')) return 0;
+
     int adductCharge = 1;
     regex suffixRe("\\](.*)$");
     regex chgNumRe("(\\d+)[+-]");
