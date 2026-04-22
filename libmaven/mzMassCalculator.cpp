@@ -202,7 +202,7 @@ int MassCalculator::getAdductCharge(string adductName) {
         string suffix = match[1].str();
         if (regex_search(suffix, match2, chgNumRe)) {
             string suffixStr = match2[1].str();
-            adductCharge = stoi(suffixStr.substr(0, suffixStr.size()-2));
+            adductCharge = stoi(suffixStr);
             if (suffix.substr(suffix.size()-1, 1) == "-") {
                 adductCharge = -1 * adductCharge;
             }
