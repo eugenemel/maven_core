@@ -337,17 +337,21 @@ void MzKitchenProcessor::labelRtAgreement(PeakGroup *g, char rtMatchLabel, bool 
  * @param compound
  * @param ms1RtTolr: fallback tolerance for RT matching
  */
-RtAgreementState MzKitchenProcessor::assessRtAgreement(float groupRtVal, Compound *compound, float ms1RtTolr, bool debug) {
+RtAgreementState MzKitchenProcessor::assessRtAgreement(
+    float groupRtVal,
+    Compound *compound,
+    float ms1RtTolr,
+    bool rtIsPreferDBRangeOverMatchTolerance,
+    bool debug) {
     if (!compound) return RtAgreementState::COMPOUND_MISSING;
 
-    //Issue 792: If the compound is missing a valid RT value,
-    //return 'true', indicating that there is no disagreement between
-    //the compound's stated RT and the peak group's measured RT.
-    //This was an intentional behavior change introduced in this case.
+    //Issue 792: compound is missing a valid RT value, so rt agreement or disagreement cannot be determined.
     if (compound->expectedRt < 0) return RtAgreementState::COMPOUND_MISSING_RT;
 
-    // Case: compounds expected RT range is known
-    if (compound->expectedRtMin > 0 && compound->expectedRtMax > 0) {
+    // Beyond this point: both compound RT and observed RT are known
+
+    // Case: expected RT range of compound is known and preferred over rt tolerance
+    if (rtIsPreferDBRangeOverMatchTolerance && compound->expectedRtMin > 0 && compound->expectedRtMax > 0) {
         if (debug) cout
                 << compound->name
                  << " RT Range: ["
@@ -361,7 +365,7 @@ RtAgreementState MzKitchenProcessor::assessRtAgreement(float groupRtVal, Compoun
                 << endl;
         return groupRtVal >= compound->expectedRtMin && groupRtVal <= compound->expectedRtMax ? RtAgreementState::RT_AGREEMENT : RtAgreementState::RT_DISAGREEMENT;
     } else {
-        //Case: compounds expected Rt range is not provided
+        //Case: expected Rt range of compound is not preferred over rt tolerance, or is not known
         if (debug) cout
                 << compound->name
                 << " RT : "
@@ -504,7 +508,12 @@ void MzKitchenProcessor::assignBestMetaboliteToGroup(
 
         //Issue 792: Altered logic around RT Agreement
         //Issue 816: Expanded options around RT matching to more properly deal with code paths.
-        RtAgreementState rtAgreementState = MzKitchenProcessor::assessRtAgreement(peakGroupRt, compound, params->rtMatchTolerance, debug);
+        RtAgreementState rtAgreementState = MzKitchenProcessor::assessRtAgreement(
+            peakGroupRt,
+            compound,
+            params->rtMatchTolerance,
+            params->rtIsPreferDBRangeOverMatchTolerance,
+            debug);
 
         // matches are only skipped if there is an explicit disagreement between compound and measured RT.
         // If insufficient information is available to make this comparison, the compound passes.

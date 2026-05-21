@@ -2938,7 +2938,12 @@ public:
                                             bool debug=false);
 
     static void labelRtAgreement(PeakGroup *g, char RtMatchLabel = 'l', bool debug = false);
-    static RtAgreementState assessRtAgreement(float groupRtVal, Compound *compound, float ms1RtTolr, bool debug = false);
+    static RtAgreementState assessRtAgreement(
+        float groupRtVal,
+        Compound *compound,
+        float ms1RtTolr,
+        bool rtIsPreferDBRangeOverMatchTolerance,
+        bool debug = false);
 };
 
 // Issue 815
