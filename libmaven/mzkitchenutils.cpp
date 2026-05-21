@@ -713,6 +713,7 @@ string MzkitchenMetaboliteSearchParameters::encodeParams() {
     encodedParams = encodedParams + "mspFilePath" + "=" + mspFilePath + ";";
     encodedParams = encodedParams + "rtIsRequireRtMatch" + "=" + to_string(rtIsRequireRtMatch) + ";";
     encodedParams = encodedParams + "rtMatchTolerance" + "=" + to_string(rtMatchTolerance) + ";";
+    encodedParams = encodedParams + "rtIsPreferDBRangeOverMatchTolerance" + "=" + to_string(rtIsPreferDBRangeOverMatchTolerance) + ";";
 
     //Issue 547
     string matchingPolicyStr = "SINGLE_TOP_HIT";
@@ -755,6 +756,9 @@ shared_ptr<MzkitchenMetaboliteSearchParameters> MzkitchenMetaboliteSearchParamet
     }
     if (decodedMap.find("rtMatchTolerance") != decodedMap.end()) {
         metaboliteSearchParameters->rtMatchTolerance = stof(decodedMap["rtMatchTolerance"]);
+    }
+    if (decodedMap.find("rtIsPreferDBRangeOverMatchTolerance") != decodedMap.end()) {
+        metaboliteSearchParameters->rtIsPreferDBRangeOverMatchTolerance = decodedMap["rtIsPreferDBRangeOverMatchTolerance"]=="1";
     }
 
     //Issue 547

@@ -2838,9 +2838,11 @@ public:
      * RT Matching
      * rtIsRequireRtMatch: Whether or not to retain match based on RT similarity.
      * rtMatchTolerance: max distance in minutes between observed and reference RT.
+     * rtIsPreferDBRangeOverMatchTolerance: if true, use the DB RT range instead of the observed rt value +/- rtMatchTolerance.
      * ========================*/
     bool rtIsRequireRtMatch = false;
     float rtMatchTolerance = 0.5f;
+    bool rtIsPreferDBRangeOverMatchTolerance = false;
 
     //default constructor
     MzkitchenMetaboliteSearchParameters() {
