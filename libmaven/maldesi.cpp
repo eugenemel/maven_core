@@ -202,3 +202,27 @@ map<int, shared_ptr<MaldesiParameters>> MaldesiParameters::decodeScanSpecific(co
 
     return scanMap;
 }
+
+map<pair<string, int>, shared_ptr<MaldesiParameters>> MaldesiParameters::decodeLibraryParamsSet(
+    const vector<string>& compoundNameVector,
+    const vector<string>& encodedParamsVector) {
+
+    map<pair<string, int>, shared_ptr<MaldesiParameters>> libraryParamsSet{};
+
+    for (unsigned int i = 0; i < compoundNameVector.size(); i++) {
+
+        string compoundName = compoundNameVector[i];
+        string scanEncodedParams = encodedParamsVector[i];
+
+        map<int, shared_ptr<MaldesiParameters>> scanSpecificParams = MaldesiParameters::decodeScanSpecific(scanEncodedParams);
+
+        for (auto it = scanSpecificParams.begin(); it != scanSpecificParams.end(); ++it) {
+            libraryParamsSet.insert(
+                make_pair(
+                    make_pair(compoundName, it->first), it->second)
+                );
+        }
+    }
+
+    return libraryParamsSet;
+}

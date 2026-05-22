@@ -67,6 +67,11 @@ public:
     //series of scan-specific MaldesiParameters objects
     //e.g. {1={minNumBoundLigand=1;maxNumBoundLigand=2;boundLigandExactMass=100;}, 2={minNumBoundLigand=1;adducts={[M+H]+&[M+2H]2+&}}}
     static map<int, shared_ptr<MaldesiParameters>> decodeScanSpecific(const string& encodedParams);
+
+    //dual vectors, related by position, e.g. compoundNameVector[0] matches to encodedParamsVector[0]
+    static map<pair<string, int>, shared_ptr<MaldesiParameters>> decodeLibraryParamsSet(
+        const vector<string>& compoundNameVector,
+        const vector<string>& encodedParamsVector);
 };
 
 #endif // MALDESI_H
