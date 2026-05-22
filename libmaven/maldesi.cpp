@@ -158,3 +158,46 @@ MaldesiIonList MaldesiIonListGenerator::getLargePeptideProteinBindingAssayIonLis
 
     return ionList;
 }
+
+shared_ptr<MaldesiParameters> MaldesiParameters::decode(const string& encodedParams) {
+    shared_ptr<MaldesiParameters> maldesiParameters = shared_ptr<MaldesiParameters>(new MaldesiParameters());
+
+    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams); //semicolon between parameters
+
+    if (decodedMap.find("minNumBoundLigand") != decodedMap.end()) {
+        maldesiParameters->minNumBoundLigand = stoi(decodedMap["minNumBoundLigand"]);
+    }
+    if (decodedMap.find("maxNumBoundLigand") != decodedMap.end()) {
+        maldesiParameters->maxNumBoundLigand = stoi(decodedMap["maxNumBoundLigand"]);
+    }
+    if (decodedMap.find("boundLigandExactMass") != decodedMap.end()) {
+        maldesiParameters->boundLigandExactMass = stod(decodedMap["boundLigandExactMass"]);
+    }
+    if (decodedMap.find("adducts") != decodedMap.end()) {
+
+        //e.g. {[M+H]+&[M+2H]2+&}
+        vector<string> adductStrings = mzUtils::decodeParameterVector(decodedMap["adducts"],"&");
+        maldesiParameters->adducts.reserve(adductStrings.size());
+
+        for (const auto& adductStr : adductStrings) {
+            maldesiParameters->adducts.push_back(MassCalculator::parseAdductFromName(adductStr));
+        }
+    }
+
+    return maldesiParameters;
+}
+
+map<int, shared_ptr<MaldesiParameters>> MaldesiParameters::decodeScanSpecific(const string& encodedParams) {
+
+    map<int, shared_ptr<MaldesiParameters>> scanMap{};
+
+    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams, ","); //comma for scan-delimited list
+
+    for (auto it = decodedMap.begin(); it != decodedMap.end(); ++it) {
+        int scanKey = stoi(it->first);
+        shared_ptr<MaldesiParameters> scanParams = MaldesiParameters::decode(it->second);
+        scanMap.insert(make_pair(scanKey, scanParams));
+    }
+
+    return scanMap;
+}
