@@ -1243,7 +1243,7 @@ unordered_map<string, string> decodeParameterMap(string encodedParams, string de
         encodedParams.erase(encodedParams.size()-1);
     }
 
-    if (encodedParams[encodedParams.size()-1] != delimiter[0]) {
+    if (!ends_with(encodedParams, delimiter)) {
         encodedParams = encodedParams + delimiter;
     }
 
@@ -1278,6 +1278,10 @@ vector<string> decodeParameterVector(string encodedParams, string delimiter) {
     }
     if (encodedParams[encodedParams.size()-1] == '}') {
         encodedParams.erase(encodedParams.size()-1);
+    }
+
+    if (!ends_with(encodedParams, delimiter)) {
+        encodedParams = encodedParams + delimiter;
     }
 
     string::size_type posPrevious = 0;
