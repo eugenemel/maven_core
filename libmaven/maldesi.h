@@ -38,6 +38,7 @@ public:
         string peptideSequence,
         vector<Adduct>& adducts,
         double boundLigandExactMass,
+        int minNumBoundLigand,
         int maxNumBoundLigand,
         double peptidePredictedIsotopeRatioThreshold,
         bool ms1UseDaTol,

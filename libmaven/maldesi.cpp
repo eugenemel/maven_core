@@ -53,6 +53,7 @@ MaldesiIonList MaldesiIonListGenerator::getLargePeptideProteinBindingAssayIonLis
     string peptideSequence,
     vector<Adduct>& adducts,
     double boundLigandExactMass,
+    int minNumBoundLigand,
     int maxNumBoundLigand,
     double peptidePredictedIsotopeRatioThreshold,
     bool ms1UseDaTol,
@@ -99,7 +100,7 @@ MaldesiIonList MaldesiIonListGenerator::getLargePeptideProteinBindingAssayIonLis
     }
 
     bool isMaxAbundanceIsotope = false;
-    int numBoundLigand = 0;
+    int numBoundLigand = minNumBoundLigand;
     while (numBoundLigand <= maxNumBoundLigand) {
         for (auto it = peptideIsotopeDist.begin(); it != peptideIsotopeDist.end(); ++it) {
             for (Adduct& adduct : adducts) {
