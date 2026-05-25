@@ -5,6 +5,11 @@
 
 #include "mzSample.h"
 
+class MaldesiIonList;
+class MaldesiIonListGenerator;
+class MaldesiLibraryParamsSet;
+class MaldesiParameters;
+
 class MaldesiIonList {
 public:
     vector<double> searchMz{};
@@ -49,6 +54,31 @@ public:
 };
 
 /**
+ * @brief MaldesiLibraryParamsSet
+ * Scan-specific parameters should only be used if they are provided,
+ * this structure retains some of the information implicit in how this data is encoded
+ * in an mzkitcpp maldesi context.
+ *
+ * Specifically, if a compound has scan-specific information for at least one scan,
+ * the compound should only be searched in scans where scan-specific information is provided.
+ * this is recorded by adding the compound to the 'compoundsWithScanSpecificParams' set.
+ *
+ * If the compound is not provided with any scan-specific information, however, the compound is not
+ * included in the 'compoundsWithScanSpecificParams' set, and downstream consumers should assume
+ * that the compound should be searched in every scan, using the default parameters.
+ *
+ * In this way, the 'compoundsWithScanSpecificParams' serves multiple purposes: to indicate which
+ * compounds have scan-specific params, and also to indicate which compounds should be searched in
+ * a subset of scans or in every scan. This is necessary because absence from the 'compoundScanSpecificParamsMap'
+ * is insufficient to indicate if a compound should be searched in every scan.
+ */
+class MaldesiLibraryParamsSet {
+public:
+    set<string> compoundsWithScanSpecificParams{};
+    map<pair<string, int>, shared_ptr<MaldesiParameters>> compoundScanSpecificParamsMap{};
+};
+
+/**
  * @brief The MaldesiParameters class
  * dedicated class for maldesi parameters, primarily used when
  * encoding/decoding from a C++ context, e.g. mzkitcpp
@@ -69,7 +99,7 @@ public:
     static map<int, shared_ptr<MaldesiParameters>> decodeScanSpecific(const string& encodedParams);
 
     //dual vectors, related by position, e.g. compoundNameVector[0] matches to encodedParamsVector[0]
-    static map<pair<string, int>, shared_ptr<MaldesiParameters>> decodeLibraryParamsSet(
+    static MaldesiLibraryParamsSet decodeLibraryParamsSet(
         const vector<string>& compoundNameVector,
         const vector<string>& encodedParamsVector);
 };
