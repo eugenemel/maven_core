@@ -102,6 +102,12 @@ public:
     static MaldesiLibraryParamsSet decodeLibraryParamsSet(
         const vector<string>& compoundNameVector,
         const vector<string>& encodedParamsVector);
+
+    //return encoded parameter value or defaults, if the encoded value corresponds to defaults
+    const int getMinNumBoundLigand(const int defaultValue);
+    const int getMaxNumBoundLigand(const int defaultValue);
+    const double getBoundLigandExactMass(const double defaultValue);
+    const vector<Adduct>& getAdducts(const vector<Adduct>& defaultValue);
 };
 
 #endif // MALDESI_H

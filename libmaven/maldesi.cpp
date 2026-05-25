@@ -230,3 +230,35 @@ MaldesiLibraryParamsSet MaldesiParameters::decodeLibraryParamsSet(
 
     return libraryParamsSet;
 }
+
+const int MaldesiParameters::getMinNumBoundLigand(const int defaultValue) {
+    if (this->minNumBoundLigand == -1) {
+        return defaultValue;
+    } else {
+        return this->minNumBoundLigand;
+    }
+}
+
+const int MaldesiParameters::getMaxNumBoundLigand(const int defaultValue) {
+    if (this->maxNumBoundLigand == -1) {
+        return defaultValue;
+    } else {
+        return this->maxNumBoundLigand;
+    }
+}
+
+const double MaldesiParameters::getBoundLigandExactMass(const double defaultValue) {
+    if (this->boundLigandExactMass == -1.0) {
+        return defaultValue;
+    } else {
+        return this->boundLigandExactMass;
+    }
+}
+
+const vector<Adduct>& MaldesiParameters::getAdducts(const vector<Adduct>& defaultValue){
+    if (this->adducts.empty()) {
+        return defaultValue;
+    } else {
+        return this->adducts;
+    }
+}
