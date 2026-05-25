@@ -1833,7 +1833,7 @@ class Adduct {
         // 'M' is the 'parent mass'
 
         //given adduct mz, compute parent monoisotopic mass
-        inline double computeParentMass(double adductMz)  {
+        inline double computeParentMass(double adductMz) const {
             double divisor = nmol != 0 ? nmol : 1; //Issue 495: Avoid divide-by-zero
 
             //Issue 840: special-case '0' charged adduct - no m/z transformation
@@ -1843,7 +1843,7 @@ class Adduct {
         }
 
         //given parent monoisotopic mass, compute adduct mz
-        inline double computeAdductMass(double parentMass) {
+        inline double computeAdductMass(double parentMass) const {
             double divisor = charge != 0 ? abs(charge) : 1; //Issue 495: avoid divide-by-zero
             return (parentMass*nmol+mass)/divisor;
         }

@@ -31,7 +31,7 @@ class MaldesiIonListGenerator {
 public:
     static MaldesiIonList getMaldesiIonList(
         double compoundMz,
-        vector<Adduct>& adducts,
+        const vector<Adduct>& adducts,
         bool ms1UseDaTol,
         double ms1PpmTol,
         double ms1DaTol,
@@ -41,7 +41,7 @@ public:
     static MaldesiIonList getLargePeptideProteinBindingAssayIonList(
         string molecularFormula,
         string peptideSequence,
-        vector<Adduct>& adducts,
+        const vector<Adduct>& adducts,
         double boundLigandExactMass,
         int minNumBoundLigand,
         int maxNumBoundLigand,

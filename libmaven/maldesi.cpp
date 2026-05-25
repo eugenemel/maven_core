@@ -3,7 +3,7 @@
 
 MaldesiIonList MaldesiIonListGenerator::getMaldesiIonList(
     double compoundMz,
-    vector<Adduct>& adducts,
+    const vector<Adduct>& adducts,
     bool ms1UseDaTol,
     double ms1PpmTol,
     double ms1DaTol,
@@ -20,7 +20,7 @@ MaldesiIonList MaldesiIonListGenerator::getMaldesiIonList(
         ionList.chg.push_back(1);
 
     } else {
-        for (Adduct& adduct : adducts) {
+        for (const Adduct& adduct : adducts) {
             double precursorMz = adduct.computeAdductMass(compoundMz);
             ionList.searchMz.push_back(precursorMz);
             ionList.ionName.push_back(adduct.name);
@@ -51,7 +51,7 @@ MaldesiIonList MaldesiIonListGenerator::getMaldesiIonList(
 MaldesiIonList MaldesiIonListGenerator::getLargePeptideProteinBindingAssayIonList(
     string molecularFormula,
     string peptideSequence,
-    vector<Adduct>& adducts,
+    const vector<Adduct>& adducts,
     double boundLigandExactMass,
     int minNumBoundLigand,
     int maxNumBoundLigand,
@@ -102,7 +102,7 @@ MaldesiIonList MaldesiIonListGenerator::getLargePeptideProteinBindingAssayIonLis
     int numBoundLigand = minNumBoundLigand;
     while (numBoundLigand <= maxNumBoundLigand) {
         for (auto it = peptideIsotopeDist.begin(); it != peptideIsotopeDist.end(); ++it) {
-            for (Adduct& adduct : adducts) {
+            for (const Adduct& adduct : adducts) {
 
                 stringstream s;
                 s << std::fixed << setprecision(6);
