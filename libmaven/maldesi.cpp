@@ -99,7 +99,6 @@ MaldesiIonList MaldesiIonListGenerator::getLargePeptideProteinBindingAssayIonLis
         }
     }
 
-    bool isMaxAbundanceIsotope = false;
     int numBoundLigand = minNumBoundLigand;
     while (numBoundLigand <= maxNumBoundLigand) {
         for (auto it = peptideIsotopeDist.begin(); it != peptideIsotopeDist.end(); ++it) {
