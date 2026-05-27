@@ -202,6 +202,20 @@ map<int, shared_ptr<MaldesiParameters>> MaldesiParameters::decodeScanSpecific(co
     return scanMap;
 }
 
+map<string, shared_ptr<MaldesiParameters>> MaldesiParameters::decodeCompoundSpecific(const string& encodedParams) {
+
+    map<string, shared_ptr<MaldesiParameters>> compoundAdductMap{};
+
+    unordered_map<string, string> decodedMap = mzUtils::decodeParameterMap(encodedParams, ","); //comma for scan-delimited list
+
+    for (auto it = decodedMap.begin(); it != decodedMap.end(); ++it) {
+        shared_ptr<MaldesiParameters> compoundAdductParams = MaldesiParameters::decode(it->second);
+        compoundAdductMap.insert(make_pair(it->first, compoundAdductParams));
+    }
+
+    return compoundAdductMap;
+}
+
 MaldesiLibraryParamsSet MaldesiParameters::decodeLibraryParamsSet(
     const vector<string>& compoundNameVector,
     const vector<string>& encodedParamsVector) {

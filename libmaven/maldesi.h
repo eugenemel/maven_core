@@ -98,6 +98,10 @@ public:
     //e.g. {1={minNumBoundLigand=1;maxNumBoundLigand=2;boundLigandExactMass=100;}, 2={minNumBoundLigand=1;adducts={[M+H]+&[M+2H]2+&}}}
     static map<int, shared_ptr<MaldesiParameters>> decodeScanSpecific(const string& encodedParams);
 
+    //series of compoundAdduct-specific MaldesiParameters objects
+    //e.g.{PEPTIDER={boundLigandExactMass=10;minNumBoundLigand=0;maxNumBoundLigand=2;},PEPPEP={adducts={[M+H]+&[M+2H]2+};minNumBoundLigand=5}}
+    static map<string, shared_ptr<MaldesiParameters>> decodeCompoundSpecific(const string& encodedParams);
+
     //dual vectors, related by position, e.g. compoundNameVector[0] matches to encodedParamsVector[0]
     static MaldesiLibraryParamsSet decodeLibraryParamsSet(
         const vector<string>& compoundNameVector,
