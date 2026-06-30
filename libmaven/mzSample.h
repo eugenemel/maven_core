@@ -561,7 +561,8 @@ public:
     void writeMzCSV(const char*);
     string cleanSampleName(string fileName);
 
-    map<string,string> mzML_cvParams(xml_node node);
+    static map<string,string> mzML_cvParams(xml_node node);
+
     void parseMzMLChromatogromList(xml_node);
     void parseMzMLSpectrumList(xml_node);
     void summary();						   	// print info about sample
