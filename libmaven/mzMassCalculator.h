@@ -147,6 +147,14 @@ class MassCalculator {
         double minimumAbundance,
         bool debug=false);
 
+    //Issue 846: direct access via atom Map
+    static NaturalAbundanceDistribution getNaturalAbundanceDistribution(
+        map<string, int> atoms,
+        unsigned int chgNum,
+        NaturalAbundanceData& naturalAbundanceData,
+        double minimumAbundance,
+        bool debug=false);
+
     //Issue 684: Compute a set of stubbed IsotopicAbundance for a case where
     // the atomic composition of a species isn't known (unknown compound mz).
     //Issue 820: Rework function, fixing various bugs

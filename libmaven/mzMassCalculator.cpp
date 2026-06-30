@@ -1098,28 +1098,13 @@ double NaturalAbundanceData::getDeltaMzBySymbol(string atomicSymbol){
 }
 
 NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
-    string compoundFormula,
-    Adduct *adduct,
+    map<string, int> atoms,
+    unsigned int chgNum,
     NaturalAbundanceData& data,
     double minAbundance,
     bool debug) {
 
     NaturalAbundanceDistribution naturalAbundanceDistribution;
-
-    map<string, int> atoms = getComposition(compoundFormula);
-    multiplyAtoms(atoms, adduct->nmol);
-    addAtoms(atoms, getComposition(adduct));
-
-    //Issue 703: If the adduct atoms reduce the compound atoms to negative amounts, remove them from the map
-    map<string, int> cleanedAtoms{};
-    for (auto it = atoms.begin(); it != atoms.end(); ++it){
-        if (it->second > 0) {
-            cleanedAtoms.insert(make_pair(it->first, it->second));
-        }
-    }
-    atoms = cleanedAtoms;
-
-    unsigned int chgNum = abs(adduct->charge);
 
     // Compute partial probabilities
     // atomSymbol, numRare, probability
@@ -1272,6 +1257,37 @@ NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
     naturalAbundanceDistribution.isotopicAbundances = existingAbundances;
 
     return naturalAbundanceDistribution;
+
+}
+
+NaturalAbundanceDistribution MassCalculator::getNaturalAbundanceDistribution(
+    string compoundFormula,
+    Adduct *adduct,
+    NaturalAbundanceData& data,
+    double minAbundance,
+    bool debug) {
+
+    map<string, int> atoms = getComposition(compoundFormula);
+    multiplyAtoms(atoms, adduct->nmol);
+    addAtoms(atoms, getComposition(adduct));
+
+    //Issue 703: If the adduct atoms reduce the compound atoms to negative amounts, remove them from the map
+    map<string, int> cleanedAtoms{};
+    for (auto it = atoms.begin(); it != atoms.end(); ++it){
+        if (it->second > 0) {
+            cleanedAtoms.insert(make_pair(it->first, it->second));
+        }
+    }
+    atoms = cleanedAtoms;
+
+    unsigned int chgNum = abs(adduct->charge);
+
+    return MassCalculator::getNaturalAbundanceDistribution(
+        atoms,
+        chgNum,
+        data,
+        minAbundance,
+        debug);
 }
 
 pair<double, double> NaturalAbundanceDistribution::getIsotopicAbundance(Isotope& isotope){
