@@ -1840,3 +1840,20 @@ map<int, double> MassCalculator::C13NatDistribution(int numCarbon, double abunda
 
     return topC13NatDist;
 }
+
+map<int, double> MassCalculator::getFlatNaturalAbundanceDistribution(
+    NaturalAbundanceDistribution& naturalAbundanceDistribution,
+    bool debug) {
+
+    map<int, double> combinedIsotopicAbundances{};
+
+    for (const IsotopicAbundance& isotopicAbundance : naturalAbundanceDistribution.isotopicAbundances) {
+        int numNeutrons = isotopicAbundance.numTotalExtraNeutrons;
+        if (combinedIsotopicAbundances.find(numNeutrons) == combinedIsotopicAbundances.end()) {
+            combinedIsotopicAbundances.insert(make_pair(numNeutrons, 0));
+        }
+        combinedIsotopicAbundances[numNeutrons] += isotopicAbundance.naturalAbundance;
+    }
+
+    return combinedIsotopicAbundances;
+}

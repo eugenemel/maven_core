@@ -155,6 +155,13 @@ class MassCalculator {
         double minimumAbundance,
         bool debug=false);
 
+    //Issue 846: return ultra-abbreviated quantitative mapping,
+    // strip out all other information besides number of neutrons and total probability
+    // <num neutrons, total probability>
+    static map<int, double> getFlatNaturalAbundanceDistribution(
+        NaturalAbundanceDistribution& naturalAbundanceDistribution,
+        bool debug=false);
+
     //Issue 684: Compute a set of stubbed IsotopicAbundance for a case where
     // the atomic composition of a species isn't known (unknown compound mz).
     //Issue 820: Rework function, fixing various bugs
