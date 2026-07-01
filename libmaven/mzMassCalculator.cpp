@@ -1051,6 +1051,16 @@ NaturalAbundanceData NaturalAbundanceData::defaultNaturalAbundanceData = []() ->
     abundanceData.setAtomData("S", 34, 33.96786701, 0.0368, 2);
 //    abundanceData.setAtomData("S", 36, 35.96708070, 0.0002, 4);
 
+    //Issue 846: add strange forms
+    abundanceData.setAtomData("Cl", 35, 34.968852694, 0.758, 0);
+    abundanceData.setAtomData("Cl", 37, 36.965902573, 0.242, 2);
+
+    abundanceData.setAtomData("B", 10, 10.012936862, 0.189, 0);
+    abundanceData.setAtomData("B", 11, 11.009305167, 0.811, 1);
+
+    abundanceData.setAtomData("Br", 79, 78.9183376, 0.5065, 0);
+    abundanceData.setAtomData("Br", 81, 80.9162882, 0.4935, 0);
+
     abundanceData.atomToDeltaMz.insert(make_pair("C", 1.00335483521));
     abundanceData.atomToDeltaMz.insert(make_pair("H", 1.00627674587));
     abundanceData.atomToDeltaMz.insert(make_pair("O", 2.004244992879));
