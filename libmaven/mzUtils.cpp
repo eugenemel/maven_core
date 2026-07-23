@@ -1097,7 +1097,7 @@ float  crossCorrelationZ(vector<float>&xvector, vector<float>& yvector, float of
 
 //		cerr << i << "\t" << xp << ":" << yp << endl;
 		float xy=0; float xx=0; float yy=0;
-		while(xp<lenx & yp<leny) {
+		while(xp<lenx && yp<leny) {
 			float x = xvector[xp]-meanx;
 			float y = yvector[yp]-meany;
 			xy +=  x*y;
