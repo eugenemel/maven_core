@@ -516,7 +516,7 @@ vector<Compound*> CompoundUtils::fromExactMassAdducts(string encodedExactMassAdd
         if (it->first == "exactMass") {
             try {
                 exactMass = stof(it->second);
-            } catch (std::exception e) {
+            } catch (std::exception& e) {
                 //swallow
             }
         }
