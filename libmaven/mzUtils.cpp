@@ -1368,7 +1368,7 @@ vector<float> decodeMzRemovedStr(string mzRemovedStr) {
         try {
             float val = stof(mzStr);
             mz.push_back(val);
-        } catch (const std::exception e) {
+        } catch (const std::exception& e) {
             // swallow
         }
     }
