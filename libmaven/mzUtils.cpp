@@ -508,13 +508,13 @@ bool fileExists(string strFilename) {
 int createDir(const char* path) {
   if (isDir(path)) return 0;
    cerr << "Creating path: " << path << endl;
-   mode_t old_mask = umask(0);
 #ifdef _WIN32
    int retval = _mkdir(path);
 #else
+   mode_t old_mask = umask(0);
    int retval = mkdir(path, 0771);
-#endif
    umask(old_mask);
+#endif
    return retval;
 }
 

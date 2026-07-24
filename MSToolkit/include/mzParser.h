@@ -72,15 +72,16 @@ typedef __int64 f_off;
 #define mzpatoi64(h) _atoi64(h)
 #endif
 
-//For Windows
-#ifdef _WIN32
+//For Windows with MinGW (not MSVC)
+#if defined(_WIN32) && !defined(_MSC_VER)
+#include <stdint.h>
+#include <stdexcept>
 #undef GCC
 typedef __int64 f_off;
 #define __int64_t int64_t
 #define mzpfseek(h,p,o) fseeko64(h,p,o)
 #define mzpftell(h) ftello64(h)
 #define mzpatoi64(h) _atoi64(h)
-#include <stdexcept>
 #endif
 
 #if defined(GCC) || defined(__LINUX__)
