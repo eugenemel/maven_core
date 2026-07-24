@@ -31,9 +31,9 @@
 #endif 
 
 
-#ifdef MINGW
-#include <io.h> 
-#endif  
+#ifdef _WIN32
+#include <io.h>
+#endif
 
 #ifndef _WIN32 //both 32 bit and 64 bit
 #include <glob.h>

@@ -73,7 +73,7 @@ typedef __int64 f_off;
 #endif
 
 //For Windows
-#ifdef __MINGW__
+#ifdef _WIN32
 #undef GCC
 typedef __int64 f_off;
 #define __int64_t int64_t
