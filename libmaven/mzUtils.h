@@ -33,6 +33,7 @@
 
 #ifdef _WIN32
 #include <io.h>
+#include <direct.h>
 #endif
 
 #ifndef _WIN32 //both 32 bit and 64 bit
