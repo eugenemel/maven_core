@@ -510,7 +510,7 @@ int createDir(const char* path) {
    cerr << "Creating path: " << path << endl;
    mode_t old_mask = umask(0);
 #ifdef MINGW
-   int retval = mkdir(path);
+   int retval = _mkdir(path);
 #else
    int retval = mkdir(path, 0771);
 #endif
