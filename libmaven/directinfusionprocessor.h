@@ -147,9 +147,11 @@ public:
      * @param scanFilterMs3MaxRt: max RT for valid MS3 scan (otherwise excluded). -1 to ignore.
      * @param isPreferSmallestMassWindow: used in DirectInfusionUtils::findNormalizedIntensity().
      *              Agglomerate results from all individual scans based on mass window lengths.
+     * @param scanSpecificNormFactors: index position in vector is maven scan num, scale intensities measured by normalization value
      * ========================*/
     float scanFilterMs3MinRt = -1.0f;
     float scanFilterMs3MaxRt = -1.0f;
+    vector<float> scanSpecificIntensityNormFactors = {};
 
     /** ===================
      * AGGLOMERATION

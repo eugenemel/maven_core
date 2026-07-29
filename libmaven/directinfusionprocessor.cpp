@@ -412,6 +412,12 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                           } // END scans->mz
 
                           if (ms3_intensity >= params->ms3MinIntensity && isFoundMatch) {
+
+                              //Issue 848: Support precomputed scan-number normalization code
+                              if (params->scanSpecificIntensityNormFactors.size() >= scan->scannum && params->scanSpecificIntensityNormFactors.size() > 0) {
+                                  ms3_intensity = ms3_intensity * params->scanSpecificIntensityNormFactors.at(scan->scannum);
+                              }
+
                               ms3Intensities.push_back(ms3_intensity);
                           }
 
@@ -3495,6 +3501,7 @@ string DirectInfusionSearchParameters::encodeParams(){
     encodedParams = encodedParams + "scanFilterIsRetainFragmentsAbovePrecursorMz" + "=" + to_string(scanFilterIsRetainFragmentsAbovePrecursorMz) + ";";
     encodedParams = encodedParams + "scanFilterPrecursorPurityPpm" + "=" + to_string(scanFilterPrecursorPurityPpm) + ";";
     encodedParams = encodedParams + "scanFilterMinIntensity" + "=" + to_string(scanFilterMinIntensity) + ";";
+    encodedParams = encodedParams + "scanSpecificIntensityNormFactors" + "=" + mzUtils::encodeFloatVector(scanSpecificIntensityNormFactors) + ";";
 
     //scan filter for MS1 scans
     encodedParams = encodedParams + "scanFilterMs1MinRt" + "=" + to_string(scanFilterMs1MinRt) + ";";
@@ -3694,6 +3701,10 @@ shared_ptr<DirectInfusionSearchParameters> DirectInfusionSearchParameters::decod
     }
     if (decodedMap.find("scanFilterMs3MaxRt") != decodedMap.end()) {
         directInfusionSearchParameters->scanFilterMs3MaxRt = stof(decodedMap["scanFilterMs3MaxRt"]);
+    }
+    if (decodedMap.find("scanSpecificIntensityNormFactors") != decodedMap.end()){
+        string encodedScanSpecificIntensityNormFactors = decodedMap["scanSpecificIntensityNormFactors"];
+        directInfusionSearchParameters->scanSpecificIntensityNormFactors = mzUtils::decodeMzRemovedStr(encodedScanSpecificIntensityNormFactors); //uses comma separator
     }
 
     //consensus spectrum params (all ms levels)

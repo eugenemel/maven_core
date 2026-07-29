@@ -1467,4 +1467,13 @@ vector<int> findMatchingMzs(vector<float>& mz, float mzmin, float mzmax) {
     return matches;
 }
 
+string encodeFloatVector(vector<float>& floatVector, string delimiter){
+    stringstream str;
+    for (unsigned int i = 0; i < floatVector.size(); i++) {
+        if (i > 0) str << delimiter;
+        str << to_string(floatVector[i]);
+    }
+    return str.str();
+}
+
 } //namespace mzUtils end
