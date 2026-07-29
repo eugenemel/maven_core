@@ -414,7 +414,16 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                           if (ms3_intensity >= params->ms3MinIntensity && isFoundMatch) {
 
                               //Issue 848: Support precomputed scan-number normalization code
-                              if (params->scanSpecificIntensityNormFactors.size() >= scan->scannum && params->scanSpecificIntensityNormFactors.size() > 0) {
+                              if (!params->scanSpecificIntensityNormFactors.empty() && params->scanSpecificIntensityNormFactors.size() >= scan->scannum) {
+                                  if (debug) {
+                                      cout << "Applying scanSpecificIntensityNormFactors to scan #"
+                                           << scan->scannum
+                                           << ": ms3_intensity="
+                                           << ms3_intensity
+                                           << " ==> "
+                                           << (ms3_intensity * params->scanSpecificIntensityNormFactors.at(scan->scannum))
+                                           << endl;
+                                  }
                                   ms3_intensity = ms3_intensity * params->scanSpecificIntensityNormFactors.at(scan->scannum);
                               }
 
