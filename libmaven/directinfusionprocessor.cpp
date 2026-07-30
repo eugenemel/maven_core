@@ -293,13 +293,19 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
     }
 
     if (debug) {
-        cout << "scans in consensus MS1 scan:" << endl;
-        for (auto it = ms1Fragment->consensus->scanNumMap.begin(); it != ms1Fragment->consensus->scanNumMap.end(); ++it){
-            cout << it->first << ": " << endl;
-            for (auto x : it->second) {
-                cout << x << " ";
+        if (!ms1Fragment) {
+            cout << "No MS1 scans were identified." << endl;
+        } else if (!ms1Fragment->consensus) {
+            cout << "No consensus spectrum could be computed from MS1 scans." << endl;
+        } else {
+            cout << "scans in consensus MS1 scan:" << endl;
+            for (auto it = ms1Fragment->consensus->scanNumMap.begin(); it != ms1Fragment->consensus->scanNumMap.end(); ++it){
+                cout << it->first << ": " << endl;
+                for (auto x : it->second) {
+                    cout << x << " ";
+                }
+                cout << endl;
             }
-            cout << endl;
         }
     }
 
@@ -404,7 +410,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                             } else if (params->ms3IntensityType == Ms3IntensityType::CLOSEST_MZ) {
                               if (abs(scan->mz[ms3_pos] - ms3_mz) < deltaMz) {
                                 deltaMz = abs(scan->mz[ms3_pos] - ms3_mz);
-                                ms3_intensity = scan->mz[ms3_pos];
+                                ms3_intensity = scan->intensity[ms3_pos];
                                 isFoundMatch = true;
                               }
                             }
