@@ -502,6 +502,10 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                     ms3MzIntensity = accumulate(it->second.begin(), it->second.end(), 0.0f) / it->second.size();
                 } else if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Median) {
                     ms3MzIntensity = median(it->second);
+                } else if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Sum) {
+                    ms3MzIntensity = accumulate(it->second.begin(), it->second.end(), 0.0f);
+                } else if (params->consensusIntensityAgglomerationType == Fragment::ConsensusIntensityAgglomerationType::Max) {
+                    ms3MzIntensity = *std::max_element(it->second.begin(), it->second.end());
                 }
 
                 intensityByMs1Ms2Ms3Mzs.insert(make_pair(it->first, ms3MzIntensity));
