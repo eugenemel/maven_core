@@ -843,6 +843,11 @@ public:
     // <ms2 m/z, vector position in Ms3Compound maps>
     map<pair<int, int>, float> intensityByMs1Ms2Ms3Mzs{};
 
+    //Issue 850: pass back scan information for particular ms3 info
+    //
+    // <ms2 m/z, vector position in Ms3Compound maps>
+    map<pair<int, int>, string> scansByMs1Ms2Ms3Mzs{};
+
     // ---------------------------------------------------- //
 
     // MS3 VALUES ARE MAPPED BASED ON MS3 FRAGMENT m/z KEY

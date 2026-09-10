@@ -348,6 +348,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
         map<int, vector<float>> scanIntensitiesByMs3Mz{};
         map<pair<int, int>, vector<float>> scanIntensitiesByMs1Ms2Ms3Mzs{};
+        map<pair<int, int>, vector<int>> scanNumsByMs1Ms2Ms3Mzs{};
 
         string matchInfoDebugString("");
 
@@ -384,6 +385,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                         vector<Scan*> scans = it2->second;
 
                         vector<float> ms3Intensities{};
+                        vector<int> ms3Scans{};
 
                         for (auto scan : scans) {
 
@@ -434,6 +436,7 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                               }
 
                               ms3Intensities.push_back(ms3_intensity);
+                              ms3Scans.push_back(scan->scannum);
                           }
 
                         } // END scans
@@ -441,7 +444,11 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                         float ms3IntensityFraction = static_cast<float>(ms3Intensities.size())/static_cast<float>(scans.size());
 
                         if (ms3IntensityFraction >= params->ms3MinFractionScans && static_cast<int>(ms3Intensities.size()) >= params->ms3MinNumScans) {
-                            for (auto ms3_intensity : ms3Intensities) {
+                            for (unsigned int j = 0; j < ms3Intensities.size(); j++) {
+
+                                int scan_num = ms3Scans[j];
+                                float ms3_intensity = ms3Intensities[j];
+
                                 if (scanIntensitiesByMs3Mz.find(ms3MzKey) == scanIntensitiesByMs3Mz.end()) {
                                     scanIntensitiesByMs3Mz.insert(make_pair(ms3MzKey, vector<float>()));
                                 }
@@ -452,6 +459,11 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
                                     scanIntensitiesByMs1Ms2Ms3Mzs.insert(make_pair(mzKey, vector<float>()));
                                 }
                                 scanIntensitiesByMs1Ms2Ms3Mzs[mzKey].push_back(ms3_intensity);
+
+                                if (scanNumsByMs1Ms2Ms3Mzs.find(mzKey) == scanNumsByMs1Ms2Ms3Mzs.end()) {
+                                    scanNumsByMs1Ms2Ms3Mzs.insert(make_pair(mzKey, vector<int>()));
+                                }
+                                scanNumsByMs1Ms2Ms3Mzs[mzKey].push_back(scan_num);
                             }
                         }
 
@@ -491,9 +503,15 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
         if (scanIntensitiesByMs1Ms2Ms3Mzs.size() >= params->ms3MinNumMatches && isPassesMs1PrecursorRequirements) {
 
+            // reduce intensities detected across identical MS3 scans to a single value
+            // (e.g., across duty cycles)
             map<pair<int, int>, float> intensityByMs1Ms2Ms3Mzs{};
+            map<pair<int, int>, string> scansByMs1Ms2Ms3Mzs{};
+
+            float sumMs3MzIntensity = 0.0f;
 
             for (auto it = scanIntensitiesByMs1Ms2Ms3Mzs.begin(); it != scanIntensitiesByMs1Ms2Ms3Mzs.end(); ++it) {
+
                 sort(it->second.begin(), it->second.end());
 
                 float ms3MzIntensity = 0.0f;
@@ -510,6 +528,24 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
                 intensityByMs1Ms2Ms3Mzs.insert(make_pair(it->first, ms3MzIntensity));
 
+                //Issue 850: MS3 intensity is just the sum of all ms3 intensities across all m/z.
+                //leaving slightly confusing name here for backwards compatibility
+                //(a better name would be sumMs3Intensity)
+                sumMs3MzIntensity += ms3MzIntensity;
+
+            }
+
+            //Issue 850: Add new scan-specific summary
+            for (auto it = scanNumsByMs1Ms2Ms3Mzs.begin(); it != scanNumsByMs1Ms2Ms3Mzs.end(); ++it) {
+                vector<int> scans = it->second;
+                stringstream scansStream;
+                for (unsigned int i = 0; i < scans.size(); i++) {
+                    if (i > 0) scansStream << ", ";
+                    scansStream << scans.at(i);
+                }
+                string scansStr = scansStream.str();
+
+                scansByMs1Ms2Ms3Mzs.insert(make_pair(it->first, scansStr));
             }
 
             // Issue 226
@@ -537,8 +573,6 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
             map<int, float> intensityByMs3Mz{};
 
-            float sumMs3MzIntensity = 0.0f;
-
             for (auto it = scanIntensitiesByMs3Mz.begin(); it != scanIntensitiesByMs3Mz.end(); ++it) {
                 sort(it->second.begin(), it->second.end());
 
@@ -552,27 +586,32 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
 
                 intensityByMs3Mz.insert(make_pair(it->first, ms3MzIntensity));
 
-                sumMs3MzIntensity += ms3MzIntensity;
-
             }
 
             //Issue 296: skip IDs with too few params matching
             if (intensityByMs3Mz.size() < params->ms3MinNumMs3MzMatches) continue;
 
             Ms3SingleSampleMatch *ms3SingleSampleMatch = new Ms3SingleSampleMatch;
+
             ms3SingleSampleMatch->ms3Compound = ms3Compound;
             ms3SingleSampleMatch->sample = sample;
             ms3SingleSampleMatch->numMs3Matches = intensityByMs1Ms2Ms3Mzs.size();
             ms3SingleSampleMatch->numMs3MzMatches = intensityByMs3Mz.size();
             ms3SingleSampleMatch->observedMs1Intensity = observedMs1Intensity;
-            ms3SingleSampleMatch->scanIntensitiesByMs1Ms2Ms3Mzs = scanIntensitiesByMs1Ms2Ms3Mzs;
-            ms3SingleSampleMatch->scanIntensitiesByMs3Mz = scanIntensitiesByMs3Mz;
             ms3SingleSampleMatch->intensityByMs1Ms2Ms3Mzs = intensityByMs1Ms2Ms3Mzs;
-            ms3SingleSampleMatch->intensityByMs3Mz = intensityByMs3Mz;
             ms3SingleSampleMatch->sumMs3MzIntensity = sumMs3MzIntensity;
-            ms3SingleSampleMatch->matchingCoordsByMs2 = matchingCoordsByMs2;
+            ms3SingleSampleMatch->scansByMs1Ms2Ms3Mzs = scansByMs1Ms2Ms3Mzs;
+
+            // TODO: possible deprecated?
+            // Issue 850: was used before, now replaced with numMs3Matches
             ms3SingleSampleMatch->ms3MatchesByMs2Mz = ms3MatchesByMs2Mz;
-            ms3SingleSampleMatch->sumMs3IntensityByMs2Mz = sumMs3IntensityByMs2Mz;
+
+            // deprecated / unused by mzkitcpp
+            ms3SingleSampleMatch->scanIntensitiesByMs1Ms2Ms3Mzs = scanIntensitiesByMs1Ms2Ms3Mzs; // not used
+            ms3SingleSampleMatch->matchingCoordsByMs2 = matchingCoordsByMs2; //not used
+            ms3SingleSampleMatch->sumMs3IntensityByMs2Mz = sumMs3IntensityByMs2Mz; //not used
+            ms3SingleSampleMatch->scanIntensitiesByMs3Mz = scanIntensitiesByMs3Mz; // not used
+            ms3SingleSampleMatch->intensityByMs3Mz = intensityByMs3Mz; //not used
 
             output.push_back(ms3SingleSampleMatch);
             if (debug) cout << ms3Compound->baseCompound->name << " " << ms3Compound->baseCompound->adductString << ": " << intensityByMs1Ms2Ms3Mzs.size() << " matches; observedMs1Intensity=" << ms3SingleSampleMatch->observedMs1Intensity << endl;
