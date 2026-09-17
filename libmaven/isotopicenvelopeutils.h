@@ -80,10 +80,15 @@ public:
 
     //convenience method that sets children of the IsotopicEnvelope.group field
     //to the IsotopicEnvelopeGroup.children (same indices as IsotopicEnvelopeGroup.isotopes).
+    //Issue 850: if 'isPermitIsotopesToChildrenPeakGroups' flag is set to false,
+    //calling this method has no effect.
     void setIsotopesToChildrenPeakGroups(Classifier *classifier = nullptr);
 
     // Issue 691: combine isotopes that give the same quant readout.
     void combineOverlappingIsotopes(float ppm=20, bool debug=false);
+
+    // Issue 850: explicitly do not add envelopes if this flag is set to true
+    bool isPermitIsotopesToChildrenPeakGroups = true;
 
     void print();
 };

@@ -263,6 +263,9 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
 
         if (mergedEICrtminFWHM <= 0 && mergedEICrtmaxFWHM <= 0) {
             cout << "WARNING: FWHM RT range could not be extracted - unable to extract any isotopes." << endl;
+            envelopeGroup.isotopePeakGroups.clear();
+            envelopeGroup.isotopes.clear();
+            envelopeGroup.isPermitIsotopesToChildrenPeakGroups = false;
             return envelopeGroup;
         }
     }
@@ -487,8 +490,8 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
             p.fromBlankSample = sample && sample->isBlank;
 
             // Issue 850: Primarily used in EIC::removeOverlappingPeaks(). Need to explicitly define this field.
-            // 'false' makes more sense here as these are isotopes, not necessarily local maxima.
-            p.localMaxFlag = false;
+            // 'true' makes sense here b/c the RT is tied to the max intensity in the window
+            p.localMaxFlag = true;
             p.groupOverlap = 0;
             p.groupOverlapFrac = 0;
 
@@ -795,6 +798,8 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
 }
 
 void IsotopicEnvelopeGroup::setIsotopesToChildrenPeakGroups(Classifier *classifier){
+    //Issue 850: if modification of the peak group is forbidden, we move on with no effect.
+    if (!this->isPermitIsotopesToChildrenPeakGroups) return;
 
     this->group->children.clear();
 
