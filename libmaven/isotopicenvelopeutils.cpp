@@ -484,6 +484,13 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
             p.signalBaselineRatio = 0;
 
             p.sample = sample;
+            p.fromBlankSample = sample && sample->isBlank;
+
+            // Issue 850: Primarily used in EIC::removeOverlappingPeaks(). Need to explicitly define this field.
+            // 'false' makes more sense here as these are isotopes, not necessarily local maxima.
+            p.localMaxFlag = false;
+            p.groupOverlap = 0;
+            p.groupOverlapFrac = 0;
 
             envelopeGroup.isotopePeakGroups[i].addPeak(p);
         }
