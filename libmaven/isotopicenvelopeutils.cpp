@@ -2114,6 +2114,13 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractFullRtRange(
             p.signalBaselineRatio = 0;
 
             p.sample = sample;
+            p.fromBlankSample = sample && sample->isBlank;
+
+            // Issue 851: Primarily used in EIC::removeOverlappingPeaks(). Need to explicitly define this field.
+            // 'true' makes sense here b/c the RT is tied to the max intensity in the window
+            p.localMaxFlag = true;
+            p.groupOverlap = 0;
+            p.groupOverlapFrac = 0;
 
             envelopeGroup.isotopePeakGroups[i].addPeak(p);
         }
