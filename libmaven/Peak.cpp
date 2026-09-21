@@ -5,6 +5,62 @@ Peak::Peak() {
     eic = nullptr;
     sample = nullptr;
     tempString = "";
+
+    //Issue 850: explicitly assign fields
+    baseMz = 0;
+    fromBlankSample = false;
+    groupOverlap = 0;
+    groupNum = 0;
+    groupOverlapFrac = 0;
+    label = 0;
+    localMaxFlag = 0;
+    maxpos = 0;
+    maxscan = 0;
+    medianMz = 0;
+    minpos = 0;
+    minscan = 0;
+    mzmax = 0;
+    mzmin = 0;
+    noNoiseObs = 0;
+    noNoiseFraction = 0;
+    peakArea = 0;
+    peakAreaCorrected = 0;
+    peakAreaFractional = 0;
+    peakAreaTop = 0;
+    peakIntensity = 0;
+    peakMz = 0;
+    peakBaseLineLevel = 0;
+    quality = 0;
+    rt = 0;
+    rtmax = 0;
+    rtmin = 0;
+    scan = 0;
+    signalBaselineRatio = 0;
+    symmetry = 0;
+    width = 0;
+    gaussFitSigma = 10;
+    gaussFitR2 = 0;
+    peakRank = 0;
+
+    chargeState = 0;
+    isMonoIsotopic = false;
+    selectionScore = 0;
+    ms2EventCount = 0;
+
+    smoothedIntensity = 0.0f;
+    smoothedPeakArea = 0.0f;
+    smoothedPeakAreaCorrected = 0.0f;
+    smoothedPeakAreaTop = 0.0f;
+    smoothedSignalBaselineRatio = 0.0f;
+
+    minPosFWHM = 0;
+    maxPosFWHM = 0;
+    minScanFWHM = 0;
+    maxScanFWHM = 0;
+    rtminFWHM = 0.0f;
+    rtmaxFWHM = 0.0f;
+    peakAreaFWHM = 0.0f;
+    smoothedPeakAreaFWHM = 0.0f;
 }
 
 Peak::Peak(EIC* e, int p) { 
@@ -43,8 +99,8 @@ Peak::Peak(EIC* e, int p) {
 		symmetry=0;
 		width=0;
 		gaussFitSigma=10;
-		gaussFitR2=FLT_MAX;
-		peakRank=INT_MAX;
+        gaussFitR2=0;
+        peakRank=0;
 
 		chargeState=0;
 		isMonoIsotopic=false;
