@@ -489,7 +489,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
             p.sample = sample;
             p.fromBlankSample = sample && sample->isBlank;
 
-            // Issue 850: Primarily used in EIC::removeOverlappingPeaks(). Need to explicitly define this field.
+            // Issue 851: Primarily used in EIC::removeOverlappingPeaks(). Need to explicitly define this field.
             // 'true' makes sense here b/c the RT is tied to the max intensity in the window
             p.localMaxFlag = true;
             p.groupOverlap = 0;
@@ -798,7 +798,7 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesVersion1(
 }
 
 void IsotopicEnvelopeGroup::setIsotopesToChildrenPeakGroups(Classifier *classifier){
-    //Issue 850: if modification of the peak group is forbidden, we move on with no effect.
+    //Issue 851: if modification of the peak group is forbidden, we move on with no effect.
     if (!this->isPermitIsotopesToChildrenPeakGroups) return;
 
     this->group->children.clear();
