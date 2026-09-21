@@ -495,7 +495,10 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
             p.groupOverlap = 0;
             p.groupOverlapFrac = 0;
 
-            envelopeGroup.isotopePeakGroups[i].addPeak(p);
+            //Issue 851: Do not retain 0 intensity isotopes unless explicitly stated
+            if (params.isKeepEmptyIsotopes || intensity > 0) {
+                envelopeGroup.isotopePeakGroups[i].addPeak(p);
+            }
         }
 
         envelope.getTotalIntensity();
@@ -2122,7 +2125,10 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractFullRtRange(
             p.groupOverlap = 0;
             p.groupOverlapFrac = 0;
 
-            envelopeGroup.isotopePeakGroups[i].addPeak(p);
+            //Issue 851: Do not retain 0 intensity isotopes unless explicitly stated
+            if (params.isKeepEmptyIsotopes || intensity > 0) {
+                envelopeGroup.isotopePeakGroups[i].addPeak(p);
+            }
         }
 
         envelope.getTotalIntensity();
