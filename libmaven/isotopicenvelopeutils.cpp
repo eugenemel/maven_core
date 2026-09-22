@@ -506,6 +506,22 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractEnvelopesFromMPlusZeroPe
         envelopeGroup.envelopeBySample.insert(make_pair(sample, envelope));
     }
 
+    //Issue 851: Remove isotope peak groups that have no peaks
+    if (!params.isKeepEmptyIsotopes) {
+        vector<PeakGroup> filteredIsotopePeakGroups;
+        vector<Isotope> filteredIsotopes;
+
+        for (unsigned int i = 0; i < envelopeGroup.isotopePeakGroups.size(); i++) {
+            if (envelopeGroup.isotopePeakGroups[i].peakCount() > 0) {
+                filteredIsotopePeakGroups.push_back(envelopeGroup.isotopePeakGroups[i]);
+                filteredIsotopes.push_back(envelopeGroup.isotopes[i]);
+            }
+        }
+
+        envelopeGroup.isotopePeakGroups = filteredIsotopePeakGroups;
+        envelopeGroup.isotopes = filteredIsotopes;
+    }
+
     return envelopeGroup;
 }
 
@@ -2134,6 +2150,22 @@ IsotopicEnvelopeGroup IsotopicEnvelopeExtractor::extractFullRtRange(
         envelope.getTotalIntensity();
 
         envelopeGroup.envelopeBySample.insert(make_pair(sample, envelope));
+    }
+
+    //Issue 851: Remove isotope peak groups that have no peaks
+    if (!params.isKeepEmptyIsotopes) {
+        vector<PeakGroup> filteredIsotopePeakGroups;
+        vector<Isotope> filteredIsotopes;
+
+        for (unsigned int i = 0; i < envelopeGroup.isotopePeakGroups.size(); i++) {
+            if (envelopeGroup.isotopePeakGroups[i].peakCount() > 0) {
+                filteredIsotopePeakGroups.push_back(envelopeGroup.isotopePeakGroups[i]);
+                filteredIsotopes.push_back(envelopeGroup.isotopes[i]);
+            }
+        }
+
+        envelopeGroup.isotopePeakGroups = filteredIsotopePeakGroups;
+        envelopeGroup.isotopes = filteredIsotopes;
     }
 
     return envelopeGroup;
