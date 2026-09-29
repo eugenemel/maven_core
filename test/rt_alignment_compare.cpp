@@ -286,12 +286,24 @@ int main(int argc, char** argv) {
 
     experiment.compute(debug, true); // (debug, isClean) -- matches peakdetector.cpp:2311
 
-    if (!experiment.referenceSample) {
+    // When isRtAlignmentAnchorPointReference is true, compute() (mzAligner.cpp:808-809)
+    // deliberately never calls determineReferenceSample() -- referenceSample stays
+    // nullptr by design, because rt_update is taken directly from each anchor point's
+    // library RT (aps.referenceRt) instead of from any sample's own observed RT
+    // (mzAligner.cpp:1034-1038). A null referenceSample in this mode is expected, not
+    // an error; only treat it as fatal in the default (reference-sample) mode.
+    if (!isRtAlignmentAnchorPointReference && !experiment.referenceSample) {
         cerr << "compute() did not select a reference sample. Aborting." << endl;
         return 1;
     }
-    cout << "Reference sample chosen by determineReferenceSample(): "
-         << experiment.referenceSample->sampleName << endl << endl;
+    if (isRtAlignmentAnchorPointReference) {
+        cout << "isRtAlignmentAnchorPointReference=true: determineReferenceSample() was not "
+             << "called; rt_update will be each anchor point's library RT (mzAligner.cpp:1035)."
+             << endl << endl;
+    } else {
+        cout << "Reference sample chosen by determineReferenceSample(): "
+             << experiment.referenceSample->sampleName << endl << endl;
+    }
 
     // 3. Load manual_bookmarks.mzrollDB ground truth.
     ManualBookmarks manual = loadManualBookmarks(manualBookmarksDb);
@@ -332,9 +344,18 @@ int main(int argc, char** argv) {
             continue;
         }
 
-        auto refIt = aps.sampleToPoints.find(experiment.referenceSample);
-        if (refIt == aps.sampleToPoints.end()) continue;
-        double rtUpdate = refIt->second->rt; // what rt_update_key.rt_update will be for every sample, for this anchor point
+        // Mirrors ExperimentAnchorPoints::computeSampleToRtMap() (mzAligner.cpp:1033-1038)
+        // exactly: in anchor-point-reference mode, rt_update is the anchor point's own
+        // library RT (aps.referenceRt); otherwise it's the reference sample's own
+        // observed RT for this anchor point.
+        double rtUpdate;
+        if (isRtAlignmentAnchorPointReference) {
+            rtUpdate = aps.referenceRt;
+        } else {
+            auto refIt = aps.sampleToPoints.find(experiment.referenceSample);
+            if (refIt == aps.sampleToPoints.end()) continue;
+            rtUpdate = refIt->second->rt;
+        }
 
         for (auto* sample : samples) {
             auto it = aps.sampleToPoints.find(sample);
