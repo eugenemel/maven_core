@@ -1053,7 +1053,7 @@ void ExperimentAnchorPoints::computeSampleToRtMap(bool debug){
                     cout << "Previous Pair: (" << lastObserved << ", " << lastReference << ")" << endl;
                 }
 
-                if (observedRt >= lastObserved && lastReference >= lastReference) {
+                if (observedRt >= lastObserved && referenceRt >= lastReference) {
                     sampleToUpdatedRts[sample].push_back(make_pair(observedRt, referenceRt));
 
                     if (debug) {
