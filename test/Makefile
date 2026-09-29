@@ -20,3 +20,8 @@ digest: digest.cpp ../libmaven/Peptide.cpp
 
 mstoolkit: mstoolkit.cpp
 	$(CC) $(CFLAGS) -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC  -o mstoolkit mstoolkit.cpp -I../MSToolkit/include -I../libmaven/ -I../pugixml/src  -L../build/lib -lmaven -lpugixml -lmstoolkitlite -lz
+
+# Issue 856: standalone driver comparing ExperimentAnchorPoints::compute() (and,
+# once t02 lands, compute_v2()) against manual_bookmarks.mzrollDB ground truth.
+rt_alignment_compare: rt_alignment_compare.cpp
+	$(CC) $(CFLAGS) -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DGCC -o rt_alignment_compare rt_alignment_compare.cpp -I.. -I../MSToolkit/include -I../libmaven/ -I../pugixml/src -L../build/lib -lmaven -lpugixml -lmstoolkitlite -lz -lsqlite3
