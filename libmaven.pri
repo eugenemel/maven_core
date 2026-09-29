@@ -48,6 +48,19 @@ mac {
 
     DEFINES -= CDFPARSER
     LIBS -= -lcdfread -lnetcdf
+
+    # Issue 853: on machines whose active Xcode SDK no longer ships
+    # AGL.framework, Qt's own .prl files for internal QtGui/QtWidgets support
+    # libraries still reference -framework AGL, breaking the final link step
+    # of every Qt Widgets target. Fall back to the AGL.tbd stub still shipped
+    # in an installed CommandLineTools SDK, if any (resolved dynamically so
+    # this keeps working across CommandLineTools updates; a no-op if AGL
+    # already links fine or no such SDK is present).
+    AGL_FALLBACK_FRAMEWORKS = $$system(ls -d /Library/Developer/CommandLineTools/SDKs/MacOSX*.sdk/System/Library/Frameworks/AGL.framework 2>/dev/null | sort -V | tail -n 1 | xargs dirname 2>/dev/null)
+    !isEmpty(AGL_FALLBACK_FRAMEWORKS) {
+        message("Using AGL.framework fallback search path: $$AGL_FALLBACK_FRAMEWORKS")
+        QMAKE_LFLAGS += -F$$AGL_FALLBACK_FRAMEWORKS
+    }
 }
 
 unix {
