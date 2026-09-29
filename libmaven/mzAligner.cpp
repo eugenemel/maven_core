@@ -985,12 +985,18 @@ void ExperimentAnchorPoints::computeSampleToRtMap(bool debug){
     bool isRtAlignmentAnchorPointReference = this->isRtAlignmentAnchorPointReference;
 
     sort(anchorPointSets.begin(), anchorPointSets.end(), [referenceSample, isRtAlignmentAnchorPointReference](const AnchorPointSet& lhs, const AnchorPointSet& rhs){
-        if (lhs.isValid && rhs.isValid) {
-            if (isRtAlignmentAnchorPointReference) {
-                return lhs.referenceRt < rhs.referenceRt;
-            } else {
-                return lhs.sampleToPoints.at(referenceSample)->rt < rhs.sampleToPoints.at(referenceSample)->rt;
-            }
+        //Issue 856: referenceRt is parsed from the anchor points file at load time and is always
+        //populated, regardless of isValid, so it is safe to use as a single, consistent sort key
+        //for every element in this mode. Previously this branch was nested inside the
+        //lhs.isValid && rhs.isValid check below, which meant invalid anchor points fell through
+        //to comparing slice->rtmax instead - mixing two different sort keys within one comparator
+        //violates std::sort's strict-weak-ordering requirement (undefined behavior), and reliably
+        //segfaults once enough anchor points are invalid (e.g. a dataset where several library
+        //compounds have no real signal at all).
+        if (isRtAlignmentAnchorPointReference) {
+            return lhs.referenceRt < rhs.referenceRt;
+        } else if (lhs.isValid && rhs.isValid) {
+            return lhs.sampleToPoints.at(referenceSample)->rt < rhs.sampleToPoints.at(referenceSample)->rt;
         } else {
             return lhs.slice->rtmax < rhs.slice->rtmax;
         }
