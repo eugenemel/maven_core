@@ -219,8 +219,6 @@ vector<Ms3SingleSampleMatch*> DirectInfusionProcessor::processSingleMs3Sample(mz
     //initialize output
     vector<Ms3SingleSampleMatch*> output;
 
-    map<int, vector<Scan>> ms3ScansByMzPrecursor{};
-
     //          <ms1Pre, ms2Pre>
     vector<tuple<double, double, Scan*>> allMs3Scans;
 

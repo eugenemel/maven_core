@@ -846,6 +846,14 @@ double Scan::getPrecursorPurity(float ppm=10.0) {
     if (this->precursorMz <= 0 ) return 0;
     if (this->sample == 0 ) return 0;
 
+    //Issue 864: precalculatedPurity can be accessed from the GUI thread (viewing
+    //a spectrum) and from background peak/fragment processing at the same time.
+    lock_guard<mutex> lock(precalculatedPurityMutex);
+
+    if (precalculatedPurity.find(ppm) != precalculatedPurity.end()) {
+        return precalculatedPurity.at(ppm);
+    }
+
 	//extract isolated window
     vector<mzPoint>isolatedSegment = this->getIsolatedRegion(this->isolationWindow);
 	if (isolatedSegment.size() == 0) return 0;
@@ -863,11 +871,14 @@ double Scan::getPrecursorPurity(float ppm=10.0) {
 	double totalInt=0;
 	for (mzPoint& x: isolatedSegment) totalInt += x.intensity();
 
+    float purity = 0;
 	if (totalInt>0) {
-		return targetInt/totalInt;
-	} else {
-		return 0;
-	}
+        purity =  targetInt/totalInt;
+    }
+
+    precalculatedPurity.insert(make_pair(ppm, purity));
+
+    return purity;
 }
 
 TMT Scan::tmtQuant() {

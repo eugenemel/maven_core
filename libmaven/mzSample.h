@@ -13,6 +13,7 @@
 #include  <limits.h>
 #include  <float.h>
 #include <iomanip>
+#include <mutex>
 #include "assert.h"
 
 #include "pugixml.hpp"
@@ -221,6 +222,9 @@ class Scan {
     float basePeakMz = 0.0f;
     float basePeakIntensity = 0.0f;
     float tic = 0.0f;
+
+    map<float, float> precalculatedPurity{};
+    mutex precalculatedPurityMutex; //Issue 864: guards precalculatedPurity, which can be read/written from multiple threads
 
     void addChildScan(Scan* s) { children.push_back(s); }
     vector<Scan*> getAllChildren() { return children; }
