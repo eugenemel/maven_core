@@ -562,6 +562,7 @@ public:
     string cleanSampleName(string fileName);
 
     static map<string,string> mzML_cvParams(xml_node node);
+    static bool isMzMLFileContainsScans(const char*); //Issue 852 - quickly check for scan content, to look for malformed files
 
     void parseMzMLChromatogromList(xml_node);
     void parseMzMLSpectrumList(xml_node);

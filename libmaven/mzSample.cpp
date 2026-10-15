@@ -324,6 +324,22 @@ void mzSample::parseMzML(const char* filename) {
     else if (!chromatogramList.empty()) { parseMzMLChromatogromList(chromatogramList); }
 }
 
+bool mzSample::isMzMLFileContainsScans(const char* filename){
+    //Issue 852: quick check for at least one scan. Reuses parseMzML()'s own
+    //lookup paths, but only checks for a first child element instead of
+    //decoding any spectrum/chromatogram binary data - that decoding (base64 +
+    //possible zlib) is the expensive part of a full load, and is skipped here.
+    xml_document doc;
+    if (!doc.load_file(filename, parse_minimal)) return false;
+
+    xml_node spectrumList = doc.first_child().first_element_by_path("mzML/run/spectrumList");
+    if (!spectrumList.empty() && !spectrumList.child("spectrum").empty()) return true;
+
+    xml_node chromatogramList = doc.first_child().first_element_by_path("mzML/run/chromatogramList");
+    if (!chromatogramList.empty() && !chromatogramList.child("chromatogram").empty()) return true;
+
+    return false;
+}
 
 void mzSample::parseMzMLChromatogromList(xml_node chromatogramList) {
 
